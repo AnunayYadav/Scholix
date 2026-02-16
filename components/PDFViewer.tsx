@@ -211,10 +211,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName }) => {
                     <div className="relative shadow-[0_64px_128px_rgba(0,0,0,0.8)] border border-white/5 rounded-sm overflow-hidden bg-white mx-auto">
                         <canvas ref={canvasRef} className="max-w-full h-auto block" />
 
-                        {/* Watermark overlay - Refined for security */}
-                        <div className="absolute inset-0 pointer-events-none opacity-[0.04] flex items-center justify-center overflow-hidden flex-wrap select-none p-20">
-                            {Array.from({ length: 100 }).map((_, i) => (
-                                <span key={i} className="text-[40px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-12 text-black">LPU NEXUS</span>
+                        {/* Watermark overlay - Reduced density for performance */}
+                        <div className="absolute inset-0 pointer-events-none opacity-[0.04] flex items-center justify-center overflow-hidden flex-wrap select-none p-20 will-change-transform">
+                            {Array.from({ length: 40 }).map((_, i) => (
+                                <span key={i} className="text-[40px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-black">LPU NEXUS</span>
                             ))}
                         </div>
 

@@ -55,7 +55,7 @@ const getPathFromModule = (module: ModuleType): string => {
   }
 };
 
-const TypingText: React.FC = () => {
+const TypingText: React.FC = React.memo(() => {
   const words = ["Simplified.", "Smarter.", "Seamless.", "Sorted.", "Secured."];
   const [index, setIndex] = useState(0);
   const [subIndex, setSubIndex] = useState(1);
@@ -71,13 +71,13 @@ const TypingText: React.FC = () => {
       const timeout = setTimeout(() => {
         setReverse(false);
         setIndex((prev) => (prev + 1) % words.length);
-      }, 400); // Wait a bit at the 'S' before typing next word
+      }, 400);
       return () => clearTimeout(timeout);
     }
 
     const timeout = setTimeout(() => {
       setSubIndex((prev) => prev + (reverse ? -1 : 1));
-    }, reverse ? 40 : (Math.random() * 40 + 80)); // Organic typing speed
+    }, reverse ? 40 : (Math.random() * 40 + 80));
 
     return () => clearTimeout(timeout);
   }, [subIndex, index, reverse]);
@@ -88,52 +88,26 @@ const TypingText: React.FC = () => {
       <span className="inline-block w-[4px] h-[0.9em] ml-1 bg-gradient-to-b from-orange-500 to-red-600 animate-cursor-blink align-middle translate-y-[-2px] shadow-[0_0_15px_rgba(234,88,12,0.6)] rounded-full transition-all duration-200"></span>
     </span>
   );
-};
+});
 
-const BackgroundEffects: React.FC = () => {
+const BackgroundEffects: React.FC = React.memo(() => {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none">
-      {/* Dynamic Blobs */}
-      <div className="absolute w-[800px] h-[800px] bg-orange-600/10 dark:bg-orange-600/20 blur-[150px] -top-20 -right-20 animate-blob-bounce rounded-full" />
-      <div className="absolute w-[600px] h-[600px] bg-yellow-600/5 dark:bg-yellow-600/10 blur-[120px] bottom-20 -left-20 animate-blob-bounce rounded-full" />
-
-      {/* Seamless Merger - Refined edge gradients for sidebar/navbar blending */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-50 dark:from-black via-slate-50/40 dark:via-black/40 to-transparent h-96 z-10 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-50 dark:from-black via-slate-50/40 dark:via-black/40 to-transparent w-96 z-10 pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_0%_0%,rgba(248,250,252,1)_0%,rgba(248,250,252,0)_80%)] dark:bg-[radial-gradient(ellipse_at_0%_0%,rgba(0,0,0,1)_0%,rgba(0,0,0,0)_80%)] z-10 pointer-events-none" />
-
-      {/* Animated Particles */}
-      <div className="absolute inset-0">
-        {[...Array(30)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-orange-500/30 dark:bg-orange-500/20 rounded-full animate-float"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${Math.random() * 10 + 15}s`,
-              opacity: Math.random() * 0.5 + 0.2
-            }}
-          />
-        ))}
-      </div>
+    <div className="fixed inset-0 overflow-hidden pointer-events-none bg-slate-50 dark:bg-black transition-colors duration-500">
+      {/* Seamless Merger */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-50 dark:from-black via-slate-50/10 dark:via-black/10 to-transparent h-96 z-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-50 dark:from-black via-slate-50/10 dark:via-black/10 to-transparent w-96 z-10 pointer-events-none" />
 
       {/* Soft Grid Overlay */}
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] dark:opacity-[0.05] contrast-150" />
     </div>
   );
-};
+});
 
-const DashboardHero: React.FC<{ navigate: (p: string) => void }> = ({ navigate }) => {
+const DashboardHero: React.FC<{ navigate: (p: string) => void }> = React.memo(({ navigate }) => {
   return (
     <div className="relative overflow-hidden bg-slate-50 dark:bg-black p-8 md:p-16 mb-0 shadow-[0_40px_100px_rgba(0,0,0,0.1)] dark:shadow-[0_40px_100px_rgba(0,0,0,0.4)] group/hero transition-colors duration-500 min-h-[calc(100vh-80px)] flex flex-col justify-center">
-      {/* Background Blobs */}
-      <div className="absolute w-[500px] h-[500px] bg-orange-600/20 blur-[100px] -top-40 -right-40 group-hover/hero:scale-110 transition-transform duration-1000 animate-blob-bounce rounded-full pointer-events-none" />
-      <div className="absolute w-[400px] h-[400px] bg-yellow-600/10 blur-[100px] bottom-0 left-0 group-hover/hero:scale-110 transition-transform duration-1000 animate-blob-bounce rounded-full pointer-events-none" />
-
       <div className="relative z-10 lg:grid lg:grid-cols-[1.2fr_0.8fr] lg:gap-12 lg:items-center">
-        <div className="animate-fade-in flex flex-col space-y-4 md:space-y-12">
+        <div className="flex flex-col space-y-4 md:space-y-12">
           {/* Header row: Title + Image on Mobile */}
           <div className="grid grid-cols-[1fr_210px] sm:grid-cols-[1fr_250px] lg:block gap-1 items-center">
             <h2 className="text-5xl sm:text-7xl lg:text-6xl xl:text-7xl font-black text-slate-900 dark:text-white tracking-tighter leading-[0.85] lg:leading-[0.9] drop-shadow-sm min-h-[3em] sm:min-h-[2.7em]">
@@ -145,9 +119,9 @@ const DashboardHero: React.FC<{ navigate: (p: string) => void }> = ({ navigate }
             {/* Mobile Only visual Suite */}
             <div className="lg:hidden relative h-64 flex items-center justify-center overflow-visible">
               <div className="relative w-full scale-125 origin-center translate-y-14">
-                <img src="/lap.png" alt="Laptop" className="w-full h-auto drop-shadow-[0_0_50px_rgba(234,88,12,0.5)] animate-float" />
-                <div className="absolute -top-20 -left-8 w-28 animate-float-delayed z-10">
-                  <img src="/note.png" alt="Notes" className="w-full h-auto drop-shadow-[0_0_40px_rgba(234,88,12,0.6)]" />
+                <img src="/lap.png" alt="Laptop" className="w-full h-auto drop-shadow-[0_0_50px_rgba(234,88,12,0.3)]" />
+                <div className="absolute -top-20 -left-8 w-28 z-10">
+                  <img src="/note.png" alt="Notes" className="w-full h-auto drop-shadow-[0_0_40px_rgba(234,88,12,0.4)]" />
                 </div>
               </div>
             </div>
@@ -174,28 +148,24 @@ const DashboardHero: React.FC<{ navigate: (p: string) => void }> = ({ navigate }
 
         {/* Desktop Only Visual Suite */}
         <div className="hidden lg:flex relative items-center justify-center h-[400px] xl:h-[500px] w-full">
-          <div className="relative z-20 w-64 xl:w-96 animate-float drop-shadow-[0_0_80px_rgba(249,115,22,0.4)]">
-            <img src="/lap.png" alt="LPU Nexus" className="w-full h-auto drop-shadow-[0_0_40px_rgba(249,115,22,0.6)]" />
+          <div className="relative z-20 w-64 xl:w-96 drop-shadow-[0_0_60px_rgba(0,0,0,0.5)]">
+            <img src="/lap.png" alt="LPU Nexus" className="w-full h-auto" />
           </div>
           {/* Desktop Note */}
-          <div className="absolute top-8 -left-8 xl:top-12 xl:-left-12 w-24 xl:w-40 animate-float-delayed z-30">
-            <img src="/note.png" alt="Notes" className="w-full h-auto drop-shadow-[0_0_50px_rgba(249,115,22,0.5)]" />
+          <div className="absolute top-8 -left-8 xl:top-12 xl:-left-12 w-24 xl:w-40 z-30 opacity-80">
+            <img src="/note.png" alt="Notes" className="w-full h-auto" />
           </div>
           {/* Desktop Certificate */}
-          <div className="absolute bottom-16 right-8 xl:right-12 w-32 xl:w-56 animate-float-delayed z-10">
-            <img src="/certificate.png" alt="Certificate" className="w-full h-auto drop-shadow-[0_0_60px_rgba(249,115,22,0.7)]" />
+          <div className="absolute bottom-16 right-8 xl:right-12 w-32 xl:w-56 z-10 opacity-80">
+            <img src="/certificate.png" alt="Certificate" className="w-full h-auto" />
           </div>
-
-          {/* Desktop Particles */}
-          <div className="absolute w-3 h-3 bg-yellow-400 rounded-full -top-10 left-1/2 animate-pulse" />
-          <div className="absolute w-2 h-2 bg-orange-500 rounded-full bottom-20 -left-10 animate-float" />
         </div>
       </div>
     </div>
   );
-};
+});
 
-const Dashboard: React.FC = () => {
+const Dashboard: React.FC = React.memo(() => {
   const navigate = useNavigate();
 
   return (
@@ -203,10 +173,10 @@ const Dashboard: React.FC = () => {
       <DashboardHero navigate={navigate} />
     </div>
   );
-};
+});
 
 
-const RegistrationPrompt: React.FC<{ userProfile: UserProfile, onComplete: (profile: UserProfile) => void }> = ({ userProfile, onComplete }) => {
+const RegistrationPrompt: React.FC<{ userProfile: UserProfile, onComplete: (profile: UserProfile) => void }> = React.memo(({ userProfile, onComplete }) => {
   const [regNo, setRegNo] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -222,7 +192,6 @@ const RegistrationPrompt: React.FC<{ userProfile: UserProfile, onComplete: (prof
       await NexusServer.updateProfile(userProfile.id, { registration_number: regNo });
       onComplete({ ...userProfile, registration_number: regNo });
     } catch (e: any) {
-      // Check for Supabase Unique Constraint Violation (Error Code 23505)
       if (e.message?.includes('unique_registration_number') || e.code === '23505') {
         setError("This Registration Number is already in use.");
       } else {
@@ -269,7 +238,7 @@ const RegistrationPrompt: React.FC<{ userProfile: UserProfile, onComplete: (prof
       </div>
     </div>
   );
-};
+});
 
 const AppContent: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -298,17 +267,17 @@ const AppContent: React.FC = () => {
     return () => unsubscribeAuth();
   }, []);
 
-  const toggleTheme = () => {
+  const toggleTheme = React.useCallback(() => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
-  };
+  }, [theme]);
 
-  const navigateToModule = (module: ModuleType) => {
+  const navigateToModule = React.useCallback((module: ModuleType) => {
     const path = getPathFromModule(module);
     navigate(path);
-  };
+  }, [navigate]);
 
   const showRegPrompt = userProfile && !userProfile.registration_number;
 
@@ -389,7 +358,7 @@ const AppContent: React.FC = () => {
             </div>
           </div>
         </div>
-        <div id="main-content-area" className={`flex-1 overflow-y-auto relative scroll-smooth ${location.pathname === '/' ? 'p-0' : 'p-4 md:p-8'} bg-transparent`}>
+        <div id="main-content-area" className={`flex-1 overflow-y-auto relative scroll-smooth ${location.pathname === '/' ? 'p-0' : 'p-4 md:p-8'} bg-transparent content-visibility-auto`}>
           <div className={`relative z-0 ${location.pathname === '/' ? 'w-full' : 'max-w-7xl mx-auto'}`}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
