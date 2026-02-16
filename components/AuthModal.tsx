@@ -84,11 +84,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="bg-white dark:bg-[#0a0a0a] rounded-[48px] w-full max-w-md shadow-[0_32px_128px_rgba(0,0,0,0.5)] border border-slate-200 dark:border-white/10 relative overflow-hidden flex flex-col group animate-fade-in mx-4">
+      <div className="bg-white dark:bg-black rounded-[48px] w-full max-w-md shadow-[0_32px_128px_rgba(0,0,0,0.5)] border border-slate-200 dark:border-white/10 relative overflow-hidden flex flex-col group animate-fade-in mx-4">
 
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-600/10 blur-[64px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
 
-        <div className="bg-slate-900 dark:bg-[#0a0a0a] p-10 text-white text-center relative rounded-t-[48px] border-b border-white/5">
+        <div className="bg-slate-900 dark:bg-black p-10 text-white text-center relative rounded-t-[48px] border-b border-white/5">
           <button onClick={onClose} className="absolute top-8 right-8 p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
           </button>

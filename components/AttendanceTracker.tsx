@@ -18,7 +18,7 @@ interface HistoryItem {
 }
 
 const SubjectSkeleton = () => (
-  <div className="glass-panel p-5 md:p-8 rounded-[32px] md:rounded-[40px] border border-slate-200 dark:border-white/5 bg-white dark:bg-slate-950/40 animate-pulse min-h-[160px]">
+  <div className="glass-panel p-5 md:p-8 rounded-[32px] md:rounded-[40px] border border-slate-200 dark:border-white/5 bg-white dark:bg-black/40 animate-pulse min-h-[160px]">
     <div className="flex flex-col items-center mb-6">
       <div className="h-10 w-24 bg-slate-200 dark:bg-white/5 rounded-[22px] mb-3 shimmer" />
       <div className="h-6 w-32 bg-slate-200 dark:bg-white/5 rounded shimmer" />

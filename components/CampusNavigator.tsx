@@ -38,7 +38,7 @@ const IconAlert = () => (
 );
 
 const MealSkeleton = () => (
-  <div className="glass-panel rounded-2xl overflow-hidden border dark:border-white/5 bg-white dark:bg-white/5 p-5 flex items-center space-x-4 animate-pulse">
+  <div className="glass-panel rounded-2xl overflow-hidden border dark:border-white/5 bg-white dark:bg-black p-5 flex items-center space-x-4 animate-pulse">
     <div className="w-12 h-12 rounded-2xl bg-slate-200 dark:bg-white/10 shimmer" />
     <div className="flex-1 space-y-2">
       <div className="h-3 w-1/4 bg-slate-200 dark:bg-white/10 rounded shimmer" />
@@ -436,7 +436,7 @@ const CampusNavigator: React.FC = () => {
 
       {isReportModalOpen && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
-          <div ref={reportModalRef} className="bg-white dark:bg-slate-950 rounded-[32px] p-8 w-full max-w-lg shadow-2xl border border-white/5 relative">
+          <div ref={reportModalRef} className="bg-white dark:bg-black rounded-[32px] p-8 w-full max-w-lg shadow-2xl border border-white/5 relative">
             <button
               onClick={() => setIsReportModalOpen(false)}
               className="absolute top-6 right-6 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
