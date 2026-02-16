@@ -43,7 +43,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName }) => {
                 const pdf = await loadingTask.promise;
                 pdfDocRef.current = pdf;
                 setNumPages(pdf.numPages);
-                renderPage(1, scale);
                 setIsLoading(false);
             } catch (err: any) {
                 console.error('Error loading PDF:', err);
@@ -73,10 +72,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName }) => {
     }, [url]);
 
     useEffect(() => {
-        if (pdfDocRef.current) {
-            renderPage(pageNumber, scale);
+        if (pdfDocRef.current && !isLoading) {
+            // Small timeout to ensure canvas is painted in the DOM
+            const timer = setTimeout(() => {
+                renderPage(pageNumber, scale);
+            }, 50);
+            return () => clearTimeout(timer);
         }
-    }, [pageNumber, scale]);
+    }, [pageNumber, scale, isLoading]);
 
     const renderPage = async (num: number, currentScale: number) => {
         if (!pdfDocRef.current || !canvasRef.current) return;
