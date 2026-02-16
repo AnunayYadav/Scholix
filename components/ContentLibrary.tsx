@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { LibraryFile, UserProfile, Folder } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
+import PDFViewer from './PDFViewer.tsx';
 
 const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' | 'category' | 'root', size?: string }) => {
   const colors = {
@@ -60,6 +61,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [draggingOverId, setDraggingOverId] = useState<string | null>(null);
+
+  const [viewerInfo, setViewerInfo] = useState<{ show: boolean, url: string, name: string }>({ show: false, url: '', name: '' });
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -193,6 +196,19 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     navigateTo(null, null, null);
   };
 
+  const handleFileAccess = async (file: LibraryFile) => {
+    try {
+      const url = await NexusServer.getFileUrl(file.storage_path);
+      if (file.storage_path.toLowerCase().endsWith('.pdf')) {
+        setViewerInfo({ show: true, url, name: file.name });
+      } else {
+        window.open(url, '_blank');
+      }
+    } catch (e: any) {
+      alert("Error accessing file: " + e.message);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-fade-in pb-20 px-4 md:px-0">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -258,7 +274,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               onDemote={() => { if (confirm("Send this file back to pending review?")) { setIsProcessing(true); NexusServer.demoteFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
               onEdit={() => { setSelectedFile(file); setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type }); setShowEditModal(true); }}
               onDelete={() => { if (confirm("Permanently delete this file?")) { setIsProcessing(true); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
-              onAccess={() => NexusServer.getFileUrl(file.storage_path).then(url => window.open(url, '_blank'))}
+              onAccess={() => handleFileAccess(file)}
               onShowDetails={() => { setSelectedFile(file); setShowDetailsModal(true); }}
             />
           ))}
@@ -326,7 +342,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             <footer className="p-8 md:p-12 bg-black border-t border-white/5 flex gap-4">
               <button onClick={() => setShowDetailsModal(false)} className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors">Discard</button>
               {selectedFile.status === 'approved' && (
-                <button onClick={() => { NexusServer.getFileUrl(selectedFile.storage_path).then(url => window.open(url, '_blank')); }} className="flex-[2] py-4 bg-orange-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">View Document ↗</button>
+                <button onClick={() => { setShowDetailsModal(false); handleFileAccess(selectedFile); }} className="flex-[2] py-4 bg-orange-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">View Document ↗</button>
               )}
             </footer>
           </div>
@@ -346,6 +362,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       )}
 
       <input type="file" ref={fileInputRef} className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) { setPendingFile(f); setMetaForm(p => ({ ...p, name: f.name.replace(/\.[^/.]+$/, ""), semester: activeSemester?.name || '', subject: activeSubject?.name || '', type: activeCategory?.name || '' })); setShowUploadModal(true); } }} />
+
+      {viewerInfo.show && (
+        <PDFViewer
+          url={viewerInfo.url}
+          fileName={viewerInfo.name}
+          onClose={() => setViewerInfo({ show: false, url: '', name: '' })}
+        />
+      )}
     </div>
   );
 };
