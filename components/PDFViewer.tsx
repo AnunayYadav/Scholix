@@ -208,8 +208,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName }) => {
                         <button onClick={onClose} className="bg-white text-black px-10 py-4 rounded-3xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl">Abort Protocol</button>
                     </div>
                 ) : (
-                    <div className="relative shadow-[0_64px_128px_rgba(0,0,0,0.8)] border border-white/5 rounded-sm overflow-hidden bg-white">
-                        <canvas ref={canvasRef} className="block" />
+                    <div className="relative shadow-[0_64px_128px_rgba(0,0,0,0.8)] border border-white/5 rounded-sm overflow-hidden bg-white mx-auto">
+                        <canvas ref={canvasRef} className="max-w-full h-auto block" />
 
                         {/* Watermark overlay - Refined for security */}
                         <div className="absolute inset-0 pointer-events-none opacity-[0.04] flex items-center justify-center overflow-hidden flex-wrap select-none p-20">
