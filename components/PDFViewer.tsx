@@ -209,7 +209,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName }) => {
                     </div>
                 ) : (
                     <div className="relative shadow-[0_64px_128px_rgba(0,0,0,0.8)] border border-white/5 rounded-sm overflow-hidden bg-white">
-                        <canvas ref={canvasRef} className="max-w-full h-auto" />
+                        <canvas ref={canvasRef} className="block" />
 
                         {/* Watermark overlay - Refined for security */}
                         <div className="absolute inset-0 pointer-events-none opacity-[0.04] flex items-center justify-center overflow-hidden flex-wrap select-none p-20">
