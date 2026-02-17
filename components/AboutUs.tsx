@@ -37,7 +37,7 @@ const StatCounter: React.FC<{ target: number; label: string; subLabel: string; a
   }, [isVisible, target]);
 
   return (
-    <div className={`space-y-1 ${isAdmin ? 'animate-pulse scale-95 opacity-80' : ''}`}>
+    <div className="space-y-1">
       <p className={`text-[10px] font-black uppercase tracking-[0.4em] ${accentColor} opacity-80`}>{label}</p>
       <h4 className="text-5xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">
         {count.toLocaleString()}{(!label.includes('Global') && !isAdmin) ? '' : '+'}
@@ -187,6 +187,13 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
               </div>
             ) : (
               <>
+                <StatCounter
+                  target={stats?.registered || 0}
+                  label="LPU Students"
+                  subLabel="Registered Website Users"
+                  accentColor="text-orange-500"
+                  isVisible={isSectionVisible}
+                />
                 <StatCounter
                   target={stats?.visitors || 0}
                   label="Unique Visitors"
