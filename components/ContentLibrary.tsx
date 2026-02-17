@@ -45,10 +45,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [activeSubject, setActiveSubject] = useState<Folder | null>(null);
   const [activeCategory, setActiveCategory] = useState<Folder | null>(null);
 
-  const programs = ["BTech CSE", "BTech IT", "BCA", "MCA", "MBA", "BCom", "BA"];
+  const initialPrograms = ["BTech CSE", "BTech IT", "BCA", "MCA", "MBA", "BCom", "BA"];
+  const [availablePrograms, setAvailablePrograms] = useState(initialPrograms);
   const [selectedProgram, setSelectedProgram] = useState(() => {
-    if (userProfile?.program && programs.includes(userProfile.program)) return userProfile.program;
-    return programs[0];
+    if (userProfile?.program && initialPrograms.includes(userProfile.program)) return userProfile.program;
+    return initialPrograms[0];
   });
 
   const [isAdminView, setIsAdminView] = useState(false);
@@ -178,7 +179,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     return { sems, subjs, cats };
   }, [folders]);
 
-  const [isCreatingNew, setIsCreatingNew] = useState({ semester: false, subject: false, type: false });
+  const [isCreatingNew, setIsCreatingNew] = useState({ program: false, semester: false, subject: false, type: false });
 
   const navigateTo = (sem: Folder | null, subj: Folder | null, cat: Folder | null) => {
     setActiveSemester(sem);
@@ -216,6 +217,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         userProfile.is_admin,
         metaForm.program
       );
+      if (!availablePrograms.includes(metaForm.program)) {
+        setAvailablePrograms(prev => [...prev, metaForm.program]);
+      }
       setShowUploadModal(false);
       setPendingFile(null);
       fetchFromSource(false);
@@ -308,7 +312,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       <div className="flex gap-2 w-full flex-col md:flex-row">
         <div className="flex-1 flex gap-2">
           <NexusDropdown
-            options={programs}
+            options={availablePrograms}
             value={selectedProgram}
             onChange={(val) => {
               setSelectedProgram(val);
@@ -481,32 +485,53 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 <h3 className="text-xl font-black uppercase tracking-widest text-white">{showUploadModal ? 'Contribute' : 'Edit Metadata'}</h3>
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">{showUploadModal ? 'Share with community' : 'Refine file info'}</p>
               </div>
-              <button onClick={() => { setShowUploadModal(false); setShowEditModal(false); setPendingFile(null); setIsCreatingNew({ semester: false, subject: false, type: false }); }} className="p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
+              <button onClick={() => { setShowUploadModal(false); setShowEditModal(false); setPendingFile(null); setIsCreatingNew({ program: false, semester: false, subject: false, type: false }); }} className="p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </header>
             <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh] pb-40">
-              <div className="space-y-2 relative z-[80]">
+              <div className="space-y-2 relative z-[95]">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Target Program</label>
-                <NexusDropdown
-                  options={programs}
-                  value={metaForm.program}
-                  onChange={(val) => {
-                    setMetaForm({ ...metaForm, program: val, semester: '', subject: '', type: '' });
-                    setSelectedProgram(val); // Sync main view so folders are fetched
-                  }}
-                  placeholder="Select Program"
-                  className="w-full"
-                />
+                {!isCreatingNew.program ? (
+                  <NexusDropdown
+                    options={availablePrograms}
+                    value={metaForm.program}
+                    onChange={(val) => {
+                      setMetaForm({ ...metaForm, program: val, semester: '', subject: '', type: '' });
+                      setSelectedProgram(val);
+                    }}
+                    placeholder="Select Program"
+                    className="w-full"
+                    renderCustomMenu={(close) => (
+                      <>
+                        {availablePrograms.map(opt => (
+                          <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, program: opt, semester: '', subject: '', type: '' }); setSelectedProgram(opt); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.program === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                            {opt}
+                            {metaForm.program === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
+                          </button>
+                        ))}
+                        <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, program: true }); setMetaForm({ ...metaForm, program: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
+                          Add New Program
+                        </button>
+                      </>
+                    )}
+                  />
+                ) : (
+                  <div className="flex gap-2">
+                    <input autoFocus placeholder="New Program Name..." value={metaForm.program} onChange={e => setMetaForm({ ...metaForm, program: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
+                    <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, program: false }); setMetaForm({ ...metaForm, program: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                  </div>
+                )}
               </div>
 
-              <div className="space-y-2 relative z-[75]">
+              <div className="space-y-2 relative z-[90]">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Document Name</label>
                 <input value={metaForm.name} onChange={e => setMetaForm({ ...metaForm, name: e.target.value })} className="w-full bg-white/5 p-4 rounded-2xl font-bold border border-white/5 text-white outline-none focus:ring-2 focus:ring-orange-500" />
               </div>
 
-              <div className="grid grid-cols-2 gap-4 relative z-[70]">
-                <div className="space-y-2 relative z-[20]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-[80]">
+                <div className="space-y-2 relative">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Semester</label>
                   {!isCreatingNew.semester ? (
                     <NexusDropdown
@@ -537,7 +562,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     </div>
                   )}
                 </div>
-                <div className="space-y-2 relative z-[10]">
+                <div className="space-y-2 relative">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Subject</label>
                   {!isCreatingNew.subject ? (
                     <NexusDropdown
@@ -569,7 +594,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   )}
                 </div>
               </div>
-              <div className="space-y-2 relative z-[60]">
+              <div className="space-y-2 relative z-[70]">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Category / Type</label>
                 {!isCreatingNew.type ? (
                   <NexusDropdown
