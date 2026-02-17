@@ -151,6 +151,15 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     });
   }, [folders, activeSemester, activeSubject, activeCategory, isAdminView, viewMode, searchQuery]);
 
+  const dropdownLists = useMemo(() => {
+    const sems = Array.from(new Set(folders.filter(f => f.type === 'semester').map(f => f.name)));
+    const subjs = Array.from(new Set(folders.filter(f => f.type === 'subject').map(f => f.name)));
+    const cats = Array.from(new Set(folders.filter(f => f.type === 'category').map(f => f.name)));
+    return { sems, subjs, cats };
+  }, [folders]);
+
+  const [isCreatingNew, setIsCreatingNew] = useState({ semester: false, subject: false, type: false });
+
   const navigateTo = (sem: Folder | null, subj: Folder | null, cat: Folder | null) => {
     setActiveSemester(sem);
     setActiveSubject(subj);
@@ -319,7 +328,39 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               userProfile={userProfile}
               isAdminMode={isAdminView}
               isPersonal={viewMode === 'my-uploads'}
-              onApprove={() => { setIsProcessing(true); NexusServer.approveFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); }}
+              onApprove={async () => {
+                setIsProcessing(true);
+                try {
+                  // Ensure folders exist
+                  let semFolder = folders.find(f => f.type === 'semester' && f.name === file.semester);
+                  if (!semFolder) {
+                    await NexusServer.createFolder(file.semester, 'semester', null, selectedProgram);
+                    const updatedFolders = await NexusServer.fetchFolders(selectedProgram);
+                    setFolders(updatedFolders);
+                    semFolder = updatedFolders.find(f => f.type === 'semester' && f.name === file.semester);
+                  }
+
+                  let subjFolder = folders.find(f => f.type === 'subject' && f.name === file.subject && f.parent_id === semFolder?.id);
+                  if (!subjFolder && semFolder) {
+                    await NexusServer.createFolder(file.subject, 'subject', semFolder.id, selectedProgram);
+                    const updatedFolders = await NexusServer.fetchFolders(selectedProgram);
+                    setFolders(updatedFolders);
+                    subjFolder = updatedFolders.find(f => f.type === 'subject' && f.name === file.subject && f.parent_id === semFolder.id);
+                  }
+
+                  let catFolder = folders.find(f => f.type === 'category' && f.name === file.type && f.parent_id === subjFolder?.id);
+                  if (!catFolder && subjFolder && file.type) {
+                    await NexusServer.createFolder(file.type, 'category', subjFolder.id, selectedProgram);
+                  }
+
+                  await NexusServer.approveFile(file.id);
+                  fetchFromSource(false);
+                } catch (e: any) {
+                  alert("Approval error: " + e.message);
+                } finally {
+                  setIsProcessing(false);
+                }
+              }}
               onReject={() => { if (confirm("Reject and remove this file?")) { setIsProcessing(true); NexusServer.rejectFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
               onDemote={() => { if (confirm("Send this file back to pending review?")) { setIsProcessing(true); NexusServer.demoteFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
               onEdit={() => { setSelectedFile(file); setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type }); setShowEditModal(true); }}
@@ -420,7 +461,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 <h3 className="text-xl font-black uppercase tracking-widest text-white">{showUploadModal ? 'Contribute' : 'Edit Metadata'}</h3>
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">{showUploadModal ? 'Share with community' : 'Refine file info'}</p>
               </div>
-              <button onClick={() => { setShowUploadModal(false); setShowEditModal(false); setPendingFile(null); }} className="p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
+              <button onClick={() => { setShowUploadModal(false); setShowEditModal(false); setPendingFile(null); setIsCreatingNew({ semester: false, subject: false, type: false }); }} className="p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </header>
@@ -432,27 +473,111 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Semester</label>
-                  <input placeholder="e.g. Semester 4" value={metaForm.semester} onChange={e => setMetaForm({ ...metaForm, semester: e.target.value })} className="w-full bg-white/5 p-4 rounded-2xl font-bold border border-white/5 text-white outline-none focus:ring-2 focus:ring-orange-500" />
+                  {!isCreatingNew.semester ? (
+                    <NexusDropdown
+                      options={dropdownLists.sems}
+                      value={metaForm.semester}
+                      onChange={(val) => setMetaForm({ ...metaForm, semester: val })}
+                      placeholder="Select Semester"
+                      className="w-full"
+                      renderCustomMenu={(close) => (
+                        <>
+                          {dropdownLists.sems.map(opt => (
+                            <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, semester: opt }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.semester === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                              {opt}
+                              {metaForm.semester === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
+                            </button>
+                          ))}
+                          <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, semester: true }); setMetaForm({ ...metaForm, semester: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
+                            Create New Folder
+                          </button>
+                        </>
+                      )}
+                    />
+                  ) : (
+                    <div className="flex gap-2">
+                      <input autoFocus placeholder="New Semester Name..." value={metaForm.semester} onChange={e => setMetaForm({ ...metaForm, semester: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
+                      <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, semester: false }); setMetaForm({ ...metaForm, semester: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Subject</label>
-                  <input placeholder="e.g. Operating Systems" value={metaForm.subject} onChange={e => setMetaForm({ ...metaForm, subject: e.target.value })} className="w-full bg-white/5 p-4 rounded-2xl font-bold border border-white/5 text-white outline-none focus:ring-2 focus:ring-orange-500" />
+                  {!isCreatingNew.subject ? (
+                    <NexusDropdown
+                      options={dropdownLists.subjs}
+                      value={metaForm.subject}
+                      onChange={(val) => setMetaForm({ ...metaForm, subject: val })}
+                      placeholder="Select Subject"
+                      className="w-full"
+                      renderCustomMenu={(close) => (
+                        <>
+                          {dropdownLists.subjs.map(opt => (
+                            <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, subject: opt }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.subject === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                              {opt}
+                              {metaForm.subject === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
+                            </button>
+                          ))}
+                          <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, subject: true }); setMetaForm({ ...metaForm, subject: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
+                            Create New Folder
+                          </button>
+                        </>
+                      )}
+                    />
+                  ) : (
+                    <div className="flex gap-2">
+                      <input autoFocus placeholder="New Subject Name..." value={metaForm.subject} onChange={e => setMetaForm({ ...metaForm, subject: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
+                      <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, subject: false }); setMetaForm({ ...metaForm, subject: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Category / Type</label>
-                <input placeholder="e.g. Notes, PYQs, Assignments" value={metaForm.type} onChange={e => setMetaForm({ ...metaForm, type: e.target.value })} className="w-full bg-white/5 p-4 rounded-2xl font-bold border border-white/5 text-white outline-none focus:ring-2 focus:ring-orange-500" />
+                {!isCreatingNew.type ? (
+                  <NexusDropdown
+                    options={dropdownLists.cats}
+                    value={metaForm.type}
+                    onChange={(val) => setMetaForm({ ...metaForm, type: val })}
+                    placeholder="Select Category"
+                    className="w-full"
+                    renderCustomMenu={(close) => (
+                      <>
+                        {dropdownLists.cats.map(opt => (
+                          <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, type: opt }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.type === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                            {opt}
+                            {metaForm.type === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
+                          </button>
+                        ))}
+                        <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, type: true }); setMetaForm({ ...metaForm, type: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
+                          Create New Folder
+                        </button>
+                      </>
+                    )}
+                  />
+                ) : (
+                  <div className="flex gap-2">
+                    <input autoFocus placeholder="New Category Name..." value={metaForm.type} onChange={e => setMetaForm({ ...metaForm, type: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
+                    <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, type: false }); setMetaForm({ ...metaForm, type: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Description</label>
                 <textarea rows={3} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-white/5 p-6 rounded-[32px] font-medium border border-white/5 text-slate-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic" />
               </div>
-              <div className="p-4 bg-orange-600/5 border border-orange-600/20 rounded-2xl flex items-center justify-between">
-                <div>
-                  <p className="text-[8px] font-black text-orange-600 uppercase tracking-widest">Target Program</p>
-                  <p className="text-xs font-black text-white">{selectedProgram}</p>
-                </div>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 text-orange-600 opacity-50"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Target Program</label>
+                <NexusDropdown
+                  options={programs}
+                  value={selectedProgram}
+                  onChange={(val) => setSelectedProgram(val)}
+                  placeholder="Select Program"
+                  className="w-full"
+                />
               </div>
             </div>
             <footer className="p-8 bg-black border-t border-white/5">
@@ -515,6 +640,9 @@ const FileCard: React.FC<{
             <div className="flex gap-1.5">
               <button onClick={(e) => { e.stopPropagation(); onApprove?.(); }} className="w-8 h-8 bg-black text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Approve">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><polyline points="20 6 9 17 4 12" /></svg>
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-black text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Edit Metadata">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
               </button>
               <button onClick={(e) => { e.stopPropagation(); onDemote?.(); }} className="w-8 h-8 bg-black text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Put to Hold">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
