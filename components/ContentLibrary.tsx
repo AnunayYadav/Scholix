@@ -466,12 +466,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               </button>
             </header>
             <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh] pb-40">
-              <div className="space-y-2">
+              <div className="space-y-2 relative z-[70]">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Document Name</label>
                 <input value={metaForm.name} onChange={e => setMetaForm({ ...metaForm, name: e.target.value })} className="w-full bg-white/5 p-4 rounded-2xl font-bold border border-white/5 text-white outline-none focus:ring-2 focus:ring-orange-500" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-4 relative z-[60]">
+                <div className="space-y-2 relative z-[20]">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Semester</label>
                   {!isCreatingNew.semester ? (
                     <NexusDropdown
@@ -502,7 +502,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     </div>
                   )}
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 relative z-[10]">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Subject</label>
                   {!isCreatingNew.subject ? (
                     <NexusDropdown
@@ -534,7 +534,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   )}
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 relative z-[50]">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Category / Type</label>
                 {!isCreatingNew.type ? (
                   <NexusDropdown
@@ -569,7 +569,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Description</label>
                 <textarea rows={3} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-white/5 p-6 rounded-[32px] font-medium border border-white/5 text-slate-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 relative z-[30]">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Target Program</label>
                 <NexusDropdown
                   options={programs}

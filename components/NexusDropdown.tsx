@@ -35,7 +35,7 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
     }, []);
 
     return (
-        <div ref={dropdownRef} className={`relative ${isOpen ? 'z-[100]' : 'z-[10]'} ${className}`}>
+        <div ref={dropdownRef} className={`relative ${isOpen ? 'z-50' : ''} ${className}`}>
             {label && (
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1 mb-2 block">
                     {label}
@@ -64,7 +64,7 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
             </button>
 
             {isOpen && (
-                <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-[220px] bg-white/90 dark:bg-black/90 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100] animate-fade-in-up origin-top p-2 space-y-1">
+                <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-[220px] bg-white/90 dark:bg-black/90 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-fade-in-up origin-top p-2 space-y-1">
                     <div className="max-h-[300px] overflow-y-auto no-scrollbar">
                         {renderCustomMenu ? renderCustomMenu(() => setIsOpen(false)) : (
                             options.map(option => (
