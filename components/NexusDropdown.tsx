@@ -35,7 +35,7 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
     }, []);
 
     return (
-        <div ref={dropdownRef} className={`relative z-50 ${className}`}>
+        <div ref={dropdownRef} className={`relative ${isOpen ? 'z-[100]' : 'z-[10]'} ${className}`}>
             {label && (
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1 mb-2 block">
                     {label}
