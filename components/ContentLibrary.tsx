@@ -44,6 +44,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [activeSubject, setActiveSubject] = useState<Folder | null>(null);
   const [activeCategory, setActiveCategory] = useState<Folder | null>(null);
 
+  const programs = ["BTech CSE", "BTech IT", "BCA", "MCA", "MBA", "BCom", "BA"];
+  const [selectedProgram, setSelectedProgram] = useState(() => {
+    if (userProfile?.program && programs.includes(userProfile.program)) return userProfile.program;
+    return programs[0];
+  });
+
   const [isAdminView, setIsAdminView] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -80,12 +86,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     if (showSkeleton) setIsLoading(true);
     try {
       const [folderList, filesFromDb] = await Promise.all([
-        NexusServer.fetchFolders(),
+        NexusServer.fetchFolders(selectedProgram),
         isAdminView
-          ? NexusServer.fetchPendingFiles(searchQuery)
+          ? NexusServer.fetchPendingFiles(selectedProgram, searchQuery)
           : (viewMode === 'my-uploads' && userProfile)
             ? NexusServer.fetchUserFiles(userProfile.id)
-            : NexusServer.fetchFiles(searchQuery, 'All')
+            : NexusServer.fetchFiles(selectedProgram, searchQuery)
       ]);
 
       setFolders(folderList);
@@ -95,7 +101,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     } finally {
       setIsLoading(false);
     }
-  }, [isAdminView, viewMode, userProfile, searchQuery]);
+  }, [isAdminView, viewMode, userProfile, searchQuery, selectedProgram]);
 
   useEffect(() => {
     fetchFromSource(true);
@@ -158,9 +164,41 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       let parentId: string | null = null;
       if (activeSubject) { type = 'category'; parentId = activeSubject.id; }
       else if (activeSemester) { type = 'subject'; parentId = activeSemester.id; }
-      await NexusServer.createFolder(newFolderName, type, parentId);
+      await NexusServer.createFolder(newFolderName, type, parentId, selectedProgram);
       setNewFolderName('');
       setShowFolderModal(false);
+      fetchFromSource(false);
+    } catch (e: any) { alert(e.message); } finally { setIsProcessing(false); }
+  };
+
+  const handleUpload = async () => {
+    if (!pendingFile || !userProfile) return;
+    setIsProcessing(true);
+    try {
+      await NexusServer.uploadFile(
+        pendingFile,
+        metaForm.name,
+        metaForm.description,
+        metaForm.subject,
+        metaForm.semester,
+        metaForm.type,
+        userProfile.id,
+        userProfile.is_admin,
+        selectedProgram
+      );
+      setShowUploadModal(false);
+      setPendingFile(null);
+      fetchFromSource(false);
+    } catch (e: any) { alert(e.message); } finally { setIsProcessing(false); }
+  };
+
+  const handleEditSubmission = async () => {
+    if (!selectedFile) return;
+    setIsProcessing(true);
+    try {
+      await NexusServer.requestUpdate(selectedFile.id, metaForm, userProfile?.is_admin || false);
+      setShowEditModal(false);
+      setSelectedFile(null);
       fetchFromSource(false);
     } catch (e: any) { alert(e.message); } finally { setIsProcessing(false); }
   };
@@ -237,12 +275,25 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         </div>
       </header>
 
-      <div className="flex gap-2 w-full">
-        <div className="relative flex-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-          <input type="text" placeholder="Filter files..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white" />
+      <div className="flex gap-2 w-full flex-col md:flex-row">
+        <div className="flex-1 flex gap-2">
+          <select
+            value={selectedProgram}
+            onChange={(e) => {
+              setSelectedProgram(e.target.value);
+              navigateTo(null, null, null);
+            }}
+            className="px-4 py-3 bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white appearance-none cursor-pointer"
+          >
+            {programs.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+
+          <div className="relative flex-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+            <input type="text" placeholder="Filter files..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white" />
+          </div>
         </div>
-        <button onClick={() => fetchFromSource(true)} className="w-12 h-12 flex items-center justify-center bg-slate-100 dark:bg-black rounded-xl text-slate-400 hover:text-orange-600 transition-colors shadow-sm border-none" title="Refresh List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></button>
+        <button onClick={() => fetchFromSource(true)} className="w-12 h-12 flex items-center justify-center bg-slate-100 dark:bg-black rounded-xl text-slate-400 hover:text-orange-600 transition-colors shadow-sm border-none self-end md:self-auto" title="Refresh List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></button>
       </div>
 
       {isLoading ? (
@@ -357,6 +408,63 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               <input autoFocus placeholder="Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-black/60 p-4 rounded-xl font-bold border dark:border-white/10 text-sm dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
               <button onClick={handleCreateFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Saving...' : 'Create Folder'}</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upload/Edit Modal */}
+      {(showUploadModal || showEditModal) && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/95 backdrop-blur-2xl animate-fade-in">
+          <div ref={modalRef} className="bg-[#050505] rounded-[48px] w-full max-w-xl border border-white/10 shadow-[0_32px_128px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col">
+            <header className="p-8 border-b border-white/5 bg-black flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-black uppercase tracking-widest text-white">{showUploadModal ? 'Contribute' : 'Edit Metadata'}</h3>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">{showUploadModal ? 'Share with community' : 'Refine file info'}</p>
+              </div>
+              <button onClick={() => { setShowUploadModal(false); setShowEditModal(false); setPendingFile(null); }} className="p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </header>
+            <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh] no-scrollbar">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Document Name</label>
+                <input value={metaForm.name} onChange={e => setMetaForm({ ...metaForm, name: e.target.value })} className="w-full bg-white/5 p-4 rounded-2xl font-bold border border-white/5 text-white outline-none focus:ring-2 focus:ring-orange-500" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Semester</label>
+                  <input placeholder="e.g. Semester 4" value={metaForm.semester} onChange={e => setMetaForm({ ...metaForm, semester: e.target.value })} className="w-full bg-white/5 p-4 rounded-2xl font-bold border border-white/5 text-white outline-none focus:ring-2 focus:ring-orange-500" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Subject</label>
+                  <input placeholder="e.g. Operating Systems" value={metaForm.subject} onChange={e => setMetaForm({ ...metaForm, subject: e.target.value })} className="w-full bg-white/5 p-4 rounded-2xl font-bold border border-white/5 text-white outline-none focus:ring-2 focus:ring-orange-500" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Category / Type</label>
+                <input placeholder="e.g. Notes, PYQs, Assignments" value={metaForm.type} onChange={e => setMetaForm({ ...metaForm, type: e.target.value })} className="w-full bg-white/5 p-4 rounded-2xl font-bold border border-white/5 text-white outline-none focus:ring-2 focus:ring-orange-500" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Description</label>
+                <textarea rows={3} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-white/5 p-6 rounded-[32px] font-medium border border-white/5 text-slate-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic" />
+              </div>
+              <div className="p-4 bg-orange-600/5 border border-orange-600/20 rounded-2xl flex items-center justify-between">
+                <div>
+                  <p className="text-[8px] font-black text-orange-600 uppercase tracking-widest">Target Program</p>
+                  <p className="text-xs font-black text-white">{selectedProgram}</p>
+                </div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 text-orange-600 opacity-50"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+              </div>
+            </div>
+            <footer className="p-8 bg-black border-t border-white/5">
+              <button
+                onClick={showUploadModal ? handleUpload : handleEditSubmission}
+                disabled={isProcessing || !metaForm.name || !metaForm.semester || !metaForm.subject}
+                className="w-full bg-orange-600 text-white py-5 rounded-[24px] font-black text-xs uppercase tracking-[0.2em] shadow-[0_12px_48px_rgba(234,88,12,0.3)] hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all border-none"
+              >
+                {isProcessing ? 'Processing...' : showUploadModal ? 'Submit Verification' : 'Update Record'}
+              </button>
+            </footer>
           </div>
         </div>
       )}

@@ -210,16 +210,16 @@ class NexusServer {
     return publicUrl;
   }
 
-  static async fetchFolders(): Promise<Folder[]> {
+  static async fetchFolders(program: string): Promise<Folder[]> {
     const client = getSupabase();
     if (!client) return [];
-    const { data } = await client.from('folders').select('*').order('name', { ascending: true });
+    const { data } = await client.from('folders').select('*').eq('program', program).order('name', { ascending: true });
     return data || [];
   }
 
-  static async createFolder(name: string, type: 'semester' | 'subject' | 'category', parentId: string | null) {
+  static async createFolder(name: string, type: 'semester' | 'subject' | 'category', parentId: string | null, program: string) {
     const client = getSupabase();
-    if (client) await client.from('folders').insert([{ name, type, parent_id: parentId }]);
+    if (client) await client.from('folders').insert([{ name, type, parent_id: parentId, program }]);
   }
 
   static async renameFolder(id: string, name: string) {
@@ -232,23 +232,24 @@ class NexusServer {
     if (client) await client.from('folders').delete().eq('id', id);
   }
 
-  static async fetchFiles(q?: string, sub?: string): Promise<LibraryFile[]> {
+  static async fetchFiles(program: string, q?: string): Promise<LibraryFile[]> {
     const client = getSupabase();
     if (!client) return [];
-    let query = client.from('documents').select('*, uploader:profiles(username)').eq('status', 'approved');
+    let query = client.from('documents').select('*, uploader:profiles(username)').eq('status', 'approved').eq('program', program);
     if (q) query = query.ilike('name', `%${q}%`);
     const { data, error } = await query.order('created_at', { ascending: false });
     if (error) { console.error("Fetch Error:", error); return []; }
     return (data || []).map(item => ({
       id: item.id, name: item.name, subject: item.subject, semester: item.semester, type: item.type,
       uploadDate: new Date(item.created_at).getTime(), size: item.size, status: item.status, storage_path: item.storage_path,
+      program: item.program,
       uploader_username: (item.uploader as any)?.username || "Anonymous Verto",
       description: item.description,
       admin_notes: item.admin_notes
     }));
   }
 
-  static async uploadFile(file: File, name: string, desc: string, sub: string, sem: string, type: string, uid: string, admin: boolean) {
+  static async uploadFile(file: File, name: string, desc: string, sub: string, sem: string, type: string, uid: string, admin: boolean, program: string) {
     const client = getSupabase();
     if (!client) return;
     const path = `community/${Math.random().toString(36).substring(7)}_${file.name}`;
@@ -257,7 +258,8 @@ class NexusServer {
     const { error: dbErr } = await client.from('documents').insert([{
       name, description: desc, subject: sub, semester: sem, type,
       size: `${(file.size / 1024 / 1024).toFixed(2)} MB`, storage_path: path,
-      uploader_id: uid, status: admin ? 'approved' : 'pending'
+      uploader_id: uid, status: admin ? 'approved' : 'pending',
+      program
     }]);
     if (dbErr) throw dbErr;
   }
@@ -327,10 +329,10 @@ class NexusServer {
     if (client) await client.from('documents').update(admin ? metadata : { pending_update: metadata }).eq('id', id);
   }
 
-  static async fetchPendingFiles(q?: string): Promise<LibraryFile[]> {
+  static async fetchPendingFiles(program: string, q?: string): Promise<LibraryFile[]> {
     const client = getSupabase();
     if (!client) return [];
-    let query = client.from('documents').select('*, uploader:profiles(username)').eq('status', 'pending');
+    let query = client.from('documents').select('*, uploader:profiles(username)').eq('status', 'pending').eq('program', program);
     if (q) query = query.ilike('name', `%${q}%`);
     const { data, error } = await query.order('created_at', { ascending: false });
     if (error) { console.error("Fetch Pending Error:", error); return []; }
@@ -339,7 +341,8 @@ class NexusServer {
       uploadDate: new Date(item.created_at).getTime(), size: item.size, status: item.status, storage_path: item.storage_path,
       uploader_username: (item.uploader as any)?.username || "Anonymous Verto",
       description: item.description,
-      admin_notes: item.admin_notes
+      admin_notes: item.admin_notes,
+      program: item.program
     }));
   }
 
@@ -353,7 +356,8 @@ class NexusServer {
       uploadDate: new Date(item.created_at).getTime(), size: item.size, status: item.status, storage_path: item.storage_path,
       uploader_username: (item.uploader as any)?.username || "Anonymous Verto",
       description: item.description,
-      admin_notes: item.admin_notes
+      admin_notes: item.admin_notes,
+      program: item.program
     }));
   }
 
