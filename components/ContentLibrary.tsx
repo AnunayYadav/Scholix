@@ -64,7 +64,27 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [metaForm, setMetaForm] = useState({ name: '', description: '', semester: '', subject: '', type: '' });
+  const [metaForm, setMetaForm] = useState({ name: '', description: '', semester: '', subject: '', type: '', program: selectedProgram });
+
+  const modalSemesters = useMemo(() => {
+    return folders.filter(f => f.type === 'semester' && f.program === metaForm.program).map(f => f.name);
+  }, [folders, metaForm.program]);
+
+  const modalSubjects = useMemo(() => {
+    const sem = folders.find(f => f.name === metaForm.semester && f.type === 'semester' && f.program === metaForm.program);
+    return sem ? folders.filter(f => f.type === 'subject' && f.parent_id === sem.id).map(f => f.name) : [];
+  }, [folders, metaForm.semester, metaForm.program]);
+
+  const modalCategories = useMemo(() => {
+    const sub = folders.find(f => f.name === metaForm.subject && f.type === 'subject' && f.program === metaForm.program);
+    return sub ? folders.filter(f => f.type === 'category' && f.parent_id === sub.id).map(f => f.name) : [];
+  }, [folders, metaForm.subject, metaForm.program]);
+
+  useEffect(() => {
+    if (showUploadModal || showEditModal) {
+      setMetaForm(prev => ({ ...prev, program: selectedProgram }));
+    }
+  }, [showUploadModal, showEditModal, selectedProgram]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [draggingOverId, setDraggingOverId] = useState<string | null>(null);
@@ -194,7 +214,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         metaForm.type,
         userProfile.id,
         userProfile.is_admin,
-        selectedProgram
+        metaForm.program
       );
       setShowUploadModal(false);
       setPendingFile(null);
@@ -309,7 +329,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
           {currentFolders.map(folder => (
-            <div key={folder.id} onDragOver={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(folder.id); }} onDragLeave={() => setDraggingOverId(null)} onDrop={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(null); const droppedFiles = e.dataTransfer.files; if (droppedFiles && droppedFiles.length > 0) { setPendingFile(droppedFiles[0]); setMetaForm({ name: droppedFiles[0].name.replace(/\.[^/.]+$/, ""), description: '', semester: folder.type === 'semester' ? folder.name : activeSemester?.name || '', subject: folder.type === 'subject' ? folder.name : activeSubject?.name || '', type: folder.type === 'category' ? folder.name : '' }); setShowUploadModal(true); } }} onClick={() => { if (folder.type === 'semester') navigateTo(folder, null, null); else if (folder.type === 'subject') navigateTo(activeSemester, folder, null); else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder); }} className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${draggingOverId === folder.id ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-slate-100 dark:border-white/5 bg-white dark:bg-black/40 hover:border-orange-500/50 hover:shadow-lg'}`}>
+            <div key={folder.id} onDragOver={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(folder.id); }} onDragLeave={() => setDraggingOverId(null)} onDrop={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(null); const droppedFiles = e.dataTransfer.files; if (droppedFiles && droppedFiles.length > 0) { setPendingFile(droppedFiles[0]); setMetaForm({ name: droppedFiles[0].name.replace(/\.[^/.]+$/, ""), description: '', semester: folder.type === 'semester' ? folder.name : activeSemester?.name || '', subject: folder.type === 'subject' ? folder.name : activeSubject?.name || '', type: folder.type === 'category' ? folder.name : '', program: folder.program }); setShowUploadModal(true); } }} onClick={() => { if (folder.type === 'semester') navigateTo(folder, null, null); else if (folder.type === 'subject') navigateTo(activeSemester, folder, null); else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder); }} className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${draggingOverId === folder.id ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-slate-100 dark:border-white/5 bg-white dark:bg-black/40 hover:border-orange-500/50 hover:shadow-lg'}`}>
               {userProfile?.is_admin && (
                 <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                   <button onClick={(e) => { e.stopPropagation(); setFolderToManage(folder); setNewFolderName(folder.name); setShowRenameModal(true); }} className="p-1.5 bg-black rounded-lg text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
@@ -466,24 +486,39 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               </button>
             </header>
             <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh] pb-40">
-              <div className="space-y-2 relative z-[70]">
+              <div className="space-y-2 relative z-[80]">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Target Program</label>
+                <NexusDropdown
+                  options={programs}
+                  value={metaForm.program}
+                  onChange={(val) => {
+                    setMetaForm({ ...metaForm, program: val, semester: '', subject: '', type: '' });
+                    setSelectedProgram(val); // Sync main view so folders are fetched
+                  }}
+                  placeholder="Select Program"
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2 relative z-[75]">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Document Name</label>
                 <input value={metaForm.name} onChange={e => setMetaForm({ ...metaForm, name: e.target.value })} className="w-full bg-white/5 p-4 rounded-2xl font-bold border border-white/5 text-white outline-none focus:ring-2 focus:ring-orange-500" />
               </div>
-              <div className="grid grid-cols-2 gap-4 relative z-[60]">
+
+              <div className="grid grid-cols-2 gap-4 relative z-[70]">
                 <div className="space-y-2 relative z-[20]">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Semester</label>
                   {!isCreatingNew.semester ? (
                     <NexusDropdown
-                      options={dropdownLists.sems}
+                      options={modalSemesters}
                       value={metaForm.semester}
-                      onChange={(val) => setMetaForm({ ...metaForm, semester: val })}
+                      onChange={(val) => setMetaForm({ ...metaForm, semester: val, subject: '', type: '' })}
                       placeholder="Select Semester"
                       className="w-full"
                       renderCustomMenu={(close) => (
                         <>
-                          {dropdownLists.sems.map(opt => (
-                            <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, semester: opt }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.semester === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                          {modalSemesters.map(opt => (
+                            <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, semester: opt, subject: '', type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.semester === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
                               {opt}
                               {metaForm.semester === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
                             </button>
@@ -506,15 +541,15 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Subject</label>
                   {!isCreatingNew.subject ? (
                     <NexusDropdown
-                      options={dropdownLists.subjs}
+                      options={modalSubjects}
                       value={metaForm.subject}
-                      onChange={(val) => setMetaForm({ ...metaForm, subject: val })}
+                      onChange={(val) => setMetaForm({ ...metaForm, subject: val, type: '' })}
                       placeholder="Select Subject"
                       className="w-full"
                       renderCustomMenu={(close) => (
                         <>
-                          {dropdownLists.subjs.map(opt => (
-                            <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, subject: opt }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.subject === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                          {modalSubjects.map(opt => (
+                            <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, subject: opt, type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.subject === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
                               {opt}
                               {metaForm.subject === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
                             </button>
@@ -534,18 +569,18 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   )}
                 </div>
               </div>
-              <div className="space-y-2 relative z-[50]">
+              <div className="space-y-2 relative z-[60]">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Category / Type</label>
                 {!isCreatingNew.type ? (
                   <NexusDropdown
-                    options={dropdownLists.cats}
+                    options={modalCategories}
                     value={metaForm.type}
                     onChange={(val) => setMetaForm({ ...metaForm, type: val })}
                     placeholder="Select Category"
                     className="w-full"
                     renderCustomMenu={(close) => (
                       <>
-                        {dropdownLists.cats.map(opt => (
+                        {modalCategories.map(opt => (
                           <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, type: opt }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.type === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
                             {opt}
                             {metaForm.type === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
@@ -565,19 +600,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   </div>
                 )}
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 relative z-[50]">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Description</label>
                 <textarea rows={3} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-white/5 p-6 rounded-[32px] font-medium border border-white/5 text-slate-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic" />
-              </div>
-              <div className="space-y-2 relative z-[30]">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Target Program</label>
-                <NexusDropdown
-                  options={programs}
-                  value={selectedProgram}
-                  onChange={(val) => setSelectedProgram(val)}
-                  placeholder="Select Program"
-                  className="w-full"
-                />
               </div>
             </div>
             <footer className="p-8 bg-black border-t border-white/5">
@@ -593,7 +618,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         </div>
       )}
 
-      <input type="file" ref={fileInputRef} className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) { setPendingFile(f); setMetaForm(p => ({ ...p, name: f.name.replace(/\.[^/.]+$/, ""), semester: activeSemester?.name || '', subject: activeSubject?.name || '', type: activeCategory?.name || '' })); setShowUploadModal(true); } }} />
+      <input type="file" ref={fileInputRef} className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) { setPendingFile(f); setMetaForm(p => ({ ...p, name: f.name.replace(/\.[^/.]+$/, ""), description: '', semester: activeSemester?.name || '', subject: activeSubject?.name || '', type: activeCategory?.name || '', program: selectedProgram })); setShowUploadModal(true); } }} />
 
       {viewerInfo.show && (
         <PDFViewer
