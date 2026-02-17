@@ -95,9 +95,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (showFolderModal || showRenameModal || showDetailsModal || showEditModal || showUploadModal) {
-      modalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const isAnyModalOpen = showFolderModal || showRenameModal || showDetailsModal || showEditModal || showUploadModal;
+    if (isAnyModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
     }
+    return () => { document.body.style.overflow = 'unset'; };
   }, [showFolderModal, showRenameModal, showDetailsModal, showEditModal, showUploadModal]);
 
   useEffect(() => {
@@ -399,8 +403,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
       {/* Details Modal */}
       {showDetailsModal && selectedFile && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl animate-fade-in">
-          <div ref={modalRef} className="bg-[#050505] rounded-[48px] w-full max-w-2xl border border-white/10 shadow-[0_32px_128px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-[200] flex items-start md:items-center justify-center p-4 bg-black/90 backdrop-blur-2xl animate-fade-in overflow-y-auto">
+          <div ref={modalRef} className="bg-[#050505] rounded-[48px] w-full max-w-2xl border border-white/10 shadow-[0_32px_128px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col my-auto max-h-[90vh]">
             <header className="p-8 md:p-12 border-b border-white/5 bg-black flex items-start justify-between">
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -465,8 +469,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       )}
 
       {showFolderModal && userProfile?.is_admin && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div ref={modalRef} className="bg-white dark:bg-black rounded-[30px] w-full max-w-sm shadow-2xl border border-white/10 overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div ref={modalRef} className="bg-white dark:bg-black rounded-[30px] w-full max-w-sm shadow-2xl border border-white/10 overflow-hidden flex flex-col my-auto">
             <div className="bg-black p-6 text-white flex justify-between items-center"><h3 className="text-lg font-black uppercase tracking-widest">New Node</h3><button onClick={() => setShowFolderModal(false)} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
             <div className="p-6 space-y-4">
               <input autoFocus placeholder="Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-black/60 p-4 rounded-xl font-bold border dark:border-white/10 text-sm dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
@@ -478,8 +482,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
       {/* Upload/Edit Modal */}
       {(showUploadModal || showEditModal) && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/95 backdrop-blur-2xl animate-fade-in">
-          <div ref={modalRef} className="bg-[#050505] rounded-[48px] w-full max-w-xl border border-white/10 shadow-[0_32px_128px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-[200] flex items-start md:items-center justify-center p-4 bg-black/95 backdrop-blur-2xl animate-fade-in overflow-y-auto">
+          <div ref={modalRef} className="bg-[#050505] rounded-[48px] w-full max-w-xl border border-white/10 shadow-[0_32px_128px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col my-auto">
             <header className="p-8 border-b border-white/5 bg-black flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-black uppercase tracking-widest text-white">{showUploadModal ? 'Contribute' : 'Edit Metadata'}</h3>
