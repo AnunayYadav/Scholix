@@ -8,6 +8,7 @@ interface NexusDropdownProps {
     className?: string;
     placeholder?: string;
     icon?: React.ReactNode;
+    renderCustomMenu?: (close: () => void) => React.ReactNode;
 }
 
 const NexusDropdown: React.FC<NexusDropdownProps> = ({
@@ -17,7 +18,8 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
     label,
     className = "",
     placeholder = "Select...",
-    icon
+    icon,
+    renderCustomMenu
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -64,27 +66,29 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
             {isOpen && (
                 <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-[220px] bg-white/90 dark:bg-black/90 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100] animate-fade-in-up origin-top p-2 space-y-1">
                     <div className="max-h-[300px] overflow-y-auto no-scrollbar">
-                        {options.map(option => (
-                            <button
-                                key={option}
-                                type="button"
-                                onClick={() => {
-                                    onChange(option);
-                                    setIsOpen(false);
-                                }}
-                                className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${value === option
+                        {renderCustomMenu ? renderCustomMenu(() => setIsOpen(false)) : (
+                            options.map(option => (
+                                <button
+                                    key={option}
+                                    type="button"
+                                    onClick={() => {
+                                        onChange(option);
+                                        setIsOpen(false);
+                                    }}
+                                    className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${value === option
                                         ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
                                         : 'text-slate-600 dark:text-slate-400 bg-transparent hover:bg-slate-100 dark:hover:bg-white/5 hover:text-orange-600'
-                                    }`}
-                            >
-                                {option}
-                                {value === option && (
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5">
-                                        <path d="M20 6 9 17 4 12" />
-                                    </svg>
-                                )}
-                            </button>
-                        ))}
+                                        }`}
+                                >
+                                    {option}
+                                    {value === option && (
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5">
+                                            <path d="M20 6 9 17 4 12" />
+                                        </svg>
+                                    )}
+                                </button>
+                            ))
+                        )}
                     </div>
                 </div>
             )}
