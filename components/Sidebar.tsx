@@ -194,7 +194,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 setModule(item.id);
                 if (window.innerWidth < 768) toggleMobileMenu();
               }}
-              className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-200 border-none text-left relative
+              className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border-none text-left relative
                 ${currentModule === item.id
                   ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
                   : 'text-slate-600 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-slate-200'

@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import NexusServer from '../services/nexusServer.ts';
+import { UserProfile } from '../types.ts';
 
-const StatCounter: React.FC<{ target: number; label: string; subLabel: string; accentColor: string; isVisible: boolean }> = ({ target, label, subLabel, accentColor, isVisible }) => {
+const StatCounter: React.FC<{ target: number; label: string; subLabel: string; accentColor: string; isVisible: boolean; isAdmin?: boolean }> = ({ target, label, subLabel, accentColor, isVisible, isAdmin }) => {
   const [count, setCount] = useState(0);
   const countRef = useRef(0);
   const animationRef = useRef<number | null>(null);
@@ -37,18 +37,22 @@ const StatCounter: React.FC<{ target: number; label: string; subLabel: string; a
   }, [isVisible, target]);
 
   return (
-    <div className="space-y-1">
+    <div className={`space-y-1 ${isAdmin ? 'animate-pulse scale-95 opacity-80' : ''}`}>
       <p className={`text-[10px] font-black uppercase tracking-[0.4em] ${accentColor} opacity-80`}>{label}</p>
       <h4 className="text-5xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">
-        {count.toLocaleString()}{label.includes('Global') ? '+' : ''}
+        {count.toLocaleString()}{(!label.includes('Global') && !isAdmin) ? '' : '+'}
       </h4>
       <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-2">{subLabel}</p>
     </div>
   );
 };
 
-const AboutUs: React.FC = () => {
-  const [stats, setStats] = useState<{ registered: number; visitors: number } | null>(null);
+interface AboutUsProps {
+  userProfile: UserProfile | null;
+}
+
+const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
+  const [stats, setStats] = useState<{ registered: number; visitors: number; totalViews: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSectionVisible, setIsSectionVisible] = useState(false);
   const metricsRef = useRef<HTMLDivElement>(null);
@@ -60,7 +64,7 @@ const AboutUs: React.FC = () => {
         setStats(data);
       } catch (e) {
         console.error("Failed to fetch impact stats");
-        setStats({ registered: 0, visitors: 0 });
+        setStats({ registered: 0, visitors: 0, totalViews: 0 });
       } finally {
         setLoading(false);
       }
@@ -184,19 +188,22 @@ const AboutUs: React.FC = () => {
             ) : (
               <>
                 <StatCounter
-                  target={stats?.registered || 0}
-                  label="LPU Students"
-                  subLabel="Registered Website Users"
-                  accentColor="text-orange-500"
-                  isVisible={isSectionVisible}
-                />
-                <StatCounter
                   target={stats?.visitors || 0}
-                  label="Global Reach"
-                  subLabel="Total Platform Visitors"
+                  label="Unique Visitors"
+                  subLabel="Session-based traffic"
                   accentColor="text-blue-400"
                   isVisible={isSectionVisible}
                 />
+                {userProfile?.is_admin && (
+                  <StatCounter
+                    target={stats?.totalViews || 0}
+                    label="Admin Only: Views"
+                    subLabel="Total raw hits / reloads"
+                    accentColor="text-emerald-500"
+                    isVisible={isSectionVisible}
+                    isAdmin={true}
+                  />
+                )}
               </>
             )}
           </div>

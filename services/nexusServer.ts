@@ -120,6 +120,13 @@ class NexusServer {
   static async recordVisit(): Promise<void> {
     const client = getSupabase();
     if (!client) return;
+
+    // 1. Raw View Tracking (Every reload/view)
+    try {
+      await client.from('site_views').insert([{}]);
+    } catch (e) { }
+
+    // 2. Session-based Visitor Tracking
     const SESSION_KEY = 'nexus_session_logged';
     if (!sessionStorage.getItem(SESSION_KEY)) {
       try {
@@ -129,14 +136,15 @@ class NexusServer {
     }
   }
 
-  static async getSiteStats(): Promise<{ registered: number; visitors: number }> {
+  static async getSiteStats(): Promise<{ registered: number; visitors: number; totalViews: number }> {
     const client = getSupabase();
-    if (!client) return { registered: 0, visitors: 0 };
+    if (!client) return { registered: 0, visitors: 0, totalViews: 0 };
     try {
       const { count: reg } = await client.from('profiles').select('*', { count: 'exact', head: true });
       const { count: vis } = await client.from('site_visits').select('*', { count: 'exact', head: true });
-      return { registered: reg || 0, visitors: vis || 0 };
-    } catch (e) { return { registered: 0, visitors: 0 }; }
+      const { count: views } = await client.from('site_views').select('*', { count: 'exact', head: true });
+      return { registered: reg || 0, visitors: vis || 0, totalViews: views || 0 };
+    } catch (e) { return { registered: 0, visitors: 0, totalViews: 0 }; }
   }
 
   static async signIn(identifier: string, pass: string) {

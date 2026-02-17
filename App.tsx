@@ -92,7 +92,7 @@ const TypingText: React.FC = React.memo(() => {
 
 const BackgroundEffects: React.FC = React.memo(() => {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none bg-slate-50 dark:bg-black transition-colors duration-500">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none bg-slate-50 dark:bg-black">
       {/* Seamless Merger */}
       <div className="absolute inset-0 bg-gradient-to-b from-slate-50 dark:from-black via-slate-50/10 dark:via-black/10 to-transparent h-96 z-10 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-r from-slate-50 dark:from-black via-slate-50/10 dark:via-black/10 to-transparent w-96 z-10 pointer-events-none" />
@@ -105,7 +105,7 @@ const BackgroundEffects: React.FC = React.memo(() => {
 
 const DashboardHero: React.FC<{ navigate: (p: string) => void }> = React.memo(({ navigate }) => {
   return (
-    <div className="relative overflow-hidden bg-slate-50 dark:bg-black p-8 md:p-16 mb-0 shadow-[0_40px_100px_rgba(0,0,0,0.1)] dark:shadow-[0_40px_100px_rgba(0,0,0,0.4)] group/hero transition-colors duration-500 min-h-[calc(100vh-80px)] flex flex-col justify-center">
+    <div className="relative overflow-hidden bg-slate-50 dark:bg-black p-8 md:p-16 mb-0 shadow-[0_40px_100px_rgba(0,0,0,0.1)] dark:shadow-[0_40px_100px_rgba(0,0,0,0.4)] group/hero min-h-[calc(100vh-80px)] flex flex-col justify-center">
       <div className="relative z-10 lg:grid lg:grid-cols-[1.2fr_0.8fr] lg:gap-12 lg:items-center">
         <div className="flex flex-col space-y-4 md:space-y-12">
           {/* Header row: Title + Image on Mobile */}
@@ -282,7 +282,7 @@ const AppContent: React.FC = () => {
   const showRegPrompt = userProfile && !userProfile.registration_number;
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-200 transition-colors duration-300">
+    <div className="flex min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-200">
       <Sidebar
         currentModule={currentModule}
         setModule={navigateToModule}
@@ -290,10 +290,10 @@ const AppContent: React.FC = () => {
         toggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         userProfile={userProfile}
       />
-      <main className="flex-1 flex flex-col h-screen overflow-hidden relative bg-slate-50 dark:bg-black transition-colors duration-500">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden relative bg-slate-50 dark:bg-black">
         <BackgroundEffects />
 
-        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-white/5 bg-white/90 dark:bg-black z-10 transition-colors duration-500">
+        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-white/5 bg-white/90 dark:bg-black z-10">
           <div className="flex items-center">
             <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-slate-600 dark:text-slate-400 mr-4 border-none bg-transparent">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
@@ -372,7 +372,7 @@ const AppContent: React.FC = () => {
               <Route path="/cgpa" element={<CGPACalculator userProfile={userProfile} />} />
               <Route path="/attendance" element={<AttendanceTracker />} />
               <Route path="/share-cgpa" element={<ShareReport />} />
-              <Route path="/about" element={<AboutUs />} />
+              <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
               <Route path="/profile" element={<ProfileSection userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={(m) => navigate(getPathFromModule(m))} />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
