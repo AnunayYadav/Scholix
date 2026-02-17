@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { UserProfile } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
+import NexusDropdown from './NexusDropdown.tsx';
 
 interface Course {
   id: string;
@@ -53,26 +54,16 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
   const [manualAdjustments, setManualAdjustments] = useState<Record<number, number>>({});
   const [courses, setCourses] = useState<Course[]>([]);
 
-  const [isSemDropdownOpen, setIsSemDropdownOpen] = useState(false);
-  const [isModeDropdownOpen, setIsModeDropdownOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
 
-  const semDropdownRef = useRef<HTMLDivElement>(null);
-  const modeDropdownRef = useRef<HTMLDivElement>(null);
   const historyPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadHistory();
-    const handleClickOutside = (event: MouseEvent) => {
-      if (semDropdownRef.current && !semDropdownRef.current.contains(event.target as Node)) setIsSemDropdownOpen(false);
-      if (modeDropdownRef.current && !modeDropdownRef.current.contains(event.target as Node)) setIsModeDropdownOpen(false);
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [userProfile]);
 
   const loadHistory = async () => {
@@ -286,31 +277,22 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
       )}
 
       <div className="flex flex-wrap items-center gap-4 mb-8">
-        <div className="relative" ref={semDropdownRef}>
-          <button onClick={() => setIsSemDropdownOpen(!isSemDropdownOpen)} className={`flex items-center justify-between min-w-[160px] px-6 py-3 rounded-2xl border transition-all duration-300 font-black text-[10px] uppercase tracking-widest ${isSemDropdownOpen ? 'bg-white dark:bg-black border-orange-500 shadow-xl' : 'bg-slate-100 dark:bg-black border-slate-200 dark:border-white/10 text-slate-700 dark:text-white'}`}>
-            <span>Semester {currentSemester}</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-3 h-3 ml-2 transition-transform ${isSemDropdownOpen ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9" /></svg>
-          </button>
-          {isSemDropdownOpen && (
-            <div className="absolute top-full left-0 mt-2 w-full z-[100] glass-panel rounded-2xl overflow-hidden shadow-2xl border dark:border-white/10 bg-white dark:bg-black">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-                <button key={sem} onClick={() => { setCurrentSemester(sem); setIsSemDropdownOpen(false); setManualAdjustments({}); }} className={`w-full text-left px-6 py-3.5 text-[10px] font-black uppercase tracking-widest transition-colors border-none ${currentSemester === sem ? 'bg-orange-600 text-white' : 'hover:bg-orange-500/10 dark:text-white'}`}>Semester {sem}</button>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="relative" ref={modeDropdownRef}>
-          <button onClick={() => setIsModeDropdownOpen(!isModeDropdownOpen)} className={`flex items-center justify-between min-w-[160px] px-6 py-3 rounded-2xl border transition-all duration-300 font-black text-[10px] uppercase tracking-widest ${isModeDropdownOpen ? 'bg-white dark:bg-black border-orange-500 shadow-xl' : 'bg-slate-100 dark:bg-black border-slate-200 dark:border-white/10 text-slate-700 dark:text-white'}`}>
-            <span>Use: {inputMode === 'marks' ? 'Marks' : 'Grades'}</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-3 h-3 ml-2 transition-transform ${isModeDropdownOpen ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9" /></svg>
-          </button>
-          {isModeDropdownOpen && (
-            <div className="absolute top-full left-0 mt-2 w-full z-[100] glass-panel rounded-2xl overflow-hidden shadow-2xl border dark:border-white/10 bg-white dark:bg-black">
-              <button onClick={() => { setInputMode('marks'); setIsModeDropdownOpen(false); }} className={`w-full text-left px-6 py-3.5 text-[10px] font-black uppercase tracking-widest border-none ${inputMode === 'marks' ? 'bg-orange-600 text-white' : 'hover:bg-orange-500/10 dark:text-white'}`}>By Marks</button>
-              <button onClick={() => { setInputMode('grades'); setIsModeDropdownOpen(false); }} className={`w-full text-left px-6 py-3.5 text-[10px] font-black uppercase tracking-widest border-none ${inputMode === 'grades' ? 'bg-orange-600 text-white' : 'hover:bg-orange-500/10 dark:text-white'}`}>By Grades</button>
-            </div>
-          )}
-        </div>
+        <NexusDropdown
+          options={['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8']}
+          value={`Semester ${currentSemester}`}
+          onChange={(val) => {
+            const sem = parseInt(val.split(' ')[1]);
+            setCurrentSemester(sem);
+            setManualAdjustments({});
+          }}
+        />
+        <NexusDropdown
+          options={['By Marks', 'By Grades']}
+          value={inputMode === 'marks' ? 'By Marks' : 'By Grades'}
+          onChange={(val) => {
+            setInputMode(val === 'By Marks' ? 'marks' : 'grades');
+          }}
+        />
       </div>
 
       {currentSemester > 1 && (
@@ -361,7 +343,16 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
                     </div>
                     <div className="space-y-1">
                       <p className="text-[7px] font-black text-slate-400 uppercase text-center">{inputMode === 'marks' ? 'Marks' : 'Grade'}</p>
-                      {inputMode === 'marks' ? <input type="number" min="0" max="100" value={c.marks} onChange={(e) => updateCourse(c.id, 'marks', parseInt(e.target.value) || 0)} className="w-20 bg-white dark:bg-white/5 border dark:border-white/10 rounded-2xl px-3 py-3 text-xs text-center font-black dark:text-white outline-none" /> : <select value={c.grade} onChange={(e) => updateCourse(c.id, 'grade', e.target.value)} className="w-20 bg-white dark:bg-white/5 border dark:border-white/10 rounded-2xl px-3 py-3 text-xs text-center font-black dark:text-white outline-none">{Object.keys(GRADE_POINTS).map(g => <option key={g} value={g}>{g}</option>)}</select>}
+                      {inputMode === 'marks' ? (
+                        <input type="number" min="0" max="100" value={c.marks} onChange={(e) => updateCourse(c.id, 'marks', parseInt(e.target.value) || 0)} className="w-20 bg-white dark:bg-white/5 border dark:border-white/10 rounded-2xl px-3 py-3 text-xs text-center font-black dark:text-white outline-none" />
+                      ) : (
+                        <NexusDropdown
+                          options={GRADELIST}
+                          value={c.grade}
+                          onChange={(val) => updateCourse(c.id, 'grade', val)}
+                          className="w-24"
+                        />
+                      )}
                     </div>
                     <button onClick={() => removeCourse(c.id)} className="p-3 text-red-500/20 hover:text-red-500 border-none bg-transparent mt-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
                   </div>

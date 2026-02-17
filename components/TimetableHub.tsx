@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { UserProfile, TimetableData, DaySchedule, TimetableSlot } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import { extractTimetableFromImage } from '../services/geminiService.ts';
+import NexusDropdown from './NexusDropdown.tsx';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -742,15 +743,15 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                 <label className="text-[8px] font-black uppercase tracking-widest text-slate-500 ml-1">Branch</label>
                 <input type="text" placeholder="e.g. CSE" value={metadata.branch} onChange={e => setMetadata({ ...metadata, branch: e.target.value.toUpperCase() })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all" />
               </div>
-              <div className="space-y-2">
-                <label className="text-[8px] font-black uppercase tracking-widest text-slate-500 ml-1">Current Year</label>
-                <select value={metadata.year} onChange={e => setMetadata({ ...metadata, year: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all appearance-none">
-                  <option value="">Select Year</option>
-                  <option value="1st">1st Year</option>
-                  <option value="2nd">2nd Year</option>
-                  <option value="3rd">3rd Year</option>
-                  <option value="4th">4th Year</option>
-                </select>
+              <div className="space-y-2 text-left">
+                <NexusDropdown
+                  label="Current Year"
+                  placeholder="Select Year"
+                  options={['1st', '2nd', '3rd', '4th']}
+                  value={metadata.year}
+                  onChange={(val) => setMetadata({ ...metadata, year: val })}
+                  className="w-full"
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-[8px] font-black uppercase tracking-widest text-slate-500 ml-1">Semester</label>

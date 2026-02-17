@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { LibraryFile, UserProfile, Folder } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import PDFViewer from './PDFViewer.tsx';
+import NexusDropdown from './NexusDropdown.tsx';
 
 const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' | 'category' | 'root', size?: string }) => {
   const colors = {
@@ -60,8 +61,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [selectedFile, setSelectedFile] = useState<LibraryFile | null>(null);
   const [folderToManage, setFolderToManage] = useState<Folder | null>(null);
   const [newFolderName, setNewFolderName] = useState('');
-  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
-  const selectorRef = useRef<HTMLDivElement>(null);
 
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -83,16 +82,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   useEffect(() => {
     if (initialView) setViewMode(initialView);
   }, [initialView]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (selectorRef.current && !selectorRef.current.contains(e.target as Node)) {
-        setIsSelectorOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const fetchFromSource = useCallback(async (showSkeleton = true) => {
     if (showSkeleton) setIsLoading(true);
@@ -289,43 +278,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
       <div className="flex gap-2 w-full flex-col md:flex-row">
         <div className="flex-1 flex gap-2">
-          <div ref={selectorRef} className="relative z-50">
-            <button
-              onClick={() => setIsSelectorOpen(!isSelectorOpen)}
-              className="flex items-center gap-4 px-5 py-3.5 bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] outline-none hover:border-orange-500/50 transition-all dark:text-white cursor-pointer min-w-[180px] justify-between group shadow-sm active:scale-95"
-            >
-              <span className="opacity-80 group-hover:opacity-100 transition-opacity">{selectedProgram}</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className={`w-3 h-3 text-orange-600 transition-transform duration-300 ${isSelectorOpen ? 'rotate-180' : ''}`}>
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </button>
-
-            {isSelectorOpen && (
-              <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-[220px] bg-white/90 dark:bg-black/90 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100] animate-fade-in-up origin-top p-2 space-y-1">
-                {programs.map(p => (
-                  <button
-                    key={p}
-                    onClick={() => {
-                      setSelectedProgram(p);
-                      setIsSelectorOpen(false);
-                      navigateTo(null, null, null);
-                    }}
-                    className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${selectedProgram === p
-                        ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
-                        : 'text-slate-600 dark:text-slate-400 bg-transparent hover:bg-slate-100 dark:hover:bg-white/5 hover:text-orange-600'
-                      }`}
-                  >
-                    {p}
-                    {selectedProgram === p && (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5">
-                        <path d="M20 6 9 17 4 12" />
-                      </svg>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <NexusDropdown
+            options={programs}
+            value={selectedProgram}
+            onChange={(val) => {
+              setSelectedProgram(val);
+              navigateTo(null, null, null);
+            }}
+          />
 
           <div className="relative flex-1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
