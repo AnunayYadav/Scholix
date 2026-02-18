@@ -213,7 +213,9 @@ class NexusServer {
   static async fetchFolders(program: string): Promise<Folder[]> {
     const client = getSupabase();
     if (!client) return [];
-    const { data } = await client.from('folders').select('*').eq('program', program).order('name', { ascending: true });
+    let query = client.from('folders').select('*');
+    if (program && program !== 'All') query = query.eq('program', program);
+    const { data } = await query.order('name', { ascending: true });
     return data || [];
   }
 
@@ -235,7 +237,8 @@ class NexusServer {
   static async fetchFiles(program: string, q?: string): Promise<LibraryFile[]> {
     const client = getSupabase();
     if (!client) return [];
-    let query = client.from('documents').select('*, uploader:profiles(username)').eq('status', 'approved').eq('program', program);
+    let query = client.from('documents').select('*, uploader:profiles(username)').eq('status', 'approved');
+    if (program && program !== 'All') query = query.eq('program', program);
     if (q) query = query.ilike('name', `%${q}%`);
     const { data, error } = await query.order('created_at', { ascending: false });
     if (error) { console.error("Fetch Error:", error); return []; }
@@ -259,7 +262,7 @@ class NexusServer {
       name, description: desc, subject: sub, semester: sem, type,
       size: `${(file.size / 1024 / 1024).toFixed(2)} MB`, storage_path: path,
       uploader_id: uid, status: admin ? 'approved' : 'pending',
-      program
+      program: program.trim()
     }]);
     if (dbErr) throw dbErr;
   }
@@ -332,7 +335,8 @@ class NexusServer {
   static async fetchPendingFiles(program: string, q?: string): Promise<LibraryFile[]> {
     const client = getSupabase();
     if (!client) return [];
-    let query = client.from('documents').select('*, uploader:profiles(username)').eq('status', 'pending').eq('program', program);
+    let query = client.from('documents').select('*, uploader:profiles(username)').eq('status', 'pending');
+    if (program && program !== 'All') query = query.eq('program', program);
     if (q) query = query.ilike('name', `%${q}%`);
     const { data, error } = await query.order('created_at', { ascending: false });
     if (error) { console.error("Fetch Pending Error:", error); return []; }

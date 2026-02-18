@@ -52,6 +52,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     return initialPrograms[0];
   });
 
+  const availableProgramsWithAll = useMemo(() => {
+    if (userProfile?.is_admin) return ["All", ...availablePrograms];
+    return availablePrograms;
+  }, [availablePrograms, userProfile?.is_admin]);
+
   const [isAdminView, setIsAdminView] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -267,6 +272,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const toggleAdminView = () => {
     const nextAdminState = !isAdminView;
     setIsAdminView(nextAdminState);
+    if (nextAdminState) {
+      setSelectedProgram('All');
+    } else {
+      setSelectedProgram(userProfile?.program || initialPrograms[0]);
+    }
     setViewMode('browse');
     setSearchQuery('');
     navigateTo(null, null, null);
@@ -316,7 +326,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       <div className="flex gap-2 w-full flex-col md:flex-row">
         <div className="flex-1 flex gap-2">
           <NexusDropdown
-            options={availablePrograms}
+            options={availableProgramsWithAll}
             value={selectedProgram}
             onChange={(val) => {
               setSelectedProgram(val);
@@ -360,25 +370,25 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 setIsProcessing(true);
                 try {
                   // Ensure folders exist
-                  let semFolder = folders.find(f => f.type === 'semester' && f.name === file.semester);
+                  let semFolder = folders.find(f => f.type === 'semester' && f.name === file.semester && f.program === file.program);
                   if (!semFolder) {
-                    await NexusServer.createFolder(file.semester, 'semester', null, selectedProgram);
+                    await NexusServer.createFolder(file.semester, 'semester', null, file.program);
                     const updatedFolders = await NexusServer.fetchFolders(selectedProgram);
                     setFolders(updatedFolders);
                     semFolder = updatedFolders.find(f => f.type === 'semester' && f.name === file.semester);
                   }
 
-                  let subjFolder = folders.find(f => f.type === 'subject' && f.name === file.subject && f.parent_id === semFolder?.id);
+                  let subjFolder = folders.find(f => f.type === 'subject' && f.name === file.subject && f.parent_id === semFolder?.id && f.program === file.program);
                   if (!subjFolder && semFolder) {
-                    await NexusServer.createFolder(file.subject, 'subject', semFolder.id, selectedProgram);
+                    await NexusServer.createFolder(file.subject, 'subject', semFolder.id, file.program);
                     const updatedFolders = await NexusServer.fetchFolders(selectedProgram);
                     setFolders(updatedFolders);
                     subjFolder = updatedFolders.find(f => f.type === 'subject' && f.name === file.subject && f.parent_id === semFolder.id);
                   }
 
-                  let catFolder = folders.find(f => f.type === 'category' && f.name === file.type && f.parent_id === subjFolder?.id);
+                  let catFolder = folders.find(f => f.type === 'category' && f.name === file.type && f.parent_id === subjFolder?.id && f.program === file.program);
                   if (!catFolder && subjFolder && file.type) {
-                    await NexusServer.createFolder(file.type, 'category', subjFolder.id, selectedProgram);
+                    await NexusServer.createFolder(file.type, 'category', subjFolder.id, file.program);
                   }
 
                   await NexusServer.approveFile(file.id);
@@ -647,7 +657,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         </div>
       )}
 
-      <input type="file" ref={fileInputRef} className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) { setPendingFile(f); setMetaForm(p => ({ ...p, name: f.name.replace(/\.[^/.]+$/, ""), description: '', semester: activeSemester?.name || '', subject: activeSubject?.name || '', type: activeCategory?.name || '', program: selectedProgram })); setShowUploadModal(true); } }} />
+      <input type="file" ref={fileInputRef} className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) { setPendingFile(f); setMetaForm(p => ({ ...p, name: f.name.replace(/\.[^/.]+$/, ""), description: '', semester: activeSemester?.name || '', subject: activeSubject?.name || '', type: activeCategory?.name || '', program: selectedProgram === 'All' ? availablePrograms[0] : selectedProgram })); setShowUploadModal(true); } }} />
 
       {viewerInfo.show && (
         <PDFViewer
