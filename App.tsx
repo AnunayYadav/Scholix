@@ -103,63 +103,20 @@ const BackgroundEffects: React.FC = React.memo(() => {
   );
 });
 
-const DashboardHero: React.FC<{ navigate: (p: string) => void }> = React.memo(({ navigate }) => {
+const DashboardHero: React.FC = React.memo(() => {
   return (
-    <div className="relative overflow-hidden bg-slate-50 dark:bg-black p-8 md:p-16 mb-0 shadow-[0_40px_100px_rgba(0,0,0,0.1)] dark:shadow-[0_40px_100px_rgba(0,0,0,0.4)] group/hero min-h-[calc(100vh-80px)] flex flex-col justify-center">
-      <div className="relative z-10 lg:grid lg:grid-cols-[1.2fr_0.8fr] lg:gap-12 lg:items-center">
-        <div className="flex flex-col space-y-4 md:space-y-12">
-          {/* Header row: Title + Image on Mobile */}
-          <div className="grid grid-cols-[1fr_210px] sm:grid-cols-[1fr_250px] lg:block gap-1 items-center">
-            <h2 className="text-5xl sm:text-7xl lg:text-6xl xl:text-7xl font-black text-slate-900 dark:text-white tracking-tighter leading-[0.85] lg:leading-[0.9] drop-shadow-sm min-h-[3em] sm:min-h-[2.7em]">
-              Your LPU <br />
-              Journey, <br />
-              <TypingText />
-            </h2>
+    <div className="relative overflow-hidden bg-transparent pt-20 pb-12 px-6">
+      <div className="max-w-4xl mx-auto text-center space-y-8">
+        <h2 className="text-5xl md:text-8xl font-black text-slate-900 dark:text-white tracking-tighter leading-[0.85] drop-shadow-sm min-h-[2.5em]">
+          Your LPU <br />
+          Journey, <br />
+          <TypingText />
+        </h2>
 
-            {/* Mobile Only visual Suite */}
-            <div className="lg:hidden relative h-64 flex items-center justify-center overflow-visible">
-              <div className="relative w-full scale-125 origin-center translate-y-14">
-                <img src="/lap.png" alt="Laptop" className="w-full h-auto drop-shadow-[0_0_50px_rgba(234,88,12,0.3)]" />
-                <div className="absolute -top-20 -left-8 w-28 z-10">
-                  <img src="/note.png" alt="Notes" className="w-full h-auto drop-shadow-[0_0_40px_rgba(234,88,12,0.4)]" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4 md:space-y-8">
-            <p className="text-slate-600 dark:text-slate-400 text-[13px] md:text-lg font-medium leading-relaxed max-w-lg">
-              Master your academics with AI-powered quiz generation, precision CGPA tracking, and seamless
-              schedule synchronization.
-            </p>
-
-            <div className="flex flex-wrap gap-6 pt-4">
-              <button
-                onClick={() => navigate('/library')}
-                className="relative overflow-hidden px-10 py-5 lg:px-12 lg:py-6 bg-gradient-to-r from-orange-500 to-red-600 hover:scale-[1.05] active:scale-95 transition-all rounded-[32px] lg:rounded-[100px] text-white font-black text-xs lg:text-[13px] uppercase tracking-[0.25em] flex items-center gap-4 shadow-[0_20px_60px_rgba(234,88,12,0.5)] border border-white/20 hover:border-white/40 group/btn cursor-pointer"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-                <span>Explore Library</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 group-hover:translate-x-1 transition-transform"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop Only Visual Suite */}
-        <div className="hidden lg:flex relative items-center justify-center h-[400px] xl:h-[500px] w-full">
-          <div className="relative z-20 w-64 xl:w-96 drop-shadow-[0_0_60px_rgba(0,0,0,0.5)]">
-            <img src="/lap.png" alt="LPU Nexus" className="w-full h-auto" />
-          </div>
-          {/* Desktop Note */}
-          <div className="absolute top-8 -left-8 xl:top-12 xl:-left-12 w-24 xl:w-40 z-30 opacity-80">
-            <img src="/note.png" alt="Notes" className="w-full h-auto" />
-          </div>
-          {/* Desktop Certificate */}
-          <div className="absolute bottom-16 right-8 xl:right-12 w-32 xl:w-56 z-10 opacity-80">
-            <img src="/certificate.png" alt="Certificate" className="w-full h-auto" />
-          </div>
-        </div>
+        <p className="text-slate-600 dark:text-slate-400 text-base md:text-xl font-medium leading-relaxed max-w-2xl mx-auto">
+          Master your academics with AI-powered quiz generation, precision CGPA tracking, and seamless
+          schedule synchronization.
+        </p>
       </div>
     </div>
   );
@@ -168,9 +125,38 @@ const DashboardHero: React.FC<{ navigate: (p: string) => void }> = React.memo(({
 const Dashboard: React.FC = React.memo(() => {
   const navigate = useNavigate();
 
+  const features = [
+    { id: 'library', name: 'Content Library', desc: 'Access 1000+ PYQs, notes and records.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>, color: 'from-orange-500 to-red-600' },
+    { id: 'quiz', name: 'AI Quiz Taker', desc: 'Generate custom tests from your subjects.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>, color: 'from-amber-500 to-orange-500' },
+    { id: 'timetable', name: 'Timetable Hub', desc: 'Sync and manage your weekly schedule.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>, color: 'from-orange-600 to-red-500' },
+    { id: 'cgpa', name: 'CGPA Forge', desc: 'Calculate and forecast your performance.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M21.21 15.89A10 10 0 1 1 8 2.83" /><path d="M22 12A10 10 0 0 1 12 22" /><path d="M12 2v10h10" /></svg>, color: 'from-red-500 to-orange-500' },
+    { id: 'attendance', name: 'Duty Guard', desc: 'Track your attendance and safe-bunks.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" /><path d="m9 12 2 2 4-4" /></svg>, color: 'from-orange-400 to-orange-600' },
+    { id: 'placement', name: 'Placement Prefect', desc: 'Analyze resumes and prep for jobs.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>, color: 'from-red-600 to-orange-600' },
+    { id: 'campus', name: 'Campus Navigator', desc: 'Find blocks and rooms with ease.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>, color: 'from-orange-500 to-amber-500' },
+    { id: 'freshers', name: 'Freshers Kit', desc: 'Essential guide for newcomers.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M20 7h-7L10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" /></svg>, color: 'from-orange-700 to-red-600' }
+  ];
+
   return (
-    <div className="w-full h-full">
-      <DashboardHero navigate={navigate} />
+    <div className="w-full h-full pb-20">
+      <DashboardHero />
+      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {features.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => navigate(`/${f.id}`)}
+            className="group relative p-8 bg-white dark:bg-white/5 rounded-[40px] border border-slate-200 dark:border-white/10 text-left transition-all hover:scale-[1.03] hover:shadow-2xl hover:border-orange-500/50 active:scale-95 border-none"
+          >
+            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center text-white mb-6 shadow-lg shadow-orange-500/20 group-hover:scale-110 transition-transform`}>
+              {f.icon}
+            </div>
+            <h4 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-2">{f.name}</h4>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-relaxed">{f.desc}</p>
+            <div className="absolute top-8 right-8 text-slate-300 dark:text-white/10 group-hover:text-orange-500 transition-colors">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
+            </div>
+          </button>
+        ))}
+      </div>
     </div>
   );
 });
