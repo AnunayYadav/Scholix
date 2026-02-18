@@ -107,7 +107,7 @@ const DashboardHero: React.FC = React.memo(() => {
   return (
     <div className="relative overflow-hidden bg-transparent pt-20 pb-12 px-6">
       <div className="max-w-4xl mx-auto text-center space-y-8">
-        <h2 className="text-5xl md:text-8xl font-black text-slate-900 dark:text-white tracking-tighter leading-[0.85] drop-shadow-sm min-h-[2.5em]">
+        <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter leading-[0.85] drop-shadow-sm min-h-[2.5em]">
           Your LPU <br />
           Journey, <br />
           <TypingText />
