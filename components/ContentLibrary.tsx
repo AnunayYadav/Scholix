@@ -217,14 +217,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     try {
       await NexusServer.uploadFile(
         pendingFile,
-        metaForm.name,
-        metaForm.description,
-        metaForm.subject,
-        metaForm.semester,
-        metaForm.type,
+        metaForm.name.trim(),
+        metaForm.description.trim(),
+        metaForm.subject.trim(),
+        metaForm.semester.trim(),
+        metaForm.type.trim(),
         userProfile.id,
         userProfile.is_admin,
-        metaForm.program
+        metaForm.program.trim()
       );
       if (!availablePrograms.includes(metaForm.program)) {
         setAvailablePrograms(prev => [...prev, metaForm.program]);
@@ -369,26 +369,28 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               onApprove={async () => {
                 setIsProcessing(true);
                 try {
-                  // Ensure folders exist
-                  let semFolder = folders.find(f => f.type === 'semester' && f.name === file.semester && f.program === file.program);
+                  // Ensure folders exist - fetch all to avoid filtering issues during admin check
+                  const allFolders = await NexusServer.fetchFolders('All');
+
+                  let semFolder = allFolders.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && f.program === file.program);
                   if (!semFolder) {
-                    await NexusServer.createFolder(file.semester, 'semester', null, file.program);
-                    const updatedFolders = await NexusServer.fetchFolders(selectedProgram);
-                    setFolders(updatedFolders);
-                    semFolder = updatedFolders.find(f => f.type === 'semester' && f.name === file.semester);
+                    await NexusServer.createFolder(file.semester.trim(), 'semester', null, file.program);
+                    const fresh = await NexusServer.fetchFolders('All');
+                    semFolder = fresh.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && (f.program === file.program || f.program === 'All'));
                   }
 
-                  let subjFolder = folders.find(f => f.type === 'subject' && f.name === file.subject && f.parent_id === semFolder?.id && f.program === file.program);
+                  let subjFolder = allFolders.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder?.id && f.program === file.program);
                   if (!subjFolder && semFolder) {
-                    await NexusServer.createFolder(file.subject, 'subject', semFolder.id, file.program);
-                    const updatedFolders = await NexusServer.fetchFolders(selectedProgram);
-                    setFolders(updatedFolders);
-                    subjFolder = updatedFolders.find(f => f.type === 'subject' && f.name === file.subject && f.parent_id === semFolder.id);
+                    await NexusServer.createFolder(file.subject.trim(), 'subject', semFolder.id, file.program);
+                    const fresh = await NexusServer.fetchFolders('All');
+                    subjFolder = fresh.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder.id && (f.program === file.program || f.program === 'All'));
                   }
 
-                  let catFolder = folders.find(f => f.type === 'category' && f.name === file.type && f.parent_id === subjFolder?.id && f.program === file.program);
-                  if (!catFolder && subjFolder && file.type) {
-                    await NexusServer.createFolder(file.type, 'category', subjFolder.id, file.program);
+                  if (file.type && file.type.trim()) {
+                    let catFolder = allFolders.find(f => f.type === 'category' && f.name.trim() === file.type.trim() && f.parent_id === subjFolder?.id && f.program === file.program);
+                    if (!catFolder && subjFolder) {
+                      await NexusServer.createFolder(file.type.trim(), 'category', subjFolder.id, file.program);
+                    }
                   }
 
                   await NexusServer.approveFile(file.id);
@@ -702,18 +704,23 @@ const FileCard: React.FC<{
         <div className="flex gap-1.5">
           {isAdminMode ? (
             <div className="flex gap-1.5">
-              <button onClick={(e) => { e.stopPropagation(); onApprove?.(); }} className="w-8 h-8 bg-black text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Approve">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><polyline points="20 6 9 17 4 12" /></svg>
-              </button>
+              {file.status !== 'approved' && (
+                <button onClick={(e) => { e.stopPropagation(); onApprove?.(); }} className="w-8 h-8 bg-black text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Approve">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><polyline points="20 6 9 17 4 12" /></svg>
+                </button>
+              )}
               <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-black text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Edit Metadata">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
               </button>
-              <button onClick={(e) => { e.stopPropagation(); onDemote?.(); }} className="w-8 h-8 bg-black text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Put to Hold">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); onReject?.(); }} className="w-8 h-8 bg-black text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Deny/Reject">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-              </button>
+              {file.status === 'approved' ? (
+                <button onClick={(e) => { e.stopPropagation(); onDemote?.(); }} className="w-8 h-8 bg-black text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Demote to Pending">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                </button>
+              ) : (
+                <button onClick={(e) => { e.stopPropagation(); onReject?.(); }} className="w-8 h-8 bg-black text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Reject & Remove">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                </button>
+              )}
             </div>
           ) : isAdmin ? (
             <div className="flex gap-1.5">
