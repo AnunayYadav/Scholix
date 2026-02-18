@@ -259,7 +259,22 @@ const AppContent: React.FC = () => {
     const unsubscribeAuth = NexusServer.onAuthStateChange(async (user) => {
       if (user) {
         const profile = await NexusServer.getProfile(user.id);
-        setUserProfile(profile || { id: user.id, email: user.email!, is_admin: false });
+        const metadata = user.user_metadata || {};
+
+        // Deep merge: prioritize database profile, fallback to auth metadata
+        const mergedProfile = profile ? {
+          ...profile,
+          registration_number: profile.registration_number || metadata.registration_number,
+          username: profile.username || metadata.username
+        } : {
+          id: user.id,
+          email: user.email!,
+          is_admin: false,
+          username: metadata.username,
+          registration_number: metadata.registration_number
+        };
+
+        setUserProfile(mergedProfile as UserProfile);
       } else {
         setUserProfile(null);
       }
