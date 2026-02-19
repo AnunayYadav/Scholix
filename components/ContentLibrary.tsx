@@ -579,7 +579,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               </button>
             </header>
 
-            <div className={`flex flex-col md:flex-row h-[70vh] md:h-[60vh]`}>
+            <div className={`flex flex-col md:flex-row flex-1 min-h-0 md:h-[60vh]`}>
               {showUploadModal && (
                 <div className="w-full md:w-64 border-r border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/10 overflow-y-auto no-scrollbar border-b md:border-b-0">
                   <div className="p-4 space-y-2">
@@ -786,7 +786,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 disabled={isProcessing || !metaForm.name || !metaForm.semester || !metaForm.subject || (showUploadModal && pendingUploads.some(u => !u.name || !u.semester || !u.subject))}
                 className="flex-1 bg-orange-600 text-white py-4 rounded-[24px] font-black text-[10px] uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(234,88,12,0.3)] hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all border-none"
               >
-                {isProcessing ? 'Processing Batch...' : showUploadModal ? `Safely Upload ${pendingUploads.length} Item${pendingUploads.length > 1 ? 's' : ''}` : 'Update Record'}
+                {isProcessing ? 'Processing Batch...' : showUploadModal ? `Upload ${pendingUploads.length} Item${pendingUploads.length > 1 ? 's' : ''}` : 'Update Record'}
               </button>
             </footer>
           </div>
