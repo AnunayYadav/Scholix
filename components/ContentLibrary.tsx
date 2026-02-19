@@ -52,10 +52,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     return initialPrograms[0];
   });
 
-  const availableProgramsWithAll = useMemo(() => {
-    if (userProfile?.is_admin) return ["All", ...availablePrograms];
-    return availablePrograms;
-  }, [availablePrograms, userProfile?.is_admin]);
+
 
   const [isAdminView, setIsAdminView] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -126,7 +123,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       semester: forceSemester || activeSemester?.name || '',
       subject: forceSubject || activeSubject?.name || '',
       type: forceType || activeCategory?.name || '',
-      program: forceProgram || (selectedProgram === 'All' ? availablePrograms[0] : selectedProgram)
+      program: forceProgram || selectedProgram
     }));
 
     setPendingUploads(prev => [...prev, ...newUploads]);
@@ -346,9 +343,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     const nextAdminState = !isAdminView;
     setIsAdminView(nextAdminState);
     if (nextAdminState) {
-      setSelectedProgram('All');
+      setSelectedProgram(userProfile?.program || availablePrograms[0]);
     } else {
-      setSelectedProgram(userProfile?.program || initialPrograms[0]);
+      setSelectedProgram(userProfile?.program || availablePrograms[0]);
     }
     setViewMode('browse');
     setSearchQuery('');
@@ -400,7 +397,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         <div className="flex gap-2 w-full flex-col md:flex-row">
           <div className="flex-1 flex gap-2">
             <NexusDropdown
-              options={availableProgramsWithAll}
+              options={availablePrograms}
               value={selectedProgram}
               onChange={(val) => {
                 setSelectedProgram(val);
