@@ -202,7 +202,7 @@ h4,
 }
 
 .modal-overlay {
-  @apply fixed inset-0 z-[10000] flex items-start md:items-center justify-center p-4 backdrop-blur-xl animate-fade-in overflow-y-auto overflow-x-hidden;
+  @apply fixed inset-0 z-[10000] flex items-start justify-center p-4 pt-20 md:pt-24 backdrop-blur-xl animate-fade-in overflow-y-auto overflow-x-hidden;
   background: rgba(var(--overlay-color-rgb), 0.4);
 }
 

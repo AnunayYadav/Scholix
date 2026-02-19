@@ -370,7 +370,7 @@ const AppContent: React.FC = () => {
           </div>
         </div>
         <div id="main-content-area" className={`flex-1 overflow-y-auto relative scroll-smooth ${location.pathname === '/' ? 'p-0' : 'p-4 md:p-8'} bg-transparent content-visibility-auto`}>
-          <div className={`relative z-0 ${location.pathname === '/' ? 'w-full' : 'max-w-7xl mx-auto'}`}>
+          <div className={`relative ${location.pathname === '/' ? 'w-full' : 'max-w-7xl mx-auto'}`}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/placement" element={<PlacementPrefect userProfile={userProfile} />} />
