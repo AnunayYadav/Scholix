@@ -246,6 +246,12 @@ const AppContent: React.FC = () => {
         const profile = await NexusServer.getProfile(user.id);
         const metadata = user.user_metadata || {};
 
+        // Auto-sync: If DB profile is missing reg number but metadata has it, update DB
+        if (profile && !profile.registration_number && metadata.registration_number) {
+          NexusServer.updateProfile(user.id, { registration_number: metadata.registration_number })
+            .catch(() => { });
+        }
+
         // Deep merge: prioritize database profile, fallback to auth metadata
         const mergedProfile = profile ? {
           ...profile,

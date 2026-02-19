@@ -163,11 +163,29 @@ class NexusServer {
     const client = getSupabase();
     if (!client) throw new Error("Registry is offline.");
     const cleanUsername = username.toLowerCase().trim();
-    return await client.auth.signUp({
+    const result = await client.auth.signUp({
       email: email.trim(),
       password: pass,
-      options: { data: { username: cleanUsername, registration_number: regNo }, emailRedirectTo: window.location.origin }
+      options: {
+        data: { username: cleanUsername, registration_number: regNo },
+        emailRedirectTo: window.location.origin
+      }
     });
+
+    // If signup is successful and we have a session (immediate login enabled)
+    // Manually ensure the profile table is updated to prevent null values if the trigger is missing
+    if (!result.error && result.data?.user && result.data.session) {
+      try {
+        await client.from('profiles').update({
+          username: cleanUsername,
+          registration_number: regNo
+        }).eq('id', result.data.user.id);
+      } catch (e) {
+        console.warn("Manual profile sync failed:", e);
+      }
+    }
+
+    return result;
   }
 
   static async signOut() {
@@ -195,7 +213,8 @@ class NexusServer {
   static async updateProfile(userId: string, updates: Partial<UserProfile>): Promise<void> {
     const client = getSupabase();
     if (!client || !userId) return;
-    await client.from('profiles').update(updates).eq('id', userId);
+    const { error } = await client.from('profiles').update(updates).eq('id', userId);
+    if (error) throw error;
   }
 
   static async uploadAvatar(userId: string, file: File): Promise<string> {
