@@ -174,7 +174,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <aside className={`
-        fixed inset-y-0 left-0 z-30 w-64 transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-[9999] w-64 transform transition-transform duration-300 ease-in-out
         bg-white dark:bg-black border-r border-slate-200 dark:border-white/5
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0 md:static flex flex-col shadow-2xl md:shadow-none
