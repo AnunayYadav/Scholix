@@ -48,6 +48,10 @@ export interface TimetableData {
   ownerName: string;
   ownerId: string;
   schedule: DaySchedule[];
+  section?: string;
+  year?: string;
+  branch?: string;
+  semester?: string;
 }
 
 export interface ResumeCategoryDetail {

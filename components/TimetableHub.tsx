@@ -195,9 +195,9 @@ const SECTION_325QG_SCHEDULE: DaySchedule[] = [
 ];
 
 const PRESET_BATCHES = [
-  { id: '325qb-2026', name: '325QB - CSE 2nd Sem 2026', schedule: SECTION_325QB_SCHEDULE },
-  { id: '325qg-2026', name: '325QG - CSE 2nd Sem 2026', schedule: SECTION_325QG_SCHEDULE },
-  { id: '325mx-2026', name: '325MX - CSE 2nd Sem 2026', schedule: MX325_SCHEDULE },
+  { id: '325qb-2026', name: '325QB - CSE 2nd Sem 2026', schedule: SECTION_325QB_SCHEDULE, section: '325QB', branch: 'CSE', year: '2nd', semester: '2' },
+  { id: '325qg-2026', name: '325QG - CSE 2nd Sem 2026', schedule: SECTION_325QG_SCHEDULE, section: '325QG', branch: 'CSE', year: '2nd', semester: '2' },
+  { id: '325mx-2026', name: '325MX - CSE 2nd Sem 2026', schedule: MX325_SCHEDULE, section: '325MX', branch: 'CSE', year: '2nd', semester: '2' },
 ];
 
 const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile }) => {
@@ -369,7 +369,11 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     const data: TimetableData = {
       ownerId: targetForAction === 'me' ? (userProfile?.id || 'local-me') : newId,
       ownerName: generatedName,
-      schedule: pendingTimetable
+      schedule: pendingTimetable,
+      section,
+      year,
+      branch,
+      semester
     };
 
     if (targetForAction === 'me') {
@@ -479,7 +483,11 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     const data: TimetableData = {
       ownerId: targetForAction === 'me' ? (userProfile?.id || 'local-me') : newId,
       ownerName: targetForAction === 'me' ? (batch.name) : (batch.name || `${batch.section} ${batch.branch}`),
-      schedule: batch.schedule
+      schedule: batch.schedule,
+      section: batch.section,
+      year: batch.year,
+      branch: batch.branch,
+      semester: batch.semester
     };
 
     if (targetForAction === 'me') {
@@ -537,13 +545,20 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                   <h4 className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500 ml-1">Standard Batches</h4>
                   <div className="space-y-2">
                     {PRESET_BATCHES.map(batch => (
-                      <button key={batch.id} onClick={() => { setTargetForAction('me'); applyPreset(batch); close(); }} className="w-full p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-2xl text-left hover:border-orange-500/50 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-all flex items-center justify-between group border-none">
-                        <div>
-                          <p className="text-[10px] font-black uppercase tracking-tight text-slate-800 dark:text-white">{batch.name}</p>
-                          <p className="text-[7px] font-bold text-slate-500 uppercase mt-0.5">Full 5-Day Schedule</p>
-                        </div>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                      </button>
+                      <div key={batch.id} className="relative group/card">
+                        <button onClick={() => { setTargetForAction('me'); applyPreset(batch); close(); }} className="w-full p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-2xl text-left hover:border-orange-500/50 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-all flex items-center justify-between group border-none">
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-tight text-slate-800 dark:text-white">{batch.name}</p>
+                            <p className="text-[7px] font-bold text-slate-500 uppercase mt-0.5">Full 5-Day Schedule</p>
+                          </div>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                        </button>
+                        {userProfile?.is_admin && (
+                          <div className="absolute top-1/2 right-12 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); handleAdminEdit(batch, e); close(); }} title="Edit" className="p-2 text-slate-400 hover:text-orange-500 transition-all active:scale-95 border-none bg-transparent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </section>
@@ -819,7 +834,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
               </div>
               <div className="space-y-2">
                 <label className="text-[8px] font-black uppercase tracking-widest text-slate-500 ml-1">Branch</label>
-                <input type="text" placeholder="e.g. CSE" value={metadata.branch} onChange={e => setMetadata({ ...metadata, branch: e.target.value.toUpperCase() })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all" />
+                <input type="text" placeholder="e.g. CSE" value={metadata.branch} onChange={e => setMetadata({ ...metadata, branch: e.target.value.toUpperCase() })} className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all" />
               </div>
               <div className="space-y-2 text-left">
                 <NexusDropdown
