@@ -427,7 +427,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   </div>
 
                 </div>
-                <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-white leading-tight">{selectedFile.name}</h3>
+                <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-slate-900 dark:text-white leading-tight">{selectedFile.name}</h3>
               </div>
               <button onClick={() => setShowDetailsModal(false)} className="p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -443,8 +443,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   { label: 'File Size', val: selectedFile.size }
                 ].map((item, i) => (
                   <div key={i} className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 mb-1">{item.label}</p>
-                    <p className="text-xs font-black uppercase tracking-tight text-white">{item.val || 'N/A'}</p>
+                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">{item.label}</p>
+                    <p className="text-xs font-black uppercase tracking-tight text-slate-800 dark:text-white">{item.val || 'N/A'}</p>
                   </div>
                 ))}
               </div>
@@ -467,7 +467,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-black uppercase text-white">{new Date(selectedFile.uploadDate).toLocaleDateString()}</p>
+                  <p className="text-xs font-black uppercase text-slate-800 dark:text-white">{new Date(selectedFile.uploadDate).toLocaleDateString()}</p>
                 </div>
               </div>
             </div>
@@ -700,10 +700,10 @@ const FileCard: React.FC<{
       <div className="flex items-start justify-between mb-2">
         <div className="w-9 h-9 bg-slate-100 dark:bg-black rounded-xl flex items-center justify-center group-hover:text-orange-500 transition-colors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg></div>
       </div>
-      <h3 className="text-xs md:text-sm font-black text-slate-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2 group-hover:text-orange-500 transition-colors">{file.name}</h3>
-      <div className="pt-3 mt-auto border-t border-slate-50 dark:border-white/5 flex items-center justify-between">
-        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{file.size}</span>
-        <div className="flex gap-1.5">
+      <h3 className="text-[11px] md:text-[13px] font-black text-slate-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2 group-hover:text-orange-500 transition-colors uppercase">{file.name}</h3>
+      <div className="pt-3 mt-auto border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+        <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{file.size}</span>
+        <div className="flex gap-1.5 peer">
           {isAdminMode ? (
             <div className="flex gap-1.5">
               {file.status !== 'approved' && (

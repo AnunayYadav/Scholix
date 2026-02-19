@@ -113,7 +113,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {showFeedbackModal && (
         <div className="modal-overlay">
           <div ref={feedbackModalRef} className="nexus-modal w-full max-w-lg p-10 relative">
-            <button onClick={() => setShowFeedbackModal(false)} className="absolute top-8 right-8 p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors border-none bg-transparent">
+            <button onClick={() => setShowFeedbackModal(false)} className="absolute top-8 right-8 p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
 
@@ -150,7 +150,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   <button
                     onClick={() => setShowFeedbackModal(false)}
                     disabled={isSubmitting}
-                    className="flex-1 py-4 text-slate-500 hover:text-slate-800 dark:hover:text-white font-black text-xs uppercase tracking-widest border-none bg-transparent transition-colors"
+                    className="flex-1 py-4 text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white font-black text-xs uppercase tracking-widest border-none bg-transparent transition-colors"
                   >
                     Dismiss
                   </button>
@@ -210,8 +210,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         </nav>
 
         <div className="p-6 border-t border-slate-200 dark:border-white/5 space-y-4">
-          <button onClick={() => setShowFeedbackModal(true)} className="w-full text-xs flex items-center justify-center space-x-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 py-2 transition-colors font-bold uppercase tracking-widest border-none bg-transparent">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+          <button onClick={() => setShowFeedbackModal(true)} className="w-full text-[10px] flex items-center justify-center space-x-2 text-slate-400 dark:text-slate-500 hover:text-orange-600 dark:hover:text-slate-200 py-3 transition-all font-black uppercase tracking-[0.2em] border border-transparent hover:border-orange-500/20 hover:bg-orange-600/5 rounded-2xl bg-transparent active:scale-95 group">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 transition-transform group-hover:rotate-12"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
             <span>Feedback</span>
           </button>
         </div>

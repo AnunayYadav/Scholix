@@ -181,20 +181,18 @@ h4,
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(249, 115, 22, 0.2);
-  border-radius: 10px;
+  background: rgba(234, 88, 12, 0.2);
+  border-radius: 20px;
+  transition: background 0.3s ease;
   border: 2px solid #000;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(249, 115, 22, 0.4);
+  background: rgba(234, 88, 12, 0.5);
 }
 
 .glass-panel {
-  @apply backdrop-blur-xl border;
-  background: rgba(255, 255, 255, 0.85);
-  /* Increased opacity for light mode */
-  border-color: rgba(0, 0, 0, 0.08);
+  @apply bg-white/80 dark:bg-black/60 backdrop-blur-2xl border border-slate-200 dark:border-white/10 shadow-[inset_0_1px_1px_rgba(255, 255, 255, 0.1)];
 }
 
 .dark .glass-panel {
@@ -225,11 +223,11 @@ h4,
 }
 
 .nexus-modal {
-  @apply bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 shadow-[0_32px_128px_rgba(0,0,0,0.4)] rounded-[40px] overflow-hidden flex flex-col my-auto transition-all animate-fade-in text-slate-900 dark:text-white;
+  @apply bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 shadow-[0_32px_128px_rgba(0, 0, 0, 0.4)] rounded-[40px] overflow-hidden flex flex-col my-auto transition-all animate-fade-in text-slate-900 dark:text-white;
 }
 
 .dark .nexus-modal {
-  @apply shadow-[0_32px_128px_rgba(0,0,0,0.8)];
+  @apply shadow-[0_32px_128px_rgba(0, 0, 0, 0.8)];
 }
 
 .shimmer {

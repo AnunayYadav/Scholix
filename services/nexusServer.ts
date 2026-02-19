@@ -22,11 +22,17 @@ const getSupabase = () => {
   if (supabaseInstance) return supabaseInstance;
   const url = getEnvVar('SUPABASE_URL');
   const key = getEnvVar('SUPABASE_ANON_KEY');
-  if (!url || !key) return null;
+  if (!url || !key) {
+    console.warn("Supabase Configuration Missing. Ensure SUPABASE_URL and SUPABASE_ANON_KEY are set.");
+    return null;
+  }
   try {
     supabaseInstance = createClient(url, key);
     return supabaseInstance;
-  } catch (e) { return null; }
+  } catch (e) {
+    console.error("Failed to initialize Supabase client:", e);
+    return null;
+  }
 };
 
 class NexusServer {
@@ -42,7 +48,11 @@ class NexusServer {
       .from('community_timetables')
       .select('*')
       .order('created_at', { ascending: false });
-    return error ? [] : data || [];
+    if (error) {
+      console.error('Fetch Community Timetables Error:', error);
+      throw new Error("Failed to sync community presets.");
+    }
+    return data || [];
   }
 
   static async shareTimetable(data: TimetableData, metadata: any) {
@@ -156,7 +166,9 @@ class NexusServer {
       if (data?.email) email = data.email;
       else throw new Error("No Verto found with that username.");
     }
-    return await client.auth.signInWithPassword({ email, password: pass });
+    const authResponse = await client.auth.signInWithPassword({ email, password: pass });
+    if (authResponse.error) throw authResponse.error;
+    return authResponse;
   }
 
   static async signUp(email: string, pass: string, username: string, regNo: string) {
@@ -197,7 +209,8 @@ class NexusServer {
   static onAuthStateChange(callback: (user: User | null) => void) {
     const client = getSupabase();
     if (!client) return () => { };
-    const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
+      // Logic for handling profile sync on specific events can go here if needed
       callback(session?.user ?? null);
     });
     return () => subscription.unsubscribe();
@@ -206,7 +219,11 @@ class NexusServer {
   static async getProfile(userId: string): Promise<UserProfile | null> {
     const client = getSupabase();
     if (!client || !userId) return null;
-    const { data } = await client.from('profiles').select('*').eq('id', userId).maybeSingle();
+    const { data, error } = await client.from('profiles').select('*').eq('id', userId).maybeSingle();
+    if (error) {
+      console.error('Get Profile Error:', error);
+      throw error;
+    }
     return data;
   }
 
@@ -289,7 +306,11 @@ class NexusServer {
   static async fetchRecords(uid: string | null, type: string) {
     const client = getSupabase();
     if (client && uid) {
-      const { data } = await client.from('user_history').select('*').eq('user_id', uid).eq('type', type).order('created_at', { ascending: false });
+      const { data, error } = await client.from('user_history').select('*').eq('user_id', uid).eq('type', type).order('created_at', { ascending: false });
+      if (error) {
+        console.error(`Fetch Records Error (${type}):`, error);
+        throw error;
+      }
       return data || [];
     }
     return [];

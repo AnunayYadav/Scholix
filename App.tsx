@@ -202,15 +202,20 @@ const RegistrationPrompt: React.FC<{ userProfile: UserProfile, onComplete: (prof
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Registration Number</label>
-            <div className="relative group">
+            <div className="relative group/input">
               <input
                 type="text" required value={regNo}
                 onChange={e => setRegNo(e.target.value.replace(/[^0-9]/g, '').slice(0, 8))}
-                className="w-full bg-slate-50 dark:bg-black pl-6 pr-4 py-5 rounded-[24px] text-sm font-bold border border-slate-200 dark:border-white/10 focus:ring-4 focus:ring-orange-600/10 dark:text-white transition-all shadow-inner outline-none"
+                className="w-full bg-slate-50 dark:bg-white/5 pl-6 pr-4 py-5 rounded-[24px] text-sm font-bold border border-slate-200 dark:border-white/10 focus:border-orange-600/30 focus:ring-4 focus:ring-orange-600/10 outline-none text-slate-800 dark:text-white transition-all shadow-inner placeholder:text-slate-300 dark:placeholder:text-slate-700 hover:border-orange-500/20"
                 placeholder="Candidate Registration (8 Digits)"
               />
             </div>
-            {error && <p className="text-[10px] font-black text-red-500 uppercase mt-4 text-center">{error}</p>}
+            {error && (
+              <div className="flex items-center justify-center gap-2 mt-4 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                <p className="text-[9px] font-black text-red-500 uppercase tracking-widest">{error}</p>
+              </div>
+            )}
           </div>
 
           <button
@@ -329,16 +334,16 @@ const AppContent: React.FC = () => {
                   {isProfileMenuOpen && (
                     <>
                       <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsProfileMenuOpen(false)} />
-                      <div className="absolute right-0 mt-3 w-56 bg-[#0a0a0a] border border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-50 animate-fade-in backdrop-blur-xl">
-                        <div className="px-5 py-3 border-b border-white/5 mb-2">
-
-                          <p className="text-[11px] font-bold text-white/40 truncate">{userProfile.email}</p>
+                      <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-50 animate-fade-in backdrop-blur-xl">
+                        <div className="px-5 py-3 border-b border-slate-100 dark:border-white/5 mb-2">
+                          <p className="text-[11px] font-bold text-slate-900 dark:text-white truncate">{userProfile.username}</p>
+                          <p className="text-[9px] font-bold text-slate-400 dark:text-white/40 truncate">{userProfile.email}</p>
                         </div>
                         <button
                           onClick={() => { navigate('/profile'); setIsProfileMenuOpen(false); }}
-                          className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-white/70 hover:text-white hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
+                          className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-white/70 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
                         >
-                          <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-orange-600/20 transition-colors">
+                          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-600/20 transition-colors">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                           </div>
                           View Terminal
