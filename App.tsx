@@ -138,21 +138,32 @@ const Dashboard: React.FC = React.memo(() => {
   return (
     <div className="w-full h-full pb-20">
       <DashboardHero />
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {features.map((f) => (
           <button
             key={f.id}
             onClick={() => navigate(`/${f.id}`)}
-            className="group relative p-8 bg-white dark:bg-white/5 rounded-[40px] border border-slate-200 dark:border-white/10 text-left transition-all hover:scale-[1.03] hover:shadow-2xl hover:border-orange-500/50 active:scale-95 border-none"
+            className="group relative p-8 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl rounded-[48px] border border-slate-200 dark:border-white/10 text-left transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2 hover:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.7)] hover:border-orange-500/40 active:scale-95 cursor-pointer overflow-hidden"
           >
-            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center text-white mb-6 shadow-lg shadow-orange-500/20 group-hover:scale-110 transition-transform`}>
+            {/* Ambient Background Glow on Hover */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-[0.03] dark:group-hover:opacity-[0.07] transition-opacity duration-500`} />
+
+            <div className={`relative w-16 h-16 rounded-[24px] bg-gradient-to-br ${f.color} flex items-center justify-center text-white mb-8 shadow-2xl shadow-orange-500/20 group-hover:scale-110 transition-all duration-500 group-hover:rotate-3`}>
+              <div className="absolute inset-0 rounded-[24px] blur-xl opacity-40 bg-inherit -z-10 group-hover:blur-2xl transition-all" />
               {f.icon}
             </div>
-            <h4 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-2">{f.name}</h4>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-relaxed">{f.desc}</p>
-            <div className="absolute top-8 right-8 text-slate-300 dark:text-white/10 group-hover:text-orange-500 transition-colors">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
+
+            <div className="relative space-y-3">
+              <h4 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">{f.name}</h4>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400/80 leading-relaxed max-w-[90%]">{f.desc}</p>
             </div>
+
+            <div className="absolute top-10 right-10 text-slate-300 dark:text-white/10 group-hover:text-orange-500 transition-all duration-500 group-hover:translate-x-1 group-hover:-translate-y-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-5 h-5"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
+            </div>
+
+            {/* Decorative Inner Border on Hover */}
+            <div className="absolute inset-0 rounded-[48px] border-2 border-orange-500/0 group-hover:border-orange-500/10 transition-all duration-500 pointer-events-none" />
           </button>
         ))}
       </div>
