@@ -84,27 +84,27 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="nexus-modal w-full max-w-md mx-4">
+      <div className="nexus-modal w-full max-w-sm mx-4">
 
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-600/10 blur-[64px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
 
-        <div className="bg-slate-900 dark:bg-black p-10 text-white text-center relative rounded-t-[48px] border-b border-white/5">
-          <button onClick={onClose} className="absolute top-8 right-8 p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
+        <div className="bg-slate-900 dark:bg-black p-8 text-white text-center relative rounded-t-[48px] border-b border-white/5">
+          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
           </button>
 
-          <div className="w-16 h-16 bg-orange-600/10 rounded-[28px] flex items-center justify-center mx-auto mb-6 border border-orange-600/20 shadow-[0_0_30px_rgba(234,88,12,0.15)]">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-8 h-8 text-orange-600 shadow-orange-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+          <div className="w-14 h-14 bg-orange-600/10 rounded-[24px] flex items-center justify-center mx-auto mb-4 border border-orange-600/20 shadow-[0_0_30px_rgba(234,88,12,0.15)]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7 text-orange-600 shadow-orange-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
           </div>
 
-          <h3 className="text-3xl font-black tracking-tighter uppercase leading-none mb-3">Nexus Gateway</h3>
-          <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2">
+          <h3 className="text-2xl font-black tracking-tighter uppercase leading-none mb-2">Nexus Gateway</h3>
+          <p className="text-white/40 text-[9px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2">
             <span className="w-1.5 h-1.5 bg-orange-600 rounded-full animate-pulse shadow-[0_0_10px_rgba(234,88,12,0.8)]" />
-            Identity Protocol: {isLogin ? 'Login' : 'Signup'}
+            Protocol: {isLogin ? 'Login' : 'Signup'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
             <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 text-[9px] font-black uppercase rounded-2xl text-center animate-fade-in flex flex-col items-center justify-center gap-2">
               <div className="flex items-center gap-2">

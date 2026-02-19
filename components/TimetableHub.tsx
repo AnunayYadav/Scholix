@@ -779,9 +779,9 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       {showRenameModal && (
         <div className="modal-overlay">
           <div className="nexus-modal w-full max-w-sm">
-            <div className="p-10 text-center">
-              <h3 className="text-2xl font-black tracking-tighter uppercase mb-2 text-slate-800 dark:text-white">Rename Profile</h3>
-              <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Personalize the name</p>
+            <div className="p-8 text-center text-slate-800 dark:text-white">
+              <h3 className="text-xl font-black tracking-tighter uppercase mb-2">Rename Profile</h3>
+              <p className="text-slate-500 text-[8px] font-black uppercase tracking-widest">Personalize the name</p>
               <div className="mt-8">
                 <input
                   autoFocus
@@ -793,9 +793,9 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                   className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-sm font-black text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/10 transition-all"
                 />
               </div>
-              <div className="flex gap-4 mt-8">
-                <button onClick={() => setShowRenameModal(false)} className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors border-none bg-transparent">Cancel</button>
-                <button onClick={handleRename} className="flex-1 py-4 bg-orange-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">Update</button>
+              <div className="flex gap-4 mt-6">
+                <button onClick={() => setShowRenameModal(false)} className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">Cancel</button>
+                <button onClick={handleRename} className="flex-1 py-3 bg-orange-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">Update</button>
               </div>
             </div>
           </div>
@@ -804,15 +804,15 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
 
       {showMetadataModal && (
         <div className="modal-overlay">
-          <div className="nexus-modal w-full max-w-md">
-            <div className="p-10 text-center space-y-2">
+          <div className="nexus-modal w-full max-w-sm">
+            <div className="p-8 text-center space-y-2">
               <div className="w-16 h-16 bg-orange-600/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-orange-600/20">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-8 h-8 text-orange-600"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
               </div>
-              <h3 className="text-3xl font-black tracking-tighter uppercase text-slate-800 dark:text-white">{editingPresetId ? 'Edit Preset' : 'Scan Successful'}</h3>
-              <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">{editingPresetId ? 'Update details' : 'Check your timetable details'}</p>
+              <h3 className="text-2xl font-black tracking-tighter uppercase text-slate-800 dark:text-white">{editingPresetId ? 'Edit Preset' : 'Scan Success'}</h3>
+              <p className="text-slate-500 text-[8px] font-black uppercase tracking-widest">{editingPresetId ? 'Update details' : 'Verify timetable parameters'}</p>
             </div>
-            <div className="p-10 pt-0 grid grid-cols-2 gap-4">
+            <div className="p-8 pt-0 grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[8px] font-black uppercase tracking-widest text-slate-500 ml-1">Section Code</label>
                 <input type="text" placeholder="e.g. 325QB" value={metadata.section} onChange={e => setMetadata({ ...metadata, section: e.target.value.toUpperCase() })} className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all" />
@@ -848,18 +848,18 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
 
       {showUploadModal && (
         <div className="modal-overlay">
-          <div className="nexus-modal w-full max-w-md">
-            <div className="p-10 text-center relative bg-slate-50 dark:bg-black/20 border-b border-slate-100 dark:border-white/5">
-              <button onClick={() => setShowUploadModal(false)} className="absolute top-8 right-8 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">
+          <div className="nexus-modal w-full max-w-sm">
+            <div className="p-8 text-center relative bg-slate-50 dark:bg-black/20 border-b border-slate-100 dark:border-white/5">
+              <button onClick={() => setShowUploadModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
-              <div className="w-16 h-16 bg-orange-600/10 rounded-[28px] flex items-center justify-center mx-auto mb-6 border border-orange-600/20">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-8 h-8 text-orange-600"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+              <div className="w-14 h-14 bg-orange-600/10 rounded-[24px] flex items-center justify-center mx-auto mb-4 border border-orange-600/20">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7 text-orange-600"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
               </div>
-              <h3 className="text-3xl font-black tracking-tighter uppercase leading-none">Upload</h3>
-              <p className="text-slate-500 text-[9px] font-black mt-3 uppercase tracking-widest">Provide screenshots for {targetForAction === 'me' ? (myTimetable?.ownerName || 'Your Profile') : 'New Connection'}</p>
+              <h3 className="text-2xl font-black tracking-tighter uppercase leading-none">Upload</h3>
+              <p className="text-slate-500 text-[8px] font-black mt-2 uppercase tracking-widest">Connect screenshots for {targetForAction === 'me' ? (myTimetable?.ownerName || 'Profile') : 'Identity'}</p>
             </div>
-            <div className="p-10 space-y-6">
+            <div className="p-8 space-y-6">
               {isProcessingAI ? (
                 <div className="py-10 text-center space-y-6">
                   <div className="w-12 h-12 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto" />

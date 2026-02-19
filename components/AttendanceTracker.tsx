@@ -506,8 +506,8 @@ const AttendanceTracker: React.FC = () => {
 
       {isEditModalOpen && editingSubject && (
         <div className="modal-overlay">
-          <div ref={editModalRef} className="bg-white dark:bg-[#070707] rounded-[32px] md:rounded-[40px] w-full max-w-md shadow-[0_32px_128px_rgba(0,0,0,0.8)] border border-slate-200 dark:border-white/10 relative overflow-hidden flex flex-col">
-            <div className="bg-black p-6 md:p-8 text-white relative rounded-t-[32px] md:rounded-t-[40px] flex-shrink-0">
+          <div ref={editModalRef} className="bg-white dark:bg-[#070707] rounded-[32px] md:rounded-[40px] w-full max-w-sm shadow-[0_32px_128px_rgba(0,0,0,0.8)] border border-slate-200 dark:border-white/10 relative overflow-hidden flex flex-col">
+            <div className="bg-black p-6 md:p-7 text-white relative rounded-t-[32px] md:rounded-t-[40px] flex-shrink-0">
               <button onClick={() => setIsEditModalOpen(false)} className="absolute top-5 right-5 md:top-6 md:right-6 p-2 text-white/50 hover:text-white transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
@@ -515,7 +515,7 @@ const AttendanceTracker: React.FC = () => {
               <p className="text-white/60 text-[9px] md:text-[10px] font-black uppercase tracking-widest">Update subject details</p>
             </div>
 
-            <div className="p-6 md:p-8 space-y-4 md:space-y-6">
+            <div className="p-6 md:p-7 space-y-4 md:space-y-5">
               <div>
                 <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 ml-1">Subject Name</label>
                 <input

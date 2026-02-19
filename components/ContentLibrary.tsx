@@ -418,23 +418,22 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       {/* Details Modal */}
       {showDetailsModal && selectedFile && (
         <div className="modal-overlay">
-          <div ref={modalRef} className="nexus-modal w-full max-w-xl">
-            <header className="p-8 md:p-10 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-start justify-between">
+          <div ref={modalRef} className="nexus-modal w-full max-w-lg">
+            <header className="p-6 md:p-8 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-start justify-between">
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-orange-600/10 flex items-center justify-center text-orange-500 border border-orange-600/20">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                  <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-500 border border-orange-600/20">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                   </div>
-
                 </div>
-                <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-slate-900 dark:text-white leading-tight">{selectedFile.name}</h3>
+                <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white leading-tight">{selectedFile.name}</h3>
               </div>
               <button onClick={() => setShowDetailsModal(false)} className="p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </header>
 
-            <div className="flex-1 overflow-y-auto p-8 md:p-12 space-y-10 no-scrollbar">
+            <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 no-scrollbar">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: 'Semester', val: selectedFile.semester },
@@ -472,10 +471,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               </div>
             </div>
 
-            <footer className="p-8 md:p-10 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-white/5 flex gap-4">
-              <button onClick={() => setShowDetailsModal(false)} className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">Discard</button>
+            <footer className="p-6 md:p-8 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-white/5 flex gap-4">
+              <button onClick={() => setShowDetailsModal(false)} className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">Discard</button>
               {selectedFile.status === 'approved' && (
-                <button onClick={() => { setShowDetailsModal(false); handleFileAccess(selectedFile); }} className="flex-[2] py-4 bg-orange-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">View Document ↗</button>
+                <button onClick={() => { setShowDetailsModal(false); handleFileAccess(selectedFile); }} className="flex-[2] py-3 bg-orange-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">View Document ↗</button>
               )}
             </footer>
           </div>
@@ -497,17 +496,17 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       {/* Upload/Edit Modal */}
       {(showUploadModal || showEditModal) && (
         <div className="modal-overlay">
-          <div ref={modalRef} className="nexus-modal w-full max-w-md">
-            <header className="p-8 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-center justify-between">
+          <div ref={modalRef} className="nexus-modal w-full max-w-sm">
+            <header className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-black uppercase tracking-widest leading-none">{showUploadModal ? 'Contribute' : 'Metadata'}</h3>
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-2">{showUploadModal ? 'Share with community' : 'Refine file info'}</p>
+                <h3 className="text-lg font-black uppercase tracking-widest leading-none">{showUploadModal ? 'Contribute' : 'Metadata'}</h3>
+                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-2">{showUploadModal ? 'Share with community' : 'Refine file info'}</p>
               </div>
               <button onClick={() => { setShowUploadModal(false); setShowEditModal(false); setPendingFile(null); setIsCreatingNew({ program: false, semester: false, subject: false, type: false }); }} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </header>
-            <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh] pb-20">
+            <div className="p-6 space-y-4 overflow-y-auto max-h-[50vh] pb-10 custom-scrollbar">
               <div className="space-y-2 relative z-[95]">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Target Program</label>
                 {!isCreatingNew.program ? (
@@ -644,15 +643,15 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 )}
               </div>
               <div className="space-y-2 relative z-[50]">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Description</label>
-                <textarea rows={3} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-white/5 p-6 rounded-[32px] font-medium border border-white/5 text-slate-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic" />
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Description</label>
+                <textarea rows={2} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-white/5 p-4 rounded-2xl font-medium border border-white/5 text-slate-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic text-xs" />
               </div>
             </div>
-            <footer className="p-8 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-white/5">
+            <footer className="p-6 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-white/5">
               <button
                 onClick={showUploadModal ? handleUpload : handleEditSubmission}
                 disabled={isProcessing || !metaForm.name || !metaForm.semester || !metaForm.subject}
-                className="w-full bg-orange-600 text-white py-5 rounded-[24px] font-black text-xs uppercase tracking-[0.2em] shadow-[0_12px_48px_rgba(234,88,12,0.3)] hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all border-none"
+                className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-[0_12px_48px_rgba(234,88,12,0.3)] hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all border-none"
               >
                 {isProcessing ? 'Processing...' : showUploadModal ? 'Submit Verification' : 'Update Record'}
               </button>

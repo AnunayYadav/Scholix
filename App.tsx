@@ -189,15 +189,15 @@ const RegistrationPrompt: React.FC<{ userProfile: UserProfile, onComplete: (prof
 
   return (
     <div className="modal-overlay">
-      <div className="nexus-modal w-full max-w-md p-10 relative overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-600/10 blur-[64px] rounded-full pointer-events-none" />
+      <div className="nexus-modal w-full max-w-sm p-8 relative overflow-hidden">
+        <div className="absolute -top-12 -right-12 w-24 h-24 bg-orange-600/10 blur-[32px] rounded-full pointer-events-none" />
 
         <div className="w-20 h-20 bg-orange-600/10 rounded-[32px] flex items-center justify-center mb-8 border border-orange-600/20">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-orange-600"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><path d="M7 21v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4" /><circle cx="12" cy="11" r="3" /></svg>
         </div>
 
-        <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-3 tracking-tighter uppercase leading-none">Identity Check</h3>
-        <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-8">Establish your Registration Number to continue to Nexus.</p>
+        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tighter uppercase leading-none">Identity Check</h3>
+        <p className="text-slate-500 text-[9px] font-black uppercase tracking-[0.2em] mb-6">Establish your Registration Number to continue to Nexus.</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -388,9 +388,9 @@ const AppContent: React.FC = () => {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
-          {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
-          {showRegPrompt && <RegistrationPrompt userProfile={userProfile} onComplete={(p) => setUserProfile(p)} />}
         </div>
+        {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+        {showRegPrompt && <RegistrationPrompt userProfile={userProfile} onComplete={(p) => setUserProfile(p)} />}
       </main>
       <Analytics />
       <SpeedInsights />

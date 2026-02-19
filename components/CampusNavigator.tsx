@@ -436,20 +436,20 @@ const CampusNavigator: React.FC = () => {
 
       {isReportModalOpen && (
         <div className="modal-overlay">
-          <div ref={reportModalRef} className="nexus-modal w-full max-w-lg p-8 relative">
+          <div ref={reportModalRef} className="nexus-modal w-full max-w-md p-6 relative">
             <button
               onClick={() => setIsReportModalOpen(false)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
 
-            <header className="mb-8">
-              <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2 tracking-tight">Report Issue</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Help us keep the mess menu accurate for everyone.</p>
+            <header className="mb-6">
+              <h3 className="text-xl font-black text-slate-800 dark:text-white mb-1 tracking-tight">Report Issue</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Help us keep the mess menu accurate.</p>
             </header>
 
-            <form onSubmit={handleReportSubmit} className="space-y-6">
+            <form onSubmit={handleReportSubmit} className="space-y-4">
               <div>
                 <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">Hostel Name</label>
                 <input
@@ -498,17 +498,17 @@ const CampusNavigator: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex gap-4 pt-4">
+              <div className="flex gap-4 pt-2">
                 <button
                   type="button"
                   onClick={() => setIsReportModalOpen(false)}
-                  className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"
+                  className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-[2] py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-orange-600/20 active:scale-[0.98]"
+                  className="flex-[2] py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-xl shadow-orange-600/20 active:scale-[0.98] border-none"
                 >
                   Submit Report
                 </button>
