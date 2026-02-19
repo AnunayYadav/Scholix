@@ -418,8 +418,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       {/* Details Modal */}
       {showDetailsModal && selectedFile && (
         <div className="modal-overlay">
-          <div ref={modalRef} className="bg-[#050505] rounded-[48px] w-full max-w-2xl border border-white/10 shadow-[0_32px_128px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col my-auto max-h-[90vh] animate-fade-in">
-            <header className="p-8 md:p-12 border-b border-white/5 bg-black flex items-start justify-between">
+          <div ref={modalRef} className="nexus-modal w-full max-w-xl">
+            <header className="p-8 md:p-10 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-start justify-between">
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-orange-600/10 flex items-center justify-center text-orange-500 border border-orange-600/20">
@@ -451,7 +451,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
               <div className="space-y-4">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Description</h4>
-                <p className="text-sm font-medium text-slate-300 leading-relaxed italic bg-white/5 p-6 rounded-3xl border border-white/5">
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed italic bg-slate-50 dark:bg-white/5 p-6 rounded-3xl border border-slate-100 dark:border-white/5">
                   {selectedFile.description || "No description provided."}
                 </p>
               </div>
@@ -472,8 +472,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               </div>
             </div>
 
-            <footer className="p-8 md:p-12 bg-black border-t border-white/5 flex gap-4">
-              <button onClick={() => setShowDetailsModal(false)} className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors">Discard</button>
+            <footer className="p-8 md:p-10 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-white/5 flex gap-4">
+              <button onClick={() => setShowDetailsModal(false)} className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">Discard</button>
               {selectedFile.status === 'approved' && (
                 <button onClick={() => { setShowDetailsModal(false); handleFileAccess(selectedFile); }} className="flex-[2] py-4 bg-orange-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">View Document ↗</button>
               )}
@@ -484,8 +484,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
       {showFolderModal && userProfile?.is_admin && (
         <div className="modal-overlay">
-          <div ref={modalRef} className="bg-white dark:bg-black rounded-[30px] w-full max-w-sm shadow-2xl border border-white/10 overflow-hidden flex flex-col my-auto animate-fade-in">
-            <div className="bg-black p-6 text-white flex justify-between items-center"><h3 className="text-lg font-black uppercase tracking-widest">New Node</h3><button onClick={() => setShowFolderModal(false)} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
+          <div ref={modalRef} className="nexus-modal w-full max-w-sm">
+            <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5"><h3 className="text-sm font-black uppercase tracking-widest">New Node</h3><button onClick={() => setShowFolderModal(false)} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
             <div className="p-6 space-y-4">
               <input autoFocus placeholder="Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-black/60 p-4 rounded-xl font-bold border dark:border-white/10 text-sm dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
               <button onClick={handleCreateFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Saving...' : 'Create Folder'}</button>
@@ -497,17 +497,17 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       {/* Upload/Edit Modal */}
       {(showUploadModal || showEditModal) && (
         <div className="modal-overlay">
-          <div ref={modalRef} className="bg-[#050505] rounded-[48px] w-full max-w-xl border border-white/10 shadow-[0_32px_128px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col my-auto animate-fade-in">
-            <header className="p-8 border-b border-white/5 bg-black flex items-center justify-between">
+          <div ref={modalRef} className="nexus-modal w-full max-w-md">
+            <header className="p-8 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-black uppercase tracking-widest text-white">{showUploadModal ? 'Contribute' : 'Edit Metadata'}</h3>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">{showUploadModal ? 'Share with community' : 'Refine file info'}</p>
+                <h3 className="text-xl font-black uppercase tracking-widest leading-none">{showUploadModal ? 'Contribute' : 'Metadata'}</h3>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-2">{showUploadModal ? 'Share with community' : 'Refine file info'}</p>
               </div>
-              <button onClick={() => { setShowUploadModal(false); setShowEditModal(false); setPendingFile(null); setIsCreatingNew({ program: false, semester: false, subject: false, type: false }); }} className="p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
+              <button onClick={() => { setShowUploadModal(false); setShowEditModal(false); setPendingFile(null); setIsCreatingNew({ program: false, semester: false, subject: false, type: false }); }} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </header>
-            <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh] pb-40">
+            <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh] pb-20">
               <div className="space-y-2 relative z-[95]">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Target Program</label>
                 {!isCreatingNew.program ? (
@@ -648,7 +648,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 <textarea rows={3} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-white/5 p-6 rounded-[32px] font-medium border border-white/5 text-slate-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic" />
               </div>
             </div>
-            <footer className="p-8 bg-black border-t border-white/5">
+            <footer className="p-8 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-white/5">
               <button
                 onClick={showUploadModal ? handleUpload : handleEditSubmission}
                 disabled={isProcessing || !metaForm.name || !metaForm.semester || !metaForm.subject}

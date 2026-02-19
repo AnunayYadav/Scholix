@@ -777,8 +777,8 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       </div>
 
       {showRenameModal && (
-        <div className="modal-overlay z-[1000]">
-          <div className="bg-white dark:bg-black rounded-[48px] w-full max-sm border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden">
+        <div className="modal-overlay">
+          <div className="nexus-modal w-full max-w-sm">
             <div className="p-10 text-center">
               <h3 className="text-2xl font-black tracking-tighter uppercase mb-2 text-slate-800 dark:text-white">Rename Profile</h3>
               <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Personalize the name</p>
@@ -803,8 +803,8 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       )}
 
       {showMetadataModal && (
-        <div className="modal-overlay z-[1000]">
-          <div className="bg-white dark:bg-black rounded-[56px] w-full max-md border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden">
+        <div className="modal-overlay">
+          <div className="nexus-modal w-full max-w-md">
             <div className="p-10 text-center space-y-2">
               <div className="w-16 h-16 bg-orange-600/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-orange-600/20">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-8 h-8 text-orange-600"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
@@ -838,7 +838,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
               <div className="col-span-2 pt-6">
                 <button onClick={submitMetadata} className="w-full py-5 bg-orange-600 text-white rounded-3xl font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-orange-600/30 hover:scale-[1.02] active:scale-95 transition-all border-none">{editingPresetId ? 'Save Admin Changes' : 'Save to Community Presets'}</button>
                 {editingPresetId && (
-                  <button onClick={() => { setShowMetadataModal(false); setEditingPresetId(null); }} className="w-full mt-2 py-3 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors border-none bg-transparent">Cancel Edit</button>
+                  <button onClick={() => { setShowMetadataModal(false); setEditingPresetId(null); }} className="w-full mt-2 py-3 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">Cancel Edit</button>
                 )}
               </div>
             </div>
@@ -848,16 +848,16 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
 
       {showUploadModal && (
         <div className="modal-overlay">
-          <div className="bg-white dark:bg-black rounded-[56px] w-full max-md border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden">
-            <div className="bg-black p-10 text-center relative">
-              <button onClick={() => setShowUploadModal(false)} className="absolute top-8 right-8 text-white/30 hover:text-white transition-colors border-none bg-transparent">
+          <div className="nexus-modal w-full max-w-md">
+            <div className="p-10 text-center relative bg-slate-50 dark:bg-black/20 border-b border-slate-100 dark:border-white/5">
+              <button onClick={() => setShowUploadModal(false)} className="absolute top-8 right-8 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
               <div className="w-16 h-16 bg-orange-600/10 rounded-[28px] flex items-center justify-center mx-auto mb-6 border border-orange-600/20">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-8 h-8 text-orange-600"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
               </div>
-              <h3 className="text-3xl font-black tracking-tighter uppercase text-white">Upload Timetable</h3>
-              <p className="text-white/40 text-[9px] font-black mt-2 uppercase tracking-widest">Upload timetable screenshots for {targetForAction === 'me' ? (myTimetable?.ownerName || 'Your Profile') : 'New Connection'}</p>
+              <h3 className="text-3xl font-black tracking-tighter uppercase leading-none">Upload</h3>
+              <p className="text-slate-500 text-[9px] font-black mt-3 uppercase tracking-widest">Provide screenshots for {targetForAction === 'me' ? (myTimetable?.ownerName || 'Your Profile') : 'New Connection'}</p>
             </div>
             <div className="p-10 space-y-6">
               {isProcessingAI ? (

@@ -203,23 +203,33 @@ h4,
 }
 
 .modal-overlay {
-  @apply fixed inset-0 z-[999] flex items-center justify-center p-4 backdrop-blur-2xl animate-fade-in overflow-hidden;
-  background: rgba(255, 255, 255, 0.75);
-  /* Neutral off-white blur */
+  @apply fixed inset-0 z-[9999] flex items-start md:items-center justify-center p-4 backdrop-blur-xl animate-fade-in overflow-y-auto overflow-x-hidden;
+  background: rgba(var(--overlay-color-rgb), 0.4);
+}
+
+:root {
+  --overlay-color-rgb: 0, 0, 0;
+}
+
+.dark {
+  --overlay-color-rgb: 0, 0, 0;
 }
 
 .dark .modal-overlay {
-  background: rgba(0, 0, 0, 0.85);
-  /* Black blur effect */
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .overlay {
-  @apply fixed inset-0 z-20 backdrop-blur-md transition-opacity duration-300;
-  background: rgba(255, 255, 255, 0.2);
+  @apply fixed inset-0 z-[9998] backdrop-blur-md transition-opacity duration-300;
+  background: rgba(0, 0, 0, 0.2);
 }
 
-.dark .overlay {
-  background: rgba(0, 0, 0, 0.4);
+.nexus-modal {
+  @apply bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 shadow-[0_32px_128px_rgba(0, 0, 0, 0.4)] rounded-[40px] overflow-hidden flex flex-col my-auto transition-all animate-fade-in text-slate-900 dark:text-white;
+}
+
+.dark .nexus-modal {
+  @apply shadow-[0_32px_128px_rgba(0, 0, 0, 0.8)];
 }
 
 .shimmer {

@@ -112,7 +112,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {showFeedbackModal && (
         <div className="modal-overlay">
-          <div ref={feedbackModalRef} className="bg-white dark:bg-black rounded-[48px] p-10 w-full max-w-lg shadow-[0_32px_128px_rgba(0,0,0,0.5)] animate-fade-in border border-slate-200 dark:border-white/10 relative overflow-hidden">
+          <div ref={feedbackModalRef} className="nexus-modal w-full max-w-lg p-10 relative">
             <button onClick={() => setShowFeedbackModal(false)} className="absolute top-8 right-8 p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors border-none bg-transparent">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>

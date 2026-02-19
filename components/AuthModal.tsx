@@ -84,7 +84,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="bg-white dark:bg-black rounded-[48px] w-full max-w-md shadow-[0_32px_128px_rgba(0,0,0,0.5)] border border-slate-200 dark:border-white/10 relative overflow-hidden flex flex-col group animate-fade-in mx-4">
+      <div className="nexus-modal w-full max-w-md mx-4">
 
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-600/10 blur-[64px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
 

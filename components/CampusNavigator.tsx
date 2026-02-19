@@ -435,8 +435,8 @@ const CampusNavigator: React.FC = () => {
       )}
 
       {isReportModalOpen && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
-          <div ref={reportModalRef} className="bg-white dark:bg-black rounded-[32px] p-8 w-full max-w-lg shadow-2xl border border-white/5 relative">
+        <div className="modal-overlay">
+          <div ref={reportModalRef} className="nexus-modal w-full max-w-lg p-8 relative">
             <button
               onClick={() => setIsReportModalOpen(false)}
               className="absolute top-6 right-6 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"

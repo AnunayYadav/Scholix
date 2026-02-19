@@ -188,8 +188,8 @@ const RegistrationPrompt: React.FC<{ userProfile: UserProfile, onComplete: (prof
   };
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 backdrop-blur-3xl bg-black/60">
-      <div className="bg-white dark:bg-black rounded-[48px] w-full max-w-md shadow-3xl border border-slate-200 dark:border-white/10 p-10 animate-fade-in relative overflow-hidden">
+    <div className="modal-overlay">
+      <div className="nexus-modal w-full max-w-md p-10 relative overflow-hidden">
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-600/10 blur-[64px] rounded-full pointer-events-none" />
 
         <div className="w-20 h-20 bg-orange-600/10 rounded-[32px] flex items-center justify-center mb-8 border border-orange-600/20">
