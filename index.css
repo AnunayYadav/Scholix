@@ -171,11 +171,6 @@ h4,
   background: #444;
 }
 
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(234, 88, 12, 0.2) transparent;
-}
-
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
 }
@@ -197,7 +192,8 @@ h4,
 }
 
 .glass-panel {
-  @apply bg-white/80 dark:bg-black/60 backdrop-blur-2xl border border-slate-200 dark:border-white/10 shadow-[inset_0_1px_1px_rgba(255, 255, 255, 0.1)];
+  @apply bg-white/80 dark:bg-black/60 backdrop-blur-2xl border border-slate-200 dark:border-white/10;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
 .dark .glass-panel {
@@ -228,11 +224,12 @@ h4,
 }
 
 .nexus-modal {
-  @apply bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 shadow-[0_32px_128px_rgba(0, 0, 0, 0.4)] rounded-[40px] overflow-hidden flex flex-col my-auto transition-all animate-fade-in text-slate-900 dark:text-white;
+  @apply bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[40px] overflow-hidden flex flex-col my-auto transition-all animate-fade-in text-slate-900 dark:text-white;
+  box-shadow: 0 32px 128px rgba(0, 0, 0, 0.4);
 }
 
 .dark .nexus-modal {
-  @apply shadow-[0_32px_128px_rgba(0, 0, 0, 0.8)];
+  box-shadow: 0 32px 128px rgba(0, 0, 0, 0.8);
 }
 
 .shimmer {
