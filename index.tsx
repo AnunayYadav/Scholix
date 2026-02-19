@@ -11,7 +11,7 @@
   if (!g.process) g.process = { env: {} };
   if (!g.process.env) g.process.env = {};
 
-  const varsToBootstrap = ['API_KEY', 'SUPABASE_URL', 'SUPABASE_ANON_KEY'];
+  const varsToBootstrap = ['SUPABASE_URL', 'SUPABASE_ANON_KEY'];
 
   varsToBootstrap.forEach(varName => {
     try {
@@ -37,10 +37,7 @@
     }
   });
 
-  // Verification for developers (only logs if key is missing)
-  if (!g.process.env.API_KEY) {
-    console.warn("Nexus Protocol: API_KEY not detected in environment. Ensure VITE_API_KEY is set in Vercel settings.");
-  }
+
 })();
 
 import React from 'react';
