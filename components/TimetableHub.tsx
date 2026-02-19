@@ -354,11 +354,24 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
 
     if (editingPresetId) {
       try {
+        const generatedName = `${section} - ${branch} ${year} Year Sem ${semester}`;
+
+        // 1. Update Community/Preset if it exists
         await NexusServer.updateCommunityTimetable(editingPresetId, metadata);
         loadCommunityPresets();
+
+        // 2. Update Local Record if it matches the editing ID
+        if (myTimetable && (myTimetable.ownerId === editingPresetId || editingPresetId === 'me' || editingPresetId === (userProfile?.id || 'local-me'))) {
+          const updated = { ...myTimetable, ...metadata, ownerName: generatedName };
+          setMyTimetable(updated);
+          if (userProfile) await NexusServer.saveRecord(userProfile.id, 'timetable_main', generatedName, updated);
+        } else {
+          setFriendTimetables(prev => prev.map(f => f.ownerId === editingPresetId ? { ...f, ...metadata, ownerName: generatedName } : f));
+        }
+
         setShowMetadataModal(false);
         setEditingPresetId(null);
-      } catch (e) { alert("Failed to update preset."); }
+      } catch (e) { console.error(e); alert("Failed to update preset info."); }
       return;
     }
 
@@ -501,14 +514,14 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     setShowUploadModal(false);
   };
 
-  const handleAdminEdit = (preset: any, e: React.MouseEvent) => {
+  const handleAdminEdit = (item: any, e: React.MouseEvent) => {
     e.stopPropagation();
-    setEditingPresetId(preset.id);
+    setEditingPresetId(item.ownerId || item.id);
     setMetadata({
-      section: preset.section || '',
-      branch: preset.branch || '',
-      year: preset.year || '',
-      semester: preset.semester || ''
+      section: item.section || '',
+      branch: item.branch || '',
+      year: item.year || '',
+      semester: item.semester || ''
     });
     setShowMetadataModal(true);
   };
@@ -547,15 +560,15 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     {PRESET_BATCHES.map(batch => (
                       <div key={batch.id} className="relative group/card">
                         <button onClick={() => { setTargetForAction('me'); applyPreset(batch); close(); }} className="w-full p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-2xl text-left hover:border-orange-500/50 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-all flex items-center justify-between group border-none">
-                          <div>
-                            <p className="text-[10px] font-black uppercase tracking-tight text-slate-800 dark:text-white">{batch.name}</p>
+                          <div className="min-w-0 pr-12">
+                            <p className="text-[10px] font-black uppercase tracking-tight text-slate-800 dark:text-white truncate">{batch.name}</p>
                             <p className="text-[7px] font-bold text-slate-500 uppercase mt-0.5">Full 5-Day Schedule</p>
                           </div>
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                         </button>
                         {userProfile?.is_admin && (
-                          <div className="absolute top-1/2 right-12 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-all">
-                            <button onClick={(e) => { e.stopPropagation(); handleAdminEdit(batch, e); close(); }} title="Edit" className="p-2 text-slate-400 hover:text-orange-500 transition-all active:scale-95 border-none bg-transparent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+                          <div className="absolute top-1/2 right-10 -translate-y-1/2 flex items-center gap-1 opacity-40 hover:opacity-100 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); handleAdminEdit(batch, e); close(); }} title="Edit" className="p-2 text-slate-400 hover:text-orange-500 transition-all active:scale-95 border-none bg-transparent flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
                           </div>
                         )}
                       </div>
@@ -570,8 +583,8 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                       {communityPresets.map(preset => (
                         <div key={preset.id} className="relative group/card">
                           <button onClick={() => { setTargetForAction('me'); applyPreset(preset); close(); }} className="w-full p-4 bg-slate-50 dark:bg-orange-600/[0.03] border border-slate-200 dark:border-orange-600/10 rounded-2xl text-left hover:border-orange-500/50 hover:bg-slate-100 dark:hover:bg-orange-600/[0.05] transition-all flex items-center justify-between group border-none">
-                            <div className="min-w-0">
-                              <p className="text-[10px] font-black uppercase tracking-tight text-slate-800 dark:text-white truncate pr-16">{preset.name}</p>
+                            <div className="min-w-0 pr-16">
+                              <p className="text-[10px] font-black uppercase tracking-tight text-slate-800 dark:text-white truncate">{preset.name}</p>
                               <div className="flex items-center gap-1.5 mt-0.5">
                                 <span className="text-[6px] font-black text-slate-500 uppercase tracking-widest">{preset.branch}</span>
                                 <span className="w-1 h-1 bg-white/10 rounded-full" />
@@ -581,9 +594,9 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                           </button>
                           {userProfile?.is_admin && (
-                            <div className="absolute top-1/2 right-12 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-all">
-                              <button onClick={(e) => { e.stopPropagation(); handleAdminEdit(preset, e); close(); }} title="Edit" className="p-2 text-slate-400 hover:text-orange-500 transition-all active:scale-95 border-none bg-transparent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
-                              <button onClick={(e) => { e.stopPropagation(); handleAdminDelete(preset.id, e); close(); }} title="Delete" className="p-2 text-slate-400 hover:text-red-500 transition-all active:scale-95 border-none bg-transparent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+                            <div className="absolute top-1/2 right-10 -translate-y-1/2 flex items-center gap-1 opacity-40 hover:opacity-100 transition-all">
+                              <button onClick={(e) => { e.stopPropagation(); handleAdminEdit(preset, e); close(); }} title="Edit" className="p-2 text-slate-400 hover:text-orange-500 transition-all active:scale-95 border-none bg-transparent flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+                              <button onClick={(e) => { e.stopPropagation(); handleAdminDelete(preset.id, e); close(); }} title="Delete" className="p-2 text-slate-400 hover:text-red-500 transition-all active:scale-95 border-none bg-transparent flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
                             </div>
                           )}
                         </div>
@@ -705,19 +718,31 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                 onClick={() => setSelectedEntityId('me')}
                 className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedEntityId === 'me' ? 'bg-orange-600/10 border-orange-600' : 'bg-white dark:bg-black border-slate-200 dark:border-white/5 hover:border-orange-500/30'}`}
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-orange-600 flex items-center justify-center font-black text-[10px] uppercase">{userProfile?.username?.[0] || 'M'}</div>
-                  <span className={`text-[10px] font-black uppercase ${selectedEntityId === 'me' ? 'text-orange-500' : 'text-slate-700 dark:text-white'}`}>
-                    {myTimetable?.ownerName || 'My Profile'}
-                  </span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-orange-600 flex items-center justify-center font-black text-[10px] uppercase flex-shrink-0">{userProfile?.username?.[0] || 'M'}</div>
+                  <div className="min-w-0 truncate">
+                    <span className={`text-[10px] font-black uppercase block truncate ${selectedEntityId === 'me' ? 'text-orange-500' : 'text-slate-700 dark:text-white'}`}>
+                      {myTimetable?.ownerName || 'My Profile'}
+                    </span>
+                    {myTimetable?.branch && (
+                      <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">{myTimetable.branch} • {myTimetable.year} • S{myTimetable.semester}</span>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setRenameTargetId('me'); setNewName(myTimetable?.ownerName || ''); setShowRenameModal(true); }}
-                    className="p-1 hover:text-orange-500 text-white/20 transition-colors border-none bg-transparent"
+                    className="p-1.5 hover:text-orange-500 text-slate-300 dark:text-white/20 transition-colors border-none bg-transparent"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handleAdminEdit(myTimetable, e); }}
+                    className="p-1.5 hover:text-orange-500 text-slate-300 dark:text-white/20 transition-colors border-none bg-transparent"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
                   </button>
                 </div>
               </div>
@@ -728,26 +753,38 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                   onClick={() => setSelectedEntityId(friend.ownerId)}
                   className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedEntityId === friend.ownerId ? 'bg-blue-600/10 border-blue-600' : 'bg-white dark:bg-black border-slate-200 dark:border-white/5 hover:border-orange-500/30'}`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-black text-[10px] uppercase">{friend.ownerName?.[0] || 'F'}</div>
-                    <span className={`text-[10px] font-black uppercase ${selectedEntityId === friend.ownerId ? 'text-blue-500' : 'text-slate-700 dark:text-white'}`}>
-                      {friend.ownerName}
-                    </span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-black text-[10px] uppercase flex-shrink-0">{friend.ownerName?.[0] || 'F'}</div>
+                    <div className="min-w-0 truncate">
+                      <span className={`text-[10px] font-black uppercase block truncate ${selectedEntityId === friend.ownerId ? 'text-blue-500' : 'text-slate-700 dark:text-white'}`}>
+                        {friend.ownerName}
+                      </span>
+                      {friend.branch && (
+                        <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">{friend.branch} • {friend.year} • S{friend.semester}</span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setRenameTargetId(friend.ownerId); setNewName(friend.ownerName); setShowRenameModal(true); }}
-                      className="p-1.5 hover:text-blue-500 text-white/20 transition-colors border-none bg-transparent"
+                      className="p-1.5 hover:text-blue-500 text-slate-300 dark:text-white/20 transition-colors border-none bg-transparent"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleAdminEdit(friend, e); }}
+                      className="p-1.5 hover:text-blue-500 text-slate-300 dark:text-white/20 transition-colors border-none bg-transparent"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
                     </button>
                     <button
                       type="button"
                       onClick={(e) => handleRemoveFriend(friend.ownerId, e)}
                       className="p-1.5 group/del hover:bg-red-500 transition-all border-none bg-transparent rounded-lg"
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover/del:text-white"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-slate-300 dark:text-white/20 group-hover/del:text-white"><path d="M18 6L6 18M6 6l12 12" /></svg>
                     </button>
                   </div>
                 </div>
@@ -759,15 +796,24 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                 onChange={() => { }}
                 className="w-full"
                 renderCustomMenu={(close) => (
-                  <div className="w-[320px] p-4 space-y-6 max-h-[500px] overflow-y-auto no-scrollbar">
+                  <div className="w-[320px] md:w-[400px] p-4 space-y-6 max-h-[500px] overflow-y-auto no-scrollbar">
                     <section className="space-y-3">
                       <h4 className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500 ml-1">Presets</h4>
                       <div className="space-y-2">
                         {PRESET_BATCHES.map(batch => (
-                          <button key={batch.id} onClick={() => { setTargetForAction('friend'); applyPreset(batch); close(); }} className="w-full p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-2xl text-left hover:border-orange-500/50 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-all flex items-center justify-between group border-none">
-                            <p className="text-[10px] font-black uppercase tracking-tight text-slate-800 dark:text-white">{batch.name}</p>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                          </button>
+                          <div key={batch.id} className="relative group/card">
+                            <button onClick={() => { setTargetForAction('friend'); applyPreset(batch); close(); }} className="w-full p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-2xl text-left hover:border-orange-500/50 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-all flex items-center justify-between group border-none">
+                              <div className="min-w-0 pr-12">
+                                <p className="text-[10px] font-black uppercase tracking-tight text-slate-800 dark:text-white truncate">{batch.name}</p>
+                              </div>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                            </button>
+                            {userProfile?.is_admin && (
+                              <div className="absolute top-1/2 right-10 -translate-y-1/2 flex items-center gap-1 opacity-40 hover:opacity-100 transition-all">
+                                <button onClick={(e) => { e.stopPropagation(); handleAdminEdit(batch, e); close(); }} title="Edit" className="p-2 text-slate-400 hover:text-orange-500 transition-all active:scale-95 border-none bg-transparent flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+                              </div>
+                            )}
+                          </div>
                         ))}
                       </div>
                     </section>
@@ -776,9 +822,20 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                         <h4 className="text-[9px] font-black uppercase tracking-[0.4em] text-orange-500 ml-1">Community</h4>
                         <div className="space-y-2">
                           {communityPresets.map(preset => (
-                            <button key={preset.id} onClick={() => { setTargetForAction('friend'); applyPreset(preset); close(); }} className="w-full p-4 bg-slate-50 dark:bg-orange-600/[0.03] border border-slate-200 dark:border-orange-600/10 rounded-2xl text-left hover:border-orange-500/50 hover:bg-slate-100 dark:hover:bg-orange-600/[0.05] transition-all flex items-center justify-between group border-none">
-                              <p className="text-[10px] font-black uppercase tracking-tight text-slate-800 dark:text-white truncate">{preset.name}</p>
-                            </button>
+                            <div key={preset.id} className="relative group/card">
+                              <button onClick={() => { setTargetForAction('friend'); applyPreset(preset); close(); }} className="w-full p-4 bg-slate-50 dark:bg-orange-600/[0.03] border border-slate-200 dark:border-orange-600/10 rounded-2xl text-left hover:border-orange-500/50 hover:bg-slate-100 dark:hover:bg-orange-600/[0.05] transition-all flex items-center justify-between group border-none">
+                                <div className="min-w-0 pr-16">
+                                  <p className="text-[10px] font-black uppercase tracking-tight text-slate-800 dark:text-white truncate">{preset.name}</p>
+                                </div>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                              </button>
+                              {userProfile?.is_admin && (
+                                <div className="absolute top-1/2 right-10 -translate-y-1/2 flex items-center gap-1 opacity-40 hover:opacity-100 transition-all">
+                                  <button onClick={(e) => { e.stopPropagation(); handleAdminEdit(preset, e); close(); }} title="Edit" className="p-2 text-slate-400 hover:text-orange-500 transition-all active:scale-95 border-none bg-transparent flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+                                  <button onClick={(e) => { e.stopPropagation(); handleAdminDelete(preset.id, e); close(); }} title="Delete" className="p-2 text-slate-400 hover:text-red-500 transition-all active:scale-95 border-none bg-transparent flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+                                </div>
+                              )}
+                            </div>
                           ))}
                         </div>
                       </section>
