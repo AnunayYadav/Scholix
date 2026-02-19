@@ -225,11 +225,11 @@ h4,
 }
 
 .nexus-modal {
-  @apply bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 shadow-[0_32px_128px_rgba(0, 0, 0, 0.4)] rounded-[40px] overflow-hidden flex flex-col my-auto transition-all animate-fade-in text-slate-900 dark:text-white;
+  @apply bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 shadow-[0_32px_128px_rgba(0,0,0,0.4)] rounded-[40px] overflow-hidden flex flex-col my-auto transition-all animate-fade-in text-slate-900 dark:text-white;
 }
 
 .dark .nexus-modal {
-  @apply shadow-[0_32px_128px_rgba(0, 0, 0, 0.8)];
+  @apply shadow-[0_32px_128px_rgba(0,0,0,0.8)];
 }
 
 .shimmer {
