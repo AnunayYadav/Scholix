@@ -21,8 +21,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const [scale, setScale] = useState(1.0);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [renderScale, setRenderScale] = useState(scale);
 
     // Touch/Pinch State
     const touchState = useRef<{
@@ -44,7 +44,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const pdfDocRef = useRef<any>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-    const thumbnailRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
     const pdfjsLibRef = useRef<any>(null);
 
     // Track visible pages for current page indicator
@@ -143,18 +142,28 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         const page = await pdfDocRef.current.getPage(1);
         const originalViewport = page.getViewport({ scale: 1.0 });
         const containerWidth = containerRef.current?.clientWidth || window.innerWidth;
-        const padding = window.innerWidth < 768 ? 20 : 80;
+        const padding = window.innerWidth < 768 ? 20 : 120; // More padding for desktop centering
         const newScale = (containerWidth - padding) / originalViewport.width;
         setScale(newScale);
     };
 
+    // Debounce scale updates for high-quality render to prevent flicker
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setRenderScale(scale);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [scale]);
+
     // Gesture Handlers
     const handleTouchStart = (e: React.TouchEvent) => {
         if (e.touches.length === 2) {
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
             touchState.current.isPinching = true;
             touchState.current.lastDist = Math.hypot(
-                Number(e.touches[0].pageX) - Number(e.touches[1].pageX),
-                Number(e.touches[0].pageY) - Number(e.touches[1].pageY)
+                Number(touch1.pageX) - Number(touch2.pageX),
+                Number(touch1.pageY) - Number(touch2.pageY)
             );
         } else if (e.touches.length === 1) {
             const now = Number(Date.now());
@@ -170,9 +179,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const handleTouchMove = (e: React.TouchEvent) => {
         if (touchState.current.isPinching && e.touches.length === 2) {
             e.preventDefault();
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
             const dist = Math.hypot(
-                Number(e.touches[0].pageX) - Number(e.touches[1].pageX),
-                Number(e.touches[0].pageY) - Number(e.touches[1].pageY)
+                Number(touch1.pageX) - Number(touch2.pageX),
+                Number(touch1.pageY) - Number(touch2.pageY)
             );
             const delta = Number(dist) - Number(touchState.current.lastDist);
 
@@ -207,7 +218,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 });
 
                 if (visiblePages.current.size > 0) {
-                    const sorted = Array.from(visiblePages.current).sort((a, b) => a - b);
+                    const sorted = Array.from(visiblePages.current).sort((a: number, b: number) => a - b);
                     setCurrentPage(sorted[0]);
                 }
             },
@@ -340,8 +351,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
                 try {
                     const page = await pdfDocRef.current.getPage(pageNum);
-                    const viewport = page.getViewport({ scale: scale * (window.devicePixelRatio || 1) });
-                    const cssViewport = page.getViewport({ scale: scale });
+                    const viewport = page.getViewport({ scale: renderScale * (window.devicePixelRatio || 1) });
+                    const cssViewport = page.getViewport({ scale: renderScale });
 
                     const canvas = canvasRef.current;
                     const context = canvas.getContext('2d');
@@ -412,27 +423,27 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 observer.disconnect();
                 if (renderTaskRef.current) renderTaskRef.current.cancel();
             };
-        }, [scale, pageNum]);
+        }, [renderScale, pageNum]); // Only re-render expensive canvas on renderScale change
 
         return (
             <div
                 ref={el => pageRefs.current[pageNum] = el}
                 data-page={pageNum}
-                className="relative mb-8 bg-white shadow-2xl rounded-sm transition-transform duration-300 origin-top"
+                className="relative mb-12 bg-white shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md transition-all duration-500 ease-out origin-top border border-white/5"
                 style={{
                     width: 'fit-content',
                     minHeight: '400px',
-                    // scale: scale // we use scale in viewport instead for better quality
+                    transform: `scale(${scale / renderScale})`, // Smooth CSS zoom
                 }}
             >
-                <canvas ref={canvasRef} className="block" />
+                <canvas ref={canvasRef} className="block rounded-md shadow-inner" />
                 <div ref={textLayerRef} className="textLayer absolute inset-0 opacity-20 pointer-events-none select-text" />
 
                 {/* Dynamic Watermark */}
                 <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center overflow-hidden flex-wrap select-none p-10">
-                    {Array.from({ length: 15 }).map((_, i) => (
-                        <span key={i} className="text-[30px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-12 text-black">
-                            {userProfile?.username || 'LPU NEXUS'} {userProfile?.registration_number || ''}
+                    {Array.from({ length: 9 }).map((_, i) => (
+                        <span key={i} className="text-[35px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-black tracking-widest">
+                            {userProfile?.username || 'LPU NEXUS'}
                         </span>
                     ))}
                 </div>
@@ -440,39 +451,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         );
     };
 
-    // Thumbnail Renderer Component
-    const ThumbnailRenderer: React.FC<{ pageNum: number }> = ({ pageNum }) => {
-        const canvasRef = useRef<HTMLCanvasElement>(null);
-
-        useEffect(() => {
-            const renderThumb = async () => {
-                if (!pdfDocRef.current || !canvasRef.current) return;
-                const page = await pdfDocRef.current.getPage(pageNum);
-                const viewport = page.getViewport({ scale: 0.2 });
-                const canvas = canvasRef.current;
-                const context = canvas.getContext('2d');
-                if (!context) return;
-
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-
-                await page.render({ canvasContext: context, viewport }).promise;
-            };
-            renderThumb();
-        }, [pageNum]);
-
-        return (
-            <div
-                onClick={() => jumpToPage(pageNum)}
-                className={`flex flex-col items-center gap-2 p-3 cursor-pointer transition-all hover:bg-white/5 rounded-xl group ${currentPage === pageNum ? 'bg-orange-600/20 ring-2 ring-orange-600' : ''}`}
-            >
-                <div className="relative shadow-lg border border-white/5 rounded-md overflow-hidden bg-white/10 w-full aspect-[1/1.4]">
-                    <canvas ref={canvasRef} className="w-full h-full object-contain" />
-                </div>
-                <span className={`text-[9px] font-black tracking-widest ${currentPage === pageNum ? 'text-orange-500' : 'text-white/40 group-hover:text-white'}`}>{pageNum}</span>
-            </div>
-        );
-    };
+    // Thumbnail Renderer Removed
 
     if (error) {
         return createPortal(
@@ -505,27 +484,20 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                         <h3 className="text-[11px] font-black text-white uppercase tracking-tighter truncate max-w-[200px]">{fileName}</h3>
                         <p className="text-[8px] font-black text-orange-500 uppercase tracking-widest leading-none mt-1">LPU Nexus Secure Protocol</p>
                     </div>
-                    <div className="h-8 w-px bg-white/5 hidden md:block" />
-                    <button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${sidebarOpen ? 'bg-orange-600 text-white' : 'bg-white/5 text-white/40 hover:text-white'}`}
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /></svg>
-                    </button>
                 </div>
 
                 {/* Center: Search & Zoom */}
                 <div className="flex items-center gap-2 md:gap-6">
                     {/* Search Bar */}
-                    <div className="hidden md:flex items-center bg-white/5 rounded-2xl border border-white/10 px-3 py-1.5 focus-within:border-orange-600 transition-all group">
+                    <div className="hidden sm:flex items-center bg-white/5 rounded-2xl border border-white/10 px-3 py-1.5 focus-within:border-orange-600 transition-all group">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/30 group-focus-within:text-orange-500"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
                         <input
                             type="text"
-                            placeholder="Search inside..."
+                            placeholder="Find..."
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && performSearch()}
-                            className="bg-transparent border-none outline-none text-[10px] font-black uppercase text-white px-3 w-40 placeholder:text-white/20"
+                            className="bg-transparent border-none outline-none text-[10px] font-black uppercase text-white px-2 w-24 md:w-32 placeholder:text-white/20"
                         />
                         {searchResults.length > 0 && (
                             <div className="flex items-center gap-2 pr-2">
@@ -554,10 +526,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                         </button>
                         <button
                             onClick={fitToWidth}
-                            className="px-3 py-1.5 rounded-xl text-[9px] font-black text-white bg-white/10 hover:bg-orange-600 transition-all border-none uppercase tracking-widest flex items-center gap-2"
+                            className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 text-white/40 hover:text-white hover:bg-orange-600 transition-all border-none"
+                            title="Fit to Width"
                         >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M4 12V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8" /><path d="m15 15 3 3-3 3" /><path d="m9 15-3 3 3 3" /></svg>
-                            Fit Width
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M4 12V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8" /><path d="m15 15 3 3-3 3" /><path d="m9 15-3 3 3 3" /></svg>
                         </button>
                     </div>
                 </div>
@@ -597,23 +569,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             </div>
 
             {/* Main Content */}
-            <div className="flex flex-1 overflow-hidden relative">
-                {/* Sidebar */}
-                <aside className={`
-                    absolute lg:relative inset-y-0 left-0 z-40 w-64 md:w-72 bg-black border-r border-white/5
-                    transform transition-all duration-500 ease-out flex flex-col no-scrollbar
-                    ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:w-0 lg:opacity-0'}
-                `}>
-                    <div className="p-6 border-b border-white/10 flex items-center justify-between">
-                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500">Thumbnails</p>
-                        <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-white/40 hover:text-white border-none bg-transparent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar custom-scrollbar">
-                        {Array.from({ length: numPages }).map((_, i) => (
-                            <ThumbnailRenderer key={i} pageNum={i + 1} />
-                        ))}
-                    </div>
-                </aside>
+            <div className="flex-1 overflow-hidden relative">
 
                 {/* PDF Container */}
                 <main
