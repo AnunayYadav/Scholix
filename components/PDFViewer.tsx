@@ -24,7 +24,8 @@ const PageRenderer = React.memo<{
     userProfile: UserProfile | null | undefined;
     searchQuery: string;
     pdfjsLib: any;
-}>(({ pageNum, pdfDoc, renderScale, scale, userProfile, searchQuery, pdfjsLib }) => {
+    registerRef: (pageNum: number, el: HTMLDivElement | null) => void;
+}>(({ pageNum, pdfDoc, renderScale, scale, userProfile, searchQuery, pdfjsLib, registerRef }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [renderTarget, setRenderTarget] = useState<{
         activeCanvas: 'A' | 'B';
@@ -118,9 +119,12 @@ const PageRenderer = React.memo<{
 
     return (
         <div
-            ref={containerRef}
+            ref={el => {
+                (containerRef as any).current = el;
+                registerRef(pageNum, el);
+            }}
             data-page={pageNum}
-            className="relative mb-12 bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top select-none border border-white/5 overflow-visible"
+            className="relative mb-12 bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top select-none border border-white/5 overflow-visible snap-start snap-always"
             style={{
                 width: 'fit-content',
                 minHeight: '400px',
@@ -189,6 +193,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const visiblePages = useRef<Set<number>>(new Set());
 
     const isAdmin = userProfile?.is_admin || false;
+    const currentPageRef = useRef(1);
+
+    useEffect(() => {
+        currentPageRef.current = currentPage;
+    }, [currentPage]);
 
     // Load PDF.js from CDN
     useEffect(() => {
@@ -249,10 +258,12 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 if (!isAdmin) e.preventDefault();
             }
             if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-                jumpToPage(Math.min(currentPage + 1, numPages));
+                e.preventDefault();
+                jumpToPage(Math.min(currentPageRef.current + 1, numPages));
             }
             if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-                jumpToPage(Math.max(currentPage - 1, 1));
+                e.preventDefault();
+                jumpToPage(Math.max(currentPageRef.current - 1, 1));
             }
         };
 
@@ -264,7 +275,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             window.removeEventListener('contextmenu', handleContextMenu);
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [url, isAdmin, currentPage, numPages]);
+    }, [url, isAdmin, numPages]);
 
     // Handle Resize
     useEffect(() => {
@@ -389,11 +400,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         // Clear existing observations
         const currentRefs = pageRefs.current;
         Object.values(currentRefs).forEach(ref => {
-            if (ref instanceof Element) observer.observe(ref);
+            if (ref) observer.observe(ref);
         });
 
         return () => observer.disconnect();
-    }, [numPages, isLoading]);
+    }, [numPages, isLoading, pdfDoc]); // Added pdfDoc to deps to re-observe when pages mount
 
     const jumpToPage = (pageNum: number) => {
         const target = pageRefs.current[pageNum];
@@ -620,7 +631,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    className="flex-1 overflow-auto bg-[#0a0a0a] relative no-scrollbar flex flex-col items-center py-12 px-4 md:px-0 select-none scroll-smooth touch-pan-y"
+                    className="flex-1 overflow-auto bg-[#0a0a0a] relative no-scrollbar flex flex-col items-center py-12 px-4 md:px-0 select-none scroll-smooth touch-pan-y snap-y snap-proximity"
                     style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                     {isLoading ? (
@@ -632,7 +643,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                             ))}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center w-full">
+                        <div className="flex flex-col items-center w-full scroll-smooth">
                             {Array.from({ length: numPages }).map((_, i) => (
                                 <PageRenderer
                                     key={i}
@@ -643,6 +654,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                                     userProfile={userProfile}
                                     searchQuery={searchQuery}
                                     pdfjsLib={pdfjsLibState}
+                                    registerRef={(pageNum, el) => {
+                                        pageRefs.current[pageNum] = el;
+                                    }}
                                 />
                             ))}
                         </div>
