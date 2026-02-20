@@ -622,16 +622,16 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 </div>
             </div>
 
-            {/* Main Content */}
-            <div className="flex-1 overflow-hidden relative">
+            {/* Main Content Wrapper (Must be flex to allow main to fill) */}
+            <div className="flex-1 overflow-hidden relative flex flex-col">
 
-                {/* PDF Container */}
+                {/* PDF Scroll Container */}
                 <main
                     ref={containerRef}
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    className="flex-1 overflow-y-auto overflow-x-hidden bg-[#0a0a0a] relative flex flex-col items-center py-12 px-4 md:px-0 select-none scroll-smooth touch-pan-y"
+                    className="flex-1 overflow-y-auto overflow-x-auto bg-[#0a0a0a] relative flex flex-col items-center py-12 px-4 md:px-0 select-none scroll-smooth touch-pan-y"
                     style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                     {isLoading ? (
