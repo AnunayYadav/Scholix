@@ -15,6 +15,144 @@ interface SearchResult {
     totalMatchesInPage: number;
 }
 
+// Move PageRenderer outside to prevent recreation on every parent render
+const PageRenderer = React.memo<{
+    pageNum: number;
+    pdfDoc: any;
+    renderScale: number;
+    scale: number;
+    userProfile: UserProfile | null | undefined;
+    searchQuery: string;
+    pdfjsLib: any;
+}>(({ pageNum, pdfDoc, renderScale, scale, userProfile, searchQuery, pdfjsLib }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [renderTarget, setRenderTarget] = useState<{
+        activeCanvas: 'A' | 'B';
+        renderedScale: number;
+    }>({ activeCanvas: 'A', renderedScale: 0 });
+
+    const canvasARef = useRef<HTMLCanvasElement>(null);
+    const canvasBRef = useRef<HTMLCanvasElement>(null);
+    const textLayerRef = useRef<HTMLDivElement>(null);
+    const renderTaskRef = useRef<any>(null);
+
+    useEffect(() => {
+        const render = async () => {
+            const targetId = renderTarget.activeCanvas === 'A' ? 'B' : 'A';
+            const targetCanvas = targetId === 'A' ? canvasARef.current : canvasBRef.current;
+            if (!pdfDoc || !targetCanvas || !textLayerRef.current || !pdfjsLib) return;
+
+            if (renderTaskRef.current) {
+                renderTaskRef.current.cancel();
+            }
+
+            try {
+                const page = await pdfDoc.getPage(pageNum);
+                const pixelRatio = window.devicePixelRatio || 1;
+                const viewport = page.getViewport({ scale: renderScale * pixelRatio });
+                const cssViewport = page.getViewport({ scale: renderScale });
+
+                targetCanvas.height = viewport.height;
+                targetCanvas.width = viewport.width;
+                targetCanvas.style.width = `${cssViewport.width}px`;
+                targetCanvas.style.height = `${cssViewport.height}px`;
+
+                const context = targetCanvas.getContext('2d', { alpha: false });
+                if (!context) return;
+
+                renderTaskRef.current = page.render({
+                    canvasContext: context,
+                    viewport: viewport,
+                });
+
+                await renderTaskRef.current.promise;
+
+                setRenderTarget({
+                    activeCanvas: targetId,
+                    renderedScale: renderScale
+                });
+
+                textLayerRef.current.innerHTML = '';
+                const textContent = await page.getTextContent();
+                await pdfjsLib.renderTextLayer({
+                    textContent: textContent,
+                    container: textLayerRef.current,
+                    viewport: cssViewport,
+                    textDivs: []
+                }).promise;
+
+                if (searchQuery.trim()) {
+                    const spans = textLayerRef.current.querySelectorAll('span');
+                    const query = searchQuery.toLowerCase();
+                    spans.forEach(span => {
+                        if (span.textContent?.toLowerCase().includes(query)) {
+                            span.classList.add('search-match');
+                        }
+                    });
+                }
+            } catch (err: any) {
+                if (err.name !== 'RenderingCancelledException') {
+                    console.error('Page render error:', err);
+                }
+            }
+        };
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    render();
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        if (containerRef.current) observer.observe(containerRef.current);
+
+        return () => {
+            observer.disconnect();
+            if (renderTaskRef.current) renderTaskRef.current.cancel();
+        };
+    }, [renderScale, pageNum, pdfDoc, pdfjsLib]); // searchQuery removed from deps to prevent re-render while typing
+
+    const currentScaleFactor = renderTarget.renderedScale > 0 ? scale / renderTarget.renderedScale : 1;
+
+    return (
+        <div
+            ref={containerRef}
+            data-page={pageNum}
+            className="relative mb-12 bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top select-none border border-white/5 overflow-visible"
+            style={{
+                width: 'fit-content',
+                minHeight: '400px',
+                transform: `scale(${currentScaleFactor}) translateZ(0)`,
+                willChange: 'transform'
+            }}
+        >
+            <canvas
+                ref={canvasARef}
+                className={`block rounded-md shadow-inner transition-opacity duration-300 ${renderTarget.activeCanvas === 'A' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
+                style={{ backfaceVisibility: 'hidden', pointerEvents: 'none' }}
+            />
+            <canvas
+                ref={canvasBRef}
+                className={`block rounded-md shadow-inner transition-opacity duration-300 ${renderTarget.activeCanvas === 'B' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
+                style={{ backfaceVisibility: 'hidden', pointerEvents: 'none' }}
+            />
+
+            <div ref={textLayerRef} className="textLayer absolute inset-0 opacity-20 pointer-events-none select-text z-20" />
+
+            {/* Dynamic Watermark */}
+            <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
+                {Array.from({ length: 9 }).map((_, i) => (
+                    <span key={i} className="text-[35px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-black tracking-widest">
+                        {userProfile?.username || 'LPU NEXUS'}
+                    </span>
+                ))}
+            </div>
+        </div>
+    );
+});
+
 const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfile }) => {
     const [numPages, setNumPages] = useState<number>(0);
     const [currentPage, setCurrentPage] = useState(1);
@@ -333,148 +471,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         }
     };
 
-    // Page Renderer Component
-    const PageRenderer: React.FC<{ pageNum: number }> = ({ pageNum }) => {
-        const containerRef = useRef<HTMLDivElement>(null);
-        const [renderTarget, setRenderTarget] = useState<{
-            activeCanvas: 'A' | 'B';
-            renderedScale: number;
-        }>({ activeCanvas: 'A', renderedScale: 0 });
-
-        const canvasARef = useRef<HTMLCanvasElement>(null);
-        const canvasBRef = useRef<HTMLCanvasElement>(null);
-        const textLayerRef = useRef<HTMLDivElement>(null);
-        const renderTaskRef = useRef<any>(null);
-
-        useEffect(() => {
-            const render = async () => {
-                const targetId = renderTarget.activeCanvas === 'A' ? 'B' : 'A';
-                const targetCanvas = targetId === 'A' ? canvasARef.current : canvasBRef.current;
-                if (!pdfDocRef.current || !targetCanvas || !textLayerRef.current) return;
-
-                if (renderTaskRef.current) {
-                    renderTaskRef.current.cancel();
-                }
-
-                try {
-                    const page = await pdfDocRef.current.getPage(pageNum);
-                    const pixelRatio = window.devicePixelRatio || 1;
-                    const viewport = page.getViewport({ scale: renderScale * pixelRatio });
-                    const cssViewport = page.getViewport({ scale: renderScale });
-
-                    targetCanvas.height = viewport.height;
-                    targetCanvas.width = viewport.width;
-                    targetCanvas.style.width = `${cssViewport.width}px`;
-                    targetCanvas.style.height = `${cssViewport.height}px`;
-
-                    const context = targetCanvas.getContext('2d', { alpha: false });
-                    if (!context) return;
-
-                    renderTaskRef.current = page.render({
-                        canvasContext: context,
-                        viewport: viewport,
-                    });
-
-                    await renderTaskRef.current.promise;
-
-                    // Atomic Swap: Change active canvas and its associated scale in one state update
-                    setRenderTarget({
-                        activeCanvas: targetId,
-                        renderedScale: renderScale
-                    });
-
-                    // Update scale tracking reference
-                    if (renderTarget.renderedScale === 0) {
-                        // Initial render - update first visible canvas width for parent container
-                        // This helps CSS 'fit-content' calculate correctly initially
-                    }
-
-                    // Render Text Layer
-                    textLayerRef.current.innerHTML = '';
-                    const textContent = await page.getTextContent();
-                    await pdfjsLibRef.current.renderTextLayer({
-                        textContent: textContent,
-                        container: textLayerRef.current,
-                        viewport: cssViewport,
-                        textDivs: []
-                    }).promise;
-
-                    if (searchQuery.trim()) {
-                        const spans = textLayerRef.current.querySelectorAll('span');
-                        const query = searchQuery.toLowerCase();
-                        spans.forEach(span => {
-                            if (span.textContent?.toLowerCase().includes(query)) {
-                                span.classList.add('search-match');
-                            }
-                        });
-                    }
-                } catch (err: any) {
-                    if (err.name !== 'RenderingCancelledException') {
-                        console.error('Page render error:', err);
-                    }
-                }
-            };
-
-            const observer = new IntersectionObserver(
-                (entries) => {
-                    if (entries[0].isIntersecting) {
-                        render();
-                    }
-                },
-                { threshold: 0.1 }
-            );
-
-            if (containerRef.current) observer.observe(containerRef.current);
-
-            return () => {
-                observer.disconnect();
-                if (renderTaskRef.current) renderTaskRef.current.cancel();
-            };
-        }, [renderScale, pageNum]);
-
-        const currentScaleFactor = renderTarget.renderedScale > 0 ? scale / renderTarget.renderedScale : 1;
-
-        return (
-            <div
-                ref={el => {
-                    pageRefs.current[pageNum] = el;
-                    if (el) (containerRef as any).current = el;
-                }}
-                data-page={pageNum}
-                className="relative mb-12 bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top select-none border border-white/5 overflow-visible"
-                style={{
-                    width: 'fit-content',
-                    minHeight: '400px',
-                    transform: `scale(${currentScaleFactor}) translateZ(0)`,
-                    willChange: 'transform'
-                }}
-            >
-                {/* Instant Swap Canvases (Zero Transition) */}
-                <canvas
-                    ref={canvasARef}
-                    className={`block rounded-md shadow-inner ${renderTarget.activeCanvas === 'A' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
-                    style={{ backfaceVisibility: 'hidden', pointerEvents: 'none' }}
-                />
-                <canvas
-                    ref={canvasBRef}
-                    className={`block rounded-md shadow-inner ${renderTarget.activeCanvas === 'B' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
-                    style={{ backfaceVisibility: 'hidden', pointerEvents: 'none' }}
-                />
-
-                <div ref={textLayerRef} className="textLayer absolute inset-0 opacity-20 pointer-events-none select-text z-20" />
-
-                {/* Dynamic Watermark */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
-                    {Array.from({ length: 9 }).map((_, i) => (
-                        <span key={i} className="text-[35px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-black tracking-widest">
-                            {userProfile?.username || 'LPU NEXUS'}
-                        </span>
-                    ))}
-                </div>
-            </div>
-        );
-    };
-
     // Thumbnail Renderer Removed
 
     if (error) {
@@ -615,7 +611,16 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     ) : (
                         <div className="flex flex-col items-center w-full">
                             {Array.from({ length: numPages }).map((_, i) => (
-                                <PageRenderer key={i} pageNum={i + 1} />
+                                <PageRenderer
+                                    key={i}
+                                    pageNum={i + 1}
+                                    pdfDoc={pdfDocRef.current}
+                                    renderScale={renderScale}
+                                    scale={scale}
+                                    userProfile={userProfile}
+                                    searchQuery={searchQuery}
+                                    pdfjsLib={pdfjsLibRef.current}
+                                />
                             ))}
                         </div>
                     )}
