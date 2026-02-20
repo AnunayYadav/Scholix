@@ -336,16 +336,20 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     // Page Renderer Component
     const PageRenderer: React.FC<{ pageNum: number }> = ({ pageNum }) => {
         const containerRef = useRef<HTMLDivElement>(null);
-        const [activeCanvas, setActiveCanvas] = useState<'A' | 'B'>('A');
+        const [renderTarget, setRenderTarget] = useState<{
+            activeCanvas: 'A' | 'B';
+            renderedScale: number;
+        }>({ activeCanvas: 'A', renderedScale: 0 });
+
         const canvasARef = useRef<HTMLCanvasElement>(null);
         const canvasBRef = useRef<HTMLCanvasElement>(null);
         const textLayerRef = useRef<HTMLDivElement>(null);
-        const [renderedScale, setRenderedScale] = useState(0);
         const renderTaskRef = useRef<any>(null);
 
         useEffect(() => {
             const render = async () => {
-                const targetCanvas = activeCanvas === 'A' ? canvasBRef.current : canvasARef.current;
+                const targetId = renderTarget.activeCanvas === 'A' ? 'B' : 'A';
+                const targetCanvas = targetId === 'A' ? canvasARef.current : canvasBRef.current;
                 if (!pdfDocRef.current || !targetCanvas || !textLayerRef.current) return;
 
                 if (renderTaskRef.current) {
@@ -373,9 +377,17 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
                     await renderTaskRef.current.promise;
 
-                    // Swap visible canvas AFTER render is complete
-                    setActiveCanvas(prev => prev === 'A' ? 'B' : 'A');
-                    setRenderedScale(renderScale);
+                    // Atomic Swap: Change active canvas and its associated scale in one state update
+                    setRenderTarget({
+                        activeCanvas: targetId,
+                        renderedScale: renderScale
+                    });
+
+                    // Update scale tracking reference
+                    if (renderTarget.renderedScale === 0) {
+                        // Initial render - update first visible canvas width for parent container
+                        // This helps CSS 'fit-content' calculate correctly initially
+                    }
 
                     // Render Text Layer
                     textLayerRef.current.innerHTML = '';
@@ -420,30 +432,33 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             };
         }, [renderScale, pageNum]);
 
-        const currentScaleFactor = renderedScale > 0 ? scale / renderedScale : 1;
+        const currentScaleFactor = renderTarget.renderedScale > 0 ? scale / renderTarget.renderedScale : 1;
 
         return (
             <div
                 ref={el => {
                     pageRefs.current[pageNum] = el;
-                    (containerRef as any).current = el;
+                    if (el) (containerRef as any).current = el;
                 }}
                 data-page={pageNum}
-                className="relative mb-12 bg-white shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md transition-all duration-300 ease-out origin-top border border-white/5"
+                className="relative mb-12 bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top select-none border border-white/5 overflow-visible"
                 style={{
                     width: 'fit-content',
                     minHeight: '400px',
-                    transform: `scale(${currentScaleFactor})`,
+                    transform: `scale(${currentScaleFactor}) translateZ(0)`,
+                    willChange: 'transform'
                 }}
             >
-                {/* Dual Canvas for Zero-Blink Rendering */}
+                {/* Instant Swap Canvases (Zero Transition) */}
                 <canvas
                     ref={canvasARef}
-                    className={`block rounded-md shadow-inner transition-opacity duration-300 ${activeCanvas === 'A' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
+                    className={`block rounded-md shadow-inner ${renderTarget.activeCanvas === 'A' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
+                    style={{ backfaceVisibility: 'hidden', pointerEvents: 'none' }}
                 />
                 <canvas
                     ref={canvasBRef}
-                    className={`block rounded-md shadow-inner transition-opacity duration-300 ${activeCanvas === 'B' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
+                    className={`block rounded-md shadow-inner ${renderTarget.activeCanvas === 'B' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
+                    style={{ backfaceVisibility: 'hidden', pointerEvents: 'none' }}
                 />
 
                 <div ref={textLayerRef} className="textLayer absolute inset-0 opacity-20 pointer-events-none select-text z-20" />
