@@ -335,57 +335,58 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
     // Page Renderer Component
     const PageRenderer: React.FC<{ pageNum: number }> = ({ pageNum }) => {
-        const canvasRef = useRef<HTMLCanvasElement>(null);
+        const containerRef = useRef<HTMLDivElement>(null);
+        const [activeCanvas, setActiveCanvas] = useState<'A' | 'B'>('A');
+        const canvasARef = useRef<HTMLCanvasElement>(null);
+        const canvasBRef = useRef<HTMLCanvasElement>(null);
         const textLayerRef = useRef<HTMLDivElement>(null);
-        const [isRendered, setIsRendered] = useState(false);
+        const [renderedScale, setRenderedScale] = useState(0);
         const renderTaskRef = useRef<any>(null);
 
         useEffect(() => {
             const render = async () => {
-                if (!pdfDocRef.current || !canvasRef.current || !textLayerRef.current) return;
+                const targetCanvas = activeCanvas === 'A' ? canvasBRef.current : canvasARef.current;
+                if (!pdfDocRef.current || !targetCanvas || !textLayerRef.current) return;
 
-                // Cleanup previous task if it exists
                 if (renderTaskRef.current) {
                     renderTaskRef.current.cancel();
                 }
 
                 try {
                     const page = await pdfDocRef.current.getPage(pageNum);
-                    const viewport = page.getViewport({ scale: renderScale * (window.devicePixelRatio || 1) });
+                    const pixelRatio = window.devicePixelRatio || 1;
+                    const viewport = page.getViewport({ scale: renderScale * pixelRatio });
                     const cssViewport = page.getViewport({ scale: renderScale });
 
-                    const canvas = canvasRef.current;
-                    const context = canvas.getContext('2d');
+                    targetCanvas.height = viewport.height;
+                    targetCanvas.width = viewport.width;
+                    targetCanvas.style.width = `${cssViewport.width}px`;
+                    targetCanvas.style.height = `${cssViewport.height}px`;
+
+                    const context = targetCanvas.getContext('2d', { alpha: false });
                     if (!context) return;
 
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-                    canvas.style.width = `${cssViewport.width}px`;
-                    canvas.style.height = `${cssViewport.height}px`;
-
-                    const renderContext = {
+                    renderTaskRef.current = page.render({
                         canvasContext: context,
                         viewport: viewport,
-                    };
+                    });
 
-                    renderTaskRef.current = page.render(renderContext);
                     await renderTaskRef.current.promise;
-                    setIsRendered(true);
 
-                    // Render Text Layer for selection and search
+                    // Swap visible canvas AFTER render is complete
+                    setActiveCanvas(prev => prev === 'A' ? 'B' : 'A');
+                    setRenderedScale(renderScale);
+
+                    // Render Text Layer
                     textLayerRef.current.innerHTML = '';
                     const textContent = await page.getTextContent();
-
-                    const textLayerTask = pdfjsLibRef.current.renderTextLayer({
+                    await pdfjsLibRef.current.renderTextLayer({
                         textContent: textContent,
                         container: textLayerRef.current,
                         viewport: cssViewport,
                         textDivs: []
-                    });
+                    }).promise;
 
-                    await textLayerTask.promise;
-
-                    // After text layer is rendered, if there's a search query, highlight it
                     if (searchQuery.trim()) {
                         const spans = textLayerRef.current.querySelectorAll('span');
                         const query = searchQuery.toLowerCase();
@@ -395,8 +396,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                             }
                         });
                     }
-
-                    setIsRendered(true);
                 } catch (err: any) {
                     if (err.name !== 'RenderingCancelledException') {
                         console.error('Page render error:', err);
@@ -408,39 +407,49 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 (entries) => {
                     if (entries[0].isIntersecting) {
                         render();
-                    } else if (isRendered) {
-                        // Optional: Clear canvas to save memory if needed
-                        // setIsRendered(false);
                     }
                 },
-                { threshold: 0.1, root: containerRef.current }
+                { threshold: 0.1 }
             );
 
-            const currentRef = pageRefs.current[pageNum];
-            if (currentRef instanceof Element) observer.observe(currentRef);
+            if (containerRef.current) observer.observe(containerRef.current);
 
             return () => {
                 observer.disconnect();
                 if (renderTaskRef.current) renderTaskRef.current.cancel();
             };
-        }, [renderScale, pageNum]); // Only re-render expensive canvas on renderScale change
+        }, [renderScale, pageNum]);
+
+        const currentScaleFactor = renderedScale > 0 ? scale / renderedScale : 1;
 
         return (
             <div
-                ref={el => pageRefs.current[pageNum] = el}
+                ref={el => {
+                    pageRefs.current[pageNum] = el;
+                    (containerRef as any).current = el;
+                }}
                 data-page={pageNum}
-                className="relative mb-12 bg-white shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md transition-all duration-500 ease-out origin-top border border-white/5"
+                className="relative mb-12 bg-white shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md transition-all duration-300 ease-out origin-top border border-white/5"
                 style={{
                     width: 'fit-content',
                     minHeight: '400px',
-                    transform: `scale(${scale / renderScale})`, // Smooth CSS zoom
+                    transform: `scale(${currentScaleFactor})`,
                 }}
             >
-                <canvas ref={canvasRef} className="block rounded-md shadow-inner" />
-                <div ref={textLayerRef} className="textLayer absolute inset-0 opacity-20 pointer-events-none select-text" />
+                {/* Dual Canvas for Zero-Blink Rendering */}
+                <canvas
+                    ref={canvasARef}
+                    className={`block rounded-md shadow-inner transition-opacity duration-300 ${activeCanvas === 'A' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
+                />
+                <canvas
+                    ref={canvasBRef}
+                    className={`block rounded-md shadow-inner transition-opacity duration-300 ${activeCanvas === 'B' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
+                />
+
+                <div ref={textLayerRef} className="textLayer absolute inset-0 opacity-20 pointer-events-none select-text z-20" />
 
                 {/* Dynamic Watermark */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center overflow-hidden flex-wrap select-none p-10">
+                <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
                     {Array.from({ length: 9 }).map((_, i) => (
                         <span key={i} className="text-[35px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-black tracking-widest">
                             {userProfile?.username || 'LPU NEXUS'}
