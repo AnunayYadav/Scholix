@@ -159,6 +159,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const [scale, setScale] = useState(1.0);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [pdfDoc, setPdfDoc] = useState<any>(null);
+    const [pdfjsLibState, setPdfjsLibState] = useState<any>(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [renderScale, setRenderScale] = useState(scale);
 
@@ -182,7 +184,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const pdfDocRef = useRef<any>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-    const pdfjsLibRef = useRef<any>(null);
 
     // Track visible pages for current page indicator
     const visiblePages = useRef<Set<number>>(new Set());
@@ -207,13 +208,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         const initPdf = async () => {
             const pdfjsLib = (window as any).pdfjsLib;
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-            pdfjsLibRef.current = pdfjsLib;
+            setPdfjsLibState(pdfjsLib);
 
             try {
                 setIsLoading(true);
                 const loadingTask = pdfjsLib.getDocument(url);
                 const pdf = await loadingTask.promise;
                 pdfDocRef.current = pdf;
+                setPdfDoc(pdf);
                 setNumPages(pdf.numPages);
 
                 // Get first page to calculate initial scale
@@ -292,6 +294,27 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         }, 300);
         return () => clearTimeout(timer);
     }, [scale]);
+
+    // Trackpad / Wheel Support
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const handleWheel = (e: WheelEvent) => {
+            if (e.ctrlKey) {
+                // Pinch to zoom or Ctrl+Wheel
+                e.preventDefault();
+                setScale(prev => {
+                    const delta = -e.deltaY * 0.005; // Finer control for trackpad
+                    const next = prev + delta;
+                    return Math.min(Math.max(0.3, next), 4);
+                });
+            }
+        };
+
+        container.addEventListener('wheel', handleWheel, { passive: false });
+        return () => container.removeEventListener('wheel', handleWheel);
+    }, []);
 
     // Gesture Handlers
     const handleTouchStart = (e: React.TouchEvent) => {
@@ -614,12 +637,12 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                                 <PageRenderer
                                     key={i}
                                     pageNum={i + 1}
-                                    pdfDoc={pdfDocRef.current}
+                                    pdfDoc={pdfDoc}
                                     renderScale={renderScale}
                                     scale={scale}
                                     userProfile={userProfile}
                                     searchQuery={searchQuery}
-                                    pdfjsLib={pdfjsLibRef.current}
+                                    pdfjsLib={pdfjsLibState}
                                 />
                             ))}
                         </div>
