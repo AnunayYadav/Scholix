@@ -184,6 +184,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const [currentSearchIndex, setCurrentSearchIndex] = useState(-1);
     const [isSearching, setIsSearching] = useState(false);
+    const [viewMode, setViewMode] = useState<'width' | 'page'>('width');
 
     const pdfDocRef = useRef<any>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -296,6 +297,27 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         const padding = window.innerWidth < 768 ? 20 : 120; // More padding for desktop centering
         const newScale = (containerWidth - padding) / originalViewport.width;
         setScale(newScale);
+        setViewMode('page'); // Next click will fit to page
+    };
+
+    const fitToPage = async () => {
+        if (!pdfDocRef.current) return;
+        const page = await pdfDocRef.current.getPage(1);
+        const originalViewport = page.getViewport({ scale: 1.0 });
+        const containerHeight = containerRef.current?.clientHeight || window.innerHeight;
+        // Subtract toolbar (80px) and padding (80px)
+        const availableHeight = containerHeight - 160;
+        const newScale = availableHeight / originalViewport.height;
+        setScale(newScale);
+        setViewMode('width'); // Next click will fit to width
+    };
+
+    const toggleFit = () => {
+        if (viewMode === 'width') {
+            fitToWidth();
+        } else {
+            fitToPage();
+        }
     };
 
     // Debounce scale updates for high-quality render to prevent flicker
@@ -579,11 +601,24 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                         </button>
                         <button
-                            onClick={fitToWidth}
+                            onClick={toggleFit}
                             className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 text-white/40 hover:text-white hover:bg-orange-600 transition-all border-none"
-                            title="Fit to Width"
+                            title={viewMode === 'width' ? "Fit to Width" : "Fit to Page"}
                         >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M4 12V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8" /><path d="m15 15 3 3-3 3" /><path d="m9 15-3 3 3 3" /></svg>
+                            {viewMode === 'width' ? (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5">
+                                    <path d="M4 12V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8" />
+                                    <path d="m15 15 3 3-3 3" />
+                                    <path d="m9 15-3 3 3 3" />
+                                </svg>
+                            ) : (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5">
+                                    <path d="M12 4h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-8" />
+                                    <path d="m9 15-3 3 3 3" />
+                                    <path d="m15 9 3-3-3-3" />
+                                    <line x1="12" y1="2" x2="12" y2="22" />
+                                </svg>
+                            )}
                         </button>
                     </div>
                 </div>
