@@ -36,6 +36,7 @@ const PageRenderer = React.memo<{
     const canvasBRef = useRef<HTMLCanvasElement>(null);
     const textLayerRef = useRef<HTMLDivElement>(null);
     const renderTaskRef = useRef<any>(null);
+    const [pageInfo, setPageInfo] = useState<{ width: number; height: number } | null>(null);
 
     useEffect(() => {
         const render = async () => {
@@ -50,6 +51,9 @@ const PageRenderer = React.memo<{
             try {
                 const page = await pdfDoc.getPage(pageNum);
                 const pixelRatio = window.devicePixelRatio || 1;
+                const baseViewport = page.getViewport({ scale: 1.0 });
+                setPageInfo({ width: baseViewport.width, height: baseViewport.height });
+
                 const viewport = page.getViewport({ scale: renderScale * pixelRatio });
                 const cssViewport = page.getViewport({ scale: renderScale });
 
@@ -124,34 +128,41 @@ const PageRenderer = React.memo<{
                 registerRef(pageNum, el);
             }}
             data-page={pageNum}
-            className="relative mb-12 bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top select-none border border-white/5 overflow-visible snap-start snap-always"
+            className="relative mb-6 bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top-left select-none border border-white/5 overflow-visible snap-start snap-always"
             style={{
-                width: 'fit-content',
-                minHeight: '400px',
-                transform: `scale(${currentScaleFactor}) translateZ(0)`,
+                width: pageInfo ? `${pageInfo.width * scale}px` : 'fit-content',
+                height: pageInfo ? `${pageInfo.height * scale}px` : '400px',
                 willChange: 'transform'
             }}
         >
-            <canvas
-                ref={canvasARef}
-                className={`block rounded-md shadow-inner ${renderTarget.activeCanvas === 'A' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
-                style={{ backfaceVisibility: 'hidden', pointerEvents: 'none' }}
-            />
-            <canvas
-                ref={canvasBRef}
-                className={`block rounded-md shadow-inner ${renderTarget.activeCanvas === 'B' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
-                style={{ backfaceVisibility: 'hidden', pointerEvents: 'none' }}
-            />
+            <div
+                style={{
+                    transform: `scale(${currentScaleFactor}) translateZ(0)`,
+                    transformOrigin: 'top left',
+                    width: 'fit-content'
+                }}
+            >
+                <canvas
+                    ref={canvasARef}
+                    className={`block rounded-md shadow-inner ${renderTarget.activeCanvas === 'A' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
+                    style={{ backfaceVisibility: 'hidden', pointerEvents: 'none' }}
+                />
+                <canvas
+                    ref={canvasBRef}
+                    className={`block rounded-md shadow-inner ${renderTarget.activeCanvas === 'B' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
+                    style={{ backfaceVisibility: 'hidden', pointerEvents: 'none' }}
+                />
 
-            <div ref={textLayerRef} className="textLayer absolute inset-0 opacity-20 pointer-events-none select-text z-20" />
+                <div ref={textLayerRef} className="textLayer absolute inset-0 opacity-20 pointer-events-none select-text z-20" />
 
-            {/* Dynamic Watermark */}
-            <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
-                {Array.from({ length: 9 }).map((_, i) => (
-                    <span key={i} className="text-[35px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-black tracking-widest">
-                        {userProfile?.username || 'LPU NEXUS'}
-                    </span>
-                ))}
+                {/* Dynamic Watermark */}
+                <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
+                    {Array.from({ length: 9 }).map((_, i) => (
+                        <span key={i} className="text-[35px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-black tracking-widest">
+                            {userProfile?.username || 'LPU NEXUS'}
+                        </span>
+                    ))}
+                </div>
             </div>
         </div>
     );
