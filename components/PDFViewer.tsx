@@ -134,12 +134,12 @@ const PageRenderer = React.memo<{
         >
             <canvas
                 ref={canvasARef}
-                className={`block rounded-md shadow-inner transition-opacity duration-300 ${renderTarget.activeCanvas === 'A' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
+                className={`block rounded-md shadow-inner ${renderTarget.activeCanvas === 'A' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
                 style={{ backfaceVisibility: 'hidden', pointerEvents: 'none' }}
             />
             <canvas
                 ref={canvasBRef}
-                className={`block rounded-md shadow-inner transition-opacity duration-300 ${renderTarget.activeCanvas === 'B' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
+                className={`block rounded-md shadow-inner ${renderTarget.activeCanvas === 'B' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
                 style={{ backfaceVisibility: 'hidden', pointerEvents: 'none' }}
             />
 
@@ -394,17 +394,17 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     setCurrentPage(sorted[0]);
                 }
             },
-            { threshold: 0.2, root: containerRef.current }
+            { threshold: 0.1 } // More lenient threshold for better tracking
         );
 
         // Clear existing observations
         const currentRefs = pageRefs.current;
         Object.values(currentRefs).forEach(ref => {
-            if (ref) observer.observe(ref);
+            if (ref) observer.observe(ref as Element);
         });
 
         return () => observer.disconnect();
-    }, [numPages, isLoading, pdfDoc]); // Added pdfDoc to deps to re-observe when pages mount
+    }, [numPages, isLoading, pdfDoc, scale]); // Added scale to re-calculate when zoomed
 
     const jumpToPage = (pageNum: number) => {
         const target = pageRefs.current[pageNum];
@@ -631,7 +631,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    className="flex-1 overflow-auto bg-[#0a0a0a] relative no-scrollbar flex flex-col items-center py-12 px-4 md:px-0 select-none scroll-smooth touch-pan-y snap-y snap-proximity"
+                    className="flex-1 overflow-y-auto overflow-x-hidden bg-[#0a0a0a] relative flex flex-col items-center py-12 px-4 md:px-0 select-none scroll-smooth touch-pan-y"
                     style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                     {isLoading ? (
