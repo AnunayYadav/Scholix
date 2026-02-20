@@ -799,6 +799,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         <PDFViewer
           url={viewerInfo.url}
           fileName={viewerInfo.name}
+          userProfile={userProfile}
           onClose={() => setViewerInfo({ show: false, url: '', name: '' })}
         />
       )}
