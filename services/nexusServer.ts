@@ -408,22 +408,16 @@ class NexusServer {
   }
 
   static async reorderFiles(fileOrders: { id: string, order: number }[]) {
-    try {
-      const client = getSupabase();
-      if (!client) return;
+    const client = getSupabase();
+    if (!client) return;
 
-      const updates = fileOrders.map(item =>
-        client.from('documents').update({ display_order: item.order }).eq('id', item.id)
-      );
+    const updates = fileOrders.map(item =>
+      client.from('documents').update({ display_order: item.order }).eq('id', item.id)
+    );
 
-      const results = await Promise.all(updates);
-      const firstError = results.find(r => r.error);
-      if (firstError) {
-        console.warn("Reorder failed (likely missing column):", firstError.error);
-      }
-    } catch (e) {
-      console.warn("Reorder exception:", e);
-    }
+    const results = await Promise.all(updates);
+    const firstError = results.find(r => r.error);
+    if (firstError) throw firstError.error;
   }
 
 }
