@@ -284,21 +284,20 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
     if (oldIndex === -1 || newIndex === -1) return;
 
-    const updatedFiles = arrayMove(allFiles, oldIndex, newIndex);
+    const movedFiles = arrayMove(allFiles, oldIndex, newIndex);
+
+    // Update the objects themselves so the sort useMemo doesn't fight the change
+    const updatedFiles = movedFiles.map((f: LibraryFile, index: number) => ({
+      ...f,
+      display_order: index
+    }));
 
     // Update local state for immediate feedback
     setAllFiles(updatedFiles);
 
     // Persist to DB
     try {
-      const fileOrders = updatedFiles
-        .filter(f => {
-          // Only update files in the current view/context to keep it efficient
-          // Or just update all for simplicity since we have updatedFiles here
-          return true;
-        })
-        .map((f, index) => ({ id: f.id, order: index }));
-
+      const fileOrders = updatedFiles.map((f, index) => ({ id: f.id, order: index }));
       await NexusServer.reorderFiles(fileOrders);
       showToast("Order synchronized", "success");
     } catch (e: any) {
