@@ -120,6 +120,7 @@ export interface LibraryFile {
   admin_notes?: string;
   isUserUploaded?: boolean;
   program: string;
+  display_order?: number;
   pending_update?: {
     name: string;
     description: string;
