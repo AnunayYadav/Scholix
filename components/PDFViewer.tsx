@@ -157,10 +157,10 @@ const PageRenderer = React.memo<{
                 <div ref={textLayerRef} className="textLayer absolute inset-0 opacity-20 pointer-events-none select-text z-20" />
 
                 {/* Dynamic Watermark */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
+                <div className="absolute inset-0 pointer-events-none opacity-[0.06] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
                     {Array.from({ length: 9 }).map((_, i) => (
                         <span key={i} className="text-[35px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-black tracking-widest">
-                            {userProfile?.username || 'LPU NEXUS'}
+                            LPU NEXUS
                         </span>
                     ))}
                 </div>
