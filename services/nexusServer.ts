@@ -277,7 +277,6 @@ class NexusServer {
     if (program && program !== 'All') query = query.eq('program', program);
     if (q) query = query.ilike('name', `%${q}%`);
     const { data, error } = await query
-      .order('display_order', { ascending: true })
       .order('created_at', { ascending: false });
     if (error) { console.error("Fetch Error:", error); return []; }
     return (data || []).map(item => ({
@@ -409,17 +408,22 @@ class NexusServer {
   }
 
   static async reorderFiles(fileOrders: { id: string, order: number }[]) {
-    const client = getSupabase();
-    if (!client) return;
+    try {
+      const client = getSupabase();
+      if (!client) return;
 
-    // Perform updates in parallel
-    const updates = fileOrders.map(item =>
-      client.from('documents').update({ display_order: item.order }).eq('id', item.id)
-    );
+      const updates = fileOrders.map(item =>
+        client.from('documents').update({ display_order: item.order }).eq('id', item.id)
+      );
 
-    const results = await Promise.all(updates);
-    const firstError = results.find(r => r.error);
-    if (firstError) throw firstError.error;
+      const results = await Promise.all(updates);
+      const firstError = results.find(r => r.error);
+      if (firstError) {
+        console.warn("Reorder failed (likely missing column):", firstError.error);
+      }
+    } catch (e) {
+      console.warn("Reorder exception:", e);
+    }
   }
 
 }

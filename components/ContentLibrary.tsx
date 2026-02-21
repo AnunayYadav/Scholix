@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { LibraryFile, UserProfile, Folder } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import PDFViewer from './PDFViewer.tsx';
@@ -572,27 +573,28 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 </div>
               </SortableContext>
 
-              <DragOverlay dropAnimation={{
-                sideEffects: defaultDropAnimationSideEffects({
-                  styles: {
-                    active: {
-                      opacity: '0.4',
+              {createPortal(
+                <DragOverlay dropAnimation={{
+                  sideEffects: defaultDropAnimationSideEffects({
+                    styles: {
+                      active: {
+                        opacity: '0.4',
+                      },
                     },
-                  },
-                }),
-              }}>
-                {activeId ? (
-                  <div className="scale-105 shadow-2xl opacity-90 transition-transform cursor-grabbing overflow-hidden rounded-[30px] border border-orange-500/50">
-                    <FileCard
-                      file={displayFiles.find(f => f.id === activeId)!}
-                      userProfile={userProfile}
-                      isAdminMode={isAdminView}
-                      onAccess={() => { }}
-                      onShowDetails={() => { }}
-                    />
-                  </div>
-                ) : null}
-              </DragOverlay>
+                  }),
+                }}>
+                  {activeId ? (
+                    <div className="scale-105 shadow-2xl opacity-90 cursor-grabbing overflow-hidden rounded-[30px] border border-orange-500/50 bg-white dark:bg-black w-[200px] md:w-[220px]">
+                      <StaticFileCard
+                        file={displayFiles.find(f => f.id === activeId)!}
+                        userProfile={userProfile}
+                        isAdminMode={isAdminView}
+                      />
+                    </div>
+                  ) : null}
+                </DragOverlay>,
+                document.body
+              )}
             </DndContext>
           </div>
         )}
@@ -1014,6 +1016,33 @@ const FileCard: React.FC<{
             <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="bg-slate-100 dark:bg-black text-orange-600 px-4 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-1.5 hover:bg-orange-600 hover:text-white transition-all shadow-md border-none">Access <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
           )}
         </div>
+      </div>
+    </div>
+  );
+};
+
+// Static version of FileCard for the Drag Overlay to avoid hook issues
+const StaticFileCard: React.FC<{
+  file: LibraryFile;
+  userProfile: UserProfile | null;
+  isAdminMode: boolean;
+}> = ({ file, userProfile, isAdminMode }) => {
+  const isAdmin = userProfile?.is_admin || false;
+  return (
+    <div className="p-5 rounded-[30px] border border-orange-500 bg-white dark:bg-black/60 flex flex-col min-h-[160px]">
+      <div className="flex items-start justify-between mb-2">
+        <div className="w-9 h-9 bg-slate-100 dark:bg-black rounded-xl flex items-center justify-center text-orange-500">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+        </div>
+        {isAdmin && (
+          <div className="p-2 -mr-2 text-orange-500">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="9" cy="5" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="9" cy="19" r="1" /><circle cx="15" cy="5" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="19" r="1" /></svg>
+          </div>
+        )}
+      </div>
+      <h3 className="text-[11px] md:text-[13px] font-black text-slate-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2 uppercase">{file.name}</h3>
+      <div className="pt-3 mt-auto border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+        <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{file.size}</span>
       </div>
     </div>
   );
