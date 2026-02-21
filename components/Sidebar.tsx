@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ModuleType, UserProfile } from '../types';
 import NexusServer from '../services/nexusServer.ts';
+import { showToast } from './Toast.tsx';
 
 interface SidebarProps {
   currentModule: ModuleType;
@@ -35,16 +36,19 @@ const Sidebar: React.FC<SidebarProps> = ({
     {
       id: ModuleType.DASHBOARD,
       label: 'Dashboard',
+      section: 'Core',
       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
     },
     {
       id: ModuleType.TIMETABLE,
       label: 'Timetable Hub',
+      section: 'Core',
       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
     },
     {
       id: ModuleType.QUIZ,
       label: 'Quiz Taker',
+      section: 'Academics',
       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="m9 12 2 2 4-4" /></svg>
     },
     {
@@ -60,6 +64,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     {
       id: ModuleType.PLACEMENT,
       label: 'Placement Prefect',
+      section: 'Resources',
       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
     },
     {
@@ -80,6 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     {
       id: ModuleType.HELP,
       label: 'Help & FAQ',
+      section: 'Support',
       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
     },
     {
@@ -98,7 +104,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       setFeedbackText("");
       setTimeout(() => { setSubmitSuccess(false); setShowFeedbackModal(false); }, 2000);
     } catch (e: any) {
-      alert(`Oops! Something went wrong: ${e.message}`);
+      showToast(`Oops! Something went wrong: ${e.message}`, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -187,26 +193,36 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                setModule(item.id);
-                if (window.innerWidth < 768) toggleMobileMenu();
-              }}
-              className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border-none text-left relative
-                ${currentModule === item.id
-                  ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
-                  : 'text-slate-600 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-slate-200'
-                }
-              `}
-            >
-              <div className="flex items-center space-x-3">
-                <span className="flex-shrink-0">{item.icon}</span>
-                <span className="font-bold text-sm tracking-tight">{item.label}</span>
-              </div>
-            </button>
-          ))}
+          {navItems.map((item, idx) => {
+            const prevSection = idx > 0 ? navItems[idx - 1].section : undefined;
+            const showSectionHeader = item.section && item.section !== prevSection;
+            return (
+              <React.Fragment key={item.id}>
+                {showSectionHeader && (
+                  <div className={`px-4 ${idx > 0 ? 'pt-4 mt-2 border-t border-slate-100 dark:border-white/5' : ''}`}>
+                    <span className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 dark:text-slate-600">{item.section}</span>
+                  </div>
+                )}
+                <button
+                  onClick={() => {
+                    setModule(item.id);
+                    if (window.innerWidth < 768) toggleMobileMenu();
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border-none text-left relative
+                    ${currentModule === item.id
+                      ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
+                      : 'text-slate-600 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-slate-200'
+                    }
+                  `}
+                >
+                  <div className="flex items-center space-x-3">
+                    <span className="flex-shrink-0">{item.icon}</span>
+                    <span className="font-bold text-sm tracking-tight">{item.label}</span>
+                  </div>
+                </button>
+              </React.Fragment>
+            );
+          })}
         </nav>
 
         <div className="p-6 border-t border-slate-200 dark:border-white/5 space-y-4">

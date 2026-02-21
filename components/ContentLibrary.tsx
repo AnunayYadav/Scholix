@@ -4,6 +4,7 @@ import { LibraryFile, UserProfile, Folder } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import PDFViewer from './PDFViewer.tsx';
 import NexusDropdown from './NexusDropdown.tsx';
+import { showToast, showConfirm } from './Toast.tsx';
 
 const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' | 'category' | 'root', size?: string }) => {
   const colors = {
@@ -269,7 +270,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       setNewFolderName('');
       setShowFolderModal(false);
       fetchFromSource(false);
-    } catch (e: any) { alert(e.message); } finally { setIsProcessing(false); }
+    } catch (e: any) { showToast(e.message, 'error'); } finally { setIsProcessing(false); }
   };
 
   const handleUpload = async () => {
@@ -299,7 +300,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       setPendingUploads([]);
       fetchFromSource(false);
     } catch (e: any) {
-      alert(`Upload failed: ${e.message}`);
+      showToast(`Upload failed: ${e.message}`, 'error');
     } finally {
       setIsProcessing(false);
     }
@@ -313,7 +314,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       setShowEditModal(false);
       setSelectedFile(null);
       fetchFromSource(false);
-    } catch (e: any) { alert(e.message); } finally { setIsProcessing(false); }
+    } catch (e: any) { showToast(e.message, 'error'); } finally { setIsProcessing(false); }
   };
 
   const handleRenameFolder = async () => {
@@ -325,18 +326,19 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       setFolderToManage(null);
       setShowRenameModal(false);
       fetchFromSource(false);
-    } catch (e: any) { alert(e.message); } finally { setIsProcessing(false); }
+    } catch (e: any) { showToast(e.message, 'error'); } finally { setIsProcessing(false); }
   };
 
   const handleDeleteFolder = async (folder: Folder, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!userProfile?.is_admin) return;
-    if (!confirm(`Permanently delete node "${folder.name}"?`)) return;
+    const confirmed = await showConfirm(`Permanently delete node "${folder.name}"?`);
+    if (!confirmed) return;
     setIsProcessing(true);
     try {
       await NexusServer.deleteFolder(folder.id);
       fetchFromSource(false);
-    } catch (e: any) { alert(e.message); } finally { setIsProcessing(false); }
+    } catch (e: any) { showToast(e.message, 'error'); } finally { setIsProcessing(false); }
   };
 
   const toggleAdminView = () => {
@@ -361,7 +363,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         window.open(url, '_blank');
       }
     } catch (e: any) {
-      alert("Error accessing file: " + e.message);
+      showToast("Error accessing file: " + e.message, 'error');
     }
   };
 
@@ -390,7 +392,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               </>
             )}
             <button onClick={() => { setViewMode(viewMode === 'browse' ? 'my-uploads' : 'browse'); navigateTo(null, null, null); setIsAdminView(false); }} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'my-uploads' ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-black text-slate-400'}`} title={viewMode === 'my-uploads' ? "Exit Vault" : "My Vault"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></button>
-            <button onClick={() => { if (!userProfile) { alert("Sign in required."); return; } fileInputRef.current?.click(); }} className="px-5 py-2 bg-orange-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-orange-600/20 border-none hover:scale-105 active:scale-95 transition-all flex items-center gap-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>Contribute {pendingUploads.length > 0 && `(${pendingUploads.length})`}</button>
+            <button onClick={() => { if (!userProfile) { showToast("Sign in required.", "info"); return; } fileInputRef.current?.click(); }} className="px-5 py-2 bg-orange-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-orange-600/20 border-none hover:scale-105 active:scale-95 transition-all flex items-center gap-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>Contribute {pendingUploads.length > 0 && `(${pendingUploads.length})`}</button>
           </div>
         </header>
 
@@ -467,15 +469,15 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     await NexusServer.approveFile(file.id);
                     fetchFromSource(false);
                   } catch (e: any) {
-                    alert("Approval error: " + e.message);
+                    showToast("Approval error: " + e.message, 'error');
                   } finally {
                     setIsProcessing(false);
                   }
                 }}
-                onReject={() => { if (confirm("Reject and remove this file?")) { setIsProcessing(true); NexusServer.rejectFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
-                onDemote={() => { if (confirm("Send this file back to pending review?")) { setIsProcessing(true); NexusServer.demoteFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
+                onReject={async () => { const confirmed = await showConfirm("Reject and remove this file?"); if (confirmed) { setIsProcessing(true); NexusServer.rejectFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
+                onDemote={async () => { const confirmed = await showConfirm("Send this file back to pending review?"); if (confirmed) { setIsProcessing(true); NexusServer.demoteFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
                 onEdit={() => { setSelectedFile(file); setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type }); setShowEditModal(true); }}
-                onDelete={() => { if (confirm("Permanently delete this file?")) { setIsProcessing(true); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
+                onDelete={async () => { const confirmed = await showConfirm("Permanently delete this file?"); if (confirmed) { setIsProcessing(true); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
                 onAccess={() => handleFileAccess(file)}
                 onShowDetails={() => { setSelectedFile(file); setShowDetailsModal(true); }}
               />

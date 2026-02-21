@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { UserProfile } from '../types.ts';
+import { showToast } from './Toast.tsx';
 
 interface PDFViewerProps {
     url: string;
@@ -449,7 +450,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const toggleFullscreen = () => {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => {
-                alert(`Error attempting to enable full-screen mode: ${err.message}`);
+                showToast(`Error attempting to enable full-screen mode: ${err.message}`, 'error');
             });
             setIsFullscreen(true);
         } else {
@@ -534,7 +535,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             link.click();
             link.remove();
         } catch (err) {
-            alert('Download failed. Protocol interrupted.');
+            showToast('Download failed. Protocol interrupted.', 'error');
         }
     };
 

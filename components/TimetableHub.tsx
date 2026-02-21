@@ -4,6 +4,7 @@ import { UserProfile, TimetableData, DaySchedule, TimetableSlot } from '../types
 import NexusServer from '../services/nexusServer.ts';
 import { extractTimetableFromImage } from '../services/geminiService.ts';
 import NexusDropdown from './NexusDropdown.tsx';
+import { showToast, showConfirm } from './Toast.tsx';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -288,10 +289,11 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     setNewName('');
   };
 
-  const handleRemoveFriend = (friendId: string, e: React.MouseEvent) => {
+  const handleRemoveFriend = async (friendId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (window.confirm("Remove this profile from your connections?")) {
+    const confirmed = await showConfirm("Remove this profile from your connections?");
+    if (confirmed) {
       setFriendTimetables(prev => prev.filter(f => f.ownerId !== friendId));
       if (selectedEntityId === friendId) {
         setSelectedEntityId('me');
@@ -337,7 +339,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       setShowUploadModal(false);
       setShowMetadataModal(true);
     } catch (err) {
-      alert("AI was unable to process those images. Please ensure they are clear screenshots from LPU Touch.");
+      showToast("AI was unable to process those images. Please ensure they are clear screenshots from LPU Touch.", "error");
     } finally {
       setIsProcessingAI(false);
       setProcessingStatus('');
@@ -348,7 +350,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
   const submitMetadata = async () => {
     const { section, branch, year, semester } = metadata;
     if (!section || !branch || !year || !semester) {
-      alert("Please fill all details to continue.");
+      showToast("Please fill all details to continue.", "info");
       return;
     }
 
@@ -371,7 +373,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
 
         setShowMetadataModal(false);
         setEditingPresetId(null);
-      } catch (e) { console.error(e); alert("Failed to update preset info."); }
+      } catch (e) { console.error(e); showToast("Failed to update preset info.", "error"); }
       return;
     }
 
@@ -528,11 +530,12 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
 
   const handleAdminDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm("Admin Action: Permanently delete this community preset?")) {
+    const confirmed = await showConfirm("Admin Action: Permanently delete this community preset?");
+    if (confirmed) {
       try {
         await NexusServer.deleteCommunityTimetable(id);
         loadCommunityPresets();
-      } catch (e) { alert("Delete failed."); }
+      } catch (e) { showToast("Delete failed.", "error"); }
     }
   };
 

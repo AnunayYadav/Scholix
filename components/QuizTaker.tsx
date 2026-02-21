@@ -4,6 +4,7 @@ import NexusServer from '../services/nexusServer.ts';
 import { generateQuizFromSyllabus } from '../services/geminiService.ts';
 import { extractTextFromPdf } from '../services/pdfUtils.ts';
 import jsPDF from 'jspdf';
+import { showToast } from './Toast.tsx';
 import html2canvas from 'html2canvas';
 
 // Static Bank - keeping this for fallback/demo
@@ -188,7 +189,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
       pdf.save(`${selectedSubject?.name || 'Quiz'}_Results.pdf`);
     } catch (e) {
-      alert("Could not generate PDF. Please try printing via browser.");
+      showToast("Could not generate PDF. Please try printing via browser.", "error");
     }
   };
 

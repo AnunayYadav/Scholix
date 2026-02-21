@@ -3,6 +3,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { UserProfile } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import NexusDropdown from './NexusDropdown.tsx';
+import { showToast, showConfirm } from './Toast.tsx';
 
 interface Course {
   id: string;
@@ -76,7 +77,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
 
   const saveSnapshot = async () => {
     if (!userProfile) {
-      alert("Please sign in to save reports to your vault.");
+      showToast("Please sign in to save reports to your vault.", "info");
       return;
     }
     setIsSaving(true);
@@ -86,9 +87,9 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
     try {
       await NexusServer.saveRecord(userProfile.id, 'cgpa_snapshot', `Saved: Sem ${currentSemester}`, content);
       await loadHistory();
-      alert("Report successfully archived in your vault.");
+      showToast("Report successfully archived in your vault.", "success");
     } catch (e) {
-      alert("Registry error: Failed to save snapshot.");
+      showToast("Registry error: Failed to save snapshot.", "error");
     } finally {
       setIsSaving(false);
     }
@@ -109,7 +110,8 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
   const deleteHistory = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!userProfile) return;
-    if (confirm("Delete this archive permanently?")) {
+    const confirmed = await showConfirm("Delete this archive permanently?");
+    if (confirmed) {
       await NexusServer.deleteRecord(id, 'cgpa_snapshot', userProfile.id);
       loadHistory();
     }

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { extractTextFromPdf } from '../services/pdfUtils';
 import { analyzeResume } from '../services/geminiService';
 import { ResumeAnalysisResult, UserProfile, AnnotatedFragment } from '../types';
+import { showToast, showConfirm } from './Toast.tsx';
 
 const IconFile = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-12 h-12 mx-auto mb-2 opacity-40">
@@ -176,12 +177,13 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
     const updated = [reportToSave, ...savedReports].slice(0, 10);
     setSavedReports(updated);
     localStorage.setItem('nexus_resume_reports', JSON.stringify(updated));
-    alert("Review saved to your history.");
+    showToast("Review saved to your history.", "success");
   };
 
-  const handleDeleteReport = (idx: number, e: React.MouseEvent) => {
+  const handleDeleteReport = async (idx: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!window.confirm("Delete this review?")) return;
+    const confirmed = await showConfirm("Delete this review?");
+    if (!confirmed) return;
     const updated = savedReports.filter((_, i) => i !== idx);
     setSavedReports(updated);
     localStorage.setItem('nexus_resume_reports', JSON.stringify(updated));

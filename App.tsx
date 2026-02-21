@@ -18,6 +18,7 @@ import { ModuleType, UserProfile } from './types.ts';
 import NexusServer from './services/nexusServer.ts';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { ToastContainer } from './components/Toast.tsx';
 
 const getModuleFromPath = (path: string): ModuleType => {
   const p = path.toLowerCase();
@@ -405,6 +406,7 @@ const AppContent: React.FC = () => {
       </main>
       <Analytics />
       <SpeedInsights />
+      <ToastContainer />
     </div>
   );
 };
