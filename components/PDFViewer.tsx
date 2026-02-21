@@ -678,7 +678,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    className="flex-1 overflow-y-auto overflow-x-auto bg-[#0a0a0a] relative flex flex-col items-center py-12 px-4 md:px-0 select-none scroll-smooth touch-pan-y"
+                    className="flex-1 overflow-y-auto overflow-x-auto bg-[#0a0a0a] relative flex flex-col items-center py-12 px-4 md:px-0 select-none scroll-smooth touch-auto"
                     style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                     {isLoading ? (
@@ -690,7 +690,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                             ))}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center w-full scroll-smooth">
+                        <div className="flex flex-col items-center min-w-max mx-auto scroll-smooth">
                             {Array.from({ length: numPages }).map((_, i) => (
                                 <PageRenderer
                                     key={i}
