@@ -284,29 +284,27 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
     if (oldIndex === -1 || newIndex === -1) return;
 
-    const movedFiles = arrayMove(allFiles, oldIndex, newIndex) as LibraryFile[];
+    const updatedFiles = arrayMove(allFiles, oldIndex, newIndex);
 
-    // Update display_order for ALL files based on their new positions in the total list
-    // This ensures consistency and prevents snapping
-    const updatedFiles = movedFiles.map((f, index) => ({
-      ...f,
-      display_order: index
-    }));
-
-    // Update local state for immediate visual feedback
+    // Update local state for immediate feedback
     setAllFiles(updatedFiles);
 
-    // Persist to DB in the background
-    NexusServer.reorderFiles(updatedFiles.map((f, index) => ({ id: f.id, order: index })))
-      .then(() => {
-        showToast("Order synchronized", "success");
-      })
-      .catch((e: any) => {
-        console.error("Shift failed:", e);
-        showToast("Order save failed. Ensure 'display_order' column exists.", "error");
-        // Only revert on hard failure if necessary
-        // fetchFromSource(false); 
-      });
+    // Persist to DB
+    try {
+      const fileOrders = updatedFiles
+        .filter(f => {
+          // Only update files in the current view/context to keep it efficient
+          // Or just update all for simplicity since we have updatedFiles here
+          return true;
+        })
+        .map((f, index) => ({ id: f.id, order: index }));
+
+      await NexusServer.reorderFiles(fileOrders);
+      showToast("Order synchronized", "success");
+    } catch (e: any) {
+      showToast("Failed to save order: " + e.message, "error");
+      fetchFromSource(false); // Revert on failure
+    }
   };
 
   const currentFolders = useMemo(() => {
