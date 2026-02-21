@@ -299,7 +299,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     try {
       const fileOrders = updatedFiles.map((f, index) => ({ id: f.id, order: index }));
       await NexusServer.reorderFiles(fileOrders);
-      showToast("Order synchronized", "success");
     } catch (e: any) {
       showToast("Failed to save order: " + e.message, "error");
       fetchFromSource(false); // Revert on failure
