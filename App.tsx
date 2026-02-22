@@ -180,9 +180,6 @@ const Dashboard: React.FC = React.memo(() => {
             <div className="absolute top-8 right-8 text-slate-300 dark:text-white/10 group-hover:text-orange-500 transition-all duration-500 group-hover:translate-x-1 group-hover:-translate-y-1">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
             </div>
-
-            {/* Decorative Inner Border on Hover */}
-            <div className="absolute inset-0 rounded-[48px] border-2 border-orange-500/0 group-hover:border-orange-500/10 transition-all duration-500 pointer-events-none" />
           </button>
         ))}
       </div>
