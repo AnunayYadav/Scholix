@@ -92,30 +92,71 @@ const EmergencyContacts: React.FC = () => {
         { id: 'gh5', title: 'GH-5', category: 'Hostel', subTitle: 'Girls Hostel', numbers: ['9876015106'], blocks: [{ label: 'Main Line', number: '0182444303' }] },
         { id: 'gh6', title: 'GH-6', category: 'Hostel', subTitle: 'Girls Hostel', numbers: ['9915020439'], blocks: [{ label: 'Main Line', number: '0182444301' }] },
 
-        // Doctors
-        { id: 'nk_gupta', title: 'Dr. N.K. Gupta', subTitle: 'Eye Spec | 31269', category: 'Doctor', numbers: ['9878426871'], availability: '4PM–8PM' },
-        { id: 'vijay_mohan', title: 'Dr. Vijay Mohan', subTitle: 'Res MO | 12772', category: 'Doctor', numbers: ['9878426880'], availability: '24 hrs' },
-        { id: 'ajay_arneja', title: 'Dr. Ajay Arneja', subTitle: 'Dentist | 15536', category: 'Doctor', numbers: ['9914033108'], availability: '4PM–8PM' },
-        { id: 'harjeet_singh', title: 'Dr. Harjeet S.', subTitle: 'Physician | 18211', category: 'Doctor', numbers: ['9815760306'] },
-        { id: 'navneet_singh', title: 'Dr. Navneet S.', subTitle: 'Res MO | 30482', category: 'Doctor', numbers: ['8264557767'] },
-        { id: 'anil_malhotra', title: 'Dr. Anil M.', subTitle: 'Physician | 24116', category: 'Doctor', numbers: ['9815364977'], availability: '2PM–10PM' },
-        { id: 'reyhan_ahmad', title: 'Dr. Reyhan A.', subTitle: 'Res MO | 31166', category: 'Doctor', numbers: ['6005932395'] },
-        { id: 'santosh_daniel', title: 'Dr. Santosh D.', subTitle: 'Res MO | 31230', category: 'Doctor', numbers: ['9944838602'] },
+        // Doctors (Updated & Expanded)
+        { id: 'nk_gupta', title: 'Dr. N.K. Gupta', subTitle: 'Eye Specialist | Medical Officer', category: 'Doctor', numbers: ['9878426871', '9815023005'], availability: '4 PM – 8 PM' },
+        { id: 'vijay_mohan', title: 'Dr. Vijay Mohan', subTitle: 'Resident Medical Officer', category: 'Doctor', numbers: ['9878426880'], availability: '24 hrs (8 hr shift)' },
+        { id: 'ajay_arneja', title: 'Dr. Ajay Arneja', subTitle: 'Dental (Part-Time)', category: 'Doctor', numbers: ['9914033108'], availability: '4 PM – 8 PM' },
+        { id: 'harjeet_singh', title: 'Dr. Harjeet Singh', subTitle: 'Medical Officer', category: 'Doctor', numbers: ['9815760306'] },
+        { id: 'navneet_singh', title: 'Dr. Navneet Singh', subTitle: 'Resident Medical Officer', category: 'Doctor', numbers: ['8264557767'] },
+        { id: 'anil_malhotra', title: 'Dr. Anil Malhotra', subTitle: 'Medical Officer', category: 'Doctor', numbers: ['9815364977'], availability: '2 PM – 10 PM' },
+        { id: 'reyhan_ahmad', title: 'Dr. Reyhan Ahmad Sheikh', subTitle: 'Resident Medical Officer', category: 'Doctor', numbers: ['6005932395'] },
+        { id: 'santosh_daniel', title: 'Dr. Santosh Daniel', subTitle: 'Resident Medical Officer', category: 'Doctor', numbers: ['9944838602'] },
 
-        // Nursing
-        { id: 'lovepreet', title: 'Lovepreet S.', subTitle: 'Nurse | 30342', category: 'Nursing', numbers: ['9914550656'], availability: '24h' },
-        { id: 'jagdeep_n', title: 'Jagdeep S.', subTitle: 'Nursing Sup | 21156', category: 'Nursing', numbers: ['9780036450'], availability: '24h' },
-        { id: 'anu_bala', title: 'Anu Bala', subTitle: 'Nurse | 28865', category: 'Nursing', numbers: ['8360751806'] },
-        { id: 'manpreet_k', title: 'Manpreet K.', subTitle: 'Nurse | 31781', category: 'Nursing', numbers: ['8427178725'] },
-        { id: 'rajpinder', title: 'Rajpinder', subTitle: 'Nurse | 15477', category: 'Nursing', numbers: ['6284518196'] },
-        { id: 'priyanka_d', title: 'Priyanka D.', subTitle: 'Nurse | 22561', category: 'Nursing', numbers: ['7831009173'] },
+        // Visiting Doctors
+        { id: 'mamta_arora', title: 'Dr. Mamta Arora', subTitle: 'Skin Specialist', category: 'Doctor', numbers: ['8146580816'], availability: 'Thursday 4 PM – 6 PM', description: 'Visiting Consultant' },
+        { id: 'shweta_b', title: 'Shweta Bharadwaj', subTitle: 'Psychologist', category: 'Counseling', numbers: ['01824-444079'], availability: 'Tue 4-6PM | Sat 11AM-1PM', description: 'Visiting Consultant' },
+        { id: 'vandana_l', title: 'Dr. Vandana Lalwani', subTitle: 'Gynecologist', category: 'Doctor', numbers: ['9814857075'], availability: 'Tue & Fri 4 PM – 6 PM', description: 'Visiting Consultant' },
+
+        // Counseling Psychologists (9 AM – 5:30 PM)
+        { id: 'counseling_neha', title: 'Ms. Neha Sharma', category: 'Counseling', numbers: ['01824-444509'], subTitle: 'Counseling Psychologist' },
+        { id: 'counseling_anusuya', title: 'Ms. Anusuya Hazarika', category: 'Counseling', numbers: ['01824-444509'], subTitle: 'Counseling Psychologist' },
+        { id: 'counseling_babita', title: 'Ms. Babita', category: 'Counseling', numbers: ['01824-444509'], subTitle: 'Counseling Psychologist' },
+        { id: 'counseling_anuradha', title: 'Ms. Anuradha', category: 'Counseling', numbers: ['01824-444509'], subTitle: 'Counseling Psychologist' },
+
+        // Nursing Staff Male (24 hrs)
+        { id: 'nurse_lp', title: 'Lovepreet Singh', category: 'Nursing', numbers: ['9914550656'], subTitle: 'Male Nursing Staff' },
+        { id: 'nurse_jd', title: 'Jagdeep Singh', category: 'Nursing', numbers: ['9780036450'], subTitle: 'Male Nursing Staff' },
+        { id: 'nurse_dr', title: 'Davinder Ram', category: 'Nursing', numbers: ['8284896636'], subTitle: 'Male Nursing Staff' },
+        { id: 'nurse_js', title: 'Jagsir Singh', category: 'Nursing', numbers: ['7888339220'], subTitle: 'Male Nursing Staff' },
+        { id: 'nurse_nk', title: 'Naveen Kumar', category: 'Nursing', numbers: ['8700219223'], subTitle: 'Male Nursing Staff' },
+        { id: 'nurse_gs', title: 'Gurjeet Singh', category: 'Nursing', numbers: [], subTitle: 'Male Nursing Staff' },
+
+        // Nursing Staff Female (24 hrs)
+        { id: 'nurse_ab', title: 'Anu Bala', category: 'Nursing', numbers: ['8360751806'], subTitle: 'Female Nursing Staff' },
+        { id: 'nurse_mk', title: 'Manpreet Kaur', category: 'Nursing', numbers: ['8427178725'], subTitle: 'Female Nursing Staff' },
+        { id: 'nurse_hk', title: 'Harvinder Kaur', category: 'Nursing', numbers: ['6280830590'], subTitle: 'Female Nursing Staff' },
+        { id: 'nurse_rj', title: 'Rajpinder', category: 'Nursing', numbers: ['6284518196'], subTitle: 'Female Nursing Staff' },
+        { id: 'nurse_mandeep', title: 'Mandeep Kaur', category: 'Nursing', numbers: ['9592571889'], subTitle: 'Female Nursing Staff' },
+        { id: 'nurse_monika', title: 'Monika Rani', category: 'Nursing', numbers: ['9056134867'], subTitle: 'Female Nursing Staff' },
+        { id: 'nurse_mamta_k', title: 'Mamta Kumari', category: 'Nursing', numbers: ['8626877236'], subTitle: 'Female Nursing Staff' },
+        { id: 'nurse_priyanka', title: 'Priyanka Devi', category: 'Nursing', numbers: ['7831009173'], subTitle: 'Female Nursing Staff' },
+        { id: 'nurse_karamjit', title: 'Karamjit', category: 'Nursing', numbers: ['7889114351'], subTitle: 'Female Nursing Staff' },
+        { id: 'nurse_jaspreet', title: 'Jaspreet Kaur', category: 'Nursing', numbers: ['8699621305'], subTitle: 'Female Nursing Staff' },
+        { id: 'nurse_sajita', title: 'Sajita Kumari', category: 'Nursing', numbers: ['9779076679'], subTitle: 'Female Nursing Staff' },
+
+        // Ward Staff
+        { id: 'ward_lady1', title: 'Rajinder Kaur', category: 'Nursing', numbers: ['7973370167'], subTitle: 'Ward Lady' },
+        { id: 'ward_lady2', title: 'Bholi', category: 'Nursing', numbers: ['8968974206'], subTitle: 'Ward Lady' },
+        { id: 'ward_boy1', title: 'Rajesh Narayan', category: 'Nursing', numbers: ['8054618366'], subTitle: 'Ward Boy' },
+        { id: 'ward_boy2', title: 'Ghanshyam', category: 'Nursing', numbers: ['8283808959'], subTitle: 'Ward Boy' },
+        { id: 'ward_boy3', title: 'Krishan Kumar', category: 'Nursing', numbers: ['9888210919'], subTitle: 'Ward Boy' },
 
         // Facilities & Admin
-        { id: 'hc_reception', title: 'HC Reception', subTitle: '24x7 Support', category: 'Facility', numbers: ['01824444079'] },
-        { id: 'hc_lab', title: 'HC Med Lab', subTitle: 'Diagnostics', category: 'Facility', numbers: ['01824444069'] },
-        { id: 'hc_chemist', title: 'Medical Store', subTitle: '24h Pharmacy', category: 'Facility', numbers: ['01824444068'] },
+        { id: 'hc_reception', title: 'HC Reception', subTitle: 'Help Line', category: 'Facility', numbers: ['018244-44079', '018245-01227'], availability: '24x7', description: 'If unreachable: Dr. Anil (9815364977) or Dr. Vijay (9878426880)' },
+        { id: 'cabin1', title: 'Cabin 1', category: 'Facility', numbers: ['018244-44071'], subTitle: 'Health Centre' },
+        { id: 'cabin2', title: 'Cabin 2', category: 'Facility', numbers: ['018244-44072'], subTitle: 'Health Centre' },
+        { id: 'cabin3', title: 'Cabin 3', category: 'Facility', numbers: ['018244-44073'], subTitle: 'Health Centre' },
+        { id: 'cabin4', title: 'Cabin 4', category: 'Facility', numbers: ['018244-44074'], subTitle: 'Health Centre' },
+        { id: 'cabin5', title: 'AO Cabin 5', category: 'Facility', numbers: ['018244-44076'], subTitle: 'Health Centre' },
+        { id: 'cabin6', title: 'Cabin 6', category: 'Facility', numbers: ['018244-95015'], subTitle: 'Health Centre' },
+        { id: 'cabin7', title: 'Cabin 7', category: 'Facility', numbers: ['018244-44077'], subTitle: 'Health Centre' },
+        { id: 'cabin8', title: 'Cabin 8', category: 'Facility', numbers: ['018244-95016'], subTitle: 'Health Centre' },
+        { id: 'hc_male_ward', title: 'Male Ward', category: 'Facility', numbers: ['018244-44066'], subTitle: 'HC Indoor' },
+        { id: 'hc_female_ward', title: 'Female Ward', category: 'Facility', numbers: ['018244-44067'], subTitle: 'HC Indoor' },
+        { id: 'hc_store', title: 'Medical Store', subTitle: '24x7 Subsidized', category: 'Facility', numbers: ['018244-44068'] },
+        { id: 'hc_lab', title: 'Medical Laboratory', subTitle: 'Diagnostics', category: 'Facility', numbers: ['018244-44069'] },
 
-        // External Referral Hospitals
+        // Referral Hospitals
         { id: 'ref_doaba', title: 'Doaba Hosp', subTitle: 'Jalandhar City', category: 'Hospital', numbers: ['0181-2226200'], description: 'Specialized Emergency Care' },
         { id: 'patel_hosp', title: 'Patel Hospital', subTitle: 'Cancer & Surgical', category: 'Hospital', numbers: ['0181-5241000'], description: 'Multi-specialty Referral' },
         { id: 'bbc_heart', title: 'BBC Heart Care', subTitle: 'Cardiac Center', category: 'Hospital', numbers: ['0181-2226227'], description: 'Advanced Heart Care' },
@@ -145,7 +186,7 @@ const EmergencyContacts: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-fade-in pb-32 focus-visible:outline-none">
             {/* Header Section */}
             <header className="text-center space-y-3">
-                <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
+                <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tighter leading-none">
                     Rescue <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">Line</span>
                 </h2>
                 <div className="flex items-center justify-center gap-2">
@@ -317,8 +358,8 @@ const EmergencyContacts: React.FC = () => {
                         <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-red-600/10 text-red-600 rounded-full text-[8px] font-black uppercase tracking-widest text-left">
                             Official Directory
                         </div>
-                        <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none text-left">Uni Health Centre</h3>
-                        <p className="text-slate-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-left">Block 03, Lovely Professional University • Open 24/7/365</p>
+                        <h3 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tighter leading-none text-left">Uni Health Centre</h3>
+                        <p className="text-slate-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-left">UNI Health Centre – Block 03, LPU • Open 24x7 | 365 Days</p>
                     </div>
                     <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-[24px] border border-slate-100 dark:border-white/5 max-w-xs w-full text-left">
                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 text-center">Referral Hospital Concessions</p>
@@ -339,14 +380,14 @@ const EmergencyContacts: React.FC = () => {
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M19 14l-2-2m0 0l-2 2m2-2V6m2 13H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11l3 3v11a2 2 0 0 1-2 2z" /></svg>
                         </div>
                         <div className="space-y-2">
-                            <h4 className="text-[15px] md:text-[17px] font-black text-slate-900 dark:text-white uppercase tracking-tighter">Medical Facilities</h4>
+                            <h4 className="text-[15px] md:text-[17px] font-bold text-slate-900 dark:text-white tracking-tighter uppercase">Medical Facilities</h4>
                             <ul className="space-y-1 text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-relaxed">
                                 <li>Diagnostic Laboratory</li>
                                 <li>ECG & Cardiac Monitor</li>
                                 <li>Oxygen & Nebulization</li>
                                 <li>Defibrillator & Minor OT</li>
                                 <li>Dental & Eye Clinics</li>
-                                <li>8 On-Call Doctors</li>
+                                <li>8 Qualified Full-time Doctors</li>
                             </ul>
                         </div>
                     </div>
@@ -357,14 +398,13 @@ const EmergencyContacts: React.FC = () => {
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>
                         </div>
                         <div className="space-y-2">
-                            <h4 className="text-[15px] md:text-[17px] font-black text-slate-900 dark:text-white uppercase tracking-tighter">OPD Specialties</h4>
+                            <h4 className="text-[15px] md:text-[17px] font-bold text-slate-900 dark:text-white tracking-tighter uppercase">OPD Specialties</h4>
                             <ul className="space-y-1 text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-relaxed">
-                                <li>General Med & Surgery</li>
-                                <li>Eye, Dental & Gynae</li>
-                                <li>ENT & Skin Specialist</li>
-                                <li>Ayurvedic Consultation</li>
-                                <li>Psychological Counseling</li>
-                                <li className="text-emerald-600 font-black">Zero Consultation Fee</li>
+                                <li>General Medicine & Surgery</li>
+                                <li>Eye Testing, Dental & Gynae</li>
+                                <li>ENT, Skin & Ayurvedic</li>
+                                <li>Psychological Consultation</li>
+                                <li className="text-emerald-600 font-black">Free Consultation (No Charges)</li>
                             </ul>
                         </div>
                     </div>
@@ -375,14 +415,13 @@ const EmergencyContacts: React.FC = () => {
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
                         </div>
                         <div className="space-y-2">
-                            <h4 className="text-[15px] md:text-[17px] font-black text-slate-900 dark:text-white uppercase tracking-tighter">Indoor Facilities</h4>
+                            <h4 className="text-[15px] md:text-[17px] font-bold text-slate-900 dark:text-white tracking-tighter uppercase">Indoor Facilities</h4>
                             <ul className="space-y-1 text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-relaxed">
-                                <li>31 Dedicated Beds</li>
-                                <li>Separate Gender Wards</li>
-                                <li>No Procedure Charges</li>
-                                <li>Subsidized Medicines</li>
-                                <li>24hr Open Chemist</li>
-                                <li>Pay Only for Medicines</li>
+                                <li>31 Beds Available</li>
+                                <li>Separate Male & Female Wards</li>
+                                <li>No Admission Charges</li>
+                                <li>24hr Subsidized Medical Store</li>
+                                <li>Paid Only for Medicines</li>
                             </ul>
                         </div>
                     </div>
@@ -393,14 +432,13 @@ const EmergencyContacts: React.FC = () => {
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                         </div>
                         <div className="space-y-2">
-                            <h4 className="text-[15px] md:text-[17px] font-black text-slate-900 dark:text-white uppercase tracking-tighter">Emergency Services</h4>
+                            <h4 className="text-[15px] md:text-[17px] font-bold text-slate-900 dark:text-white tracking-tighter uppercase">Emergency Support</h4>
                             <ul className="space-y-1 text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-relaxed">
                                 <li>6 Active Ambulances</li>
-                                <li className="text-red-500">Free for Serious Cases</li>
-                                <li>24x7 Referral System</li>
-                                <li>Jalandhar & Phagwara</li>
-                                <li>Emergency Helpline</li>
-                                <li>Immediate Response</li>
+                                <li className="text-red-500">Free for Seriously Ill</li>
+                                <li>24x7 Emergency Support</li>
+                                <li>Referrals: JAL, PHG, LDH</li>
+                                <li>Immediate Response Team</li>
                             </ul>
                         </div>
                     </div>
