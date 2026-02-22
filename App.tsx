@@ -188,74 +188,7 @@ const Dashboard: React.FC = React.memo(() => {
 });
 
 
-const RegistrationPrompt: React.FC<{ userProfile: UserProfile, onComplete: (profile: UserProfile) => void }> = React.memo(({ userProfile, onComplete }) => {
-  const [regNo, setRegNo] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (regNo.length < 8) {
-      setError("Please enters a valid 8-digit Registration Number.");
-      return;
-    }
-    setLoading(true);
-    try {
-      await NexusServer.updateProfile(userProfile.id, { registration_number: regNo });
-      onComplete({ ...userProfile, registration_number: regNo });
-    } catch (e: any) {
-      if (e.message?.includes('unique_registration_number') || e.code === '23505') {
-        setError("This Registration Number is already in use.");
-      } else {
-        setError(e.message || "Failed to register profile.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="modal-overlay">
-      <div className="nexus-modal w-full max-w-sm p-8 relative overflow-hidden">
-        <div className="absolute -top-12 -right-12 w-24 h-24 bg-orange-600/10 blur-[32px] rounded-full pointer-events-none" />
-
-        <div className="w-20 h-20 bg-orange-600/10 rounded-[32px] flex items-center justify-center mb-8 border border-orange-600/20">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-orange-600"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><path d="M7 21v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4" /><circle cx="12" cy="11" r="3" /></svg>
-        </div>
-
-        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tighter uppercase leading-none">Identity Check</h3>
-        <p className="text-slate-500 text-[9px] font-black uppercase tracking-[0.2em] mb-6">Establish your Registration Number to continue to Nexus.</p>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Registration Number</label>
-            <div className="relative group/input">
-              <input
-                type="text" required value={regNo}
-                onChange={e => setRegNo(e.target.value.replace(/[^0-9]/g, '').slice(0, 8))}
-                className="w-full bg-slate-50 dark:bg-white/5 pl-6 pr-4 py-5 rounded-[24px] text-sm font-bold border border-slate-200 dark:border-white/10 focus:border-orange-600/30 focus:ring-4 focus:ring-orange-600/10 outline-none text-slate-800 dark:text-white transition-all shadow-inner placeholder:text-slate-300 dark:placeholder:text-slate-700 hover:border-orange-500/20"
-                placeholder="Candidate Registration (8 Digits)"
-              />
-            </div>
-            {error && (
-              <div className="flex items-center justify-center gap-2 mt-4 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                <p className="text-[9px] font-black text-red-500 uppercase tracking-widest">{error}</p>
-              </div>
-            )}
-          </div>
-
-          <button
-            type="submit" disabled={loading || regNo.length < 8}
-            className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-5 rounded-[24px] font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-orange-600/20 active:scale-95 transition-all disabled:opacity-50 border-none"
-          >
-            {loading ? 'Synchronizing...' : 'Authorize Signature'}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-});
 
 const AppContent: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -317,7 +250,7 @@ const AppContent: React.FC = () => {
     navigate(path);
   }, [navigate]);
 
-  const showRegPrompt = userProfile && !userProfile.registration_number;
+
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-200">
@@ -421,7 +354,6 @@ const AppContent: React.FC = () => {
           </div>
         </div>
         {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
-        {showRegPrompt && <RegistrationPrompt userProfile={userProfile} onComplete={(p) => setUserProfile(p)} />}
       </main>
       <Analytics />
       <SpeedInsights />
