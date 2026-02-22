@@ -6,6 +6,7 @@ interface NexusDropdownProps {
     onChange: (value: string) => void;
     label?: string;
     className?: string;
+    buttonClassName?: string;
     placeholder?: string;
     icon?: React.ReactNode;
     renderCustomMenu?: (close: () => void) => React.ReactNode;
@@ -17,6 +18,7 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
     onChange,
     label,
     className = "",
+    buttonClassName = "",
     placeholder = "Select...",
     icon,
     renderCustomMenu
@@ -44,7 +46,7 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-4 px-5 py-3.5 bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] outline-none hover:border-orange-500/50 transition-all dark:text-white cursor-pointer min-w-[180px] justify-between group shadow-sm active:scale-95"
+                className={`flex items-center gap-4 px-5 py-3.5 bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] outline-none hover:border-orange-500/50 transition-all dark:text-white cursor-pointer min-w-[180px] justify-between group shadow-sm active:scale-95 ${buttonClassName}`}
             >
                 <div className="flex items-center gap-3">
                     {icon && <span className="opacity-50">{icon}</span>}
