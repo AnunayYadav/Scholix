@@ -507,7 +507,17 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
             <div className="relative flex-1">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-              <input type="text" placeholder="Filter files..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white" />
+              <input
+                type="text"
+                placeholder="Filter files..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                autoCapitalize="none"
+                autoCorrect="off"
+                autoComplete="off"
+                spellCheck="false"
+                className="w-full pl-11 pr-4 py-3 bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white"
+              />
             </div>
           </div>
           <button onClick={() => fetchFromSource(true)} className="w-12 h-12 flex items-center justify-center bg-slate-100 dark:bg-black rounded-xl text-slate-400 hover:text-orange-600 transition-colors shadow-sm border-none self-end md:self-auto" title="Refresh List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></button>

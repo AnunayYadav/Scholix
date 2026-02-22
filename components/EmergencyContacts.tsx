@@ -189,8 +189,12 @@ const EmergencyContacts: React.FC = () => {
                         type="text"
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        placeholder="Search contact..."
-                        className="w-full bg-slate-50 dark:bg-white/[0.03] pl-12 md:pl-14 pr-6 py-4 md:py-5 rounded-2xl md:rounded-[24px] border border-slate-200 dark:border-white/10 text-[11px] md:text-[12px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500/30 transition-all dark:text-white"
+                        placeholder="Search emergency services..."
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        autoComplete="off"
+                        spellCheck="false"
+                        className="w-full bg-slate-50 dark:bg-white/[0.03] pl-12 md:pl-14 pr-6 py-4 md:py-5 rounded-2xl md:rounded-[24px] border border-slate-200 dark:border-white/10 text-[13px] md:text-[14px] font-bold outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500/30 transition-all dark:text-white"
                     />
                 </div>
 

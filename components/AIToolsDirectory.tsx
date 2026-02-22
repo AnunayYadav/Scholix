@@ -164,10 +164,14 @@ const AIToolsDirectory: React.FC = () => {
                     </div>
                     <input
                         type="text"
+                        placeholder="Forge your search..."
                         value={searchQuery}
-                        onChange={e => setSearchQuery(e.target.value)}
-                        placeholder="Search for intelligence..."
-                        className="w-full bg-white dark:bg-white/[0.03] pl-14 pr-6 py-5 rounded-[24px] border border-slate-200 dark:border-white/10 text-[12px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500/30 transition-all dark:text-white shadow-xl shadow-black/5"
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        autoComplete="off"
+                        spellCheck="false"
+                        className="w-full pl-10 pr-4 py-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-[10px] font-bold outline-none focus:ring-4 focus:ring-orange-500/10 transition-all dark:text-white"
                     />
                 </div>
             </header>

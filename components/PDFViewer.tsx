@@ -585,7 +585,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && performSearch()}
-                            className="bg-transparent border-none outline-none text-[10px] font-black uppercase text-white px-2 w-24 md:w-32 placeholder:text-white/20"
+                            autoCapitalize="none"
+                            autoCorrect="off"
+                            autoComplete="off"
+                            spellCheck="false"
+                            className="bg-transparent border-none outline-none text-[11px] font-bold text-white px-2 w-24 md:w-32 placeholder:text-white/20"
                         />
                         {searchResults.length > 0 && (
                             <div className="flex items-center gap-2 pr-2">
