@@ -444,6 +444,20 @@ class NexusServer {
     if (error) throw error;
   }
 
+  static async updateMarketplaceItem(id: string, updates: any) {
+    const client = getSupabase();
+    if (!client) return;
+    const { error } = await client.from('marketplace_items').update(updates).eq('id', id);
+    if (error) throw error;
+  }
+
+  static async deleteMarketplaceItem(id: string) {
+    const client = getSupabase();
+    if (!client) return;
+    const { error } = await client.from('marketplace_items').delete().eq('id', id);
+    if (error) throw error;
+  }
+
   static async uploadMarketplaceImage(file: File, path: string): Promise<string> {
     const client = getSupabase();
     if (!client) throw new Error("Registry offline.");
@@ -468,6 +482,20 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return;
     const { error } = await client.from('roommate_requests').insert([request]);
+    if (error) throw error;
+  }
+
+  static async updateRoommateRequest(id: string, updates: any) {
+    const client = getSupabase();
+    if (!client) return;
+    const { error } = await client.from('roommate_requests').update(updates).eq('id', id);
+    if (error) throw error;
+  }
+
+  static async deleteRoommateRequest(id: string) {
+    const client = getSupabase();
+    if (!client) return;
+    const { error } = await client.from('roommate_requests').delete().eq('id', id);
     if (error) throw error;
   }
 }

@@ -7,6 +7,8 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     const [requests, setRequests] = useState<RoommateRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [showPostModal, setShowPostModal] = useState(false);
+    const [showUserOnly, setShowUserOnly] = useState(false);
+    const [editingRequest, setEditingRequest] = useState<RoommateRequest | null>(null);
     const [newRequest, setNewRequest] = useState({
         location: '',
         budget: '',
@@ -28,36 +30,89 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!userProfile) { showToast("Sign in required.", "info"); return; }
+        if (!newRequest.location || !newRequest.budget || !newRequest.preferences) {
+            showToast("All fields are mandatory.", "info");
+            return;
+        }
 
         try {
-            await NexusServer.createRoommateRequest({
+            const requestData = {
                 ...newRequest,
                 user_id: userProfile.id,
                 status: 'Active'
-            });
-            showToast("Request posted successfully!", "success");
-            setShowPostModal(false);
+            };
+
+            if (editingRequest) {
+                await NexusServer.updateRoommateRequest(editingRequest.id, requestData);
+                showToast("Request updated!", "success");
+            } else {
+                await NexusServer.createRoommateRequest(requestData);
+                showToast("Request posted!", "success");
+            }
+
+            closeModal();
             fetchRequests();
         } catch (err: any) {
             showToast("Error: " + err.message, "error");
         }
     };
 
+    const handleDelete = async (id: string) => {
+        if (!window.confirm("Are you sure you want to delete this request?")) return;
+        try {
+            await NexusServer.deleteRoommateRequest(id);
+            showToast("Request deleted.", "success");
+            fetchRequests();
+        } catch (err: any) {
+            showToast("Error: " + err.message, "error");
+        }
+    };
+
+    const handleEdit = (req: RoommateRequest) => {
+        setEditingRequest(req);
+        setNewRequest({
+            location: req.location,
+            budget: req.budget,
+            preferences: req.preferences,
+            gender_preference: req.gender_preference || 'Any'
+        });
+        setShowPostModal(true);
+    };
+
+    const closeModal = () => {
+        setShowPostModal(false);
+        setEditingRequest(null);
+        setNewRequest({ location: '', budget: '', preferences: '', gender_preference: 'Any' });
+    };
+
+    const filteredRequests = requests.filter(req => {
+        return !showUserOnly || req.user_id === userProfile?.id;
+    });
+
     return (
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-4 py-6 pb-32">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                <div className="space-y-1">
+                <div className="space-y-1 text-left">
                     <h2 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white tracking-tighter leading-none">
                         Roommate <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Finder</span>
                     </h2>
                     <p className="text-slate-500 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Find your perfect match to share your space.</p>
                 </div>
-                <button
-                    onClick={() => { if (!userProfile) showToast("Sign in required.", "info"); else setShowPostModal(true); }}
-                    className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-black text-[9px] uppercase tracking-[0.2em] shadow-xl shadow-orange-600/10 hover:scale-105 active:scale-95 transition-all border-none cursor-pointer"
-                >
-                    Post Request
-                </button>
+                <div className="flex flex-wrap gap-3">
+                    <button
+                        onClick={() => { if (!userProfile) showToast("Sign in required.", "info"); else setShowUserOnly(!showUserOnly); }}
+                        className={`px-6 py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] transition-all border-none cursor-pointer flex items-center gap-2 ${showUserOnly ? 'bg-orange-600 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white'}`}
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                        {showUserOnly ? 'All Requests' : 'My Requests'}
+                    </button>
+                    <button
+                        onClick={() => { if (!userProfile) showToast("Sign in required.", "info"); else setShowPostModal(true); }}
+                        className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-black text-[9px] uppercase tracking-[0.2em] shadow-xl shadow-orange-600/10 hover:scale-105 active:scale-95 transition-all border-none cursor-pointer"
+                    >
+                        Post Request
+                    </button>
+                </div>
             </header>
 
             {loading ? (
@@ -68,13 +123,24 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {requests.map(req => (
-                        <div key={req.id} className="group p-6 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-slate-200 dark:border-white/10 hover:border-orange-500/40 hover:shadow-xl hover:shadow-orange-600/5 transition-all duration-500 flex flex-col md:flex-row gap-6 items-start md:items-center">
+                    {filteredRequests.map(req => (
+                        <div key={req.id} className="group p-6 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-slate-200 dark:border-white/10 hover:border-orange-500/40 hover:shadow-xl hover:shadow-orange-600/5 transition-all duration-500 flex flex-col md:flex-row gap-6 items-start md:items-center relative">
+                            {req.user_id === userProfile?.id && (
+                                <div className="absolute top-2 right-2 flex gap-1 z-30">
+                                    <button onClick={() => handleEdit(req)} className="p-2 bg-white/90 dark:bg-black/80 rounded-full text-blue-500 hover:text-blue-600 shadow-sm border-none cursor-pointer backdrop-blur-md">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                    </button>
+                                    <button onClick={() => handleDelete(req.id)} className="p-2 bg-white/90 dark:bg-black/80 rounded-full text-red-500 hover:text-red-600 shadow-sm border-none cursor-pointer backdrop-blur-md">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>
+                                    </button>
+                                </div>
+                            )}
+
                             <div className="w-12 h-12 rounded-[18px] bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white text-lg font-black shadow-lg shrink-0">
                                 {req.user_username?.[0]?.toUpperCase() || 'V'}
                             </div>
 
-                            <div className="flex-1 space-y-2">
+                            <div className="flex-1 space-y-2 text-left">
                                 <div className="flex flex-wrap items-center gap-2">
                                     <h4 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">{req.user_username || 'Anonymous Verto'}</h4>
                                     <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded-md text-[8px] font-black uppercase tracking-widest">{req.status}</span>
@@ -97,18 +163,18 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                             </button>
                         </div>
                     ))}
-                    {requests.length === 0 && <div className="py-20 text-center text-slate-400 font-black uppercase tracking-widest opacity-40 text-[10px]">No requests found yet. Be the first to post!</div>}
+                    {filteredRequests.length === 0 && <div className="py-20 text-center text-slate-400 font-black uppercase tracking-widest opacity-40 text-[10px]">No requests found yet.</div>}
                 </div>
             )}
 
             {showPostModal && (
                 <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md">
-                    <div className="bg-white dark:bg-[#0a0a0a] w-full max-w-md rounded-[32px] p-6 relative shadow-2xl border border-slate-200 dark:border-white/10">
-                        <button onClick={() => setShowPostModal(false)} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
-                        <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1 tracking-tighter uppercase">Find Roommate</h3>
+                    <div className="bg-white dark:bg-[#0a0a0a] w-full max-w-md rounded-[32px] p-6 relative shadow-2xl border border-slate-200 dark:border-white/10 animate-slide-up">
+                        <button onClick={closeModal} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                        <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1 tracking-tighter uppercase">{editingRequest ? 'Edit Request' : 'Find Roommate'}</h3>
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-6">Tell us what you're looking for.</p>
 
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-4 text-left">
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Preferred Location</label>
@@ -123,7 +189,9 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                 <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Lifestyle Preferences</label>
                                 <textarea required value={newRequest.preferences} onChange={e => setNewRequest({ ...newRequest, preferences: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 min-h-[80px] text-slate-800 dark:text-white" placeholder="e.g. Non-smoker, Vegan, Late sleeper..." />
                             </div>
-                            <button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none cursor-pointer">Post Request</button>
+                            <button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none cursor-pointer">
+                                {editingRequest ? 'Save Changes' : 'Post Request'}
+                            </button>
                         </form>
                     </div>
                 </div>
