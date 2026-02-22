@@ -323,6 +323,31 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     return { sems, subjs, cats };
   }, [folders]);
 
+  const folderFileCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    folders.forEach(folder => {
+      let count = 0;
+      if (folder.type === 'semester') {
+        count = allFiles.filter(f => f.semester === folder.name).length;
+      } else if (folder.type === 'subject') {
+        const parentSem = folders.find(f => f.id === folder.parent_id);
+        if (parentSem) {
+          count = allFiles.filter(f => f.semester === parentSem.name && f.subject === folder.name).length;
+        }
+      } else if (folder.type === 'category') {
+        const parentSub = folders.find(f => f.id === folder.parent_id);
+        if (parentSub) {
+          const parentSem = folders.find(f => f.id === parentSub.parent_id);
+          if (parentSem) {
+            count = allFiles.filter(f => f.semester === parentSem.name && f.subject === parentSub.name && f.type === folder.name).length;
+          }
+        }
+      }
+      counts[folder.id] = count;
+    });
+    return counts;
+  }, [folders, allFiles]);
+
   const [isCreatingNew, setIsCreatingNew] = useState({ program: false, semester: false, subject: false, type: false });
 
   const navigateTo = (sem: Folder | null, subj: Folder | null, cat: Folder | null) => {
@@ -514,6 +539,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       )}
                       <FolderIcon type={folder.type} size="w-10 h-10" />
                       <h3 className="text-sm md:text-base font-black text-slate-800 dark:text-white tracking-tight uppercase leading-tight mt-1">{folder.name}</h3>
+                      <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">
+                        {folderFileCounts[folder.id] || 0} File{folderFileCounts[folder.id] !== 1 ? 's' : ''}
+                      </p>
                       <div className="absolute -right-2 -bottom-2 opacity-5 group-hover:scale-110 transition-transform"><FolderIcon type={folder.type} size="w-24 h-24" /></div>
                     </div>
                   ))}
