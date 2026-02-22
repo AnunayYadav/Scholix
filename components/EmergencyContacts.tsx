@@ -148,13 +148,13 @@ const EmergencyContacts: React.FC = () => {
                 {coreContacts.map((contact, i) => (
                     <div
                         key={i}
-                        className={`bg-gradient-to-br ${contact.color} p-5 md:p-8 rounded-[28px] md:rounded-[40px] relative overflow-hidden shadow-lg shadow-black/10 group active:scale-[0.98] transition-all duration-300 w-[calc(50%-6px)] md:flex-1 min-w-[150px] md:min-w-0 h-auto md:h-full`}
+                        className={`bg-gradient-to-br ${contact.color} p-4 md:p-8 rounded-[28px] md:rounded-[40px] relative overflow-hidden shadow-lg shadow-black/10 group active:scale-[0.98] transition-all duration-300 ${i === 2 ? 'w-1/2 md:flex-1' : 'w-[calc(50%-6px)] md:flex-1'} h-auto md:h-full`}
                     >
                         {contact.icon}
                         <div className="relative z-20 h-full flex flex-col justify-between space-y-4 md:space-y-6">
                             <div className="space-y-1">
                                 <p className="text-[8px] md:text-[12px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] text-white/70">{contact.title}</p>
-                                <h3 className="text-xl md:text-4xl font-black text-white tracking-tighter leading-none">{contact.status}</h3>
+                                <h3 className="text-xl md:text-3xl font-black text-white tracking-tighter leading-none">{contact.status}</h3>
                             </div>
                             <div className="space-y-2 md:space-y-3">
                                 {contact.numbers.map((num, ni) => (
@@ -163,7 +163,7 @@ const EmergencyContacts: React.FC = () => {
                                             <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/10 flex items-center justify-center text-white shrink-0">
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5 md:w-3.5 md:h-3.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
                                             </div>
-                                            <span className="text-[11px] md:text-lg font-black text-white tracking-tight truncate">{num}</span>
+                                            <span className="text-[9.5px] md:text-lg font-black text-white tracking-tight leading-none whitespace-nowrap">{num}</span>
                                         </div>
                                         <button
                                             onClick={() => copyToClipboard(num)}
@@ -209,12 +209,12 @@ const EmergencyContacts: React.FC = () => {
                             >
                                 <div className="flex items-center gap-4 md:gap-5 text-left min-w-0">
                                     <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shadow-md transition-transform group-hover:scale-105 shrink-0 ${category === 'Hostel' ? 'bg-orange-600 text-white' :
-                                            category === 'Doctor' ? 'bg-red-600 text-white' :
-                                                category === 'Nursing' ? 'bg-blue-600 text-white' :
-                                                    category === 'Counseling' ? 'bg-purple-600 text-white' :
-                                                        category === 'Hospital' ? 'bg-cyan-600 text-white' :
-                                                            category === 'Facility' ? 'bg-slate-700 text-white' :
-                                                                'bg-emerald-600 text-white'
+                                        category === 'Doctor' ? 'bg-red-600 text-white' :
+                                            category === 'Nursing' ? 'bg-blue-600 text-white' :
+                                                category === 'Counseling' ? 'bg-purple-600 text-white' :
+                                                    category === 'Hospital' ? 'bg-cyan-600 text-white' :
+                                                        category === 'Facility' ? 'bg-slate-700 text-white' :
+                                                            'bg-emerald-600 text-white'
                                         }`}>
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 md:w-6 h-5 md:h-6">
                                             {category === 'Hostel' && <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />}
@@ -246,8 +246,8 @@ const EmergencyContacts: React.FC = () => {
                                             <div className="space-y-4">
                                                 <div className="flex justify-between items-start gap-2">
                                                     <div className="min-w-0 text-left">
-                                                        <h4 className="text-[14px] md:text-lg font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-tight truncate">{item.title}</h4>
-                                                        {item.subTitle && <p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-tight mt-0.5 truncate">{item.subTitle}</p>}
+                                                        <h4 className="text-[14px] md:text-lg font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-tight">{item.title}</h4>
+                                                        {item.subTitle && <p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-tight mt-0.5">{item.subTitle}</p>}
                                                     </div>
                                                     <div className="p-2 rounded-lg md:rounded-xl bg-slate-50 dark:bg-white/10 text-slate-400 group-hover:text-orange-600 transition-all shrink-0">
                                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 md:w-5 md:h-5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
