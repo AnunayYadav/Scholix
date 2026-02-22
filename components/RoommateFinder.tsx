@@ -129,41 +129,41 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             ) : (
                 <div className="space-y-4">
                     {filteredRequests.map(req => (
-                        <div key={req.id} className="group p-6 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-slate-200 dark:border-white/10 hover:border-orange-500/40 hover:shadow-xl hover:shadow-orange-600/5 transition-all duration-500 flex flex-col md:flex-row gap-6 items-start md:items-center relative">
+                        <div key={req.id} className="group p-5 bg-white dark:bg-[#0c0c0c] rounded-[24px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 hover:shadow-xl transition-all duration-500 flex flex-col md:flex-row gap-5 items-start md:items-center relative overflow-hidden">
                             {req.user_id === userProfile?.id && (
-                                <div className="absolute top-2 right-2 flex gap-1 z-30">
-                                    <button onClick={() => handleEdit(req)} className="p-2 bg-white/90 dark:bg-black/80 rounded-full text-blue-500 hover:text-blue-600 shadow-sm border-none cursor-pointer backdrop-blur-md">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                <div className="absolute top-3 right-3 flex gap-1 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => handleEdit(req)} className="p-1.5 bg-white/90 dark:bg-black/80 rounded-lg text-blue-500 hover:text-blue-600 shadow-sm border-none cursor-pointer backdrop-blur-md">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                                     </button>
-                                    <button onClick={() => handleDelete(req.id)} className="p-2 bg-white/90 dark:bg-black/80 rounded-full text-red-500 hover:text-red-600 shadow-sm border-none cursor-pointer backdrop-blur-md">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>
+                                    <button onClick={() => handleDelete(req.id)} className="p-1.5 bg-white/90 dark:bg-black/80 rounded-lg text-red-500 hover:text-red-600 shadow-sm border-none cursor-pointer backdrop-blur-md">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
                                     </button>
                                 </div>
                             )}
 
-                            <div className="w-12 h-12 rounded-[18px] bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white text-lg font-black shadow-lg shrink-0">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white text-base font-black shadow-lg shrink-0">
                                 {req.user_username?.[0]?.toUpperCase() || 'V'}
                             </div>
 
-                            <div className="flex-1 space-y-2 text-left">
+                            <div className="flex-1 space-y-1.5 text-left min-w-0">
                                 <div className="flex flex-wrap items-center gap-2">
-                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">{req.user_username || 'Anonymous Verto'}</h4>
-                                    <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded-md text-[8px] font-black uppercase tracking-widest">{req.status}</span>
+                                    <h4 className="text-[16px] font-bold text-slate-900 dark:text-white tracking-tight leading-tight">{req.user_username || 'Anonymous Verto'}</h4>
+                                    <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-500 rounded text-[7px] font-black uppercase tracking-widest">{req.status}</span>
                                 </div>
-                                <p className="text-xs font-bold text-slate-600 dark:text-slate-400 leading-relaxed italic">"{req.preferences}"</p>
+                                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight italic line-clamp-1">"{req.preferences}"</p>
                                 <div className="flex flex-wrap gap-4 pt-1">
-                                    <div className="flex items-center gap-2 text-slate-400 dark:text-white/30 skew-x-[-12deg]">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                                        <span className="text-[9px] font-black uppercase tracking-widest">{req.location}</span>
+                                    <div className="flex items-center gap-1.5 text-slate-400 dark:text-white/20">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                                        <span className="text-[8px] font-black uppercase tracking-widest">{req.location}</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-slate-400 dark:text-white/30 skew-x-[-12deg]">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></svg>
-                                        <span className="text-[9px] font-black uppercase tracking-widest">Budget: {req.budget}</span>
+                                    <div className="flex items-center gap-1.5 text-slate-400 dark:text-white/20">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></svg>
+                                        <span className="text-[8px] font-black uppercase tracking-widest">Budget: {req.budget}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <button className="w-full md:w-auto px-5 py-3 bg-slate-100 dark:bg-white/5 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-white hover:bg-orange-500 hover:text-white transition-all border-none cursor-pointer">
+                            <button className="w-full md:w-auto px-4 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white dark:hover:text-white transition-all border-none cursor-pointer shadow-lg shadow-black/5">
                                 Connect
                             </button>
                         </div>

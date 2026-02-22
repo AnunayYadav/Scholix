@@ -273,7 +273,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
           </div>
         </header>
 
-        <div className="glass-panel p-10 md:p-14 rounded-[56px] shadow-2xl flex flex-col md:flex-row items-center gap-12 relative overflow-hidden">
+        <div className="glass-panel p-8 md:p-10 rounded-[32px] shadow-2xl flex flex-col md:flex-row items-center gap-10 relative overflow-hidden">
           <ScoreAura score={result.totalScore} label="Resume Score" />
 
           <div className="flex-1 space-y-6">
@@ -290,7 +290,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
           </div>
         </div>
 
-        <div className="glass-panel p-8 md:p-12 rounded-[56px] shadow-2xl space-y-8 animate-fade-in relative overflow-visible">
+        <div className="glass-panel p-6 md:p-8 rounded-[32px] shadow-2xl space-y-6 animate-fade-in relative overflow-visible">
           <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-100 dark:border-white/5 pb-8">
             <div>
               <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Content Check</h3>
@@ -299,7 +299,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
           </header>
 
           <div className="relative overflow-visible">
-            <div className="max-h-[600px] overflow-y-auto custom-scrollbar p-8 md:p-12 bg-black rounded-[40px] border border-white/5 shadow-inner">
+            <div className="max-h-[600px] overflow-y-auto custom-scrollbar p-6 md:p-8 bg-black rounded-[24px] border border-white/5 shadow-inner">
               <div className="text-sm md:text-base text-slate-300 font-medium leading-relaxed whitespace-pre-wrap font-mono">
                 {result.annotatedContent.map((fragment, i) => (
                   <FragmentHighlight key={i} fragment={fragment} onHover={handleFragmentHover} />
@@ -317,7 +317,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`p-5 rounded-[32px] border text-left transition-all h-full flex flex-col justify-between group ${isActive ? 'bg-orange-600 border-orange-500 shadow-xl shadow-orange-600/20 text-white scale-[1.02]' : 'bg-white dark:bg-black border-slate-100 dark:border-white/10 text-slate-500 hover:border-orange-500/30'}`}
+                className={`p-4 rounded-[24px] border text-left transition-all h-full flex flex-col justify-between group ${isActive ? 'bg-orange-600 border-orange-500 shadow-xl shadow-orange-600/20 text-white scale-[1.02]' : 'bg-white dark:bg-black border-slate-100 dark:border-white/10 text-slate-500 hover:border-orange-500/30'}`}
               >
                 <p className={`text-xl font-black ${isActive ? 'text-white' : 'text-slate-900 dark:text-white group-hover:text-orange-600'}`}>{catData.score}%</p>
                 <p className={`text-[8px] font-black uppercase tracking-tight leading-tight ${isActive ? 'text-white/80' : 'text-slate-400'}`}>{cat.label}</p>
@@ -349,14 +349,14 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
         </div>
       )}
 
-      <div className="glass-panel p-8 md:p-12 rounded-[64px] shadow-2xl space-y-10">
+      <div className="glass-panel p-8 md:p-10 rounded-[32px] shadow-2xl space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <div className="space-y-5">
             <div className="flex items-center gap-3">
               <div className="w-7 h-7 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600 font-black text-[10px]">1</div>
               <label className="text-[9px] font-black uppercase text-slate-400 tracking-[0.2em] block">Your Resume</label>
             </div>
-            <div className="relative border-4 border-dashed border-slate-100 dark:border-white/5 rounded-[40px] p-12 text-center hover:border-orange-500/40 transition-all bg-slate-50 dark:bg-white/[0.02] group cursor-pointer shadow-inner">
+            <div className="relative border-4 border-dashed border-slate-100 dark:border-white/5 rounded-[24px] p-8 text-center hover:border-orange-500/40 transition-all bg-slate-50 dark:bg-white/[0.02] group cursor-pointer shadow-inner">
               <input type="file" accept=".pdf" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
               <IconFile />
               <p className="text-sm font-black uppercase tracking-widest text-slate-400 group-hover:text-orange-600 transition-colors">
