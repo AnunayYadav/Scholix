@@ -173,7 +173,7 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             )}
 
             {showPostModal && (
-                <div className="fixed inset-0 z-[20000] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md">
+                <div className="fixed inset-0 z-[20000] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
                     <div className="bg-white dark:bg-[#0a0a0a] w-full max-w-md rounded-[32px] p-6 relative shadow-2xl border border-slate-200 dark:border-white/10 animate-slide-up">
                         <button onClick={closeModal} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1 tracking-tighter uppercase">{editingRequest ? 'Edit Request' : 'Find Roommate'}</h3>

@@ -36,6 +36,30 @@
     }
   }
 
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px) scale(0.98);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
   @keyframes float {
 
     0%,
@@ -118,6 +142,8 @@
 
   --animate-cursor-blink: blink 0.8s ease-in-out infinite;
   --animate-char-reveal: char-reveal 0.2s ease-out forwards;
+  --animate-slide-up: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-scale-in: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 :root {
@@ -207,8 +233,8 @@ h4,
 }
 
 .modal-overlay {
-  @apply fixed inset-0 z-[10000] flex items-start justify-center p-4 pt-20 md:pt-24 backdrop-blur-xl animate-fade-in overflow-y-auto overflow-x-hidden;
-  background: rgba(var(--overlay-color-rgb), 0.4);
+  @apply fixed inset-0 z-[10000] flex items-start justify-center p-4 pt-20 md:pt-24 backdrop-blur-xl overflow-y-auto overflow-x-hidden;
+  background: rgba(0, 0, 0, 0.7);
 }
 
 :root {
@@ -229,7 +255,7 @@ h4,
 }
 
 .nexus-modal {
-  @apply bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[40px] overflow-hidden flex flex-col my-auto transition-all animate-fade-in text-slate-900 dark:text-white max-h-[90vh];
+  @apply bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[40px] overflow-hidden flex flex-col my-auto transition-all animate-slide-up text-slate-900 dark:text-white max-h-[90vh];
   box-shadow: 0 32px 128px rgba(0, 0, 0, 0.4);
 }
 
