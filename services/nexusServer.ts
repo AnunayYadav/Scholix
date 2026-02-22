@@ -157,6 +157,48 @@ class NexusServer {
     } catch (e) { return { registered: 0, visitors: 0, totalViews: 0 }; }
   }
 
+  static async trackPageView(path: string): Promise<void> {
+    const client = getSupabase();
+    if (!client) return;
+
+    const SESSION_KEY = `viewed_${path}`;
+    const isNewVisitor = !sessionStorage.getItem(SESSION_KEY);
+
+    try {
+      await client.rpc('increment_page_stat', { p_path: path, p_is_new_visitor: isNewVisitor });
+      if (isNewVisitor) sessionStorage.setItem(SESSION_KEY, 'true');
+    } catch (e) {
+      console.warn("Page tracking legacy fallback:", e);
+      // Fallback if RPC is not available (simple insert into site_views)
+      await this.recordVisit();
+    }
+  }
+
+  static async trackEvent(eventName: string): Promise<void> {
+    const client = getSupabase();
+    if (!client) return;
+    try {
+      await client.rpc('increment_event_stat', { p_event_name: eventName });
+    } catch (e) {
+      console.warn("Event tracking failed:", e);
+    }
+  }
+
+  static async getDetailedStats(): Promise<{ pageStats: any[], eventStats: any[] }> {
+    const client = getSupabase();
+    if (!client) return { pageStats: [], eventStats: [] };
+
+    const [pages, events] = await Promise.all([
+      client.from('page_stats').select('*').order('views', { ascending: false }),
+      client.from('event_stats').select('*').order('count', { ascending: false })
+    ]);
+
+    return {
+      pageStats: pages.data || [],
+      eventStats: events.data || []
+    };
+  }
+
   static async signIn(identifier: string, pass: string) {
     const client = getSupabase();
     if (!client) throw new Error("Registry is offline.");

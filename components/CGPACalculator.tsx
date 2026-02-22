@@ -143,7 +143,9 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
       totalCredits += Number(c.credits) || 0;
       gradeCounts[c.grade] = (gradeCounts[c.grade] || 0) + 1;
     });
-    return { sgpa: totalCredits === 0 ? 0 : totalPoints / totalCredits, totalPoints, totalCredits, gradeCounts };
+    const result = { sgpa: totalCredits === 0 ? 0 : totalPoints / totalCredits, totalPoints, totalCredits, gradeCounts };
+    if (totalCredits > 0) NexusServer.trackEvent('cgpa_calculated');
+    return result;
   }, [courses]);
 
   const overallCGPA = useMemo(() => {

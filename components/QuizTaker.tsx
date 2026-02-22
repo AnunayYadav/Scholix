@@ -136,6 +136,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
         await NexusServer.saveQuestionsToBank(selectedSubject.name, unit, questions.filter(q => q.unit === unit));
       }
 
+      NexusServer.trackEvent('quiz_generated');
       startQuiz(questions, false);
 
     } catch (err: any) {

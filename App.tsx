@@ -18,6 +18,7 @@ import MarketplaceHub from './components/MarketplaceHub.tsx';
 import RoommateFinder from './components/RoommateFinder.tsx';
 import EmergencyContacts from './components/EmergencyContacts.tsx';
 import AIToolsDirectory from './components/AIToolsDirectory.tsx';
+import AdminStats from './components/AdminStats.tsx';
 import { ModuleType, UserProfile } from './types.ts';
 import NexusServer from './services/nexusServer.ts';
 import { Analytics } from "@vercel/analytics/react";
@@ -42,6 +43,7 @@ const getModuleFromPath = (path: string): ModuleType => {
   if (p.endsWith('/roommate')) return ModuleType.ROOMMATE;
   if (p.endsWith('/emergency')) return ModuleType.EMERGENCY;
   if (p.endsWith('/ai-tools')) return ModuleType.AI_TOOLS;
+  if (p.endsWith('/admin-stats')) return ModuleType.ADMIN_STATS;
   return ModuleType.DASHBOARD;
 };
 
@@ -64,6 +66,7 @@ const getPathFromModule = (module: ModuleType): string => {
     case ModuleType.ROOMMATE: return '/roommate';
     case ModuleType.EMERGENCY: return '/emergency';
     case ModuleType.AI_TOOLS: return '/ai-tools';
+    case ModuleType.ADMIN_STATS: return '/admin-stats';
     default: return '/';
   }
 };
@@ -202,6 +205,10 @@ const AppContent: React.FC = () => {
   const currentModule = getModuleFromPath(location.pathname);
 
   useEffect(() => {
+    NexusServer.trackPageView(location.pathname);
+  }, [location.pathname]);
+
+  useEffect(() => {
     NexusServer.recordVisit();
     const savedTheme = (localStorage.getItem('theme') as 'light' | 'dark') || 'dark';
     setTheme(savedTheme);
@@ -301,6 +308,17 @@ const AppContent: React.FC = () => {
                           </div>
                           View Terminal
                         </button>
+                        {userProfile.is_admin && (
+                          <button
+                            onClick={() => { navigate('/admin-stats'); setIsProfileMenuOpen(false); }}
+                            className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-white/70 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-600/20 transition-colors">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
+                            </div>
+                            System Intelligence
+                          </button>
+                        )}
                         <button
                           onClick={async () => { await NexusServer.signOut(); navigate('/'); setIsProfileMenuOpen(false); }}
                           className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-red-500 hover:bg-red-500/10 border-none bg-transparent flex items-center gap-3 transition-all"
@@ -342,6 +360,7 @@ const AppContent: React.FC = () => {
               <Route path="/roommate" element={<RoommateFinder userProfile={userProfile} />} />
               <Route path="/emergency" element={<EmergencyContacts />} />
               <Route path="/ai-tools" element={<AIToolsDirectory />} />
+              <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
