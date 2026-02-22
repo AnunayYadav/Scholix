@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { RoommateRequest, UserProfile } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import { showToast } from './Toast.tsx';
 
 const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile }) => {
+    const navigate = useNavigate();
     const [requests, setRequests] = useState<RoommateRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [showPostModal, setShowPostModal] = useState(false);
@@ -103,7 +105,16 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                     </h2>
                     <p className="text-slate-500 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Find your perfect match to share your space.</p>
                 </div>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                    <button
+                        onClick={() => navigate('/marketplace')}
+                        className="p-3.5 rounded-2xl bg-white dark:bg-[#0c0c0c] border border-slate-200 dark:border-white/5 text-slate-400 hover:text-orange-500 transition-all shadow-sm cursor-pointer flex items-center gap-2"
+                        title="Back to Market"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><polyline points="15 18 9 12 15 6" /></svg>
+                        <span className="hidden lg:inline text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-orange-500">Market Hub</span>
+                    </button>
+                    <div className="h-8 w-[1px] bg-slate-200 dark:bg-white/10 mx-1 hidden sm:block" />
                     <button
                         onClick={() => { if (!userProfile) showToast("Sign in required.", "info"); else setShowUserOnly(!showUserOnly); }}
                         className={`px-6 py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] transition-all border-none cursor-pointer flex items-center gap-2 ${showUserOnly ? 'bg-orange-600 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white'}`}

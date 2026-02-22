@@ -152,19 +152,29 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Buy, Sell & Trade within the LPU Community</p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
-                    <div className="flex items-center bg-white dark:bg-[#0c0c0c] p-1.5 rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm overflow-x-auto custom-scrollbar no-scrollbar">
-                        {categories.map(c => (
-                            <button
-                                key={c}
-                                onClick={() => setFilter(c)}
-                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border-none cursor-pointer whitespace-nowrap ${filter === c
-                                    ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-600/20'
-                                    : 'text-slate-400 hover:text-orange-500 dark:text-slate-500 dark:hover:text-white bg-transparent'
-                                    }`}
-                            >
-                                {c}
-                            </button>
-                        ))}
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center bg-white dark:bg-[#0c0c0c] p-1.5 rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm overflow-x-auto custom-scrollbar no-scrollbar">
+                            {categories.map(c => (
+                                <button
+                                    key={c}
+                                    onClick={() => setFilter(c)}
+                                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border-none cursor-pointer whitespace-nowrap ${filter === c
+                                        ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-600/20'
+                                        : 'text-slate-400 hover:text-orange-500 dark:text-slate-500 dark:hover:text-white bg-transparent'
+                                        }`}
+                                >
+                                    {c}
+                                </button>
+                            ))}
+                        </div>
+                        <button
+                            onClick={() => navigate('/roommate')}
+                            className="p-3.5 rounded-2xl bg-white dark:bg-[#0c0c0c] border border-slate-200 dark:border-white/5 text-slate-400 hover:text-orange-500 transition-all shadow-sm cursor-pointer flex items-center gap-2"
+                            title="Find Roommates"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                            <span className="hidden lg:inline text-[9px] font-black uppercase tracking-widest">Roommates</span>
+                        </button>
                     </div>
                     <div className="flex items-center gap-3">
                         <button
