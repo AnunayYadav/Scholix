@@ -298,11 +298,15 @@ class NexusServer {
     if (error) throw error;
   }
 
+  static sanitizeStoragePath(name: string): string {
+    return name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  }
+
   static async uploadAvatar(userId: string, file: File): Promise<string> {
     const client = getSupabase();
     if (!client) throw new Error("Registry offline.");
     const fileExt = file.name.split('.').pop();
-    const filePath = `avatars/${userId}/${Math.random()}.${fileExt}`;
+    const filePath = `avatars/${userId}/${Math.random()}.${this.sanitizeStoragePath(fileExt || 'png')}`;
     const { error: uploadError } = await client.storage.from('nexus-documents').upload(filePath, file);
     if (uploadError) throw uploadError;
     const { data: { publicUrl } } = client.storage.from('nexus-documents').getPublicUrl(filePath);
@@ -357,7 +361,8 @@ class NexusServer {
   static async uploadFile(file: File, name: string, desc: string, sub: string, sem: string, type: string, uid: string, admin: boolean, program: string) {
     const client = getSupabase();
     if (!client) return;
-    const path = `community/${Math.random().toString(36).substring(7)}_${file.name}`;
+    const cleanName = this.sanitizeStoragePath(file.name);
+    const path = `community/${Math.random().toString(36).substring(7)}_${cleanName}`;
     const { error: storageErr } = await client.storage.from('nexus-documents').upload(path, file);
     if (storageErr) throw storageErr;
     const { error: dbErr } = await client.from('documents').insert([{

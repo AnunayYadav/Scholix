@@ -57,7 +57,8 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             let imageUrls: string[] = editingItem?.images || [];
 
             if (selectedFile) {
-                const path = `marketplace/${userProfile.id}/${Date.now()}_${selectedFile.name}`;
+                const cleanName = NexusServer.sanitizeStoragePath(selectedFile.name);
+                const path = `marketplace/${userProfile.id}/${Date.now()}_${cleanName}`;
                 const publicUrl = await NexusServer.uploadMarketplaceImage(selectedFile, path);
                 imageUrls = [publicUrl]; // For now we only support one image for simplicity in UI
             }
