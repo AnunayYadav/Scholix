@@ -34,7 +34,13 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     const fetchItems = async () => {
         setLoading(true);
         const data = await NexusServer.fetchMarketplaceItems();
-        setItems(data as MarketplaceItem[]);
+        // Map joined seller profile data to the item properties
+        const mapped = data.map((item: any) => ({
+            ...item,
+            seller_username: item.seller?.username || item.seller_username || 'Verto Anonymous',
+            seller_avatar: item.seller?.avatar_url || item.seller_avatar
+        }));
+        setItems(mapped as MarketplaceItem[]);
         setLoading(false);
     };
 
@@ -137,7 +143,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     });
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-6 pb-32">
+        <div className="max-w-[1440px] mx-auto px-6 py-10 pb-32">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div className="space-y-1 text-left">
                     <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
@@ -182,13 +188,13 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             </div>
 
             {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-4">
                     {Array.from({ length: 8 }).map((_, i) => (
                         <div key={i} className="h-80 bg-slate-100 dark:bg-white/5 rounded-[40px] animate-pulse" />
                     ))}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-4">
                     {filteredItems.map(item => (
                         <div key={item.id} className="group p-4 bg-white dark:bg-[#0c0c0c] rounded-[48px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 shadow-sm hover:shadow-2xl hover:shadow-orange-600/5 transition-all duration-500 flex flex-col relative overflow-hidden">
                             {/* Tags Overlay */}
@@ -278,7 +284,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
 
             {/* Detailed View Modal */}
             {selectedItem && (
-                <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 md:p-6 bg-slate-900/60 backdrop-blur-xl animate-fade-in" onClick={() => setSelectedItem(null)}>
+                <div className="fixed inset-0 z-[20000] flex items-center justify-center p-4 md:p-6 bg-slate-900/60 backdrop-blur-xl animate-fade-in" onClick={() => setSelectedItem(null)}>
                     <div className="bg-white dark:bg-[#080808] w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-[40px] md:rounded-[56px] relative shadow-2xl border border-white/10 flex flex-col md:flex-row group animate-scale-up" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setSelectedItem(null)} className="absolute top-6 right-6 z-50 p-3 bg-black/20 hover:bg-orange-600 backdrop-blur-md text-white rounded-2xl transition-all border-none cursor-pointer">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
