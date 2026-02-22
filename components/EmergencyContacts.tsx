@@ -4,7 +4,7 @@ import { showToast } from './Toast.tsx';
 interface ContactInfo {
     id: string;
     title: string;
-    category: 'Hostel' | 'Doctor' | 'Nursing' | 'Counseling' | 'Facility' | 'Hospital' | 'Administrative' | 'Support';
+    category: 'Hostel' | 'Doctor' | 'Nursing' | 'Counseling' | 'Facility' | 'Hospital' | 'Administrative' | 'Support' | 'Women Support' | 'Fire & Safety' | 'Accounts' | 'Student Relations';
     subTitle?: string;
     description?: string;
     numbers: string[];
@@ -165,12 +165,34 @@ const EmergencyContacts: React.FC = () => {
         { id: 'sacred_heart', title: 'Sacred Heart', subTitle: 'General Support', category: 'Hospital', numbers: ['0181-2670390'], description: 'Charitable Healthcare' },
         { id: 'civil_phag', title: 'Civil Phagwara', subTitle: 'Govt Support', category: 'Hospital', numbers: ['01824-260275'], description: 'Phagwara City Hospital' },
 
-        // Administrative & Student Relations
+        // Women Help Center & Safety Cell (9 AM - 5 PM)
+        { id: 'monica_gulati', title: 'Dr. Monica Gulati', category: 'Women Support', numbers: ['9915020408'], blocks: [{ label: 'Landline', number: '01824-444040' }], subTitle: 'Women Help Center' },
+        { id: 'ravinder_kaur', title: 'Mrs. Ravinder Kaur', category: 'Women Support', numbers: ['9878977800'], blocks: [{ label: 'Landline', number: '01824-444235' }], subTitle: 'Women Help Center' },
+        { id: 'nirpaljeet_kaur', title: 'Ms. Nirpaljeet Kaur', category: 'Women Support', numbers: ['7986757060'], subTitle: 'Women Help Center' },
+        { id: 'surinder_khurana_women', title: 'Mr. Surinder Khurana', category: 'Women Support', numbers: ['9876644331'], blocks: [{ label: 'Landline', number: '01824-444097' }], subTitle: 'Women Help Center' },
+
+        // Fire and Safety Cell (24x7)
+        { id: 'fire_safety_office', title: 'Office of Fire & Safety', category: 'Fire & Safety', numbers: [], blocks: [{ label: 'Landline 24x7', number: '01824-444201' }], subTitle: 'Fire & Safety Cell' },
+        { id: 'fire_officer_minhas', title: 'Mr. Kuldeep Singh Minhas', category: 'Fire & Safety', numbers: ['9780036402'], subTitle: 'Fire Officer' },
+        { id: 'fire_tender', title: 'Fire Tender (Emergency)', category: 'Fire & Safety', numbers: ['7508183870'], subTitle: 'Immediate Response' },
+        { id: 'surinder_khurana_fire', title: 'Mr. Surinder Kumar Khurana', category: 'Fire & Safety', numbers: ['9876644331'], blocks: [{ label: 'Landline', number: '01824-444097' }], subTitle: 'Safety Cell' },
+        { id: 'sunil_sharma_safety', title: 'Mr. Sunil Sharma', category: 'Fire & Safety', numbers: ['9878426874'], blocks: [{ label: 'Landline', number: '01824-444661' }], subTitle: 'Safety Cell' },
+        { id: 'brig_dhillon', title: 'Brig. G. S. Dhillon', category: 'Fire & Safety', numbers: ['9780005945'], blocks: [{ label: 'Landline', number: '01824-444200' }], subTitle: 'Director Security' },
+
+        // Accounts & Fee Queries (9 AM - 5 PM)
+        { id: 'accounts_helpdesk', title: 'Accounts Help Desk', category: 'Accounts', numbers: [], blocks: [{ label: 'Landline', number: '01824-444337' }], description: 'Email: helpdesk.accounts@lpu.co.in' },
+        { id: 'krishan_lal', title: 'Mr. Krishan Lal', category: 'Accounts', numbers: ['8054848002'], subTitle: 'Coordinator (Dept)', description: 'Email: krishan.lal@lpu.co.in' },
+        { id: 'manohar_sharma', title: 'Mr. Manohar Sharma', category: 'Accounts', numbers: ['9876740040'], subTitle: 'Head of Division', description: 'Email: cgm.lovely@gmail.com' },
+
+        // Division of Student Relationship (9 AM - 5 PM)
+        { id: 'dsr_helpline', title: 'Parental / Student Helpline', category: 'Student Relations', numbers: ['7347000929', '8968667777'], blocks: [{ label: 'Landline', number: '01824-510311' }], description: 'Email: parents@lpu.co.in' },
+
+        // Administrative & Student Relations (General)
         { id: 'dsw_main', title: 'DSW Office', subTitle: 'Student Welfare', category: 'Administrative', numbers: ['01824-444234'], description: 'Grievance & Welfare' },
         { id: 'rms_helpline', title: 'RMS Support', subTitle: 'Student Relation', category: 'Administrative', numbers: ['01824-444040'], description: 'Relationship Management' },
         { id: 'security_ctrl', title: 'Security HQ', subTitle: 'Control Room', category: 'Administrative', numbers: ['01824-444501'], description: '24/7 Campus Monitoring' },
         { id: 'admission_cell', title: 'Admissions', subTitle: 'Counseling', category: 'Administrative', numbers: ['01824-404404'], description: 'Programs & Guidance' },
-        { id: 'accounts', title: 'Accounts Desk', subTitle: 'Fee Help', category: 'Administrative', numbers: ['01824444337'] },
+        { id: 'accounts_desk', title: 'Accounts Desk', subTitle: 'Fee Help', category: 'Administrative', numbers: ['01824444337'] },
     ];
 
     const filteredDirectory = useMemo(() => {
@@ -254,7 +276,7 @@ const EmergencyContacts: React.FC = () => {
                 </div>
 
                 {/* Grouped Folders */}
-                {['Hostel', 'Doctor', 'Nursing', 'Counseling', 'Hospital', 'Facility', 'Administrative'].map((category) => {
+                {['Hostel', 'Doctor', 'Nursing', 'Women Support', 'Fire & Safety', 'Counseling', 'Hospital', 'Facility', 'Administrative', 'Accounts', 'Student Relations'].map((category) => {
                     const categoryItems = filteredDirectory.filter(item => item.category === category);
                     if (categoryItems.length === 0) return null;
 
@@ -273,7 +295,11 @@ const EmergencyContacts: React.FC = () => {
                                                 category === 'Counseling' ? 'bg-purple-600 text-white' :
                                                     category === 'Hospital' ? 'bg-cyan-600 text-white' :
                                                         category === 'Facility' ? 'bg-slate-700 text-white' :
-                                                            'bg-emerald-600 text-white'
+                                                            category === 'Women Support' ? 'bg-rose-600 text-white' :
+                                                                category === 'Fire & Safety' ? 'bg-red-700 text-white' :
+                                                                    category === 'Accounts' ? 'bg-amber-600 text-white' :
+                                                                        category === 'Student Relations' ? 'bg-emerald-600 text-white' :
+                                                                            'bg-slate-600 text-white'
                                         }`}>
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 md:w-6 h-5 md:h-6">
                                             {category === 'Hostel' && <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />}
@@ -283,6 +309,10 @@ const EmergencyContacts: React.FC = () => {
                                             {category === 'Hospital' && <path d="M19 14l-2-2m0 0l-2 2m2-2V6h-4" />}
                                             {category === 'Facility' && <path d="M3 21h18M3 7v1h18V7l-9-5zm3 3v10m6-10v10m6-10v10" />}
                                             {category === 'Administrative' && <path d="M16 4h2a2 2 0 0 1-2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M8 2h8v4H8z" />}
+                                            {category === 'Women Support' && <circle cx="12" cy="12" r="10" />}
+                                            {category === 'Fire & Safety' && <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />}
+                                            {category === 'Accounts' && <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />}
+                                            {category === 'Student Relations' && <path d="M17 21v-2a4 4 0 0 0-3-3.87M9 21v-2a4 4 0 0 1 3-3.87M16 3.13a4 4 0 0 1 0 7.75" />}
                                         </svg>
                                     </div>
                                     <div className="min-w-0 text-left">
