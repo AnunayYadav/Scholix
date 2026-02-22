@@ -426,6 +426,41 @@ class NexusServer {
     }
   }
 
+  /**
+   * Marketplace Methods
+   */
+  static async fetchMarketplaceItems(): Promise<any[]> {
+    const client = getSupabase();
+    if (!client) return [];
+    const { data, error } = await client.from('marketplace_items').select('*, seller:profiles(username, avatar_url)').order('created_at', { ascending: false });
+    if (error) { console.error("Marketplace fetch error:", error); return []; }
+    return data || [];
+  }
+
+  static async createMarketplaceItem(item: any) {
+    const client = getSupabase();
+    if (!client) return;
+    const { error } = await client.from('marketplace_items').insert([item]);
+    if (error) throw error;
+  }
+
+  /**
+   * Roommate Finder Methods
+   */
+  static async fetchRoommateRequests(): Promise<any[]> {
+    const client = getSupabase();
+    if (!client) return [];
+    const { data, error } = await client.from('roommate_requests').select('*, user:profiles(username, avatar_url)').order('created_at', { ascending: false });
+    if (error) { console.error("Roommate fetch error:", error); return []; }
+    return data || [];
+  }
+
+  static async createRoommateRequest(request: any) {
+    const client = getSupabase();
+    if (!client) return;
+    const { error } = await client.from('roommate_requests').insert([request]);
+    if (error) throw error;
+  }
 }
 
 export default NexusServer;

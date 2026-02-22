@@ -12,7 +12,58 @@ export enum ModuleType {
   ABOUT = 'ABOUT',
   PROFILE = 'PROFILE',
   TIMETABLE = 'TIMETABLE',
-  QUIZ = 'QUIZ'
+  QUIZ = 'QUIZ',
+  MARKETPLACE = 'MARKETPLACE',
+  ROOMMATE = 'ROOMMATE',
+  EMERGENCY = 'EMERGENCY',
+  AI_TOOLS = 'AI_TOOLS'
+}
+
+export interface MarketplaceItem {
+  id: string;
+  seller_id: string;
+  title: string;
+  description: string;
+  price: number;
+  category: string;
+  condition: string;
+  images: string[];
+  status: 'Available' | 'Sold';
+  created_at: string;
+  seller_username?: string;
+  seller_avatar?: string;
+}
+
+export interface RoommateRequest {
+  id: string;
+  user_id: string;
+  location: string;
+  budget: string;
+  preferences: string;
+  gender_preference: string;
+  status: 'Active' | 'Found';
+  created_at: string;
+  user_username?: string;
+  user_avatar?: string;
+}
+
+export interface EmergencyContact {
+  id: string;
+  name: string;
+  designation: string;
+  phone: string;
+  email: string;
+  category: 'Administration' | 'Hostel' | 'Security' | 'Healthcare' | 'Helpdesk';
+}
+
+export interface AITool {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  category: 'Writing' | 'Coding' | 'Research' | 'Design' | 'General' | 'Productivity' | 'Presentations' | 'Video' | 'Audio' | 'Business';
+  pricing: 'Free' | 'Freemium' | 'Paid';
+  tags: string[];
 }
 
 export interface UserProfile {

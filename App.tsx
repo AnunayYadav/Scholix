@@ -14,6 +14,10 @@ import AuthModal from './components/AuthModal.tsx';
 import ProfileSection from './components/ProfileSection.tsx';
 import TimetableHub from './components/TimetableHub.tsx';
 import QuizTaker from './components/QuizTaker.tsx';
+import MarketplaceHub from './components/MarketplaceHub.tsx';
+import RoommateFinder from './components/RoommateFinder.tsx';
+import EmergencyContacts from './components/EmergencyContacts.tsx';
+import AIToolsDirectory from './components/AIToolsDirectory.tsx';
 import { ModuleType, UserProfile } from './types.ts';
 import NexusServer from './services/nexusServer.ts';
 import { Analytics } from "@vercel/analytics/react";
@@ -34,6 +38,10 @@ const getModuleFromPath = (path: string): ModuleType => {
   if (p.endsWith('/help')) return ModuleType.HELP;
   if (p.endsWith('/about')) return ModuleType.ABOUT;
   if (p.endsWith('/profile')) return ModuleType.PROFILE;
+  if (p.endsWith('/marketplace')) return ModuleType.MARKETPLACE;
+  if (p.endsWith('/roommate')) return ModuleType.ROOMMATE;
+  if (p.endsWith('/emergency')) return ModuleType.EMERGENCY;
+  if (p.endsWith('/ai-tools')) return ModuleType.AI_TOOLS;
   return ModuleType.DASHBOARD;
 };
 
@@ -52,6 +60,10 @@ const getPathFromModule = (module: ModuleType): string => {
     case ModuleType.PROFILE: return '/profile';
     case ModuleType.DASHBOARD: return '/';
     case ModuleType.SHARE_CGPA: return '/share-cgpa';
+    case ModuleType.MARKETPLACE: return '/marketplace';
+    case ModuleType.ROOMMATE: return '/roommate';
+    case ModuleType.EMERGENCY: return '/emergency';
+    case ModuleType.AI_TOOLS: return '/ai-tools';
     default: return '/';
   }
 };
@@ -106,14 +118,14 @@ const BackgroundEffects: React.FC = React.memo(() => {
 
 const DashboardHero: React.FC = React.memo(() => {
   return (
-    <div className="relative overflow-hidden bg-transparent pt-20 pb-12 px-6">
-      <div className="max-w-4xl mx-auto text-center space-y-8">
-        <h2 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter leading-[0.9] drop-shadow-sm min-h-[2em]">
+    <div className="relative overflow-hidden bg-transparent pt-16 pb-10 px-6">
+      <div className="max-w-4xl mx-auto text-center space-y-6">
+        <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter leading-[0.9] drop-shadow-sm min-h-[2em]">
           Your LPU Journey, <br />
           <TypingText />
         </h2>
 
-        <p className="text-slate-600 dark:text-slate-400 text-base md:text-xl font-medium leading-relaxed max-w-2xl mx-auto">
+        <p className="text-slate-600 dark:text-slate-400 text-sm md:text-lg font-medium leading-relaxed max-w-2xl mx-auto">
           Master your academics with AI-powered quiz generation, precision CGPA tracking, and seamless
           schedule synchronization.
         </p>
@@ -133,34 +145,40 @@ const Dashboard: React.FC = React.memo(() => {
     { id: 'attendance', name: 'Duty Guard', desc: 'Track your attendance and safe-bunks.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" /><path d="m9 12 2 2 4-4" /></svg> },
     { id: 'placement', name: 'Placement Prefect', desc: 'Analyze resumes and prep for jobs.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg> },
     { id: 'campus', name: 'Campus Navigator', desc: 'Find blocks and rooms with ease.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg> },
-    { id: 'freshers', name: 'Freshers Kit', desc: 'Essential guide for newcomers.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M20 7h-7L10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" /></svg> }
+    { id: 'freshers', name: 'Freshers Kit', desc: 'Essential guide for newcomers.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M20 7h-7L10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" /></svg> },
+    { id: 'marketplace', name: 'LPU Market', desc: 'Buy/Sell used books and items.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg> },
+    { id: 'roommate', name: 'Roommate Finder', desc: 'Find your perfect LPU flatmate.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg> },
+    { id: 'emergency', name: 'Rescue Line', desc: 'Emergency LPU official contacts.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg> },
+    { id: 'ai-tools', name: 'AI Directory', desc: 'Curated AI tools for students.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M12 2a10 10 0 1 0 10 10H12V2Z" /><path d="M12 12L2.1 12.1" /><path d="M12 12v9.9" /><path d="M12 12l7-7" /><path d="M12 12l7 7" /></svg> }
   ];
 
   return (
     <div className="w-full h-full pb-20">
       <DashboardHero />
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {features.map((f) => (
           <button
             key={f.id}
             onClick={() => navigate(`/${f.id}`)}
-            className="group relative p-8 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl rounded-[48px] border border-slate-200 dark:border-white/10 text-left transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2 hover:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.7)] hover:border-orange-500/40 active:scale-95 cursor-pointer overflow-hidden"
+            className="group relative p-6 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-slate-200 dark:border-white/10 text-left transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1.5 hover:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.7)] hover:border-orange-500/40 active:scale-95 cursor-pointer overflow-hidden"
           >
             {/* Ambient Background Glow on Hover */}
             <div className={`absolute inset-0 bg-gradient-to-br from-orange-500 to-red-600 opacity-0 group-hover:opacity-[0.03] dark:group-hover:opacity-[0.07] transition-opacity duration-500`} />
 
-            <div className={`relative w-16 h-16 rounded-[24px] bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white mb-8 shadow-2xl shadow-orange-500/20 group-hover:scale-110 transition-all duration-500 group-hover:rotate-3`}>
-              <div className="absolute inset-0 rounded-[24px] blur-xl opacity-40 bg-inherit -z-10 group-hover:blur-2xl transition-all" />
-              {f.icon}
+            <div className={`relative w-12 h-12 rounded-[16px] bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white mb-6 shadow-2xl shadow-orange-500/20 group-hover:scale-110 transition-all duration-500 group-hover:rotate-3`}>
+              <div className="absolute inset-0 rounded-[16px] blur-xl opacity-40 bg-inherit -z-10 group-hover:blur-2xl transition-all" />
+              <div className="scale-90">
+                {f.icon}
+              </div>
             </div>
 
-            <div className="relative space-y-3">
-              <h4 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">{f.name}</h4>
-              <p className="text-xs font-bold text-slate-500 dark:text-slate-400/80 leading-relaxed max-w-[90%]">{f.desc}</p>
+            <div className="relative space-y-2">
+              <h4 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">{f.name}</h4>
+              <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400/80 leading-relaxed max-w-[90%]">{f.desc}</p>
             </div>
 
-            <div className="absolute top-10 right-10 text-slate-300 dark:text-white/10 group-hover:text-orange-500 transition-all duration-500 group-hover:translate-x-1 group-hover:-translate-y-1">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-5 h-5"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
+            <div className="absolute top-8 right-8 text-slate-300 dark:text-white/10 group-hover:text-orange-500 transition-all duration-500 group-hover:translate-x-1 group-hover:-translate-y-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
             </div>
 
             {/* Decorative Inner Border on Hover */}
@@ -397,6 +415,10 @@ const AppContent: React.FC = () => {
               <Route path="/share-cgpa" element={<ShareReport />} />
               <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
               <Route path="/profile" element={<ProfileSection userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={(m) => navigate(getPathFromModule(m))} />} />
+              <Route path="/marketplace" element={<MarketplaceHub userProfile={userProfile} />} />
+              <Route path="/roommate" element={<RoommateFinder userProfile={userProfile} />} />
+              <Route path="/emergency" element={<EmergencyContacts />} />
+              <Route path="/ai-tools" element={<AIToolsDirectory />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>

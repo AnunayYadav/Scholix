@@ -7,31 +7,31 @@ const HelpSection: React.FC = () => {
 
   const faqs = [
     {
-      category: 'Attendance & CGPA',
+      category: 'LPU Market & Roommates',
+      questions: [
+        { q: "How do I find roommates?", a: "Navigate to the 'LPU Market' section and click on the 'Find Roommates' button at the top. You can post your requirements or connect with others looking for a stay." },
+        { q: "Is the marketplace safe?", a: "LPU Market is exclusively for verified students. However, always meet in public campus areas for exchanges. You can report suspicious listings via the feedback modal." }
+      ]
+    },
+    {
+      category: 'AI Forge (Directory)',
+      questions: [
+        { q: "Are all AI tools listed here free?", a: "We curate a mix of Free, Freemium, and Paid tools. Most student-focused tools like Gamma (for PPTs) and ChatGPT have generous free tiers. Check the tags on each card for pricing details." },
+        { q: "How often is the directory updated?", a: "The 'AI Forge' is updated weekly with the latest breakthroughs in AI for coding, research, and presentations to keep you ahead in your academics." }
+      ]
+    },
+    {
+      category: 'Tools & Academics',
       questions: [
         { q: "How does the 'Safe to Skip' calculation work?", a: "It calculates the difference between your current attendance and your target percentage (e.g., 75%) to determine how many upcoming lectures you can miss without dropping below your goal. It's accurate to the nearest session." },
         { q: "Does the CGPA calculator support LPU's relative grading?", a: "The calculator uses the standard LPU 10-point scale. Since relative grading varies by batch performance, use this as a 'Target Minimum'. If you match these grades, you're guaranteed that CGPA regardless of the curve." }
       ]
     },
     {
-      category: 'Placement Prefect (Flash)',
+      category: 'Campus & Support',
       questions: [
-        { q: "What are 'Industry Trends' in the Prefect?", a: "Instead of pasting a JD, you can select 'Trends' to evaluate your resume against 2025 technology standards for specific roles like AI Engineer or Frontend Dev. It checks for the latest high-demand keywords." },
-        { q: "What does 'Deep Scrutiny' do?", a: "It switches the AI model to a more 'ruthless' technical recruiter persona. It won't just look for words; it will judge your project complexity and phrasing impact. Be prepared for harsh feedback." }
-      ]
-    },
-    {
-      category: 'Campus Navigator',
-      questions: [
-        { q: "Why can't I see the 'Powered by' text on the map?", a: "We've optimized the map viewport for a cleaner, immersive 3D experience. The map is updated periodically to reflect new blocks and auditorium locations." },
-        { q: "How do I report a wrong mess menu?", a: "Use the 'Report Issue' button at the bottom. You can even upload a photo of the physical menu board to help us verify and update the database for everyone." }
-      ]
-    },
-    {
-      category: 'Privacy & Data',
-      questions: [
-        { q: "Is my resume stored on your servers?", a: "Resumes are processed in volatile memory for analysis and are not stored permanently. Files uploaded to the 'Content Library' are stored securely in our Nexus Vault for the community." },
-        { q: "Who manages the content library?", a: "Verified 'Admin Vertos' review every contribution to ensure notes are relevant and accurate. Your 'Personal Vault' allows you to track your own contributions." }
+        { q: "What is the 'Rescue Line'?", a: "The Rescue Line (Emergency Contacts) provides instant access to hostel wardens, campus security, and healthcare services. It's built for rapid response in critical situations." },
+        { q: "How do I contribute notes to the library?", a: "Go to 'Study Material', click 'Contribute', and upload your PYQs or notes. Our Admin Vertos will review and approve them within 24 hours." }
       ]
     }
   ];
