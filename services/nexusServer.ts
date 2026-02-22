@@ -227,10 +227,32 @@ class NexusServer {
     return data;
   }
 
+  static async ensureProfile(user: User): Promise<UserProfile> {
+    const client = getSupabase();
+    if (!client) throw new Error("Registry offline.");
+
+    const { data: existing } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
+
+    if (existing) return existing;
+
+    const metadata = user.user_metadata || {};
+    const newProfile = {
+      id: user.id,
+      email: user.email!,
+      username: metadata.username || user.email?.split('@')[0] || `verto_${user.id.slice(0, 5)}`,
+      registration_number: metadata.registration_number || null,
+      is_admin: false
+    };
+
+    const { data, error } = await client.from('profiles').insert([newProfile]).select().single();
+    if (error) throw error;
+    return data;
+  }
+
   static async updateProfile(userId: string, updates: Partial<UserProfile>): Promise<void> {
     const client = getSupabase();
     if (!client || !userId) return;
-    const { error } = await client.from('profiles').update(updates).eq('id', userId);
+    const { error } = await client.from('profiles').upsert({ id: userId, ...updates });
     if (error) throw error;
   }
 

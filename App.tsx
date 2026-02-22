@@ -208,29 +208,22 @@ const AppContent: React.FC = () => {
     document.documentElement.classList.toggle('dark', savedTheme === 'dark');
     const unsubscribeAuth = NexusServer.onAuthStateChange(async (user) => {
       if (user) {
-        const profile = await NexusServer.getProfile(user.id);
-        const metadata = user.user_metadata || {};
-
-        // Auto-sync: If DB profile is missing reg number but metadata has it, update DB
-        if (profile && !profile.registration_number && metadata.registration_number) {
-          NexusServer.updateProfile(user.id, { registration_number: metadata.registration_number })
-            .catch(() => { });
+        try {
+          // ensureProfile guarantees a record exists in 'profiles' table
+          const profile = await NexusServer.ensureProfile(user);
+          setUserProfile(profile);
+        } catch (err) {
+          console.error("Profile synchronization error:", err);
+          // Fallback to local profile if DB insert fails
+          const metadata = user.user_metadata || {};
+          setUserProfile({
+            id: user.id,
+            email: user.email!,
+            is_admin: false,
+            username: metadata.username || user.email?.split('@')[0],
+            registration_number: metadata.registration_number
+          } as UserProfile);
         }
-
-        // Deep merge: prioritize database profile, fallback to auth metadata
-        const mergedProfile = profile ? {
-          ...profile,
-          registration_number: profile.registration_number || metadata.registration_number,
-          username: profile.username || metadata.username
-        } : {
-          id: user.id,
-          email: user.email!,
-          is_admin: false,
-          username: metadata.username,
-          registration_number: metadata.registration_number
-        };
-
-        setUserProfile(mergedProfile as UserProfile);
       } else {
         setUserProfile(null);
       }
