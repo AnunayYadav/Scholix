@@ -6,64 +6,77 @@ const AIToolsDirectory: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
     const tools: AITool[] = [
-        // AI Chat & Assistants
+        // AI Chat & Assistants (General)
         { id: '1', name: 'ChatGPT', description: 'The gold standard for conversational AI and complex problem solving.', url: 'https://chat.openai.com', category: 'General', pricing: 'Freemium', tags: ['OpenAI', 'Chat'] },
         { id: '2', name: 'Gemini AI', description: 'Google\'s powerful multimodal AI integrated with the Google ecosystem.', url: 'https://gemini.google.com', category: 'General', pricing: 'Freemium', tags: ['Google', 'Search'] },
-        { id: '3', name: 'Claude AI', description: 'Advanced AI known for high-quality writing and safe reasoning.', url: 'https://claude.ai', category: 'Writing', pricing: 'Freemium', tags: ['Anthropic', 'Writing'] },
+        { id: '3', name: 'Claude AI', description: 'Advanced AI known for high-quality writing and safe reasoning.', url: 'https://claude.ai', category: 'General', pricing: 'Freemium', tags: ['Anthropic', 'Writing'] },
         { id: '4', name: 'Grok', description: 'X (Twitter)\'s real-time AI with access to live social data.', url: 'https://x.ai', category: 'General', pricing: 'Paid', tags: ['X', 'Real-time'] },
-        { id: '5', name: 'Qwen', description: 'Alibaba\'s massive language model with strong multilingual capabilities.', url: 'https://chat.qwen.ai', category: 'General', pricing: 'Free', tags: ['Alibaba', 'Global'] },
+        { id: '5', name: 'Le Chat Mistral', description: 'The premier European AI model known for efficiency and open weights.', url: 'https://chat.mistral.ai', category: 'General', pricing: 'Free', tags: ['Europe', 'Open'] },
+        { id: 'anychat', name: 'Anychat', description: 'Universal interface to access multiple AI models in one place.', url: 'https://anychat.one', category: 'General', pricing: 'Freemium', tags: ['Multi-model', 'UI'] },
+        { id: 'pi', name: 'Pi AI', description: 'A personal AI designed to be supportive, smart, and available anytime.', url: 'https://pi.ai', category: 'General', pricing: 'Free', tags: ['Personal', 'Voice'] },
+
+        // Coding
         { id: '6', name: 'DeepSeek', description: 'Hyper-efficient coding and reasoning model from China.', url: 'https://chat.deepseek.com', category: 'Coding', pricing: 'Free', tags: ['Efficiency', 'Reasoning'] },
-        { id: '7', name: 'Microsoft Copilot', description: 'Your everyday AI companion integrated into Windows and Office.', url: 'https://copilot.microsoft.com', category: 'Productivity', pricing: 'Freemium', tags: ['Microsoft', 'Work'] },
-        { id: '8', name: 'Kimi AI', description: 'Specialized in processing extremely long documents and large files.', url: 'https://kimi.moonshot.cn', category: 'Research', pricing: 'Free', tags: ['Long Context', 'PDF'] },
-        { id: '9', name: 'Anychat', description: 'Universal interface to access multiple AI models in one place.', url: 'https://anychat.one', category: 'General', pricing: 'Freemium', tags: ['Multi-model', 'UI'] },
         { id: '10', name: 'Replit Agent', description: 'Autonomous agent that builds and deploys software from natural language.', url: 'https://replit.com/ai', category: 'Coding', pricing: 'Paid', tags: ['Autonomous', 'Deploy'] },
-
-        // Productivity & Office
-        { id: '11', name: 'Gamma AI', description: 'Create stunning presentations and docs in seconds with a prompt.', url: 'https://gamma.app', category: 'Presentations', pricing: 'Freemium', tags: ['PPT', 'Design'] },
-        { id: '12', name: 'Beautiful.ai', description: 'Presentation software that applies design rules in real-time.', url: 'https://beautiful.ai', category: 'Presentations', pricing: 'Freemium', tags: ['Slides', 'Smart Design'] },
-        { id: '13', name: 'Notion AI', description: 'AI assistant integrated directly into your Notion workspace.', url: 'https://www.notion.so/product/ai', category: 'Productivity', pricing: 'Paid', tags: ['Notes', 'Workflow'] },
-        { id: '14', name: 'Zapier AI', description: 'Automate workflows across 5,000+ apps using natural language.', url: 'https://zapier.com/ai', category: 'Productivity', pricing: 'Freemium', tags: ['Automation', 'Logic'] },
-        { id: '15', name: 'AskYourPDF', description: 'Chat with any PDF document to get summaries and answers instantly.', url: 'https://askyourpdf.com', category: 'Research', pricing: 'Freemium', tags: ['PDF', 'Chat'] },
-        { id: '16', name: 'DeepL', description: 'The world\'s most accurate and nuanced instant translator.', url: 'https://www.deepl.com', category: 'Productivity', pricing: 'Freemium', tags: ['Translation', 'Nuance'] },
-        { id: '17', name: 'Perplexity', description: 'AI search engine that provides real-time citations and reliable sources.', url: 'https://www.perplexity.ai', category: 'Research', pricing: 'Freemium', tags: ['Search', 'Study'] },
-        { id: '18', name: 'Scribe', description: 'Auto-generates step-by-step guides by observing your workflow.', url: 'https://scribehow.com', category: 'Productivity', pricing: 'Freemium', tags: ['Tutorials', 'Documentation'] },
-        { id: '19', name: 'Arc Search', description: 'The browser that browses for you, summarizing the web.', url: 'https://arc.net', category: 'Productivity', pricing: 'Free', tags: ['Browser', 'Summary'] },
-
-        // Video Tools
-        { id: '20', name: 'HeyGen', description: 'Create AI avatars and professional video content from text.', url: 'https://www.heygen.com', category: 'Video', pricing: 'Freemium', tags: ['Avatar', 'Marketing'] },
-        { id: '21', name: 'Runway', description: 'Next-gen video generation tools for professional VFX and film.', url: 'https://runwayml.com', category: 'Video', pricing: 'Freemium', tags: ['Gen-2', 'VFX'] },
-        { id: '22', name: 'Lumiere', description: 'Google\'s space-time diffusion model for realistic video generation.', url: 'https://deepmind.google/discover/blog/lumiere-a-space-time-diffusion-model-for-video-generation/', category: 'Video', pricing: 'Free', tags: ['Google', 'Research'] },
-        { id: '23', name: 'CapCut AI', description: 'Powerful trending video editor with integrated AI features.', url: 'https://www.capcut.com', category: 'Video', pricing: 'Freemium', tags: ['Edit', 'TikTok'] },
-        { id: '24', name: 'Seaweed.video', description: 'High-fidelity cinematic video generation from text prompts.', url: 'https://seaweed.video', category: 'Video', pricing: 'Freemium', tags: ['Cinematic', 'Gen'] },
-
-        // Image & Art
-        { id: '25', name: 'Midjourney', description: 'Museum-quality digital art and hyper-realistic image generation.', url: 'https://www.midjourney.com', category: 'Design', pricing: 'Paid', tags: ['Art', 'Ultra-real'] },
-        { id: '26', name: 'Adobe Firefly', description: 'Generative AI designed for creators, integrated with Photoshop.', url: 'https://firefly.adobe.com', category: 'Design', pricing: 'Freemium', tags: ['Adobe', 'Creative'] },
-        { id: '27', name: 'Leonardo.ai', description: 'Creative platform for generating high-quality assets and art.', url: 'https://leonardo.ai', category: 'Design', pricing: 'Freemium', tags: ['Assets', 'Prompt'] },
-        { id: '28', name: 'FaceSwapper', description: 'Seamless AI face swapping for creative photos and videos.', url: 'https://faceswapper.ai', category: 'Design', pricing: 'Freemium', tags: ['Photo', 'Swap'] },
-        { id: '29', name: 'LogoCreator AI', description: 'Custom professional logos generated instantly with AI.', url: 'https://logocreator.ai', category: 'Design', pricing: 'Paid', tags: ['Branding', 'Logos'] },
-
-        // Audio & Music
-        { id: '30', name: 'ElevenLabs', description: 'The most realistic AI speech and voice synthesis in any language.', url: 'https://elevenlabs.io', category: 'Audio', pricing: 'Freemium', tags: ['Voice', 'TTS'] },
-        { id: '31', name: 'MusicGen', description: 'Generate original music from text prompts by Meta AI.', url: 'https://huggingface.co/spaces/facebook/MusicGen', category: 'Audio', pricing: 'Free', tags: ['Meta', 'Music'] },
-        { id: '32', name: 'Otter.ai', description: 'AI-powered meeting notes and real-time transcription.', url: 'https://otter.ai', category: 'Audio', pricing: 'Freemium', tags: ['Transcription', 'Study'] },
-        { id: '33', name: 'Voicemod', description: 'Real-time AI voice changer and soundboard for gamers.', url: 'https://www.voicemod.net', category: 'Audio', pricing: 'Freemium', tags: ['Voice', 'Gaming'] },
-        { id: '34', name: 'SoundMagic AI', description: 'Suite of AI tools for audio cleaning and enhancement.', url: 'https://soundmagic.ai', category: 'Audio', pricing: 'Freemium', tags: ['Clean', 'Engine'] },
-
-        // Business & Marketing
-        { id: '35', name: 'AdCreative.ai', description: 'Generate conversion-focused ad creatives and social posts.', url: 'https://www.adcreative.ai', category: 'Business', pricing: 'Freemium', tags: ['Ads', 'Conversion'] },
-        { id: '36', name: 'Surfer SEO', description: 'AI-driven SEO content orchestration and keyword research.', url: 'https://surferseo.com', category: 'Business', pricing: 'Paid', tags: ['SEO', 'Growth'] },
-        { id: '37', name: 'Shopify Magic', description: 'AI-powered commerce tools built directly into Shopify.', url: 'https://www.shopify.com/magic', category: 'Business', pricing: 'Paid', tags: ['Shopify', 'Sales'] },
-        { id: '38', name: 'Apollo AI', description: 'Find leads and close deals with massive B2B database and AI.', url: 'https://apollo.io', category: 'Business', pricing: 'Freemium', tags: ['Leads', 'Sales'] },
-        { id: '39', name: 'MarketMuse', description: 'AI content strategy platform for better search rankings.', url: 'https://www.marketmuse.com', category: 'Business', pricing: 'Paid', tags: ['Strategy', 'AI'] },
-
-        // Code / Developer
         { id: '40', name: 'GitHub Copilot', description: 'The world\'s most popular AI pair programmer in your IDE.', url: 'https://github.com/features/copilot', category: 'Coding', pricing: 'Paid', tags: ['Autofill', 'Algorithms'] },
         { id: '41', name: 'Cursor', description: 'The AI code editor built to understand your entire codebase.', url: 'https://cursor.sh', category: 'Coding', pricing: 'Freemium', tags: ['Forge', 'IDE'] },
-        { id: '42', name: 'Lovable', description: 'Automate build and deployment of full-stack applications.', url: 'https://lovable.dev', category: 'Coding', pricing: 'Freemium', tags: ['Apps', 'No-code'] },
-        { id: '43', name: 'Codeium', description: 'Fast, free AI code completion extension for all major IDEs.', url: 'https://codeium.com', category: 'Coding', pricing: 'Free', tags: ['Extension', 'Autocomplete'] },
-        { id: '44', name: 'Bolt.new', description: 'Browser-based fullstack web development via prompting.', url: 'https://bolt.new', category: 'Coding', pricing: 'Freemium', tags: ['Vite', 'Fullstack'] },
-        { id: '45', name: 'Pieces AI', description: 'Manage and search your developer snippets with AI context.', url: 'https://pieces.app', category: 'Coding', pricing: 'Freemium', tags: ['Snippets', 'Context'] }
+        { id: 'phind', name: 'Phind', description: 'The AI search engine optimized specifically for developers and coding.', url: 'https://phind.com', category: 'Coding', pricing: 'Free', tags: ['Search', 'Docs'] },
+        { id: 'tabnine', name: 'Tabnine', description: 'Private and secure AI code completion for various programming languages.', url: 'https://tabnine.com', category: 'Coding', pricing: 'Freemium', tags: ['Private', 'Safety'] },
+        { id: 'codium', name: 'CodiumAI', description: 'AI that helps developers write tests and understand code logic.', url: 'https://codium.ai', category: 'Coding', pricing: 'Free', tags: ['Testing', 'Logic'] },
+        { id: 'blackbox', name: 'Blackbox AI', description: 'Ultra-fast code generation and code search for VS Code.', url: 'https://useblackbox.io', category: 'Coding', pricing: 'Freemium', tags: ['Speed', 'Search'] },
+        { id: 'warp', name: 'Warp', description: 'The modern terminal with built-in AI for command generation.', url: 'https://warp.dev', category: 'Coding', pricing: 'Free', tags: ['Terminal', 'CLI'] },
+
+        // Writing & Content
+        { id: 'jasper', name: 'Jasper', description: 'Professional AI platform for high-performance marketing copy.', url: 'https://jasper.ai', category: 'Writing', pricing: 'Paid', tags: ['Marketing', 'Ads'] },
+        { id: 'copyai', name: 'Copy.ai', description: 'Scale your content marketing with AI-driven workflows.', url: 'https://copy.ai', category: 'Writing', pricing: 'Freemium', tags: ['SEO', 'Blogs'] },
+        { id: 'quillbot', name: 'QuillBot', description: 'The ultimate paraphrasing and grammar correction tool.', url: 'https://quillbot.com', category: 'Writing', pricing: 'Freemium', tags: ['Edit', 'Rewrite'] },
+        { id: 'wordtune', name: 'Wordtune', description: 'AI writing assistant that helps you rephrase thoughts clearly.', url: 'https://wordtune.com', category: 'Writing', pricing: 'Freemium', tags: ['Clarity', 'Tone'] },
+        { id: 'sudowrite', name: 'Sudowrite', description: 'The specialized AI playground for fiction and creative writers.', url: 'https://sudowrite.com', category: 'Writing', pricing: 'Freemium', tags: ['Stories', 'Creative'] },
+        { id: 'hemingway', name: 'Hemingway Editor', description: 'AI-assisted editor that makes your writing bold and clear.', url: 'https://hemingwayapp.com', category: 'Writing', pricing: 'Free', tags: ['Clarity', 'Verto'] },
+
+        // Research & Learning
+        { id: '17', name: 'Perplexity', description: 'AI search engine that provides real-time citations and reliable sources.', url: 'https://www.perplexity.ai', category: 'Research', pricing: 'Freemium', tags: ['Search', 'Study'] },
+        { id: 'notebooklm', name: 'NotebookLM', description: 'Google\'s AI research tool that understands your uploaded notes.', url: 'https://notebooklm.google', category: 'Research', pricing: 'Free', tags: ['Google', 'Notes'] },
+        { id: 'elicit', name: 'Elicit', description: 'Automate your research workflow by finding data in 200m papers.', url: 'https://elicit.org', category: 'Research', pricing: 'Freemium', tags: ['Science', 'Data'] },
+        { id: 'consensus', name: 'Consensus', description: 'Search engine that finds answers in peer-reviewed research.', url: 'https://consensus.app', category: 'Research', pricing: 'Freemium', tags: ['Evidence', 'Reliable'] },
+        { id: 'scite', name: 'Scite.ai', description: 'Verify scientific claims using smart citations and AI analysis.', url: 'https://scite.ai', category: 'Research', pricing: 'Paid', tags: ['Citations', 'Trust'] },
+        { id: '8', name: 'Kimi AI', description: 'Specialized in processing extremely long documents and large files.', url: 'https://kimi.moonshot.cn', category: 'Research', pricing: 'Free', tags: ['Long Context', 'PDF'] },
+        { id: '15', name: 'AskYourPDF', description: 'Chat with any PDF document to get summaries and answers instantly.', url: 'https://askyourpdf.com', category: 'Research', pricing: 'Freemium', tags: ['PDF', 'Chat'] },
+
+        // Design & Image
+        { id: '25', name: 'Midjourney', description: 'Museum-quality digital art and hyper-realistic image generation.', url: 'https://www.midjourney.com', category: 'Design', pricing: 'Paid', tags: ['Art', 'Ultra-real'] },
+        { id: '26', name: 'Adobe Firefly', description: 'Generative AI designed for creators, integrated with Photoshop.', url: 'https://firefly.adobe.com', category: 'Design', pricing: 'Freemium', tags: ['Adobe', 'Creative'] },
+        { id: 'canva', name: 'Canva Magic Studio', description: 'All-in-one AI design suite for social media and branding.', url: 'https://canva.com', category: 'Design', pricing: 'Freemium', tags: ['Speed', 'Social'] },
+        { id: 'framer', name: 'Framer AI', description: 'Design and deploy a professional website with a single prompt.', url: 'https://framer.com', category: 'Design', pricing: 'Freemium', tags: ['Web', 'Layout'] },
+        { id: 'uizard', name: 'Uizard', description: 'Generate UI designs from text and sketches effortlessly.', url: 'https://uizard.io', category: 'Design', pricing: 'Freemium', tags: ['UI/UX', 'Prototypes'] },
+        { id: 'removal', name: 'Removal.ai', description: 'High-precision AI background removal for photos.', url: 'https://removal.ai', category: 'Design', pricing: 'Free', tags: ['Cleanup', 'Photo'] },
+        { id: 'looka', name: 'Looka', description: 'AI platform to design logos and build your entire brand.', url: 'https://looka.com', category: 'Design', pricing: 'Paid', tags: ['Logo', 'Branding'] },
+
+        // Productivity
+        { id: '7', name: 'Microsoft Copilot', description: 'Your everyday AI companion integrated into Windows and Office.', url: 'https://copilot.microsoft.com', category: 'Productivity', pricing: 'Freemium', tags: ['Microsoft', 'Work'] },
+        { id: '13', name: 'Notion AI', description: 'AI assistant integrated directly into your Notion workspace.', url: 'https://www.notion.so/product/ai', category: 'Productivity', pricing: 'Paid', tags: ['Notes', 'Workflow'] },
+        { id: 'otter', name: 'Otter.ai', description: 'AI-powered meeting notes and real-time transcription.', url: 'https://otter.ai', category: 'Productivity', pricing: 'Freemium', tags: ['Meeting', 'Audio'] },
+        { id: 'taskade', name: 'Taskade', description: 'AI productivity workspace for mapping out complex projects.', url: 'https://taskade.com', category: 'Productivity', pricing: 'Freemium', tags: ['Tasks', 'Mindmap'] },
+        { id: 'morgen', name: 'Morgen', description: 'AI calendar and task manager for focused deep work.', url: 'https://morgen.ai', category: 'Productivity', pricing: 'Freemium', tags: ['Time', 'Calendar'] },
+        { id: 'deepwell', name: 'DeepL', description: 'The world\'s most accurate and nuanced instant translator.', url: 'https://www.deepl.com', category: 'Productivity', pricing: 'Freemium', tags: ['Translation', 'Accuracy'] },
+
+        // Video & Presentations
+        { id: '11', name: 'Gamma AI', description: 'Create stunning presentations and docs in seconds with a prompt.', url: 'https://gamma.app', category: 'Presentations', pricing: 'Freemium', tags: ['PPT', 'Design'] },
+        { id: 'tome', name: 'Tome', description: 'Generative storytelling for professional visual narratives.', url: 'https://tome.app', category: 'Presentations', pricing: 'Freemium', tags: ['Story', 'Slides'] },
+        { id: 'decktopus', name: 'Decktopus', description: 'World\'s #1 AI-powered presentation generator.', url: 'https://decktopus.com', category: 'Presentations', pricing: 'Paid', tags: ['Fast', 'Presentation'] },
+        { id: 'runway', name: 'Runway Gen-3', description: 'Next-gen video generation tools for professional VFX and film.', url: 'https://runwayml.com', category: 'Video', pricing: 'Freemium', tags: ['VFX', 'High-res'] },
+        { id: 'pika', name: 'Pika Labs', description: 'Cinematic video generation from text and image prompts.', url: 'https://pika.art', category: 'Video', pricing: 'Freemium', tags: ['Motion', 'Art'] },
+        { id: 'heygen', name: 'HeyGen', description: 'Create AI avatars and professional video content from text.', url: 'https://www.heygen.com', category: 'Video', pricing: 'Freemium', tags: ['Avatar', 'Marketing'] },
+        { id: 'descript', name: 'Descript', description: 'Edit video and audio as easily as editing a text document.', url: 'https://descript.com', category: 'Video', pricing: 'Freemium', tags: ['Edit', 'Podcast'] },
+
+        // Audio & Business
+        { id: 'suno', name: 'Suno AI', description: 'Generate full songs with lyrics and vocals from a prompt.', url: 'https://suno.com', category: 'Audio', pricing: 'Freemium', tags: ['Music', 'Gen'] },
+        { id: 'udio', name: 'Udio', description: 'High-fidelity music generation with incredible vocal range.', url: 'https://udio.com', category: 'Audio', pricing: 'Freemium', tags: ['Audio', 'Vocal'] },
+        { id: 'elevenlabs', name: 'ElevenLabs', description: 'The most realistic AI speech synthesis and voice cloning.', url: 'https://elevenlabs.io', category: 'Audio', pricing: 'Freemium', tags: ['Voice', 'TTS'] },
+        { id: 'adcreative', name: 'AdCreative.ai', description: 'Generate conversion-focused ad creatives and social posts.', url: 'https://www.adcreative.ai', category: 'Business', pricing: 'Paid', tags: ['Ads', 'Marketing'] },
+        { id: 'namelix', name: 'Namelix', description: 'Generate short, brandable business names using AI.', url: 'https://namelix.com', category: 'Business', pricing: 'Free', tags: ['Names', 'Branding'] },
+        { id: 'shopmagic', name: 'Shopify Magic', description: 'AI commerce tools built directly into Shopify.', url: 'https://shopify.com/magic', category: 'Business', pricing: 'Paid', tags: ['Sales', 'Ecom'] },
+        { id: 'lavender', name: 'Lavender', description: 'The AI email assistant that helps you write better sales emails.', url: 'https://lavender.ai', category: 'Business', pricing: 'Freemium', tags: ['Email', 'Sales'] }
     ];
 
     const categories = ['All', 'General', 'Writing', 'Coding', 'Research', 'Design', 'Productivity', 'Presentations', 'Video', 'Audio', 'Business'];
@@ -158,21 +171,25 @@ const AIToolsDirectory: React.FC = () => {
                     <div className="h-[1px] w-8 md:w-16 bg-slate-200 dark:bg-white/10" />
                 </div>
 
-                <div className="relative max-w-xl mx-auto pt-4 group">
-                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors z-10">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                <div className="relative max-w-xl mx-auto mt-8 group">
+                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-all duration-300 z-10 pointer-events-none">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
                     </div>
                     <input
                         type="text"
-                        placeholder="Forge your search..."
+                        placeholder="Ignite your search..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         autoCapitalize="none"
                         autoCorrect="off"
                         autoComplete="off"
                         spellCheck="false"
-                        className="w-full pl-10 pr-4 py-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-[10px] font-bold outline-none focus:ring-4 focus:ring-orange-500/10 transition-all dark:text-white"
+                        className="w-full pl-16 pr-6 py-5 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-[24px] text-[13px] md:text-[14px] font-bold outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500/40 transition-all dark:text-white shadow-2xl shadow-black/5"
                     />
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+                        <kbd className="hidden md:flex h-6 px-1.5 items-center justify-center rounded-md bg-slate-100 dark:bg-white/10 text-[10px] font-black text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-white/10">CMD</kbd>
+                        <kbd className="hidden md:flex h-6 px-1.5 items-center justify-center rounded-md bg-slate-100 dark:bg-white/10 text-[10px] font-black text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-white/10">K</kbd>
+                    </div>
                 </div>
             </header>
 
@@ -183,8 +200,8 @@ const AIToolsDirectory: React.FC = () => {
                         key={cat}
                         onClick={() => setFilter(cat)}
                         className={`px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all whitespace-nowrap border cursor-pointer active:scale-95 ${filter === cat
-                            ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-600/20'
-                            : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:border-orange-500/30'
+                                ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-600/20'
+                                : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:border-orange-500/30'
                             }`}
                     >
                         {cat}
@@ -214,8 +231,8 @@ const AIToolsDirectory: React.FC = () => {
                                         {getToolIcon(tool.name)}
                                     </div>
                                     <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border ${tool.pricing === 'Free' ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5' :
-                                        tool.pricing === 'Freemium' ? 'text-orange-500 border-orange-500/20 bg-orange-500/5' :
-                                            'text-blue-500 border-blue-500/20 bg-blue-500/5'
+                                            tool.pricing === 'Freemium' ? 'text-orange-500 border-orange-500/20 bg-orange-500/5' :
+                                                'text-blue-500 border-blue-500/20 bg-blue-500/5'
                                         }`}>
                                         {tool.pricing}
                                     </span>

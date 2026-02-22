@@ -4,7 +4,7 @@ import { showToast } from './Toast.tsx';
 interface ContactInfo {
     id: string;
     title: string;
-    category: 'Hostel' | 'Doctor' | 'Nursing' | 'Counseling' | 'Facility' | 'Hospital' | 'Administrative';
+    category: 'Hostel' | 'Doctor' | 'Nursing' | 'Counseling' | 'Facility' | 'Hospital' | 'Administrative' | 'Support';
     subTitle?: string;
     description?: string;
     numbers: string[];
@@ -114,7 +114,21 @@ const EmergencyContacts: React.FC = () => {
         { id: 'hc_reception', title: 'HC Reception', subTitle: '24x7 Support', category: 'Facility', numbers: ['01824444079'] },
         { id: 'hc_lab', title: 'HC Med Lab', subTitle: 'Diagnostics', category: 'Facility', numbers: ['01824444069'] },
         { id: 'hc_chemist', title: 'Medical Store', subTitle: '24h Pharmacy', category: 'Facility', numbers: ['01824444068'] },
-        { id: 'ref_doaba', title: 'Doaba Hosp', subTitle: 'Emergency Ref', category: 'Hospital', numbers: ['0181-2226200'] },
+
+        // External Referral Hospitals
+        { id: 'ref_doaba', title: 'Doaba Hosp', subTitle: 'Jalandhar City', category: 'Hospital', numbers: ['0181-2226200'], description: 'Specialized Emergency Care' },
+        { id: 'patel_hosp', title: 'Patel Hospital', subTitle: 'Cancer & Surgical', category: 'Hospital', numbers: ['0181-5241000'], description: 'Multi-specialty Referral' },
+        { id: 'bbc_heart', title: 'BBC Heart Care', subTitle: 'Cardiac Center', category: 'Hospital', numbers: ['0181-2226227'], description: 'Advanced Heart Care' },
+        { id: 'johal_hosp', title: 'Johal Hospital', subTitle: '24x7 Emergency', category: 'Hospital', numbers: ['0181-5011110'], description: 'Trauma & Ortho' },
+        { id: 'capitol', title: 'Capitol Hospital', subTitle: 'Jalandhar', category: 'Hospital', numbers: ['0181-5038000'], description: 'Global Healthcare' },
+        { id: 'sacred_heart', title: 'Sacred Heart', subTitle: 'General Support', category: 'Hospital', numbers: ['0181-2670390'], description: 'Charitable Healthcare' },
+        { id: 'civil_phag', title: 'Civil Phagwara', subTitle: 'Govt Support', category: 'Hospital', numbers: ['01824-260275'], description: 'Phagwara City Hospital' },
+
+        // Administrative & Student Relations
+        { id: 'dsw_main', title: 'DSW Office', subTitle: 'Student Welfare', category: 'Administrative', numbers: ['01824-444234'], description: 'Grievance & Welfare' },
+        { id: 'rms_helpline', title: 'RMS Support', subTitle: 'Student Relation', category: 'Administrative', numbers: ['01824-444040'], description: 'Relationship Management' },
+        { id: 'security_ctrl', title: 'Security HQ', subTitle: 'Control Room', category: 'Administrative', numbers: ['01824-444501'], description: '24/7 Campus Monitoring' },
+        { id: 'admission_cell', title: 'Admissions', subTitle: 'Counseling', category: 'Administrative', numbers: ['01824-404404'], description: 'Programs & Guidance' },
         { id: 'accounts', title: 'Accounts Desk', subTitle: 'Fee Help', category: 'Administrative', numbers: ['01824444337'] },
     ];
 
@@ -233,7 +247,8 @@ const EmergencyContacts: React.FC = () => {
                                     <div className="min-w-0 text-left">
                                         <h3 className="text-[16px] md:text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">
                                             {category === 'Facility' ? 'Health Centre HQ' :
-                                                category === 'Hospital' ? 'Hospital Directory' : category}
+                                                category === 'Hospital' ? 'External Referral Hospitals' :
+                                                    category === 'Administrative' ? 'University Services' : category}
                                         </h3>
                                         <p className="text-[10px] md:text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none mt-1">{categoryItems.length} Records Found</p>
                                     </div>
@@ -252,6 +267,7 @@ const EmergencyContacts: React.FC = () => {
                                                     <div className="min-w-0 text-left">
                                                         <h4 className="text-[14px] md:text-lg font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-tight">{item.title}</h4>
                                                         {item.subTitle && <p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-tight mt-0.5">{item.subTitle}</p>}
+                                                        {item.description && <p className="text-[8px] md:text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-2 italic leading-tight">{item.description}</p>}
                                                     </div>
                                                     <div className="p-2 rounded-lg md:rounded-xl bg-slate-50 dark:bg-white/10 text-slate-400 group-hover:text-orange-600 transition-all shrink-0">
                                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 md:w-5 md:h-5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
