@@ -129,7 +129,7 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             ) : (
                 <div className="space-y-4">
                     {filteredRequests.map(req => (
-                        <div key={req.id} className="group p-5 bg-white dark:bg-[#0c0c0c] rounded-[24px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 hover:shadow-xl transition-all duration-500 flex flex-col md:flex-row gap-5 items-start md:items-center relative overflow-hidden">
+                        <div key={req.id} className="group p-5 bg-white dark:bg-[#0c0c0c] rounded-[32px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 hover:shadow-xl transition-all duration-500 flex flex-col md:flex-row gap-5 items-start md:items-center relative overflow-hidden">
                             {req.user_id === userProfile?.id && (
                                 <div className="absolute top-3 right-3 flex gap-1 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onClick={() => handleEdit(req)} className="p-1.5 bg-white/90 dark:bg-black/80 rounded-lg text-blue-500 hover:text-blue-600 shadow-sm border-none cursor-pointer backdrop-blur-md">
@@ -141,7 +141,7 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                 </div>
                             )}
 
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white text-base font-black shadow-lg shrink-0">
+                            <div className="w-10 h-10 rounded-[18px] bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white text-base font-black shadow-lg shrink-0">
                                 {req.user_username?.[0]?.toUpperCase() || 'V'}
                             </div>
 

@@ -1002,7 +1002,7 @@ const FileCard: React.FC<{
       ref={setNodeRef}
       style={style}
       onClick={onShowDetails}
-      className={`group p-4 rounded-2xl border border-slate-100 dark:border-white/5 bg-white dark:bg-[#0c0c0c] hover:border-orange-500 hover:shadow-xl transition-all relative overflow-hidden flex flex-col min-h-[140px] cursor-pointer ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
+      className={`group p-4 rounded-[30px] border border-slate-100 dark:border-white/5 bg-white dark:bg-[#0c0c0c] hover:border-orange-500 hover:shadow-xl transition-all relative overflow-hidden flex flex-col min-h-[140px] cursor-pointer ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
     >
       <div className="flex items-start justify-between mb-2">
         <div className="w-9 h-9 bg-slate-100 dark:bg-black rounded-xl flex items-center justify-center group-hover:text-orange-500 transition-colors">
@@ -1067,7 +1067,7 @@ const StaticFileCard: React.FC<{
 }> = ({ file, userProfile, isAdminMode }) => {
   const isAdmin = userProfile?.is_admin || false;
   return (
-    <div className="p-4 rounded-2xl border border-orange-500 bg-white dark:bg-[#0c0c0c] flex flex-col min-h-[140px]">
+    <div className="p-4 rounded-[30px] border border-orange-500 bg-white dark:bg-[#0c0c0c] flex flex-col min-h-[140px]">
       <div className="flex items-start justify-between mb-2">
         <div className="w-9 h-9 bg-slate-100 dark:bg-black rounded-xl flex items-center justify-center text-orange-500">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>

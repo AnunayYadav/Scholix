@@ -196,7 +196,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-4">
                     {filteredItems.map(item => (
-                        <div key={item.id} className="group p-4 bg-white dark:bg-[#0c0c0c] rounded-[32px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 shadow-sm hover:shadow-2xl hover:shadow-orange-600/5 transition-all duration-500 flex flex-col relative overflow-hidden">
+                        <div key={item.id} className="group p-4 bg-white dark:bg-[#0c0c0c] rounded-[42px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 shadow-sm hover:shadow-2xl hover:shadow-orange-600/5 transition-all duration-500 flex flex-col relative overflow-hidden">
                             {/* Tags Overlay */}
                             <div className="absolute top-5 left-5 flex flex-col gap-2 z-30 transform -translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
                                 {item.seller_id === userProfile?.id && (
@@ -211,7 +211,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                 )}
                             </div>
 
-                            <div className="relative aspect-square mb-4 rounded-[24px] overflow-hidden bg-slate-50 dark:bg-white/[0.02] flex items-center justify-center border border-slate-100 dark:border-white/5">
+                            <div className="relative aspect-square mb-4 rounded-[32px] overflow-hidden bg-slate-50 dark:bg-white/[0.02] flex items-center justify-center border border-slate-100 dark:border-white/5">
                                 {item.images && item.images.length > 0 ? (
                                     <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                                 ) : (
