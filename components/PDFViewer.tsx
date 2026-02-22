@@ -184,11 +184,17 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const touchState = useRef<{
         lastDist: number;
         lastTap: number;
+        lastTapX: number;
+        lastTapY: number;
         isPinching: boolean;
+        wasScrolling: boolean;
     }>({
         lastDist: 0,
         lastTap: 0,
-        isPinching: false
+        lastTapX: 0,
+        lastTapY: 0,
+        isPinching: false,
+        wasScrolling: false
     });
 
     // Search State
@@ -372,13 +378,27 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 Number(touch1.pageY) - Number(touch2.pageY)
             );
         } else if (e.touches.length === 1) {
+            const touch = e.touches[0];
             const now = Number(Date.now());
-            const lastTap = Number(touchState.current.lastTap);
-            if (now - lastTap < 300) {
-                // Double tap
+            const lastTap = touchState.current.lastTap;
+            const lastTapX = touchState.current.lastTapX;
+            const lastTapY = touchState.current.lastTapY;
+
+            // Check if this is a double tap (within 300ms and 30px distance)
+            const dist = Math.hypot(touch.pageX - lastTapX, touch.pageY - lastTapY);
+
+            if (now - lastTap < 300 && dist < 30) {
+                // Double tap detected
                 setScale(prev => prev > 1.2 ? 1.0 : 2.0);
+                // Reset to prevent any accidental triple-tap behavior
+                touchState.current.lastTap = 0;
+            } else {
+                touchState.current.lastTap = now;
             }
-            touchState.current.lastTap = now;
+
+            touchState.current.lastTapX = touch.pageX;
+            touchState.current.lastTapY = touch.pageY;
+            touchState.current.wasScrolling = false;
         }
     };
 
@@ -400,10 +420,16 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 });
                 touchState.current.lastDist = dist;
             }
+        } else if (e.touches.length === 1) {
+            touchState.current.wasScrolling = true;
         }
     };
 
     const handleTouchEnd = () => {
+        // If the user was scrolling, the current tap shouldn't count towards a double-tap zoom
+        if (touchState.current.wasScrolling) {
+            touchState.current.lastTap = 0;
+        }
         touchState.current.isPinching = false;
         touchState.current.lastDist = 0;
     };
@@ -676,13 +702,12 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             {/* Main Content Wrapper (Must be flex to allow main to fill) */}
             <div className="flex-1 overflow-hidden relative flex flex-col">
 
-                {/* PDF Scroll Container */}
                 <main
                     ref={containerRef}
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    className="flex-1 overflow-y-auto overflow-x-auto bg-[#0a0a0a] relative flex flex-col items-center py-12 px-4 md:px-0 select-none scroll-smooth touch-auto"
+                    className="flex-1 overflow-y-auto overflow-x-auto bg-[#0a0a0a] relative flex flex-col items-center py-12 px-4 md:px-0 select-none scroll-smooth touch-pan-x touch-pan-y"
                     style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                     {isLoading ? (
@@ -777,7 +802,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     to { transform: translateX(100%); }
                 }
             `}</style>
-        </div>,
+        </div >,
         document.body
     );
 };
