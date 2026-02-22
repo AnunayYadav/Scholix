@@ -724,7 +724,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8 h-8 rounded-full bg-orange-600 flex items-center justify-center font-black text-[10px] uppercase flex-shrink-0">{userProfile?.username?.[0] || 'M'}</div>
                   <div className="min-w-0 truncate">
-                    <span className={`text-[10px] font-black uppercase block truncate ${selectedEntityId === 'me' ? 'text-orange-500' : 'text-slate-700 dark:text-white'}`}>
+                    <span className={`text-[11px] font-bold block truncate ${selectedEntityId === 'me' ? 'text-orange-500' : 'text-slate-700 dark:text-white'}`}>
                       {myTimetable?.ownerName || 'My Profile'}
                     </span>
                     {myTimetable?.branch && (
@@ -759,7 +759,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-black text-[10px] uppercase flex-shrink-0">{friend.ownerName?.[0] || 'F'}</div>
                     <div className="min-w-0 truncate">
-                      <span className={`text-[10px] font-black uppercase block truncate ${selectedEntityId === friend.ownerId ? 'text-blue-500' : 'text-slate-700 dark:text-white'}`}>
+                      <span className={`text-[11px] font-bold block truncate ${selectedEntityId === friend.ownerId ? 'text-blue-500' : 'text-slate-700 dark:text-white'}`}>
                         {friend.ownerName}
                       </span>
                       {friend.branch && (

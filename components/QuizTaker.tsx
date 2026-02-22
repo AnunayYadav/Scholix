@@ -53,7 +53,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const loadValidSubjects = async () => {
     setInitializing(true);
     try {
-      const allFiles = await NexusServer.fetchFiles();
+      const allFiles = await NexusServer.fetchFiles('All');
       const syllabusFiles = allFiles.filter(f =>
         (f.name.toLowerCase().includes('syllabus') ||
           (f.type && f.type.toLowerCase().includes('syllabus'))) &&
@@ -379,7 +379,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   return (
     <div className="max-w-4xl mx-auto space-y-12 animate-fade-in pb-20 px-4 md:px-0">
       <header className="text-center space-y-4">
-        <h2 className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Taker</span></h2>
+        <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tighter leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Taker</span></h2>
         <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px]">AI-Generated Practice Questions from Your Syllabus</p>
       </header>
 

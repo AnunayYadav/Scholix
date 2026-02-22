@@ -47,7 +47,7 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
         <div className="max-w-7xl mx-auto px-4 py-6">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div className="space-y-1">
-                    <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
+                    <h2 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white tracking-tighter leading-none">
                         Roommate <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Finder</span>
                     </h2>
                     <p className="text-slate-500 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Find your perfect match to share your space.</p>
@@ -76,7 +76,7 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
 
                             <div className="flex-1 space-y-2">
                                 <div className="flex flex-wrap items-center gap-2">
-                                    <h4 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">{req.user_username || 'Anonymous Verto'}</h4>
+                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">{req.user_username || 'Anonymous Verto'}</h4>
                                     <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded-md text-[8px] font-black uppercase tracking-widest">{req.status}</span>
                                 </div>
                                 <p className="text-xs font-bold text-slate-600 dark:text-slate-400 leading-relaxed italic">"{req.preferences}"</p>

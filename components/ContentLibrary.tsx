@@ -503,6 +503,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 setSelectedProgram(val);
                 navigateTo(null, null, null);
               }}
+              className="flex-shrink-0"
+              buttonClassName="!h-12 !py-0 !rounded-2xl"
             />
 
             <div className="relative flex-1">
@@ -516,7 +518,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 autoCorrect="off"
                 autoComplete="off"
                 spellCheck="false"
-                className="w-full pl-11 pr-4 py-3 bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white"
+                className="w-full pl-11 pr-4 h-12 bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white"
               />
             </div>
           </div>
@@ -1018,7 +1020,7 @@ const FileCard: React.FC<{
           </div>
         )}
       </div>
-      <h3 className="text-[11px] md:text-[13px] font-black text-slate-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2 group-hover:text-orange-500 transition-colors uppercase">{file.name}</h3>
+      <h3 className="text-[11px] md:text-[13px] font-bold text-slate-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2 group-hover:text-orange-500 transition-colors">{file.name}</h3>
       <div className="pt-3 mt-auto border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
         <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{file.size}</span>
         <div className="flex gap-1.5 peer">
@@ -1076,7 +1078,7 @@ const StaticFileCard: React.FC<{
           </div>
         )}
       </div>
-      <h3 className="text-[11px] md:text-[13px] font-black text-slate-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2 uppercase">{file.name}</h3>
+      <h3 className="text-[11px] md:text-[13px] font-bold text-slate-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2">{file.name}</h3>
       <div className="pt-3 mt-auto border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
         <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{file.size}</span>
       </div>

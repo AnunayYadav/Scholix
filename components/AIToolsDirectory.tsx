@@ -251,7 +251,7 @@ const AIToolsDirectory: React.FC = () => {
             {/* Header Section */}
             <header className="text-center space-y-4 relative">
                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 bg-orange-500/10 blur-[80px] rounded-full" />
-                <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
+                <h2 className="text-3xl md:text-5xl font-bold text-slate-800 dark:text-white tracking-tighter leading-none">
                     AI <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600">Forge</span>
                 </h2>
                 <div className="flex items-center justify-center gap-2">
@@ -277,7 +277,7 @@ const AIToolsDirectory: React.FC = () => {
                             autoCorrect="off"
                             autoComplete="off"
                             spellCheck="false"
-                            className="w-full pl-16 pr-6 py-5 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-[24px] text-[13px] md:text-[14px] font-bold outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500/40 transition-all dark:text-white shadow-2xl shadow-black/5"
+                            className="w-full pl-16 pr-24 h-[62px] bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-[28px] text-[13px] md:text-[14px] font-bold outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500/40 transition-all dark:text-white shadow-2xl shadow-black/5"
                         />
                         <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
                             <kbd className="hidden md:flex h-6 px-1.5 items-center justify-center rounded-md bg-slate-100 dark:bg-white/10 text-[10px] font-black text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-white/10">CMD</kbd>
@@ -295,15 +295,15 @@ const AIToolsDirectory: React.FC = () => {
                                 {getCategoryIcon(filter)}
                             </svg>
                         }
-                        className="w-full md:w-auto md:min-w-[240px]"
-                        buttonClassName="!py-5 !rounded-[24px]"
+                        className="w-full md:w-auto md:min-w-[260px]"
+                        buttonClassName="!h-[62px] !rounded-[28px] !text-[13px] md:!text-[14px] !font-bold"
                         renderCustomMenu={(close) => (
                             <div className="space-y-1">
                                 {categories.map(cat => (
                                     <button
                                         key={cat}
                                         onClick={() => { setFilter(cat); close(); }}
-                                        className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer border-none ${filter === cat
+                                        className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-xs font-bold transition-all cursor-pointer border-none ${filter === cat
                                             ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
                                             : 'text-slate-500 dark:text-slate-400 bg-transparent hover:bg-slate-100 dark:hover:bg-white/5 hover:text-orange-600'
                                             }`}
@@ -358,10 +358,10 @@ const AIToolsDirectory: React.FC = () => {
                                 </div>
 
                                 <div className="space-y-2 text-left">
-                                    <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
+                                    <h4 className="text-xl font-bold text-slate-900 dark:text-white tracking-tighter leading-none">
                                         {tool.name}
                                     </h4>
-                                    <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 uppercase tracking-wide">
+                                    <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 tracking-wide">
                                         {tool.description}
                                     </p>
                                 </div>
@@ -379,7 +379,7 @@ const AIToolsDirectory: React.FC = () => {
                                 href={tool.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="relative z-10 mt-8 group/btn h-12 flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[20px] text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white dark:hover:text-white transition-all no-underline shadow-lg active:scale-95"
+                                className="relative z-10 mt-8 group/btn h-12 flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[20px] text-[10px] font-black tracking-widest hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white dark:hover:text-white transition-all no-underline shadow-lg active:scale-95"
                             >
                                 Forge Ahead
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1"><path d="M7 17L17 7M17 7H7M17 7V17" /></svg>

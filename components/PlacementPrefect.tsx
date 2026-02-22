@@ -332,7 +332,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
   return (
     <div className="max-w-4xl mx-auto space-y-12 animate-fade-in pb-20 px-4 md:px-0">
       <header className="text-center space-y-4">
-        <h2 className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">Placement <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Prefect</span></h2>
+        <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tighter leading-none">Placement <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Prefect</span></h2>
         <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px]">Get AI Feedback to help your placement prep</p>
       </header>
 
@@ -380,7 +380,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
               <div className="grid grid-cols-2 gap-2">
                 {INDUSTRY_ROLES.map(role => (
                   <button key={role.id} onClick={() => handleRoleSelect(role.id)} className={`p-4 rounded-2xl border text-left transition-all ${selectedRoleId === role.id ? 'bg-orange-600/10 border-orange-600 text-orange-500 scale-[1.02]' : 'bg-slate-50 dark:bg-black border-slate-100 dark:border-white/5 text-slate-500 hover:border-orange-500/30'}`}>
-                    <p className="text-[9px] font-black uppercase tracking-tight leading-tight">{role.name}</p>
+                    <p className="text-[10px] font-bold tracking-tight leading-tight">{role.name}</p>
                   </button>
                 ))}
               </div>
