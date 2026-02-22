@@ -456,7 +456,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     try {
       NexusServer.trackEvent('file_opened');
       const url = await NexusServer.getFileUrl(file.storage_path);
-      if (url) window.open(url, '_blank');
+      if (file.storage_path.toLowerCase().endsWith('.pdf')) {
+        setViewerInfo({ show: true, url, name: file.name });
+      } else {
+        if (url) window.open(url, '_blank');
+      }
     } catch (err) {
       console.error("Access Error:", err);
     }
