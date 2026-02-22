@@ -11,6 +11,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     const [filter, setFilter] = useState('All');
     const [showUserOnly, setShowUserOnly] = useState(false);
     const [showSellModal, setShowSellModal] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(null);
     const [editingItem, setEditingItem] = useState<MarketplaceItem | null>(null);
     const [newItem, setNewItem] = useState({
         title: '',
@@ -154,7 +155,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                     </button>
                     <button
                         onClick={() => { if (!userProfile) showToast("Sign in required.", "info"); else setShowUserOnly(!showUserOnly); }}
-                        className={`px-5 py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] transition-all border-none cursor-pointer flex items-center gap-2 ${showUserOnly ? 'bg-orange-600 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white'}`}
+                        className={`px-5 py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] transition-all border-none cursor-pointer flex items-center gap-2 ${showUserOnly ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white'}`}
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                         {showUserOnly ? 'All Items' : 'My Ads'}
@@ -181,74 +182,164 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             </div>
 
             {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
                     {Array.from({ length: 8 }).map((_, i) => (
-                        <div key={i} className="h-56 bg-slate-100 dark:bg-white/5 rounded-[24px] animate-pulse" />
+                        <div key={i} className="h-80 bg-slate-100 dark:bg-white/5 rounded-[40px] animate-pulse" />
                     ))}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
                     {filteredItems.map(item => (
-                        <div key={item.id} className="group p-5 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-slate-200 dark:border-white/10 hover:border-orange-500/40 hover:shadow-xl hover:shadow-orange-600/5 transition-all duration-500 flex flex-col relative">
-                            {item.seller_id === userProfile?.id && (
-                                <div className="absolute top-2 left-2 flex gap-1 z-30">
-                                    <button onClick={() => handleEdit(item)} className="p-2 bg-white/90 dark:bg-black/80 rounded-full text-blue-500 hover:text-blue-600 shadow-sm border-none cursor-pointer backdrop-blur-md">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                                    </button>
-                                    <button onClick={() => handleDelete(item.id)} className="p-2 bg-white/90 dark:bg-black/80 rounded-full text-red-500 hover:text-red-600 shadow-sm border-none cursor-pointer backdrop-blur-md">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>
-                                    </button>
-                                </div>
-                            )}
-
-                            <div className="relative aspect-square mb-4 rounded-[20px] overflow-hidden bg-slate-50 dark:bg-white/5 flex items-center justify-center">
-                                {item.images && item.images.length > 0 ? (
-                                    <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                                ) : (
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-10 h-10 text-slate-300 dark:text-white/10"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
+                        <div key={item.id} className="group p-4 bg-white dark:bg-[#0c0c0c] rounded-[48px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 shadow-sm hover:shadow-2xl hover:shadow-orange-600/5 transition-all duration-500 flex flex-col relative overflow-hidden">
+                            {/* Tags Overlay */}
+                            <div className="absolute top-6 left-6 flex flex-col gap-2 z-30 transform -translate-x-2 group-hover:translate-x-0 transition-transform duration-500">
+                                {item.seller_id === userProfile?.id && (
+                                    <div className="flex gap-1.5 p-1.5 bg-white/90 dark:bg-black/60 backdrop-blur-md rounded-2xl shadow-xl border border-white/20">
+                                        <button onClick={(e) => { e.stopPropagation(); handleEdit(item); }} className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-xl transition-colors border-none bg-transparent cursor-pointer">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                        </button>
+                                        <div className="w-[1px] h-4 bg-slate-200 dark:bg-white/10 self-center" />
+                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} className="p-2 text-red-500 hover:bg-red-500/10 rounded-xl transition-colors border-none bg-transparent cursor-pointer">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                                        </button>
+                                    </div>
                                 )}
-                                <div className="absolute top-3 right-3 px-2 py-1 bg-orange-600 text-white rounded-md text-[8px] font-black uppercase tracking-widest shadow-lg leading-none">
-                                    ₹{item.price}
+                            </div>
+
+                            <div className="relative aspect-square mb-5 rounded-[36px] overflow-hidden bg-slate-50 dark:bg-white/[0.02] flex items-center justify-center border border-slate-100 dark:border-white/5">
+                                {item.images && item.images.length > 0 ? (
+                                    <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                                ) : (
+                                    <div className="flex flex-col items-center gap-3 opacity-20">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-12 h-12 text-slate-900 dark:text-white"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
+                                        <span className="text-[10px] font-black uppercase tracking-widest">No Image</span>
+                                    </div>
+                                )}
+
+                                <div className="absolute top-4 right-4 z-20">
+                                    <div className="px-3.5 py-2 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-2xl shadow-xl shadow-orange-600/30 flex items-center gap-1.5 group-hover:scale-110 transition-transform duration-500">
+                                        <span className="text-[10px] font-black opacity-70">₹</span>
+                                        <span className="text-sm font-black tracking-tight">{item.price}</span>
+                                    </div>
+                                </div>
+
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            </div>
+
+                            <div className="px-2 space-y-4 flex-1 text-left">
+                                <div className="flex justify-between items-center h-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-orange-600" />
+                                        <span className="text-[9px] font-black text-orange-600 uppercase tracking-widest">{item.category}</span>
+                                    </div>
+                                    <div className="px-2 py-0.5 bg-slate-100 dark:bg-white/5 rounded-full">
+                                        <span className="text-[8px] font-black text-slate-400 dark:text-white/40 uppercase tracking-widest">{item.condition}</span>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <h4 className="text-lg font-black text-slate-900 dark:text-white tracking-tighter leading-tight uppercase group-hover:text-orange-500 transition-colors line-clamp-1">{item.title}</h4>
+                                    <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400/50 leading-relaxed line-clamp-2 min-h-[30px]">{item.description}</p>
                                 </div>
                             </div>
 
-                            <div className="space-y-2 flex-1 text-left">
-                                <div className="flex justify-between items-start">
-                                    <span className="text-[8px] font-black text-orange-600 uppercase tracking-widest">{item.category}</span>
-                                    <span className="text-[8px] font-black text-slate-400 dark:text-white/20 uppercase tracking-widest">{item.condition}</span>
-                                </div>
-                                <h4 className="text-base font-black text-slate-900 dark:text-white tracking-tighter leading-tight uppercase group-hover:text-orange-500 transition-colors line-clamp-2">{item.title}</h4>
-                                <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400/60 leading-relaxed line-clamp-3">{item.description}</p>
-                            </div>
-
-                            <div className="pt-4 mt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-7 h-7 rounded-full bg-orange-600/10 flex items-center justify-center text-orange-600 font-black text-[9px]">
+                            <div className="pt-5 mt-5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between px-1">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100 dark:from-white/10 dark:to-white/5 flex items-center justify-center text-orange-600 font-black text-[11px] shadow-inner border border-white/50 dark:border-white/10 group-hover:rotate-6 transition-transform">
                                         {item.seller_username?.[0]?.toUpperCase() || 'V'}
                                     </div>
                                     <div className="flex flex-col text-left">
-                                        <span className="text-[8px] font-black text-slate-800 dark:text-white uppercase tracking-widest leading-none">{item.seller_username || 'Anonymous Verto'}</span>
-                                        {item.location && <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tight mt-0.5">{item.location}</span>}
+                                        <span className="text-[9px] font-black text-slate-800 dark:text-white uppercase tracking-widest leading-none">{(item.seller_username && item.seller_username.length > 1) ? item.seller_username : 'Verto Anonymous'}</span>
+                                        {item.location && <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight mt-1 opacity-70 flex items-center gap-1">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                                            {item.location}
+                                        </span>}
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-2">
                                     {item.seller_phone && (
-                                        <a href={`tel:${item.seller_phone}`} className="p-1.5 text-orange-600 hover:bg-orange-600/10 rounded-lg transition-all border-none bg-transparent">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                                        <a href={`tel:${item.seller_phone}`} className="w-9 h-9 flex items-center justify-center text-white bg-[#0e0e0e] hover:bg-orange-600 rounded-2xl transition-all shadow-xl shadow-black/5 group/btn hover:scale-110 active:scale-95 border-none">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="w-3.5 h-3.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
                                         </a>
                                     )}
-                                    <button className="p-1.5 text-slate-400 hover:text-orange-600 transition-colors border-none bg-transparent cursor-pointer">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                    <button onClick={() => setSelectedItem(item)} className="w-9 h-9 flex items-center justify-center text-slate-400 dark:text-white/40 hover:text-white hover:bg-orange-600 bg-slate-100 dark:bg-white/5 rounded-2xl transition-all hover:scale-110 active:scale-95 border-none cursor-pointer">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="w-4 h-4"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     ))}
                     {filteredItems.length === 0 && (
-                        <div className="col-span-full py-20 text-center text-slate-400 font-black uppercase tracking-widest opacity-40 text-[10px]">
-                            No items found.
+                        <div className="col-span-full py-32 text-center text-slate-400 font-black uppercase tracking-[0.3em] opacity-30 text-[10px]">
+                            No treasures found in this category.
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Detailed View Modal */}
+            {selectedItem && (
+                <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 md:p-6 bg-slate-900/60 backdrop-blur-xl animate-fade-in" onClick={() => setSelectedItem(null)}>
+                    <div className="bg-white dark:bg-[#080808] w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-[40px] md:rounded-[56px] relative shadow-2xl border border-white/10 flex flex-col md:flex-row group animate-scale-up" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setSelectedItem(null)} className="absolute top-6 right-6 z-50 p-3 bg-black/20 hover:bg-orange-600 backdrop-blur-md text-white rounded-2xl transition-all border-none cursor-pointer">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                        </button>
+
+                        <div className="w-full md:w-1/2 h-[300px] md:h-auto bg-slate-50 dark:bg-white/[0.02] relative overflow-hidden">
+                            {selectedItem.images && selectedItem.images.length > 0 ? (
+                                <img src={selectedItem.images[0]} alt={selectedItem.title} className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center opacity-10">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-32 h-32"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></svg>
+                                </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:hidden" />
+                            <div className="absolute bottom-6 left-6 md:hidden">
+                                <span className="px-4 py-2 bg-orange-600 text-white rounded-2xl font-black text-lg">₹{selectedItem.price}</span>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 p-8 md:p-12 overflow-y-auto custom-scrollbar flex flex-col text-left">
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-3">
+                                        <span className="px-3 py-1 bg-orange-600/10 text-orange-600 rounded-lg text-[9px] font-black uppercase tracking-widest">{selectedItem.category}</span>
+                                        <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-white/40 rounded-lg text-[9px] font-black uppercase tracking-widest">{selectedItem.condition} Condition</span>
+                                    </div>
+                                    <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">{selectedItem.title}</h2>
+                                    <div className="hidden md:block py-4">
+                                        <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">₹{selectedItem.price}</span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Description</h5>
+                                    <p className="text-sm md:text-base text-slate-600 dark:text-slate-400/80 leading-relaxed font-medium">{selectedItem.description}</p>
+                                </div>
+
+                                <div className="pt-8 border-t border-slate-100 dark:border-white/5 space-y-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-14 h-14 rounded-[22px] bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white text-xl font-black shadow-xl">
+                                            {(selectedItem.seller_username && selectedItem.seller_username.length > 0) ? selectedItem.seller_username[0].toUpperCase() : 'V'}
+                                        </div>
+                                        <div>
+                                            <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Listed By</h5>
+                                            <p className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">{selectedItem.seller_username || 'Anonymous Verto'}</p>
+                                            {selectedItem.location && <p className="text-[10px] font-bold text-orange-600 uppercase tracking-widest mt-0.5">{selectedItem.location}</p>}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        {selectedItem.seller_phone && (
+                                            <a href={`tel:${selectedItem.seller_phone}`} className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-5 rounded-[24px] font-black text-[11px] uppercase tracking-[0.2em] shadow-2xl shadow-orange-600/30 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all text-decoration-none border-none">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                                                Call Seller
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 
