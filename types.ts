@@ -32,6 +32,8 @@ export interface MarketplaceItem {
   created_at: string;
   seller_username?: string;
   seller_avatar?: string;
+  seller_phone?: string;
+  location?: string;
 }
 
 export interface RoommateRequest {

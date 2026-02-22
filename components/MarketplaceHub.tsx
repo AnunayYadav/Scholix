@@ -15,8 +15,13 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
         description: '',
         price: '',
         category: 'Books',
-        condition: 'Good'
+        condition: 'Good',
+        phone: '',
+        location: ''
     });
+    const [uploading, setUploading] = useState(false);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const categories = ['All', 'Books', 'Electronics', 'Cycles', 'Hostel Essentials', 'Others'];
 
@@ -34,20 +39,50 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     const handleSellSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!userProfile) { showToast("Sign in required to sell.", "info"); return; }
+        if (!newItem.phone) { showToast("Phone number is required.", "info"); return; }
 
+        setLoading(true);
         try {
+            let imageUrls: string[] = [];
+
+            if (selectedFile) {
+                const path = `marketplace/${userProfile.id}/${Date.now()}_${selectedFile.name}`;
+                const publicUrl = await NexusServer.uploadMarketplaceImage(selectedFile, path);
+                imageUrls.push(publicUrl);
+            }
+
             await NexusServer.createMarketplaceItem({
-                ...newItem,
+                title: newItem.title,
+                description: newItem.description,
+                category: newItem.category,
+                condition: newItem.condition,
                 price: parseFloat(newItem.price),
                 seller_id: userProfile.id,
+                seller_phone: newItem.phone,
+                location: newItem.location,
                 status: 'Available',
-                images: [] // Image upload logic can be added later
+                images: imageUrls
             });
             showToast("Item listed successfully!", "success");
             setShowSellModal(false);
+            setNewItem({ title: '', description: '', price: '', category: 'Books', condition: 'Good', phone: '', location: '' });
+            setImagePreview(null);
+            setSelectedFile(null);
             fetchItems();
         } catch (err: any) {
             showToast("Error: " + err.message, "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setSelectedFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => setImagePreview(reader.result as string);
+            reader.readAsDataURL(file);
         }
     };
 
@@ -126,11 +161,21 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                     <div className="w-7 h-7 rounded-full bg-orange-600/10 flex items-center justify-center text-orange-600 font-black text-[9px]">
                                         {item.seller_username?.[0]?.toUpperCase() || 'V'}
                                     </div>
-                                    <span className="text-[8px] font-black text-slate-800 dark:text-white uppercase tracking-widest">{item.seller_username || 'Anonymous Verto'}</span>
+                                    <div className="flex flex-col">
+                                        <span className="text-[8px] font-black text-slate-800 dark:text-white uppercase tracking-widest leading-none">{item.seller_username || 'Anonymous Verto'}</span>
+                                        {item.location && <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tight mt-0.5">{item.location}</span>}
+                                    </div>
                                 </div>
-                                <button className="p-1.5 text-slate-400 hover:text-orange-600 transition-colors border-none bg-transparent cursor-pointer">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                                </button>
+                                <div className="flex items-center gap-1">
+                                    {item.seller_phone && (
+                                        <a href={`tel:${item.seller_phone}`} className="p-1.5 text-orange-600 hover:bg-orange-600/10 rounded-lg transition-all border-none bg-transparent">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                                        </a>
+                                    )}
+                                    <button className="p-1.5 text-slate-400 hover:text-orange-600 transition-colors border-none bg-transparent cursor-pointer">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -144,29 +189,57 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                         <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1 tracking-tighter uppercase">List Item</h3>
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-6">Ready to pass your gear to the next Verto?</p>
 
-                        <form onSubmit={handleSellSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Title</label>
-                                <input type="text" required value={newItem.title} onChange={e => setNewItem({ ...newItem, title: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white" placeholder="What are you selling?" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
+                        <div className="max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+                            <form onSubmit={handleSellSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Price (₹)</label>
-                                    <input type="number" required value={newItem.price} onChange={e => setNewItem({ ...newItem, price: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white" placeholder="Price" />
+                                    <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Product Photo</label>
+                                    <div className="group relative w-full h-32 bg-slate-50 dark:bg-white/5 rounded-2xl border-2 border-dashed border-slate-200 dark:border-white/10 hover:border-orange-500/50 transition-all overflow-hidden flex items-center justify-center cursor-pointer" onClick={() => document.getElementById('market-image-upload')?.click()}>
+                                        {imagePreview ? (
+                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="text-center space-y-1">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6 mx-auto text-slate-300"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+                                                <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Click to upload</p>
+                                            </div>
+                                        )}
+                                        <input id="market-image-upload" type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                                    </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Category</label>
-                                    <select value={newItem.category} onChange={e => setNewItem({ ...newItem, category: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white appearance-none">
-                                        {categories.filter(c => c !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
-                                    </select>
+                                    <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Title</label>
+                                    <input type="text" required value={newItem.title} onChange={e => setNewItem({ ...newItem, title: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white" placeholder="What are you selling?" />
                                 </div>
-                            </div>
-                            <div>
-                                <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Description</label>
-                                <textarea required value={newItem.description} onChange={e => setNewItem({ ...newItem, description: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 min-h-[80px] text-slate-800 dark:text-white" placeholder="Brief details about the item's state..." />
-                            </div>
-                            <button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none cursor-pointer">List Now</button>
-                        </form>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Price (₹)</label>
+                                        <input type="number" required value={newItem.price} onChange={e => setNewItem({ ...newItem, price: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white" placeholder="Price" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Category</label>
+                                        <select value={newItem.category} onChange={e => setNewItem({ ...newItem, category: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white appearance-none">
+                                            {categories.filter(c => c !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Description</label>
+                                    <textarea required value={newItem.description} onChange={e => setNewItem({ ...newItem, description: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 min-h-[80px] text-slate-800 dark:text-white" placeholder="Brief details about the item's state..." />
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Contact Number</label>
+                                        <input type="tel" required value={newItem.phone} onChange={e => setNewItem({ ...newItem, phone: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white" placeholder="e.g. 98150XXXXX" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Hostel / Address</label>
+                                        <input type="text" required value={newItem.location} onChange={e => setNewItem({ ...newItem, location: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white" placeholder="e.g. BH-4, 502" />
+                                    </div>
+                                </div>
+                                <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none cursor-pointer disabled:opacity-50">
+                                    {loading ? 'Listing...' : 'List Now'}
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             )}

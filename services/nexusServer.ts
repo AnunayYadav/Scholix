@@ -444,6 +444,15 @@ class NexusServer {
     if (error) throw error;
   }
 
+  static async uploadMarketplaceImage(file: File, path: string): Promise<string> {
+    const client = getSupabase();
+    if (!client) throw new Error("Registry offline.");
+    const { error: uploadError } = await client.storage.from('nexus-documents').upload(path, file);
+    if (uploadError) throw uploadError;
+    const { data: { publicUrl } } = client.storage.from('nexus-documents').getPublicUrl(path);
+    return publicUrl;
+  }
+
   /**
    * Roommate Finder Methods
    */
