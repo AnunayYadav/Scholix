@@ -97,37 +97,41 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     });
 
     return (
-        <div className="max-w-[1440px] mx-auto px-6 py-10 pb-32">
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                <div className="space-y-1 text-left">
-                    <h2 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white tracking-tighter leading-none">
-                        Roommate <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Finder</span>
-                    </h2>
-                    <p className="text-slate-500 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Find your perfect match to share your space.</p>
-                </div>
-                <div className="flex flex-wrap items-center gap-3">
-                    <button
-                        onClick={() => navigate('/marketplace')}
-                        className="p-3.5 rounded-2xl bg-white dark:bg-[#0c0c0c] border border-slate-200 dark:border-white/5 text-slate-400 hover:text-orange-500 transition-all shadow-sm cursor-pointer flex items-center gap-2"
-                        title="Back to Market"
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><polyline points="15 18 9 12 15 6" /></svg>
-                        <span className="hidden lg:inline text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-orange-500">Market Hub</span>
-                    </button>
-                    <div className="h-8 w-[1px] bg-slate-200 dark:bg-white/10 mx-1 hidden sm:block" />
-                    <button
-                        onClick={() => { if (!userProfile) showToast("Sign in required.", "info"); else setShowUserOnly(!showUserOnly); }}
-                        className={`px-6 py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] transition-all border-none cursor-pointer flex items-center gap-2 ${showUserOnly ? 'bg-orange-600 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white'}`}
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                        {showUserOnly ? 'All Requests' : 'My Requests'}
-                    </button>
-                    <button
-                        onClick={() => { if (!userProfile) showToast("Sign in required.", "info"); else setShowPostModal(true); }}
-                        className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-black text-[9px] uppercase tracking-[0.2em] shadow-xl shadow-orange-600/10 hover:scale-105 active:scale-95 transition-all border-none cursor-pointer"
-                    >
-                        Post Request
-                    </button>
+        <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-10 pb-32 overflow-hidden">
+            <header className="space-y-6 mb-8">
+                {/* Top Row: Title and Main Actions */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div className="space-y-1 text-left">
+                        <h2 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white tracking-tighter leading-none">
+                            Roommate <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Finder</span>
+                        </h2>
+                        <p className="text-slate-500 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Find your perfect match to share your space.</p>
+                    </div>
+
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                        <button
+                            onClick={() => navigate('/marketplace')}
+                            className="flex-1 md:flex-none p-3.5 rounded-2xl bg-white dark:bg-[#0c0c0c] border border-slate-200 dark:border-white/5 text-slate-400 hover:text-orange-500 transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2"
+                            title="Back to Market"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><polyline points="15 18 9 12 15 6" /></svg>
+                            <span className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap">Market Hub</span>
+                        </button>
+                        <div className="h-8 w-[1px] bg-slate-200 dark:bg-white/10 mx-1 hidden md:block" />
+                        <button
+                            onClick={() => { if (!userProfile) showToast("Sign in required.", "info"); else setShowUserOnly(!showUserOnly); }}
+                            className={`flex-1 md:flex-none px-6 py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] transition-all border-none cursor-pointer flex items-center justify-center gap-2 ${showUserOnly ? 'bg-orange-600 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white'}`}
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                            {showUserOnly ? 'All' : 'Mine'}
+                        </button>
+                        <button
+                            onClick={() => { if (!userProfile) showToast("Sign in required.", "info"); else setShowPostModal(true); }}
+                            className="flex-1 md:flex-none px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-black text-[9px] uppercase tracking-[0.2em] shadow-xl shadow-orange-600/10 hover:scale-105 active:scale-95 transition-all border-none cursor-pointer"
+                        >
+                            Post Request
+                        </button>
+                    </div>
                 </div>
             </header>
 

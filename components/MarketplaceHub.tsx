@@ -143,40 +143,26 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     });
 
     return (
-        <div className="max-w-[1440px] mx-auto px-6 py-10 pb-32">
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                <div className="space-y-1 text-left">
-                    <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
-                        LPU <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Market</span>
-                    </h2>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Buy, Sell & Trade within the LPU Community</p>
-                </div>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
-                    <div className="flex items-center gap-2">
-                        <div className="flex items-center bg-white dark:bg-[#0c0c0c] p-1.5 rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm overflow-x-auto custom-scrollbar no-scrollbar">
-                            {categories.map(c => (
-                                <button
-                                    key={c}
-                                    onClick={() => setFilter(c)}
-                                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border-none cursor-pointer whitespace-nowrap ${filter === c
-                                        ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-600/20'
-                                        : 'text-slate-400 hover:text-orange-500 dark:text-slate-500 dark:hover:text-white bg-transparent'
-                                        }`}
-                                >
-                                    {c}
-                                </button>
-                            ))}
-                        </div>
+        <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-10 pb-32 overflow-hidden">
+            <header className="space-y-6 mb-8">
+                {/* Top Row: Title and Main Actions */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div className="space-y-1 text-left">
+                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
+                            LPU <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Market</span>
+                        </h2>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Buy, Sell & Trade within the LPU Community</p>
+                    </div>
+
+                    <div className="flex items-center gap-3 w-full md:w-auto">
                         <button
                             onClick={() => navigate('/roommate')}
-                            className="p-3.5 rounded-2xl bg-white dark:bg-[#0c0c0c] border border-slate-200 dark:border-white/5 text-slate-400 hover:text-orange-500 transition-all shadow-sm cursor-pointer flex items-center gap-2"
+                            className="flex-1 md:flex-none p-3.5 rounded-2xl bg-white dark:bg-[#0c0c0c] border border-slate-200 dark:border-white/5 text-slate-400 hover:text-orange-500 transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2"
                             title="Find Roommates"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                            <span className="hidden lg:inline text-[9px] font-black uppercase tracking-widest">Roommates</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap">Roommates</span>
                         </button>
-                    </div>
-                    <div className="flex items-center gap-3">
                         <button
                             onClick={() => setShowUserOnly(!showUserOnly)}
                             className={`p-3.5 rounded-2xl transition-all border shadow-sm cursor-pointer ${showUserOnly
@@ -192,12 +178,28 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                 if (!userProfile) showToast("Please sign in to list items", "info");
                                 else setShowSellModal(true);
                             }}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-black px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl hover:shadow-2xl border-none cursor-pointer"
+                            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-black px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl hover:shadow-2xl border-none cursor-pointer"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                             Post Ad
                         </button>
                     </div>
+                </div>
+
+                {/* Bottom Row: Filter Bar */}
+                <div className="flex items-center bg-white dark:bg-[#0c0c0c] p-1.5 rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm overflow-x-auto no-scrollbar w-full md:w-max mx-auto md:mx-0">
+                    {categories.map(c => (
+                        <button
+                            key={c}
+                            onClick={() => setFilter(c)}
+                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border-none cursor-pointer whitespace-nowrap ${filter === c
+                                ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-600/20'
+                                : 'text-slate-400 hover:text-orange-500 dark:text-slate-500 dark:hover:text-white bg-transparent'
+                                }`}
+                        >
+                            {c}
+                        </button>
+                    ))}
                 </div>
             </header>
 
