@@ -149,54 +149,58 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                     <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
                         LPU <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Market</span>
                     </h2>
-                    <p className="text-slate-500 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Second-hand treasures for every Verto.</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Buy, Sell & Trade within the LPU Community</p>
                 </div>
-                <div className="flex flex-wrap gap-3">
-                    <button
-                        onClick={() => navigate('/roommate')}
-                        className="px-5 py-3 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white rounded-xl font-black text-[9px] uppercase tracking-[0.2em] hover:bg-orange-500/10 hover:text-orange-600 transition-all border-none cursor-pointer flex items-center gap-2"
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                        Find Roommates
-                    </button>
-                    <button
-                        onClick={() => { if (!userProfile) showToast("Sign in required.", "info"); else setShowUserOnly(!showUserOnly); }}
-                        className={`px-5 py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] transition-all border-none cursor-pointer flex items-center gap-2 ${showUserOnly ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white'}`}
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                        {showUserOnly ? 'All Items' : 'My Ads'}
-                    </button>
-                    <button
-                        onClick={() => { if (!userProfile) showToast("Sign in required.", "info"); else setShowSellModal(true); }}
-                        className="px-5 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-black text-[9px] uppercase tracking-[0.2em] shadow-xl shadow-orange-600/10 hover:scale-105 active:scale-95 transition-all border-none cursor-pointer"
-                    >
-                        Post an Ad
-                    </button>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
+                    <div className="flex items-center bg-white dark:bg-[#0c0c0c] p-1.5 rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm overflow-x-auto custom-scrollbar no-scrollbar">
+                        {categories.map(c => (
+                            <button
+                                key={c}
+                                onClick={() => setFilter(c)}
+                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border-none cursor-pointer whitespace-nowrap ${filter === c
+                                    ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-600/20'
+                                    : 'text-slate-400 hover:text-orange-500 dark:text-slate-500 dark:hover:text-white bg-transparent'
+                                    }`}
+                            >
+                                {c}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setShowUserOnly(!showUserOnly)}
+                            className={`p-3.5 rounded-2xl transition-all border shadow-sm cursor-pointer ${showUserOnly
+                                ? 'bg-orange-500/10 border-orange-500/50 text-orange-600'
+                                : 'bg-white dark:bg-[#0c0c0c] border-slate-200 dark:border-white/5 text-slate-400'
+                                }`}
+                            title="My Listings"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                        </button>
+                        <button
+                            onClick={() => {
+                                if (!userProfile) showToast("Please sign in to list items", "info");
+                                else setShowSellModal(true);
+                            }}
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-black px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl hover:shadow-2xl border-none cursor-pointer"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                            Post Ad
+                        </button>
+                    </div>
                 </div>
             </header>
 
-            <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
-                {categories.map(cat => (
-                    <button
-                        key={cat}
-                        onClick={() => setFilter(cat)}
-                        className={`px-4 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all whitespace-nowrap border-none cursor-pointer ${filter === cat ? 'bg-orange-600 text-white shadow-md' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/40 hover:bg-orange-500/10'}`}
-                    >
-                        {cat}
-                    </button>
-                ))}
-            </div>
-
             {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-8 mt-4 px-2 md:px-0">
                     {Array.from({ length: 8 }).map((_, i) => (
-                        <div key={i} className="h-80 bg-slate-100 dark:bg-white/5 rounded-[40px] animate-pulse" />
+                        <div key={i} className="h-60 md:h-80 bg-slate-100 dark:bg-white/5 rounded-[32px] md:rounded-[40px] animate-pulse" />
                     ))}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-8 mt-4 px-2 md:px-0">
                     {filteredItems.map(item => (
-                        <div key={item.id} onClick={() => setSelectedItem(item)} className="group p-4 bg-white dark:bg-[#0c0c0c] rounded-[42px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 shadow-sm hover:shadow-2xl hover:shadow-orange-600/5 transition-all duration-500 flex flex-col relative overflow-hidden cursor-pointer">
+                        <div key={item.id} onClick={() => setSelectedItem(item)} className="group p-3 md:p-4 bg-white dark:bg-[#0c0c0c] rounded-[32px] md:rounded-[42px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 shadow-sm hover:shadow-2xl hover:shadow-orange-600/5 transition-all duration-500 flex flex-col relative overflow-hidden cursor-pointer">
                             {/* Tags Overlay */}
                             <div className="absolute top-5 left-5 flex flex-col gap-2 z-30 transform -translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
                                 {item.seller_id === userProfile?.id && (
@@ -215,31 +219,30 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                 {item.images && item.images.length > 0 ? (
                                     <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                                 ) : (
-                                    <div className="flex flex-col items-center gap-3 opacity-20">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-12 h-12 text-slate-900 dark:text-white"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
-                                        <span className="text-[10px] font-black uppercase tracking-widest">No Image</span>
+                                    <div className="flex flex-col items-center gap-2 opacity-20">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 md:w-12 md:h-12 text-slate-900 dark:text-white"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
+                                        <span className="text-[8px] font-black uppercase tracking-widest">No Image</span>
                                     </div>
                                 )}
 
-                                <div className="absolute top-4 right-4 z-20">
-                                    <div className="px-3 py-1 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg shadow-lg shadow-orange-600/20 flex items-center gap-1 group-hover:scale-110 transition-transform duration-500">
-                                        <span className="text-[9px] font-black opacity-70">₹</span>
-                                        <span className="text-[11px] font-black tracking-tight">{item.price}</span>
+                                <div className="absolute top-3 right-3 md:top-4 md:right-4 z-20">
+                                    <div className="px-2 py-0.5 md:px-3 md:py-1 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg shadow-lg shadow-orange-600/20 flex items-center gap-1 group-hover:scale-110 transition-transform duration-500">
+                                        <span className="text-[8px] md:text-[9px] font-black opacity-70">₹</span>
+                                        <span className="text-[10px] md:text-[11px] font-black tracking-tight">{item.price}</span>
                                     </div>
                                 </div>
-
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             </div>
 
-                            <div className="flex flex-col gap-1.5 text-left mb-4 min-w-0 px-1">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-orange-600 animate-pulse" />
-                                    <span className="text-[8px] font-black text-orange-600 uppercase tracking-widest leading-none">{item.category}</span>
+                            <div className="flex flex-col gap-1 text-left mb-3 min-w-0 px-1">
+                                <div className="flex items-center gap-1.5">
+                                    <div className="w-1 h-1 rounded-full bg-orange-600 animate-pulse" />
+                                    <span className="text-[7px] md:text-[8px] font-black text-orange-600 uppercase tracking-widest leading-none">{item.category}</span>
                                     <span className="text-[7px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">•</span>
-                                    <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">{item.condition}</span>
+                                    <span className="text-[7px] md:text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">{item.condition}</span>
                                 </div>
-                                <h3 className="text-[15px] font-black text-slate-900 dark:text-white tracking-tight leading-tight truncate">{item.title}</h3>
-                                {item.description && <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 line-clamp-1 opacity-70">{item.description}</p>}
+                                <h3 className="text-[13px] md:text-[15px] font-black text-slate-900 dark:text-white tracking-tight leading-tight truncate">{item.title}</h3>
+                                {item.description && <p className="text-[9px] md:text-[10px] font-medium text-slate-500 dark:text-slate-400 line-clamp-1 opacity-70">{item.description}</p>}
                             </div>
 
                             <div className="pt-4 mt-auto border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
@@ -255,17 +258,17 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                 <div className="flex items-center gap-1 shrink-0">
                                     {item.seller_phone && (
                                         <>
-                                            <a href={`tel:${item.seller_phone}`} onClick={(e) => e.stopPropagation()} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-white/40 hover:text-white hover:bg-orange-600 bg-slate-50 dark:bg-white/5 rounded-lg transition-all hover:scale-105 active:scale-95 border-none">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                                            <a href={`tel:${item.seller_phone}`} onClick={(e) => e.stopPropagation()} className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-slate-400 dark:text-white/40 hover:text-white hover:bg-orange-600 bg-slate-50 dark:bg-white/5 rounded-lg transition-all hover:scale-105 active:scale-95 border-none">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 md:w-3.5 h-3 md:h-3.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
                                             </a>
                                             <a
                                                 href={`https://wa.me/${item.seller_phone.replace(/\D/g, '').length === 10 ? '91' + item.seller_phone.replace(/\D/g, '') : item.seller_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi, I'm interested in your "${item.title}" listed on LPU Nexus.`)}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-white/40 hover:text-white hover:bg-[#25D366] bg-slate-50 dark:bg-white/5 rounded-lg transition-all hover:scale-105 active:scale-95 border-none"
+                                                className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center text-slate-400 dark:text-white/40 hover:text-white hover:bg-[#25D366] bg-slate-50 dark:bg-white/5 rounded-lg transition-all hover:scale-105 active:scale-95 border-none"
                                             >
-                                                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                                                <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 md:w-4 md:h-4">
                                                     <path d="M12.004 2C6.474 2 2 6.474 2 12.004c0 1.944.558 3.754 1.524 5.289l-1.5 5.511 5.642-1.48c1.39.756 2.973 1.192 4.654 1.192 5.53 0 10.004-4.474 10.004-10.004S17.534 2 12.004 2zm0 18.25c-1.63 0-3.155-.444-4.464-1.218l-.32-.187-3.32.868.883-3.23-.205-.327c-.833-1.32-1.274-2.857-1.274-4.469 0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8zm4.615-6.233c-.253-.127-1.5-.74-1.733-.824-.233-.085-.403-.127-.573.127-.17.253-.655.824-.805 1s-.3.19-.553.064c-.253-.127-1.07-.394-2.038-1.258-.753-.672-1.26-1.503-1.408-1.756-.148-.253-.016-.39.11-.515.114-.114.253-.296.38-.444.127-.148.17-.253.254-.423.085-.17.042-.317-.02-.444-.063-.127-.571-1.376-.782-1.884-.206-.494-.413-.427-.572-.427-.148 0-.317-.01-.486-.01s-.444.064-.677.317c-.233.253-.89.868-.89 2.116s.91 2.455 1.037 2.624c.127.169 1.79 2.73 4.334 3.824.605.26 1.077.416 1.446.533.606.192 1.158.165 1.593.1.485-.072 1.492-.61 1.704-1.203.212-.593.212-1.101.148-1.203-.063-.102-.275-.186-.53-.313z" />
                                                 </svg>
                                             </a>
@@ -363,6 +366,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                 </div>
             )}
 
+            {/* Sell Modal */}
             {showSellModal && (
                 <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
                     <div className="bg-white dark:bg-[#0a0a0a] w-full max-w-md rounded-[32px] p-6 relative shadow-2xl border border-slate-200 dark:border-white/10 animate-slide-up">
