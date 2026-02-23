@@ -206,7 +206,7 @@ const PageRenderer = React.memo<{
                 {/* Dynamic Watermark */}
                 <div className="absolute inset-0 pointer-events-none opacity-[0.06] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
                     {Array.from({ length: 9 }).map((_, i) => (
-                        <span key={i} className="text-[35px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-black/10 dark:text-black tracking-widest">
+                        <span key={i} className="text-[35px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-slate-900 dark:text-white tracking-widest">
                             LPU NEXUS
                         </span>
                     ))}
