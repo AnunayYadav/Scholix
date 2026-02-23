@@ -176,8 +176,8 @@ h4,
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -185,41 +185,46 @@ h4,
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #222;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #999;
+  background: rgba(0, 0, 0, 0.2);
 }
+
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  background: rgba(255, 255, 255, 0.2);
 }
 
+
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
+  width: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 10px;
+  background: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(234, 88, 12, 0.2);
-  border-radius: 20px;
-  transition: background 0.3s ease;
-  border: 2px solid #000;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(234, 88, 12, 0.5);
+  background: rgba(234, 88, 12, 0.4);
 }
+
 
 .glass-panel {
   @apply bg-white/90 dark:bg-black/60 backdrop-blur-2xl border border-slate-200/80 dark:border-white/10;
