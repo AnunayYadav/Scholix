@@ -105,111 +105,113 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-5">
-          {error && (
-            <div className="p-5 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl animate-fade-in">
-              <div className="flex items-center gap-2 mb-1">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="11.99" y2="16" /></svg>
-                <span className="text-[10px] font-black uppercase tracking-widest">Error detected</span>
-              </div>
-              <p className="text-[11px] font-bold opacity-90 leading-relaxed">{error}</p>
-            </div>
-          )}
-
-          <div className="space-y-6">
-            {isLogin ? (
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5 ml-1">Email or Username</label>
-                  <div className="relative group">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                    <input
-                      type="text" required value={identifier} onChange={e => setIdentifier(e.target.value)}
-                      disabled={loading}
-                      className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
-                      placeholder="Enter your registered email"
-                    />
-                  </div>
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
+          <div className="p-6 md:p-8 space-y-6 overflow-y-auto custom-scrollbar max-h-[50vh] md:max-h-none">
+            {error && (
+              <div className="p-5 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl animate-fade-in">
+                <div className="flex items-center gap-2 mb-1">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="11.99" y2="16" /></svg>
+                  <span className="text-[10px] font-black uppercase tracking-widest">Error detected</span>
                 </div>
-
-                <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5 ml-1">Password</label>
-                  <div className="relative group">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                    <input
-                      type="password" required value={password} onChange={e => setPassword(e.target.value)}
-                      disabled={loading}
-                      className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
-                      placeholder="••••••••"
-                    />
-                  </div>
-                </div>
+                <p className="text-[11px] font-bold opacity-90 leading-relaxed">{error}</p>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="md:col-span-2">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5 ml-1">Unique Username</label>
-                  <div className="relative group">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm group-focus-within:text-orange-600">@</span>
-                    <input
-                      type="text" required value={username} onChange={e => handleUsernameChange(e.target.value)}
-                      disabled={loading}
-                      className={`w-full bg-slate-50 dark:bg-white/[0.03] pl-9 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white disabled:opacity-50 ${usernameStatus === 'available' ? 'border-emerald-500/50 ring-4 ring-emerald-500/5' :
-                        usernameStatus === 'taken' ? 'border-red-500/50 ring-4 ring-red-500/5' : 'border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
-                        }`}
-                      placeholder="choose_a_tag"
-                    />
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                      {usernameStatus === 'checking' && <div className="w-3 h-3 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />}
-                      {usernameStatus === 'available' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5 text-emerald-500"><polyline points="20 6 9 17 4 12" /></svg>}
-                      {usernameStatus === 'taken' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5 text-red-500"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>}
+            )}
+
+            <div className="space-y-6">
+              {isLogin ? (
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5 ml-1">Email or Username</label>
+                    <div className="relative group">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                      <input
+                        type="text" required value={identifier} onChange={e => setIdentifier(e.target.value)}
+                        disabled={loading}
+                        className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                        placeholder="Enter your registered email"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5 ml-1">Password</label>
+                    <div className="relative group">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                      <input
+                        type="password" required value={password} onChange={e => setPassword(e.target.value)}
+                        disabled={loading}
+                        className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                        placeholder="••••••••"
+                      />
                     </div>
                   </div>
                 </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="md:col-span-2">
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5 ml-1">Unique Username</label>
+                    <div className="relative group">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm group-focus-within:text-orange-600">@</span>
+                      <input
+                        type="text" required value={username} onChange={e => handleUsernameChange(e.target.value)}
+                        disabled={loading}
+                        className={`w-full bg-slate-50 dark:bg-white/[0.03] pl-9 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white disabled:opacity-50 ${usernameStatus === 'available' ? 'border-emerald-500/50 ring-4 ring-emerald-500/5' :
+                          usernameStatus === 'taken' ? 'border-red-500/50 ring-4 ring-red-500/5' : 'border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
+                          }`}
+                        placeholder="choose_a_tag"
+                      />
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                        {usernameStatus === 'checking' && <div className="w-3 h-3 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />}
+                        {usernameStatus === 'available' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5 text-emerald-500"><polyline points="20 6 9 17 4 12" /></svg>}
+                        {usernameStatus === 'taken' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5 text-red-500"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>}
+                      </div>
+                    </div>
+                  </div>
 
-                <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5 ml-1">Official Email</label>
-                  <div className="relative group">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
-                    <input
-                      type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                      disabled={loading}
-                      className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
-                      placeholder="name@lpu.in"
-                    />
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5 ml-1">Official Email</label>
+                    <div className="relative group">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                      <input
+                        type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                        disabled={loading}
+                        className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                        placeholder="name@lpu.in"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5 ml-1">Reg Number</label>
+                    <div className="relative group">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><path d="M7 21v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4" /><circle cx="12" cy="11" r="3" /></svg>
+                      <input
+                        type="text" required value={regNo} onChange={e => setRegNo(e.target.value.replace(/[^0-9]/g, '').slice(0, 8))}
+                        disabled={loading}
+                        className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                        placeholder="1240...."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5 ml-1">Secure Password</label>
+                    <div className="relative group">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                      <input
+                        type="password" required value={password} onChange={e => setPassword(e.target.value)}
+                        disabled={loading}
+                        className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                        placeholder="Min. 6 characters"
+                      />
+                    </div>
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5 ml-1">Reg Number</label>
-                  <div className="relative group">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><path d="M7 21v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4" /><circle cx="12" cy="11" r="3" /></svg>
-                    <input
-                      type="text" required value={regNo} onChange={e => setRegNo(e.target.value.replace(/[^0-9]/g, '').slice(0, 8))}
-                      disabled={loading}
-                      className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
-                      placeholder="1240...."
-                    />
-                  </div>
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5 ml-1">Secure Password</label>
-                  <div className="relative group">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                    <input
-                      type="password" required value={password} onChange={e => setPassword(e.target.value)}
-                      disabled={loading}
-                      className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
-                      placeholder="Min. 6 characters"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
-          <div className="pt-2">
+          <div className="p-6 md:p-8 pt-0 md:pt-0">
             <button
               type="submit" disabled={loading || (!isLogin && usernameStatus === 'taken')}
               className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:shadow-[0_20px_40px_-10px_rgba(234,88,12,0.4)] hover:scale-[1.01] text-white py-5 rounded-3xl font-black text-xs uppercase tracking-[0.2em] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3 border-none"
@@ -222,7 +224,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             <button
               type="button"
               onClick={() => { setIsLogin(!isLogin); setError(null); }}
-              className="w-full text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-orange-600 transition-colors py-6 bg-transparent border-none"
+              className="w-full text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-orange-500 transition-colors py-6 bg-transparent border-none"
             >
               {isLogin ? "New here? Create an account" : "Have an account? Sign in"}
             </button>
