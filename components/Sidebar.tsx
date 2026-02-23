@@ -193,8 +193,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         fixed inset-y-0 left-0 z-[40] w-64 transform transition-transform duration-300 ease-in-out
         bg-white dark:bg-black border-r border-slate-200 dark:border-white/5
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:translate-x-0 md:static flex flex-col shadow-2xl md:shadow-none
+        md:translate-x-0 md:sticky md:top-0 md:h-screen flex flex-col shadow-2xl md:shadow-none
       `}>
+
         <div className="p-8 border-b border-slate-200 dark:border-white/5">
           <h1 className="text-2xl font-black bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tighter cursor-pointer" onClick={() => setModule(ModuleType.DASHBOARD)}>
             LPU-Nexus
@@ -202,7 +203,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-600 mt-1">Your Student Hub</p>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
+
           {navItems.map((item) => (
             <button
               key={item.id}
