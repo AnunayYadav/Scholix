@@ -149,12 +149,28 @@ class NexusServer {
   static async getSiteStats(): Promise<{ registered: number; visitors: number; totalViews: number }> {
     const client = getSupabase();
     if (!client) return { registered: 0, visitors: 0, totalViews: 0 };
-    try {
-      const { count: reg } = await client.from('profiles').select('*', { count: 'exact', head: true });
-      const { count: vis } = await client.from('site_visits').select('*', { count: 'exact', head: true });
-      const { count: views } = await client.from('site_views').select('*', { count: 'exact', head: true });
-      return { registered: reg || 0, visitors: vis || 0, totalViews: views || 0 };
-    } catch (e) { return { registered: 0, visitors: 0, totalViews: 0 }; }
+
+    // Fetch counts individually to prevent one RLS failure from wiping all results
+    const fetchCount = async (table: string) => {
+      try {
+        const { count, error } = await client.from(table).select('*', { count: 'exact', head: true });
+        if (error) {
+          console.warn(`Stat fetch error for ${table}:`, error.message);
+          return 0;
+        }
+        return count || 0;
+      } catch (e) {
+        return 0;
+      }
+    };
+
+    const [reg, vis, views] = await Promise.all([
+      fetchCount('profiles'),
+      fetchCount('site_visits'),
+      fetchCount('site_views')
+    ]);
+
+    return { registered: reg, visitors: vis, totalViews: views };
   }
 
   static async trackPageView(path: string): Promise<void> {
