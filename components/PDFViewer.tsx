@@ -682,37 +682,36 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     <div className="flex items-center gap-1 bg-white/5 rounded-2xl p-1 border border-white/10">
                         <button
                             onClick={() => setScale(prev => Math.max(0.2, prev - 0.1))}
-                            className="w-8 h-8 rounded-xl flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all border-none"
+                            className="w-8 h-8 rounded-xl flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all border-none bg-transparent"
                         >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="5" y1="12" x2="19" y2="12" /></svg>
                         </button>
-                        <span className="text-[9px] font-black text-white px-2 min-w-[50px] text-center">{Math.round(scale * 100)}%</span>
+                        <span className="text-[10px] font-black text-white px-2 min-w-[50px] text-center">{Math.round(scale * 100)}%</span>
                         <button
                             onClick={() => setScale(prev => Math.min(3, prev + 0.1))}
-                            className="w-8 h-8 rounded-xl flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all border-none"
+                            className="w-8 h-8 rounded-xl flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all border-none bg-transparent"
                         >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                         </button>
+
                         <button
                             onClick={toggleFit}
-                            className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 text-white/40 hover:text-white hover:bg-orange-600 transition-all border-none"
+                            className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 text-white/50 hover:text-white hover:bg-orange-600 transition-all border-none"
                             title={viewMode === 'width' ? "Fit to Width" : "Fit to Page"}
                         >
                             {viewMode === 'width' ? (
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5">
-                                    <path d="M4 12V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8" />
-                                    <path d="m15 15 3 3-3 3" />
-                                    <path d="m9 15-3 3 3 3" />
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                                    <path d="M2 12h20" />
+                                    <path d="M7 7l-5 5 5 5" />
+                                    <path d="M17 7l5 5-5 5" />
                                 </svg>
                             ) : (
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5">
-                                    <path d="M12 4h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-8" />
-                                    <path d="m9 15-3 3 3 3" />
-                                    <path d="m15 9 3-3-3-3" />
-                                    <line x1="12" y1="2" x2="12" y2="22" />
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m14 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                                 </svg>
                             )}
                         </button>
+
                     </div>
                 </div>
 
