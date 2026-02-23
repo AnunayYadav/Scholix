@@ -24,9 +24,12 @@ const PageRenderer = React.memo<{
     scale: number;
     userProfile: UserProfile | null | undefined;
     searchQuery: string;
+    currentSearchIndex: number;
+    searchResults: SearchResult[];
     pdfjsLib: any;
     registerRef: (pageNum: number, el: HTMLDivElement | null) => void;
-}>(({ pageNum, pdfDoc, renderScale, scale, userProfile, searchQuery, pdfjsLib, registerRef }) => {
+}>(({ pageNum, pdfDoc, renderScale, scale, userProfile, searchQuery, currentSearchIndex, searchResults, pdfjsLib, registerRef }) => {
+
     const containerRef = useRef<HTMLDivElement>(null);
     const [renderTarget, setRenderTarget] = useState<{
         activeCanvas: 'A' | 'B';
@@ -118,7 +121,51 @@ const PageRenderer = React.memo<{
             observer.disconnect();
             if (renderTaskRef.current) renderTaskRef.current.cancel();
         };
-    }, [renderScale, pageNum, pdfDoc, pdfjsLib]); // searchQuery removed from deps to prevent re-render while typing
+    }, [renderScale, pageNum, pdfDoc, pdfjsLib]);
+
+    // Independent search highlighting effect to prevent full re-renders
+    useEffect(() => {
+        if (!textLayerRef.current) return;
+
+        // Optimized reset: only remove our marks to preserve PDF.js structure
+        const marks = textLayerRef.current.querySelectorAll('mark.pdf-search-match');
+        marks.forEach(mark => {
+            const textNode = document.createTextNode(mark.textContent || '');
+            mark.parentNode?.replaceChild(textNode, mark);
+        });
+        textLayerRef.current.normalize();
+
+        if (!searchQuery.trim()) return;
+
+        const spans = textLayerRef.current.querySelectorAll('span');
+        const query = searchQuery.trim().toLowerCase();
+        const regex = new RegExp(`(${query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
+
+        const activeResult = searchResults[currentSearchIndex];
+        const isActivePage = activeResult?.pageIndex === pageNum;
+
+        let globalMatchCount = 0;
+
+        spans.forEach(span => {
+            const originalText = span.textContent || '';
+            if (originalText.toLowerCase().includes(query)) {
+                // Replace text with mark tags
+                span.innerHTML = originalText.replace(regex, (match) => {
+                    const isCurrent = isActivePage && globalMatchCount === activeResult.matchIndex;
+                    globalMatchCount++;
+                    return `<mark class="pdf-search-match ${isCurrent ? 'active-match' : ''}">${match}</mark>`;
+                });
+            }
+        });
+
+        // Scroll active match into view if it's on this page
+        if (isActivePage) {
+            const activeEl = textLayerRef.current.querySelector('.active-match');
+            if (activeEl) {
+                activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    }, [searchQuery, currentSearchIndex, searchResults, pageNum, renderTarget.renderedScale]);
 
     const currentScaleFactor = renderTarget.renderedScale > 0 ? scale / renderTarget.renderedScale : 1;
 
@@ -508,20 +555,24 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         for (let i = 1; i <= numPages; i++) {
             const page = await pdfDocRef.current.getPage(i);
             const textContent = await page.getTextContent();
-            const text = textContent.items.map((item: any) => item.str).join(' ').toLowerCase();
 
-            let count = 0;
-            let pos = text.indexOf(query);
-            while (pos !== -1) {
-                results.push({
-                    pageIndex: i,
-                    matchIndex: count,
-                    totalMatchesInPage: 0 // Will adjust later if needed
-                });
-                count++;
-                pos = text.indexOf(query, pos + 1);
-            }
+            // Search within individual items for more precise match counting per span
+            let pageMatchCount = 0;
+            textContent.items.forEach((item: any) => {
+                const str = item.str.toLowerCase();
+                let pos = str.indexOf(query);
+                while (pos !== -1) {
+                    results.push({
+                        pageIndex: i,
+                        matchIndex: pageMatchCount,
+                        totalMatchesInPage: 0
+                    });
+                    pageMatchCount++;
+                    pos = str.indexOf(query, pos + 1);
+                }
+            });
         }
+
 
         setSearchResults(results);
         setIsSearching(false);
@@ -729,11 +780,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                                     scale={scale}
                                     userProfile={userProfile}
                                     searchQuery={searchQuery}
+                                    currentSearchIndex={currentSearchIndex}
+                                    searchResults={searchResults}
                                     pdfjsLib={pdfjsLibState}
                                     registerRef={(pageNum, el) => {
                                         pageRefs.current[pageNum] = el;
                                     }}
                                 />
+
                             ))}
                         </div>
                     )}
@@ -785,6 +839,21 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     border-radius: 2px;
                     box-shadow: 0 0 10px rgba(234, 88, 12, 0.2);
                     color: white;
+                }
+
+                mark.pdf-search-match {
+                    background-color: rgba(234, 88, 12, 0.3);
+                    color: inherit;
+                    border-radius: 1px;
+                    transition: all 0.2s ease;
+                }
+
+                mark.pdf-search-match.active-match {
+                    background-color: #ea580c;
+                    color: white;
+                    box-shadow: 0 0 15px rgba(234, 88, 12, 0.5);
+                    transform: scale(1.1);
+                    z-index: 10;
                 }
                 
                 @keyframes fade-in {
