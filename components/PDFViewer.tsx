@@ -176,7 +176,7 @@ const PageRenderer = React.memo<{
                 registerRef(pageNum, el);
             }}
             data-page={pageNum}
-            className="relative mb-6 bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top-left select-none border border-white/5 overflow-visible snap-start snap-always"
+            className="relative mb-6 bg-white dark:bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top-left select-none border border-slate-200 dark:border-white/5 overflow-visible snap-start snap-always"
             style={{
                 width: pageInfo ? `${pageInfo.width * scale}px` : 'fit-content',
                 height: pageInfo ? `${pageInfo.height * scale}px` : '400px',
@@ -206,7 +206,7 @@ const PageRenderer = React.memo<{
                 {/* Dynamic Watermark */}
                 <div className="absolute inset-0 pointer-events-none opacity-[0.06] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
                     {Array.from({ length: 9 }).map((_, i) => (
-                        <span key={i} className="text-[35px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-black tracking-widest">
+                        <span key={i} className="text-[35px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-black/10 dark:text-black tracking-widest">
                             LPU NEXUS
                         </span>
                     ))}
@@ -635,18 +635,18 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     }
 
     return createPortal(
-        <div className={`fixed inset-0 z-[9999] flex flex-col bg-[#050505] animate-fade-in overflow-hidden ${isFullscreen ? 'p-0' : ''}`}>
+        <div className={`fixed inset-0 z-[9999] flex flex-col bg-slate-100 dark:bg-[#050505] animate-fade-in overflow-hidden ${isFullscreen ? 'p-0' : ''}`}>
             {/* Toolbar */}
-            <div className="flex items-center justify-between px-4 md:px-6 h-16 md:h-20 bg-black/80 backdrop-blur-2xl border-b border-white/5 z-50">
+            <div className="flex items-center justify-between px-4 md:px-6 h-16 md:h-20 bg-white/80 dark:bg-black/80 backdrop-blur-2xl border-b border-slate-200 dark:border-white/5 z-50">
                 <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
                     <button
                         onClick={onClose}
-                        className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-orange-600 text-white transition-all border-none group"
+                        className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-slate-200 dark:bg-white/5 hover:bg-orange-600 text-slate-600 dark:text-white transition-all border-none group"
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                     </button>
                     <div className="hidden sm:block truncate">
-                        <h3 className="text-[11px] font-black text-white uppercase tracking-tighter truncate max-w-[200px]">{fileName}</h3>
+                        <h3 className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-tighter truncate max-w-[200px]">{fileName}</h3>
                         <p className="text-[8px] font-black text-orange-500 uppercase tracking-widest leading-none mt-1">LPU Nexus Secure Protocol</p>
                     </div>
                 </div>
@@ -654,8 +654,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 {/* Center: Search & Zoom */}
                 <div className="flex items-center gap-2 md:gap-6">
                     {/* Search Bar */}
-                    <div className="hidden sm:flex items-center bg-white/5 rounded-2xl border border-white/10 px-3 py-1.5 focus-within:border-orange-600 transition-all group">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/30 group-focus-within:text-orange-500"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                    <div className="hidden sm:flex items-center bg-slate-200 dark:bg-white/5 rounded-2xl border border-slate-300 dark:border-white/10 px-3 py-1.5 focus-within:border-orange-600 transition-all group">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-slate-400 dark:text-white/30 group-focus-within:text-orange-500"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
                         <input
                             type="text"
                             placeholder="Find..."
@@ -666,37 +666,37 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                             autoCorrect="off"
                             autoComplete="off"
                             spellCheck="false"
-                            className="bg-transparent border-none outline-none text-[11px] font-bold text-white px-2 w-24 md:w-32 placeholder:text-white/20"
+                            className="bg-transparent border-none outline-none text-[11px] font-bold text-slate-900 dark:text-white px-2 w-24 md:w-32 placeholder:text-slate-400 dark:placeholder:text-white/20"
                         />
                         {searchResults.length > 0 && (
                             <div className="flex items-center gap-2 pr-2">
                                 <span className="text-[9px] font-black text-orange-500 whitespace-nowrap">{currentSearchIndex + 1} / {searchResults.length}</span>
-                                <div className="h-4 w-px bg-white/10 mx-1" />
-                                <button onClick={prevSearch} className="text-white/40 hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3"><path d="m15 18-6-6 6-6" /></svg></button>
-                                <button onClick={nextSearch} className="text-white/40 hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3"><path d="m9 18 6-6-6-6" /></svg></button>
+                                <div className="h-4 w-px bg-slate-300 dark:bg-white/10 mx-1" />
+                                <button onClick={prevSearch} className="text-slate-400 dark:text-white/40 hover:text-slate-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3"><path d="m15 18-6-6 6-6" /></svg></button>
+                                <button onClick={nextSearch} className="text-slate-400 dark:text-white/40 hover:text-slate-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3"><path d="m9 18 6-6-6-6" /></svg></button>
                             </div>
                         )}
                     </div>
 
                     {/* Scale Controls */}
-                    <div className="flex items-center gap-1 bg-white/5 rounded-2xl p-1 border border-white/10">
+                    <div className="flex items-center gap-1 bg-slate-200 dark:bg-white/5 rounded-2xl p-1 border border-slate-300 dark:border-white/10">
                         <button
                             onClick={() => setScale(prev => Math.max(0.2, prev - 0.1))}
-                            className="w-8 h-8 rounded-xl flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all border-none bg-transparent"
+                            className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 dark:text-white/50 hover:text-slate-900 dark:hover:text-white hover:bg-slate-300 dark:hover:bg-white/10 transition-all border-none bg-transparent"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="5" y1="12" x2="19" y2="12" /></svg>
                         </button>
-                        <span className="text-[10px] font-black text-white px-2 min-w-[50px] text-center">{Math.round(scale * 100)}%</span>
+                        <span className="text-[10px] font-black text-slate-900 dark:text-white px-2 min-w-[50px] text-center">{Math.round(scale * 100)}%</span>
                         <button
                             onClick={() => setScale(prev => Math.min(3, prev + 0.1))}
-                            className="w-8 h-8 rounded-xl flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all border-none bg-transparent"
+                            className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 dark:text-white/50 hover:text-slate-900 dark:hover:text-white hover:bg-slate-300 dark:hover:bg-white/10 transition-all border-none bg-transparent"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                         </button>
 
                         <button
                             onClick={toggleFit}
-                            className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 text-white/50 hover:text-white hover:bg-orange-600 transition-all border-none"
+                            className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-300/50 dark:bg-white/5 text-slate-500 dark:text-white/50 hover:text-slate-900 dark:hover:text-white hover:bg-orange-600 transition-all border-none"
                             title={viewMode === 'width' ? "Fit to Width" : "Fit to Page"}
                         >
                             {viewMode === 'width' ? (
@@ -717,21 +717,21 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
                 {/* Right: Actions */}
                 <div className="flex items-center gap-2">
-                    <div className="hidden sm:flex items-center bg-white/5 border border-white/10 rounded-2xl px-4 py-3 gap-3">
+                    <div className="hidden sm:flex items-center bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-2xl px-4 py-3 gap-3">
                         <input
                             type="number"
                             min={1}
                             max={numPages}
                             value={currentPage}
                             onChange={e => jumpToPage(parseInt(e.target.value) || 1)}
-                            className="w-10 bg-transparent border-none outline-none text-center text-[10px] font-black text-white"
+                            className="w-10 bg-transparent border-none outline-none text-center text-[10px] font-black text-slate-900 dark:text-white"
                         />
-                        <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">/ {numPages}</span>
+                        <span className="text-[10px] font-black text-slate-400 dark:text-white/20 uppercase tracking-widest">/ {numPages}</span>
                     </div>
 
                     <button
                         onClick={toggleFullscreen}
-                        className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 text-white/40 hover:text-white border-none group"
+                        className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white border-none group"
                         title="Toggle Fullscreen"
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 group-hover:scale-110 transition-transform"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" /></svg>
@@ -757,14 +757,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    className="flex-1 overflow-y-auto overflow-x-auto bg-[#0a0a0a] relative flex flex-col items-center py-12 px-4 md:px-0 select-none scroll-smooth touch-pan-x touch-pan-y"
+                    className="flex-1 overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-[#0a0a0a] relative flex flex-col items-center py-12 px-4 md:px-0 select-none scroll-smooth touch-pan-x touch-pan-y"
                     style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                     {isLoading ? (
                         <div className="flex flex-col items-center w-full max-w-4xl px-4 space-y-8">
                             {Array.from({ length: 3 }).map((_, i) => (
-                                <div key={i} className="w-full bg-white/5 rounded-xl aspect-[1/1.4] animate-pulse relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent shimmer-effect" />
+                                <div key={i} className="w-full bg-slate-200 dark:bg-white/5 rounded-xl aspect-[1/1.4] animate-pulse relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-300/20 dark:via-white/5 to-transparent shimmer-effect" />
                                 </div>
                             ))}
                         </div>
@@ -824,8 +824,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     background: transparent;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(255, 255, 255, 0.1);
+                    background: rgba(0, 0, 0, 0.1);
                     border-radius: 10px;
+                }
+                .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: rgba(255, 255, 255, 0.1);
                 }
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
