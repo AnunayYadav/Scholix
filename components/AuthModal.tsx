@@ -87,16 +87,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
       <div className="nexus-modal w-full max-w-md mx-4 overflow-hidden">
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-600/10 blur-[80px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
 
-        <div className="bg-white dark:bg-black p-10 md:p-12 text-center relative border-b border-slate-100 dark:border-white/5">
-          <button onClick={onClose} className="absolute top-8 right-8 p-2 text-slate-400 hover:text-orange-500 transition-colors border-none bg-transparent active:scale-95">
+        <div className="bg-white dark:bg-black p-8 md:p-10 text-center relative border-b border-slate-100 dark:border-white/5">
+          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-orange-500 transition-colors border-none bg-transparent active:scale-95">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
           </button>
 
-          <div className="w-16 h-16 bg-orange-600/10 rounded-[28px] flex items-center justify-center mx-auto mb-6 border border-orange-600/20 shadow-[0_0_40px_rgba(234,88,12,0.1)]">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-8 h-8 text-orange-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+          <div className="w-12 h-12 bg-orange-600/10 rounded-[24px] flex items-center justify-center mx-auto mb-4 border border-orange-600/20 shadow-[0_0_40px_rgba(234,88,12,0.1)]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6 text-orange-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
           </div>
 
-          <h3 className="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none mb-3">
+          <h3 className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none mb-2">
             {isLogin ? 'Welcome Back' : 'Join Nexus'}
           </h3>
           <p className="text-slate-500 dark:text-white/40 text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2">
@@ -105,7 +105,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 md:p-10 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-5">
           {error && (
             <div className="p-5 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl animate-fade-in">
               <div className="flex items-center gap-2 mb-1">
