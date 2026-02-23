@@ -843,16 +843,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
                 mark.pdf-search-match {
                     background-color: rgba(234, 88, 12, 0.3);
-                    color: inherit;
+                    color: transparent;
                     border-radius: 1px;
-                    transition: all 0.2s ease;
+                    transition: background 0.2s ease;
                 }
 
                 mark.pdf-search-match.active-match {
                     background-color: #ea580c;
-                    color: white;
-                    box-shadow: 0 0 15px rgba(234, 88, 12, 0.5);
-                    transform: scale(1.1);
+                    color: transparent;
+                    box-shadow: 0 0 15px rgba(234, 88, 12, 0.4);
                     z-index: 10;
                 }
                 
