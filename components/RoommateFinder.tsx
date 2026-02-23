@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { RoommateRequest, UserProfile } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import { showToast } from './Toast.tsx';
+import VerifiedBadge from './VerifiedBadge.tsx';
+
 
 const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile }) => {
     const navigate = useNavigate();
@@ -162,7 +164,10 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
 
                             <div className="flex-1 space-y-1.5 text-left min-w-0">
                                 <div className="flex flex-wrap items-center gap-2">
-                                    <h4 className="text-[16px] font-bold text-slate-900 dark:text-white tracking-tight leading-tight">{req.user_username || 'Anonymous Verto'}</h4>
+                                    <div className="flex items-center gap-1.5">
+                                        <h4 className="text-[16px] font-bold text-slate-900 dark:text-white tracking-tight leading-tight">{req.user_username || 'Anonymous Verto'}</h4>
+                                        <VerifiedBadge isAdmin={req.user_is_admin} size="w-4 h-4" />
+                                    </div>
                                     <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-500 rounded text-[7px] font-black uppercase tracking-widest">{req.status}</span>
                                 </div>
                                 <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight italic line-clamp-1">"{req.preferences}"</p>

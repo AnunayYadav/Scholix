@@ -3,7 +3,10 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { UserProfile, ModuleType } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 
+import VerifiedBadge from './VerifiedBadge.tsx';
+
 interface ProfileSectionProps {
+
   userProfile: UserProfile | null;
   setUserProfile: (p: UserProfile | null) => void;
   navigateToModule: (m: ModuleType) => void;
@@ -168,9 +171,11 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
             <div className="w-2 h-2 rounded-full bg-orange-600 animate-pulse" />
             <span className="text-[9px] font-black uppercase tracking-[0.3em] text-orange-600">Verification Active</span>
           </div>
-          <h2 className="text-6xl md:text-7xl font-black text-slate-800 dark:text-white tracking-tighter uppercase leading-none mb-4 italic drop-shadow-2xl">
+          <h2 className="text-6xl md:text-7xl font-black text-slate-800 dark:text-white tracking-tighter uppercase leading-none mb-4 italic drop-shadow-2xl flex items-center justify-center gap-4">
             {userProfile.username || 'Citizen Verto'}
+            <VerifiedBadge isAdmin={userProfile.is_admin} size="w-10 h-10 md:w-14 md:h-14" />
           </h2>
+
           <p className="text-slate-500 text-[12px] font-black uppercase tracking-[0.5em] opacity-50 flex items-center justify-center gap-2">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
             ID: {userProfile.email}

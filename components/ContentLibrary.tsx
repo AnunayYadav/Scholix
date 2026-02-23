@@ -27,7 +27,10 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+import VerifiedBadge from './VerifiedBadge.tsx';
+
 const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' | 'category' | 'root', size?: string }) => {
+
   const colors = {
     root: 'text-slate-400',
     semester: 'text-orange-600',
@@ -686,7 +689,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   </div>
                   <div>
                     <p className="text-[8px] font-black text-orange-600 uppercase tracking-widest">Uploader</p>
-                    <p className="text-xs font-black uppercase">@{selectedFile.uploader_username}</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-xs font-black uppercase">@{selectedFile.uploader_username}</p>
+                      <VerifiedBadge isAdmin={selectedFile.uploader_is_admin} size="w-3.5 h-3.5" />
+                    </div>
+
                   </div>
                 </div>
                 <div className="text-right">

@@ -33,6 +33,7 @@ export interface MarketplaceItem {
   created_at: string;
   seller_username?: string;
   seller_avatar?: string;
+  seller_is_admin?: boolean;
   seller_phone?: string;
   location?: string;
 }
@@ -48,6 +49,7 @@ export interface RoommateRequest {
   created_at: string;
   user_username?: string;
   user_avatar?: string;
+  user_is_admin?: boolean;
 }
 
 export interface EmergencyContact {
@@ -171,6 +173,7 @@ export interface LibraryFile {
   storage_path: string;
   uploader_id?: string;
   uploader_username?: string;
+  uploader_is_admin?: boolean;
   admin_notes?: string;
   isUserUploaded?: boolean;
   program: string;

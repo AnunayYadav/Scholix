@@ -11,6 +11,7 @@ import AttendanceTracker from './components/AttendanceTracker.tsx';
 import ShareReport from './components/ShareReport.tsx';
 import AboutUs from './components/AboutUs.tsx';
 import AuthModal from './components/AuthModal.tsx';
+import VerifiedBadge from './components/VerifiedBadge.tsx';
 import ProfileSection from './components/ProfileSection.tsx';
 import TimetableHub from './components/TimetableHub.tsx';
 import QuizTaker from './components/QuizTaker.tsx';
@@ -295,9 +296,17 @@ const AppContent: React.FC = () => {
                     <>
                       <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsProfileMenuOpen(false)} />
                       <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-50 animate-fade-in backdrop-blur-xl">
-                        <div className="px-5 py-3 border-b border-slate-100 dark:border-white/5 mb-2">
-                          <p className="text-[11px] font-bold text-slate-900 dark:text-white truncate">{userProfile.username}</p>
-                          <p className="text-[9px] font-bold text-slate-400 dark:text-white/40 truncate">{userProfile.email}</p>
+                        <div className="px-5 py-3 border-b border-slate-100 dark:border-white/5 mb-2 flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600 font-black text-[10px] shrink-0 border border-orange-600/5 overflow-hidden">
+                            {userProfile.avatar_url ? <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" /> : (userProfile.username?.[0]?.toUpperCase() || 'V')}
+                          </div>
+                          <div className="flex flex-col text-left min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <p className="font-black text-slate-800 dark:text-white uppercase tracking-wider text-[11px] truncate">{userProfile.username || 'Verto'}</p>
+                              <VerifiedBadge isAdmin={userProfile.is_admin} size="w-3.5 h-3.5" />
+                            </div>
+                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest truncate">{userProfile.email}</p>
+                          </div>
                         </div>
                         <button
                           onClick={() => { navigate('/profile'); setIsProfileMenuOpen(false); }}

@@ -341,7 +341,7 @@ class NexusServer {
   static async fetchFiles(program: string, q?: string): Promise<LibraryFile[]> {
     const client = getSupabase();
     if (!client) return [];
-    let query = client.from('documents').select('*, uploader:profiles(username)').eq('status', 'approved');
+    let query = client.from('documents').select('*, uploader:profiles(username, is_admin)').eq('status', 'approved');
     if (program && program !== 'All') query = query.eq('program', program);
     if (q) query = query.ilike('name', `%${q}%`);
     const { data, error } = await query
@@ -352,6 +352,7 @@ class NexusServer {
       uploadDate: new Date(item.created_at).getTime(), size: item.size, status: item.status, storage_path: item.storage_path,
       program: item.program,
       uploader_username: (item.uploader as any)?.username || "Anonymous Verto",
+      uploader_is_admin: (item.uploader as any)?.is_admin || false,
       description: item.description,
       admin_notes: item.admin_notes,
       display_order: item.display_order
@@ -446,7 +447,7 @@ class NexusServer {
   static async fetchPendingFiles(program: string, q?: string): Promise<LibraryFile[]> {
     const client = getSupabase();
     if (!client) return [];
-    let query = client.from('documents').select('*, uploader:profiles(username)').eq('status', 'pending');
+    let query = client.from('documents').select('*, uploader:profiles(username, is_admin)').eq('status', 'pending');
     if (program && program !== 'All') query = query.eq('program', program);
     if (q) query = query.ilike('name', `%${q}%`);
     const { data, error } = await query.order('created_at', { ascending: false });
@@ -464,7 +465,7 @@ class NexusServer {
   static async fetchUserFiles(uid: string): Promise<LibraryFile[]> {
     const client = getSupabase();
     if (!client) return [];
-    const { data, error } = await client.from('documents').select('*, uploader:profiles(username)').eq('uploader_id', uid).order('created_at', { ascending: false });
+    const { data, error } = await client.from('documents').select('*, uploader:profiles(username, is_admin)').eq('uploader_id', uid).order('created_at', { ascending: false });
     if (error) { console.error("Fetch User Files Error:", error); return []; }
     return (data || []).map(item => ({
       id: item.id, name: item.name, subject: item.subject, semester: item.semester, type: item.type,
@@ -501,9 +502,15 @@ class NexusServer {
   static async fetchMarketplaceItems(): Promise<any[]> {
     const client = getSupabase();
     if (!client) return [];
-    const { data, error } = await client.from('marketplace_items').select('*, seller:profiles(username, avatar_url)').order('created_at', { ascending: false });
+    const { data, error } = await client.from('marketplace_items').select('*, seller:profiles(username, avatar_url, is_admin)').order('created_at', { ascending: false });
     if (error) { console.error("Marketplace fetch error:", error); return []; }
-    return data || [];
+    return (data || []).map(item => ({
+      ...item,
+      seller_username: (item.seller as any)?.username,
+      seller_avatar: (item.seller as any)?.avatar_url,
+      seller_is_admin: (item.seller as any)?.is_admin
+    }));
+
   }
 
   static async createMarketplaceItem(item: any) {
@@ -542,9 +549,15 @@ class NexusServer {
   static async fetchRoommateRequests(): Promise<any[]> {
     const client = getSupabase();
     if (!client) return [];
-    const { data, error } = await client.from('roommate_requests').select('*, user:profiles(username, avatar_url)').order('created_at', { ascending: false });
+    const { data, error } = await client.from('roommate_requests').select('*, user:profiles(username, avatar_url, is_admin)').order('created_at', { ascending: false });
     if (error) { console.error("Roommate fetch error:", error); return []; }
-    return data || [];
+    return (data || []).map(item => ({
+      ...item,
+      user_username: (item.user as any)?.username,
+      user_avatar: (item.user as any)?.avatar_url,
+      user_is_admin: (item.user as any)?.is_admin
+    }));
+
   }
 
   static async createRoommateRequest(request: any) {

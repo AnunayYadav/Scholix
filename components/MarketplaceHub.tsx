@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { MarketplaceItem, UserProfile } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import { showToast } from './Toast.tsx';
+import VerifiedBadge from './VerifiedBadge.tsx';
+
 
 const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile }) => {
     const navigate = useNavigate();
@@ -264,7 +266,10 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                         {item.seller_username?.[0]?.toUpperCase() || 'V'}
                                     </div>
                                     <div className="flex flex-col text-left min-w-0 pr-2">
-                                        <span className="text-[9px] font-black text-slate-800 dark:text-white uppercase tracking-wider truncate">{item.seller_username || 'Verto'}</span>
+                                        <div className="flex items-center gap-1 min-w-0 pr-2">
+                                            <span className="text-[9px] font-black text-slate-800 dark:text-white uppercase tracking-wider truncate">{item.seller_username || 'Verto'}</span>
+                                            <VerifiedBadge isAdmin={item.seller_is_admin} size="w-3 h-3" />
+                                        </div>
                                         {item.location && <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight opacity-70 truncate line-clamp-1">{item.location}</span>}
                                     </div>
                                 </div>
@@ -346,7 +351,10 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                         </div>
                                         <div>
                                             <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Listed By</h5>
-                                            <p className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">{selectedItem.seller_username || 'Anonymous Verto'}</p>
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">{selectedItem.seller_username || 'Anonymous Verto'}</p>
+                                                <VerifiedBadge isAdmin={selectedItem.seller_is_admin} size="w-5 h-5" />
+                                            </div>
                                             {selectedItem.location && <p className="text-[10px] font-bold text-orange-600 uppercase tracking-widest mt-0.5">{selectedItem.location}</p>}
                                         </div>
                                     </div>
