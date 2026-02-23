@@ -6,7 +6,6 @@ import NexusServer from '../services/nexusServer.ts';
 import PDFViewer from './PDFViewer.tsx';
 import NexusDropdown from './NexusDropdown.tsx';
 import { showToast, showConfirm } from './Toast.tsx';
-import { optimizeFile } from '../utils/pdfOptimizer.ts';
 import {
   DndContext,
   closestCenter,
@@ -381,21 +380,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     try {
       // Use the latest state of pendingUploads
       for (const upload of pendingUploads) {
-        let fileToUpload = upload.file;
-        let compressionNotes = '';
-
-        try {
-          const { file: optimizedFile, saved } = await optimizeFile(upload.file);
-          if (saved > 0) {
-            fileToUpload = optimizedFile;
-            compressionNotes = ` (Optimized: saved ${(saved / 1024 / 1024).toFixed(2)}MB)`;
-          }
-        } catch (err) {
-          console.warn("Optimization skipped:", err);
-        }
-
         await NexusServer.uploadFile(
-          fileToUpload,
+          upload.file,
           upload.name.trim(),
           upload.description.trim(),
           upload.subject.trim(),
@@ -405,10 +391,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
           userProfile.is_admin,
           upload.program.trim()
         );
-
-        if (compressionNotes) {
-          showToast(`File "${upload.name}"${compressionNotes}`, 'success');
-        }
 
         if (!availablePrograms.includes(upload.program)) {
           setAvailablePrograms(prev => [...prev, upload.program]);
