@@ -141,13 +141,15 @@ const HelpSection: React.FC = () => {
         <h3 className="text-white text-2xl font-black mb-4 relative z-10 uppercase tracking-tight">Still have questions?</h3>
         <p className="text-slate-400 mb-8 max-w-md mx-auto relative z-10 text-sm font-medium">Our student support team is ready to help you navigate through your campus journey.</p>
         <a
-          href="https://mail.google.com/mail/?view=cm&fs=1&to=anunayarvind@gmail.com&su=LPU-Nexus%20Support%20Request"
+          href="https://wa.me/918935031251?text=Hi!%20I%20need%20some%20help%20with%20LPU-Nexus."
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center space-x-3 bg-white text-black px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-orange-500 hover:text-white hover:scale-105 active:scale-95 transition-all shadow-xl relative z-10"
+          className="inline-flex items-center space-x-3 bg-white text-black px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#25D366] hover:text-white hover:scale-105 active:scale-95 transition-all shadow-xl relative z-10"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-          <span>Get Direct Help</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-11.7 8.38 8.38 0 0 1 3.8.9L21 3l-1.5 4.7z" />
+          </svg>
+          <span>WhatsApp for Help</span>
         </a>
       </div>
     </div>
