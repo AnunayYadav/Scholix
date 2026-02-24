@@ -37,13 +37,28 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
         setUnreadCount(unreadGlobals + unreadPersonals);
     };
 
+    const triggerBrowserNotification = (title: string, body: string) => {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification(title, {
+                body: body,
+                icon: '/logo.png' // Matches your site icon
+            });
+        }
+    };
+
     useEffect(() => {
+        // Request permission on mount
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
         loadData();
 
         // Subscribe to Global (Everyone)
         const unsubGlobal = NexusServer.subscribeToGlobalAnnouncements((newAnn) => {
             setGlobalAnnouncements(prev => [newAnn, ...prev]);
             setUnreadCount(prev => prev + 1);
+            triggerBrowserNotification(newAnn.title, newAnn.message);
         });
 
         // Subscribe to Personal (If Logged In)
@@ -52,6 +67,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
             unsubPersonal = NexusServer.subscribeToNotifications(userProfile.id, (newNotif) => {
                 setPersonalNotifications(prev => [newNotif, ...prev]);
                 setUnreadCount(prev => prev + 1);
+                triggerBrowserNotification(newNotif.title, newNotif.message);
             });
         }
 
