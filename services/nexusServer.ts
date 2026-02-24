@@ -1,6 +1,6 @@
 
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
-import { LibraryFile, UserProfile, Folder, QuizQuestion, TimetableData } from '../types.ts';
+import { LibraryFile, UserProfile, Folder, QuizQuestion, TimetableData, NexusNotification } from '../types.ts';
 
 const getEnvVar = (name: string): string => {
   try {
@@ -595,6 +595,71 @@ class NexusServer {
     if (!client) return;
     const { error } = await client.from('roommate_requests').delete().eq('id', id);
     if (error) throw error;
+  }
+
+  /**
+   * Notification Methods
+   */
+  static async fetchNotifications(userId: string): Promise<NexusNotification[]> {
+    const client = getSupabase();
+    if (!client || !userId) return [];
+    const { data, error } = await client
+      .from('notifications')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) {
+      console.error('Fetch Notifications Error:', error);
+      return [];
+    }
+    return data || [];
+  }
+
+  static async markNotificationAsRead(notificationId: string) {
+    const client = getSupabase();
+    if (!client) return;
+    const { error } = await client
+      .from('notifications')
+      .update({ read: true })
+      .eq('id', notificationId);
+    if (error) throw error;
+  }
+
+  static async markAllNotificationsAsRead(userId: string) {
+    const client = getSupabase();
+    if (!client || !userId) return;
+    const { error } = await client
+      .from('notifications')
+      .update({ read: true })
+      .eq('user_id', userId)
+      .eq('read', false);
+    if (error) throw error;
+  }
+
+  static subscribeToNotifications(userId: string, onNotification: (payload: any) => void) {
+    const client = getSupabase();
+    if (!client || !userId) return () => { };
+
+    const channel = client
+      .channel(`notifications:${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userId}`
+        },
+        (payload) => {
+          onNotification(payload.new);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
   }
 }
 
