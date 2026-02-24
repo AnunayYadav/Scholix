@@ -725,6 +725,23 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         </div>
       )}
 
+      {showRenameModal && userProfile?.is_admin && (
+        <div className="modal-overlay">
+          <div ref={modalRef} className="nexus-modal w-full max-w-sm">
+            <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5">
+              <h3 className="text-sm font-black uppercase tracking-widest">Rename Folder</h3>
+              <button onClick={() => setShowRenameModal(false)} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <input autoFocus placeholder="New Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-black/60 p-4 rounded-xl font-bold border dark:border-white/10 text-sm dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
+              <button onClick={handleRenameFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Updating...' : 'Save Changes'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Upload/Edit Modal */}
       {(showUploadModal || showEditModal) && (
         <div className="modal-overlay">
