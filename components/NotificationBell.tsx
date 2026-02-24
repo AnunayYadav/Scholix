@@ -201,7 +201,6 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                                             <div className="flex justify-between items-start gap-2">
                                                 <div className="flex flex-col min-w-0">
                                                     <p className="font-black text-slate-800 dark:text-white uppercase tracking-wider text-[11px] truncate">{item.title}</p>
-                                                    {item.isGlobal && <span className="text-[7px] font-black text-orange-600 uppercase tracking-tighter">Community Update</span>}
                                                 </div>
                                                 {isUnread && <div className="w-2 h-2 rounded-full bg-orange-600 shrink-0 mt-1" />}
                                             </div>
