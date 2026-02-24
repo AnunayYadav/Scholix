@@ -240,7 +240,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         data = data.filter(f =>
           f.semester === activeSemester?.name &&
           f.subject === activeSubject.name &&
-          (!f.type || f.type.trim() === '' || f.type === 'General' || f.type === activeSubject.name)
+          (!f.type || f.type.trim() === '' || f.type === 'General')
         );
       } else {
         data = [];
@@ -791,8 +791,20 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                 setPendingUploads([]);
                               } else {
                                 setPendingUploads(nextUploads);
-                                if (activeUploadIndex >= nextUploads.length) setActiveUploadIndex(nextUploads.length - 1);
-                                else switchActiveUpload(activeUploadIndex === idx ? (idx === 0 ? 0 : idx - 1) : (activeUploadIndex > idx ? activeUploadIndex - 1 : activeUploadIndex));
+                                // Determine next index and immediately update metaForm from the NEW array
+                                const nextIdx = activeUploadIndex === idx ? (idx === 0 ? 0 : idx - 1) : (activeUploadIndex > idx ? activeUploadIndex - 1 : activeUploadIndex);
+                                const target = nextUploads[nextIdx];
+                                if (target) {
+                                  setActiveUploadIndex(nextIdx);
+                                  setMetaForm({
+                                    name: target.name,
+                                    description: target.description,
+                                    semester: target.semester,
+                                    subject: target.subject,
+                                    type: target.type,
+                                    program: target.program
+                                  });
+                                }
                               }
                             }}
                             className="absolute top-2 right-2 p-1 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all border-none bg-transparent"
@@ -1059,6 +1071,9 @@ const FileCard: React.FC<{
               )}
               <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-black text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Edit Metadata">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-slate-100 dark:bg-black text-blue-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-blue-500 hover:text-white transition-all border-none" title="View Document">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
               </button>
               {file.status === 'approved' ? (
                 <button onClick={(e) => { e.stopPropagation(); onDemote?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-black text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Demote to Pending">
