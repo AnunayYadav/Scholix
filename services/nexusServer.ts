@@ -661,6 +661,41 @@ class NexusServer {
       client.removeChannel(channel);
     };
   }
+
+  static async sendGlobalNotification(title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', link?: string) {
+    const client = getSupabase();
+    if (!client) return;
+
+    // 1. Fetch all user IDs from profiles
+    const { data: users, error: fetchError } = await client
+      .from('profiles')
+      .select('id');
+
+    if (fetchError || !users) {
+      console.error('Failed to fetch users for global notification:', fetchError);
+      throw new Error("Target discovery failed.");
+    }
+
+    // 2. Prepare bulk insert
+    const notifications = users.map(user => ({
+      user_id: user.id,
+      title,
+      message,
+      type,
+      link,
+      read: false
+    }));
+
+    // 3. Insert in batches if necessary (Supabase handled, but good for large sets)
+    const { error: insertError } = await client
+      .from('notifications')
+      .insert(notifications);
+
+    if (insertError) {
+      console.error('Failed to blast global notification:', insertError);
+      throw insertError;
+    }
+  }
 }
 
 export default NexusServer;

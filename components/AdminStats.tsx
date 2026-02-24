@@ -6,6 +6,122 @@ interface AdminStatsProps {
     userProfile: UserProfile | null;
 }
 
+const GlobalBroadcaster: React.FC = () => {
+    const [title, setTitle] = useState('');
+    const [message, setMessage] = useState('');
+    const [type, setType] = useState<'info' | 'success' | 'warning' | 'error'>('info');
+    const [link, setLink] = useState('');
+    const [isSending, setIsSending] = useState(false);
+    const [status, setStatus] = useState<{ msg: string; error: boolean } | null>(null);
+
+    const handleBroadcast = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!title || !message) return;
+
+        setIsSending(true);
+        setStatus(null);
+        try {
+            await NexusServer.sendGlobalNotification(title, message, type, link || undefined);
+            setStatus({ msg: 'SIGNAL BROADCAST SUCCESSFUL', error: false });
+            setTitle('');
+            setMessage('');
+            setLink('');
+        } catch (err) {
+            setStatus({ msg: 'BROADCAST FAILED', error: true });
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+    return (
+        <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 bg-orange-600/5 blur-3xl rounded-full -mr-10 -mt-10" />
+
+            <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 rounded-2xl bg-orange-600 flex items-center justify-center text-white shadow-xl shadow-orange-600/20">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
+                </div>
+                <div>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">Global Broadcaster</h3>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Transmit signals to all platform users</p>
+                </div>
+            </div>
+
+            <form onSubmit={handleBroadcast} className="space-y-6 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Signal Title</label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            placeholder="e.g., NEW CONTENT ALERT"
+                            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-3 text-sm font-bold focus:outline-none focus:border-orange-500/50 transition-all"
+                            required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Signal Type</label>
+                        <div className="flex gap-2 p-1 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
+                            {(['info', 'success', 'warning', 'error'] as const).map((t) => (
+                                <button
+                                    key={t}
+                                    type="button"
+                                    onClick={() => setType(t)}
+                                    className={`flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${type === t
+                                            ? 'bg-orange-600 text-white shadow-lg'
+                                            : 'text-slate-400 hover:text-slate-600 dark:hover:text-white'
+                                        }`}
+                                >
+                                    {t}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Message Content</label>
+                    <textarea
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder="Detailed information for the user population..."
+                        className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[24px] px-5 py-4 text-sm font-medium focus:outline-none focus:border-orange-500/50 transition-all min-h-[100px] resize-none"
+                        required
+                    />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                    <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Target Link (Optional)</label>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => setLink(e.target.value)}
+                            placeholder="/library, /marketplace, etc."
+                            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-3 text-sm font-mono focus:outline-none focus:border-orange-500/50 transition-all"
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={isSending || !title || !message}
+                        className="w-full bg-orange-600 text-white font-black text-xs uppercase tracking-[0.2em] py-4 rounded-2xl shadow-xl shadow-orange-600/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
+                    >
+                        {isSending ? 'TRANSMITTING...' : 'INITIATE BROADCAST'}
+                    </button>
+                </div>
+
+                {status && (
+                    <div className={`mt-4 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center border ${status.error ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                        }`}>
+                        {status.msg}
+                    </div>
+                )}
+            </form>
+        </div>
+    );
+};
+
 const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
     const [stats, setStats] = useState<{ pageStats: any[], eventStats: any[] } | null>(null);
     const [loading, setLoading] = useState(true);
@@ -57,6 +173,8 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                 </div>
             ) : (
                 <>
+                    <GlobalBroadcaster />
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Page Views Table */}
                         <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl">
