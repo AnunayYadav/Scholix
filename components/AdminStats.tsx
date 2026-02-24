@@ -42,15 +42,15 @@ const GlobalBroadcaster: React.FC = () => {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
                 </div>
                 <div>
-                    <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">Global Broadcaster</h3>
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Transmit signals to all platform users</p>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">Announcements</h3>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Send a notification to everyone</p>
                 </div>
             </div>
 
             <form onSubmit={handleBroadcast} className="space-y-6 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Signal Title</label>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Notification Title</label>
                         <input
                             type="text"
                             value={title}
@@ -61,7 +61,7 @@ const GlobalBroadcaster: React.FC = () => {
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Signal Type</label>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Notification Type</label>
                         <div className="flex gap-2 p-1 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
                             {(['info', 'success', 'warning', 'error'] as const).map((t) => (
                                 <button
@@ -69,8 +69,8 @@ const GlobalBroadcaster: React.FC = () => {
                                     type="button"
                                     onClick={() => setType(t)}
                                     className={`flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${type === t
-                                            ? 'bg-orange-600 text-white shadow-lg'
-                                            : 'text-slate-400 hover:text-slate-600 dark:hover:text-white'
+                                        ? 'bg-orange-600 text-white shadow-lg'
+                                        : 'text-slate-400 hover:text-slate-600 dark:hover:text-white'
                                         }`}
                                 >
                                     {t}
@@ -107,7 +107,7 @@ const GlobalBroadcaster: React.FC = () => {
                         disabled={isSending || !title || !message}
                         className="w-full bg-orange-600 text-white font-black text-xs uppercase tracking-[0.2em] py-4 rounded-2xl shadow-xl shadow-orange-600/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
                     >
-                        {isSending ? 'TRANSMITTING...' : 'INITIATE BROADCAST'}
+                        {isSending ? 'SENDING...' : 'SEND NOTIFICATION'}
                     </button>
                 </div>
 
