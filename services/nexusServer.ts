@@ -662,39 +662,55 @@ class NexusServer {
     };
   }
 
-  static async sendGlobalNotification(title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', link?: string) {
+  static async fetchGlobalAnnouncements(): Promise<any[]> {
+    const client = getSupabase();
+    if (!client) return [];
+    const { data, error } = await client
+      .from('global_announcements')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (error) {
+      console.error('Fetch Global Announcements Error:', error);
+      return [];
+    }
+    return data || [];
+  }
+
+  static subscribeToGlobalAnnouncements(onAnnouncement: (payload: any) => void) {
+    const client = getSupabase();
+    if (!client) return () => { };
+
+    const channel = client
+      .channel('public_announcements')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'global_announcements' },
+        (payload) => onAnnouncement(payload.new)
+      )
+      .subscribe();
+
+    return () => client.removeChannel(channel);
+  }
+
+  static async sendGlobalAnnouncement(title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', link?: string) {
     const client = getSupabase();
     if (!client) return;
+    const { error } = await client
+      .from('global_announcements')
+      .insert([{ title, message, type, link }]);
+    if (error) throw error;
+  }
 
-    // 1. Fetch all user IDs from profiles
-    const { data: users, error: fetchError } = await client
-      .from('profiles')
-      .select('id');
-
-    if (fetchError || !users) {
-      console.error('Failed to fetch users for global notification:', fetchError);
-      throw new Error("Target discovery failed.");
-    }
-
-    // 2. Prepare bulk insert
-    const notifications = users.map(user => ({
-      user_id: user.id,
-      title,
-      message,
-      type,
-      link,
-      read: false
-    }));
-
-    // 3. Insert in batches if necessary (Supabase handled, but good for large sets)
-    const { error: insertError } = await client
-      .from('notifications')
-      .insert(notifications);
-
-    if (insertError) {
-      console.error('Failed to blast global notification:', insertError);
-      throw insertError;
-    }
+  // Keep this for individual/targeted blasts if needed
+  static async sendGlobalNotification(title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', link?: string) {
+    // Blast to all personal notification feeds
+    const client = getSupabase();
+    if (!client) return;
+    const { data: users } = await client.from('profiles').select('id');
+    if (!users) return;
+    const notifications = users.map(user => ({ user_id: user.id, title, message, type, link, read: false }));
+    await client.from('notifications').insert(notifications);
   }
 }
 

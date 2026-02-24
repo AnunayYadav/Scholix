@@ -8,35 +8,57 @@ interface NotificationBellProps {
     userProfile: UserProfile | null;
 }
 
+
 const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
-    const [notifications, setNotifications] = useState<NexusNotification[]>([]);
+    const [personalNotifications, setPersonalNotifications] = useState<NexusNotification[]>([]);
+    const [globalAnnouncements, setGlobalAnnouncements] = useState<any[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
+    const loadData = async () => {
+        // 1. Fetch Global (Everyone)
+        const globals = await NexusServer.fetchGlobalAnnouncements();
+        setGlobalAnnouncements(globals);
+
+        // 2. Fetch Personal (If Logged In)
+        let personals: NexusNotification[] = [];
+        if (userProfile) {
+            personals = await NexusServer.fetchNotifications(userProfile.id);
+            setPersonalNotifications(personals);
+        }
+
+        // 3. Calculate Unread
+        const lastSeenGlobal = localStorage.getItem('nexus_last_announcement_seen');
+        const unreadGlobals = globals.filter(g => !lastSeenGlobal || new Date(g.created_at) > new Date(lastSeenGlobal)).length;
+        const unreadPersonals = personals.filter(p => !p.read).length;
+
+        setUnreadCount(unreadGlobals + unreadPersonals);
+    };
+
     useEffect(() => {
-        if (!userProfile) return;
+        loadData();
 
-        const loadNotifications = async () => {
-            const data = await NexusServer.fetchNotifications(userProfile.id);
-            setNotifications(data);
-            setUnreadCount(data.filter(n => !n.read).length);
-        };
-
-        loadNotifications();
-
-        const unsubscribe = NexusServer.subscribeToNotifications(userProfile.id, (newNotif) => {
-            setNotifications(prev => [newNotif, ...prev]);
+        // Subscribe to Global (Everyone)
+        const unsubGlobal = NexusServer.subscribeToGlobalAnnouncements((newAnn) => {
+            setGlobalAnnouncements(prev => [newAnn, ...prev]);
             setUnreadCount(prev => prev + 1);
-
-            // Optional: Play a subtle sound or show a toast
-            if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification(newNotif.title, { body: newNotif.message });
-            }
         });
 
-        return () => unsubscribe();
+        // Subscribe to Personal (If Logged In)
+        let unsubPersonal = () => { };
+        if (userProfile) {
+            unsubPersonal = NexusServer.subscribeToNotifications(userProfile.id, (newNotif) => {
+                setPersonalNotifications(prev => [newNotif, ...prev]);
+                setUnreadCount(prev => prev + 1);
+            });
+        }
+
+        return () => {
+            unsubGlobal();
+            unsubPersonal();
+        };
     }, [userProfile]);
 
     useEffect(() => {
@@ -52,32 +74,49 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
     const handleToggle = () => {
         setIsOpen(!isOpen);
         if (!isOpen && unreadCount > 0) {
-            // Mark all as read when opening? Or maybe specifically mark individual ones.
-            // For simplicity, let's just mark all as read when they open the pane.
+            // Mark global as seen locally when closing/opening
+            if (globalAnnouncements.length > 0) {
+                localStorage.setItem('nexus_last_announcement_seen', globalAnnouncements[0].created_at);
+            }
         }
     };
 
     const markAllAsRead = async () => {
-        if (!userProfile) return;
-        await NexusServer.markAllNotificationsAsRead(userProfile.id);
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        if (userProfile) {
+            await NexusServer.markAllNotificationsAsRead(userProfile.id);
+            setPersonalNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        }
+
+        if (globalAnnouncements.length > 0) {
+            localStorage.setItem('nexus_last_announcement_seen', globalAnnouncements[0].created_at);
+        }
+
         setUnreadCount(0);
     };
 
-    const handleNotificationClick = async (notification: NexusNotification) => {
-        if (!notification.read) {
-            await NexusServer.markNotificationAsRead(notification.id);
-            setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, read: true } : n));
-            setUnreadCount(prev => Math.max(0, prev - 1));
+    const handleNotificationClick = async (item: any, isGlobal: boolean) => {
+        if (!isGlobal && !item.read) {
+            await NexusServer.markNotificationAsRead(item.id);
+            setPersonalNotifications(prev => prev.map(n => n.id === item.id ? { ...n, read: true } : n));
         }
 
-        if (notification.link) {
-            navigate(notification.link);
+        if (item.link) {
+            navigate(item.link);
         }
         setIsOpen(false);
+
+        // Refresh count
+        const lastSeen = localStorage.getItem('nexus_last_announcement_seen');
+        const uG = globalAnnouncements.filter(g => !lastSeen || new Date(g.created_at) > new Date(lastSeen)).length;
+        const uP = personalNotifications.filter(p => !p.read).length;
+        setUnreadCount(uG + uP);
     };
 
-    if (!userProfile) return null;
+    // Combine and sort
+    const allNotifications = [
+        ...globalAnnouncements.map(g => ({ ...g, isGlobal: true })),
+        ...personalNotifications.map(p => ({ ...p, isGlobal: false }))
+    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -111,7 +150,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                     </div>
 
                     <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
-                        {notifications.length === 0 ? (
+                        {allNotifications.length === 0 ? (
                             <div className="px-8 py-12 text-center">
                                 <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400 dark:text-white/10 mx-auto mb-4">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
@@ -120,34 +159,44 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                                 <p className="text-[8px] text-slate-400/60 mt-1 uppercase tracking-wider">You're all caught up</p>
                             </div>
                         ) : (
-                            notifications.map((notification) => (
-                                <button
-                                    key={notification.id}
-                                    onClick={() => handleNotificationClick(notification)}
-                                    className={`w-full text-left px-5 py-4 flex gap-4 hover:bg-orange-600/5 dark:hover:bg-white/5 transition-all relative border-none bg-transparent group ${!notification.read ? 'bg-orange-600/[0.02] dark:bg-orange-600/[0.04]' : ''}`}
-                                >
-                                    <div className={`w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center ${notification.type === 'success' ? 'bg-green-500/10 text-green-500' :
-                                        notification.type === 'warning' ? 'bg-amber-500/10 text-amber-500' :
-                                            notification.type === 'error' ? 'bg-red-500/10 text-red-500' :
-                                                'bg-orange-500/10 text-orange-600'
-                                        }`}>
-                                        {notification.type === 'success' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 6L9 17l-5-5" /></svg>}
-                                        {notification.type === 'warning' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>}
-                                        {notification.type === 'error' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>}
-                                        {notification.type === 'info' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>}
-                                    </div>
-                                    <div className="flex flex-col gap-1 min-w-0">
-                                        <div className="flex justify-between items-start gap-2">
-                                            <p className="font-black text-slate-800 dark:text-white uppercase tracking-wider text-[11px] truncate">{notification.title}</p>
-                                            {!notification.read && <div className="w-2 h-2 rounded-full bg-orange-600 shrink-0" />}
+                            allNotifications.map((item) => {
+                                const lastSeen = localStorage.getItem('nexus_last_announcement_seen');
+                                const isUnread = item.isGlobal
+                                    ? (!lastSeen || new Date(item.created_at) > new Date(lastSeen))
+                                    : !item.read;
+
+                                return (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => handleNotificationClick(item, item.isGlobal)}
+                                        className={`w-full text-left px-5 py-4 flex gap-4 hover:bg-orange-600/5 dark:hover:bg-white/5 transition-all relative border-none bg-transparent group ${isUnread ? 'bg-orange-600/[0.02] dark:bg-orange-600/[0.04]' : ''}`}
+                                    >
+                                        <div className={`w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center ${item.type === 'success' ? 'bg-green-500/10 text-green-500' :
+                                            item.type === 'warning' ? 'bg-amber-500/10 text-amber-500' :
+                                                item.type === 'error' ? 'bg-red-500/10 text-red-500' :
+                                                    'bg-orange-500/10 text-orange-600'
+                                            }`}>
+                                            {item.type === 'success' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 6L9 17l-5-5" /></svg>}
+                                            {item.type === 'warning' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>}
+                                            {item.type === 'error' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>}
+                                            {item.type === 'info' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>}
                                         </div>
-                                        <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{notification.message}</p>
-                                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">
-                                            {new Date(notification.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                        </p>
-                                    </div>
-                                </button>
-                            ))
+                                        <div className="flex flex-col gap-1 min-w-0">
+                                            <div className="flex justify-between items-start gap-2">
+                                                <div className="flex flex-col min-w-0">
+                                                    <p className="font-black text-slate-800 dark:text-white uppercase tracking-wider text-[11px] truncate">{item.title}</p>
+                                                    {item.isGlobal && <span className="text-[7px] font-black text-orange-600 uppercase tracking-tighter">Community Update</span>}
+                                                </div>
+                                                {isUnread && <div className="w-2 h-2 rounded-full bg-orange-600 shrink-0 mt-1" />}
+                                            </div>
+                                            <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{item.message}</p>
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                                                {new Date(item.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            </p>
+                                        </div>
+                                    </button>
+                                );
+                            })
                         )}
                     </div>
 

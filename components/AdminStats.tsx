@@ -21,7 +21,7 @@ const GlobalBroadcaster: React.FC = () => {
         setIsSending(true);
         setStatus(null);
         try {
-            await NexusServer.sendGlobalNotification(title, message, type, link || undefined);
+            await NexusServer.sendGlobalAnnouncement(title, message, type, link || undefined);
             setStatus({ msg: 'SIGNAL BROADCAST SUCCESSFUL', error: false });
             setTitle('');
             setMessage('');
