@@ -585,7 +585,6 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
             options={[]}
             onChange={() => { }}
             className="flex-shrink-0"
-            // We will replace this dummy with a custom render below
             renderCustomMenu={(close) => (
               <div className="w-[320px] md:w-[400px] p-4 space-y-6 max-h-[500px] overflow-y-auto no-scrollbar">
                 <section className="space-y-3">
@@ -593,18 +592,20 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                   <div className="space-y-2">
                     {PRESET_BATCHES.map(batch => (
                       <div key={batch.id} className="relative group/card">
-                        <button onClick={() => { setTargetForAction('me'); applyPreset(batch); close(); }} className="w-full p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-2xl text-left hover:border-orange-500/50 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-all flex items-center justify-between group border-none">
+                        <button
+                          onClick={() => {
+                            setTargetForAction(selectedEntityId === 'me' ? 'me' : 'friend');
+                            applyPreset(batch, selectedEntityId === 'me' ? undefined : selectedEntityId);
+                            close();
+                          }}
+                          className="w-full p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-2xl text-left hover:border-orange-500/50 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-all flex items-center justify-between group border-none"
+                        >
                           <div className="min-w-0 pr-12">
                             <p className="text-[10px] font-black uppercase tracking-tight text-slate-800 dark:text-white truncate">{batch.name}</p>
                             <p className="text-[7px] font-bold text-slate-500 uppercase mt-0.5">Full 5-Day Schedule</p>
                           </div>
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                         </button>
-                        {userProfile?.is_admin && (
-                          <div className="absolute top-1/2 right-10 -translate-y-1/2 flex items-center gap-1 opacity-40 hover:opacity-100 transition-all">
-                            <button onClick={(e) => { e.stopPropagation(); handleAdminEdit(batch, e); close(); }} title="Edit" className="p-2 text-slate-400 hover:text-orange-500 transition-all active:scale-95 border-none bg-transparent flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -616,7 +617,14 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     <div className="space-y-2">
                       {communityPresets.map(preset => (
                         <div key={preset.id} className="relative group/card">
-                          <button onClick={() => { setTargetForAction('me'); applyPreset(preset); close(); }} className="w-full p-4 bg-slate-50 dark:bg-orange-600/[0.03] border border-slate-200 dark:border-orange-600/10 rounded-2xl text-left hover:border-orange-500/50 hover:bg-slate-100 dark:hover:bg-orange-600/[0.05] transition-all flex items-center justify-between group border-none">
+                          <button
+                            onClick={() => {
+                              setTargetForAction(selectedEntityId === 'me' ? 'me' : 'friend');
+                              applyPreset(preset, selectedEntityId === 'me' ? undefined : selectedEntityId);
+                              close();
+                            }}
+                            className="w-full p-4 bg-slate-50 dark:bg-orange-600/[0.03] border border-slate-200 dark:border-orange-600/10 rounded-2xl text-left hover:border-orange-500/50 hover:bg-slate-100 dark:hover:bg-orange-600/[0.05] transition-all flex items-center justify-between group border-none"
+                          >
                             <div className="min-w-0 pr-16">
                               <p className="text-[10px] font-black uppercase tracking-tight text-slate-800 dark:text-white truncate">{preset.name}</p>
                               <div className="flex items-center gap-1.5 mt-0.5">
@@ -627,12 +635,6 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                             </div>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                           </button>
-                          {userProfile?.is_admin && (
-                            <div className="absolute top-1/2 right-10 -translate-y-1/2 flex items-center gap-1 opacity-40 hover:opacity-100 transition-all">
-                              <button onClick={(e) => { e.stopPropagation(); handleAdminEdit(preset, e); close(); }} title="Edit" className="p-2 text-slate-400 hover:text-orange-500 transition-all active:scale-95 border-none bg-transparent flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
-                              <button onClick={(e) => { e.stopPropagation(); handleAdminDelete(preset.id, e); close(); }} title="Delete" className="p-2 text-slate-400 hover:text-red-500 transition-all active:scale-95 border-none bg-transparent flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
-                            </div>
-                          )}
                         </div>
                       ))}
                     </div>
@@ -769,14 +771,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     onClick={(e) => { e.stopPropagation(); setRenameTargetId('me'); setNewName(myTimetable?.ownerName || ''); setShowRenameModal(true); }}
                     className="p-1.5 hover:text-orange-500 text-slate-300 dark:text-white/20 transition-colors border-none bg-transparent"
                   >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); handleAdminEdit(myTimetable, e); }}
-                    className="p-1.5 hover:text-orange-500 text-slate-300 dark:text-white/20 transition-colors border-none bg-transparent"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                   </button>
                 </div>
               </div>
@@ -808,13 +803,6 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                       </button>
                       <button
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); handleAdminEdit(friend, e); }}
-                        className="p-1.5 hover:text-blue-500 text-slate-300 dark:text-white/20 transition-colors border-none bg-transparent"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
-                      </button>
-                      <button
-                        type="button"
                         onClick={(e) => handleRemoveFriend(friend.ownerId, e)}
                         className="p-1.5 group/del hover:bg-red-500 transition-all border-none bg-transparent rounded-lg"
                       >
@@ -822,28 +810,6 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                       </button>
                     </div>
                   </div>
-
-                  {(!friend.branch) && (
-                    <NexusDropdown
-                      placeholder="Assign Batch Preset"
-                      options={[]}
-                      onChange={() => { }}
-                      className="w-full"
-                      renderCustomMenu={(close) => (
-                        <div className="w-[300px] p-4 space-y-4 max-h-[400px] overflow-y-auto no-scrollbar">
-                          <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 pb-2">Available Batches</h4>
-                          <div className="space-y-2">
-                            {PRESET_BATCHES.map(b => (
-                              <button key={b.id} onClick={() => { applyPreset(b, friend.ownerId); close(); }} className="w-full p-3 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-xl text-left hover:border-orange-500 transition-all text-[10px] font-bold border-none uppercase truncate">{b.name}</button>
-                            ))}
-                            {communityPresets.map(cp => (
-                              <button key={cp.id} onClick={() => { applyPreset(cp, friend.ownerId); close(); }} className="w-full p-3 bg-slate-50 dark:bg-orange-600/[0.05] border border-orange-500/10 rounded-xl text-left hover:border-orange-500 transition-all text-[10px] font-bold border-none uppercase truncate">{cp.name}</button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    />
-                  )}
                 </div>
               ))}
 
