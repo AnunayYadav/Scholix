@@ -174,7 +174,10 @@ const PageRenderer = React.memo<{
     return (
         <div
             ref={el => {
-                if (el) registerRef(pageNum, el);
+                if (el) {
+                    containerRef.current = el;
+                    registerRef(pageNum, el);
+                }
             }}
             data-page={pageNum}
             className="relative mb-6 bg-white dark:bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top-left select-none border border-slate-200 dark:border-white/5 overflow-visible"
