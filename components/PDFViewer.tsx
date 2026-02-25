@@ -186,10 +186,9 @@ const PageRenderer = React.memo<{
             data-page={pageNum}
             className="relative mb-6 bg-white dark:bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top-left select-none border border-slate-200 dark:border-white/5 overflow-visible"
             style={{
-                width: pageInfo ? `${Math.round(pageInfo.width * scale)}px` : 'fit-content',
-                height: pageInfo ? `${Math.round(pageInfo.height * scale)}px` : '400px',
-                willChange: 'transform, width, height',
-                transform: 'translateZ(0)'
+                width: pageInfo ? `${pageInfo.width * scale}px` : 'fit-content',
+                height: pageInfo ? `${pageInfo.height * scale}px` : '400px',
+                willChange: 'transform'
             }}
         >
             <div className="absolute inset-0 overflow-hidden rounded-md">
@@ -221,14 +220,10 @@ const PageRenderer = React.memo<{
                 <div
                     ref={textLayerRef}
                     className={`textLayer absolute inset-0 pointer-events-none select-text z-20 transition-all duration-200 ${isZooming ? 'opacity-0' : 'opacity-20'}`}
-                    style={{ transform: 'translateZ(0)' }}
                 />
 
                 {/* Dynamic Watermark */}
-                <div
-                    className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30"
-                    style={{ transform: 'translateZ(0)' }}
-                >
+                <div className="absolute inset-0 pointer-events-none opacity-[0.04] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
                     {Array.from({ length: 9 }).map((_, i) => (
                         <span key={i} className="text-[35px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-slate-900 dark:text-white tracking-widest">
                             LPU NEXUS
@@ -276,7 +271,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const [viewMode, setViewMode] = useState<'width' | 'page'>('width');
     const [isZooming, setIsZooming] = useState(false);
     const zoomTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const isZoomingRef = useRef(false);
 
     const pdfDocRef = useRef<any>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -300,15 +294,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
     // Handle isZooming state for UI optimizations
     const setZooming = useCallback(() => {
-        if (!isZoomingRef.current) {
-            setIsZooming(true);
-            isZoomingRef.current = true;
-        }
+        setIsZooming(true);
         if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
-        zoomTimeoutRef.current = setTimeout(() => {
-            setIsZooming(false);
-            isZoomingRef.current = false;
-        }, 150); // Faster recovery
+        zoomTimeoutRef.current = setTimeout(() => setIsZooming(false), 300);
     }, []);
 
     // Load PDF.js from CDN
@@ -462,8 +450,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         const docX = (container.scrollLeft + focalX - oldOffsetX);
         const docY = (container.scrollTop + focalY);
 
-        const nextScrollLeft = Math.round((docX * ratio) - focalX + newOffsetX);
-        const nextScrollTop = Math.round((docY * ratio) - focalY);
+        const nextScrollLeft = (docX * ratio) - focalX + newOffsetX;
+        const nextScrollTop = (docY * ratio) - focalY;
 
         container.scrollTo({
             left: nextScrollLeft,
@@ -864,7 +852,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                     className="flex-1 overflow-auto bg-slate-100 dark:bg-[#0a0a0a] relative select-none"
-                    style={{ WebkitOverflowScrolling: 'touch', transform: 'translateZ(0)', willChange: 'scroll-position' }}
+                    style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                     {isLoading ? (
                         <div className="flex flex-col items-center w-full max-w-4xl px-4 mx-auto space-y-8">
