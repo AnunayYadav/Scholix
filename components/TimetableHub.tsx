@@ -493,11 +493,24 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     return overlaps;
   }, [myTimetable, activeTimetable, activeDay, selectedEntityId]);
 
-  const applyPreset = async (batch: any) => {
-    const newId = `friend-${Math.random().toString(36).substr(2, 9)}`;
+  const applyPreset = async (batch: any, targetId?: string) => {
+    // Check if any other profile (me or friends) already has this batch
+    const allProfiles = [myTimetable, ...friendTimetables].filter(Boolean) as TimetableData[];
+    const isDuplicate = allProfiles.some(p =>
+      p.ownerId !== (targetId || (targetForAction === 'me' ? (userProfile?.id || 'local-me') : 'new')) &&
+      p.section === batch.section &&
+      p.branch === batch.branch &&
+      p.semester === batch.semester
+    );
+
+    if (isDuplicate) {
+      showToast(`A connection with batch ${batch.section} already exists.`, "error");
+      return;
+    }
+
     const data: TimetableData = {
-      ownerId: targetForAction === 'me' ? (userProfile?.id || 'local-me') : newId,
-      ownerName: targetForAction === 'me' ? (batch.name) : (batch.name || `${batch.section} ${batch.branch}`),
+      ownerId: targetId || (targetForAction === 'me' ? (userProfile?.id || 'local-me') : `friend-${Math.random().toString(36).substr(2, 9)}`),
+      ownerName: targetForAction === 'me' || targetId ? (batch.name) : (batch.name || `${batch.section} ${batch.branch}`),
       schedule: batch.schedule,
       section: batch.section,
       year: batch.year,
@@ -505,15 +518,33 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       semester: batch.semester
     };
 
-    if (targetForAction === 'me') {
+    if (targetForAction === 'me' && !targetId) {
       if (userProfile) await NexusServer.saveRecord(userProfile.id, 'timetable_main', batch.name, data);
       setMyTimetable(data);
       setSelectedEntityId('me');
     } else {
-      setFriendTimetables(prev => [...prev, data]);
-      setSelectedEntityId(newId);
+      setFriendTimetables(prev => {
+        const exists = prev.find(f => f.ownerId === data.ownerId);
+        if (exists) {
+          return prev.map(f => f.ownerId === data.ownerId ? data : f);
+        }
+        return [...prev, data];
+      });
+      setSelectedEntityId(data.ownerId);
     }
     setShowUploadModal(false);
+  };
+
+  const handleAddEmptyConnection = () => {
+    const newId = `friend-${Math.random().toString(36).substr(2, 9)}`;
+    const newFriend: TimetableData = {
+      ownerId: newId,
+      ownerName: 'New Connection',
+      schedule: []
+    };
+    setFriendTimetables(prev => [...prev, newFriend]);
+    setSelectedEntityId(newId);
+    showToast("Empty connection added. Select a batch preset to load schedule.", "info");
   };
 
   const handleAdminEdit = (item: any, e: React.MouseEvent) => {
@@ -751,101 +782,79 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
               </div>
 
               {friendTimetables.map(friend => (
-                <div
-                  key={friend.ownerId}
-                  onClick={() => setSelectedEntityId(friend.ownerId)}
-                  className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedEntityId === friend.ownerId ? 'bg-blue-600/10 border-blue-600' : 'bg-white dark:bg-black border-slate-200 dark:border-white/5 hover:border-orange-500/30'}`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-black text-[10px] uppercase flex-shrink-0">{friend.ownerName?.[0] || 'F'}</div>
-                    <div className="min-w-0 truncate">
-                      <span className={`text-[11px] font-bold block truncate ${selectedEntityId === friend.ownerId ? 'text-blue-500' : 'text-slate-700 dark:text-white'}`}>
-                        {friend.ownerName}
-                      </span>
-                      {friend.branch && (
-                        <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">{friend.branch} • {friend.year} • S{friend.semester}</span>
-                      )}
+                <div key={friend.ownerId} className="space-y-2">
+                  <div
+                    onClick={() => setSelectedEntityId(friend.ownerId)}
+                    className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedEntityId === friend.ownerId ? 'bg-blue-600/10 border-blue-600' : 'bg-white dark:bg-black border-slate-200 dark:border-white/5 hover:border-orange-500/30'}`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-black text-[10px] uppercase flex-shrink-0">{friend.ownerName?.[0] || 'F'}</div>
+                      <div className="min-w-0 truncate">
+                        <span className={`text-[11px] font-bold block truncate ${selectedEntityId === friend.ownerId ? 'text-blue-500' : 'text-slate-700 dark:text-white'}`}>
+                          {friend.ownerName}
+                        </span>
+                        {friend.branch && (
+                          <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">{friend.branch} • {friend.year} • S{friend.semester}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setRenameTargetId(friend.ownerId); setNewName(friend.ownerName); setShowRenameModal(true); }}
+                        className="p-1.5 hover:text-blue-500 text-slate-300 dark:text-white/20 transition-colors border-none bg-transparent"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handleAdminEdit(friend, e); }}
+                        className="p-1.5 hover:text-blue-500 text-slate-300 dark:text-white/20 transition-colors border-none bg-transparent"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => handleRemoveFriend(friend.ownerId, e)}
+                        className="p-1.5 group/del hover:bg-red-500 transition-all border-none bg-transparent rounded-lg"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-slate-300 dark:text-white/20 group-hover/del:text-white"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setRenameTargetId(friend.ownerId); setNewName(friend.ownerName); setShowRenameModal(true); }}
-                      className="p-1.5 hover:text-blue-500 text-slate-300 dark:text-white/20 transition-colors border-none bg-transparent"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); handleAdminEdit(friend, e); }}
-                      className="p-1.5 hover:text-blue-500 text-slate-300 dark:text-white/20 transition-colors border-none bg-transparent"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => handleRemoveFriend(friend.ownerId, e)}
-                      className="p-1.5 group/del hover:bg-red-500 transition-all border-none bg-transparent rounded-lg"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-slate-300 dark:text-white/20 group-hover/del:text-white"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                    </button>
-                  </div>
+
+                  {(!friend.branch) && (
+                    <NexusDropdown
+                      placeholder="Assign Batch Preset"
+                      options={[]}
+                      onChange={() => { }}
+                      className="w-full"
+                      renderCustomMenu={(close) => (
+                        <div className="w-[300px] p-4 space-y-4 max-h-[400px] overflow-y-auto no-scrollbar">
+                          <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 pb-2">Available Batches</h4>
+                          <div className="space-y-2">
+                            {PRESET_BATCHES.map(b => (
+                              <button key={b.id} onClick={() => { applyPreset(b, friend.ownerId); close(); }} className="w-full p-3 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-xl text-left hover:border-orange-500 transition-all text-[10px] font-bold border-none uppercase truncate">{b.name}</button>
+                            ))}
+                            {communityPresets.map(cp => (
+                              <button key={cp.id} onClick={() => { applyPreset(cp, friend.ownerId); close(); }} className="w-full p-3 bg-slate-50 dark:bg-orange-600/[0.05] border border-orange-500/10 rounded-xl text-left hover:border-orange-500 transition-all text-[10px] font-bold border-none uppercase truncate">{cp.name}</button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    />
+                  )}
                 </div>
               ))}
 
-              <NexusDropdown
-                placeholder="+ Add Connection"
-                options={[]}
-                onChange={() => { }}
-                className="w-full"
-                renderCustomMenu={(close) => (
-                  <div className="w-[320px] md:w-[400px] p-4 space-y-6 max-h-[500px] overflow-y-auto no-scrollbar">
-                    <section className="space-y-3">
-                      <h4 className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500 ml-1">Presets</h4>
-                      <div className="space-y-2">
-                        {PRESET_BATCHES.map(batch => (
-                          <div key={batch.id} className="relative group/card">
-                            <button onClick={() => { setTargetForAction('friend'); applyPreset(batch); close(); }} className="w-full p-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-2xl text-left hover:border-orange-500/50 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-all flex items-center justify-between group border-none">
-                              <div className="min-w-0 pr-12">
-                                <p className="text-[10px] font-black uppercase tracking-tight text-slate-800 dark:text-white truncate">{batch.name}</p>
-                              </div>
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                            </button>
-                            {userProfile?.is_admin && (
-                              <div className="absolute top-1/2 right-10 -translate-y-1/2 flex items-center gap-1 opacity-40 hover:opacity-100 transition-all">
-                                <button onClick={(e) => { e.stopPropagation(); handleAdminEdit(batch, e); close(); }} title="Edit" className="p-2 text-slate-400 hover:text-orange-500 transition-all active:scale-95 border-none bg-transparent flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                    {communityPresets.length > 0 && (
-                      <section className="space-y-3">
-                        <h4 className="text-[9px] font-black uppercase tracking-[0.4em] text-orange-500 ml-1">Community</h4>
-                        <div className="space-y-2">
-                          {communityPresets.map(preset => (
-                            <div key={preset.id} className="relative group/card">
-                              <button onClick={() => { setTargetForAction('friend'); applyPreset(preset); close(); }} className="w-full p-4 bg-slate-50 dark:bg-orange-600/[0.03] border border-slate-200 dark:border-orange-600/10 rounded-2xl text-left hover:border-orange-500/50 hover:bg-slate-100 dark:hover:bg-orange-600/[0.05] transition-all flex items-center justify-between group border-none">
-                                <div className="min-w-0 pr-16">
-                                  <p className="text-[10px] font-black uppercase tracking-tight text-slate-800 dark:text-white truncate">{preset.name}</p>
-                                </div>
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                              </button>
-                              {userProfile?.is_admin && (
-                                <div className="absolute top-1/2 right-10 -translate-y-1/2 flex items-center gap-1 opacity-40 hover:opacity-100 transition-all">
-                                  <button onClick={(e) => { e.stopPropagation(); handleAdminEdit(preset, e); close(); }} title="Edit" className="p-2 text-slate-400 hover:text-orange-500 transition-all active:scale-95 border-none bg-transparent flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
-                                  <button onClick={(e) => { e.stopPropagation(); handleAdminDelete(preset.id, e); close(); }} title="Delete" className="p-2 text-slate-400 hover:text-red-500 transition-all active:scale-95 border-none bg-transparent flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </section>
-                    )}
-                  </div>
-                )}
-              />
+              <button
+                onClick={handleAddEmptyConnection}
+                className="w-full p-4 rounded-2xl border-2 border-dashed border-slate-200 dark:border-white/5 hover:border-orange-500/30 hover:bg-orange-600/5 transition-all flex items-center justify-center gap-2 group border-none"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-slate-400 group-hover:text-orange-500 transition-colors"><path d="M12 5v14M5 12h14" /></svg>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-orange-500 transition-colors">Add New Connection</span>
+              </button>
+
             </div>
           </div>
         </div>
