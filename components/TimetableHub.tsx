@@ -670,9 +670,9 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                 <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-600">{activeDay} Schedule ({activeTimetable.ownerName})</h3>
                 <span className="text-[8px] font-bold text-slate-500 uppercase">{daySlotsWithBreaks.filter(s => s.type !== 'break').length} Activities Today</span>
               </div>
-              <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
                 {daySlotsWithBreaks.length === 0 ? (
-                  <div className="p-10 bg-slate-50 dark:bg-black border border-slate-100 dark:border-white/5 rounded-[32px] text-center"><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No events found for {activeDay}.</p></div>
+                  <div className="col-span-full p-10 bg-slate-50 dark:bg-black border border-slate-100 dark:border-white/5 rounded-[32px] text-center"><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No events found for {activeDay}.</p></div>
                 ) : (
                   daySlotsWithBreaks.map(slot => {
                     const startMin = timeToMinutes(slot.startTime);
@@ -691,24 +691,37 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     }
 
                     return (
-                      <div key={slot.id} className={`group p-6 rounded-[32px] transition-all flex items-center justify-between border ${isActive ? 'bg-orange-600/10 border-orange-500/50 shadow-[0_0_30px_rgba(234,88,12,0.1)] scale-[1.01]' : isFinished ? 'bg-slate-50 dark:bg-black border-slate-100 dark:border-white/5 opacity-40 grayscale' : isBreak ? 'bg-slate-50 dark:bg-black border-slate-100 dark:border-white/5 opacity-70' : 'bg-white dark:bg-black border-slate-100 dark:border-white/5 hover:border-orange-500/30'}`}>
-                        <div className="flex items-center gap-6">
-                          <div className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center border shadow-inner ${isActive ? 'bg-orange-600 border-orange-400' : isFinished ? 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-white/5' : 'bg-slate-50 dark:bg-black border-slate-200 dark:border-white/5'}`}>
-                            <span className={`text-[10px] font-black ${isActive ? 'text-white' : isFinished ? 'text-slate-600' : 'text-orange-600'}`}>{slot.startTime}</span>
-                            <div className={`w-4 h-px my-1 ${isActive ? 'bg-white/30' : 'bg-white/10'}`} />
-                            <span className={`text-[8px] font-bold ${isActive ? 'text-white/70' : 'text-slate-500'}`}>{slot.endTime}</span>
+                      <div key={slot.id} className={`group relative p-4 md:p-5 rounded-[24px] md:rounded-[32px] transition-all flex flex-col justify-between border ${isActive ? 'bg-orange-600/10 border-orange-500/60 shadow-2xl scale-[1.02] z-10' : isFinished ? 'bg-slate-50 dark:bg-black border-slate-100 dark:border-white/5 opacity-40 grayscale' : isBreak ? 'bg-slate-50/50 dark:bg-white/[0.02] border-dashed border-slate-200 dark:border-white/10' : 'bg-white dark:bg-black border-slate-100 dark:border-white/5 hover:border-orange-500/30'}`}>
+
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="flex flex-col md:flex-row justify-between items-start gap-2">
+                            <div className={`px-2 py-1 md:px-3 md:py-1.5 rounded-lg md:rounded-xl text-[7px] md:text-[9px] font-black whitespace-nowrap ${isActive ? 'bg-orange-600 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}>
+                              {slot.startTime} — {slot.endTime}
+                            </div>
+                            <div className={`px-2 py-0.5 md:py-1 text-[6px] md:text-[7px] font-black uppercase tracking-[0.2em] rounded-md ${isActive ? 'bg-orange-500 text-white animate-pulse' : isFinished ? 'bg-slate-200 dark:bg-white/10 text-slate-600' : 'text-slate-400'}`}>
+                              {statusLabel}
+                            </div>
                           </div>
+
                           <div>
-                            <h4 className={`text-lg font-black uppercase tracking-tight transition-colors ${isActive ? 'text-orange-500' : isFinished ? 'text-slate-400' : isBreak ? 'text-slate-400' : 'text-slate-800 dark:text-white group-hover:text-orange-500'}`}>{slot.subject}</h4>
-                            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">{isBreak ? 'Free Window' : `Room ${slot.room} • ${slot.type === 'lab' ? 'Practical' : 'Lecture'}`}</p>
+                            <h4 className={`text-sm md:text-xl font-black uppercase tracking-tight leading-tight mb-1 md:mb-2 ${isActive ? 'text-orange-500' : isBreak ? 'text-slate-400' : 'text-slate-800 dark:text-white'}`}>
+                              {slot.subject}
+                            </h4>
+                            <p className="text-[7px] md:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-tight">
+                              {isBreak ? 'Free Window' : `Room ${slot.room} • ${slot.type}`}
+                            </p>
                           </div>
                         </div>
-                        <div className="flex flex-col items-end">
-                          <div className={`px-2 py-1 text-[7px] font-black uppercase tracking-[0.2em] transition-all ${isActive ? 'text-orange-600 animate-pulse' : isFinished ? 'text-slate-600' : 'text-slate-500'}`}>
-                            {statusLabel}
+
+                        {isActive && (
+                          <div className="mt-3 md:mt-4 flex items-center gap-1.5">
+                            <span className="flex h-1 w-1 md:h-1.5 md:w-1.5 relative">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-1 w-1 md:h-1.5 md:w-1.5 bg-orange-500"></span>
+                            </span>
+                            <span className="text-[6px] md:text-[8px] font-black text-orange-600 uppercase tracking-widest whitespace-nowrap">Now in progress</span>
                           </div>
-                          {isActive && <p className="text-[8px] font-bold text-orange-600 mt-2">Active</p>}
-                        </div>
+                        )}
                       </div>
                     );
                   })

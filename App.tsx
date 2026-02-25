@@ -124,6 +124,7 @@ const BackgroundEffects: React.FC = React.memo(() => {
 const TodaysSchedule: React.FC = () => {
   const [timetable, setTimetable] = useState<TimetableData | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedMe = localStorage.getItem('nexus_timetable_me');
@@ -148,7 +149,13 @@ const TodaysSchedule: React.FC = () => {
     return (
       <div className="max-w-6xl mx-auto px-6 mb-12 animate-fade-in">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400 ml-1">Today's Schedule</h3>
+          <button
+            onClick={() => navigate('/timetable')}
+            className="flex items-center gap-2 group/header border-none bg-transparent p-0 transition-opacity hover:opacity-80"
+          >
+            <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400 ml-1">Today's Schedule</h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-slate-400 group-hover/header:translate-x-1 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </button>
         </div>
         <div className="p-8 rounded-[32px] border border-dashed border-slate-200 dark:border-white/10 flex flex-col items-center justify-center text-center space-y-3 bg-white/50 dark:bg-white/[0.02]">
           <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400">
@@ -166,8 +173,21 @@ const TodaysSchedule: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-6 mb-12 animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400 ml-1">Today's Schedule</h3>
-        <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest">{today}</span>
+        <button
+          onClick={() => navigate('/timetable')}
+          className="flex items-center gap-2 group/header border-none bg-transparent p-0 transition-opacity hover:opacity-80"
+        >
+          <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400 ml-1">Today's Schedule</h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-slate-400 group-hover/header:translate-x-1 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+        </button>
+        <div className="flex flex-col items-end">
+          <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest">{today}</span>
+          {timetable?.ownerName && (
+            <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter truncate max-w-[150px]">
+              {timetable.ownerName}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-6 no-scrollbar snap-x snap-mandatory">
@@ -179,9 +199,10 @@ const TodaysSchedule: React.FC = () => {
           const isPassed = currentMinutes >= end;
 
           return (
-            <div
+            <button
               key={slot.id}
-              className={`flex-shrink-0 w-[260px] md:w-[300px] snap-center group relative overflow-hidden rounded-[40px] border transition-all duration-500 ${isGoingOn ? 'border-white/40 scale-[1.02] shadow-[0_25px_50px_-12px_rgba(234,88,12,0.5)]' : 'border-white/10 shadow-xl'}`}
+              onClick={() => navigate('/timetable')}
+              className={`flex-shrink-0 w-[220px] md:w-[260px] snap-center group relative overflow-hidden rounded-[32px] border bg-transparent p-0 text-left transition-all duration-500 hover:scale-[1.05] active:scale-95 cursor-pointer ${isGoingOn ? 'border-white/40 scale-[1.02] shadow-[0_25px_50px_-12px_rgba(234,88,12,0.5)]' : 'border-white/10 shadow-xl'}`}
             >
               <div className={`absolute inset-0 bg-gradient-to-br from-orange-400 via-orange-500 to-red-600`} />
 
@@ -193,11 +214,11 @@ const TodaysSchedule: React.FC = () => {
                 </svg>
               </div>
 
-              <div className="relative p-7 space-y-6">
+              <div className="relative p-5 space-y-5">
                 <div className="flex justify-between items-start">
-                  <div className="space-y-1.5">
-                    <h4 className="text-3xl font-black text-white tracking-tighter uppercase leading-none drop-shadow-md">{slot.subject}</h4>
-                    <p className="text-[11px] font-black text-white uppercase tracking-[0.1em]">{slot.room} • {slot.type}</p>
+                  <div className="space-y-1">
+                    <h4 className="text-2xl font-black text-white tracking-tighter uppercase leading-none drop-shadow-md">{slot.subject}</h4>
+                    <p className="text-[10px] font-black text-white uppercase tracking-[0.1em]">{slot.room} • {slot.type}</p>
                   </div>
 
                   <div className={`px-3 py-1.5 rounded-2xl text-[8px] font-black uppercase tracking-widest backdrop-blur-md flex items-center gap-1.5 ${isGoingOn ? 'bg-white text-orange-600 shadow-lg' : 'bg-black/20 text-white'}`}>
@@ -223,7 +244,7 @@ const TodaysSchedule: React.FC = () => {
                   )}
                 </div>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
