@@ -144,7 +144,24 @@ const TodaysSchedule: React.FC = () => {
 
   const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
 
-  if (!dayData || dayData.slots.length === 0) return null;
+  if (!dayData || dayData.slots.length === 0) {
+    return (
+      <div className="max-w-6xl mx-auto px-6 mb-12 animate-fade-in">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400 ml-1">Today's Schedule</h3>
+        </div>
+        <div className="p-8 rounded-[32px] border border-dashed border-slate-200 dark:border-white/10 flex flex-col items-center justify-center text-center space-y-3 bg-white/50 dark:bg-white/[0.02]">
+          <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+          </div>
+          <div className="space-y-1">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No Schedule In Sync</p>
+            <p className="text-[9px] font-bold text-slate-400/60 uppercase">Go to Timetable Hub to load your batch preset</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-6 mb-12 animate-fade-in">
@@ -160,15 +177,12 @@ const TodaysSchedule: React.FC = () => {
           const isGoingOn = currentMinutes >= start && currentMinutes < end;
           const isUpcoming = currentMinutes < start;
           const isPassed = currentMinutes >= end;
-
-          if (isPassed && dayData.slots.length > 3 && !isGoingOn) return null;
-
           return (
             <div
               key={slot.id}
-              className={`flex-shrink-0 w-[240px] md:w-[280px] snap-center group relative overflow-hidden rounded-[32px] border transition-all duration-300 ${isGoingOn ? 'border-orange-500 shadow-[0_20px_40px_rgba(234,88,12,0.2)]' : 'border-slate-200 dark:border-white/10 opacity-80 hover:opacity-100'}`}
+              className={`flex-shrink-0 w-[240px] md:w-[280px] snap-center group relative overflow-hidden rounded-[32px] border transition-all duration-300 ${isGoingOn ? 'border-orange-500 shadow-[0_20px_40px_rgba(234,88,12,0.2)]' : 'border-slate-200 dark:border-white/10 opacity-60 hover:opacity-100'}`}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br from-orange-400 via-orange-500 to-red-600 opacity-90 ${!isGoingOn && 'grayscale-[0.3] brightness-90'}`} />
+              <div className={`absolute inset-0 bg-gradient-to-br from-orange-400 via-orange-500 to-red-600 opacity-90 ${isPassed && 'grayscale-[0.5] brightness-75'} ${!isGoingOn && !isPassed && 'brightness-90'}`} />
 
               {/* Patterns */}
               <div className="absolute inset-0 opacity-10 pointer-events-none">
