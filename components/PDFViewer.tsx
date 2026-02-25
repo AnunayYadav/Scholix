@@ -422,7 +422,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     useEffect(() => {
         const timer = setTimeout(() => {
             setRenderScale(scale);
-        }, 150); // Faster high-qual transition once zooming stops
+        }, 100); // Super fast high-qual transition
         return () => clearTimeout(timer);
     }, [scale]);
 
@@ -542,10 +542,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 Number(touch1.clientX) - Number(touch2.clientX),
                 Number(touch1.clientY) - Number(touch2.clientY)
             );
-            const delta = Number(dist) - Number(touchState.current.lastDist);
 
-            if (Math.abs(delta) > 10) {
+            if (touchState.current.lastDist > 0) {
+                const ratio = dist / touchState.current.lastDist;
                 setZooming();
+
                 const rect = containerRef.current?.getBoundingClientRect();
                 if (rect) {
                     focalPointRef.current = {
@@ -555,11 +556,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 }
 
                 setScale(prev => {
-                    const next = prev + (delta > 0 ? 0.05 : -0.05);
+                    const next = prev * ratio;
                     return Math.min(Math.max(0.3, next), 4);
                 });
-                touchState.current.lastDist = dist;
             }
+            touchState.current.lastDist = dist;
         } else if (e.touches.length === 1) {
             touchState.current.wasScrolling = true;
         }
@@ -850,7 +851,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    className="flex-1 overflow-auto bg-slate-100 dark:bg-[#0a0a0a] relative block py-12 px-4 md:px-0 select-none touch-pan-x touch-pan-y"
+                    className="flex-1 overflow-auto bg-slate-100 dark:bg-[#0a0a0a] relative select-none"
                     style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                     {isLoading ? (
@@ -862,7 +863,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                             ))}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center min-w-full mx-auto">
+                        <div className="flex flex-col items-center min-w-max mx-auto py-12 px-4 md:px-8">
                             {Array.from({ length: numPages }).map((_, i) => (
                                 <PageRenderer
                                     key={i}
