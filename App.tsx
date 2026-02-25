@@ -177,43 +177,50 @@ const TodaysSchedule: React.FC = () => {
           const isGoingOn = currentMinutes >= start && currentMinutes < end;
           const isUpcoming = currentMinutes < start;
           const isPassed = currentMinutes >= end;
+
           return (
             <div
               key={slot.id}
-              className={`flex-shrink-0 w-[240px] md:w-[280px] snap-center group relative overflow-hidden rounded-[32px] border transition-all duration-300 ${isGoingOn ? 'border-orange-500 shadow-[0_20px_40px_rgba(234,88,12,0.2)]' : 'border-slate-200 dark:border-white/10 opacity-60 hover:opacity-100'}`}
+              className={`flex-shrink-0 w-[260px] md:w-[300px] snap-center group relative overflow-hidden rounded-[40px] border transition-all duration-500 ${isGoingOn ? 'border-white/40 scale-[1.02] shadow-[0_25px_50px_-12px_rgba(234,88,12,0.5)]' : 'border-white/10 shadow-xl'}`}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br from-orange-400 via-orange-500 to-red-600 opacity-90 ${isPassed && 'grayscale-[0.5] brightness-75'} ${!isGoingOn && !isPassed && 'brightness-90'}`} />
+              <div className={`absolute inset-0 bg-gradient-to-br from-orange-400 via-orange-500 to-red-600`} />
 
               {/* Patterns */}
-              <div className="absolute inset-0 opacity-10 pointer-events-none">
+              <div className="absolute inset-0 opacity-20 pointer-events-none">
                 <svg className="w-full h-full" viewBox="0 0 100 100">
                   <defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5" /></pattern></defs>
                   <rect width="100" height="100" fill="url(#grid)" />
                 </svg>
               </div>
 
-              <div className="relative p-6 space-y-4">
+              <div className="relative p-7 space-y-6">
                 <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <h4 className="text-xl font-black text-white tracking-tighter uppercase leading-none">{slot.subject}</h4>
-                    <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{slot.room} • {slot.type === 'lab' ? 'Practical' : 'Lecture'}</p>
+                  <div className="space-y-1.5">
+                    <h4 className="text-3xl font-black text-white tracking-tighter uppercase leading-none drop-shadow-md">{slot.subject}</h4>
+                    <p className="text-[11px] font-black text-white uppercase tracking-[0.1em]">{slot.room} • {slot.type}</p>
+                  </div>
+
+                  <div className={`px-3 py-1.5 rounded-2xl text-[8px] font-black uppercase tracking-widest backdrop-blur-md flex items-center gap-1.5 ${isGoingOn ? 'bg-white text-orange-600 shadow-lg' : 'bg-black/20 text-white'}`}>
+                    {isGoingOn && (
+                      <span className="flex h-1.5 w-1.5 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-current"></span>
+                      </span>
+                    )}
+                    {isGoingOn ? 'Going On' : isUpcoming ? 'Upcoming' : 'Done'}
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-white/20 flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest">Time Window</p>
+                    <p className="text-sm font-black text-white tracking-widest">{slot.startTime} - {slot.endTime}</p>
                   </div>
                   {isGoingOn && (
-                    <span className="flex h-2 w-2 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                    </span>
+                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-5 h-5"><path d="M12 2v20M2 12h20" /></svg>
+                    </div>
                   )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <div className={`px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${isGoingOn ? 'bg-white text-orange-600' : 'bg-black/20 text-white'}`}>
-                    {isGoingOn ? '● Going On' : isUpcoming ? 'Upcoming' : 'Completed'}
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-white/20">
-                  <p className="text-xs font-black text-white tracking-widest">{slot.startTime} - {slot.endTime}</p>
                 </div>
               </div>
             </div>
@@ -261,8 +268,7 @@ const Dashboard: React.FC = React.memo(() => {
   ];
 
   return (
-    <div className="w-full h-full pb-20">
-      <DashboardHero />
+    <div className="w-full h-full pb-20 pt-10">
       <TodaysSchedule />
       <div className="max-w-6xl mx-auto px-6 mb-10">
         <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400 ml-1 mb-8">Categories</h3>
