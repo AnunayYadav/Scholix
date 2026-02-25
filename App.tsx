@@ -20,7 +20,7 @@ import RoommateFinder from './components/RoommateFinder.tsx';
 import EmergencyContacts from './components/EmergencyContacts.tsx';
 import AIToolsDirectory from './components/AIToolsDirectory.tsx';
 import AdminStats from './components/AdminStats.tsx';
-import { ModuleType, UserProfile } from './types.ts';
+import { ModuleType, UserProfile, TimetableData } from './types.ts';
 import NexusServer from './services/nexusServer.ts';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -121,6 +121,95 @@ const BackgroundEffects: React.FC = React.memo(() => {
   );
 });
 
+const TodaysSchedule: React.FC = () => {
+  const [timetable, setTimetable] = useState<TimetableData | null>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const savedMe = localStorage.getItem('nexus_timetable_me');
+    if (savedMe) {
+      try { setTimetable(JSON.parse(savedMe)); } catch (e) { }
+    }
+    const timer = setInterval(() => setCurrentTime(new Date()), 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+  const dayData = timetable?.schedule?.find(s => s.day === today);
+
+  const timeToMinutes = (time: string) => {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+
+  if (!dayData || dayData.slots.length === 0) return null;
+
+  return (
+    <div className="max-w-6xl mx-auto px-6 mb-12 animate-fade-in">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400 ml-1">Today's Schedule</h3>
+        <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest">{today}</span>
+      </div>
+
+      <div className="flex gap-4 overflow-x-auto pb-6 no-scrollbar snap-x snap-mandatory">
+        {dayData.slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)).map((slot) => {
+          const start = timeToMinutes(slot.startTime);
+          const end = timeToMinutes(slot.endTime);
+          const isGoingOn = currentMinutes >= start && currentMinutes < end;
+          const isUpcoming = currentMinutes < start;
+          const isPassed = currentMinutes >= end;
+
+          if (isPassed && dayData.slots.length > 3 && !isGoingOn) return null;
+
+          return (
+            <div
+              key={slot.id}
+              className={`flex-shrink-0 w-[240px] md:w-[280px] snap-center group relative overflow-hidden rounded-[32px] border transition-all duration-300 ${isGoingOn ? 'border-orange-500 shadow-[0_20px_40px_rgba(234,88,12,0.2)]' : 'border-slate-200 dark:border-white/10 opacity-80 hover:opacity-100'}`}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br from-orange-400 via-orange-500 to-red-600 opacity-90 ${!isGoingOn && 'grayscale-[0.3] brightness-90'}`} />
+
+              {/* Patterns */}
+              <div className="absolute inset-0 opacity-10 pointer-events-none">
+                <svg className="w-full h-full" viewBox="0 0 100 100">
+                  <defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5" /></pattern></defs>
+                  <rect width="100" height="100" fill="url(#grid)" />
+                </svg>
+              </div>
+
+              <div className="relative p-6 space-y-4">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1">
+                    <h4 className="text-xl font-black text-white tracking-tighter uppercase leading-none">{slot.subject}</h4>
+                    <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{slot.room} • {slot.type === 'lab' ? 'Practical' : 'Lecture'}</p>
+                  </div>
+                  {isGoingOn && (
+                    <span className="flex h-2 w-2 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className={`px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${isGoingOn ? 'bg-white text-orange-600' : 'bg-black/20 text-white'}`}>
+                    {isGoingOn ? '● Going On' : isUpcoming ? 'Upcoming' : 'Completed'}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/20">
+                  <p className="text-xs font-black text-white tracking-widest">{slot.startTime} - {slot.endTime}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 const DashboardHero: React.FC = React.memo(() => {
   return (
     <div className="relative overflow-hidden bg-transparent pt-16 pb-10 px-6">
@@ -160,33 +249,37 @@ const Dashboard: React.FC = React.memo(() => {
   return (
     <div className="w-full h-full pb-20">
       <DashboardHero />
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {features.map((f) => (
-          <button
-            key={f.id}
-            onClick={() => navigate(`/${f.id}`)}
-            className="group relative p-6 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-slate-200 dark:border-white/10 text-left transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1.5 hover:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.7)] hover:border-orange-500/40 active:scale-95 cursor-pointer overflow-hidden"
-          >
-            {/* Ambient Background Glow on Hover */}
-            <div className={`absolute inset-0 bg-gradient-to-br from-orange-500 to-red-600 opacity-0 group-hover:opacity-[0.03] dark:group-hover:opacity-[0.07] transition-opacity duration-500`} />
+      <TodaysSchedule />
+      <div className="max-w-6xl mx-auto px-6 mb-10">
+        <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400 ml-1 mb-8">Categories</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {features.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => navigate(`/${f.id}`)}
+              className="group relative p-6 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-slate-200 dark:border-white/10 text-left transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1.5 hover:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.7)] hover:border-orange-500/40 active:scale-95 cursor-pointer overflow-hidden"
+            >
+              {/* Ambient Background Glow on Hover */}
+              <div className={`absolute inset-0 bg-gradient-to-br from-orange-500 to-red-600 opacity-0 group-hover:opacity-[0.03] dark:group-hover:opacity-[0.07] transition-opacity duration-500`} />
 
-            <div className={`relative w-12 h-12 rounded-[16px] bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white mb-6 shadow-2xl shadow-orange-500/20 group-hover:scale-110 transition-all duration-500 group-hover:rotate-3`}>
-              <div className="absolute inset-0 rounded-[16px] blur-xl opacity-40 bg-inherit -z-10 group-hover:blur-2xl transition-all" />
-              <div className="scale-90">
-                {f.icon}
+              <div className={`relative w-12 h-12 rounded-[16px] bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white mb-6 shadow-2xl shadow-orange-500/20 group-hover:scale-110 transition-all duration-500 group-hover:rotate-3`}>
+                <div className="absolute inset-0 rounded-[16px] blur-xl opacity-40 bg-inherit -z-10 group-hover:blur-2xl transition-all" />
+                <div className="scale-90">
+                  {f.icon}
+                </div>
               </div>
-            </div>
 
-            <div className="relative space-y-2">
-              <h4 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">{f.name}</h4>
-              <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400/80 leading-relaxed max-w-[90%]">{f.desc}</p>
-            </div>
+              <div className="relative space-y-2">
+                <h4 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">{f.name}</h4>
+                <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400/80 leading-relaxed max-w-[90%]">{f.desc}</p>
+              </div>
 
-            <div className="absolute top-8 right-8 text-slate-300 dark:text-white/10 group-hover:text-orange-500 transition-all duration-500 group-hover:translate-x-1 group-hover:-translate-y-1">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
-            </div>
-          </button>
-        ))}
+              <div className="absolute top-8 right-8 text-slate-300 dark:text-white/10 group-hover:text-orange-500 transition-all duration-500 group-hover:translate-x-1 group-hover:-translate-y-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
