@@ -28,7 +28,8 @@ const PageRenderer = React.memo<{
     searchResults: SearchResult[];
     pdfjsLib: any;
     registerRef: (pageNum: number, el: HTMLDivElement | null) => void;
-}>(({ pageNum, pdfDoc, renderScale, scale, userProfile, searchQuery, currentSearchIndex, searchResults, pdfjsLib, registerRef }) => {
+    isZooming: boolean;
+}>(({ pageNum, pdfDoc, renderScale, scale, userProfile, searchQuery, currentSearchIndex, searchResults, pdfjsLib, registerRef, isZooming }) => {
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [renderTarget, setRenderTarget] = useState<{
@@ -54,11 +55,12 @@ const PageRenderer = React.memo<{
 
             try {
                 const page = await pdfDoc.getPage(pageNum);
-                const pixelRatio = window.devicePixelRatio || 1;
+                const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
                 const baseViewport = page.getViewport({ scale: 1.0 });
                 setPageInfo({ width: baseViewport.width, height: baseViewport.height });
 
-                const viewport = page.getViewport({ scale: renderScale * pixelRatio });
+                const targetScale = Math.min(renderScale, 2.5);
+                const viewport = page.getViewport({ scale: targetScale * pixelRatio });
                 const cssViewport = page.getViewport({ scale: renderScale });
 
                 targetCanvas.height = viewport.height;
@@ -172,8 +174,7 @@ const PageRenderer = React.memo<{
     return (
         <div
             ref={el => {
-                (containerRef as any).current = el;
-                registerRef(pageNum, el);
+                if (el) registerRef(pageNum, el);
             }}
             data-page={pageNum}
             className="relative mb-6 bg-white dark:bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top-left select-none border border-slate-200 dark:border-white/5 overflow-visible"
@@ -192,16 +193,19 @@ const PageRenderer = React.memo<{
             >
                 <canvas
                     ref={canvasARef}
-                    className={`block rounded-md shadow-inner ${renderTarget.activeCanvas === 'A' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
-                    style={{ backfaceVisibility: 'hidden', pointerEvents: 'none' }}
+                    className={`block rounded-md shadow-inner transition-opacity duration-300 ${renderTarget.activeCanvas === 'A' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
+                    style={{ backfaceVisibility: 'hidden', pointerEvents: 'none', transform: 'translateZ(0)' }}
                 />
                 <canvas
                     ref={canvasBRef}
-                    className={`block rounded-md shadow-inner ${renderTarget.activeCanvas === 'B' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
-                    style={{ backfaceVisibility: 'hidden', pointerEvents: 'none' }}
+                    className={`block rounded-md shadow-inner transition-opacity duration-300 ${renderTarget.activeCanvas === 'B' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
+                    style={{ backfaceVisibility: 'hidden', pointerEvents: 'none', transform: 'translateZ(0)' }}
                 />
 
-                <div ref={textLayerRef} className="textLayer absolute inset-0 opacity-20 pointer-events-none select-text z-20" />
+                <div
+                    ref={textLayerRef}
+                    className={`textLayer absolute inset-0 opacity-20 pointer-events-none select-text z-20 transition-opacity duration-300 ${isZooming ? 'opacity-0' : 'opacity-20'}`}
+                />
 
                 {/* Dynamic Watermark */}
                 <div className="absolute inset-0 pointer-events-none opacity-[0.06] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
@@ -250,12 +254,18 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const [currentSearchIndex, setCurrentSearchIndex] = useState(-1);
     const [isSearching, setIsSearching] = useState(false);
     const [viewMode, setViewMode] = useState<'width' | 'page'>('width');
+    const [isZooming, setIsZooming] = useState(false);
+    const zoomTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const pdfDocRef = useRef<any>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
     const lastScaleRef = useRef(scale);
     const focalPointRef = useRef<{ x: number; y: number } | null>(null);
+
+    const registerPageRef = useCallback((pageNum: number, el: HTMLDivElement | null) => {
+        pageRefs.current[pageNum] = el;
+    }, []);
 
     // Track visible pages for current page indicator
     const visiblePages = useRef<Set<number>>(new Set());
@@ -266,6 +276,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     useEffect(() => {
         currentPageRef.current = currentPage;
     }, [currentPage]);
+
+    // Handle isZooming state for UI optimizations
+    const setZooming = useCallback(() => {
+        setIsZooming(true);
+        if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
+        zoomTimeoutRef.current = setTimeout(() => setIsZooming(false), 300);
+    }, []);
 
     // Load PDF.js from CDN
     useEffect(() => {
@@ -390,40 +407,34 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     useEffect(() => {
         const timer = setTimeout(() => {
             setRenderScale(scale);
-        }, 300);
+        }, 150); // Faster high-qual transition once zooming stops
         return () => clearTimeout(timer);
     }, [scale]);
 
-    // Maintain focal point during zoom
-    useEffect(() => {
+    // Maintain focal point during zoom - UseLayoutEffect for zero-latency
+    // @ts-ignore
+    const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
+
+    useIsomorphicLayoutEffect(() => {
         const container = containerRef.current;
         if (!container || scale === lastScaleRef.current) return;
 
-        // The inner wrapper contains all pages and is centered via items-center on main
         const wrapper = container.querySelector('div.flex.flex-col.items-center') as HTMLElement;
         if (!wrapper) return;
 
         const ratio = scale / lastScaleRef.current;
-
-        // Focal point relative to container
         const focalX = focalPointRef.current?.x ?? (container.clientWidth / 2);
         const focalY = focalPointRef.current?.y ?? (container.clientHeight / 2);
 
         const containerWidth = container.clientWidth;
-
-        // The wrapper width is already updated for the new scale because this runs after render
         const newWidth = wrapper.offsetWidth;
         const oldWidth = newWidth / ratio;
-
-        // Centering offsets
         const oldOffsetX = Math.max(0, (containerWidth - oldWidth) / 2);
         const newOffsetX = Math.max(0, (containerWidth - newWidth) / 2);
 
-        // Focal point in document coordinates (relative to document start)
         const docX = (container.scrollLeft + focalX - oldOffsetX);
         const docY = (container.scrollTop + focalY);
 
-        // New scroll positions
         const nextScrollLeft = (docX * ratio) - focalX + newOffsetX;
         const nextScrollTop = (docY * ratio) - focalY;
 
@@ -444,8 +455,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
         const handleWheel = (e: WheelEvent) => {
             if (e.ctrlKey) {
-                // Pinch to zoom or Ctrl+Wheel
                 e.preventDefault();
+                setZooming();
 
                 const rect = container.getBoundingClientRect();
                 focalPointRef.current = {
@@ -454,7 +465,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 };
 
                 setScale(prev => {
-                    const delta = -e.deltaY * 0.005; // Finer control for trackpad
+                    const delta = -e.deltaY * 0.005;
                     const next = prev + delta;
                     return Math.min(Math.max(0.3, next), 4);
                 });
@@ -519,6 +530,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             const delta = Number(dist) - Number(touchState.current.lastDist);
 
             if (Math.abs(delta) > 10) {
+                setZooming();
                 const rect = containerRef.current?.getBoundingClientRect();
                 if (rect) {
                     focalPointRef.current = {
@@ -848,9 +860,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                                     currentSearchIndex={currentSearchIndex}
                                     searchResults={searchResults}
                                     pdfjsLib={pdfjsLibState}
-                                    registerRef={(pageNum, el) => {
-                                        pageRefs.current[pageNum] = el;
-                                    }}
+                                    registerRef={registerPageRef}
+                                    isZooming={isZooming}
                                 />
 
                             ))}
