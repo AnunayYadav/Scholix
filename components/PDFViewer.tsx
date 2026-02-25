@@ -176,7 +176,7 @@ const PageRenderer = React.memo<{
                 registerRef(pageNum, el);
             }}
             data-page={pageNum}
-            className="relative mb-6 bg-white dark:bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top-left select-none border border-slate-200 dark:border-white/5 overflow-visible snap-start snap-always"
+            className="relative mb-6 bg-white dark:bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top-left select-none border border-slate-200 dark:border-white/5 overflow-visible"
             style={{
                 width: pageInfo ? `${pageInfo.width * scale}px` : 'fit-content',
                 height: pageInfo ? `${pageInfo.height * scale}px` : '400px',
@@ -254,6 +254,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const pdfDocRef = useRef<any>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+    const lastScaleRef = useRef(scale);
+    const focalPointRef = useRef<{ x: number; y: number } | null>(null);
 
     // Track visible pages for current page indicator
     const visiblePages = useRef<Set<number>>(new Set());
@@ -385,12 +387,36 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         }
     };
 
-    // Debounce scale updates for high-quality render to prevent flicker
     useEffect(() => {
         const timer = setTimeout(() => {
             setRenderScale(scale);
         }, 300);
         return () => clearTimeout(timer);
+    }, [scale]);
+
+    // Maintain focal point during zoom
+    useEffect(() => {
+        if (!containerRef.current || scale === lastScaleRef.current) return;
+
+        const container = containerRef.current;
+        const focalPoint = focalPointRef.current || {
+            x: container.clientWidth / 2,
+            y: container.clientHeight / 2
+        };
+
+        const ratio = scale / lastScaleRef.current;
+
+        const newScrollTop = (container.scrollTop + focalPoint.y) * ratio - focalPoint.y;
+        const newScrollLeft = (container.scrollLeft + focalPoint.x) * ratio - focalPoint.x;
+
+        container.scrollTo({
+            top: newScrollTop,
+            left: newScrollLeft,
+            behavior: 'auto'
+        });
+
+        lastScaleRef.current = scale;
+        focalPointRef.current = null;
     }, [scale]);
 
     // Trackpad / Wheel Support
@@ -402,6 +428,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             if (e.ctrlKey) {
                 // Pinch to zoom or Ctrl+Wheel
                 e.preventDefault();
+
+                const rect = container.getBoundingClientRect();
+                focalPointRef.current = {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+
                 setScale(prev => {
                     const delta = -e.deltaY * 0.005; // Finer control for trackpad
                     const next = prev + delta;
@@ -436,6 +469,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
             if (now - lastTap < 300 && dist < 30) {
                 // Double tap detected
+                const rect = containerRef.current?.getBoundingClientRect();
+                if (rect) {
+                    focalPointRef.current = {
+                        x: touch.pageX - rect.left,
+                        y: touch.pageY - rect.top
+                    };
+                }
                 setScale(prev => prev > 1.2 ? 1.0 : 2.0);
                 // Reset to prevent any accidental triple-tap behavior
                 touchState.current.lastTap = 0;
@@ -461,6 +501,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             const delta = Number(dist) - Number(touchState.current.lastDist);
 
             if (Math.abs(delta) > 10) {
+                const rect = containerRef.current?.getBoundingClientRect();
+                if (rect) {
+                    focalPointRef.current = {
+                        x: (Number(touch1.pageX) + Number(touch2.pageX)) / 2 - rect.left,
+                        y: (Number(touch1.pageY) + Number(touch2.pageY)) / 2 - rect.top
+                    };
+                }
+
                 setScale(prev => {
                     const next = prev + (delta > 0 ? 0.05 : -0.05);
                     return Math.min(Math.max(0.3, next), 4);
@@ -757,7 +805,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    className="flex-1 overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-[#0a0a0a] relative flex flex-col items-center py-12 px-4 md:px-0 select-none scroll-smooth touch-pan-x touch-pan-y"
+                    className="flex-1 overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-[#0a0a0a] relative flex flex-col items-center py-12 px-4 md:px-0 select-none touch-pan-x touch-pan-y"
                     style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                     {isLoading ? (
@@ -769,7 +817,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                             ))}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center min-w-max mx-auto scroll-smooth">
+                        <div className="flex flex-col items-center min-w-max mx-auto">
                             {Array.from({ length: numPages }).map((_, i) => (
                                 <PageRenderer
                                     key={i}
