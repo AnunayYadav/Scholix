@@ -396,22 +396,40 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
     // Maintain focal point during zoom
     useEffect(() => {
-        if (!containerRef.current || scale === lastScaleRef.current) return;
-
         const container = containerRef.current;
-        const focalPoint = focalPointRef.current || {
-            x: container.clientWidth / 2,
-            y: container.clientHeight / 2
-        };
+        if (!container || scale === lastScaleRef.current) return;
+
+        // The inner wrapper contains all pages and is centered via items-center on main
+        const wrapper = container.querySelector('div.flex.flex-col.items-center') as HTMLElement;
+        if (!wrapper) return;
 
         const ratio = scale / lastScaleRef.current;
 
-        const newScrollTop = (container.scrollTop + focalPoint.y) * ratio - focalPoint.y;
-        const newScrollLeft = (container.scrollLeft + focalPoint.x) * ratio - focalPoint.x;
+        // Focal point relative to container
+        const focalX = focalPointRef.current?.x ?? (container.clientWidth / 2);
+        const focalY = focalPointRef.current?.y ?? (container.clientHeight / 2);
+
+        const containerWidth = container.clientWidth;
+
+        // The wrapper width is already updated for the new scale because this runs after render
+        const newWidth = wrapper.offsetWidth;
+        const oldWidth = newWidth / ratio;
+
+        // Centering offsets
+        const oldOffsetX = Math.max(0, (containerWidth - oldWidth) / 2);
+        const newOffsetX = Math.max(0, (containerWidth - newWidth) / 2);
+
+        // Focal point in document coordinates (relative to document start)
+        const docX = (container.scrollLeft + focalX - oldOffsetX);
+        const docY = (container.scrollTop + focalY);
+
+        // New scroll positions
+        const nextScrollLeft = (docX * ratio) - focalX + newOffsetX;
+        const nextScrollTop = (docY * ratio) - focalY;
 
         container.scrollTo({
-            top: newScrollTop,
-            left: newScrollLeft,
+            left: nextScrollLeft,
+            top: nextScrollTop,
             behavior: 'auto'
         });
 
@@ -465,15 +483,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             const lastTapY = touchState.current.lastTapY;
 
             // Check if this is a double tap (within 300ms and 30px distance)
-            const dist = Math.hypot(touch.pageX - lastTapX, touch.pageY - lastTapY);
+            const dist = Math.hypot(touch.clientX - lastTapX, touch.clientY - lastTapY);
 
             if (now - lastTap < 300 && dist < 30) {
                 // Double tap detected
                 const rect = containerRef.current?.getBoundingClientRect();
                 if (rect) {
                     focalPointRef.current = {
-                        x: touch.pageX - rect.left,
-                        y: touch.pageY - rect.top
+                        x: touch.clientX - rect.left,
+                        y: touch.clientY - rect.top
                     };
                 }
                 setScale(prev => prev > 1.2 ? 1.0 : 2.0);
@@ -483,8 +501,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 touchState.current.lastTap = now;
             }
 
-            touchState.current.lastTapX = touch.pageX;
-            touchState.current.lastTapY = touch.pageY;
+            touchState.current.lastTapX = touch.clientX;
+            touchState.current.lastTapY = touch.clientY;
             touchState.current.wasScrolling = false;
         }
     };
@@ -495,8 +513,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             const touch1 = e.touches[0];
             const touch2 = e.touches[1];
             const dist = Math.hypot(
-                Number(touch1.pageX) - Number(touch2.pageX),
-                Number(touch1.pageY) - Number(touch2.pageY)
+                Number(touch1.clientX) - Number(touch2.clientX),
+                Number(touch1.clientY) - Number(touch2.clientY)
             );
             const delta = Number(dist) - Number(touchState.current.lastDist);
 
@@ -504,8 +522,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 const rect = containerRef.current?.getBoundingClientRect();
                 if (rect) {
                     focalPointRef.current = {
-                        x: (Number(touch1.pageX) + Number(touch2.pageX)) / 2 - rect.left,
-                        y: (Number(touch1.pageY) + Number(touch2.pageY)) / 2 - rect.top
+                        x: (Number(touch1.clientX) + Number(touch2.clientX)) / 2 - rect.left,
+                        y: (Number(touch1.clientY) + Number(touch2.clientY)) / 2 - rect.top
                     };
                 }
 
@@ -805,11 +823,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    className="flex-1 overflow-y-auto overflow-x-auto bg-slate-100 dark:bg-[#0a0a0a] relative flex flex-col items-center py-12 px-4 md:px-0 select-none touch-pan-x touch-pan-y"
+                    className="flex-1 overflow-auto bg-slate-100 dark:bg-[#0a0a0a] relative block py-12 px-4 md:px-0 select-none touch-pan-x touch-pan-y"
                     style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                     {isLoading ? (
-                        <div className="flex flex-col items-center w-full max-w-4xl px-4 space-y-8">
+                        <div className="flex flex-col items-center w-full max-w-4xl px-4 mx-auto space-y-8">
                             {Array.from({ length: 3 }).map((_, i) => (
                                 <div key={i} className="w-full bg-slate-200 dark:bg-white/5 rounded-xl aspect-[1/1.4] animate-pulse relative overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-300/20 dark:via-white/5 to-transparent shimmer-effect" />
@@ -817,7 +835,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                             ))}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center min-w-max mx-auto">
+                        <div className="flex flex-col items-center min-w-full mx-auto">
                             {Array.from({ length: numPages }).map((_, i) => (
                                 <PageRenderer
                                     key={i}
