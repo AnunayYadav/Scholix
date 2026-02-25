@@ -34,8 +34,9 @@ const PageRenderer = React.memo<{
     const containerRef = useRef<HTMLDivElement>(null);
     const [renderTarget, setRenderTarget] = useState<{
         activeCanvas: 'A' | 'B';
-        renderedScale: number;
-    }>({ activeCanvas: 'A', renderedScale: 0 });
+        scaleA: number;
+        scaleB: number;
+    }>({ activeCanvas: 'A', scaleA: renderScale || scale || 1, scaleB: 0 });
 
     const canvasARef = useRef<HTMLCanvasElement>(null);
     const canvasBRef = useRef<HTMLCanvasElement>(null);
@@ -78,10 +79,11 @@ const PageRenderer = React.memo<{
 
                 await renderTaskRef.current.promise;
 
-                setRenderTarget({
+                setRenderTarget(prev => ({
                     activeCanvas: targetId,
-                    renderedScale: renderScale
-                });
+                    scaleA: targetId === 'A' ? renderScale : prev.scaleA,
+                    scaleB: targetId === 'B' ? renderScale : prev.scaleB
+                }));
 
                 textLayerRef.current.innerHTML = '';
                 const textContent = await page.getTextContent();
@@ -167,9 +169,11 @@ const PageRenderer = React.memo<{
                 activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
-    }, [searchQuery, currentSearchIndex, searchResults, pageNum, renderTarget.renderedScale]);
+    }, [searchQuery, currentSearchIndex, searchResults, pageNum, renderTarget.activeCanvas === 'A' ? renderTarget.scaleA : renderTarget.scaleB]);
 
-    const currentScaleFactor = renderTarget.renderedScale > 0 ? scale / renderTarget.renderedScale : 1;
+    const activeScale = renderTarget.activeCanvas === 'A' ? renderTarget.scaleA : renderTarget.scaleB;
+    const scaleA = renderTarget.scaleA || activeScale || 1;
+    const scaleB = renderTarget.scaleB || activeScale || 1;
 
     return (
         <div
@@ -187,31 +191,39 @@ const PageRenderer = React.memo<{
                 willChange: 'transform'
             }}
         >
-            <div
-                style={{
-                    transform: `scale(${currentScaleFactor}) translateZ(0)`,
-                    transformOrigin: 'top left',
-                    width: 'fit-content'
-                }}
-            >
+            <div className="absolute inset-0 overflow-hidden rounded-md">
                 <canvas
                     ref={canvasARef}
-                    className={`block rounded-md shadow-inner transition-opacity duration-300 ${renderTarget.activeCanvas === 'A' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
-                    style={{ backfaceVisibility: 'hidden', pointerEvents: 'none', transform: 'translateZ(0)' }}
+                    className={`absolute inset-0 block rounded-md shadow-inner transition-opacity duration-200 ${renderTarget.activeCanvas === 'A' ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                    style={{
+                        backfaceVisibility: 'hidden',
+                        pointerEvents: 'none',
+                        transform: `scale(${scale / scaleA}) translateZ(0)`,
+                        transformOrigin: 'top left',
+                        width: pageInfo ? `${pageInfo.width * scaleA}px` : 'auto',
+                        height: pageInfo ? `${pageInfo.height * scaleA}px` : 'auto',
+                    }}
                 />
                 <canvas
                     ref={canvasBRef}
-                    className={`block rounded-md shadow-inner transition-opacity duration-300 ${renderTarget.activeCanvas === 'B' ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0'}`}
-                    style={{ backfaceVisibility: 'hidden', pointerEvents: 'none', transform: 'translateZ(0)' }}
+                    className={`absolute inset-0 block rounded-md shadow-inner transition-opacity duration-200 ${renderTarget.activeCanvas === 'B' ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                    style={{
+                        backfaceVisibility: 'hidden',
+                        pointerEvents: 'none',
+                        transform: `scale(${scale / scaleB}) translateZ(0)`,
+                        transformOrigin: 'top left',
+                        width: pageInfo ? `${pageInfo.width * scaleB}px` : 'auto',
+                        height: pageInfo ? `${pageInfo.height * scaleB}px` : 'auto',
+                    }}
                 />
 
                 <div
                     ref={textLayerRef}
-                    className={`textLayer absolute inset-0 opacity-20 pointer-events-none select-text z-20 transition-opacity duration-300 ${isZooming ? 'opacity-0' : 'opacity-20'}`}
+                    className={`textLayer absolute inset-0 pointer-events-none select-text z-20 transition-all duration-200 ${isZooming ? 'opacity-0' : 'opacity-20'}`}
                 />
 
                 {/* Dynamic Watermark */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.06] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
+                <div className="absolute inset-0 pointer-events-none opacity-[0.04] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
                     {Array.from({ length: 9 }).map((_, i) => (
                         <span key={i} className="text-[35px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-slate-900 dark:text-white tracking-widest">
                             LPU NEXUS
