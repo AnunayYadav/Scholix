@@ -329,7 +329,7 @@ const AttendanceTracker: React.FC = () => {
           <SubjectSkeleton />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 relative z-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 relative z-0">
           {filteredSubjects.map((sub) => {
             const { percentage, needed, skippable, goal } = calculateStats(sub);
             const isBelowGoal = percentage < goal;
@@ -342,40 +342,40 @@ const AttendanceTracker: React.FC = () => {
               <div
                 key={sub.id}
                 className={`
-                  glass-panel p-6 md:p-8 rounded-[40px] border transition-all duration-500 group relative overflow-hidden flex flex-col
+                  glass-panel p-5 md:p-6 rounded-[32px] border transition-all duration-500 group relative overflow-hidden flex flex-col
                   border-slate-200 dark:border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]
                   bg-white/80 dark:bg-[#0a0a0a]/60 backdrop-blur-xl
                   ${isDeleting ? 'ring-4 ring-red-500/20 border-red-500 scale-[0.98]' : ''}
                 `}
               >
                 {/* Top Section: Name and Percentage */}
-                <div className="flex justify-between items-start mb-6">
-                  <div className="space-y-1">
-                    <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="space-y-0.5">
+                    <h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
                       {sub.name}
                     </h3>
                     <div className="flex items-center gap-2">
-                      <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded-md text-[8px] font-black uppercase text-slate-500">
+                      <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded-md text-[7px] font-black uppercase text-slate-500">
                         {sub.present}/{sub.total} SESSIONS
                       </span>
                     </div>
                   </div>
 
-                  <div className={`px-4 py-2 rounded-2xl ${accentBg} border border-transparent group-hover:border-current/10 transition-all`}>
-                    <span className={`${accentColor} text-xl md:text-2xl font-black tracking-tighter`}>
+                  <div className={`px-3 py-1.5 rounded-xl ${accentBg} border border-transparent group-hover:border-current/10 transition-all`}>
+                    <span className={`${accentColor} text-lg md:text-xl font-black tracking-tighter`}>
                       {percentage.toFixed(1)}
-                      <span className="text-[10px] opacity-40 ml-0.5 font-bold">%</span>
+                      <span className="text-[9px] opacity-40 ml-0.5 font-bold">%</span>
                     </span>
                   </div>
                 </div>
 
                 {/* Progress Bar Section */}
-                <div className="mb-8">
-                  <div className="flex justify-between items-center mb-2 px-1">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">COURSE PROGRESS</p>
-                    <p className="text-[8px] font-black text-orange-600 uppercase tracking-widest">GOAL: {sub.goal}%</p>
+                <div className="mb-5">
+                  <div className="flex justify-between items-center mb-1.5 px-0.5">
+                    <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest">PROGRESS</p>
+                    <p className="text-[7px] font-black text-orange-600 uppercase tracking-widest">GOAL: {sub.goal}%</p>
                   </div>
-                  <div className="h-2 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden relative">
+                  <div className="h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden relative">
                     {/* Goal Marker */}
                     <div
                       className="absolute top-0 bottom-0 w-0.5 bg-orange-500/30 z-20 backdrop-blur-md"
@@ -396,19 +396,19 @@ const AttendanceTracker: React.FC = () => {
 
                 {/* Action Buttons */}
                 {!showArchived && (
-                  <div className="grid grid-cols-2 gap-3 mb-6">
+                  <div className="grid grid-cols-2 gap-2 mb-4">
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'present', e)}
-                      className="group/btn h-12 bg-white dark:bg-white text-black rounded-2xl font-black text-[9px] uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg flex items-center justify-center gap-2 border-none"
+                      className="group/btn h-10 bg-white dark:bg-white text-black rounded-xl font-black text-[8px] uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-1.5 border-none"
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-emerald-600"><path d="M20 6L9 17l-5-5" /></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-emerald-600"><path d="M20 6L9 17l-5-5" /></svg>
                       PRESENT
                     </button>
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'absent', e)}
-                      className="group/btn h-12 bg-slate-100/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-2xl font-black text-[9px] uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 hover:scale-[1.02] active:scale-[0.98] transition-all border border-slate-200/50 dark:border-white/10 flex items-center justify-center gap-2"
+                      className="group/btn h-10 bg-slate-100/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-xl font-black text-[8px] uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 hover:scale-[1.02] active:scale-[0.98] transition-all border border-slate-200/50 dark:border-white/10 flex items-center justify-center gap-1.5"
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 opacity-50"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 opacity-50"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                       ABSENT
                     </button>
                   </div>
