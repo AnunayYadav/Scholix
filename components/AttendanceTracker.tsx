@@ -399,14 +399,14 @@ const AttendanceTracker: React.FC = () => {
                   <div className="grid grid-cols-2 gap-2 mb-4">
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'present', e)}
-                      className="group/btn h-10 bg-white dark:bg-white text-black rounded-xl font-black text-[8px] uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-1.5 border-none"
+                      className="group/btn h-9 bg-white dark:bg-white text-black rounded-lg font-black text-[8px] uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-1.5 border-none"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-emerald-600"><path d="M20 6L9 17l-5-5" /></svg>
                       PRESENT
                     </button>
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'absent', e)}
-                      className="group/btn h-10 bg-slate-100/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-xl font-black text-[8px] uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 hover:scale-[1.02] active:scale-[0.98] transition-all border border-slate-200/50 dark:border-white/10 flex items-center justify-center gap-1.5"
+                      className="group/btn h-9 bg-slate-100/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-lg font-black text-[8px] uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 hover:scale-[1.02] active:scale-[0.98] transition-all border border-slate-200/50 dark:border-white/10 flex items-center justify-center gap-1.5"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 opacity-50"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                       ABSENT
