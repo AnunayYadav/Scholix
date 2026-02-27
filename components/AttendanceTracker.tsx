@@ -348,49 +348,44 @@ const AttendanceTracker: React.FC = () => {
                   ${isDeleting ? 'ring-4 ring-red-500/20 border-red-500 scale-[0.98]' : ''}
                 `}
               >
-                {/* Header Section */}
-                <div className="flex flex-col items-center text-center mt-2 mb-6">
-                  <div className={`
-                    relative px-6 py-3 rounded-3xl ${accentBg} transition-all duration-500 group-hover:scale-105 mb-4
-                    border border-transparent group-hover:border-current/10
-                  `}>
-                    <span className={`${accentColor} text-3xl md:text-4xl font-black tracking-tighter`}>
-                      {percentage.toFixed(1)}
-                      <span className="text-sm md:text-base opacity-40 ml-1 font-bold">%</span>
-                    </span>
+                {/* Top Section: Name and Percentage */}
+                <div className="flex justify-between items-start mb-6">
+                  <div className="space-y-1">
+                    <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
+                      {sub.name}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded-md text-[8px] font-black uppercase text-slate-500">
+                        {sub.present}/{sub.total} SESSIONS
+                      </span>
+                    </div>
                   </div>
 
-                  <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-2 line-clamp-1 transition-colors">
-                    {sub.name}
-                  </h3>
-
-                  <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-500/80">
-                    <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-lg">
-                      <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                      {sub.present}/{sub.total} Sessions
-                    </span>
-                    <span className="flex items-center gap-1.5 bg-orange-600/5 px-2.5 py-1 rounded-lg text-orange-600">
-                      <div className="w-1.5 h-1.5 rounded-full bg-orange-600 animate-pulse" />
-                      Goal: {sub.goal}%
+                  <div className={`px-4 py-2 rounded-2xl ${accentBg} border border-transparent group-hover:border-current/10 transition-all`}>
+                    <span className={`${accentColor} text-xl md:text-2xl font-black tracking-tighter`}>
+                      {percentage.toFixed(1)}
+                      <span className="text-[10px] opacity-40 ml-0.5 font-bold">%</span>
                     </span>
                   </div>
                 </div>
 
                 {/* Progress Bar Section */}
-                <div className="px-1 mb-8">
-                  <div className="h-4 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden relative shadow-inner p-1">
-                    {/* Goal Marker with Pulse */}
+                <div className="mb-8">
+                  <div className="flex justify-between items-center mb-2 px-1">
+                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">COURSE PROGRESS</p>
+                    <p className="text-[8px] font-black text-orange-600 uppercase tracking-widest">GOAL: {sub.goal}%</p>
+                  </div>
+                  <div className="h-2 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden relative">
+                    {/* Goal Marker */}
                     <div
-                      className="absolute top-0 bottom-0 w-1 bg-white/20 dark:bg-white/10 z-20 backdrop-blur-md"
+                      className="absolute top-0 bottom-0 w-0.5 bg-orange-500/30 z-20 backdrop-blur-md"
                       style={{ left: `${goal}%` }}
-                    >
-                      <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,1)]" />
-                    </div>
+                    />
 
                     <div
                       className={`h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${!isBelowGoal
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_20px_rgba(16,185,129,0.4)]'
-                        : 'bg-gradient-to-r from-red-600 to-rose-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]'
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
+                        : 'bg-gradient-to-r from-red-600 to-rose-500'
                         }`}
                       style={{ width: `${percentage}%` }}
                     >
@@ -399,91 +394,77 @@ const AttendanceTracker: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Counter Buttons */}
+                {/* Action Buttons */}
                 {!showArchived && (
-                  <div className="grid grid-cols-2 gap-4 mb-8">
+                  <div className="grid grid-cols-2 gap-3 mb-6">
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'present', e)}
-                      className="group/btn relative overflow-hidden bg-white dark:bg-white text-black py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-black/10 flex items-center justify-center gap-2 border-none"
+                      className="group/btn h-12 bg-white dark:bg-white text-black rounded-2xl font-black text-[9px] uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg flex items-center justify-center gap-2 border-none"
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-emerald-600"><path d="M20 6L9 17l-5-5" /></svg>
-                      <span>Present</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-emerald-600"><path d="M20 6L9 17l-5-5" /></svg>
+                      PRESENT
                     </button>
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'absent', e)}
-                      className="group/btn relative overflow-hidden bg-slate-100/50 dark:bg-white/5 text-slate-600 dark:text-slate-400 py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 hover:scale-[1.02] active:scale-[0.98] transition-all border border-slate-200/50 dark:border-white/10 flex items-center justify-center gap-2"
+                      className="group/btn h-12 bg-slate-100/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-2xl font-black text-[9px] uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 hover:scale-[1.02] active:scale-[0.98] transition-all border border-slate-200/50 dark:border-white/10 flex items-center justify-center gap-2"
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 opacity-50"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                      <span>Absent</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 opacity-50"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                      ABSENT
                     </button>
                   </div>
                 )}
 
                 {/* Footer Analysis */}
-                <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-100 dark:border-white/5">
+                <div className="mt-auto flex items-center justify-between pt-5 border-t border-slate-100 dark:border-white/5">
                   <div className={`
-                    px-4 py-2 rounded-2xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2
+                    px-3 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-widest flex items-center gap-2
                     ${isBelowGoal ? 'bg-red-500/5 text-red-500' : 'bg-emerald-500/5 text-emerald-500'}
                   `}>
-                    <div className={`w-2 h-2 rounded-full ${isBelowGoal ? 'bg-red-500' : 'bg-emerald-500'} animate-pulse`} />
+                    <div className={`w-1.5 h-1.5 rounded-full ${isBelowGoal ? 'bg-red-500' : 'bg-emerald-500'} animate-pulse`} />
                     {isBelowGoal ? (
-                      <span>Needs {needed >= 999 ? '∞' : needed} sessions</span>
+                      <span>Needs {needed >= 999 ? '∞' : needed} more</span>
                     ) : (
                       <span>Safe for {skippable >= 999 ? '∞' : skippable} skips</span>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5">
                     {isDeleting ? (
-                      <div className="flex items-center gap-1.5 animate-fade-in">
+                      <div className="flex items-center gap-1 animate-fade-in">
                         <button
                           onClick={(e) => { e.stopPropagation(); setDeletingId(null); }}
-                          className="px-3 py-2 bg-slate-100 dark:bg-white/5 text-[9px] font-black uppercase text-slate-400 rounded-xl hover:text-white transition-colors border-none"
+                          className="px-2 py-1.5 bg-slate-100 dark:bg-white/5 text-[8px] font-black uppercase text-slate-400 rounded-lg hover:text-white transition-colors border-none"
                         >
                           No
                         </button>
                         <button
                           onClick={executeDelete}
-                          className="px-3 py-2 bg-red-600 text-[9px] font-black uppercase text-white rounded-xl shadow-lg hover:bg-red-700 transition-colors border-none"
+                          className="px-2 py-1.5 bg-red-600 text-[8px] font-black uppercase text-white rounded-lg shadow-md hover:bg-red-700 transition-colors border-none"
                         >
-                          Delete
+                          Del
                         </button>
                       </div>
                     ) : (
-                      <div className="flex items-center bg-slate-100/50 dark:bg-white/5 rounded-2xl p-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all duration-300">
+                      <div className="flex items-center bg-slate-50 dark:bg-white/5 rounded-xl p-0.5">
                         {hasHistory && (
                           <button
                             onClick={(e) => undoSubjectLastAction(sub.id, e)}
-                            title="Undo Last Action"
-                            className="p-2 text-slate-400 hover:text-orange-500 transition-all hover:scale-110 border-none bg-transparent"
+                            className="p-1.5 text-slate-400 hover:text-orange-500 transition-all border-none bg-transparent"
                           >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 10h10a5 5 0 0 1 0 10H11" /><polyline points="8 5 3 10 8 15" /></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 10h10a5 5 0 0 1 0 10H11" /><polyline points="8 5 3 10 8 15" /></svg>
                           </button>
                         )}
                         <button
                           onClick={(e) => handleEdit(sub, e)}
-                          title="Edit Subject"
-                          className="p-2 text-slate-400 hover:text-orange-500 transition-all hover:scale-110 border-none bg-transparent"
+                          className="p-1.5 text-slate-400 hover:text-orange-500 transition-all border-none bg-transparent"
                         >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                        </button>
-                        <button
-                          onClick={(e) => toggleArchive(sub.id, e)}
-                          title={sub.archived ? "Restore to Active" : "Move to Archive"}
-                          className={`p-2 transition-all hover:scale-110 border-none bg-transparent ${sub.archived ? 'text-orange-500 hover:text-orange-600' : 'text-slate-400 hover:text-orange-500'}`}
-                        >
-                          {sub.archived ? (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 12h18" /><path d="m15 18 6-6-6-6" /><path d="M3 18v-6a9 9 0 0 1 18 0v6" /></svg>
-                          ) : (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
-                          )}
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                         </button>
                         <button
                           onClick={(e) => confirmDelete(sub.id, e)}
-                          title="Permanently Delete"
-                          className="p-2 text-slate-400 hover:text-red-500 transition-all hover:scale-110 border-none bg-transparent"
+                          className="p-1.5 text-slate-400 hover:text-red-500 transition-all border-none bg-transparent"
                         >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
                         </button>
                       </div>
                     )}

@@ -207,16 +207,7 @@ const TodaysSchedule: React.FC = () => {
               onClick={() => navigate('/timetable')}
               className={`flex-shrink-0 w-[220px] md:w-[260px] snap-center group relative overflow-hidden rounded-[32px] border bg-transparent p-0 text-left transition-all duration-500 hover:scale-[1.05] active:scale-95 cursor-pointer ${isGoingOn ? 'border-white/40 scale-[1.02] shadow-[0_25px_50px_-12px_rgba(234,88,12,0.5)]' : 'border-white/10 shadow-xl'}`}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br from-orange-400 via-orange-500 to-red-600`} />
-
-              {/* Patterns */}
-              <div className="absolute inset-0 opacity-20 pointer-events-none">
-                <svg className="w-full h-full" viewBox="0 0 100 100">
-                  <defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5" /></pattern></defs>
-                  <rect width="100" height="100" fill="url(#grid)" />
-                </svg>
-              </div>
-
+              <div className={`absolute inset-0 bg-gradient-to-br from-orange-500 to-red-600`} />
               <div className="relative p-5 space-y-5">
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
