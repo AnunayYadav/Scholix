@@ -329,7 +329,7 @@ const AttendanceTracker: React.FC = () => {
           <SubjectSkeleton />
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 relative z-0">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 relative z-0">
           {filteredSubjects.map((sub) => {
             const { percentage, needed, skippable, goal } = calculateStats(sub);
             const isBelowGoal = percentage < goal;
@@ -342,29 +342,29 @@ const AttendanceTracker: React.FC = () => {
               <div
                 key={sub.id}
                 className={`
-                  glass-panel p-5 md:p-6 rounded-[32px] border transition-all duration-500 group relative overflow-hidden flex flex-col
+                  glass-panel p-3 sm:p-5 md:p-6 rounded-[24px] md:rounded-[32px] border transition-all duration-500 group relative overflow-hidden flex flex-col
                   border-slate-200 dark:border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]
                   bg-white/80 dark:bg-[#0a0a0a]/60 backdrop-blur-xl
                   ${isDeleting ? 'ring-4 ring-red-500/20 border-red-500 scale-[0.98]' : ''}
                 `}
               >
                 {/* Top Section: Name and Percentage */}
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-3">
                   <div className="space-y-0.5">
-                    <h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
+                    <h3 className="text-base sm:text-lg md:text-xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none truncate max-w-[70px] sm:max-w-none">
                       {sub.name}
                     </h3>
                     <div className="flex items-center gap-2">
-                      <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded-md text-[7px] font-black uppercase text-slate-500">
-                        {sub.present}/{sub.total} SESSIONS
+                      <span className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded text-[6px] md:text-[7px] font-black uppercase text-slate-500">
+                        {sub.present}/{sub.total} S
                       </span>
                     </div>
                   </div>
 
-                  <div className={`px-3 py-1.5 rounded-xl ${accentBg} border border-transparent group-hover:border-current/10 transition-all`}>
-                    <span className={`${accentColor} text-lg md:text-xl font-black tracking-tighter`}>
+                  <div className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl ${accentBg} border border-transparent group-hover:border-current/10 transition-all`}>
+                    <span className={`${accentColor} text-base sm:text-lg md:text-xl font-black tracking-tighter`}>
                       {percentage.toFixed(1)}
-                      <span className="text-[9px] opacity-40 ml-0.5 font-bold">%</span>
+                      <span className="text-[8px] sm:text-[9px] opacity-40 ml-0.5 font-bold">%</span>
                     </span>
                   </div>
                 </div>
