@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { ModuleType, UserProfile } from '../types';
 import NexusServer from '../services/nexusServer.ts';
 import { showToast } from './Toast.tsx';
@@ -130,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="overlay md:hidden" onClick={toggleMobileMenu} />
       )}
 
-      {showFeedbackModal && (
+      {showFeedbackModal && createPortal(
         <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget && !isSubmitting) setShowFeedbackModal(false); }}>
           <div ref={feedbackModalRef} className="nexus-modal w-full max-w-lg p-10 relative">
             <button onClick={() => setShowFeedbackModal(false)} className="absolute top-8 right-8 p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90">
@@ -190,7 +191,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.getElementById('modal-root') || document.body
       )}
 
       <aside className={`

@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { UserProfile } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import NexusDropdown from './NexusDropdown.tsx';
@@ -491,7 +492,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
         </div>
       </div>
 
-      {isShareModalOpen && (
+      {isShareModalOpen && createPortal(
         <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setIsShareModalOpen(false); }}>
           <div className="nexus-modal w-full max-w-sm p-10">
             <button onClick={() => setIsShareModalOpen(false)} className="absolute top-8 right-8 p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors border-none bg-transparent">
@@ -523,7 +524,8 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
               Copy Link
             </button>
           </div>
-        </div>
+        </div>,
+        document.getElementById('modal-root') || document.body
       )}
     </div>
   );

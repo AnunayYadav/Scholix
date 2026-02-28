@@ -742,7 +742,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     <button onClick={onClose} className="bg-white text-black px-10 py-4 rounded-3xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl">Abort Protocol</button>
                 </div>
             </div>,
-            document.body
+            document.getElementById('modal-root') || document.body
         );
     }
 
@@ -984,7 +984,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 }
             `}</style>
         </div >,
-        document.body
+        document.getElementById('modal-root') || document.body
     );
 };
 

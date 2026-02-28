@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { showToast } from './Toast.tsx';
 
 const IconMess = () => (
@@ -312,8 +313,8 @@ const CampusNavigator: React.FC = () => {
         </button>
       )}
 
-      {isReportModalOpen && (
-        <div className="modal-overlay">
+      {isReportModalOpen && createPortal(
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setIsReportModalOpen(false); }}>
           <div ref={reportModalRef} className="nexus-modal w-full max-w-md p-6 relative">
             <button
               onClick={() => setIsReportModalOpen(false)}
@@ -393,7 +394,8 @@ const CampusNavigator: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.getElementById('modal-root') || document.body
       )}
     </div>
   );

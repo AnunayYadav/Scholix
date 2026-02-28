@@ -643,9 +643,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         )}
       </div>
 
-      {/* Details Modal */}
-      {showDetailsModal && selectedFile && (
-        <div className="modal-overlay">
+      {showDetailsModal && selectedFile && createPortal(
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowDetailsModal(false); }}>
           <div ref={modalRef} className="nexus-modal w-full max-w-lg">
             <header className="p-6 md:p-8 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-start justify-between">
               <div className="space-y-4">
@@ -710,11 +709,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               )}
             </footer>
           </div>
-        </div>
+        </div>,
+        document.getElementById('modal-root') || document.body
       )}
 
-      {showFolderModal && userProfile?.is_admin && (
-        <div className="modal-overlay">
+      {showFolderModal && userProfile?.is_admin && createPortal(
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowFolderModal(false); }}>
           <div ref={modalRef} className="nexus-modal w-full max-w-sm">
             <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5"><h3 className="text-sm font-black uppercase tracking-widest">New Node</h3><button onClick={() => setShowFolderModal(false)} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
             <div className="p-6 space-y-4">
@@ -722,11 +722,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               <button onClick={handleCreateFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Saving...' : 'Create Folder'}</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.getElementById('modal-root') || document.body
       )}
 
-      {showRenameModal && userProfile?.is_admin && (
-        <div className="modal-overlay">
+      {showRenameModal && userProfile?.is_admin && createPortal(
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowRenameModal(false); }}>
           <div ref={modalRef} className="nexus-modal w-full max-w-sm">
             <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5">
               <h3 className="text-sm font-black uppercase tracking-widest">Rename Folder</h3>
@@ -739,12 +740,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               <button onClick={handleRenameFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Updating...' : 'Save Changes'}</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.getElementById('modal-root') || document.body
       )}
 
-      {/* Upload/Edit Modal */}
-      {(showUploadModal || showEditModal) && (
-        <div className="modal-overlay">
+      {(showUploadModal || showEditModal) && createPortal(
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget && !isProcessing) { setShowUploadModal(false); setShowEditModal(false); } }}>
           <div ref={modalRef} className={`nexus-modal w-full ${showUploadModal ? 'max-w-4xl' : 'max-w-sm'} overflow-hidden`}>
             <header className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-center justify-between">
               <div>
@@ -757,6 +758,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </header>
+
 
             <div className={`flex flex-col md:flex-row flex-1 min-h-0 md:h-[60vh]`}>
               {showUploadModal && (
@@ -981,7 +983,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               </button>
             </footer>
           </div>
-        </div>
+        </div>,
+        document.getElementById('modal-root') || document.body
       )}
 
       <input type="file" ref={fileInputRef} className="hidden" multiple onChange={e => { const files = e.target.files; if (files && files.length > 0) handleFilesSelected(files); }} />

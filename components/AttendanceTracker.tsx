@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 interface Subject {
   id: string;
@@ -485,11 +486,11 @@ const AttendanceTracker: React.FC = () => {
         </div>
       )}
 
-      {isEditModalOpen && editingSubject && (
-        <div className="modal-overlay">
+      {isEditModalOpen && editingSubject && createPortal(
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setIsEditModalOpen(false); }}>
           <div ref={editModalRef} className="bg-white dark:bg-[#070707] rounded-[32px] md:rounded-[40px] w-full max-w-sm shadow-[0_32px_128px_rgba(0,0,0,0.8)] border border-slate-200 dark:border-white/10 relative overflow-hidden flex flex-col animate-slide-up">
             <div className="bg-black p-6 md:p-7 text-white relative rounded-t-[32px] md:rounded-t-[40px] flex-shrink-0">
-              <button onClick={() => setIsEditModalOpen(false)} className="absolute top-5 right-5 md:top-6 md:right-6 p-2 text-white/50 hover:text-white transition-colors">
+              <button onClick={() => setIsEditModalOpen(false)} className="absolute top-5 right-5 md:top-6 md:right-6 p-2 text-white/50 hover:text-white transition-colors border-none bg-transparent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
               <h3 className="text-lg md:text-xl font-black tracking-tighter uppercase leading-none mb-1">Modify Entry</h3>
@@ -540,21 +541,24 @@ const AttendanceTracker: React.FC = () => {
 
               <div className="flex gap-3 md:gap-4 pt-2">
                 <button
+                  type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="flex-1 py-3.5 md:py-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors"
+                  className="flex-1 py-3.5 md:py-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent"
                 >
                   Cancel
                 </button>
                 <button
+                  type="button"
                   onClick={saveEdit}
-                  className="flex-[2] bg-orange-600 text-white py-3.5 md:py-4 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all"
+                  className="flex-[2] bg-orange-600 text-white py-3.5 md:py-4 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none"
                 >
                   Save Changes
                 </button>
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.getElementById('modal-root') || document.body
       )}
     </div>
   );

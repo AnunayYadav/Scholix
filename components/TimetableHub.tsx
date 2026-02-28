@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { UserProfile, TimetableData, DaySchedule, TimetableSlot } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import { extractTimetableFromImage } from '../services/geminiService.ts';
@@ -839,8 +840,8 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
         </div>
       </div>
 
-      {showRenameModal && (
-        <div className="modal-overlay">
+      {showRenameModal && createPortal(
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowRenameModal(false); }}>
           <div className="nexus-modal w-full max-w-sm">
             <div className="p-8 text-center text-slate-800 dark:text-white">
               <h3 className="text-xl font-black tracking-tighter uppercase mb-2">Rename Profile</h3>
@@ -862,11 +863,12 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.getElementById('modal-root') || document.body
       )}
 
-      {showMetadataModal && (
-        <div className="modal-overlay">
+      {showMetadataModal && createPortal(
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) { setShowMetadataModal(false); setEditingPresetId(null); } }}>
           <div className="nexus-modal w-full max-w-sm">
             <div className="p-8 text-center space-y-2">
               <div className="w-16 h-16 bg-orange-600/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-orange-600/20">
@@ -906,11 +908,12 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.getElementById('modal-root') || document.body
       )}
 
-      {showUploadModal && (
-        <div className="modal-overlay">
+      {showUploadModal && createPortal(
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget && !isProcessingAI) setShowUploadModal(false); }}>
           <div className="nexus-modal w-full max-w-sm">
             <div className="p-8 text-center relative bg-slate-50 dark:bg-black/20 border-b border-slate-100 dark:border-white/5">
               <button onClick={() => setShowUploadModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">
@@ -946,7 +949,8 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.getElementById('modal-root') || document.body
       )}
 
     </div>

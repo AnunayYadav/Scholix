@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { RoommateRequest, UserProfile } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
@@ -206,8 +207,8 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                 </div>
             )}
 
-            {showPostModal && (
-                <div className="modal-overlay">
+            {showPostModal && createPortal(
+                <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}>
                     <div className="nexus-modal w-full max-w-md p-6">
                         <button onClick={closeModal} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1 tracking-tighter uppercase">{editingRequest ? 'Edit Request' : 'Find Roommate'}</h3>
@@ -233,7 +234,8 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                             </button>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.getElementById('modal-root') || document.body
             )}
         </div>
     );

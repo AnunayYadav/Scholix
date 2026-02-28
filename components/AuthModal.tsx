@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import NexusServer from '../services/nexusServer.ts';
 
 interface AuthModalProps {
@@ -153,7 +154,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
 
   const passwordStrength = getPasswordStrength(password);
 
-  return (
+  return createPortal(
     <div className={`modal-overlay ${isClosing ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget && !loading) handleClose(); }}>
       <div ref={modalRef} className={`nexus-modal w-full max-w-md mx-4 overflow-hidden ${isClosing ? 'closing' : ''}`}>
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-600/10 blur-[80px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
@@ -288,8 +289,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                           ))}
                         </div>
                         <p className={`text-[9px] font-black uppercase tracking-widest ${passwordStrength.score <= 1 ? 'text-red-500' :
-                            passwordStrength.score <= 2 ? 'text-orange-500' :
-                              passwordStrength.score <= 3 ? 'text-yellow-500' : 'text-emerald-500'
+                          passwordStrength.score <= 2 ? 'text-orange-500' :
+                            passwordStrength.score <= 3 ? 'text-yellow-500' : 'text-emerald-500'
                           }`}>
                           {passwordStrength.label}
                         </p>
@@ -321,7 +322,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.getElementById('modal-root') || document.body
   );
 };
 
