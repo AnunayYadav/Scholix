@@ -492,8 +492,8 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
       </div>
 
       {isShareModalOpen && (
-        <div className="modal-overlay">
-          <div className="bg-white dark:bg-[#0a0a0a] rounded-[48px] w-full max-w-sm shadow-[0_32px_128px_rgba(0,0,0,0.5)] border border-slate-200 dark:border-white/10 p-10 relative animate-fade-in">
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setIsShareModalOpen(false); }}>
+          <div className="nexus-modal w-full max-w-sm p-10">
             <button onClick={() => setIsShareModalOpen(false)} className="absolute top-8 right-8 p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors border-none bg-transparent">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>

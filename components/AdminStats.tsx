@@ -168,8 +168,23 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
 
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="h-96 bg-slate-200 dark:bg-white/5 animate-pulse rounded-[32px]" />
-                    <div className="h-96 bg-slate-200 dark:bg-white/5 animate-pulse rounded-[32px]" />
+                    {[0, 1].map(i => (
+                        <div key={i} className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl">
+                            <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
+                                <div className="h-5 w-32 skeleton-pulse rounded-lg" />
+                                <div className="h-5 w-16 skeleton-pulse rounded-full" />
+                            </div>
+                            <div className="p-4 space-y-3">
+                                {Array.from({ length: 6 }).map((_, j) => (
+                                    <div key={j} className="flex items-center gap-4 p-3">
+                                        <div className="h-4 w-4 skeleton-pulse rounded" />
+                                        <div className="h-4 flex-1 skeleton-pulse rounded-md" />
+                                        <div className="h-4 w-16 skeleton-pulse rounded-md" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             ) : (
                 <>

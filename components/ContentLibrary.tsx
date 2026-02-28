@@ -45,10 +45,10 @@ const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' |
 };
 
 const SkeletonCard = () => (
-  <div className="group p-5 rounded-[30px] border border-slate-100 dark:border-white/5 bg-white dark:bg-black/40 relative overflow-hidden flex flex-col min-h-[140px] animate-pulse">
-    <div className="w-10 h-10 bg-slate-200 dark:bg-white/5 rounded-xl mb-4 shimmer" />
-    <div className="h-4 w-3/4 bg-slate-200 dark:bg-white/5 rounded-md mb-2 shimmer" />
-    <div className="h-3 w-1/2 bg-slate-200 dark:bg-white/5 rounded-md shimmer" />
+  <div className="group p-5 rounded-[30px] border border-slate-100 dark:border-white/5 bg-white dark:bg-black/40 relative overflow-hidden flex flex-col min-h-[140px]">
+    <div className="w-10 h-10 skeleton-pulse rounded-xl mb-4" />
+    <div className="h-4 w-3/4 skeleton-pulse rounded-md mb-2" />
+    <div className="h-3 w-1/2 skeleton-pulse rounded-md" />
   </div>
 );
 

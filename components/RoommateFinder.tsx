@@ -138,9 +138,23 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             </header>
 
             {loading ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="h-24 bg-slate-100 dark:bg-white/5 rounded-2xl animate-pulse" />
+                        <div key={i} className="p-5 bg-white dark:bg-[#0c0c0c] rounded-[32px] border border-slate-200 dark:border-white/5 flex flex-col md:flex-row gap-5 items-start md:items-center">
+                            <div className="w-10 h-10 rounded-[18px] skeleton-pulse shrink-0" />
+                            <div className="flex-1 space-y-2.5 min-w-0">
+                                <div className="flex items-center gap-2">
+                                    <div className="h-4 w-28 skeleton-pulse rounded-md" />
+                                    <div className="h-3 w-12 skeleton-pulse rounded" />
+                                </div>
+                                <div className="h-3 w-2/3 skeleton-pulse rounded-md" />
+                                <div className="flex gap-4">
+                                    <div className="h-2 w-20 skeleton-pulse rounded-md" />
+                                    <div className="h-2 w-24 skeleton-pulse rounded-md" />
+                                </div>
+                            </div>
+                            <div className="w-full md:w-20 h-9 skeleton-pulse rounded-xl" />
+                        </div>
                     ))}
                 </div>
             ) : (
@@ -193,8 +207,8 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             )}
 
             {showPostModal && (
-                <div className="fixed inset-0 z-[20000] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
-                    <div className="bg-white dark:bg-[#0a0a0a] w-full max-w-md rounded-[32px] p-6 relative shadow-2xl border border-slate-200 dark:border-white/10 animate-slide-up">
+                <div className="modal-overlay">
+                    <div className="nexus-modal w-full max-w-md p-6">
                         <button onClick={closeModal} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1 tracking-tighter uppercase">{editingRequest ? 'Edit Request' : 'Find Roommate'}</h3>
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-6">Tell us what you're looking for.</p>

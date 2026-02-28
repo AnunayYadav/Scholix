@@ -209,7 +209,21 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             {loading ? (
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-8 mt-4 px-2 md:px-0">
                     {Array.from({ length: 8 }).map((_, i) => (
-                        <div key={i} className="h-60 md:h-80 bg-slate-100 dark:bg-white/5 rounded-[32px] md:rounded-[40px] animate-pulse" />
+                        <div key={i} className="p-3 md:p-4 bg-white dark:bg-[#0c0c0c] rounded-[32px] md:rounded-[42px] border border-slate-200 dark:border-white/5 flex flex-col">
+                            <div className="aspect-square mb-4 rounded-[32px] skeleton-pulse" />
+                            <div className="px-1 space-y-2 mb-3">
+                                <div className="h-2 w-16 skeleton-pulse rounded-md" />
+                                <div className="h-4 w-3/4 skeleton-pulse rounded-md" />
+                                <div className="h-2 w-1/2 skeleton-pulse rounded-md" />
+                            </div>
+                            <div className="pt-4 mt-auto border-t border-slate-100 dark:border-white/5 flex items-center gap-2">
+                                <div className="w-8 h-8 skeleton-pulse rounded-lg" />
+                                <div className="space-y-1.5 flex-1">
+                                    <div className="h-2 w-20 skeleton-pulse rounded-md" />
+                                    <div className="h-2 w-12 skeleton-pulse rounded-md" />
+                                </div>
+                            </div>
+                        </div>
                     ))}
                 </div>
             ) : (
@@ -306,7 +320,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
 
             {/* Detailed View Modal */}
             {selectedItem && (
-                <div className="fixed inset-0 z-[20000] flex items-center justify-center p-4 md:p-6 bg-black/60 backdrop-blur-xl animate-fade-in" onClick={() => setSelectedItem(null)}>
+                <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
                     <div className="bg-white dark:bg-[#080808] w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-[40px] md:rounded-[56px] relative shadow-2xl border border-white/10 flex flex-col md:flex-row group animate-slide-up" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setSelectedItem(null)} className="absolute top-6 right-6 z-50 p-3 bg-black/20 hover:bg-orange-600 backdrop-blur-md text-white rounded-2xl transition-all border-none cursor-pointer">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -389,8 +403,8 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
 
             {/* Sell Modal */}
             {showSellModal && (
-                <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
-                    <div className="bg-white dark:bg-[#0a0a0a] w-full max-w-md rounded-[32px] p-6 relative shadow-2xl border border-slate-200 dark:border-white/10 animate-slide-up">
+                <div className="modal-overlay">
+                    <div className="nexus-modal w-full max-w-md p-6">
                         <button onClick={closeModal} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1 tracking-tighter uppercase">{editingItem ? 'Edit Listing' : 'List Item'}</h3>
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-6">Ready to pass your gear to the next Verto?</p>
