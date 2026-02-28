@@ -342,14 +342,14 @@ const AttendanceTracker: React.FC = () => {
               <div
                 key={sub.id}
                 className={`
-                  glass-panel p-3 sm:p-5 md:p-6 rounded-[24px] md:rounded-[32px] border transition-all duration-500 group relative overflow-hidden flex flex-col
+                  glass-panel p-3 sm:p-4 md:p-5 rounded-[20px] md:rounded-[28px] border transition-all duration-500 group relative overflow-hidden flex flex-col
                   border-slate-200 dark:border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]
                   bg-white/80 dark:bg-[#0a0a0a]/60 backdrop-blur-xl
                   ${isDeleting ? 'ring-4 ring-red-500/20 border-red-500 scale-[0.98]' : ''}
                 `}
               >
                 {/* Top Section: Name and Percentage */}
-                <div className="flex justify-between items-start mb-3">
+                <div className="flex justify-between items-start mb-2.5">
                   <div className="space-y-0.5">
                     <h3 className="text-base sm:text-lg md:text-xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none truncate max-w-[70px] sm:max-w-none">
                       {sub.name}
@@ -370,7 +370,7 @@ const AttendanceTracker: React.FC = () => {
                 </div>
 
                 {/* Progress Bar Section */}
-                <div className="mb-5">
+                <div className="mb-4">
                   <div className="flex justify-between items-center mb-1.5 px-0.5">
                     <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest">PROGRESS</p>
                     <p className="text-[7px] font-black text-orange-600 uppercase tracking-widest">GOAL: {sub.goal}%</p>
@@ -396,26 +396,26 @@ const AttendanceTracker: React.FC = () => {
 
                 {/* Action Buttons */}
                 {!showArchived && (
-                  <div className="grid grid-cols-2 gap-2 mb-4">
+                  <div className="grid grid-cols-2 gap-1.5 mb-3.5">
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'present', e)}
-                      className="group/btn h-9 bg-white dark:bg-white text-black rounded-lg font-black text-[8px] uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-1.5 border-none"
+                      className="group/btn h-7 bg-white dark:bg-white text-black rounded-full font-black text-[7px] uppercase tracking-widest hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center justify-center gap-1 border-none"
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-emerald-600"><path d="M20 6L9 17l-5-5" /></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5 text-emerald-600"><path d="M20 6L9 17l-5-5" /></svg>
                       PRESENT
                     </button>
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'absent', e)}
-                      className="group/btn h-9 bg-slate-100/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-lg font-black text-[8px] uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 hover:scale-[1.02] active:scale-[0.98] transition-all border border-slate-200/50 dark:border-white/10 flex items-center justify-center gap-1.5"
+                      className="group/btn h-7 bg-slate-100/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-full font-black text-[7px] uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 hover:scale-[1.05] active:scale-[0.95] transition-all border border-slate-200/50 dark:border-white/10 flex items-center justify-center gap-1"
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 opacity-50"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5 opacity-50"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                       ABSENT
                     </button>
                   </div>
                 )}
 
                 {/* Footer Analysis */}
-                <div className="mt-auto flex items-center justify-between pt-5 border-t border-slate-100 dark:border-white/5">
+                <div className="mt-auto flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/5">
                   <div className={`
                     px-3 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-widest flex items-center gap-2
                     ${isBelowGoal ? 'bg-red-500/5 text-red-500' : 'bg-emerald-500/5 text-emerald-500'}
