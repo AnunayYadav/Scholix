@@ -136,7 +136,9 @@ export const ToastContainer: React.FC = () => {
 
             {/* Confirm Modal */}
             {confirmState && createPortal(
-                <div className="modal-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) handleConfirm(false); }}>
+                <div className="modal-overlay"
+                    style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+                    onMouseDown={(e) => { if (e.target === e.currentTarget) handleConfirm(false); }}>
                     <div className="nexus-modal w-full max-w-sm p-8 text-center space-y-6">
                         <div className="w-14 h-14 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-center justify-center mx-auto text-orange-500">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7">

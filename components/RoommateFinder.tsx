@@ -217,7 +217,9 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             )}
 
             {showPostModal && createPortal(
-                <div className={`modal-overlay ${isClosing ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
+                <div className={`modal-overlay ${isClosing ? 'closing' : ''}`}
+                    style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+                    onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
                     <div className={`nexus-modal w-full max-w-md p-6 ${isClosing ? 'closing' : ''}`}>
                         <button onClick={handleClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1 tracking-tighter uppercase">{editingRequest ? 'Edit Request' : 'Find Roommate'}</h3>

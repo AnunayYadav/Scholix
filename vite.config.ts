@@ -15,6 +15,10 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, '.'),
       }
+    },
+    build: {
+      target: 'es2020',
+      cssTarget: 'safari13',
     }
 
   };

@@ -324,7 +324,9 @@ const CampusNavigator: React.FC = () => {
       )}
 
       {isReportModalOpen && createPortal(
-        <div className={`modal-overlay ${isClosing ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
+        <div className={`modal-overlay ${isClosing ? 'closing' : ''}`}
+          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
           <div ref={reportModalRef} className={`nexus-modal w-full max-w-md p-6 relative ${isClosing ? 'closing' : ''}`}>
             <button
               onClick={handleClose}

@@ -868,7 +868,11 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       </div>
 
       {showRenameModal && createPortal(
-        <div className={`modal-overlay ${isClosingRename ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleCloseRename(); }}>
+        <div
+          className={`modal-overlay ${isClosingRename ? 'closing' : ''}`}
+          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) handleCloseRename(); }}
+        >
           <div className={`nexus-modal w-full max-w-sm ${isClosingRename ? 'closing' : ''}`}>
             <div className="p-8 text-center text-slate-800 dark:text-white">
               <h3 className="text-xl font-black tracking-tighter uppercase mb-2">Rename Profile</h3>
@@ -895,7 +899,11 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       )}
 
       {showMetadataModal && createPortal(
-        <div className={`modal-overlay ${isClosingMetadata ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleCloseMetadata(); }}>
+        <div
+          className={`modal-overlay ${isClosingMetadata ? 'closing' : ''}`}
+          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) handleCloseMetadata(); }}
+        >
           <div className={`nexus-modal w-full max-w-sm ${isClosingMetadata ? 'closing' : ''}`}>
             <div className="p-8 text-center space-y-2">
               <div className="w-16 h-16 bg-orange-600/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-orange-600/20">
@@ -940,7 +948,11 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       )}
 
       {showUploadModal && createPortal(
-        <div className={`modal-overlay ${isClosingUpload ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget && !isProcessingAI) handleCloseUpload(); }}>
+        <div
+          className={`modal-overlay ${isClosingUpload ? 'closing' : ''}`}
+          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          onClick={(e) => { if (e.target === e.currentTarget && !isProcessingAI) handleCloseUpload(); }}
+        >
           <div className={`nexus-modal w-full max-w-sm ${isClosingUpload ? 'closing' : ''}`}>
             <div className="p-8 text-center relative bg-slate-50 dark:bg-black/20 border-b border-slate-100 dark:border-white/5">
               <button onClick={handleCloseUpload} className="absolute top-6 right-6 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">

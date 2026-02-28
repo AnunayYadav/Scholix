@@ -497,7 +497,11 @@ const AttendanceTracker: React.FC = () => {
       )}
 
       {isEditModalOpen && editingSubject && createPortal(
-        <div className={`modal-overlay ${isClosing ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
+        <div
+          className={`modal-overlay ${isClosing ? 'closing' : ''}`}
+          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
+        >
           <div ref={editModalRef} className={`bg-white dark:bg-[#070707] rounded-[32px] md:rounded-[40px] w-full max-w-sm shadow-[0_32px_128px_rgba(0,0,0,0.8)] border border-slate-200 dark:border-white/10 relative overflow-hidden flex flex-col animate-slide-up ${isClosing ? 'closing' : ''}`}>
             <div className="bg-black p-6 md:p-7 text-white relative rounded-t-[32px] md:rounded-t-[40px] flex-shrink-0">
               <button onClick={handleClose} className="absolute top-5 right-5 md:top-6 md:right-6 p-2 text-white/50 hover:text-white transition-colors border-none bg-transparent">

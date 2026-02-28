@@ -155,7 +155,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const passwordStrength = getPasswordStrength(password);
 
   return createPortal(
-    <div className={`modal-overlay ${isClosing ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget && !loading) handleClose(); }}>
+    <div
+      className={`modal-overlay ${isClosing ? 'closing' : ''}`}
+      style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+      onClick={(e) => { if (e.target === e.currentTarget && !loading) handleClose(); }}
+    >
       <div ref={modalRef} className={`nexus-modal w-full max-w-md mx-4 overflow-hidden ${isClosing ? 'closing' : ''}`}>
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-600/10 blur-[80px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
 

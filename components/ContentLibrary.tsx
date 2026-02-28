@@ -692,7 +692,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       </div>
 
       {showDetailsModal && selectedFile && createPortal(
-        <div className={`modal-overlay ${isClosingDetails ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleCloseDetails(); }}>
+        <div className={`modal-overlay ${isClosingDetails ? 'closing' : ''}`}
+          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) handleCloseDetails(); }}>
           <div ref={modalRef} className={`nexus-modal w-full max-w-lg ${isClosingDetails ? 'closing' : ''}`}>
             <header className="p-6 md:p-8 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-start justify-between">
               <div className="space-y-4">
@@ -762,7 +764,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       )}
 
       {showFolderModal && userProfile?.is_admin && createPortal(
-        <div className={`modal-overlay ${isClosingFolder ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleCloseFolder(); }}>
+        <div className={`modal-overlay ${isClosingFolder ? 'closing' : ''}`}
+          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) handleCloseFolder(); }}>
           <div ref={modalRef} className={`nexus-modal w-full max-w-sm ${isClosingFolder ? 'closing' : ''}`}>
             <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5"><h3 className="text-sm font-black uppercase tracking-widest">New Node</h3><button onClick={handleCloseFolder} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
             <div className="p-6 space-y-4">
@@ -775,7 +779,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       )}
 
       {showRenameModal && userProfile?.is_admin && createPortal(
-        <div className={`modal-overlay ${isClosingRename ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleCloseRename(); }}>
+        <div className={`modal-overlay ${isClosingRename ? 'closing' : ''}`}
+          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) handleCloseRename(); }}>
           <div ref={modalRef} className={`nexus-modal w-full max-w-sm ${isClosingRename ? 'closing' : ''}`}>
             <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5">
               <h3 className="text-sm font-black uppercase tracking-widest">Rename Folder</h3>
@@ -793,7 +799,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       )}
 
       {(showUploadModal || showEditModal) && createPortal(
-        <div className={`modal-overlay ${(showUploadModal ? isClosingUpload : isClosingEdit) ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget && !isProcessing) { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); } }}>
+        <div className={`modal-overlay ${(showUploadModal ? isClosingUpload : isClosingEdit) ? 'closing' : ''}`}
+          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          onClick={(e) => { if (e.target === e.currentTarget && !isProcessing) { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); } }}>
           <div ref={modalRef} className={`nexus-modal w-full ${showUploadModal ? 'max-w-4xl' : 'max-w-sm'} overflow-hidden ${(showUploadModal ? isClosingUpload : isClosingEdit) ? 'closing' : ''}`}>
             <header className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-center justify-between">
               <div>
