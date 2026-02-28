@@ -27,6 +27,28 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     });
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isClosingDetail, setIsClosingDetail] = useState(false);
+    const [isClosingSell, setIsClosingSell] = useState(false);
+
+    const handleCloseDetail = () => {
+        setIsClosingDetail(true);
+        setTimeout(() => {
+            setSelectedItem(null);
+            setIsClosingDetail(false);
+        }, 250);
+    };
+
+    const handleCloseSell = () => {
+        setIsClosingSell(true);
+        setTimeout(() => {
+            setShowSellModal(false);
+            setEditingItem(null);
+            setNewItem({ title: '', description: '', price: '', category: 'Books', condition: 'Good', phone: '', location: '' });
+            setImagePreview(null);
+            setSelectedFile(null);
+            setIsClosingSell(false);
+        }, 250);
+    };
 
     const categories = ['All', 'Books', 'Electronics', 'Cycles', 'Hostel Essentials', 'Others'];
 
@@ -87,7 +109,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                 showToast("Item listed successfully!", "success");
             }
 
-            closeModal();
+            handleCloseSell();
             fetchItems();
         } catch (err: any) {
             showToast("Error: " + err.message, "error");
@@ -123,11 +145,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     };
 
     const closeModal = () => {
-        setShowSellModal(false);
-        setEditingItem(null);
-        setNewItem({ title: '', description: '', price: '', category: 'Books', condition: 'Good', phone: '', location: '' });
-        setImagePreview(null);
-        setSelectedFile(null);
+        handleCloseSell();
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -321,9 +339,9 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
 
             {/* Detailed View Modal */}
             {selectedItem && createPortal(
-                <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setSelectedItem(null); }}>
-                    <div className="bg-white dark:bg-[#080808] w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-[40px] md:rounded-[56px] relative shadow-2xl border border-white/10 flex flex-col md:flex-row group animate-slide-up" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setSelectedItem(null)} className="absolute top-6 right-6 z-50 p-3 bg-black/20 hover:bg-orange-600 backdrop-blur-md text-white rounded-2xl transition-all border-none cursor-pointer">
+                <div className={`modal-overlay ${isClosingDetail ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleCloseDetail(); }}>
+                    <div className={`bg-white dark:bg-[#080808] w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-[40px] md:rounded-[56px] relative shadow-2xl border border-white/10 flex flex-col md:flex-row group animate-slide-up ${isClosingDetail ? 'closing' : ''}`} onClick={e => e.stopPropagation()}>
+                        <button onClick={handleCloseDetail} className="absolute top-6 right-6 z-50 p-3 bg-black/20 hover:bg-orange-600 backdrop-blur-md text-white rounded-2xl transition-all border-none cursor-pointer">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                         </button>
 
@@ -405,9 +423,9 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
 
             {/* Sell Modal */}
             {showSellModal && createPortal(
-                <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowSellModal(false); }}>
-                    <div className="nexus-modal w-full max-w-md p-6">
-                        <button onClick={closeModal} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                <div className={`modal-overlay ${isClosingSell ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleCloseSell(); }}>
+                    <div className={`nexus-modal w-full max-w-md p-6 ${isClosingSell ? 'closing' : ''}`}>
+                        <button onClick={handleCloseSell} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1 tracking-tighter uppercase">{editingItem ? 'Edit Listing' : 'List Item'}</h3>
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-6">Ready to pass your gear to the next Verto?</p>
 

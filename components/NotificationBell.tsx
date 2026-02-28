@@ -13,7 +13,16 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
     const [personalNotifications, setPersonalNotifications] = useState<NexusNotification[]>([]);
     const [globalAnnouncements, setGlobalAnnouncements] = useState<any[]>([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
+
+    const handleClose = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            setIsOpen(false);
+            setIsClosing(false);
+        }, 250);
+    };
     const dropdownRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
@@ -80,7 +89,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
+                handleClose();
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -88,7 +97,11 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
     }, []);
 
     const handleToggle = () => {
-        setIsOpen(!isOpen);
+        if (isOpen) {
+            handleClose();
+        } else {
+            setIsOpen(true);
+        }
         if (!isOpen && unreadCount > 0) {
             // Mark global as seen locally when closing/opening
             if (globalAnnouncements.length > 0) {
@@ -119,7 +132,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
         if (item.link) {
             navigate(item.link);
         }
-        setIsOpen(false);
+        handleClose();
 
         // Refresh count
         const lastSeen = localStorage.getItem('nexus_last_announcement_seen');
@@ -152,7 +165,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-3 w-80 bg-white/90 dark:bg-[#0a0a0a]/90 border border-slate-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-[60] animate-fade-in backdrop-blur-xl">
+                <div className={`absolute right-0 mt-3 w-80 bg-white/90 dark:bg-[#0a0a0a]/90 border border-slate-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-[60] animate-fade-in backdrop-blur-xl transition-all duration-300 ${isClosing ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
                     <div className="px-5 py-3 border-b border-slate-100 dark:border-white/5 mb-2 flex items-center justify-between">
                         <h3 className="text-[12px] font-black text-slate-800 dark:text-white uppercase tracking-wider">Updates</h3>
                         {unreadCount > 0 && (

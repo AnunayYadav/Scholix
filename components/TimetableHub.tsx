@@ -209,10 +209,40 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
   const [selectedEntityId, setSelectedEntityId] = useState<string>('me');
 
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [isClosingUpload, setIsClosingUpload] = useState(false);
   const [showRenameModal, setShowRenameModal] = useState(false);
+  const [isClosingRename, setIsClosingRename] = useState(false);
   const [showMetadataModal, setShowMetadataModal] = useState(false);
+  const [isClosingMetadata, setIsClosingMetadata] = useState(false);
   const [renameTargetId, setRenameTargetId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
+
+  const handleCloseUpload = () => {
+    setIsClosingUpload(true);
+    setTimeout(() => {
+      setShowUploadModal(false);
+      setIsClosingUpload(false);
+    }, 250);
+  };
+
+  const handleCloseRename = () => {
+    setIsClosingRename(true);
+    setTimeout(() => {
+      setShowRenameModal(false);
+      setIsClosingRename(false);
+      setRenameTargetId(null);
+      setNewName('');
+    }, 250);
+  };
+
+  const handleCloseMetadata = () => {
+    setIsClosingMetadata(true);
+    setTimeout(() => {
+      setShowMetadataModal(false);
+      setIsClosingMetadata(false);
+      setEditingPresetId(null);
+    }, 250);
+  };
 
   const [isProcessingAI, setIsProcessingAI] = useState(false);
   const [processingStatus, setProcessingStatus] = useState('');
@@ -285,9 +315,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       setFriendTimetables(prev => prev.map(f => f.ownerId === renameTargetId ? { ...f, ownerName: newName.trim() } : f));
     }
 
-    setShowRenameModal(false);
-    setRenameTargetId(null);
-    setNewName('');
+    handleCloseRename();
   };
 
   const handleRemoveFriend = async (friendId: string, e: React.MouseEvent) => {
@@ -337,7 +365,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       setPendingTimetable(combinedSchedules);
       setEditingPresetId(null);
       setMetadata({ section: '', year: '', branch: '', semester: '' });
-      setShowUploadModal(false);
+      handleCloseUpload();
       setShowMetadataModal(true);
     } catch (err) {
       showToast("AI was unable to process those images. Please ensure they are clear screenshots from LPU Touch.", "error");
@@ -372,8 +400,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
           setFriendTimetables(prev => prev.map(f => f.ownerId === editingPresetId ? { ...f, ...metadata, ownerName: generatedName } : f));
         }
 
-        setShowMetadataModal(false);
-        setEditingPresetId(null);
+        handleCloseMetadata();
       } catch (e) { console.error(e); showToast("Failed to update preset info.", "error"); }
       return;
     }
@@ -409,7 +436,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       loadCommunityPresets();
     } catch (e) { }
 
-    setShowMetadataModal(false);
+    handleCloseMetadata();
     setPendingTimetable(null);
     setMetadata({ section: '', year: '', branch: '', semester: '' });
   };
@@ -841,8 +868,8 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       </div>
 
       {showRenameModal && createPortal(
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowRenameModal(false); }}>
-          <div className="nexus-modal w-full max-w-sm">
+        <div className={`modal-overlay ${isClosingRename ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleCloseRename(); }}>
+          <div className={`nexus-modal w-full max-w-sm ${isClosingRename ? 'closing' : ''}`}>
             <div className="p-8 text-center text-slate-800 dark:text-white">
               <h3 className="text-xl font-black tracking-tighter uppercase mb-2">Rename Profile</h3>
               <p className="text-slate-500 text-[8px] font-black uppercase tracking-widest">Personalize the name</p>
@@ -858,7 +885,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                 />
               </div>
               <div className="flex gap-4 mt-6">
-                <button onClick={() => setShowRenameModal(false)} className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">Cancel</button>
+                <button onClick={handleCloseRename} className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">Cancel</button>
                 <button onClick={handleRename} className="flex-1 py-3 bg-orange-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">Update</button>
               </div>
             </div>
@@ -868,8 +895,8 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       )}
 
       {showMetadataModal && createPortal(
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) { setShowMetadataModal(false); setEditingPresetId(null); } }}>
-          <div className="nexus-modal w-full max-w-sm">
+        <div className={`modal-overlay ${isClosingMetadata ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleCloseMetadata(); }}>
+          <div className={`nexus-modal w-full max-w-sm ${isClosingMetadata ? 'closing' : ''}`}>
             <div className="p-8 text-center space-y-2">
               <div className="w-16 h-16 bg-orange-600/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-orange-600/20">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-8 h-8 text-orange-600"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
@@ -903,7 +930,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
               <div className="col-span-2 pt-6">
                 <button onClick={submitMetadata} className="w-full py-5 bg-orange-600 text-white rounded-3xl font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-orange-600/30 hover:scale-[1.02] active:scale-95 transition-all border-none">{editingPresetId ? 'Save Admin Changes' : 'Save to Community Presets'}</button>
                 {editingPresetId && (
-                  <button onClick={() => { setShowMetadataModal(false); setEditingPresetId(null); }} className="w-full mt-2 py-3 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">Cancel Edit</button>
+                  <button onClick={handleCloseMetadata} className="w-full mt-2 py-3 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">Cancel Edit</button>
                 )}
               </div>
             </div>
@@ -913,10 +940,10 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       )}
 
       {showUploadModal && createPortal(
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget && !isProcessingAI) setShowUploadModal(false); }}>
-          <div className="nexus-modal w-full max-w-sm">
+        <div className={`modal-overlay ${isClosingUpload ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget && !isProcessingAI) handleCloseUpload(); }}>
+          <div className={`nexus-modal w-full max-w-sm ${isClosingUpload ? 'closing' : ''}`}>
             <div className="p-8 text-center relative bg-slate-50 dark:bg-black/20 border-b border-slate-100 dark:border-white/5">
-              <button onClick={() => setShowUploadModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">
+              <button onClick={handleCloseUpload} className="absolute top-6 right-6 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
               <div className="w-14 h-14 bg-orange-600/10 rounded-[24px] flex items-center justify-center mx-auto mb-4 border border-orange-600/20">

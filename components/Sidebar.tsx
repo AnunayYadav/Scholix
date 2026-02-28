@@ -24,6 +24,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [feedbackText, setFeedbackText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   const feedbackModalRef = useRef<HTMLDivElement>(null);
 
@@ -32,7 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       document.body.classList.add('modal-open');
       feedbackModalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       const handleEsc = (e: KeyboardEvent) => {
-        if (e.key === 'Escape' && !isSubmitting) setShowFeedbackModal(false);
+        if (e.key === 'Escape' && !isSubmitting) handleClose();
       };
       window.addEventListener('keydown', handleEsc);
       return () => {
@@ -41,6 +42,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       };
     }
   }, [showFeedbackModal, isSubmitting]);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setShowFeedbackModal(false);
+      setIsClosing(false);
+    }, 250);
+  };
 
   const navItems = [
     {
@@ -70,7 +79,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: ModuleType.LIBRARY,
-      label: 'Study Material',
+      label: 'Content Library',
       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /><path d="M8 8h10M8 12h10" /></svg>
     },
     {
@@ -117,7 +126,10 @@ const Sidebar: React.FC<SidebarProps> = ({
       await NexusServer.submitFeedback(feedbackText, userProfile?.id, userProfile?.email);
       setSubmitSuccess(true);
       setFeedbackText("");
-      setTimeout(() => { setSubmitSuccess(false); setShowFeedbackModal(false); }, 2000);
+      setTimeout(() => {
+        setSubmitSuccess(false);
+        handleClose();
+      }, 2000);
     } catch (e: any) {
       showToast(`Oops! Something went wrong: ${e.message}`, 'error');
     } finally {
@@ -132,9 +144,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       {showFeedbackModal && createPortal(
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget && !isSubmitting) setShowFeedbackModal(false); }}>
-          <div ref={feedbackModalRef} className="nexus-modal w-full max-w-lg p-10 relative">
-            <button onClick={() => setShowFeedbackModal(false)} className="absolute top-8 right-8 p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90">
+        <div className={`modal-overlay ${isClosing ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget && !isSubmitting) handleClose(); }}>
+          <div ref={feedbackModalRef} className={`nexus-modal w-full max-w-lg p-10 relative ${isClosing ? 'closing' : ''}`}>
+            <button onClick={handleClose} className="absolute top-8 right-8 p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
 

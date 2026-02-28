@@ -327,7 +327,25 @@ const AppContent: React.FC = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isClosingAuth, setIsClosingAuth] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isClosingProfile, setIsClosingProfile] = useState(false);
+
+  const handleProfileClose = () => {
+    setIsClosingProfile(true);
+    setTimeout(() => {
+      setIsProfileMenuOpen(false);
+      setIsClosingProfile(false);
+    }, 250);
+  };
+
+  const handleAuthClose = () => {
+    setIsClosingAuth(true);
+    setTimeout(() => {
+      setShowAuthModal(false);
+      setIsClosingAuth(false);
+    }, 400); // AuthModal animation is 0.4s
+  };
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -412,7 +430,7 @@ const AppContent: React.FC = () => {
             <div className="relative">
               {userProfile ? (
                 <>
-                  <button onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)} className="w-11 h-11 rounded-full bg-gradient-to-tr from-orange-600 to-red-600 p-[1.5px] border-none shadow-[0_8px_20px_rgba(234,88,12,0.2)] hover:scale-105 active:scale-95 transition-all overflow-hidden cursor-pointer group">
+                  <button onClick={() => isProfileMenuOpen ? handleProfileClose() : setIsProfileMenuOpen(true)} className="w-11 h-11 rounded-full bg-gradient-to-tr from-orange-600 to-red-600 p-[1.5px] border-none shadow-[0_8px_20px_rgba(234,88,12,0.2)] hover:scale-105 active:scale-95 transition-all overflow-hidden cursor-pointer group text-left">
                     <div className="w-full h-full bg-white dark:bg-[#0a0a0a] rounded-full overflow-hidden flex items-center justify-center text-slate-900 dark:text-orange-600 font-black text-sm">
                       {userProfile.avatar_url ? (
                         <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" />
@@ -423,8 +441,8 @@ const AppContent: React.FC = () => {
                   </button>
                   {isProfileMenuOpen && (
                     <>
-                      <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsProfileMenuOpen(false)} />
-                      <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-50 animate-fade-in backdrop-blur-xl">
+                      <div className="fixed inset-0 z-40 bg-transparent" onClick={handleProfileClose} />
+                      <div className={`absolute right-0 mt-3 w-56 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-50 animate-fade-in backdrop-blur-xl transition-all duration-300 ${isClosingProfile ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
                         <div className="px-5 py-3 border-b border-slate-100 dark:border-white/5 mb-2 flex items-center gap-3">
                           <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600 font-black text-[10px] shrink-0 border border-orange-600/5 overflow-hidden">
                             {userProfile.avatar_url ? <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" /> : (userProfile.username?.[0]?.toUpperCase() || 'V')}
@@ -438,7 +456,7 @@ const AppContent: React.FC = () => {
                           </div>
                         </div>
                         <button
-                          onClick={() => { navigate('/profile'); setIsProfileMenuOpen(false); }}
+                          onClick={() => { navigate('/profile'); handleProfileClose(); }}
                           className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-white/70 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
                         >
                           <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-600/20 transition-colors">
@@ -448,7 +466,7 @@ const AppContent: React.FC = () => {
                         </button>
                         {userProfile.is_admin && (
                           <button
-                            onClick={() => { navigate('/admin-stats'); setIsProfileMenuOpen(false); }}
+                            onClick={() => { navigate('/admin-stats'); handleProfileClose(); }}
                             className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-white/70 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
                           >
                             <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-600/20 transition-colors">
@@ -458,7 +476,7 @@ const AppContent: React.FC = () => {
                           </button>
                         )}
                         <button
-                          onClick={async () => { await NexusServer.signOut(); navigate('/'); setIsProfileMenuOpen(false); }}
+                          onClick={async () => { await NexusServer.signOut(); navigate('/'); handleProfileClose(); }}
                           className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-red-500 hover:bg-red-500/10 border-none bg-transparent flex items-center gap-3 transition-all"
                         >
                           <div className="w-8 h-8 rounded-full bg-red-500/5 flex items-center justify-center">

@@ -263,6 +263,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const [pdfjsLibState, setPdfjsLibState] = useState<any>(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [renderScale, setRenderScale] = useState(scale);
+    const [isClosing, setIsClosing] = useState(false);
+
+    const handleClose = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            onClose();
+            setIsClosing(false);
+        }, 250);
+    };
 
     // Touch/Pinch State
     const touchState = useRef<{
@@ -739,7 +748,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     </div>
                     <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Connection Fault</h3>
                     <p className="text-xs text-slate-500 font-bold uppercase tracking-widest leading-relaxed">{error}</p>
-                    <button onClick={onClose} className="bg-white text-black px-10 py-4 rounded-3xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl">Abort Protocol</button>
+                    <button onClick={handleClose} className="bg-white text-black px-10 py-4 rounded-3xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl">Abort Protocol</button>
                 </div>
             </div>,
             document.getElementById('modal-root') || document.body
@@ -747,12 +756,12 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     }
 
     return createPortal(
-        <div className={`fixed inset-0 z-[9999] flex flex-col bg-slate-100 dark:bg-[#050505] animate-fade-in overflow-hidden ${isFullscreen ? 'p-0' : ''}`}>
+        <div className={`fixed inset-0 z-[9999] flex flex-col bg-slate-100 dark:bg-[#050505] animate-fade-in overflow-hidden transition-all duration-300 ${isClosing ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'} ${isFullscreen ? 'p-0' : ''}`}>
             {/* Toolbar */}
             <div className="flex items-center justify-between px-4 md:px-6 h-16 md:h-20 bg-white/80 dark:bg-black/80 backdrop-blur-2xl border-b border-slate-200 dark:border-white/5 z-50">
                 <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
                     <button
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-slate-200 dark:bg-white/5 hover:bg-orange-600 text-slate-600 dark:text-white transition-all border-none group"
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>

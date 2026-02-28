@@ -101,6 +101,54 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     program: string;
   }[]>([]);
   const [activeUploadIndex, setActiveUploadIndex] = useState(0);
+
+  const [isClosingDetails, setIsClosingDetails] = useState(false);
+  const [isClosingFolder, setIsClosingFolder] = useState(false);
+  const [isClosingRename, setIsClosingRename] = useState(false);
+  const [isClosingUpload, setIsClosingUpload] = useState(false);
+  const [isClosingEdit, setIsClosingEdit] = useState(false);
+
+  const handleCloseDetails = () => {
+    setIsClosingDetails(true);
+    setTimeout(() => {
+      setShowDetailsModal(false);
+      setIsClosingDetails(false);
+    }, 250);
+  };
+
+  const handleCloseFolder = () => {
+    setIsClosingFolder(true);
+    setTimeout(() => {
+      setShowFolderModal(false);
+      setIsClosingFolder(false);
+    }, 250);
+  };
+
+  const handleCloseRename = () => {
+    setIsClosingRename(true);
+    setTimeout(() => {
+      setShowRenameModal(false);
+      setIsClosingRename(false);
+    }, 250);
+  };
+
+  const handleCloseUpload = () => {
+    setIsClosingUpload(true);
+    setTimeout(() => {
+      setShowUploadModal(false);
+      setPendingUploads([]);
+      setIsCreatingNew({ program: false, semester: false, subject: false, type: false });
+      setIsClosingUpload(false);
+    }, 250);
+  };
+
+  const handleCloseEdit = () => {
+    setIsClosingEdit(true);
+    setTimeout(() => {
+      setShowEditModal(false);
+      setIsClosingEdit(false);
+    }, 250);
+  };
   const [metaForm, setMetaForm] = useState({ name: '', description: '', semester: '', subject: '', type: '', program: selectedProgram });
 
   const modalSemesters = useMemo(() => {
@@ -369,7 +417,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       else if (activeSemester) { type = 'subject'; parentId = activeSemester.id; }
       await NexusServer.createFolder(newFolderName, type, parentId, selectedProgram);
       setNewFolderName('');
-      setShowFolderModal(false);
+      handleCloseFolder();
       fetchFromSource(false);
     } catch (e: any) { showToast(e.message, 'error'); } finally { setIsProcessing(false); }
   };
@@ -397,7 +445,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         }
       }
 
-      setShowUploadModal(false);
+      handleCloseUpload();
       setPendingUploads([]);
       fetchFromSource(false);
       showToast("Contribution successful!", "success");
@@ -413,7 +461,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     setIsProcessing(true);
     try {
       await NexusServer.requestUpdate(selectedFile.id, metaForm, userProfile?.is_admin || false);
-      setShowEditModal(false);
+      handleCloseEdit();
       setSelectedFile(null);
       fetchFromSource(false);
     } catch (e: any) { showToast(e.message, 'error'); } finally { setIsProcessing(false); }
@@ -426,7 +474,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       await NexusServer.renameFolder(folderToManage.id, newFolderName);
       setNewFolderName('');
       setFolderToManage(null);
-      setShowRenameModal(false);
+      handleCloseRename();
       fetchFromSource(false);
     } catch (e: any) { showToast(e.message, 'error'); } finally { setIsProcessing(false); }
   };
@@ -644,8 +692,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       </div>
 
       {showDetailsModal && selectedFile && createPortal(
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowDetailsModal(false); }}>
-          <div ref={modalRef} className="nexus-modal w-full max-w-lg">
+        <div className={`modal-overlay ${isClosingDetails ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleCloseDetails(); }}>
+          <div ref={modalRef} className={`nexus-modal w-full max-w-lg ${isClosingDetails ? 'closing' : ''}`}>
             <header className="p-6 md:p-8 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-start justify-between">
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -655,7 +703,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 </div>
                 <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white leading-tight">{selectedFile.name}</h3>
               </div>
-              <button onClick={() => setShowDetailsModal(false)} className="p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
+              <button onClick={handleCloseDetails} className="p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </header>
@@ -703,9 +751,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             </div>
 
             <footer className="p-6 md:p-8 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-white/5 flex gap-4">
-              <button onClick={() => setShowDetailsModal(false)} className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">Discard</button>
+              <button onClick={handleCloseDetails} className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">Discard</button>
               {selectedFile.status === 'approved' && (
-                <button onClick={() => { setShowDetailsModal(false); handleFileAccess(selectedFile); }} className="flex-[2] py-3 bg-orange-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">View Document ↗</button>
+                <button onClick={() => { handleCloseDetails(); handleFileAccess(selectedFile); }} className="flex-[2] py-3 bg-orange-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">View Document ↗</button>
               )}
             </footer>
           </div>
@@ -714,9 +762,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       )}
 
       {showFolderModal && userProfile?.is_admin && createPortal(
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowFolderModal(false); }}>
-          <div ref={modalRef} className="nexus-modal w-full max-w-sm">
-            <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5"><h3 className="text-sm font-black uppercase tracking-widest">New Node</h3><button onClick={() => setShowFolderModal(false)} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
+        <div className={`modal-overlay ${isClosingFolder ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleCloseFolder(); }}>
+          <div ref={modalRef} className={`nexus-modal w-full max-w-sm ${isClosingFolder ? 'closing' : ''}`}>
+            <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5"><h3 className="text-sm font-black uppercase tracking-widest">New Node</h3><button onClick={handleCloseFolder} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
             <div className="p-6 space-y-4">
               <input autoFocus placeholder="Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-black/60 p-4 rounded-xl font-bold border dark:border-white/10 text-sm dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
               <button onClick={handleCreateFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Saving...' : 'Create Folder'}</button>
@@ -727,11 +775,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       )}
 
       {showRenameModal && userProfile?.is_admin && createPortal(
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowRenameModal(false); }}>
-          <div ref={modalRef} className="nexus-modal w-full max-w-sm">
+        <div className={`modal-overlay ${isClosingRename ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleCloseRename(); }}>
+          <div ref={modalRef} className={`nexus-modal w-full max-w-sm ${isClosingRename ? 'closing' : ''}`}>
             <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5">
               <h3 className="text-sm font-black uppercase tracking-widest">Rename Folder</h3>
-              <button onClick={() => setShowRenameModal(false)} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white">
+              <button onClick={handleCloseRename} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
@@ -745,8 +793,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       )}
 
       {(showUploadModal || showEditModal) && createPortal(
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget && !isProcessing) { setShowUploadModal(false); setShowEditModal(false); } }}>
-          <div ref={modalRef} className={`nexus-modal w-full ${showUploadModal ? 'max-w-4xl' : 'max-w-sm'} overflow-hidden`}>
+        <div className={`modal-overlay ${(showUploadModal ? isClosingUpload : isClosingEdit) ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget && !isProcessing) { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); } }}>
+          <div ref={modalRef} className={`nexus-modal w-full ${showUploadModal ? 'max-w-4xl' : 'max-w-sm'} overflow-hidden ${(showUploadModal ? isClosingUpload : isClosingEdit) ? 'closing' : ''}`}>
             <header className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-black uppercase tracking-widest leading-none">{showUploadModal ? 'Contribute Library' : 'Metadata Edit'}</h3>
@@ -754,7 +802,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   {showUploadModal ? `Batch Processing: ${pendingUploads.length} File${pendingUploads.length > 1 ? 's' : ''}` : 'Refine file parameters'}
                 </p>
               </div>
-              <button onClick={() => { setShowUploadModal(false); setShowEditModal(false); setPendingUploads([]); setIsCreatingNew({ program: false, semester: false, subject: false, type: false }); }} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">
+              <button onClick={() => { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); }} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </header>

@@ -132,6 +132,16 @@ const CampusNavigator: React.FC = () => {
     }
   };
 
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsReportModalOpen(false);
+      setIsClosing(false);
+    }, 250);
+  };
+
   const currentMenuData = currentWeek === 1 ? MESS_DATA.week1 : MESS_DATA.week2;
   const selectedMeals = currentMenuData.find(m => m.day === selectedDay)?.meals;
 
@@ -155,7 +165,7 @@ const CampusNavigator: React.FC = () => {
     console.log("Report submitted:", reportForm);
     showToast("Thank you! Your report has been submitted. We'll verify and update the data shortly.", "success");
     setReportForm({ hostelName: '', issueDetails: '', imageProof: null });
-    setIsReportModalOpen(false);
+    handleClose();
   };
 
   const MealCard = ({ title, items, icon, colorClass }: { title: string, items: MealCategories, icon: React.ReactNode, colorClass: string }) => (
@@ -314,10 +324,10 @@ const CampusNavigator: React.FC = () => {
       )}
 
       {isReportModalOpen && createPortal(
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setIsReportModalOpen(false); }}>
-          <div ref={reportModalRef} className="nexus-modal w-full max-w-md p-6 relative">
+        <div className={`modal-overlay ${isClosing ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
+          <div ref={reportModalRef} className={`nexus-modal w-full max-w-md p-6 relative ${isClosing ? 'closing' : ''}`}>
             <button
-              onClick={() => setIsReportModalOpen(false)}
+              onClick={handleClose}
               className="absolute top-5 right-5 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -380,7 +390,7 @@ const CampusNavigator: React.FC = () => {
               <div className="flex gap-4 pt-2">
                 <button
                   type="button"
-                  onClick={() => setIsReportModalOpen(false)}
+                  onClick={handleClose}
                   className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent"
                 >
                   Cancel
