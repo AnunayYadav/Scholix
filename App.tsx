@@ -1,31 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar.tsx';
-import PlacementPrefect from './components/PlacementPrefect.tsx';
-import ContentLibrary from './components/ContentLibrary.tsx';
-import CampusNavigator from './components/CampusNavigator.tsx';
-import HelpSection from './components/HelpSection.tsx';
-import FreshersKit from './components/FreshersKit.tsx';
-import CGPACalculator from './components/CGPACalculator.tsx';
-import AttendanceTracker from './components/AttendanceTracker.tsx';
-import ShareReport from './components/ShareReport.tsx';
-import AboutUs from './components/AboutUs.tsx';
 import AuthModal from './components/AuthModal.tsx';
 import VerifiedBadge from './components/VerifiedBadge.tsx';
-import ProfileSection from './components/ProfileSection.tsx';
-import TimetableHub from './components/TimetableHub.tsx';
-import QuizTaker from './components/QuizTaker.tsx';
-import MarketplaceHub from './components/MarketplaceHub.tsx';
-import RoommateFinder from './components/RoommateFinder.tsx';
-import EmergencyContacts from './components/EmergencyContacts.tsx';
-import AIToolsDirectory from './components/AIToolsDirectory.tsx';
-import AdminStats from './components/AdminStats.tsx';
 import { ModuleType, UserProfile, TimetableData } from './types.ts';
 import NexusServer from './services/nexusServer.ts';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { ToastContainer } from './components/Toast.tsx';
 import NotificationBell from './components/NotificationBell.tsx';
+
+// Lazy-loaded route components for code splitting
+const PlacementPrefect = React.lazy(() => import('./components/PlacementPrefect.tsx'));
+const ContentLibrary = React.lazy(() => import('./components/ContentLibrary.tsx'));
+const CampusNavigator = React.lazy(() => import('./components/CampusNavigator.tsx'));
+const HelpSection = React.lazy(() => import('./components/HelpSection.tsx'));
+const FreshersKit = React.lazy(() => import('./components/FreshersKit.tsx'));
+const CGPACalculator = React.lazy(() => import('./components/CGPACalculator.tsx'));
+const AttendanceTracker = React.lazy(() => import('./components/AttendanceTracker.tsx'));
+const ShareReport = React.lazy(() => import('./components/ShareReport.tsx'));
+const AboutUs = React.lazy(() => import('./components/AboutUs.tsx'));
+const ProfileSection = React.lazy(() => import('./components/ProfileSection.tsx'));
+const TimetableHub = React.lazy(() => import('./components/TimetableHub.tsx'));
+const QuizTaker = React.lazy(() => import('./components/QuizTaker.tsx'));
+const MarketplaceHub = React.lazy(() => import('./components/MarketplaceHub.tsx'));
+const RoommateFinder = React.lazy(() => import('./components/RoommateFinder.tsx'));
+const EmergencyContacts = React.lazy(() => import('./components/EmergencyContacts.tsx'));
+const AIToolsDirectory = React.lazy(() => import('./components/AIToolsDirectory.tsx'));
+const AdminStats = React.lazy(() => import('./components/AdminStats.tsx'));
+const PDFViewer = React.lazy(() => import('./components/PDFViewer.tsx'));
 
 const getModuleFromPath = (path: string): ModuleType => {
   const p = path.toLowerCase();
@@ -115,8 +118,7 @@ const BackgroundEffects: React.FC = React.memo(() => {
       <div className="absolute inset-0 bg-gradient-to-b from-slate-50 dark:from-black via-slate-50/10 dark:via-black/10 to-transparent h-96 z-10 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-r from-slate-50 dark:from-black via-slate-50/10 dark:via-black/10 to-transparent w-96 z-10 pointer-events-none" />
 
-      {/* Soft Grid Overlay */}
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] dark:opacity-[0.05] contrast-150" />
+
     </div>
   );
 });
@@ -481,27 +483,38 @@ const AppContent: React.FC = () => {
         </div>
         <div id="main-content-area" className={`flex-1 overflow-y-auto relative scroll-smooth ${location.pathname === '/' ? 'p-0' : 'p-4 md:p-8'} bg-transparent content-visibility-auto`}>
           <div className={`relative ${location.pathname === '/' ? 'w-full' : 'max-w-7xl mx-auto'}`}>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/placement" element={<PlacementPrefect userProfile={userProfile} />} />
-              <Route path="/timetable" element={<TimetableHub userProfile={userProfile} />} />
-              <Route path="/quiz" element={<QuizTaker userProfile={userProfile} />} />
-              <Route path="/library" element={<ContentLibrary userProfile={userProfile} />} />
-              <Route path="/campus" element={<CampusNavigator />} />
-              <Route path="/help" element={<HelpSection />} />
-              <Route path="/freshers" element={<FreshersKit />} />
-              <Route path="/cgpa" element={<CGPACalculator userProfile={userProfile} />} />
-              <Route path="/attendance" element={<AttendanceTracker />} />
-              <Route path="/share-cgpa" element={<ShareReport />} />
-              <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
-              <Route path="/profile" element={<ProfileSection userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={(m) => navigate(getPathFromModule(m))} />} />
-              <Route path="/marketplace" element={<MarketplaceHub userProfile={userProfile} />} />
-              <Route path="/roommate" element={<RoommateFinder userProfile={userProfile} />} />
-              <Route path="/emergency" element={<EmergencyContacts />} />
-              <Route path="/ai-tools" element={<AIToolsDirectory />} />
-              <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <Suspense fallback={
+              <div className="flex items-center justify-center py-32">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-8 h-8 border-3 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Loading module...</p>
+                </div>
+              </div>
+            }>
+              <div key={location.pathname} className="page-transition-enter">
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/placement" element={<PlacementPrefect userProfile={userProfile} />} />
+                  <Route path="/timetable" element={<TimetableHub userProfile={userProfile} />} />
+                  <Route path="/quiz" element={<QuizTaker userProfile={userProfile} />} />
+                  <Route path="/library" element={<ContentLibrary userProfile={userProfile} />} />
+                  <Route path="/campus" element={<CampusNavigator />} />
+                  <Route path="/help" element={<HelpSection />} />
+                  <Route path="/freshers" element={<FreshersKit />} />
+                  <Route path="/cgpa" element={<CGPACalculator userProfile={userProfile} />} />
+                  <Route path="/attendance" element={<AttendanceTracker />} />
+                  <Route path="/share-cgpa" element={<ShareReport />} />
+                  <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
+                  <Route path="/profile" element={<ProfileSection userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={(m) => navigate(getPathFromModule(m))} />} />
+                  <Route path="/marketplace" element={<MarketplaceHub userProfile={userProfile} />} />
+                  <Route path="/roommate" element={<RoommateFinder userProfile={userProfile} />} />
+                  <Route path="/emergency" element={<EmergencyContacts />} />
+                  <Route path="/ai-tools" element={<AIToolsDirectory />} />
+                  <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </div>
+            </Suspense>
           </div>
         </div>
         {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}

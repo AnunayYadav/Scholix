@@ -16,6 +16,31 @@ const getEnvVar = (name: string): string => {
   return '';
 };
 
+// Rate limiter for auth operations
+const rateLimiter = {
+  attempts: new Map<string, { count: number; resetAt: number }>(),
+  check(key: string, maxAttempts: number = 5, windowMs: number = 60000): boolean {
+    const now = Date.now();
+    const entry = this.attempts.get(key);
+    if (!entry || now > entry.resetAt) {
+      this.attempts.set(key, { count: 1, resetAt: now + windowMs });
+      return true;
+    }
+    if (entry.count >= maxAttempts) return false;
+    entry.count++;
+    return true;
+  }
+};
+
+// Input sanitization utility
+const sanitizeInput = (input: string, maxLength: number = 500): string => {
+  return input
+    .replace(/<[^>]*>/g, '') // Strip HTML tags
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '') // Strip control chars
+    .trim()
+    .slice(0, maxLength);
+};
+
 let supabaseInstance: SupabaseClient | null = null;
 
 const getSupabase = () => {
@@ -218,7 +243,11 @@ class NexusServer {
   static async signIn(identifier: string, pass: string) {
     const client = getSupabase();
     if (!client) throw new Error("Registry is offline.");
-    let email = identifier.trim();
+    // Rate limiting: 5 attempts per minute per identifier
+    if (!rateLimiter.check(`auth_signin_${identifier.toLowerCase().trim()}`)) {
+      throw new Error("Too many login attempts. Please wait a moment and try again.");
+    }
+    let email = sanitizeInput(identifier.trim(), 100);
     if (!identifier.includes('@')) {
       const { data } = await client.from('profiles').select('email').eq('username', identifier.toLowerCase().trim()).maybeSingle();
       if (data?.email) email = data.email;
@@ -232,23 +261,28 @@ class NexusServer {
   static async signUp(email: string, pass: string, username: string, regNo: string) {
     const client = getSupabase();
     if (!client) throw new Error("Registry is offline.");
-    const cleanUsername = username.toLowerCase().trim();
+    // Rate limiting: 3 signup attempts per 2 minutes per email
+    if (!rateLimiter.check(`auth_signup_${email.toLowerCase().trim()}`, 3, 120000)) {
+      throw new Error("Too many signup attempts. Please wait a moment and try again.");
+    }
+    const cleanUsername = sanitizeInput(username.toLowerCase().trim(), 15);
+    const cleanEmail = sanitizeInput(email.trim(), 100);
+    const cleanRegNo = sanitizeInput(regNo.replace(/[^0-9]/g, ''), 8);
     const result = await client.auth.signUp({
-      email: email.trim(),
+      email: cleanEmail,
       password: pass,
       options: {
-        data: { username: cleanUsername, registration_number: regNo },
+        data: { username: cleanUsername, registration_number: cleanRegNo },
         emailRedirectTo: window.location.origin
       }
     });
 
     // If signup is successful and we have a session (immediate login enabled)
-    // Manually ensure the profile table is updated to prevent null values if the trigger is missing
     if (!result.error && result.data?.user && result.data.session) {
       try {
         await client.from('profiles').update({
           username: cleanUsername,
-          registration_number: regNo
+          registration_number: cleanRegNo
         }).eq('id', result.data.user.id);
       } catch (e) {
         console.warn("Manual profile sync failed:", e);
@@ -423,7 +457,9 @@ class NexusServer {
 
   static async submitFeedback(text: string, uid?: string, email?: string) {
     const client = getSupabase();
-    if (client) await client.from('feedback').insert([{ text, user_id: uid, user_email: email }]);
+    const sanitizedText = sanitizeInput(text, 2000);
+    if (!sanitizedText) return;
+    if (client) await client.from('feedback').insert([{ text: sanitizedText, user_id: uid, user_email: email }]);
   }
 
   static async getFileUrl(path: string) {
@@ -532,7 +568,14 @@ class NexusServer {
   static async createMarketplaceItem(item: any) {
     const client = getSupabase();
     if (!client) return;
-    const { error } = await client.from('marketplace_items').insert([item]);
+    // Sanitize user-provided text fields
+    const sanitized = {
+      ...item,
+      title: item.title ? sanitizeInput(item.title, 100) : item.title,
+      description: item.description ? sanitizeInput(item.description, 1000) : item.description,
+      contact_info: item.contact_info ? sanitizeInput(item.contact_info, 200) : item.contact_info,
+    };
+    const { error } = await client.from('marketplace_items').insert([sanitized]);
     if (error) throw error;
   }
 
@@ -579,7 +622,14 @@ class NexusServer {
   static async createRoommateRequest(request: any) {
     const client = getSupabase();
     if (!client) return;
-    const { error } = await client.from('roommate_requests').insert([request]);
+    // Sanitize user-provided text fields
+    const sanitized = {
+      ...request,
+      description: request.description ? sanitizeInput(request.description, 1000) : request.description,
+      preferences: request.preferences ? sanitizeInput(request.preferences, 500) : request.preferences,
+      contact_info: request.contact_info ? sanitizeInput(request.contact_info, 200) : request.contact_info,
+    };
+    const { error } = await client.from('roommate_requests').insert([sanitized]);
     if (error) throw error;
   }
 
@@ -696,9 +746,12 @@ class NexusServer {
   static async sendGlobalAnnouncement(title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', link?: string) {
     const client = getSupabase();
     if (!client) return;
+    const sanitizedTitle = sanitizeInput(title, 200);
+    const sanitizedMessage = sanitizeInput(message, 2000);
+    const sanitizedLink = link ? sanitizeInput(link, 500) : undefined;
     const { error } = await client
       .from('global_announcements')
-      .insert([{ title, message, type, link }]);
+      .insert([{ title: sanitizedTitle, message: sanitizedMessage, type, link: sanitizedLink }]);
     if (error) throw error;
   }
 

@@ -85,7 +85,7 @@ const PageRenderer = React.memo<{
                     scaleB: targetId === 'B' ? renderScale : prev.scaleB
                 }));
 
-                textLayerRef.current.innerHTML = '';
+                while (textLayerRef.current.firstChild) textLayerRef.current.removeChild(textLayerRef.current.firstChild);
                 const textContent = await page.getTextContent();
                 await pdfjsLib.renderTextLayer({
                     textContent: textContent,
@@ -153,12 +153,30 @@ const PageRenderer = React.memo<{
         spans.forEach(span => {
             const originalText = span.textContent || '';
             if (originalText.toLowerCase().includes(query)) {
-                // Replace text with mark tags
-                span.innerHTML = originalText.replace(regex, (match) => {
-                    const isCurrent = isActivePage && globalMatchCount === activeResult.matchIndex;
+                // Safe DOM manipulation instead of innerHTML to prevent XSS
+                const fragment = document.createDocumentFragment();
+                let lastIndex = 0;
+                let match: RegExpExecArray | null;
+                const safeRegex = new RegExp(regex.source, regex.flags);
+                while ((match = safeRegex.exec(originalText)) !== null) {
+                    // Add text before match
+                    if (match.index > lastIndex) {
+                        fragment.appendChild(document.createTextNode(originalText.slice(lastIndex, match.index)));
+                    }
+                    // Create safe mark element
+                    const mark = document.createElement('mark');
+                    mark.className = `pdf-search-match ${isActivePage && globalMatchCount === activeResult?.matchIndex ? 'active-match' : ''}`;
+                    mark.textContent = match[0];
+                    fragment.appendChild(mark);
                     globalMatchCount++;
-                    return `<mark class="pdf-search-match ${isCurrent ? 'active-match' : ''}">${match}</mark>`;
-                });
+                    lastIndex = match.index + match[0].length;
+                }
+                // Add remaining text
+                if (lastIndex < originalText.length) {
+                    fragment.appendChild(document.createTextNode(originalText.slice(lastIndex)));
+                }
+                span.textContent = '';
+                span.appendChild(fragment);
             }
         });
 

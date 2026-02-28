@@ -1,10 +1,26 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import NexusServer from '../services/nexusServer.ts';
 
 interface AuthModalProps {
   onClose: () => void;
 }
+
+const getPasswordStrength = (password: string): { score: number; label: string; color: string } => {
+  if (!password) return { score: 0, label: '', color: 'bg-slate-200 dark:bg-white/10' };
+  let score = 0;
+  if (password.length >= 6) score++;
+  if (password.length >= 10) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  if (score <= 1) return { score: 1, label: 'Weak', color: 'bg-red-500' };
+  if (score <= 2) return { score: 2, label: 'Fair', color: 'bg-orange-500' };
+  if (score <= 3) return { score: 3, label: 'Good', color: 'bg-yellow-500' };
+  if (score <= 4) return { score: 4, label: 'Strong', color: 'bg-emerald-500' };
+  return { score: 5, label: 'Excellent', color: 'bg-emerald-400' };
+};
 
 const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,6 +32,59 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
+  const [isClosing, setIsClosing] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Body scroll lock
+  useEffect(() => {
+    document.body.classList.add('modal-open');
+    return () => document.body.classList.remove('modal-open');
+  }, []);
+
+  // Escape key handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !loading) handleClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [loading]);
+
+  // Focus trap
+  useEffect(() => {
+    const modal = modalRef.current;
+    if (!modal) return;
+
+    const focusableElements = modal.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstFocusable = focusableElements[0] as HTMLElement;
+    const lastFocusable = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey) {
+        if (document.activeElement === firstFocusable) {
+          e.preventDefault();
+          lastFocusable?.focus();
+        }
+      } else {
+        if (document.activeElement === lastFocusable) {
+          e.preventDefault();
+          firstFocusable?.focus();
+        }
+      }
+    };
+
+    modal.addEventListener('keydown', handleTab);
+    firstFocusable?.focus();
+    return () => modal.removeEventListener('keydown', handleTab);
+  }, [isLogin]);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => onClose(), 250);
+  };
 
   useEffect(() => {
     if (!isLogin && username.length >= 3) {
@@ -55,7 +124,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
         if (result.error) throw result.error;
 
         // Success: Close modal
-        onClose();
+        handleClose();
       } else {
         if (!email.trim()) throw new Error("Official email is required.");
         if (!regNo.trim()) throw new Error("Registration number is required.");
@@ -67,7 +136,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
         if (result.error) throw result.error;
 
         // Success
-        onClose();
+        handleClose();
       }
     } catch (err: any) {
       console.error("Auth Failure:", err);
@@ -82,13 +151,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     if (clean.length <= 15) setUsername(clean);
   };
 
+  const passwordStrength = getPasswordStrength(password);
+
   return (
-    <div className="modal-overlay">
-      <div className="nexus-modal w-full max-w-md mx-4 overflow-hidden">
+    <div className={`modal-overlay ${isClosing ? 'closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget && !loading) handleClose(); }}>
+      <div ref={modalRef} className={`nexus-modal w-full max-w-md mx-4 overflow-hidden ${isClosing ? 'closing' : ''}`}>
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-600/10 blur-[80px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
 
         <div className="bg-white dark:bg-black p-8 md:p-10 text-center relative border-b border-slate-100 dark:border-white/5">
-          <button onClick={onClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-orange-500 transition-colors border-none bg-transparent active:scale-95">
+          <button onClick={handleClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-orange-500 transition-colors border-none bg-transparent active:scale-95">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
           </button>
 
@@ -205,6 +276,25 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                         placeholder="Min. 6 characters"
                       />
                     </div>
+                    {/* Password Strength Indicator */}
+                    {password.length > 0 && (
+                      <div className="mt-3 space-y-1.5 animate-fade-in">
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map(i => (
+                            <div
+                              key={i}
+                              className={`password-strength-bar flex-1 ${i <= passwordStrength.score ? passwordStrength.color : 'bg-slate-200 dark:bg-white/5'}`}
+                            />
+                          ))}
+                        </div>
+                        <p className={`text-[9px] font-black uppercase tracking-widest ${passwordStrength.score <= 1 ? 'text-red-500' :
+                            passwordStrength.score <= 2 ? 'text-orange-500' :
+                              passwordStrength.score <= 3 ? 'text-yellow-500' : 'text-emerald-500'
+                          }`}>
+                          {passwordStrength.label}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -223,7 +313,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
 
             <button
               type="button"
-              onClick={() => { setIsLogin(!isLogin); setError(null); }}
+              onClick={() => { setIsLogin(!isLogin); setError(null); setPassword(''); }}
               className="w-full text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-orange-500 transition-colors py-6 bg-transparent border-none"
             >
               {isLogin ? "New here? Create an account" : "Have an account? Sign in"}

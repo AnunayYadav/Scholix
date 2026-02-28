@@ -28,9 +28,18 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   useEffect(() => {
     if (showFeedbackModal) {
+      document.body.classList.add('modal-open');
       feedbackModalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const handleEsc = (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && !isSubmitting) setShowFeedbackModal(false);
+      };
+      window.addEventListener('keydown', handleEsc);
+      return () => {
+        document.body.classList.remove('modal-open');
+        window.removeEventListener('keydown', handleEsc);
+      };
     }
-  }, [showFeedbackModal]);
+  }, [showFeedbackModal, isSubmitting]);
 
   const navItems = [
     {
@@ -122,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       {showFeedbackModal && (
-        <div className="modal-overlay">
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget && !isSubmitting) setShowFeedbackModal(false); }}>
           <div ref={feedbackModalRef} className="nexus-modal w-full max-w-lg p-10 relative">
             <button onClick={() => setShowFeedbackModal(false)} className="absolute top-8 right-8 p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>

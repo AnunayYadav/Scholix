@@ -227,8 +227,8 @@ h4,
 
 
 .glass-panel {
-  @apply bg-white/90 dark:bg-black/60 backdrop-blur-2xl border border-slate-200/80 dark:border-white/10;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  @apply bg-white/90 dark:bg-black/60 backdrop-blur-2xl border border-slate-200 dark:border-white/10;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.6);
 }
 
 .dark .glass-panel {
@@ -240,6 +240,11 @@ h4,
 .modal-overlay {
   @apply fixed inset-0 z-[10000] flex items-start justify-center p-4 pt-20 md:pt-24 backdrop-blur-xl overflow-y-auto overflow-x-hidden;
   background: rgba(0, 0, 0, 0.7);
+  animation: overlayFadeIn 0.3s ease-out;
+}
+
+.modal-overlay.closing {
+  animation: overlayFadeOut 0.25s ease-in forwards;
 }
 
 :root {
@@ -260,8 +265,12 @@ h4,
 }
 
 .nexus-modal {
-  @apply bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[40px] overflow-hidden flex flex-col my-auto transition-all animate-slide-up text-slate-900 dark:text-white max-h-[90vh];
+  @apply bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[28px] md:rounded-[40px] overflow-hidden flex flex-col my-auto transition-all animate-slide-up text-slate-900 dark:text-white max-h-[90vh];
   box-shadow: 0 32px 128px rgba(0, 0, 0, 0.4);
+}
+
+.nexus-modal.closing {
+  animation: modalSlideOut 0.25s ease-in forwards;
 }
 
 .dark .nexus-modal {
@@ -320,4 +329,83 @@ h4,
   filter: blur(80px);
   opacity: 0.3;
   animation: blob-bounce 12s linear infinite;
+}
+
+/* Page transition */
+.page-transition-enter {
+  animation: pageEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal exit animations */
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlayFadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes modalSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+}
+
+/* Body scroll lock when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Password strength bar */
+.password-strength-bar {
+  height: 3px;
+  border-radius: 999px;
+  transition: all 0.4s ease;
+}
+
+/* Item list animations */
+.list-item-enter {
+  animation: listItemIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes listItemIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
