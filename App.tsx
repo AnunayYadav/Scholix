@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar.tsx';
 import PlacementPrefect from './components/PlacementPrefect.tsx';
@@ -144,6 +144,11 @@ const TodaysSchedule: React.FC = () => {
 
   const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
 
+  const sortedSlots = useMemo(
+    () => dayData ? [...dayData.slots].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)) : [],
+    [dayData]
+  );
+
   if (!dayData || dayData.slots.length === 0) {
     return (
       <div className="max-w-6xl mx-auto px-6 mb-12 animate-fade-in">
@@ -193,7 +198,7 @@ const TodaysSchedule: React.FC = () => {
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-6 no-scrollbar snap-x snap-mandatory">
-        {dayData.slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)).map((slot) => {
+        {sortedSlots.map((slot) => {
           const start = timeToMinutes(slot.startTime);
           const end = timeToMinutes(slot.endTime);
           const isGoingOn = currentMinutes >= start && currentMinutes < end;

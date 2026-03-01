@@ -132,9 +132,11 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
       if (!questions || questions.length === 0) throw new Error("AI generation yielded no results.");
 
       setStatus('Saving to library...');
-      for (const unit of selectedUnits) {
-        await NexusServer.saveQuestionsToBank(selectedSubject.name, unit, questions.filter(q => q.unit === unit));
-      }
+      await Promise.all(
+        selectedUnits.map(unit =>
+          NexusServer.saveQuestionsToBank(selectedSubject.name, unit, questions.filter(q => q.unit === unit))
+        )
+      );
 
       NexusServer.trackEvent('quiz_generated');
       startQuiz(questions, false);
@@ -153,8 +155,13 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   };
 
   const startQuiz = (questions: QuizQuestion[], cached: boolean) => {
-    // Shuffle and pick 10
-    const shuffled = [...questions].sort(() => 0.5 - Math.random()).slice(0, 10);
+    // Fisher-Yates shuffle — O(n), unbiased
+    const arr = [...questions];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    const shuffled = arr.slice(0, 10);
     setQuizQuestions(shuffled);
     setIsCached(cached);
     setLoading(false);
