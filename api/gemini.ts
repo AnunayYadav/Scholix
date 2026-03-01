@@ -84,11 +84,8 @@ export default async function handler(req: Request) {
 
   } catch (error: any) {
     const errorMsg = error.message || String(error);
-    console.error("Backend Gemini Error Context:", {
-      message: errorMsg,
-      stack: error.stack,
-      status: error.status || error.code
-    });
+    // Silenced console.error as requested for cleaner logs
+    // Original: console.error("Backend Gemini Error Context:", { message: errorMsg, ... });
 
     // Detect Rate Limits (Quota) - Enhanced check
     const isRateLimit =

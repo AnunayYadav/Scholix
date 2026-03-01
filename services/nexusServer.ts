@@ -74,7 +74,6 @@ class NexusServer {
       .select('*')
       .order('created_at', { ascending: false });
     if (error) {
-      console.error('Fetch Community Timetables Error:', error);
       throw new Error("Failed to sync community presets.");
     }
     return data || [];
@@ -723,7 +722,6 @@ class NexusServer {
       .order('created_at', { ascending: false })
       .limit(20);
     if (error) {
-      console.error('Fetch Global Announcements Error:', error);
       return [];
     }
     return data || [];

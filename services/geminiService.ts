@@ -3,53 +3,67 @@ import { Type } from "@google/genai";
 import { ResumeAnalysisResult, DaySchedule, QuizQuestion } from "../types.ts";
 
 /**
+ * Global request queue state to prevent 429s (Too Many Requests)
+ */
+let isProcessingRequest = false;
+const requestQueue: (() => void)[] = [];
+let lastRequestTimestamp = 0;
+const MIN_REQUEST_SPACING = 2000; // 2 seconds between successful calls
+
+/**
  * Internal helper to communicate with the backend Gemini proxy
  */
-const callGeminiProxy = async (action: string, payload: any, retries = 7, delay = 3000) => {
-  for (let i = 0; i <= retries; i++) {
-    try {
-      const res = await fetch("/api/gemini", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, payload }),
-      });
+const callGeminiProxy = async (action: string, payload: any, retries = 5, delay = 3000) => {
+  // 1. Queue management (Semaphore)
+  if (isProcessingRequest) {
+    await new Promise<void>(resolve => requestQueue.push(resolve));
+  }
+  isProcessingRequest = true;
 
-      if (res.ok) {
-        return await res.json();
-      }
-
-      const errData = await res.json().catch(() => ({}));
-
-      // If it's a rate limit or server overload and we have retries left
-      if ((res.status === 429 || res.status === 503) && i < retries) {
-        // More aggressive exponential backoff for 429
-        const multiplier = res.status === 429 ? 2.5 : 2;
-        const jitter = Math.random() * 2000;
-        const backoff = (delay * Math.pow(multiplier, i)) + jitter;
-
-        await new Promise(resolve => setTimeout(resolve, backoff));
-        continue;
-      }
-
-      if (res.status === 429) {
-        throw new Error(errData.error || "The AI is currently busy. Please wait a minute before trying again.");
-      }
-
-      if (res.status === 503 || res.status === 504) {
-        throw new Error("Nexus Intelligence is temporarily overloaded. Please try again shortly.");
-      }
-
-      throw new Error(errData.error || `Request failed with status ${res.status}. Please check your connection.`);
-    } catch (e: any) {
-      if (i === retries) {
-        if (e.message.includes('Failed to fetch')) {
-          throw new Error("Network Error: Could not reach the AI gateway. Please check your internet connection.");
-        }
-        throw e;
-      }
-      // For network errors, we also retry
-      await new Promise(resolve => setTimeout(resolve, delay));
+  try {
+    // 2. Enforce minimum spacing between calls to stay under RPM limits
+    const now = Date.now();
+    const timeSinceLast = now - lastRequestTimestamp;
+    if (timeSinceLast < MIN_REQUEST_SPACING) {
+      await new Promise(r => setTimeout(r, MIN_REQUEST_SPACING - timeSinceLast));
     }
+
+    for (let i = 0; i <= retries; i++) {
+      try {
+        const res = await fetch("/api/gemini", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action, payload }),
+        });
+
+        if (res.ok) {
+          lastRequestTimestamp = Date.now();
+          return await res.json();
+        }
+
+        const errData = await res.json().catch(() => ({}));
+
+        // If it's a rate limit or server overload and we have retries left
+        if ((res.status === 429 || res.status === 503) && i < retries) {
+          const multiplier = res.status === 429 ? 2.5 : 2;
+          const jitter = Math.random() * 2000;
+          const backoff = (delay * Math.pow(multiplier, i)) + jitter;
+          await new Promise(resolve => setTimeout(resolve, backoff));
+          continue;
+        }
+
+        if (res.status === 429) throw new Error(errData.error || "Too many requests. Please wait.");
+        if (res.status >= 500) throw new Error("AI Service temporary overload. Try again later.");
+        throw new Error(errData.error || `Error ${res.status}`);
+      } catch (e: any) {
+        if (i === retries) throw e;
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  } finally {
+    isProcessingRequest = false;
+    const next = requestQueue.shift();
+    if (next) next();
   }
 };
 
