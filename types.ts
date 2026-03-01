@@ -66,9 +66,10 @@ export interface AITool {
   name: string;
   description: string;
   url: string;
-  category: 'Writing' | 'Coding' | 'Research' | 'Design' | 'General' | 'Productivity' | 'Presentations' | 'Video' | 'Audio' | 'Business';
+  category: 'Writing' | 'Coding' | 'Research' | 'Design' | 'General' | 'Productivity' | 'Presentations' | 'Video' | 'Audio' | 'Business' | 'Education' | '3D' | 'Data' | 'Security' | 'Healthcare';
   pricing: 'Free' | 'Freemium' | 'Paid';
   tags: string[];
+  isHero?: boolean;
 }
 
 export interface UserProfile {
