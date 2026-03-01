@@ -84,28 +84,42 @@ export default async function handler(req: Request) {
     }), { status: 200 });
 
   } catch (error: any) {
-    console.error("Backend Gemini Error:", error);
+    const errorMsg = error.message || String(error);
+    console.error("Backend Gemini Error Context:", {
+      message: errorMsg,
+      stack: error.stack,
+      status: error.status || error.code
+    });
 
-    const errorMsg = error.message || "";
+    // Detect Rate Limits (Quota) - Enhanced check
+    const isRateLimit =
+      errorMsg.includes("429") ||
+      errorMsg.toLowerCase().includes("quota") ||
+      errorMsg.toLowerCase().includes("rate limit") ||
+      error.status === 429 ||
+      error.code === 429;
 
-    // Detect Rate Limits (Quota)
-    if (errorMsg.includes("429") || errorMsg.toLowerCase().includes("quota") || errorMsg.toLowerCase().includes("rate limit")) {
+    if (isRateLimit) {
       return new Response(JSON.stringify({
-        error: "System Cool-down Required: The AI is currently processing a high volume of requests. Please wait about 60 seconds and try again.",
-        type: "RATE_LIMIT"
-      }), { status: 429 });
+        error: "Google Gemini Quota Exhausted: The system is under heavy load or the free-tier limit has been reached. Please try again in 60 seconds.",
+        type: "RATE_LIMIT",
+        source: "google_ai_sdk"
+      }), {
+        status: 429,
+        headers: { "Content-Type": "application/json", "Retry-After": "60" }
+      });
     }
 
     // Detect Overload/Server Issues
     if (errorMsg.includes("500") || errorMsg.includes("503") || errorMsg.toLowerCase().includes("overloaded")) {
       return new Response(JSON.stringify({
-        error: "Server Congestion: Nexus Intelligence servers are temporarily overloaded. Please try again in a few minutes.",
+        error: "AI Engine Overloaded: Google's servers are temporarily unable to process this request. Please try again shortly.",
         type: "SERVER_OVERLOAD"
       }), { status: 503 });
     }
 
     return new Response(JSON.stringify({
-      error: "Interface Error: A communication failure occurred between the client and the AI core. Ensure your connection is stable.",
+      error: "Intelligence Gateway Error: An unexpected failure occurred in the AI bridge.",
       details: errorMsg
     }), { status: 500 });
   }

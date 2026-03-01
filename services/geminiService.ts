@@ -5,16 +5,28 @@ import { ResumeAnalysisResult, DaySchedule, QuizQuestion } from "../types.ts";
 /**
  * Internal helper to communicate with the backend Gemini proxy
  */
-const callGeminiProxy = async (action: string, payload: any) => {
-  try {
-    const res = await fetch("/api/gemini", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, payload }),
-    });
+const callGeminiProxy = async (action: string, payload: any, retries = 3, delay = 2000) => {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const res = await fetch("/api/gemini", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, payload }),
+      });
 
-    if (!res.ok) {
+      if (res.ok) {
+        return await res.json();
+      }
+
       const errData = await res.json().catch(() => ({}));
+
+      // If it's a rate limit or server overload and we have retries left
+      if ((res.status === 429 || res.status === 503) && i < retries) {
+        const backoff = delay * Math.pow(2, i); // 2s, 4s, 8s
+        console.warn(`Gemini API rate limited (${res.status}). Retrying in ${backoff}ms... (Attempt ${i + 1}/${retries})`);
+        await new Promise(resolve => setTimeout(resolve, backoff));
+        continue;
+      }
 
       if (res.status === 429) {
         throw new Error(errData.error || "The AI is currently busy. Please wait a minute before trying again.");
@@ -25,14 +37,17 @@ const callGeminiProxy = async (action: string, payload: any) => {
       }
 
       throw new Error(errData.error || `Request failed with status ${res.status}. Please check your connection.`);
+    } catch (e: any) {
+      if (i === retries) {
+        if (e.message.includes('Failed to fetch')) {
+          throw new Error("Network Error: Could not reach the AI gateway. Please check your internet connection.");
+        }
+        throw e;
+      }
+      // For network errors, we also retry
+      console.warn(`Network error during Gemini call. Retrying... (Attempt ${i + 1}/${retries})`);
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
-
-    return await res.json();
-  } catch (e: any) {
-    if (e.message.includes('Failed to fetch')) {
-      throw new Error("Network Error: Could not reach the AI gateway. Please check your internet connection.");
-    }
-    throw e;
   }
 };
 
