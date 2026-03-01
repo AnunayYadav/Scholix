@@ -299,9 +299,9 @@ const AIToolsDirectory: React.FC = () => {
                             <div className="relative z-10 space-y-5">
                                 <div className="flex items-center justify-between">
                                     {tool.isHero ? (
-                                        <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-900 dark:bg-white rounded-full border border-white/10 dark:border-black/10 shadow-lg">
-                                            <span className="text-[7px] font-black text-white dark:text-slate-900 uppercase tracking-widest">Nexus Pick</span>
-                                            <span className="text-[10px] animate-pulse">✨</span>
+                                        <div className="flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-white/5 rounded-full border border-slate-200 dark:border-white/10 shadow-sm">
+                                            <span className="text-[7px] font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600 uppercase tracking-widest">Nexus Pick</span>
+                                            <span className="text-[10px]">✨</span>
                                         </div>
                                     ) : <div />}
                                     <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border ${tool.pricing === 'Free' ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5' :
