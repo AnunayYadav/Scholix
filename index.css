@@ -279,8 +279,25 @@ h4,
 }
 
 .nexus-modal {
-  @apply bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[28px] md:rounded-[40px] overflow-hidden flex flex-col my-auto transition-all animate-slide-up text-slate-900 dark:text-white max-h-[90vh];
+  background-color: white;
+  border: 1px solid rgba(226, 232, 240, 1);
+  border-radius: 28px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  transition: all 0.3s ease;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  color: #0f172a;
+  max-height: 90vh;
   box-shadow: 0 32px 128px rgba(0, 0, 0, 0.4);
+}
+
+.dark .nexus-modal {
+  background-color: #0a0a0a;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  box-shadow: 0 32px 128px rgba(0, 0, 0, 0.8);
 }
 
 .nexus-modal.closing {
@@ -294,7 +311,7 @@ h4,
 .shimmer {
   background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0) 100%);
   background-size: 200% 100%;
-  @apply animate-shimmer;
+  animation: shimmer 2s infinite linear;
 }
 
 .perspective-1000 {

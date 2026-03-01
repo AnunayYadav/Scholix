@@ -705,10 +705,16 @@ class NexusServer {
           onNotification(payload.new);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.warn('Realtime Notification Channel Error - Attempting reconnect...');
+        }
+      });
 
     return () => {
-      client.removeChannel(channel);
+      if (channel && channel.state !== 'closed') {
+        client.removeChannel(channel).catch(() => { /* ignore cleanup race conditions */ });
+      }
     };
   }
 
@@ -738,9 +744,17 @@ class NexusServer {
         { event: 'INSERT', schema: 'public', table: 'global_announcements' },
         (payload) => onAnnouncement(payload.new)
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.warn('Realtime Global Channel Error');
+        }
+      });
 
-    return () => client.removeChannel(channel);
+    return () => {
+      if (channel && channel.state !== 'closed') {
+        client.removeChannel(channel).catch(() => { /* ignore cleanup race conditions */ });
+      }
+    };
   }
 
   static async sendGlobalAnnouncement(title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', link?: string) {

@@ -5,7 +5,8 @@ import { ResumeAnalysisResult, DaySchedule, QuizQuestion } from "../types.ts";
 /**
  * Internal helper to communicate with the backend Gemini proxy
  */
-const callGeminiProxy = async (action: string, payload: any, retries = 3, delay = 2000) => {
+const callGeminiProxy = async (action: string, payload: any, retries = 7, delay = 3000) => {
+  console.log(`[Gemini Service v2.1] Initiating ${action} via Proxy...`);
   for (let i = 0; i <= retries; i++) {
     try {
       const res = await fetch("/api/gemini", {
@@ -22,8 +23,13 @@ const callGeminiProxy = async (action: string, payload: any, retries = 3, delay 
 
       // If it's a rate limit or server overload and we have retries left
       if ((res.status === 429 || res.status === 503) && i < retries) {
-        const backoff = delay * Math.pow(2, i); // 2s, 4s, 8s
-        console.warn(`Gemini API rate limited (${res.status}). Retrying in ${backoff}ms... (Attempt ${i + 1}/${retries})`);
+        // More aggressive exponential backoff for 429
+        const multiplier = res.status === 429 ? 2.5 : 2;
+        const jitter = Math.random() * 2000;
+        const backoff = (delay * Math.pow(multiplier, i)) + jitter;
+
+        console.warn(`[Gemini Core] ${res.status === 429 ? 'Rate Limit Trace' : 'Server Overload'}. Cooling down for ${Math.round(backoff / 1000)}s... (Attempt ${i + 1}/${retries})`);
+
         await new Promise(resolve => setTimeout(resolve, backoff));
         continue;
       }
