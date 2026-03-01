@@ -6,7 +6,6 @@ import { ResumeAnalysisResult, DaySchedule, QuizQuestion } from "../types.ts";
  * Internal helper to communicate with the backend Gemini proxy
  */
 const callGeminiProxy = async (action: string, payload: any, retries = 7, delay = 3000) => {
-  console.log(`[Gemini Service v2.1] Initiating ${action} via Proxy...`);
   for (let i = 0; i <= retries; i++) {
     try {
       const res = await fetch("/api/gemini", {
@@ -27,8 +26,6 @@ const callGeminiProxy = async (action: string, payload: any, retries = 7, delay 
         const multiplier = res.status === 429 ? 2.5 : 2;
         const jitter = Math.random() * 2000;
         const backoff = (delay * Math.pow(multiplier, i)) + jitter;
-
-        console.warn(`[Gemini Core] ${res.status === 429 ? 'Rate Limit Trace' : 'Server Overload'}. Cooling down for ${Math.round(backoff / 1000)}s... (Attempt ${i + 1}/${retries})`);
 
         await new Promise(resolve => setTimeout(resolve, backoff));
         continue;
@@ -51,7 +48,6 @@ const callGeminiProxy = async (action: string, payload: any, retries = 7, delay 
         throw e;
       }
       // For network errors, we also retry
-      console.warn(`Network error during Gemini call. Retrying... (Attempt ${i + 1}/${retries})`);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }

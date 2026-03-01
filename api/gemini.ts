@@ -27,7 +27,7 @@ export default async function handler(req: Request) {
     switch (action) {
       case "ANALYZE_RESUME": {
         const response = await ai.models.generateContent({
-          model: payload.deep ? "gemini-1.5-pro" : "gemini-1.5-flash",
+          model: payload.deep ? "gemini-1.5-pro" : "gemini-2.0-flash",
           contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
           config: {
             responseMimeType: "application/json",
@@ -41,7 +41,7 @@ export default async function handler(req: Request) {
 
       case "GENERATE_QUIZ": {
         const response = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-2.0-flash",
           contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
           config: {
             responseMimeType: "application/json",
@@ -55,7 +55,7 @@ export default async function handler(req: Request) {
 
       case "EXTRACT_TIMETABLE": {
         const response = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-2.0-flash",
           contents: [{
             role: 'user',
             parts: [
@@ -72,7 +72,6 @@ export default async function handler(req: Request) {
         responseText = response.text || "";
         break;
       }
-
 
       default:
         return new Response(JSON.stringify({ error: "Invalid protocol action requested." }), { status: 400 });
@@ -120,7 +119,11 @@ export default async function handler(req: Request) {
 
     return new Response(JSON.stringify({
       error: "Intelligence Gateway Error: An unexpected failure occurred in the AI bridge.",
-      details: errorMsg
+      details: errorMsg,
+      debug: {
+        status: error.status,
+        code: error.code
+      }
     }), { status: 500 });
   }
 }

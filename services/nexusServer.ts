@@ -705,11 +705,7 @@ class NexusServer {
           onNotification(payload.new);
         }
       )
-      .subscribe((status) => {
-        if (status === 'CHANNEL_ERROR') {
-          console.warn('Realtime Notification Channel Error - Attempting reconnect...');
-        }
-      });
+      .subscribe();
 
     return () => {
       if (channel && channel.state !== 'closed') {
@@ -744,11 +740,7 @@ class NexusServer {
         { event: 'INSERT', schema: 'public', table: 'global_announcements' },
         (payload) => onAnnouncement(payload.new)
       )
-      .subscribe((status) => {
-        if (status === 'CHANNEL_ERROR') {
-          console.warn('Realtime Global Channel Error');
-        }
-      });
+      .subscribe();
 
     return () => {
       if (channel && channel.state !== 'closed') {
