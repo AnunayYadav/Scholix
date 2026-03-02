@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { LibraryFile, UserProfile, Folder } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import PDFViewer from './PDFViewer.tsx';
+import NexusOriginals from './NexusOriginals.tsx';
 import NexusDropdown from './NexusDropdown.tsx';
 import { showToast, showConfirm } from './Toast.tsx';
 import {
@@ -60,7 +61,7 @@ interface ContentLibraryProps {
 const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialView = 'browse' }) => {
   const [allFiles, setAllFiles] = useState<LibraryFile[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
-  const [viewMode, setViewMode] = useState<'browse' | 'my-uploads'>(initialView);
+  const [viewMode, setViewMode] = useState<'browse' | 'my-uploads' | 'originals'>(initialView);
   const [isLoading, setIsLoading] = useState(true);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -524,7 +525,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-3xl font-bold text-slate-800 dark:text-white tracking-tighter leading-none mb-1">
-              Content <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Library</span> Hub
+              {viewMode === 'originals' ? (
+                <>Nexus <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Originals</span></>
+              ) : (
+                <>Content <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Library</span> Hub</>
+              )}
             </h2>
             {!isAdminView && !searchQuery && viewMode === 'browse' && (
               <nav className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-black tracking-widest text-slate-400">
@@ -542,152 +547,167 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 <button onClick={() => { setNewFolderName(''); setShowFolderModal(true); }} className="w-10 h-10 bg-slate-100 dark:bg-black rounded-xl flex items-center justify-center text-orange-600 hover:scale-110 active:scale-95 transition-all shadow-sm border-none" title="Create Folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg></button>
               </>
             )}
-            <button onClick={() => { setViewMode(viewMode === 'browse' ? 'my-uploads' : 'browse'); navigateTo(null, null, null); setIsAdminView(false); }} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'my-uploads' ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-black text-slate-400'}`} title={viewMode === 'my-uploads' ? "Exit Vault" : "My Vault"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></button>
+            <button
+              onClick={() => { setViewMode('originals'); navigateTo(null, null, null); setIsAdminView(false); }}
+              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'originals' ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-black text-slate-400'}`}
+              title="Nexus Originals"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+            </button>
+            <button onClick={() => { setViewMode(viewMode === 'my-uploads' ? 'browse' : 'my-uploads'); navigateTo(null, null, null); setIsAdminView(false); }} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'my-uploads' ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-black text-slate-400'}`} title={viewMode === 'my-uploads' ? "Exit Vault" : "My Vault"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></button>
             <button onClick={() => { if (!userProfile) { showToast("Sign in required.", "info"); return; } fileInputRef.current?.click(); }} className="px-5 py-2 bg-orange-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-orange-600/20 border-none hover:scale-105 active:scale-95 transition-all flex items-center gap-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>Contribute {pendingUploads.length > 0 && `(${pendingUploads.length})`}</button>
           </div>
         </header>
 
-        <div className="flex gap-2 w-full flex-col md:flex-row">
-          <div className="flex-1 flex gap-2">
-            <NexusDropdown
-              options={availablePrograms}
-              value={selectedProgram}
-              onChange={(val) => {
-                setSelectedProgram(val);
-                navigateTo(null, null, null);
-              }}
-              className="flex-shrink-0"
-              buttonClassName="!h-12 !py-0 !rounded-2xl"
-            />
-
-            <div className="relative flex-1">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-              <input
-                type="text"
-                placeholder="Filter files..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                autoCapitalize="none"
-                autoCorrect="off"
-                autoComplete="off"
-                spellCheck="false"
-                className="w-full pl-11 pr-4 h-12 bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white"
+        {viewMode !== 'originals' && (
+          <div className="flex gap-2 w-full flex-col md:flex-row">
+            <div className="flex-1 flex gap-2">
+              <NexusDropdown
+                options={availablePrograms}
+                value={selectedProgram}
+                onChange={(val) => {
+                  setSelectedProgram(val);
+                  navigateTo(null, null, null);
+                }}
+                className="flex-shrink-0"
+                buttonClassName="!h-12 !py-0 !rounded-2xl"
               />
+
+              <div className="relative flex-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                <input
+                  type="text"
+                  placeholder="Filter files..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  autoComplete="off"
+                  spellCheck="false"
+                  className="w-full pl-11 pr-4 h-12 bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white"
+                />
+              </div>
             </div>
+            <button onClick={() => fetchFromSource(true)} className="w-12 h-12 flex items-center justify-center bg-slate-100 dark:bg-black rounded-xl text-slate-400 hover:text-orange-600 transition-colors shadow-sm border-none self-end md:self-auto" title="Refresh List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></button>
           </div>
-          <button onClick={() => fetchFromSource(true)} className="w-12 h-12 flex items-center justify-center bg-slate-100 dark:bg-black rounded-xl text-slate-400 hover:text-orange-600 transition-colors shadow-sm border-none self-end md:self-auto" title="Refresh List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></button>
-        </div>
+        )}
 
-        {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">{Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)}</div>
-        ) : (
-          <div className="relative">
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={displayFiles.map(f => f.id)}
-                strategy={rectSortingStrategy}
-                disabled={!userProfile?.is_admin}
+        {viewMode !== 'originals' && (
+          isLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">{Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)}</div>
+          ) : (
+            <div className="relative">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
               >
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-                  {currentFolders.map(folder => (
-                    <div key={folder.id} onDragOver={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(folder.id); }} onDragLeave={() => setDraggingOverId(null)} onDrop={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(null); const droppedFiles = e.dataTransfer.files; if (droppedFiles && droppedFiles.length > 0) { handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : ''); } }} onClick={() => { if (folder.type === 'semester') navigateTo(folder, null, null); else if (folder.type === 'subject') navigateTo(activeSemester, folder, null); else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder); }} className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${draggingOverId === folder.id ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-slate-100 dark:border-white/5 bg-white dark:bg-black/40 hover:border-orange-500/50 hover:shadow-lg'}`}>
-                      {userProfile?.is_admin && (
-                        <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                          <button onClick={(e) => { e.stopPropagation(); setFolderToManage(folder); setNewFolderName(folder.name); setShowRenameModal(true); }} className="p-1.5 bg-slate-100 dark:bg-black rounded-lg text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
-                          <button onClick={(e) => handleDeleteFolder(folder, e)} className="p-1.5 bg-slate-100 dark:bg-black rounded-lg text-red-500 hover:bg-red dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
-                        </div>
-                      )}
-                      <FolderIcon type={folder.type} size="w-10 h-10" />
-                      <h3 className="text-sm md:text-base font-black text-slate-800 dark:text-white tracking-tight uppercase leading-tight mt-1">{folder.name}</h3>
-                      <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">
-                        {folderFileCounts[folder.id] || 0} File{folderFileCounts[folder.id] !== 1 ? 's' : ''}
-                      </p>
-                      <div className="absolute -right-2 -bottom-2 opacity-5 group-hover:scale-110 transition-transform"><FolderIcon type={folder.type} size="w-24 h-24" /></div>
-                    </div>
-                  ))}
-                  {displayFiles.map(file => (
-                    <FileCard
-                      key={file.id}
-                      file={file}
-                      userProfile={userProfile}
-                      isAdminMode={isAdminView}
-                      isPersonal={viewMode === 'my-uploads'}
-                      onApprove={async () => {
-                        setIsProcessing(true);
-                        try {
-                          // Ensure folders exist - fetch all to avoid filtering issues during admin check
-                          const allFolders = await NexusServer.fetchFolders('All');
-
-                          let semFolder = allFolders.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && f.program === file.program);
-                          if (!semFolder) {
-                            await NexusServer.createFolder(file.semester.trim(), 'semester', null, file.program);
-                            const fresh = await NexusServer.fetchFolders('All');
-                            semFolder = fresh.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && (f.program === file.program || f.program === 'All'));
-                          }
-
-                          let subjFolder = allFolders.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder?.id && f.program === file.program);
-                          if (!subjFolder && semFolder) {
-                            await NexusServer.createFolder(file.subject.trim(), 'subject', semFolder.id, file.program);
-                            const fresh = await NexusServer.fetchFolders('All');
-                            subjFolder = fresh.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder.id && (f.program === file.program || f.program === 'All'));
-                          }
-
-                          if (file.type && file.type.trim()) {
-                            let catFolder = allFolders.find(f => f.type === 'category' && f.name.trim() === file.type.trim() && f.parent_id === subjFolder?.id && f.program === file.program);
-                            if (!catFolder && subjFolder) {
-                              await NexusServer.createFolder(file.type.trim(), 'category', subjFolder.id, file.program);
-                            }
-                          }
-
-                          await NexusServer.approveFile(file.id);
-                          fetchFromSource(false);
-                        } catch (e: any) {
-                          showToast("Approval error: " + e.message, 'error');
-                        } finally {
-                          setIsProcessing(false);
-                        }
-                      }}
-                      onReject={async () => { const confirmed = await showConfirm("Reject and remove this file?"); if (confirmed) { setIsProcessing(true); NexusServer.rejectFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
-                      onDemote={async () => { const confirmed = await showConfirm("Send this file back to pending review?"); if (confirmed) { setIsProcessing(true); NexusServer.demoteFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
-                      onEdit={() => { setSelectedFile(file); setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type }); setShowEditModal(true); }}
-                      onDelete={async () => { const confirmed = await showConfirm("Permanently delete this file?"); if (confirmed) { setIsProcessing(true); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
-                      onAccess={() => handleFileAccess(file)}
-                      onShowDetails={() => { setSelectedFile(file); setShowDetailsModal(true); }}
-                    />
-                  ))}
-                  {displayFiles.length === 0 && currentFolders.length === 0 && !isLoading && <div className="col-span-full py-20 text-center text-slate-400 font-black uppercase text-[10px] tracking-[0.2em] opacity-40">No files found.</div>}
-                </div>
-              </SortableContext>
-
-              {createPortal(
-                <DragOverlay dropAnimation={{
-                  sideEffects: defaultDropAnimationSideEffects({
-                    styles: {
-                      active: {
-                        opacity: '0.4',
-                      },
-                    },
-                  }),
-                }}>
-                  {activeId ? (
-                    <div className="scale-105 shadow-2xl opacity-90 cursor-grabbing overflow-hidden rounded-[30px] border border-orange-500/50 bg-white dark:bg-black w-[200px] md:w-[220px]">
-                      <StaticFileCard
-                        file={displayFiles.find(f => f.id === activeId)!}
+                <SortableContext
+                  items={displayFiles.map(f => f.id)}
+                  strategy={rectSortingStrategy}
+                  disabled={!userProfile?.is_admin}
+                >
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+                    {currentFolders.map(folder => (
+                      <div key={folder.id} onDragOver={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(folder.id); }} onDragLeave={() => setDraggingOverId(null)} onDrop={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(null); const droppedFiles = e.dataTransfer.files; if (droppedFiles && droppedFiles.length > 0) { handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : ''); } }} onClick={() => { if (folder.type === 'semester') navigateTo(folder, null, null); else if (folder.type === 'subject') navigateTo(activeSemester, folder, null); else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder); }} className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${draggingOverId === folder.id ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-slate-100 dark:border-white/5 bg-white dark:bg-black/40 hover:border-orange-500/50 hover:shadow-lg'}`}>
+                        {userProfile?.is_admin && (
+                          <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                            <button onClick={(e) => { e.stopPropagation(); setFolderToManage(folder); setNewFolderName(folder.name); setShowRenameModal(true); }} className="p-1.5 bg-slate-100 dark:bg-black rounded-lg text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+                            <button onClick={(e) => handleDeleteFolder(folder, e)} className="p-1.5 bg-slate-100 dark:bg-black rounded-lg text-red-500 hover:bg-red dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+                          </div>
+                        )}
+                        <FolderIcon type={folder.type} size="w-10 h-10" />
+                        <h3 className="text-sm md:text-base font-black text-slate-800 dark:text-white tracking-tight uppercase leading-tight mt-1">{folder.name}</h3>
+                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">
+                          {folderFileCounts[folder.id] || 0} File{folderFileCounts[folder.id] !== 1 ? 's' : ''}
+                        </p>
+                        <div className="absolute -right-2 -bottom-2 opacity-5 group-hover:scale-110 transition-transform"><FolderIcon type={folder.type} size="w-24 h-24" /></div>
+                      </div>
+                    ))}
+                    {displayFiles.map(file => (
+                      <FileCard
+                        key={file.id}
+                        file={file}
                         userProfile={userProfile}
                         isAdminMode={isAdminView}
+                        isPersonal={viewMode === 'my-uploads'}
+                        onApprove={async () => {
+                          setIsProcessing(true);
+                          try {
+                            const allFolders = await NexusServer.fetchFolders('All');
+                            let semFolder = allFolders.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && f.program === file.program);
+                            if (!semFolder) {
+                              await NexusServer.createFolder(file.semester.trim(), 'semester', null, file.program);
+                              const fresh = await NexusServer.fetchFolders('All');
+                              semFolder = fresh.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && (f.program === file.program || f.program === 'All'));
+                            }
+                            let subjFolder = allFolders.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder?.id && f.program === file.program);
+                            if (!subjFolder && semFolder) {
+                              await NexusServer.createFolder(file.subject.trim(), 'subject', semFolder.id, file.program);
+                              const fresh = await NexusServer.fetchFolders('All');
+                              subjFolder = fresh.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder.id && (f.program === file.program || f.program === 'All'));
+                            }
+                            if (file.type && file.type.trim()) {
+                              let catFolder = allFolders.find(f => f.type === 'category' && f.name.trim() === file.type.trim() && f.parent_id === subjFolder?.id && f.program === file.program);
+                              if (!catFolder && subjFolder) {
+                                await NexusServer.createFolder(file.type.trim(), 'category', subjFolder.id, file.program);
+                              }
+                            }
+                            await NexusServer.approveFile(file.id);
+                            fetchFromSource(false);
+                          } catch (e: any) {
+                            showToast("Approval error: " + e.message, 'error');
+                          } finally {
+                            setIsProcessing(false);
+                          }
+                        }}
+                        onReject={async () => { const confirmed = await showConfirm("Reject and remove this file?"); if (confirmed) { setIsProcessing(true); NexusServer.rejectFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
+                        onDemote={async () => { const confirmed = await showConfirm("Send this file back to pending review?"); if (confirmed) { setIsProcessing(true); NexusServer.demoteFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
+                        onEdit={() => { setSelectedFile(file); setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type }); setShowEditModal(true); }}
+                        onDelete={async () => { const confirmed = await showConfirm("Permanently delete this file?"); if (confirmed) { setIsProcessing(true); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
+                        onAccess={() => handleFileAccess(file)}
+                        onShowDetails={() => { setSelectedFile(file); setShowDetailsModal(true); }}
                       />
-                    </div>
-                  ) : null}
-                </DragOverlay>,
-                document.body
-              )}
-            </DndContext>
-          </div>
+                    ))}
+                    {displayFiles.length === 0 && currentFolders.length === 0 && !isLoading && <div className="col-span-full py-20 text-center text-slate-400 font-black uppercase text-[10px] tracking-[0.2em] opacity-40">No files found.</div>}
+                  </div>
+                </SortableContext>
+                {createPortal(
+                  <DragOverlay dropAnimation={{
+                    sideEffects: defaultDropAnimationSideEffects({
+                      styles: {
+                        active: {
+                          opacity: '0.4',
+                        },
+                      },
+                    }),
+                  }}>
+                    {activeId ? (
+                      <div className="scale-105 shadow-2xl opacity-90 cursor-grabbing overflow-hidden rounded-[30px] border border-orange-500/50 bg-white dark:bg-black w-[200px] md:w-[220px]">
+                        <StaticFileCard
+                          file={displayFiles.find(f => f.id === activeId)!}
+                          userProfile={userProfile}
+                          isAdminMode={isAdminView}
+                        />
+                      </div>
+                    ) : null}
+                  </DragOverlay>,
+                  document.body
+                )}
+              </DndContext>
+            </div>
+          )
+        )}
+
+        {viewMode === 'originals' && (
+          <NexusOriginals
+            userProfile={userProfile}
+            activeSubject={activeSubject?.name || 'Search Subject'}
+            activeSemester={activeSemester?.name || 'All'}
+            activeProgram={selectedProgram}
+            onBack={() => setViewMode('browse')}
+          />
         )}
       </div>
 

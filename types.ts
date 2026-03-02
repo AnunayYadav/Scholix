@@ -202,6 +202,22 @@ export interface Flashcard {
   back: string;
 }
 
+export interface NexusOriginal {
+  id: string;
+  subject: string;
+  semester: string;
+  program: string;
+  ltp?: string;
+  credits?: string | number;
+  content: {
+    notes: { title: string; body: string; image?: string; unit?: number }[];
+    quizzes: QuizQuestion[];
+    flashcards: Flashcard[];
+  };
+  created_at: string;
+  last_updated: string;
+}
+
 export interface GroundingChunk {
   web?: {
     uri?: string;

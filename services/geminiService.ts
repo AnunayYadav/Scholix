@@ -277,4 +277,74 @@ export const extractTimetableFromImage = async (base64Image: string): Promise<Da
   return JSON.parse(data.text) as DaySchedule[];
 };
 
+/**
+ * Module: Nexus Originals
+ */
+export const generateSubjectOriginals = async (subjectName: string, syllabusText: string): Promise<any> => {
+  const prompt = `
+    TASK: GENERATE COMPREHENSIVE STUDY MATERIAL FOR THE SUBJECT: "${subjectName}".
+    
+    SYLLABUS CONTEXT:
+    ---
+    ${syllabusText.substring(0, 15000)}
+    ---
+
+    REQUIREMENTS:
+    1. CHAPTER-WISE NOTES: Generate 5 detailed summary notes covering the entire syllabus.
+    2. QUESTION BANK: Generate 10 high-quality MCQs (quizzes).
+    3. FLASHCARDS: Generate 10 flashcards for quick revision.
+    
+    GUIDELINES:
+    - Use professional, academic tone.
+    - Notes should be concise but cover key concepts.
+    - All content must be strictly related to "${subjectName}".
+  `;
+
+  const schema = {
+    type: Type.OBJECT,
+    properties: {
+      notes: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            title: { type: Type.STRING },
+            body: { type: Type.STRING, description: "Detailed Markdown content for the note" }
+          },
+          required: ["title", "body"]
+        }
+      },
+      quizzes: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            unit: { type: Type.INTEGER },
+            question: { type: Type.STRING },
+            options: { type: Type.ARRAY, items: { type: Type.STRING }, minItems: 4, maxItems: 4 },
+            correctAnswer: { type: Type.INTEGER },
+            explanation: { type: Type.STRING }
+          },
+          required: ["unit", "question", "options", "correctAnswer", "explanation"]
+        }
+      },
+      flashcards: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            front: { type: Type.STRING },
+            back: { type: Type.STRING }
+          },
+          required: ["front", "back"]
+        }
+      }
+    },
+    required: ["notes", "quizzes", "flashcards"]
+  };
+
+  const data = await callGeminiProxy("GENERATE_SUBJECT_ORIGINALS", { prompt, schema });
+  return JSON.parse(data.text);
+};
+
 

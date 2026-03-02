@@ -769,6 +769,38 @@ class NexusServer {
     const notifications = users.map(user => ({ user_id: user.id, title, message, type, link, read: false }));
     await client.from('notifications').insert(notifications);
   }
+
+  /**
+   * Nexus Originals Methods
+   */
+  static async fetchNexusOriginal(subject: string, semester: string, program: string): Promise<any | null> {
+    const client = getSupabase();
+    if (!client) return null;
+    const { data, error } = await client
+      .from('nexus_originals')
+      .select('*')
+      .eq('subject', subject)
+      .eq('semester', semester)
+      .eq('program', program)
+      .maybeSingle();
+    if (error && error.code !== 'PGRST116') {
+      console.error("Fetch Originals Error:", error);
+    }
+    return data;
+  }
+
+  static async upsertNexusOriginal(subject: string, semester: string, program: string, content: any) {
+    const client = getSupabase();
+    if (!client) return;
+    const { error } = await client.from('nexus_originals').upsert({
+      subject,
+      semester,
+      program,
+      content,
+      last_updated: new Date().toISOString()
+    }, { onConflict: 'subject,semester,program' });
+    if (error) throw error;
+  }
 }
 
 export default NexusServer;

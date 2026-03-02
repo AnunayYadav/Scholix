@@ -73,6 +73,20 @@ export default async function handler(req: Request) {
         break;
       }
 
+      case "GENERATE_SUBJECT_ORIGINALS": {
+        const response = await ai.models.generateContent({
+          model: "gemini-1.5-pro",
+          contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
+          config: {
+            responseMimeType: "application/json",
+            responseSchema: payload.schema,
+            temperature: 0.2,
+          },
+        });
+        responseText = response.text || "";
+        break;
+      }
+
       default:
         return new Response(JSON.stringify({ error: "Invalid protocol action requested." }), { status: 400 });
     }
