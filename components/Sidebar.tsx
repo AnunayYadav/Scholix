@@ -25,6 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const feedbackModalRef = useRef<HTMLDivElement>(null);
 
@@ -211,22 +212,35 @@ const Sidebar: React.FC<SidebarProps> = ({
         document.getElementById('modal-root') || document.body
       )}
 
-      <aside className={`
-        fixed inset-y-0 left-0 z-[40] w-64 transform transition-transform duration-300 ease-in-out
-        bg-white dark:bg-black border-r border-slate-200 dark:border-white/5
-        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:translate-x-0 md:sticky md:top-0 md:h-screen flex flex-col shadow-2xl md:shadow-none
-      `}>
+      <aside
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`
+          fixed inset-y-0 left-0 z-[40] transform transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
+          bg-white dark:bg-black border-r border-slate-200 dark:border-white/5
+          ${isMobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0 md:w-20'}
+          md:hover:w-64 md:sticky md:top-0 md:h-screen flex flex-col shadow-2xl md:shadow-none
+        `}
+      >
 
-        <div className="p-8 border-b border-slate-200 dark:border-white/5">
-          <h1 className="text-2xl font-black bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tighter cursor-pointer" onClick={() => setModule(ModuleType.DASHBOARD)}>
-            LPU-Nexus
-          </h1>
-          <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-600 mt-1">Your Student Hub</p>
+        <div className="h-20 flex items-center px-6 border-b border-slate-200 dark:border-white/5 overflow-hidden flex-shrink-0">
+          <div className="flex items-center w-full">
+            <img
+              src="/favicon.ico"
+              alt="LPU-Nexus Logo"
+              className="w-8 h-8 rounded-lg flex-shrink-0 shadow-lg shadow-orange-600/10 active:scale-90 transition-transform cursor-pointer"
+              onClick={() => setModule(ModuleType.DASHBOARD)}
+            />
+            <div className={`ml-4 transition-all duration-300 ease-out flex flex-col ${isHovered ? 'opacity-100 translate-x-0 visible' : 'opacity-0 -translate-x-4 invisible absolute'}`}>
+              <h1 className="text-xl font-black bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tighter whitespace-nowrap">
+                LPU-Nexus
+              </h1>
+              <p className="text-[8px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-600 whitespace-nowrap">Student Intelligence</p>
+            </div>
+          </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
-
+        <nav className="flex-1 p-3 space-y-2 overflow-y-auto no-scrollbar overflow-x-hidden">
           {navItems.map((item) => (
             <button
               key={item.id}
@@ -234,25 +248,50 @@ const Sidebar: React.FC<SidebarProps> = ({
                 setModule(item.id);
                 if (window.innerWidth < 768) toggleMobileMenu();
               }}
-              className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border-none text-left relative
+              className={`w-full h-12 flex items-center rounded-2xl border-none text-left relative group transition-all duration-300
                 ${currentModule === item.id
                   ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
                   : 'text-slate-600 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-slate-200'
                 }
               `}
             >
-              <div className="flex items-center space-x-3">
-                <span className="flex-shrink-0">{item.icon}</span>
-                <span className="font-bold text-sm tracking-tight">{item.label}</span>
+              <div className="flex items-center w-full px-3.5">
+                <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center transition-transform group-hover:scale-110">
+                  {item.icon}
+                </span>
+                <span className={`ml-4 font-bold text-sm tracking-tight whitespace-nowrap transition-all duration-300 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute'}`}>
+                  {item.label}
+                </span>
               </div>
+
+              {!isHovered && currentModule === item.id && (
+                <div className="absolute right-0 w-1 h-5 bg-white rounded-l-full animate-fade-in" />
+              )}
+
+              {!isHovered && (
+                <div className="absolute left-full ml-4 px-4 py-2 bg-slate-950/90 dark:bg-white text-white dark:text-black text-[12px] font-bold tracking-tight rounded-xl opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-2xl backdrop-blur-md">
+                  {item.label}
+                </div>
+              )}
             </button>
           ))}
         </nav>
 
-        <div className="p-6 border-t border-slate-200 dark:border-white/5 space-y-4">
-          <button onClick={() => setShowFeedbackModal(true)} className="w-full text-[10px] flex items-center justify-center space-x-2 text-slate-400 dark:text-slate-500 hover:text-orange-600 dark:hover:text-slate-200 py-3 transition-all font-black uppercase tracking-[0.2em] border border-transparent hover:border-orange-500/20 hover:bg-orange-600/5 rounded-2xl bg-transparent active:scale-95 group">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 transition-transform group-hover:rotate-12"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-            <span>Feedback</span>
+        <div className="p-2 border-t border-slate-200 dark:border-white/5 flex-shrink-0">
+          <button onClick={() => setShowFeedbackModal(true)} className="w-full h-10 flex items-center rounded-2xl border border-transparent hover:border-orange-500/20 hover:bg-orange-600/5 transition-all bg-transparent active:scale-95 group relative">
+            <div className="flex items-center w-full px-4">
+              <span className="flex-shrink-0 text-slate-400 dark:text-slate-500 group-hover:text-orange-600 transition-colors">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 transition-transform group-hover:rotate-12"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+              </span>
+              <span className={`ml-4 text-sm font-bold text-slate-400 dark:text-slate-500 group-hover:text-orange-600 transition-all duration-300 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute'}`}>
+                Feedback
+              </span>
+            </div>
+            {!isHovered && (
+              <div className="absolute left-full ml-4 px-4 py-2 bg-slate-950/90 dark:bg-white text-white dark:text-black text-[12px] font-bold tracking-tight rounded-xl opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-2xl backdrop-blur-md">
+                Feedback
+              </div>
+            )}
           </button>
         </div>
       </aside>

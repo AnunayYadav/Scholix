@@ -541,21 +541,25 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             )}
           </div>
           <div className="flex gap-2">
-            {userProfile?.is_admin && (
+            {viewMode !== 'originals' && (
               <>
-                <button onClick={toggleAdminView} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${isAdminView ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-black text-slate-400'}`} title={isAdminView ? "Exit Review Hub" : "Enter Review Hub"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></button>
-                <button onClick={() => { setNewFolderName(''); setShowFolderModal(true); }} className="w-10 h-10 bg-slate-100 dark:bg-black rounded-xl flex items-center justify-center text-orange-600 hover:scale-110 active:scale-95 transition-all shadow-sm border-none" title="Create Folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg></button>
+                {userProfile?.is_admin && (
+                  <>
+                    <button onClick={toggleAdminView} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${isAdminView ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-black text-slate-400'}`} title={isAdminView ? "Exit Review Hub" : "Enter Review Hub"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></button>
+                    <button onClick={() => { setNewFolderName(''); setShowFolderModal(true); }} className="w-10 h-10 bg-slate-100 dark:bg-black rounded-xl flex items-center justify-center text-orange-600 hover:scale-110 active:scale-95 transition-all shadow-sm border-none" title="Create Folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg></button>
+                  </>
+                )}
+                <button
+                  onClick={() => { setViewMode('originals'); navigateTo(null, null, null); setIsAdminView(false); }}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'originals' ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-black text-slate-400'}`}
+                  title="Nexus Originals"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                </button>
+                <button onClick={() => { setViewMode(viewMode === 'my-uploads' ? 'browse' : 'my-uploads'); navigateTo(null, null, null); setIsAdminView(false); }} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'my-uploads' ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-black text-slate-400'}`} title={viewMode === 'my-uploads' ? "Exit Vault" : "My Vault"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></button>
+                <button onClick={() => { if (!userProfile) { showToast("Sign in required.", "info"); return; } fileInputRef.current?.click(); }} className="px-5 py-2 bg-orange-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-orange-600/20 border-none hover:scale-105 active:scale-95 transition-all flex items-center gap-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>Contribute {pendingUploads.length > 0 && `(${pendingUploads.length})`}</button>
               </>
             )}
-            <button
-              onClick={() => { setViewMode('originals'); navigateTo(null, null, null); setIsAdminView(false); }}
-              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'originals' ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-black text-slate-400'}`}
-              title="Nexus Originals"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-            </button>
-            <button onClick={() => { setViewMode(viewMode === 'my-uploads' ? 'browse' : 'my-uploads'); navigateTo(null, null, null); setIsAdminView(false); }} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'my-uploads' ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-black text-slate-400'}`} title={viewMode === 'my-uploads' ? "Exit Vault" : "My Vault"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></button>
-            <button onClick={() => { if (!userProfile) { showToast("Sign in required.", "info"); return; } fileInputRef.current?.click(); }} className="px-5 py-2 bg-orange-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-orange-600/20 border-none hover:scale-105 active:scale-95 transition-all flex items-center gap-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>Contribute {pendingUploads.length > 0 && `(${pendingUploads.length})`}</button>
           </div>
         </header>
 
@@ -711,369 +715,379 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         )}
       </div>
 
-      {showDetailsModal && selectedFile && createPortal(
-        <div className={`modal-overlay ${isClosingDetails ? 'closing' : ''}`}
-          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) handleCloseDetails(); }}>
-          <div ref={modalRef} className={`nexus-modal w-full max-w-lg ${isClosingDetails ? 'closing' : ''}`}>
-            <header className="p-6 md:p-8 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-start justify-between">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-500 border border-orange-600/20">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+      {
+        showDetailsModal && selectedFile && createPortal(
+          <div className={`modal-overlay ${isClosingDetails ? 'closing' : ''}`}
+            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+            onClick={(e) => { if (e.target === e.currentTarget) handleCloseDetails(); }}>
+            <div ref={modalRef} className={`nexus-modal w-full max-w-lg ${isClosingDetails ? 'closing' : ''}`}>
+              <header className="p-6 md:p-8 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-start justify-between">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-500 border border-orange-600/20">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                    </div>
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white leading-tight">{selectedFile.name}</h3>
+                </div>
+                <button onClick={handleCloseDetails} className="p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+              </header>
+
+              <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 no-scrollbar">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { label: 'Semester', val: selectedFile.semester },
+                    { label: 'Subject', val: selectedFile.subject },
+                    { label: 'Category', val: selectedFile.type },
+                    { label: 'File Size', val: selectedFile.size }
+                  ].map((item, i) => (
+                    <div key={i} className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                      <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">{item.label}</p>
+                      <p className="text-xs font-black uppercase tracking-tight text-slate-800 dark:text-white">{item.val || 'N/A'}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Description</h4>
+                  <p className="text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed italic bg-slate-50 dark:bg-white/5 p-6 rounded-3xl border border-slate-100 dark:border-white/5">
+                    {selectedFile.description || "No description provided."}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between p-6 bg-orange-600/5 border border-orange-600/20 rounded-3xl">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center font-black text-xs">
+                      {selectedFile.uploader_username?.[0] || 'V'}
+                    </div>
+                    <div>
+                      <p className="text-[8px] font-black text-orange-600 uppercase tracking-widest">Uploader</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-xs font-black uppercase">@{selectedFile.uploader_username}</p>
+                        <VerifiedBadge isAdmin={selectedFile.uploader_is_admin} size="w-3.5 h-3.5" />
+                      </div>
+
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-black uppercase text-slate-800 dark:text-white">{new Date(selectedFile.uploadDate).toLocaleDateString()}</p>
                   </div>
                 </div>
-                <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white leading-tight">{selectedFile.name}</h3>
               </div>
-              <button onClick={handleCloseDetails} className="p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
-              </button>
-            </header>
 
-            <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 no-scrollbar">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                  { label: 'Semester', val: selectedFile.semester },
-                  { label: 'Subject', val: selectedFile.subject },
-                  { label: 'Category', val: selectedFile.type },
-                  { label: 'File Size', val: selectedFile.size }
-                ].map((item, i) => (
-                  <div key={i} className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">{item.label}</p>
-                    <p className="text-xs font-black uppercase tracking-tight text-slate-800 dark:text-white">{item.val || 'N/A'}</p>
+              <footer className="p-6 md:p-8 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-white/5 flex gap-4">
+                <button onClick={handleCloseDetails} className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">Discard</button>
+                {selectedFile.status === 'approved' && (
+                  <button onClick={() => { handleCloseDetails(); handleFileAccess(selectedFile); }} className="flex-[2] py-3 bg-orange-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">View Document ↗</button>
+                )}
+              </footer>
+            </div>
+          </div>,
+          document.getElementById('modal-root') || document.body
+        )
+      }
+
+      {
+        showFolderModal && userProfile?.is_admin && createPortal(
+          <div className={`modal-overlay ${isClosingFolder ? 'closing' : ''}`}
+            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+            onClick={(e) => { if (e.target === e.currentTarget) handleCloseFolder(); }}>
+            <div ref={modalRef} className={`nexus-modal w-full max-w-sm ${isClosingFolder ? 'closing' : ''}`}>
+              <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5"><h3 className="text-sm font-black uppercase tracking-widest">New Node</h3><button onClick={handleCloseFolder} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
+              <div className="p-6 space-y-4">
+                <input autoFocus placeholder="Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-black/60 p-4 rounded-xl font-bold border dark:border-white/10 text-sm dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
+                <button onClick={handleCreateFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Saving...' : 'Create Folder'}</button>
+              </div>
+            </div>
+          </div>,
+          document.getElementById('modal-root') || document.body
+        )
+      }
+
+      {
+        showRenameModal && userProfile?.is_admin && createPortal(
+          <div className={`modal-overlay ${isClosingRename ? 'closing' : ''}`}
+            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+            onClick={(e) => { if (e.target === e.currentTarget) handleCloseRename(); }}>
+            <div ref={modalRef} className={`nexus-modal w-full max-w-sm ${isClosingRename ? 'closing' : ''}`}>
+              <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5">
+                <h3 className="text-sm font-black uppercase tracking-widest">Rename Folder</h3>
+                <button onClick={handleCloseRename} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                <input autoFocus placeholder="New Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-black/60 p-4 rounded-xl font-bold border dark:border-white/10 text-sm dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
+                <button onClick={handleRenameFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Updating...' : 'Save Changes'}</button>
+              </div>
+            </div>
+          </div>,
+          document.getElementById('modal-root') || document.body
+        )
+      }
+
+      {
+        (showUploadModal || showEditModal) && createPortal(
+          <div className={`modal-overlay ${(showUploadModal ? isClosingUpload : isClosingEdit) ? 'closing' : ''}`}
+            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+            onClick={(e) => { if (e.target === e.currentTarget && !isProcessing) { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); } }}>
+            <div ref={modalRef} className={`nexus-modal w-full ${showUploadModal ? 'max-w-4xl' : 'max-w-sm'} overflow-hidden ${(showUploadModal ? isClosingUpload : isClosingEdit) ? 'closing' : ''}`}>
+              <header className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-black uppercase tracking-widest leading-none">{showUploadModal ? 'Contribute Library' : 'Metadata Edit'}</h3>
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-2">
+                    {showUploadModal ? `Batch Processing: ${pendingUploads.length} File${pendingUploads.length > 1 ? 's' : ''}` : 'Refine file parameters'}
+                  </p>
+                </div>
+                <button onClick={() => { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); }} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+              </header>
+
+
+              <div className={`flex flex-col md:flex-row flex-1 min-h-0 md:h-[60vh]`}>
+                {showUploadModal && (
+                  <div className="w-full md:w-64 border-r border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/10 overflow-y-auto no-scrollbar border-b md:border-b-0">
+                    <div className="p-4 space-y-2">
+                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest px-2 mb-3">Pending Files</p>
+                      {pendingUploads.map((up, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => switchActiveUpload(idx)}
+                          className={`w-full text-left p-4 rounded-2xl transition-all border-none relative group ${activeUploadIndex === idx ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'hover:bg-orange-500/5 text-slate-500 hover:text-orange-500'}`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeUploadIndex === idx ? 'bg-white/20' : 'bg-slate-100 dark:bg-black'}`}>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-black uppercase tracking-tight truncate">{up.name || up.file.name}</p>
+                              <p className={`text-[8px] font-bold opacity-60 truncate ${activeUploadIndex === idx ? 'text-white' : 'text-slate-400'}`}>{(up.file.size / 1024 / 1024).toFixed(2)} MB</p>
+                            </div>
+                            {activeUploadIndex === idx && (
+                              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full" />
+                            )}
+                          </div>
+                          {pendingUploads.length > 1 && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const nextUploads = pendingUploads.filter((_, i) => i !== idx);
+                                if (nextUploads.length === 0) {
+                                  setShowUploadModal(false);
+                                  setPendingUploads([]);
+                                } else {
+                                  setPendingUploads(nextUploads);
+                                  // Determine next index and immediately update metaForm from the NEW array
+                                  const nextIdx = activeUploadIndex === idx ? (idx === 0 ? 0 : idx - 1) : (activeUploadIndex > idx ? activeUploadIndex - 1 : activeUploadIndex);
+                                  const target = nextUploads[nextIdx];
+                                  if (target) {
+                                    setActiveUploadIndex(nextIdx);
+                                    setMetaForm({
+                                      name: target.name,
+                                      description: target.description,
+                                      semester: target.semester,
+                                      subject: target.subject,
+                                      type: target.type,
+                                      program: target.program
+                                    });
+                                  }
+                                }
+                              }}
+                              className="absolute top-2 right-2 p-1 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all border-none bg-transparent"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                            </button>
+                          )}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
+                )}
 
-              <div className="space-y-4">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Description</h4>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed italic bg-slate-50 dark:bg-white/5 p-6 rounded-3xl border border-slate-100 dark:border-white/5">
-                  {selectedFile.description || "No description provided."}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between p-6 bg-orange-600/5 border border-orange-600/20 rounded-3xl">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center font-black text-xs">
-                    {selectedFile.uploader_username?.[0] || 'V'}
-                  </div>
-                  <div>
-                    <p className="text-[8px] font-black text-orange-600 uppercase tracking-widest">Uploader</p>
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-xs font-black uppercase">@{selectedFile.uploader_username}</p>
-                      <VerifiedBadge isAdmin={selectedFile.uploader_is_admin} size="w-3.5 h-3.5" />
+                <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 custom-scrollbar bg-white dark:bg-black/20">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2 relative z-[95]">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Target Program</label>
+                      {!isCreatingNew.program ? (
+                        <NexusDropdown
+                          options={availablePrograms}
+                          value={metaForm.program}
+                          onChange={(val) => {
+                            setMetaForm({ ...metaForm, program: val, semester: '', subject: '', type: '' });
+                          }}
+                          placeholder="Select Program"
+                          className="w-full"
+                          renderCustomMenu={(close) => (
+                            <>
+                              {availablePrograms.map(opt => (
+                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, program: opt, semester: '', subject: '', type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.program === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                                  {opt}
+                                  {metaForm.program === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
+                                </button>
+                              ))}
+                              <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, program: true }); setMetaForm({ ...metaForm, program: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
+                                Add New Program
+                              </button>
+                            </>
+                          )}
+                        />
+                      ) : (
+                        <div className="flex gap-2">
+                          <input autoFocus placeholder="New Program..." value={metaForm.program} onChange={e => setMetaForm({ ...metaForm, program: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
+                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, program: false }); setMetaForm({ ...metaForm, program: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                        </div>
+                      )}
                     </div>
 
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-black uppercase text-slate-800 dark:text-white">{new Date(selectedFile.uploadDate).toLocaleDateString()}</p>
-                </div>
-              </div>
-            </div>
+                    <div className="space-y-2 relative z-[90]">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Document Title</label>
+                      <input value={metaForm.name} onChange={e => setMetaForm({ ...metaForm, name: e.target.value })} className="w-full bg-slate-100 dark:bg-black/40 p-4 rounded-2xl font-bold border border-transparent dark:border-white/5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all" />
+                    </div>
 
-            <footer className="p-6 md:p-8 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-white/5 flex gap-4">
-              <button onClick={handleCloseDetails} className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">Discard</button>
-              {selectedFile.status === 'approved' && (
-                <button onClick={() => { handleCloseDetails(); handleFileAccess(selectedFile); }} className="flex-[2] py-3 bg-orange-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">View Document ↗</button>
-              )}
-            </footer>
-          </div>
-        </div>,
-        document.getElementById('modal-root') || document.body
-      )}
-
-      {showFolderModal && userProfile?.is_admin && createPortal(
-        <div className={`modal-overlay ${isClosingFolder ? 'closing' : ''}`}
-          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) handleCloseFolder(); }}>
-          <div ref={modalRef} className={`nexus-modal w-full max-w-sm ${isClosingFolder ? 'closing' : ''}`}>
-            <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5"><h3 className="text-sm font-black uppercase tracking-widest">New Node</h3><button onClick={handleCloseFolder} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
-            <div className="p-6 space-y-4">
-              <input autoFocus placeholder="Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-black/60 p-4 rounded-xl font-bold border dark:border-white/10 text-sm dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
-              <button onClick={handleCreateFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Saving...' : 'Create Folder'}</button>
-            </div>
-          </div>
-        </div>,
-        document.getElementById('modal-root') || document.body
-      )}
-
-      {showRenameModal && userProfile?.is_admin && createPortal(
-        <div className={`modal-overlay ${isClosingRename ? 'closing' : ''}`}
-          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) handleCloseRename(); }}>
-          <div ref={modalRef} className={`nexus-modal w-full max-w-sm ${isClosingRename ? 'closing' : ''}`}>
-            <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5">
-              <h3 className="text-sm font-black uppercase tracking-widest">Rename Folder</h3>
-              <button onClick={handleCloseRename} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
-              </button>
-            </div>
-            <div className="p-6 space-y-4">
-              <input autoFocus placeholder="New Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-black/60 p-4 rounded-xl font-bold border dark:border-white/10 text-sm dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
-              <button onClick={handleRenameFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Updating...' : 'Save Changes'}</button>
-            </div>
-          </div>
-        </div>,
-        document.getElementById('modal-root') || document.body
-      )}
-
-      {(showUploadModal || showEditModal) && createPortal(
-        <div className={`modal-overlay ${(showUploadModal ? isClosingUpload : isClosingEdit) ? 'closing' : ''}`}
-          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
-          onClick={(e) => { if (e.target === e.currentTarget && !isProcessing) { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); } }}>
-          <div ref={modalRef} className={`nexus-modal w-full ${showUploadModal ? 'max-w-4xl' : 'max-w-sm'} overflow-hidden ${(showUploadModal ? isClosingUpload : isClosingEdit) ? 'closing' : ''}`}>
-            <header className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-black uppercase tracking-widest leading-none">{showUploadModal ? 'Contribute Library' : 'Metadata Edit'}</h3>
-                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-2">
-                  {showUploadModal ? `Batch Processing: ${pendingUploads.length} File${pendingUploads.length > 1 ? 's' : ''}` : 'Refine file parameters'}
-                </p>
-              </div>
-              <button onClick={() => { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); }} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
-              </button>
-            </header>
-
-
-            <div className={`flex flex-col md:flex-row flex-1 min-h-0 md:h-[60vh]`}>
-              {showUploadModal && (
-                <div className="w-full md:w-64 border-r border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/10 overflow-y-auto no-scrollbar border-b md:border-b-0">
-                  <div className="p-4 space-y-2">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest px-2 mb-3">Pending Files</p>
-                    {pendingUploads.map((up, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => switchActiveUpload(idx)}
-                        className={`w-full text-left p-4 rounded-2xl transition-all border-none relative group ${activeUploadIndex === idx ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'hover:bg-orange-500/5 text-slate-500 hover:text-orange-500'}`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeUploadIndex === idx ? 'bg-white/20' : 'bg-slate-100 dark:bg-black'}`}>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-[10px] font-black uppercase tracking-tight truncate">{up.name || up.file.name}</p>
-                            <p className={`text-[8px] font-bold opacity-60 truncate ${activeUploadIndex === idx ? 'text-white' : 'text-slate-400'}`}>{(up.file.size / 1024 / 1024).toFixed(2)} MB</p>
-                          </div>
-                          {activeUploadIndex === idx && (
-                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full" />
+                    <div className="space-y-2 relative z-[80]">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Semester</label>
+                      {!isCreatingNew.semester ? (
+                        <NexusDropdown
+                          options={modalSemesters}
+                          value={metaForm.semester}
+                          onChange={(val) => setMetaForm({ ...metaForm, semester: val, subject: '', type: '' })}
+                          placeholder="Select Semester"
+                          className="w-full"
+                          renderCustomMenu={(close) => (
+                            <>
+                              {modalSemesters.map(opt => (
+                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, semester: opt, subject: '', type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.semester === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                                  {opt}
+                                  {metaForm.semester === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
+                                </button>
+                              ))}
+                              <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, semester: true }); setMetaForm({ ...metaForm, semester: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
+                                Create New Folder
+                              </button>
+                            </>
                           )}
+                        />
+                      ) : (
+                        <div className="flex gap-2">
+                          <input autoFocus placeholder="New Sem..." value={metaForm.semester} onChange={e => setMetaForm({ ...metaForm, semester: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
+                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, semester: false }); setMetaForm({ ...metaForm, semester: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         </div>
-                        {pendingUploads.length > 1 && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const nextUploads = pendingUploads.filter((_, i) => i !== idx);
-                              if (nextUploads.length === 0) {
-                                setShowUploadModal(false);
-                                setPendingUploads([]);
-                              } else {
-                                setPendingUploads(nextUploads);
-                                // Determine next index and immediately update metaForm from the NEW array
-                                const nextIdx = activeUploadIndex === idx ? (idx === 0 ? 0 : idx - 1) : (activeUploadIndex > idx ? activeUploadIndex - 1 : activeUploadIndex);
-                                const target = nextUploads[nextIdx];
-                                if (target) {
-                                  setActiveUploadIndex(nextIdx);
-                                  setMetaForm({
-                                    name: target.name,
-                                    description: target.description,
-                                    semester: target.semester,
-                                    subject: target.subject,
-                                    type: target.type,
-                                    program: target.program
-                                  });
-                                }
-                              }
-                            }}
-                            className="absolute top-2 right-2 p-1 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all border-none bg-transparent"
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                          </button>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+                      )}
+                    </div>
 
-              <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 custom-scrollbar bg-white dark:bg-black/20">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2 relative z-[95]">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Target Program</label>
-                    {!isCreatingNew.program ? (
-                      <NexusDropdown
-                        options={availablePrograms}
-                        value={metaForm.program}
-                        onChange={(val) => {
-                          setMetaForm({ ...metaForm, program: val, semester: '', subject: '', type: '' });
-                        }}
-                        placeholder="Select Program"
-                        className="w-full"
-                        renderCustomMenu={(close) => (
-                          <>
-                            {availablePrograms.map(opt => (
-                              <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, program: opt, semester: '', subject: '', type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.program === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
-                                {opt}
-                                {metaForm.program === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
+                    <div className="space-y-2 relative z-[75]">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Subject</label>
+                      {!isCreatingNew.subject ? (
+                        <NexusDropdown
+                          options={modalSubjects}
+                          value={metaForm.subject}
+                          onChange={(val) => setMetaForm({ ...metaForm, subject: val, type: '' })}
+                          placeholder="Select Subject"
+                          className="w-full"
+                          renderCustomMenu={(close) => (
+                            <>
+                              {modalSubjects.map(opt => (
+                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, subject: opt, type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.subject === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                                  {opt}
+                                  {metaForm.subject === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
+                                </button>
+                              ))}
+                              <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, subject: true }); setMetaForm({ ...metaForm, subject: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
+                                Create New Folder
                               </button>
-                            ))}
-                            <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, program: true }); setMetaForm({ ...metaForm, program: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
-                              Add New Program
-                            </button>
-                          </>
-                        )}
-                      />
-                    ) : (
-                      <div className="flex gap-2">
-                        <input autoFocus placeholder="New Program..." value={metaForm.program} onChange={e => setMetaForm({ ...metaForm, program: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
-                        <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, program: false }); setMetaForm({ ...metaForm, program: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
-                      </div>
-                    )}
-                  </div>
+                            </>
+                          )}
+                        />
+                      ) : (
+                        <div className="flex gap-2">
+                          <input autoFocus placeholder="New Subject..." value={metaForm.subject} onChange={e => setMetaForm({ ...metaForm, subject: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
+                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, subject: false }); setMetaForm({ ...metaForm, subject: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                        </div>
+                      )}
+                    </div>
 
-                  <div className="space-y-2 relative z-[90]">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Document Title</label>
-                    <input value={metaForm.name} onChange={e => setMetaForm({ ...metaForm, name: e.target.value })} className="w-full bg-slate-100 dark:bg-black/40 p-4 rounded-2xl font-bold border border-transparent dark:border-white/5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all" />
-                  </div>
-
-                  <div className="space-y-2 relative z-[80]">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Semester</label>
-                    {!isCreatingNew.semester ? (
-                      <NexusDropdown
-                        options={modalSemesters}
-                        value={metaForm.semester}
-                        onChange={(val) => setMetaForm({ ...metaForm, semester: val, subject: '', type: '' })}
-                        placeholder="Select Semester"
-                        className="w-full"
-                        renderCustomMenu={(close) => (
-                          <>
-                            {modalSemesters.map(opt => (
-                              <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, semester: opt, subject: '', type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.semester === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
-                                {opt}
-                                {metaForm.semester === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
+                    <div className="space-y-2 relative z-[70]">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Category / Type</label>
+                      {!isCreatingNew.type ? (
+                        <NexusDropdown
+                          options={modalCategories}
+                          value={metaForm.type}
+                          onChange={(val) => setMetaForm({ ...metaForm, type: val })}
+                          placeholder="Select Category"
+                          className="w-full"
+                          renderCustomMenu={(close) => (
+                            <>
+                              {modalCategories.map(opt => (
+                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, type: opt }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.type === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                                  {opt}
+                                  {metaForm.type === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
+                                </button>
+                              ))}
+                              <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, type: true }); setMetaForm({ ...metaForm, type: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
+                                Create New Folder
                               </button>
-                            ))}
-                            <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, semester: true }); setMetaForm({ ...metaForm, semester: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
-                              Create New Folder
-                            </button>
-                          </>
-                        )}
-                      />
-                    ) : (
-                      <div className="flex gap-2">
-                        <input autoFocus placeholder="New Sem..." value={metaForm.semester} onChange={e => setMetaForm({ ...metaForm, semester: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
-                        <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, semester: false }); setMetaForm({ ...metaForm, semester: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
-                      </div>
-                    )}
-                  </div>
+                            </>
+                          )}
+                        />
+                      ) : (
+                        <div className="flex gap-2">
+                          <input autoFocus placeholder="New Category..." value={metaForm.type} onChange={e => setMetaForm({ ...metaForm, type: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
+                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, type: false }); setMetaForm({ ...metaForm, type: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                        </div>
+                      )}
+                    </div>
 
-                  <div className="space-y-2 relative z-[75]">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Subject</label>
-                    {!isCreatingNew.subject ? (
-                      <NexusDropdown
-                        options={modalSubjects}
-                        value={metaForm.subject}
-                        onChange={(val) => setMetaForm({ ...metaForm, subject: val, type: '' })}
-                        placeholder="Select Subject"
-                        className="w-full"
-                        renderCustomMenu={(close) => (
-                          <>
-                            {modalSubjects.map(opt => (
-                              <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, subject: opt, type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.subject === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
-                                {opt}
-                                {metaForm.subject === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
-                              </button>
-                            ))}
-                            <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, subject: true }); setMetaForm({ ...metaForm, subject: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
-                              Create New Folder
-                            </button>
-                          </>
-                        )}
-                      />
-                    ) : (
-                      <div className="flex gap-2">
-                        <input autoFocus placeholder="New Subject..." value={metaForm.subject} onChange={e => setMetaForm({ ...metaForm, subject: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
-                        <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, subject: false }); setMetaForm({ ...metaForm, subject: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-2 relative z-[70]">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Category / Type</label>
-                    {!isCreatingNew.type ? (
-                      <NexusDropdown
-                        options={modalCategories}
-                        value={metaForm.type}
-                        onChange={(val) => setMetaForm({ ...metaForm, type: val })}
-                        placeholder="Select Category"
-                        className="w-full"
-                        renderCustomMenu={(close) => (
-                          <>
-                            {modalCategories.map(opt => (
-                              <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, type: opt }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.type === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
-                                {opt}
-                                {metaForm.type === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
-                              </button>
-                            ))}
-                            <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, type: true }); setMetaForm({ ...metaForm, type: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
-                              Create New Folder
-                            </button>
-                          </>
-                        )}
-                      />
-                    ) : (
-                      <div className="flex gap-2">
-                        <input autoFocus placeholder="New Category..." value={metaForm.type} onChange={e => setMetaForm({ ...metaForm, type: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
-                        <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, type: false }); setMetaForm({ ...metaForm, type: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-2 relative z-[50] md:col-span-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Short Description</label>
-                    <textarea rows={2} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-slate-100 dark:bg-black/40 p-4 rounded-3xl font-medium border border-transparent dark:border-white/5 text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic text-xs transition-all" placeholder="Tell us more about this file..." />
+                    <div className="space-y-2 relative z-[50] md:col-span-2">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Short Description</label>
+                      <textarea rows={2} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-slate-100 dark:bg-black/40 p-4 rounded-3xl font-medium border border-transparent dark:border-white/5 text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic text-xs transition-all" placeholder="Tell us more about this file..." />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <footer className="p-6 md:p-8 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-white/5 flex flex-col md:flex-row gap-4">
-              {showUploadModal && (
+              <footer className="p-6 md:p-8 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-white/5 flex flex-col md:flex-row gap-4">
+                {showUploadModal && (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-6 py-4 bg-slate-100 dark:bg-black text-slate-400 hover:text-orange-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border-none"
+                  >
+                    Add More
+                  </button>
+                )}
                 <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-6 py-4 bg-slate-100 dark:bg-black text-slate-400 hover:text-orange-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border-none"
+                  onClick={showUploadModal ? handleUpload : handleEditSubmission}
+                  disabled={isProcessing || !metaForm.name || !metaForm.semester || !metaForm.subject || (showUploadModal && pendingUploads.some(u => !u.name || !u.semester || !u.subject))}
+                  className="flex-1 bg-orange-600 text-white py-4 rounded-[24px] font-black text-[10px] uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(234,88,12,0.3)] hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all border-none"
                 >
-                  Add More
+                  {isProcessing ? 'Processing Batch...' : showUploadModal ? `Upload ${pendingUploads.length} Item${pendingUploads.length > 1 ? 's' : ''}` : 'Update Record'}
                 </button>
-              )}
-              <button
-                onClick={showUploadModal ? handleUpload : handleEditSubmission}
-                disabled={isProcessing || !metaForm.name || !metaForm.semester || !metaForm.subject || (showUploadModal && pendingUploads.some(u => !u.name || !u.semester || !u.subject))}
-                className="flex-1 bg-orange-600 text-white py-4 rounded-[24px] font-black text-[10px] uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(234,88,12,0.3)] hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all border-none"
-              >
-                {isProcessing ? 'Processing Batch...' : showUploadModal ? `Upload ${pendingUploads.length} Item${pendingUploads.length > 1 ? 's' : ''}` : 'Update Record'}
-              </button>
-            </footer>
-          </div>
-        </div>,
-        document.getElementById('modal-root') || document.body
-      )}
+              </footer>
+            </div>
+          </div>,
+          document.getElementById('modal-root') || document.body
+        )
+      }
 
       <input type="file" ref={fileInputRef} className="hidden" multiple onChange={e => { const files = e.target.files; if (files && files.length > 0) handleFilesSelected(files); }} />
 
-      {viewerInfo.show && (
-        <PDFViewer
-          url={viewerInfo.url}
-          fileName={viewerInfo.name}
-          userProfile={userProfile}
-          onClose={() => setViewerInfo({ show: false, url: '', name: '' })}
-        />
-      )}
-    </div>
+      {
+        viewerInfo.show && (
+          <PDFViewer
+            url={viewerInfo.url}
+            fileName={viewerInfo.name}
+            userProfile={userProfile}
+            onClose={() => setViewerInfo({ show: false, url: '', name: '' })}
+          />
+        )
+      }
+    </div >
   );
 };
 

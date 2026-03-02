@@ -1,5 +1,4 @@
-
-import { NexusOriginal } from "../types";
+import { NexusOriginal } from "../types.ts";
 
 export const nexusOriginalsData: NexusOriginal[] = [
     {
@@ -13,271 +12,235 @@ export const nexusOriginalsData: NexusOriginal[] = [
             notes: [
                 {
                     unit: 1,
-                    title: "Unit I: Fundamentals & Semiconductor Devices",
-                    image: "/nexus-originals/ece249_unit1.png",
+                    title: "Unit I: Semiconductor Physics & BJT",
+                    image: "file:///C:/Users/ASUS/.gemini/antigravity/brain/385cb81f-3c0a-45ac-b5ba-d4f7d9c8e010/ece249_unit1_semiconductor_bjt_diagram_1772440128046.png",
                     body: `
-# Unit I: Fundamentals of Electrical Laws and Semiconductor Devices
+# Table of Contents
+[1. Semiconductor Physics](#semiconductor-physics)
+[2. Formation of P-N Junction](#pn-junction)
+[3. V-I Characteristics of Diode](#v-i-characteristics)
+[4. Zener Diode as Voltage Regulator](#zener-diode)
+[5. Bipolar Junction Transistors (BJT)](#bjt)
+[6. Transistor Characteristics (CE)](#transistor-characteristics)
+[7. Transistor as Amplifier & Switch](#applications)
 
-## 1. Fundamentals of Electrical Laws
-### Ohm's Law
-*   **Statement:** The current through a conductor between two points is directly proportional to the voltage across the two points, provided temperature and other physical conditions remain constant.
-*   **Formula:** $V = I \times R$
-*   **Key Components:** 
-    *   $V$: Voltage (Volts)
-    *   $I$: Current (Amperes)
-    *   $R$: Resistance (Ohms)
+# Semiconductor Physics
+Semiconductors are materials with electrical conductivity between that of a conductor and an insulator. The most common semiconductor material is **Silicon (Si)**.
 
-### Kirchhoff's Laws
-1.  **Kirchhoff's Current Law (KCL):** The total current entering a junction or node is exactly equal to the total current leaving that junction. (Conservation of Charge)
-2.  **Kirchhoff's Voltage Law (KVL):** The directed sum of electrical potential differences (voltage) around any closed loop is zero. (Conservation of Energy)
+## Intrinsic Semiconductors
+* **Intrinsic:** These are pure semiconductors without any added impurities. At $0 K$, they act as insulators. At room temperature, some covalent bonds break, creating electron-hole pairs.
+* **Carrier Concentration:** In intrinsic semiconductors, the number of electron density ($n$) equals hole density ($p$):
+$$ n = p = n_i $$
 
-### Voltage & Current Division Rules
-*   **Voltage Division Rule (VDR):** In a series circuit, voltage across a resistor is directly proportional to its resistance. $V_x = V_{total} \times (R_x / R_{total})$
-*   **Current Division Rule (CDR):** In a parallel circuit, current through a branch is inversely proportional to its resistance. $I_x = I_{total} \times (R_{total} / R_x)$
+## Extrinsic Semiconductors
+* **Extrinsic:** Created by adding a controlled amount of impurity atoms (doping).
+* **N-Type:** Formed by adding **Pentavalent** impurities (e.g., Phosphorus, Arsenic). Majority carriers are **Electrons**.
+* **P-Type:** Formed by adding **Trivalent** impurities (e.g., Boron, Aluminum). Majority carriers are **Holes**.
 
-## 2. Semiconductor Devices
-### Basics of Semiconductors
-*   **Intrinsic:** Pure semiconductor (e.g., Silicon, Germanium). No impurities.
-*   **Extrinsic:** Doped semiconductor. 
-    *   **N-type:** Doped with Pentavalent impurities (e.g., Phosphorus). Majority carriers: Electrons.
-    *   **P-type:** Doped with Trivalent impurities (e.g., Boron). Majority carriers: Holes.
+# Formation of P-N Junction
+When a P-type and N-type material are joined, a **Depletion Region** is formed at the junction due to the diffusion of carriers.
 
-### PN Junction Diode
-*   **Working:** Formed by joining P-type and N-type materials. A depletion region is formed at the junction.
-*   **Characteristics:**
-    *   **Forward Bias:** Conducts current easily (low resistance).
-    *   **Reverse Bias:** Blocks current flow (high resistance) until breakdown.
-*   **Applications:**
-    *   **Rectifier:** Converts AC to DC.
-    *   **Switch:** Controls the flow of current.
+* **Depletion Layer:** A region devoid of free charge carriers, acting as a potential barrier.
+* **Barrier Potential:** For Silicon, $V_0 \approx 0.7V$. For Germanium, $V_0 \approx 0.3V$.
 
-### Bipolar Junction Transistor (BJT)
-*   **Types:** NPN and PNP.
-*   **Terminals:** Emitter (E), Base (B), and Collector (C).
-*   **CE Configuration:** Common Emitter configuration is most common for amplification due to high voltage and current gain.
+# V-I Characteristics
+The Voltage-Current relationship of a diode is given by the diode equation:
 
-> **Key Takeaway:** Understanding the fundamental laws of electricity is crucial for analyzing any circuit, while semiconductor devices form the building blocks of modern electronics.
+$$ I = I_0(e^{\frac{V}{\eta V_T}} - 1) $$
 
-**Example:** Think of voltage as water pressure, current as the flow of water, and resistance as the width of the pipe. Ohm's law simply relates these three!
-          `
+Where:
+* $I$ = Diode current
+* $I_0$ = Reverse saturation current
+* $V$ = Applied voltage
+* $V_T$ = Thermal voltage ($\approx 26mV$ at room temperature)
+
+# Zener Diode 
+* **Zener Diode:** A heavily doped diode designed to operate in the reverse breakdown region.
+* **Voltage Regulation:** It maintains a constant voltage $V_Z$ across its terminals even when current changes.
+
+# Bipolar Junction Transistors (BJT)
+A BJT is a three-terminal semiconductor device that can act as an amplifier or a switch. Its terminals are **Emitter (E)**, **Base (B)**, and **Collector (C)**.
+
+* **Current Relationship:** The fundamental current equation for a BJT is:
+$$ I_E = I_B + I_C $$
+
+* **Common Emitter Gain ($\beta$):** 
+$$ \beta = \frac{I_C}{I_B} $$
+
+# Applications
+* **Transistor as an Amplifier:** Small changes in input $I_B$ lead to large changes in $I_C$. 
+* **Transistor as a Switch:** 
+    * **OFF State:** Operating in cut-off region.
+    * **ON State:** Operating in saturation region.
+
+> **Key Takeaway:** Semiconductors are the heart of modern electronics. Understanding the P-N junction leads to understanding diodes, while the BJT allows us to control and amplify electrical signals.
+`
                 },
                 {
                     unit: 2,
-                    title: "Unit II: Introduction to Arduino and Sensors",
+                    title: "Unit II: FET and Operational Amplifiers",
+                    image: "file:///C:/Users/ASUS/.gemini/antigravity/brain/385cb81f-3c0a-45ac-b5ba-d4f7d9c8e010/ece249_unit2_fet_opamp_diagram_1772440151493.png",
                     body: `
-# Unit II: Introduction of Arduino and Sensors
+# Table of Contents
+[1. Field Effect Transistors (FET)](#fet)
+[2. JFET Characteristics](#jfet)
+[3. MOSFET Overview](#mosfet)
+[4. Introduction to Op-Amp](#op-amp-basics)
+[5. Op-Amp Applications](#op-amp-applications)
 
-## 1. Signal Basics
-*   **Analog Signals:** Continuous signals that vary over time (e.g., temperature reading).
-*   **Digital Signals:** Discrete signals, typically high (1) or low (0) (e.g., light switch).
+# Field Effect Transistors (FET)
+FETs are unipolar devices where current is controlled by an electric field rather than current.
 
-## 2. Arduino Board
-*   **Overview:** An open-source electronics platform based on easy-to-use hardware and software.
-*   **Pin Configuration:**
-    *   **Digital Pins:** Used for digital input/output (Pins 0-13).
-    *   **Analog Input Pins:** Used for reading analog values (A0-A5).
-    *   **Power Pins:** 5V, 3.3V, GND, Vin.
-    *   **PWM Pins:** Pulse Width Modulation for varied output level (marked with ~).
+## JFET Characteristics
+* **Shockley's Equation:** The drain current $I_D$ is related to gate-source voltage $V_{GS}$ as:
+$$ I_D = I_{DSS} \left( 1 - \frac{V_{GS}}{V_P} \right)^2 $$
 
-## 3. Sensors
-### IR Sensor (Infrared)
-*   **Principle:** Emits IR light and detects its reflection to sense objects or color.
-*   **Application:** Obstacle detection, line following robots.
+Where:
+* $I_{DSS}$ = Short-circuit drain current
+* $V_P$ = Pinch-off voltage
 
-### LDR (Light Dependent Resistor)
-*   **Principle:** Resistance decreases as light intensity increases.
-*   **Application:** Automatic street lights.
+# MOSFET Overview
+* **Enhancement Mode:** Channel is created only when $V_{GS} > V_{Th}$.
+* **Depletion Mode:** Channel exists at $V_{GS} = 0$.
 
-### Ultrasonic Sensor (HC-SR04)
-*   **Principle:** Measures distance by sending sound waves and measuring the time taken for the echo to return.
-*   **Application:** Proximity sensing, distance measurement.
+# Introduction to Op-Amp
+* **Op-Amp:** A high-gain DC-coupled electronic voltage amplifier with differential inputs.
 
-### Temperature & Humidity Sensor (DHT11/DHT22)
-*   **Working:** Provides digital output calibrated for temperature and humidity.
-*   **Application:** Weather monitoring, HVAC systems.
+## Ideal Op-Amp Characteristics
+* **Open-loop Gain ($A_{OL}$):** $\infty$
+* **Input Impedance ($Z_{in}$):** $\infty$
+* **Output Impedance ($Z_{out}$):** $0$
 
-> **Key Takeaway:** Arduino acts as the "brain," while sensors act as the "eyes and ears" of an electronic project.
+# Op-Amp Applications
 
-**Example:** An automatic night light uses an LDR to sense darkness and then tells the Arduino to turn on an LED.
-          `
+## 1. Inverting Amplifier
+Output is $180^\circ$ out of phase with input.
+$$ V_{out} = -\left( \frac{R_f}{R_1} \right) V_{in} $$
+
+## 2. Non-Inverting Amplifier
+Output is in phase with input.
+$$ V_{out} = \left( 1 + \frac{R_f}{R_1} \right) V_{in} $$
+
+## 3. Integrator
+Output is the integral of the input voltage.
+$$ V_{out} = -\frac{1}{RC} \int V_{in} dt $$
+
+## 4. Differentiator
+Output is proportional to the rate of change of input.
+$$ V_{out} = -RC \frac{dV_{in}}{dt} $$
+
+> **Key Takeaway:** While BJTs are current-controlled, FETs offer superior input resistance. Op-Amps are versatile building blocks for analog signal processing.
+`
                 },
                 {
                     unit: 3,
-                    title: "Unit III: Number Systems and Logic Gates",
+                    title: "Unit III: Logic Gates & Combinational Circuits",
+                    image: "file:///C:/Users/ASUS/.gemini/antigravity/brain/385cb81f-3c0a-45ac-b5ba-d4f7d9c8e010/ece249_unit3_logic_gates_diagram_v2_1772440321841.png",
                     body: `
-# Unit III: Number System and Logic Gates
+# Table of Contents
+[1. Digital Logic Gates](#logic-gates)
+[2. Universal Gates](#universal-gates)
+[3. De Morgan's Theorem](#de-morgan)
+[4. Combinational Circuits](#combinational-circuits)
 
-## 1. Number Systems
-*   **Binary (Base 2):** 0, 1.
-*   **Octal (Base 8):** 0-7.
-*   **Decimal (Base 10):** 0-9.
-*   **Hexadecimal (Base 16):** 0-9, A-F.
-*   **Conversion:** Process of changing a number from one base to another (e.g., Decimal to Binary using successive division).
+# Digital Logic Gates
+* **AND Gate:** $Y = A \cdot B$
+* **OR Gate:** $Y = A + B$
+* **NOT Gate:** $Y = \overline{A}$
+* **XOR Gate:** $Y = A \oplus B$
 
-## 2. Digital Codes
-*   **B-G Conversion:** Binary to Gray code.
-*   **G-B Conversion:** Gray code to Binary.
-*   **Excess-3 & BCD:** Used for specific digital calculations and displays.
+# Universal Gates
+**NAND** and **NOR** gates are called Universal Gates because they can implement any other logic gate.
+* **NAND Expression:** $Y = \overline{A \cdot B}$
+* **NOR Expression:** $Y = \overline{A + B}$
 
-## 3. Binary Arithmetic
-*   **Addition:** Standard binary rules ($1+1=10$).
-*   **Subtraction using 2's Complement:** 
-    1. Find 2's complement of the number to be subtracted.
-    2. Add it to the other number.
-    3. Ignore carry if it exists (result is positive); if no carry, find 2's complement of result (result is negative).
+# De Morgan's Theorem
+Crucial for simplifying logic expressions:
+* **First Theorem:**
+$$ \overline{A \cdot B} = \overline{A} + \overline{B} $$
+* **Second Theorem:**
+$$ \overline{A + B} = \overline{A} \cdot \overline{B} $$
 
-## 4. Logic Gates & Boolean Algebra
-*   **Basic Gates:** AND, OR, NOT.
-*   **Universal Gates:** NAND, NOR (Can implement any basic gate).
-*   **Derived Gates:** XOR, XNOR.
-*   **Boolean Laws:** De Morgan's Theorem, Distributive Law, etc.
+# Combinational Circuits
+Circuits where output depends solely on current inputs.
 
-## 5. K-Map (Karnaugh Map)
-*   **Purpose:** Simplification of Boolean expressions.
-*   **Up to 4 variables:** Systematic way to group 1s (SOP) or 0s (POS) in a grid to find the minimal expression.
+## Full Adder Equations
+* **Sum ($S$):** $A \oplus B \oplus C_{in}$
+* **Carry-out ($C_{out}$):** $(A \cdot B) + (C_{in} \cdot (A \oplus B))$
 
-> **Key Takeaway:** Logic gates are the fundamental decision-makers in digital electronics, and K-maps provide a visual way to optimize them.
-          `
+> **Key Takeaway:** Logic gates manage digital decisions, while combinational circuits process input data immediately.
+`
                 },
                 {
                     unit: 4,
-                    title: "Unit IV: Combinational Logic Circuits",
+                    title: "Unit IV: Sequential Circuits & Arduino",
+                    image: "file:///C:/Users/ASUS/.gemini/antigravity/brain/385cb81f-3c0a-45ac-b5ba-d4f7d9c8e010/ece249_unit4_sequential_arduino_diagram_v2_1772440346693.png",
                     body: `
-# Unit IV: Introduction to Combinational Logic Circuits
+# Table of Contents
+[1. Sequential Logic Basics](#sequential-logic-basics)
+[2. Flip-Flops](#flip-flops)
+[3. Arduino Uno Architecture](#arduino-uno-architecture)
 
-## 1. What are Combinational Circuits?
-*   Circuits where the output at any time depends only on the current inputs. No memory involved.
+# Sequential Logic Basics
+* **Sequential Circuits:** Unlike combinational circuits, these have **memory**. Output depends on current inputs AND previous states.
 
-## 2. Common Combinational Circuits
-### Adders & Subtractors
-*   **Half Adder:** Adds 2 bits. Produces Sum and Carry.
-*   **Full Adder:** Adds 3 bits (including carry-in).
-*   **Half/Full Subtractor:** Performs subtraction producing Difference and Borrow.
+# Flip-Flops
+Memory elements that store 1 bit of data.
+* **SR Flip-Flop:** Set-Reset.
+* **JK Flip-Flop:** Universal flip-flop that eliminates SR invalid state.
+* **D Flip-Flop:** Data flip-flop.
+* **T Flip-Flop:** Toggle flip-flop.
 
-### Multiplexers (MUX)
-*   **Function:** Many-to-one. Selects one of many input signals and forwards it to a single output.
-*   **Application:** Data selection, signal routing.
+# Arduino Uno Architecture
+* **Microcontroller:** ATmega328P
+* **Clock Speed:** $16 MHz$
+* **Input Voltage:** $7-12 V$
 
-### De-multiplexers (DEMUX)
-*   **Function:** One-to-many. Takes a single input and routes it to one of many outputs.
+## Core Functions
+* **Reading Sensors:** \`analogRead(pin)\`, \`digitalRead(pin)\`
+* **Controlling Actuators:** \`analogWrite(pin, value)\`, \`digitalWrite(pin, state)\`
 
-### Decoders & Encoders
-*   **Decoder:** Converts $n$ input lines to $2^n$ output lines.
-*   **Encoder:** Converts $2^n$ input lines to $n$ output lines (Inverse of decoder).
-
-### Magnitude Comparator
-*   **Function:** Compares two binary numbers (A and B) and determines if $A>B$, $A<B$, or $A=B$.
-
-> **Key Takeaway:** Combinational circuits are used for processing data instantly without storing it.
-          `
-                },
-                {
-                    unit: 5,
-                    title: "Unit V: Sequential Logic Circuits",
-                    body: `
-# Unit V: Introduction to Sequential Logic Circuits
-
-## 1. What are Sequential Circuits?
-*   Circuits where output depends on current inputs AND past outputs (requires memory elements).
-
-## 2. Latches and Flip-Flops
-*   **Latch:** Level-triggered storage element.
-    *   **SR Latch:** Set-Reset. 
-    *   **D Latch:** Data latch.
-*   **Flip-Flop:** Edge-triggered storage element (changes state only on clock pulse).
-    *   **SR Flip-Flop:** Similar to SR latch but clocked.
-    *   **JK Flip-Flop:** "Universal" flip-flop, solves the invalid state issue of SR.
-    *   **D Flip-Flop:** Delay/Data flip-flop. State follows input.
-    *   **T Flip-Flop:** Toggle flip-flop. State flips on every clock if T=1.
-
-## 3. Master-Slave Flip-Flop
-*   Consists of two flip-flops (Master and Slave) connected together to eliminate "race around" conditions in JK flip-flops.
-
-## 4. Flip-Flop Conversion
-*   The process of converting one type of flip-flop into another (e.g., SR to JK) using additional logic gates.
-
-> **Key Takeaway:** Flip-flops are the basic building blocks of memory in digital systems.
-          `
-                },
-                {
-                    unit: 6,
-                    title: "Unit VI: Applications of Sequential Circuits",
-                    body: `
-# Unit VI: Applications of Sequential Circuits
-
-## 1. Registers
-*   A group of flip-flops used to store multiple bits of data.
-*   **Shift Registers:**
-    *   **SISO:** Serial-In Serial-Out.
-    *   **SIPO:** Serial-In Parallel-Out.
-    *   **PISO:** Parallel-In Serial-Out.
-    *   **PIPO:** Parallel-In Parallel-Out.
-
-## 2. Counters
-*   Circuits that cyclicly go through a sequence of states.
-*   **Asynchronous (Ripple) Counter:** Clock is applied only to the first flip-flop; others are triggered by the previous flip-flop's output.
-*   **Synchronous Counter:** Clock is applied simultaneously to all flip-flops. Higher speed.
-*   **Special Counters:**
-    *   **UP/DOWN Counter:** Can count in both directions.
-    *   **Mod-N Counter:** Counts up to N states (e.g., Mod-10 counts 0-9).
-    *   **Ring Counter:** A shift register with the last output fed back to the first.
-    *   **Johnson Counter:** Similar to ring counter but inverted feedback.
-
-> **Key Takeaway:** Registers store data, while counters track the sequence of events or time.
-          `
+> **Key Takeaway:** Sequential circuits provide memory, and Arduino provides the software-controlled platform to run them.
+`
                 }
             ],
             quizzes: [
                 {
                     unit: 1,
-                    question: "Which law states that the sum of voltages around a closed loop is zero?",
-                    options: ["Ohm's Law", "Kirchhoff's Voltage Law", "Kirchhoff's Current Law", "Coulomb's Law"],
-                    correctAnswer: 1,
-                    explanation: "KVL is based on the principle of conservation of energy."
+                    question: "What is the knee voltage for a Silicon diode?",
+                    options: ["0.3V", "0.5V", "0.7V", "1.1V"],
+                    correctAnswer: 2,
+                    explanation: "Silicon diodes generally start conducting after a barrier potential of 0.7V is overcome."
                 },
                 {
                     unit: 2,
-                    question: "Which sensor is commonly used for distance measurement in Arduino projects?",
-                    options: ["IR Sensor", "LDR", "Ultrasonic Sensor", "DHT11"],
-                    correctAnswer: 2,
-                    explanation: "Ultrasonic sensors use sound waves to measure distance."
+                    question: "In an ideal Op-Amp, what is the value of input impedance?",
+                    options: ["Zero", "1 kOhm", "1 MOhm", "Infinite"],
+                    correctAnswer: 3,
+                    explanation: "Ideal op-amps draw zero current from inputs, implying infinite input impedance."
                 },
                 {
                     unit: 3,
-                    question: "What is the 2's complement of binary 1010?",
-                    options: ["0110", "0101", "1011", "0111"],
-                    correctAnswer: 0,
-                    explanation: "1's complement of 1010 is 0101. Adding 1 gives 0110."
+                    question: "Which of these is a Universal Gate?",
+                    options: ["AND", "OR", "NAND", "XOR"],
+                    correctAnswer: 2,
+                    explanation: "NAND and NOR can be used to construct any other basic logic gate."
                 },
                 {
                     unit: 4,
-                    question: "Which combinational circuit is known as 'many-to-one'?",
-                    options: ["Decoder", "Encoder", "Multiplexer", "De-multiplexer"],
-                    correctAnswer: 2,
-                    explanation: "A Multiplexer (MUX) selects one from multiple inputs based on selection lines."
-                },
-                {
-                    unit: 5,
-                    question: "Which flip-flop toggle its state when the input is high?",
-                    options: ["SR Flip-flop", "D Flip-flop", "JK Flip-flop", "T Flip-flop"],
+                    question: "Which type of Flip-Flop is also called a Toggle Flip-Flop?",
+                    options: ["SR", "D", "JK", "T"],
                     correctAnswer: 3,
-                    explanation: "T stands for Toggle. If T=1, the state changes."
-                },
-                {
-                    unit: 6,
-                    question: "In which shift register is data loaded all at once but read bit-by-bit?",
-                    options: ["SISO", "SIPO", "PISO", "PIPO"],
-                    correctAnswer: 2,
-                    explanation: "PISO (Parallel-In Serial-Out) loads bits in parallel and shifts them out serially."
+                    explanation: "The T flip-flop 'toggles' its output on every active clock edge if T=1."
                 }
             ],
             flashcards: [
-                { front: "What does VDR stand for?", back: "Voltage Division Rule - used in series circuits to find voltage across a resistor." },
-                { front: "What is the majority carrier in P-type semiconductor?", back: "Holes" },
-                { front: "How many pins are typically on an Arduino Uno digital header?", back: "14 (0 to 13)" },
-                { front: "Which gate is called the universal gate?", back: "NAND or NOR" },
-                { front: "What is the main advantage of Master-Slave Flip-Flops?", back: "Eliminates race-around conditions in JK Flip-Flops." },
-                { front: "What is a Mod-8 counter?", back: "A counter that has 8 states, counting from 0 to 7." }
+                { front: "What is Doping?", back: "The intentional addition of impurities to a semiconductor to change its electrical properties." },
+                { front: "State Ohm's Law.", back: "V = I * R" },
+                { front: "What is a Transistor Beta (\u03B2)?", back: "The current gain of a BJT in CE configuration (Ic / Ib)." },
+                { front: "Equation for Inverting Op-Amp Gain?", back: "G = -Rf / R1" },
+                { front: "What is De Morgan's 1st Law?", back: "(A * B)' = A' + B'" },
+                { front: "What is a MOD-16 counter?", back: "A counter that counts 16 states (0 to 15)." }
             ]
         },
         created_at: new Date().toISOString(),
