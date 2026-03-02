@@ -212,6 +212,15 @@ const Sidebar: React.FC<SidebarProps> = ({
         document.getElementById('modal-root') || document.body
       )}
 
+      {/* Mobile sidebar backdrop */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-[30] bg-[#0a0a0a]/20 dark:bg-[#0a0a0a]/40 md:hidden transition-opacity duration-500 animate-fade-in"
+          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          onClick={toggleMobileMenu}
+        />
+      )}
+
       <aside
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
