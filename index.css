@@ -297,7 +297,7 @@ h4,
   flex-direction: column;
   margin: auto;
   transition: all 0.3s ease;
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   color: #0f172a;
   max-height: 90vh;
   box-shadow: 0 32px 128px rgba(0, 0, 0, 0.4);
