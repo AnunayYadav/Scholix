@@ -687,7 +687,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-8 space-y-6">
           {(!activeTimetable || !activeTimetable.schedule || activeTimetable.schedule.length === 0) ? (
-            <div className="glass-panel p-16 rounded-[48px] border-4 border-dashed border-slate-200 dark:border-white/5 flex flex-col items-center justify-center text-center bg-slate-100 dark:bg-black">
+            <div className="glass-panel p-16 rounded-[48px] border-4 border-dashed border-slate-200 dark:border-white/5 flex flex-col items-center justify-center text-center bg-slate-100 dark:bg-[#0a0a0a]">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-20 h-20 mb-6"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
               <h3 className="text-xl font-black uppercase tracking-tighter">No Schedule Data</h3>
               <p className="text-xs font-bold mt-2">Use a Batch Preset or Upload screenshots for {activeTimetable?.ownerName || (selectedEntityId === 'me' ? 'your profile' : 'this friend')}.</p>
@@ -700,7 +700,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {daySlotsWithBreaks.length === 0 ? (
-                  <div className="col-span-full p-10 bg-slate-50 dark:bg-black border border-slate-100 dark:border-white/5 rounded-[32px] text-center"><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No events found for {activeDay}.</p></div>
+                  <div className="col-span-full p-10 bg-slate-50 dark:bg-[#0a0a0a] border border-slate-100 dark:border-white/5 rounded-[32px] text-center"><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No events found for {activeDay}.</p></div>
                 ) : (
                   daySlotsWithBreaks.map(slot => {
                     const startMin = timeToMinutes(slot.startTime);
@@ -719,7 +719,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     }
 
                     return (
-                      <div key={slot.id} className={`group relative p-4 md:p-5 rounded-[24px] md:rounded-[32px] transition-all flex flex-col justify-between border ${isActive ? 'bg-orange-600/10 border-orange-500/60 shadow-2xl scale-[1.02] z-10' : isFinished ? 'bg-slate-50 dark:bg-black border-slate-100 dark:border-white/5 opacity-40 grayscale' : isBreak ? 'bg-slate-50/50 dark:bg-white/[0.02] border-dashed border-slate-200 dark:border-white/10' : 'bg-white dark:bg-black border-slate-100 dark:border-white/5 hover:border-orange-500/30'}`}>
+                      <div key={slot.id} className={`group relative p-4 md:p-5 rounded-[24px] md:rounded-[32px] transition-all flex flex-col justify-between border ${isActive ? 'bg-orange-600/10 border-orange-500/60 shadow-2xl scale-[1.02] z-10' : isFinished ? 'bg-slate-50 dark:bg-[#0a0a0a] border-slate-100 dark:border-white/5 opacity-40 grayscale' : isBreak ? 'bg-slate-50/50 dark:bg-white/[0.02] border-dashed border-slate-200 dark:border-white/10' : 'bg-white dark:bg-[#0a0a0a] border-slate-100 dark:border-white/5 hover:border-orange-500/30'}`}>
 
                         <div className="space-y-3 md:space-y-4">
                           <div className="flex flex-col md:flex-row justify-between items-start gap-2">
@@ -788,12 +788,12 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 blur-[60px] rounded-full pointer-events-none" />
           </div>
 
-          <div className="glass-panel p-8 rounded-[48px] border border-slate-200 dark:border-white/5 bg-white dark:bg-black">
+          <div className="glass-panel p-8 rounded-[48px] border border-slate-200 dark:border-white/5 bg-white dark:bg-[#0a0a0a]">
             <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6">Your Connections</h3>
             <div className="space-y-4">
               <div
                 onClick={() => setSelectedEntityId('me')}
-                className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedEntityId === 'me' ? 'bg-orange-600/10 border-orange-600' : 'bg-white dark:bg-black border-slate-200 dark:border-white/5 hover:border-orange-500/30'}`}
+                className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedEntityId === 'me' ? 'bg-orange-600/10 border-orange-600' : 'bg-white dark:bg-[#0a0a0a] border-slate-200 dark:border-white/5 hover:border-orange-500/30'}`}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8 h-8 rounded-full bg-orange-600 flex items-center justify-center font-black text-[10px] uppercase flex-shrink-0">{userProfile?.username?.[0] || 'M'}</div>
@@ -821,7 +821,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                 <div key={friend.ownerId} className="space-y-2">
                   <div
                     onClick={() => setSelectedEntityId(friend.ownerId)}
-                    className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedEntityId === friend.ownerId ? 'bg-blue-600/10 border-blue-600' : 'bg-white dark:bg-black border-slate-200 dark:border-white/5 hover:border-orange-500/30'}`}
+                    className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedEntityId === friend.ownerId ? 'bg-blue-600/10 border-blue-600' : 'bg-white dark:bg-[#0a0a0a] border-slate-200 dark:border-white/5 hover:border-orange-500/30'}`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-black text-[10px] uppercase flex-shrink-0">{friend.ownerName?.[0] || 'F'}</div>
@@ -915,11 +915,11 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
             <div className="p-8 pt-0 grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[8px] font-black uppercase tracking-widest text-slate-500 ml-1">Section Code</label>
-                <input type="text" placeholder="e.g. 325QB" value={metadata.section} onChange={e => setMetadata({ ...metadata, section: e.target.value.toUpperCase() })} className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all" />
+                <input type="text" placeholder="e.g. 325QB" value={metadata.section} onChange={e => setMetadata({ ...metadata, section: e.target.value.toUpperCase() })} className="w-full bg-slate-50 dark:bg-[#0a0a0a]/40 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all" />
               </div>
               <div className="space-y-2">
                 <label className="text-[8px] font-black uppercase tracking-widest text-slate-500 ml-1">Branch</label>
-                <input type="text" placeholder="e.g. CSE" value={metadata.branch} onChange={e => setMetadata({ ...metadata, branch: e.target.value.toUpperCase() })} className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all" />
+                <input type="text" placeholder="e.g. CSE" value={metadata.branch} onChange={e => setMetadata({ ...metadata, branch: e.target.value.toUpperCase() })} className="w-full bg-slate-50 dark:bg-[#0a0a0a]/40 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all" />
               </div>
               <div className="space-y-2 text-left">
                 <NexusDropdown
@@ -954,7 +954,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
           onClick={(e) => { if (e.target === e.currentTarget && !isProcessingAI) handleCloseUpload(); }}
         >
           <div className={`nexus-modal w-full max-w-sm ${isClosingUpload ? 'closing' : ''}`}>
-            <div className="p-8 text-center relative bg-slate-50 dark:bg-black/20 border-b border-slate-100 dark:border-white/5">
+            <div className="p-8 text-center relative bg-slate-50 dark:bg-[#0a0a0a]/20 border-b border-slate-100 dark:border-white/5">
               <button onClick={handleCloseUpload} className="absolute top-6 right-6 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>

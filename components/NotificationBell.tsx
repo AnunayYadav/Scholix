@@ -165,9 +165,9 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
             </button>
 
             {isOpen && (
-                <div className={`absolute right-0 mt-3 w-80 bg-white/90 dark:bg-[#0a0a0a]/90 border border-slate-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-[60] animate-fade-in backdrop-blur-xl transition-all duration-300 ${isClosing ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
+                <div className={`absolute right-[-10px] sm:right-0 mt-3 w-[calc(100vw-32px)] sm:w-80 max-w-[340px] bg-white/90 dark:bg-[#0a0a0a]/90 border border-slate-200 dark:border-white/10 rounded-[24px] sm:rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-[60] animate-fade-in backdrop-blur-xl transition-all duration-300 ${isClosing ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
                     <div className="px-5 py-3 border-b border-slate-100 dark:border-white/5 mb-2 flex items-center justify-between">
-                        <h3 className="text-[12px] font-black text-slate-800 dark:text-white uppercase tracking-wider">Updates</h3>
+                        <h3 className="text-[12px] font-bold text-slate-800 dark:text-white tracking-wider">Updates</h3>
                         {unreadCount > 0 && (
                             <button
                                 onClick={markAllAsRead}

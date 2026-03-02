@@ -476,7 +476,7 @@ const EmergencyContacts: React.FC = () => {
             </div>
 
             {/* Support Box */}
-            <div className="bg-slate-950 dark:bg-black p-8 md:p-10 rounded-[32px] md:rounded-[40px] border border-white/5 text-center relative overflow-hidden shadow-2xl">
+            <div className="bg-slate-950 dark:bg-[#0a0a0a] p-8 md:p-10 rounded-[32px] md:rounded-[40px] border border-white/5 text-center relative overflow-hidden shadow-2xl">
                 <div className="absolute inset-0 bg-gradient-to-tr from-orange-600/5 to-transparent opacity-50" />
                 <div className="relative z-10 space-y-3 md:space-y-4">
                     <h3 className="text-xl md:text-2xl font-black text-white tracking-tighter uppercase leading-none">Global Helpdesk</h3>

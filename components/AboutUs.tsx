@@ -117,7 +117,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
       </section>
 
       {/* Credit & Heritage Section */}
-      <section className="p-10 md:p-16 rounded-[60px] bg-white/[0.03] dark:bg-black/20 backdrop-blur-3xl text-slate-800 dark:text-white shadow-[0_32px_128px_rgba(0,0,0,0.5)] border border-white/10 relative overflow-hidden transition-all duration-700 group">
+      <section className="p-10 md:p-16 rounded-[60px] bg-white/[0.03] dark:bg-[#0a0a0a]/20 backdrop-blur-3xl text-slate-800 dark:text-white shadow-[0_32px_128px_rgba(0,0,0,0.5)] border border-white/10 relative overflow-hidden transition-all duration-700 group">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(249,115,22,0.05)_0%,transparent_70%)] pointer-events-none" />
         {/* Abstract Background Decor */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-600/10 blur-[120px] rounded-full -mr-32 -mt-32"></div>

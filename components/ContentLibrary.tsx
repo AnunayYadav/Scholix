@@ -46,7 +46,7 @@ const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' |
 };
 
 const SkeletonCard = () => (
-  <div className="group p-5 rounded-[30px] border border-slate-100 dark:border-white/5 bg-white dark:bg-black/40 relative overflow-hidden flex flex-col min-h-[140px]">
+  <div className="group p-5 rounded-[30px] border border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 relative overflow-hidden flex flex-col min-h-[140px]">
     <div className="w-10 h-10 skeleton-pulse rounded-xl mb-4" />
     <div className="h-4 w-3/4 skeleton-pulse rounded-md mb-2" />
     <div className="h-3 w-1/2 skeleton-pulse rounded-md" />
@@ -545,18 +545,18 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               <>
                 {userProfile?.is_admin && (
                   <>
-                    <button onClick={toggleAdminView} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${isAdminView ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-black text-slate-400'}`} title={isAdminView ? "Exit Review Hub" : "Enter Review Hub"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></button>
-                    <button onClick={() => { setNewFolderName(''); setShowFolderModal(true); }} className="w-10 h-10 bg-slate-100 dark:bg-black rounded-xl flex items-center justify-center text-orange-600 hover:scale-110 active:scale-95 transition-all shadow-sm border-none" title="Create Folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg></button>
+                    <button onClick={toggleAdminView} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${isAdminView ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-[#0a0a0a] text-slate-400'}`} title={isAdminView ? "Exit Review Hub" : "Enter Review Hub"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></button>
+                    <button onClick={() => { setNewFolderName(''); setShowFolderModal(true); }} className="w-10 h-10 bg-slate-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center text-orange-600 hover:scale-110 active:scale-95 transition-all shadow-sm border-none" title="Create Folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg></button>
                   </>
                 )}
                 <button
                   onClick={() => { setViewMode('originals'); navigateTo(null, null, null); setIsAdminView(false); }}
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'originals' ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-black text-slate-400'}`}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'originals' ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-[#0a0a0a] text-slate-400'}`}
                   title="Nexus Originals"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
                 </button>
-                <button onClick={() => { setViewMode(viewMode === 'my-uploads' ? 'browse' : 'my-uploads'); navigateTo(null, null, null); setIsAdminView(false); }} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'my-uploads' ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-black text-slate-400'}`} title={viewMode === 'my-uploads' ? "Exit Vault" : "My Vault"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></button>
+                <button onClick={() => { setViewMode(viewMode === 'my-uploads' ? 'browse' : 'my-uploads'); navigateTo(null, null, null); setIsAdminView(false); }} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'my-uploads' ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-[#0a0a0a] text-slate-400'}`} title={viewMode === 'my-uploads' ? "Exit Vault" : "My Vault"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></button>
                 <button onClick={() => { if (!userProfile) { showToast("Sign in required.", "info"); return; } fileInputRef.current?.click(); }} className="px-5 py-2 bg-orange-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-orange-600/20 border-none hover:scale-105 active:scale-95 transition-all flex items-center gap-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>Contribute {pendingUploads.length > 0 && `(${pendingUploads.length})`}</button>
               </>
             )}
@@ -588,11 +588,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   autoCorrect="off"
                   autoComplete="off"
                   spellCheck="false"
-                  className="w-full pl-11 pr-4 h-12 bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white"
+                  className="w-full pl-11 pr-4 h-12 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white"
                 />
               </div>
             </div>
-            <button onClick={() => fetchFromSource(true)} className="w-12 h-12 flex items-center justify-center bg-slate-100 dark:bg-black rounded-xl text-slate-400 hover:text-orange-600 transition-colors shadow-sm border-none self-end md:self-auto" title="Refresh List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></button>
+            <button onClick={() => fetchFromSource(true)} className="w-12 h-12 flex items-center justify-center bg-slate-100 dark:bg-[#0a0a0a] rounded-xl text-slate-400 hover:text-orange-600 transition-colors shadow-sm border-none self-end md:self-auto" title="Refresh List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></button>
           </div>
         )}
 
@@ -614,11 +614,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 >
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
                     {currentFolders.map(folder => (
-                      <div key={folder.id} onDragOver={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(folder.id); }} onDragLeave={() => setDraggingOverId(null)} onDrop={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(null); const droppedFiles = e.dataTransfer.files; if (droppedFiles && droppedFiles.length > 0) { handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : ''); } }} onClick={() => { if (folder.type === 'semester') navigateTo(folder, null, null); else if (folder.type === 'subject') navigateTo(activeSemester, folder, null); else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder); }} className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${draggingOverId === folder.id ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-slate-100 dark:border-white/5 bg-white dark:bg-black/40 hover:border-orange-500/50 hover:shadow-lg'}`}>
+                      <div key={folder.id} onDragOver={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(folder.id); }} onDragLeave={() => setDraggingOverId(null)} onDrop={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(null); const droppedFiles = e.dataTransfer.files; if (droppedFiles && droppedFiles.length > 0) { handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : ''); } }} onClick={() => { if (folder.type === 'semester') navigateTo(folder, null, null); else if (folder.type === 'subject') navigateTo(activeSemester, folder, null); else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder); }} className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${draggingOverId === folder.id ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-orange-500/50 hover:shadow-lg'}`}>
                         {userProfile?.is_admin && (
                           <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                            <button onClick={(e) => { e.stopPropagation(); setFolderToManage(folder); setNewFolderName(folder.name); setShowRenameModal(true); }} className="p-1.5 bg-slate-100 dark:bg-black rounded-lg text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
-                            <button onClick={(e) => handleDeleteFolder(folder, e)} className="p-1.5 bg-slate-100 dark:bg-black rounded-lg text-red-500 hover:bg-red dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+                            <button onClick={(e) => { e.stopPropagation(); setFolderToManage(folder); setNewFolderName(folder.name); setShowRenameModal(true); }} className="p-1.5 bg-slate-100 dark:bg-[#0a0a0a] rounded-lg text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+                            <button onClick={(e) => handleDeleteFolder(folder, e)} className="p-1.5 bg-slate-100 dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
                           </div>
                         )}
                         <FolderIcon type={folder.type} size="w-10 h-10" />
@@ -688,7 +688,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     }),
                   }}>
                     {activeId ? (
-                      <div className="scale-105 shadow-2xl opacity-90 cursor-grabbing overflow-hidden rounded-[30px] border border-orange-500/50 bg-white dark:bg-black w-[200px] md:w-[220px]">
+                      <div className="scale-105 shadow-2xl opacity-90 cursor-grabbing overflow-hidden rounded-[30px] border border-orange-500/50 bg-white dark:bg-[#0a0a0a] w-[200px] md:w-[220px]">
                         <StaticFileCard
                           file={displayFiles.find(f => f.id === activeId)!}
                           userProfile={userProfile}
@@ -721,7 +721,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
             onClick={(e) => { if (e.target === e.currentTarget) handleCloseDetails(); }}>
             <div ref={modalRef} className={`nexus-modal w-full max-w-lg ${isClosingDetails ? 'closing' : ''}`}>
-              <header className="p-6 md:p-8 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-start justify-between">
+              <header className="p-6 md:p-8 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#0a0a0a]/20 flex items-start justify-between">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-500 border border-orange-600/20">
@@ -752,7 +752,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
                 <div className="space-y-4">
                   <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Description</h4>
-                  <p className="text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed italic bg-slate-50 dark:bg-white/5 p-6 rounded-3xl border border-slate-100 dark:border-white/5">
+                  <p className="text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed italic bg-slate-50 dark:bg-[#0a0a0a]/5 p-6 rounded-3xl border border-slate-100 dark:border-white/5">
                     {selectedFile.description || "No description provided."}
                   </p>
                 </div>
@@ -777,7 +777,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 </div>
               </div>
 
-              <footer className="p-6 md:p-8 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-white/5 flex gap-4">
+              <footer className="p-6 md:p-8 bg-slate-50 dark:bg-[#0a0a0a]/20 border-t border-slate-100 dark:border-white/5 flex gap-4">
                 <button onClick={handleCloseDetails} className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">Discard</button>
                 {selectedFile.status === 'approved' && (
                   <button onClick={() => { handleCloseDetails(); handleFileAccess(selectedFile); }} className="flex-[2] py-3 bg-orange-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">View Document ↗</button>
@@ -795,9 +795,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
             onClick={(e) => { if (e.target === e.currentTarget) handleCloseFolder(); }}>
             <div ref={modalRef} className={`nexus-modal w-full max-w-sm ${isClosingFolder ? 'closing' : ''}`}>
-              <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5"><h3 className="text-sm font-black uppercase tracking-widest">New Node</h3><button onClick={handleCloseFolder} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
+              <div className="bg-slate-50 dark:bg-[#0a0a0a]/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5"><h3 className="text-sm font-black uppercase tracking-widest">New Node</h3><button onClick={handleCloseFolder} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
               <div className="p-6 space-y-4">
-                <input autoFocus placeholder="Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-black/60 p-4 rounded-xl font-bold border dark:border-white/10 text-sm dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
+                <input autoFocus placeholder="Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-[#0a0a0a]/60 p-4 rounded-xl font-bold border dark:border-white/10 text-sm dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
                 <button onClick={handleCreateFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Saving...' : 'Create Folder'}</button>
               </div>
             </div>
@@ -812,14 +812,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
             onClick={(e) => { if (e.target === e.currentTarget) handleCloseRename(); }}>
             <div ref={modalRef} className={`nexus-modal w-full max-w-sm ${isClosingRename ? 'closing' : ''}`}>
-              <div className="bg-slate-50 dark:bg-black/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5">
+              <div className="bg-slate-50 dark:bg-[#0a0a0a]/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5">
                 <h3 className="text-sm font-black uppercase tracking-widest">Rename Folder</h3>
                 <button onClick={handleCloseRename} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               </div>
               <div className="p-6 space-y-4">
-                <input autoFocus placeholder="New Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-black/60 p-4 rounded-xl font-bold border dark:border-white/10 text-sm dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
+                <input autoFocus placeholder="New Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-[#0a0a0a]/60 p-4 rounded-xl font-bold border dark:border-white/10 text-sm dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
                 <button onClick={handleRenameFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Updating...' : 'Save Changes'}</button>
               </div>
             </div>
@@ -834,7 +834,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
             onClick={(e) => { if (e.target === e.currentTarget && !isProcessing) { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); } }}>
             <div ref={modalRef} className={`nexus-modal w-full ${showUploadModal ? 'max-w-4xl' : 'max-w-sm'} overflow-hidden ${(showUploadModal ? isClosingUpload : isClosingEdit) ? 'closing' : ''}`}>
-              <header className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/20 flex items-center justify-between">
+              <header className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#0a0a0a]/20 flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-black uppercase tracking-widest leading-none">{showUploadModal ? 'Contribute Library' : 'Metadata Edit'}</h3>
                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-2">
@@ -849,7 +849,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
               <div className={`flex flex-col md:flex-row flex-1 min-h-0 md:h-[60vh]`}>
                 {showUploadModal && (
-                  <div className="w-full md:w-64 border-r border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/10 overflow-y-auto no-scrollbar border-b md:border-b-0">
+                  <div className="w-full md:w-64 border-r border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#0a0a0a]/10 overflow-y-auto no-scrollbar border-b md:border-b-0">
                     <div className="p-4 space-y-2">
                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest px-2 mb-3">Pending Files</p>
                       {pendingUploads.map((up, idx) => (
@@ -859,7 +859,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           className={`w-full text-left p-4 rounded-2xl transition-all border-none relative group ${activeUploadIndex === idx ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'hover:bg-orange-500/5 text-slate-500 hover:text-orange-500'}`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeUploadIndex === idx ? 'bg-white/20' : 'bg-slate-100 dark:bg-black'}`}>
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeUploadIndex === idx ? 'bg-white/20' : 'bg-slate-100 dark:bg-[#0a0a0a]'}`}>
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                             </div>
                             <div className="min-w-0">
@@ -907,7 +907,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   </div>
                 )}
 
-                <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 custom-scrollbar bg-white dark:bg-black/20">
+                <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 custom-scrollbar bg-white dark:bg-[#0a0a0a]/20">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2 relative z-[95]">
                       <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Target Program</label>
@@ -945,7 +945,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
                     <div className="space-y-2 relative z-[90]">
                       <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Document Title</label>
-                      <input value={metaForm.name} onChange={e => setMetaForm({ ...metaForm, name: e.target.value })} className="w-full bg-slate-100 dark:bg-black/40 p-4 rounded-2xl font-bold border border-transparent dark:border-white/5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all" />
+                      <input value={metaForm.name} onChange={e => setMetaForm({ ...metaForm, name: e.target.value })} className="w-full bg-slate-100 dark:bg-[#0a0a0a]/40 p-4 rounded-2xl font-bold border border-transparent dark:border-white/5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all" />
                     </div>
 
                     <div className="space-y-2 relative z-[80]">
@@ -1046,17 +1046,17 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
                     <div className="space-y-2 relative z-[50] md:col-span-2">
                       <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Short Description</label>
-                      <textarea rows={2} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-slate-100 dark:bg-black/40 p-4 rounded-3xl font-medium border border-transparent dark:border-white/5 text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic text-xs transition-all" placeholder="Tell us more about this file..." />
+                      <textarea rows={2} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-slate-100 dark:bg-[#0a0a0a]/40 p-4 rounded-3xl font-medium border border-transparent dark:border-white/5 text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic text-xs transition-all" placeholder="Tell us more about this file..." />
                     </div>
                   </div>
                 </div>
               </div>
 
-              <footer className="p-6 md:p-8 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-white/5 flex flex-col md:flex-row gap-4">
+              <footer className="p-6 md:p-8 bg-slate-50 dark:bg-[#0a0a0a]/20 border-t border-slate-100 dark:border-white/5 flex flex-col md:flex-row gap-4">
                 {showUploadModal && (
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-6 py-4 bg-slate-100 dark:bg-black text-slate-400 hover:text-orange-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border-none"
+                    className="px-6 py-4 bg-slate-100 dark:bg-[#0a0a0a] text-slate-400 hover:text-orange-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all border-none"
                   >
                     Add More
                   </button>
@@ -1133,10 +1133,10 @@ const FileCard: React.FC<{
       ref={setNodeRef}
       style={style}
       onClick={onShowDetails}
-      className={`group p-4 rounded-[30px] border border-slate-100 dark:border-white/5 bg-white dark:bg-[#0c0c0c] hover:border-orange-500 hover:shadow-xl transition-all relative overflow-hidden flex flex-col min-h-[140px] cursor-pointer ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
+      className={`group p-4 rounded-[30px] border border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a] hover:border-orange-500 hover:shadow-xl transition-all relative overflow-hidden flex flex-col min-h-[140px] cursor-pointer ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
     >
       <div className="flex items-start justify-between mb-2">
-        <div className="w-9 h-9 bg-slate-100 dark:bg-black rounded-xl flex items-center justify-center group-hover:text-orange-500 transition-colors">
+        <div className="w-9 h-9 bg-slate-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center group-hover:text-orange-500 transition-colors">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
         </div>
         {isAdmin && (
@@ -1158,34 +1158,34 @@ const FileCard: React.FC<{
           {isAdminMode ? (
             <div className="flex gap-1.5">
               {file.status !== 'approved' && (
-                <button onClick={(e) => { e.stopPropagation(); onApprove?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-black text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Approve">
+                <button onClick={(e) => { e.stopPropagation(); onApprove?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Approve">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><polyline points="20 6 9 17 4 12" /></svg>
                 </button>
               )}
-              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-black text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Edit Metadata">
+              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Edit Metadata">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
               </button>
-              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-slate-100 dark:bg-black text-blue-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-blue-500 hover:text-white transition-all border-none" title="View Document">
+              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-blue-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-blue-500 hover:text-white transition-all border-none" title="View Document">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
               </button>
               {file.status === 'approved' ? (
-                <button onClick={(e) => { e.stopPropagation(); onDemote?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-black text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Demote to Pending">
+                <button onClick={(e) => { e.stopPropagation(); onDemote?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Demote to Pending">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                 </button>
               ) : (
-                <button onClick={(e) => { e.stopPropagation(); onReject?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-black text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Reject & Remove">
+                <button onClick={(e) => { e.stopPropagation(); onReject?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Reject & Remove">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                 </button>
               )}
             </div>
           ) : isAdmin ? (
             <div className="flex gap-1.5">
-              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-black text-orange-600 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-600 hover:text-white transition-all border-none" title="Edit Metadata"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
-              <button onClick={(e) => { e.stopPropagation(); onDelete?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-black text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
-              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-slate-100 dark:bg-black text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Access File"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
+              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-orange-600 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-600 hover:text-white transition-all border-none" title="Edit Metadata"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+              <button onClick={(e) => { e.stopPropagation(); onDelete?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Access File"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
             </div>
           ) : (
-            <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="bg-slate-100 dark:bg-black text-orange-600 px-4 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-1.5 hover:bg-orange-600 hover:text-white transition-all shadow-md border-none">Access <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
+            <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="bg-slate-100 dark:bg-[#0a0a0a] text-orange-600 px-4 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-1.5 hover:bg-orange-600 hover:text-white transition-all shadow-md border-none">Access <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
           )}
         </div>
       </div>
@@ -1201,9 +1201,9 @@ const StaticFileCard: React.FC<{
 }> = ({ file, userProfile, isAdminMode }) => {
   const isAdmin = userProfile?.is_admin || false;
   return (
-    <div className="p-4 rounded-[30px] border border-orange-500 bg-white dark:bg-[#0c0c0c] flex flex-col min-h-[140px]">
+    <div className="p-4 rounded-[30px] border border-orange-500 bg-white dark:bg-[#0a0a0a] flex flex-col min-h-[140px]">
       <div className="flex items-start justify-between mb-2">
-        <div className="w-9 h-9 bg-slate-100 dark:bg-black rounded-xl flex items-center justify-center text-orange-500">
+        <div className="w-9 h-9 bg-slate-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center text-orange-500">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
         </div>
         {isAdmin && (

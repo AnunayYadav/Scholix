@@ -248,14 +248,24 @@ h4,
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 1.5rem !important;
-  z-index: 100000;
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  z-index: 100 !important;
+  background-color: rgba(15, 23, 42, 0.4) !important;
   backdrop-filter: blur(20px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
   animation: overlayFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  padding: 1.5rem !important;
   transform: translateZ(0);
   isolation: isolate;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  background-color: rgba(15, 23, 42, 0.3);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  animation: overlayFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .dark .modal-overlay {

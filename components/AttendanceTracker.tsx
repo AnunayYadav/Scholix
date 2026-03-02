@@ -19,7 +19,7 @@ interface HistoryItem {
 }
 
 const SubjectSkeleton = () => (
-  <div className="glass-panel p-5 md:p-8 rounded-[32px] md:rounded-[40px] border border-slate-200 dark:border-white/5 bg-white dark:bg-black/40 animate-pulse min-h-[160px]">
+  <div className="glass-panel p-5 md:p-8 rounded-[32px] md:rounded-[40px] border border-slate-200 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 animate-pulse min-h-[160px]">
     <div className="flex flex-col items-center mb-6">
       <div className="h-10 w-24 bg-slate-200 dark:bg-white/5 rounded-[22px] mb-3 shimmer" />
       <div className="h-6 w-32 bg-slate-200 dark:bg-white/5 rounded shimmer" />
@@ -258,7 +258,7 @@ const AttendanceTracker: React.FC = () => {
               ) : (
                 <button
                   onClick={(e) => { e.stopPropagation(); setWipingAll(true); }}
-                  className="flex items-center space-x-2 px-4 md:px-6 py-2.5 md:py-3 bg-slate-100 dark:bg-black rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                  className="flex items-center space-x-2 px-4 md:px-6 py-2.5 md:py-3 bg-slate-100 dark:bg-[#0a0a0a] rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 md:w-4 h-3.5 md:h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
                   <span>Clear All</span>
@@ -269,7 +269,7 @@ const AttendanceTracker: React.FC = () => {
 
           <button
             onClick={() => setShowArchived(!showArchived)}
-            className={`flex items-center space-x-2 px-4 md:px-6 py-2.5 md:py-3 rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${showArchived ? 'bg-orange-600 text-white' : 'bg-slate-100 dark:bg-black text-slate-600 dark:text-slate-400'}`}
+            className={`flex items-center space-x-2 px-4 md:px-6 py-2.5 md:py-3 rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${showArchived ? 'bg-orange-600 text-white' : 'bg-slate-100 dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400'}`}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 md:w-4 h-3.5 md:h-4"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
             <span>{showArchived ? 'Active Subjects' : 'Archived'}</span>
@@ -277,7 +277,7 @@ const AttendanceTracker: React.FC = () => {
         </div>
       </header>
 
-      <div className="glass-panel p-5 md:p-8 rounded-[32px] md:rounded-[40px] bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-white/5 shadow-2xl relative z-0">
+      <div className="glass-panel p-5 md:p-8 rounded-[32px] md:rounded-[40px] bg-white dark:bg-[#0a0a0a]/50 border border-slate-200 dark:border-white/5 shadow-2xl relative z-0">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 items-end">
           <div className="md:col-span-4">
             <label className="block text-[9px] md:text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">
@@ -291,7 +291,7 @@ const AttendanceTracker: React.FC = () => {
                 setNewSub({ ...newSub, name: e.target.value });
                 if (showValidation) setShowValidation(false);
               }}
-              className={`w-full bg-slate-100 dark:bg-black border rounded-2xl px-5 py-3.5 md:py-4 text-slate-800 dark:text-white outline-none transition-all font-bold text-sm shadow-inner ${showValidation && !newSub.name.trim()
+              className={`w-full bg-slate-100 dark:bg-[#0a0a0a] border rounded-2xl px-5 py-3.5 md:py-4 text-slate-800 dark:text-white outline-none transition-all font-bold text-sm shadow-inner ${showValidation && !newSub.name.trim()
                 ? 'border-red-500 ring-2 ring-red-500/20'
                 : 'border-transparent focus:ring-2 focus:ring-orange-600'
                 }`}
@@ -303,13 +303,13 @@ const AttendanceTracker: React.FC = () => {
               <input
                 type="number" placeholder="P" value={newSub.present}
                 onChange={(e) => setNewSub({ ...newSub, present: e.target.value })}
-                className="w-full bg-slate-100 dark:bg-black border border-transparent rounded-2xl px-3 py-3.5 md:py-4 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all text-sm text-center font-bold shadow-inner"
+                className="w-full bg-slate-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-3 py-3.5 md:py-4 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all text-sm text-center font-bold shadow-inner"
               />
               <span className="text-slate-400 font-black">/</span>
               <input
                 type="number" placeholder="T" value={newSub.total}
                 onChange={(e) => setNewSub({ ...newSub, total: e.target.value })}
-                className="w-full bg-slate-100 dark:bg-black border border-transparent rounded-2xl px-3 py-3.5 md:py-4 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all text-sm text-center font-bold shadow-inner"
+                className="w-full bg-slate-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-3 py-3.5 md:py-4 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all text-sm text-center font-bold shadow-inner"
               />
             </div>
           </div>
@@ -318,7 +318,7 @@ const AttendanceTracker: React.FC = () => {
             <input
               type="number" placeholder="75" value={newSub.goal}
               onChange={(e) => setNewSub({ ...newSub, goal: e.target.value })}
-              className="w-full bg-slate-100 dark:bg-black border border-transparent rounded-2xl px-5 py-3.5 md:py-4 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all text-sm text-center font-bold shadow-inner"
+              className="w-full bg-slate-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-5 py-3.5 md:py-4 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all text-sm text-center font-bold shadow-inner"
             />
           </div>
           <div className="md:col-span-3">
@@ -502,7 +502,7 @@ const AttendanceTracker: React.FC = () => {
           style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
           onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
         >
-          <div ref={editModalRef} className={`bg-white dark:bg-[#070707] rounded-[32px] md:rounded-[40px] w-full max-w-sm shadow-[0_32px_128px_rgba(0,0,0,0.8)] border border-slate-200 dark:border-white/10 relative overflow-hidden flex flex-col animate-slide-up ${isClosing ? 'closing' : ''}`}>
+          <div ref={editModalRef} className={`bg-white dark:bg-[#0a0a0a] rounded-[32px] md:rounded-[40px] w-full max-w-sm shadow-[0_32px_128px_rgba(0,0,0,0.8)] border border-slate-200 dark:border-white/10 relative overflow-hidden flex flex-col animate-slide-up ${isClosing ? 'closing' : ''}`}>
             <div className="bg-black p-6 md:p-7 text-white relative rounded-t-[32px] md:rounded-t-[40px] flex-shrink-0">
               <button onClick={handleClose} className="absolute top-5 right-5 md:top-6 md:right-6 p-2 text-white/50 hover:text-white transition-colors border-none bg-transparent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -518,7 +518,7 @@ const AttendanceTracker: React.FC = () => {
                   type="text"
                   value={editingSubject.name}
                   onChange={(e) => setEditingSubject({ ...editingSubject, name: e.target.value })}
-                  className="w-full bg-zinc-100 dark:bg-black p-3.5 md:p-4 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white"
+                  className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white"
                 />
               </div>
 
@@ -529,7 +529,7 @@ const AttendanceTracker: React.FC = () => {
                     type="number"
                     value={editingSubject.present}
                     onChange={(e) => setEditingSubject({ ...editingSubject, present: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-zinc-100 dark:bg-black p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white text-center"
+                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white text-center"
                   />
                 </div>
                 <div>
@@ -538,7 +538,7 @@ const AttendanceTracker: React.FC = () => {
                     type="number"
                     value={editingSubject.total}
                     onChange={(e) => setEditingSubject({ ...editingSubject, total: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-zinc-100 dark:bg-black p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white text-center"
+                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white text-center"
                   />
                 </div>
               </div>
@@ -549,7 +549,7 @@ const AttendanceTracker: React.FC = () => {
                   type="number"
                   value={editingSubject.goal}
                   onChange={(e) => setEditingSubject({ ...editingSubject, goal: parseInt(e.target.value) || 0 })}
-                  className="w-full bg-zinc-100 dark:bg-black p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white text-center"
+                  className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white text-center"
                 />
               </div>
 

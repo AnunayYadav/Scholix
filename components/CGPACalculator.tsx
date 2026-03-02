@@ -277,7 +277,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
           {history.length === 0 ? <p className="text-xs text-slate-400 font-bold py-8 text-center uppercase tracking-widest opacity-40">Vault empty.</p> : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {history.map(h => (
-                <div key={h.id} onClick={() => loadSnapshot(h)} className="p-5 bg-white dark:bg-black border border-slate-100 dark:border-white/5 rounded-3xl cursor-pointer hover:border-orange-500/50 transition-all flex items-center justify-between shadow-sm">
+                <div key={h.id} onClick={() => loadSnapshot(h)} className="p-5 bg-white dark:bg-[#0a0a0a] border border-slate-100 dark:border-white/5 rounded-3xl cursor-pointer hover:border-orange-500/50 transition-all flex items-center justify-between shadow-sm">
                   <div>
                     <p className="text-xs font-black uppercase tracking-tight dark:text-white">{h.label}</p>
                     <p className="text-[8px] font-bold text-slate-400 uppercase mt-1">{new Date(h.created_at).toLocaleDateString()}</p>
@@ -320,7 +320,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
                 value={prevCGPA}
                 onChange={(e) => setPrevCGPA(e.target.value)}
                 placeholder="e.g. 8.45"
-                className="w-full bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-sm font-black dark:text-white outline-none focus:ring-2 focus:ring-orange-600"
+                className="w-full bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-sm font-black dark:text-white outline-none focus:ring-2 focus:ring-orange-600"
               />
             </div>
             <div>
@@ -330,7 +330,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
                 value={prevTotalCredits}
                 onChange={(e) => setPrevTotalCredits(e.target.value)}
                 placeholder="e.g. 42"
-                className="w-full bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-sm font-black dark:text-white outline-none focus:ring-2 focus:ring-orange-600"
+                className="w-full bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-sm font-black dark:text-white outline-none focus:ring-2 focus:ring-orange-600"
               />
             </div>
           </div>
@@ -339,14 +339,14 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className="glass-panel p-8 rounded-[40px] space-y-6 shadow-sm border dark:border-white/5 bg-white dark:bg-black/40 relative">
+          <div className="glass-panel p-8 rounded-[40px] space-y-6 shadow-sm border dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 relative">
             <div className="flex items-center justify-between">
               <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Course Entries</h3>
               <button onClick={addCourse} className="text-[10px] font-black uppercase tracking-widest text-orange-600 bg-orange-600/5 hover:bg-orange-600/10 px-6 py-2.5 rounded-xl border border-orange-600/20 transition-all border-none">+ Add Field</button>
             </div>
             {courses.length === 0 ? <div className="py-16 text-center border-4 border-dashed border-slate-100 dark:border-white/5 rounded-[40px] opacity-40 uppercase font-black text-[10px] tracking-widest">Awaiting Registry Data</div> : (
               <div className="space-y-4">{courses.map((c) => (
-                <div key={c.id} className="flex flex-col md:flex-row items-center gap-4 bg-slate-50 dark:bg-black/40 p-5 rounded-[32px] border border-slate-100 dark:border-white/5 transition-all hover:border-orange-500/20">
+                <div key={c.id} className="flex flex-col md:flex-row items-center gap-4 bg-slate-50 dark:bg-[#0a0a0a]/40 p-5 rounded-[32px] border border-slate-100 dark:border-white/5 transition-all hover:border-orange-500/20">
                   <div className="flex-1 w-full">
                     <input type="text" placeholder="Course Name" value={c.name} onChange={(e) => updateCourse(c.id, 'name', e.target.value)} className="w-full bg-white dark:bg-white/5 border dark:border-white/10 rounded-2xl px-5 py-3 text-sm font-black dark:text-white outline-none focus:ring-2 focus:ring-orange-600/50" />
                   </div>
@@ -382,7 +382,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Forecast individual semester performance</p>
               </div>
               <div className="relative">
-                <input type="number" step="0.1" max="10" value={targetCGPA} onChange={(e) => setTargetCGPA(e.target.value)} className="w-28 bg-white dark:bg-black/60 border border-blue-500/30 rounded-2xl px-4 py-3 text-base text-center font-black text-blue-600 outline-none focus:ring-4 focus:ring-blue-500/10" placeholder="9.0" />
+                <input type="number" step="0.1" max="10" value={targetCGPA} onChange={(e) => setTargetCGPA(e.target.value)} className="w-28 bg-white dark:bg-[#0a0a0a]/60 border border-blue-500/30 rounded-2xl px-4 py-3 text-base text-center font-black text-blue-600 outline-none focus:ring-4 focus:ring-blue-500/10" placeholder="9.0" />
                 <span className="absolute -top-2 -right-2 w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center text-white text-[8px] font-black">!</span>
               </div>
             </header>
@@ -391,7 +391,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
               <div className="space-y-8 animate-fade-in">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {roadmapData.roadmap.map((item) => (
-                    <div key={item.sem} className={`p-5 rounded-[32px] border transition-all flex flex-col items-center justify-center text-center relative overflow-hidden ${item.isManual ? 'bg-orange-600/10 border-orange-600/30 shadow-lg' : 'bg-white dark:bg-black border-slate-100 dark:border-white/5'}`}>
+                    <div key={item.sem} className={`p-5 rounded-[32px] border transition-all flex flex-col items-center justify-center text-center relative overflow-hidden ${item.isManual ? 'bg-orange-600/10 border-orange-600/30 shadow-lg' : 'bg-white dark:bg-[#0a0a0a] border-slate-100 dark:border-white/5'}`}>
                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3">Sem {item.sem}</p>
 
                       <div className="flex items-center gap-3 relative z-10">
@@ -448,7 +448,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 blur-[60px] rounded-full group-hover:scale-125 transition-transform" />
           </div>
 
-          <div className="glass-panel p-10 rounded-[56px] text-center shadow-2xl bg-white dark:bg-black text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 relative overflow-hidden group">
+          <div className="glass-panel p-10 rounded-[56px] text-center shadow-2xl bg-white dark:bg-[#0a0a0a] text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 relative overflow-hidden group">
             <h3 className="text-[10px] font-black uppercase tracking-[0.4em] opacity-80 mb-4 relative z-10 text-slate-500 dark:text-white/60">Overall CGPA</h3>
             <p className="text-6xl font-black tracking-tighter mb-6 relative z-10">{overallCGPA}</p>
             <div className="h-2 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden relative z-10">
@@ -457,7 +457,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-orange-600/5 blur-[60px] rounded-full group-hover:scale-125 transition-transform" />
           </div>
 
-          <div className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/5 bg-white dark:bg-black/20">
+          <div className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/20">
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-100 dark:border-white/5 pb-4">Grade Pulse</h3>
             <div className="space-y-4">
               {/* Fix: Explicitly cast count to number as Object.entries value might be inferred as unknown */}
@@ -479,7 +479,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
         </div>
       </div>
 
-      <div className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/5 bg-white dark:bg-black/60 shadow-sm overflow-hidden">
+      <div className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/60 shadow-sm overflow-hidden">
         <header className="flex items-center justify-between mb-8">
           <h3 className="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em]">LPU Grading Standards</h3>
           <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-white/5 px-3 py-1 rounded-full">Standard Reference</span>
@@ -520,7 +520,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
             <h3 className="text-3xl font-black tracking-tighter uppercase mb-2 text-slate-900 dark:text-white leading-none">Share Report</h3>
             <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-8">Encrypted link generated for your academic snapshot.</p>
 
-            <div className="bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded-3xl p-6 mb-8 select-all break-all text-[11px] font-mono text-slate-600 dark:text-slate-400 leading-relaxed shadow-inner">
+            <div className="bg-slate-50 dark:bg-[#0a0a0a]/50 border border-slate-200 dark:border-white/10 rounded-3xl p-6 mb-8 select-all break-all text-[11px] font-mono text-slate-600 dark:text-slate-400 leading-relaxed shadow-inner">
               {shareUrl}
             </div>
 

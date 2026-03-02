@@ -123,7 +123,7 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                     <div className="flex items-center gap-3 w-full md:w-auto">
                         <button
                             onClick={() => navigate('/marketplace')}
-                            className="flex-1 md:flex-none p-3.5 rounded-2xl bg-white dark:bg-[#0c0c0c] border border-slate-200 dark:border-white/5 text-slate-400 hover:text-orange-500 transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2"
+                            className="flex-1 md:flex-none p-3.5 rounded-2xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 text-slate-400 hover:text-orange-500 transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2"
                             title="Back to Market"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><polyline points="15 18 9 12 15 6" /></svg>
@@ -150,7 +150,7 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             {loading ? (
                 <div className="space-y-4">
                     {Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="p-5 bg-white dark:bg-[#0c0c0c] rounded-[32px] border border-slate-200 dark:border-white/5 flex flex-col md:flex-row gap-5 items-start md:items-center">
+                        <div key={i} className="p-5 bg-white dark:bg-[#0a0a0a] rounded-[32px] border border-slate-200 dark:border-white/5 flex flex-col md:flex-row gap-5 items-start md:items-center">
                             <div className="w-10 h-10 rounded-[18px] skeleton-pulse shrink-0" />
                             <div className="flex-1 space-y-2.5 min-w-0">
                                 <div className="flex items-center gap-2">
@@ -170,13 +170,13 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             ) : (
                 <div className="space-y-4">
                     {filteredRequests.map(req => (
-                        <div key={req.id} className="group p-5 bg-white dark:bg-[#0c0c0c] rounded-[32px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 hover:shadow-xl transition-all duration-500 flex flex-col md:flex-row gap-5 items-start md:items-center relative overflow-hidden">
+                        <div key={req.id} className="group p-5 bg-white dark:bg-[#0a0a0a] rounded-[32px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 hover:shadow-xl transition-all duration-500 flex flex-col md:flex-row gap-5 items-start md:items-center relative overflow-hidden">
                             {req.user_id === userProfile?.id && (
                                 <div className="absolute top-3 right-3 flex gap-1 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => handleEdit(req)} className="p-1.5 bg-white/90 dark:bg-black/80 rounded-lg text-blue-500 hover:text-blue-600 shadow-sm border-none cursor-pointer backdrop-blur-md">
+                                    <button onClick={() => handleEdit(req)} className="p-1.5 bg-white/90 dark:bg-[#0a0a0a]/80 rounded-lg text-blue-500 hover:text-blue-600 shadow-sm border-none cursor-pointer backdrop-blur-md">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                                     </button>
-                                    <button onClick={() => handleDelete(req.id)} className="p-1.5 bg-white/90 dark:bg-black/80 rounded-lg text-red-500 hover:text-red-600 shadow-sm border-none cursor-pointer backdrop-blur-md">
+                                    <button onClick={() => handleDelete(req.id)} className="p-1.5 bg-white/90 dark:bg-[#0a0a0a]/80 rounded-lg text-red-500 hover:text-red-600 shadow-sm border-none cursor-pointer backdrop-blur-md">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
                                     </button>
                                 </div>

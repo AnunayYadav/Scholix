@@ -163,7 +163,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
       <div ref={modalRef} className={`nexus-modal w-full max-w-md mx-4 overflow-hidden ${isClosing ? 'closing' : ''}`}>
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-600/10 blur-[80px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
 
-        <div className="bg-white dark:bg-black p-8 md:p-10 text-center relative border-b border-slate-100 dark:border-white/5">
+        <div className="bg-white dark:bg-[#0a0a0a] p-8 md:p-10 text-center relative border-b border-slate-100 dark:border-white/5">
           <button onClick={handleClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-orange-500 transition-colors border-none bg-transparent active:scale-95">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
           </button>
@@ -203,7 +203,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                       <input
                         type="text" required value={identifier} onChange={e => setIdentifier(e.target.value)}
                         disabled={loading}
-                        className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                        className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
                         placeholder="Enter your registered email"
                       />
                     </div>
@@ -216,7 +216,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                       <input
                         type="password" required value={password} onChange={e => setPassword(e.target.value)}
                         disabled={loading}
-                        className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                        className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
                         placeholder="••••••••"
                       />
                     </div>
@@ -231,7 +231,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                       <input
                         type="text" required value={username} onChange={e => handleUsernameChange(e.target.value)}
                         disabled={loading}
-                        className={`w-full bg-slate-50 dark:bg-white/[0.03] pl-9 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white disabled:opacity-50 ${usernameStatus === 'available' ? 'border-emerald-500/50 ring-4 ring-emerald-500/5' :
+                        className={`w-full bg-slate-50 dark:bg-[#0a0a0a] pl-9 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white disabled:opacity-50 ${usernameStatus === 'available' ? 'border-emerald-500/50 ring-4 ring-emerald-500/5' :
                           usernameStatus === 'taken' ? 'border-red-500/50 ring-4 ring-red-500/5' : 'border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
                           }`}
                         placeholder="choose_a_tag"
@@ -251,7 +251,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                       <input
                         type="email" required value={email} onChange={e => setEmail(e.target.value)}
                         disabled={loading}
-                        className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                        className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
                         placeholder="name@lpu.in"
                       />
                     </div>
@@ -264,7 +264,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                       <input
                         type="text" required value={regNo} onChange={e => setRegNo(e.target.value.replace(/[^0-9]/g, '').slice(0, 8))}
                         disabled={loading}
-                        className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                        className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
                         placeholder="1240...."
                       />
                     </div>
@@ -277,7 +277,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                       <input
                         type="password" required value={password} onChange={e => setPassword(e.target.value)}
                         disabled={loading}
-                        className="w-full bg-slate-50 dark:bg-white/[0.03] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                        className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
                         placeholder="Min. 6 characters"
                       />
                     </div>

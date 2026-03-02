@@ -46,7 +46,7 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center gap-4 px-5 py-3 bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-2xl text-xs font-bold outline-none hover:border-orange-500/50 transition-all dark:text-white cursor-pointer min-w-[180px] justify-between group shadow-sm active:scale-95 ${buttonClassName}`}
+                className={`flex items-center gap-4 px-5 py-3 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-2xl text-xs font-bold outline-none hover:border-orange-500/50 transition-all dark:text-white cursor-pointer min-w-[180px] justify-between group shadow-sm active:scale-95 ${buttonClassName}`}
             >
                 <div className="flex items-center gap-3">
                     {icon && <span className="opacity-50">{icon}</span>}
@@ -66,7 +66,7 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
             </button>
 
             {isOpen && (
-                <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-[220px] bg-white/90 dark:bg-black/90 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-fade-in-up origin-top p-2 space-y-1">
+                <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-[220px] bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-fade-in-up origin-top p-2 space-y-1">
                     <div className="max-h-[300px] overflow-y-auto no-scrollbar">
                         {renderCustomMenu ? renderCustomMenu(() => setIsOpen(false)) : (
                             options.map(option => (

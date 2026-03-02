@@ -40,7 +40,7 @@ const IconAlert = () => (
 );
 
 const MealSkeleton = () => (
-  <div className="glass-panel rounded-2xl overflow-hidden border dark:border-white/5 bg-white dark:bg-black p-5 flex items-center space-x-4 animate-pulse">
+  <div className="glass-panel rounded-2xl overflow-hidden border dark:border-white/5 bg-white dark:bg-[#0a0a0a] p-5 flex items-center space-x-4 animate-pulse">
     <div className="w-12 h-12 rounded-2xl bg-slate-200 dark:bg-white/10 shimmer" />
     <div className="flex-1 space-y-2">
       <div className="h-3 w-1/4 bg-slate-200 dark:bg-white/10 rounded shimmer" />
@@ -348,7 +348,7 @@ const CampusNavigator: React.FC = () => {
                   placeholder="e.g., BH-1, GH-4, Sun Hostel"
                   value={reportForm.hostelName}
                   onChange={(e) => setReportForm(prev => ({ ...prev, hostelName: e.target.value }))}
-                  className="w-full px-5 py-4 rounded-2xl bg-slate-100 dark:bg-black border border-transparent dark:border-white/5 focus:ring-2 focus:ring-orange-500 outline-none text-slate-800 dark:text-slate-200 transition-all font-bold"
+                  className="w-full px-5 py-4 rounded-2xl bg-slate-100 dark:bg-[#0a0a0a] border border-transparent dark:border-white/5 focus:ring-2 focus:ring-orange-500 outline-none text-slate-800 dark:text-slate-200 transition-all font-bold"
                   required
                 />
               </div>
@@ -359,7 +359,7 @@ const CampusNavigator: React.FC = () => {
                   placeholder="e.g., Sunday breakfast items are swapped..."
                   value={reportForm.issueDetails}
                   onChange={(e) => setReportForm(prev => ({ ...prev, issueDetails: e.target.value }))}
-                  className="w-full h-32 px-5 py-4 rounded-2xl bg-slate-100 dark:bg-black border border-transparent dark:border-white/5 focus:ring-2 focus:ring-orange-500 outline-none text-slate-800 dark:text-slate-200 transition-all font-bold resize-none"
+                  className="w-full h-32 px-5 py-4 rounded-2xl bg-slate-100 dark:bg-[#0a0a0a] border border-transparent dark:border-white/5 focus:ring-2 focus:ring-orange-500 outline-none text-slate-800 dark:text-slate-200 transition-all font-bold resize-none"
                   required
                 />
               </div>
@@ -373,7 +373,7 @@ const CampusNavigator: React.FC = () => {
                     onChange={handleImageUpload}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   />
-                  <div className={`w-full py-6 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-black/40 flex flex-col items-center justify-center transition-all ${reportForm.imageProof ? 'border-orange-500 bg-orange-500/5' : 'group-hover:border-orange-500/50'}`}>
+                  <div className={`w-full py-6 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-[#0a0a0a]/40 flex flex-col items-center justify-center transition-all ${reportForm.imageProof ? 'border-orange-500 bg-orange-500/5' : 'group-hover:border-orange-500/50'}`}>
                     {reportForm.imageProof ? (
                       <div className="flex flex-col items-center">
                         <img src={reportForm.imageProof} alt="Proof" className="h-16 w-16 object-cover rounded-lg mb-2 shadow-lg" />

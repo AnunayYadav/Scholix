@@ -218,7 +218,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                     <input
                       type="text" value={form.username}
                       onChange={(e) => setForm({ ...form, username: e.target.value })}
-                      className="w-full bg-slate-50 dark:bg-black/40 pl-11 pr-5 py-5 rounded-[24px] text-sm font-bold border border-slate-200/50 dark:border-white/5 focus:border-orange-600/30 focus:ring-4 focus:ring-orange-600/10 outline-none text-slate-900 dark:text-white transition-all shadow-inner placeholder:text-slate-300 dark:placeholder:text-slate-700 hover:border-orange-500/20"
+                      className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-5 py-5 rounded-[24px] text-sm font-bold border border-slate-200/50 dark:border-white/5 focus:border-orange-600/30 focus:ring-4 focus:ring-orange-600/10 outline-none text-slate-900 dark:text-white transition-all shadow-inner placeholder:text-slate-300 dark:placeholder:text-slate-700 hover:border-orange-500/20"
                       placeholder="alias_verto"
                     />
                   </div>
@@ -242,7 +242,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                     <input
                       type="text" value={form.program} placeholder="e.g. B.Tech Computer Science"
                       onChange={(e) => setForm({ ...form, program: e.target.value })}
-                      className="w-full bg-slate-50 dark:bg-black/40 pl-14 pr-5 py-5 rounded-[24px] text-sm font-bold border border-slate-200/50 dark:border-white/5 focus:border-orange-600/30 focus:ring-4 focus:ring-orange-600/10 outline-none text-slate-900 dark:text-white transition-all shadow-inner placeholder:text-slate-300 dark:placeholder:text-slate-700 hover:border-orange-500/20"
+                      className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-14 pr-5 py-5 rounded-[24px] text-sm font-bold border border-slate-200/50 dark:border-white/5 focus:border-orange-600/30 focus:ring-4 focus:ring-orange-600/10 outline-none text-slate-900 dark:text-white transition-all shadow-inner placeholder:text-slate-300 dark:placeholder:text-slate-700 hover:border-orange-500/20"
                     />
                   </div>
                 </div>
@@ -255,7 +255,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                     <input
                       type="text" value={form.registration_number} placeholder="1241...."
                       onChange={(e) => setForm({ ...form, registration_number: e.target.value.replace(/[^0-9]/g, '').slice(0, 8) })}
-                      className="w-full bg-slate-50 dark:bg-black/40 px-5 py-5 rounded-[24px] text-sm font-bold border border-slate-200/50 dark:border-white/5 focus:border-orange-600/30 focus:ring-4 focus:ring-orange-600/10 outline-none text-slate-900 dark:text-white transition-all shadow-inner placeholder:text-slate-300 dark:placeholder:text-slate-700 hover:border-orange-500/20"
+                      className="w-full bg-slate-50 dark:bg-[#0a0a0a] px-5 py-5 rounded-[24px] text-sm font-bold border border-slate-200/50 dark:border-white/5 focus:border-orange-600/30 focus:ring-4 focus:ring-orange-600/10 outline-none text-slate-900 dark:text-white transition-all shadow-inner placeholder:text-slate-300 dark:placeholder:text-slate-700 hover:border-orange-500/20"
                     />
                   </div>
                   <div>
@@ -263,7 +263,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                     <input
                       type="text" value={form.batch} placeholder="2024-28"
                       onChange={(e) => setForm({ ...form, batch: e.target.value })}
-                      className="w-full bg-slate-50 dark:bg-black/40 px-5 py-5 rounded-[24px] text-sm font-bold border border-slate-200/50 dark:border-white/5 focus:border-orange-600/30 focus:ring-4 focus:ring-orange-600/10 outline-none text-slate-900 dark:text-white transition-all shadow-inner placeholder:text-slate-300 dark:placeholder:text-slate-700 hover:border-orange-500/20"
+                      className="w-full bg-slate-50 dark:bg-[#0a0a0a] px-5 py-5 rounded-[24px] text-sm font-bold border border-slate-200/50 dark:border-white/5 focus:border-orange-600/30 focus:ring-4 focus:ring-orange-600/10 outline-none text-slate-900 dark:text-white transition-all shadow-inner placeholder:text-slate-300 dark:placeholder:text-slate-700 hover:border-orange-500/20"
                     />
                   </div>
                 </div>
@@ -275,7 +275,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                     <textarea
                       value={form.bio} placeholder="Tell us about yourself..."
                       onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                      className="w-full bg-slate-50 dark:bg-black/40 pl-14 pr-5 py-5 rounded-[24px] text-sm font-bold border border-slate-200/50 dark:border-white/5 focus:border-orange-600/30 focus:ring-4 focus:ring-orange-600/10 outline-none text-slate-900 dark:text-white transition-all shadow-inner h-[116px] resize-none placeholder:text-slate-300 dark:placeholder:text-slate-700 hover:border-orange-500/20 shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
+                      className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-14 pr-5 py-5 rounded-[24px] text-sm font-bold border border-slate-200/50 dark:border-white/5 focus:border-orange-600/30 focus:ring-4 focus:ring-orange-600/10 outline-none text-slate-900 dark:text-white transition-all shadow-inner h-[116px] resize-none placeholder:text-slate-300 dark:placeholder:text-slate-700 hover:border-orange-500/20 shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
                     />
                   </div>
                 </div>

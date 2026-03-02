@@ -179,7 +179,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                     <div className="flex items-center gap-3 w-full md:w-auto">
                         <button
                             onClick={() => navigate('/roommate')}
-                            className="flex-1 md:flex-none p-3.5 rounded-2xl bg-white dark:bg-[#0c0c0c] border border-slate-200 dark:border-white/5 text-slate-400 hover:text-orange-500 transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2"
+                            className="flex-1 md:flex-none p-3.5 rounded-2xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 text-slate-400 hover:text-orange-500 transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2"
                             title="Find Roommates"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
@@ -189,7 +189,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                             onClick={() => setShowUserOnly(!showUserOnly)}
                             className={`p-3.5 rounded-2xl transition-all border shadow-sm cursor-pointer ${showUserOnly
                                 ? 'bg-orange-500/10 border-orange-500/50 text-orange-600'
-                                : 'bg-white dark:bg-[#0c0c0c] border-slate-200 dark:border-white/5 text-slate-400'
+                                : 'bg-white dark:bg-[#0a0a0a] border-slate-200 dark:border-white/5 text-slate-400'
                                 }`}
                             title="My Listings"
                         >
@@ -209,7 +209,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                 </div>
 
                 {/* Bottom Row: Filter Bar */}
-                <div className="flex items-center bg-white dark:bg-[#0c0c0c] p-1.5 rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm overflow-x-auto no-scrollbar w-full md:w-max mx-auto md:mx-0">
+                <div className="flex items-center bg-white dark:bg-[#0a0a0a] p-1.5 rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm overflow-x-auto no-scrollbar w-full md:w-max mx-auto md:mx-0">
                     {categories.map(c => (
                         <button
                             key={c}
@@ -228,7 +228,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             {loading ? (
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-8 mt-4 px-2 md:px-0">
                     {Array.from({ length: 8 }).map((_, i) => (
-                        <div key={i} className="p-3 md:p-4 bg-white dark:bg-[#0c0c0c] rounded-[32px] md:rounded-[42px] border border-slate-200 dark:border-white/5 flex flex-col">
+                        <div key={i} className="p-3 md:p-4 bg-white dark:bg-[#0a0a0a] rounded-[32px] md:rounded-[42px] border border-slate-200 dark:border-white/5 flex flex-col">
                             <div className="aspect-square mb-4 rounded-[32px] skeleton-pulse" />
                             <div className="px-1 space-y-2 mb-3">
                                 <div className="h-2 w-16 skeleton-pulse rounded-md" />
@@ -248,11 +248,11 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-8 mt-4 px-2 md:px-0">
                     {filteredItems.map(item => (
-                        <div key={item.id} onClick={() => setSelectedItem(item)} className="group p-3 md:p-4 bg-white dark:bg-[#0c0c0c] rounded-[32px] md:rounded-[42px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 shadow-sm hover:shadow-2xl hover:shadow-orange-600/5 transition-all duration-500 flex flex-col relative overflow-hidden cursor-pointer">
+                        <div key={item.id} onClick={() => setSelectedItem(item)} className="group p-3 md:p-4 bg-white dark:bg-[#0a0a0a] rounded-[32px] md:rounded-[42px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 shadow-sm hover:shadow-2xl hover:shadow-orange-600/5 transition-all duration-500 flex flex-col relative overflow-hidden cursor-pointer">
                             {/* Tags Overlay */}
                             <div className="absolute top-5 left-5 flex flex-col gap-2 z-30 transform -translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
                                 {item.seller_id === userProfile?.id && (
-                                    <div className="flex bg-white/95 dark:bg-black/80 backdrop-blur-md rounded-xl shadow-lg border border-slate-200/50 dark:border-white/10 overflow-hidden">
+                                    <div className="flex bg-white/95 dark:bg-[#0a0a0a]/80 backdrop-blur-md rounded-xl shadow-lg border border-slate-200/50 dark:border-white/10 overflow-hidden">
                                         <button onClick={(e) => { e.stopPropagation(); handleEdit(item); }} className="p-2 text-blue-500 hover:bg-blue-500/10 transition-colors border-none bg-transparent cursor-pointer">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                                         </button>
@@ -342,7 +342,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                 <div className={`modal-overlay ${isClosingDetail ? 'closing' : ''}`}
                     style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
                     onClick={(e) => { if (e.target === e.currentTarget) handleCloseDetail(); }}>
-                    <div className={`bg-white dark:bg-[#080808] w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-[40px] md:rounded-[56px] relative shadow-2xl border border-white/10 flex flex-col md:flex-row group animate-slide-up ${isClosingDetail ? 'closing' : ''}`} onClick={e => e.stopPropagation()}>
+                    <div className={`bg-white dark:bg-[#0a0a0a] w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-[40px] md:rounded-[56px] relative shadow-2xl border border-white/10 flex flex-col md:flex-row group animate-slide-up ${isClosingDetail ? 'closing' : ''}`} onClick={e => e.stopPropagation()}>
                         <button onClick={handleCloseDetail} className="absolute top-6 right-6 z-50 p-3 bg-black/20 hover:bg-orange-600 backdrop-blur-md text-white rounded-2xl transition-all border-none cursor-pointer">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                         </button>

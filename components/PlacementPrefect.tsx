@@ -317,7 +317,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`p-4 rounded-[32px] border text-left transition-all h-full flex flex-col justify-between group ${isActive ? 'bg-orange-600 border-orange-500 shadow-xl shadow-orange-600/20 text-white scale-[1.02]' : 'bg-white dark:bg-black border-slate-100 dark:border-white/10 text-slate-500 hover:border-orange-500/30'}`}
+                className={`p-4 rounded-[32px] border text-left transition-all h-full flex flex-col justify-between group ${isActive ? 'bg-orange-600 border-orange-500 shadow-xl shadow-orange-600/20 text-white scale-[1.02]' : 'bg-white dark:bg-[#0a0a0a] border-slate-100 dark:border-white/10 text-slate-500 hover:border-orange-500/30'}`}
               >
                 <p className={`text-xl font-black ${isActive ? 'text-white' : 'text-slate-900 dark:text-white group-hover:text-orange-600'}`}>{catData.score}%</p>
                 <p className={`text-[8px] font-black uppercase tracking-tight leading-tight ${isActive ? 'text-white/80' : 'text-slate-400'}`}>{cat.label}</p>
@@ -379,14 +379,14 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
             {analysisMode === 'trend' ? (
               <div className="grid grid-cols-2 gap-2">
                 {INDUSTRY_ROLES.map(role => (
-                  <button key={role.id} onClick={() => handleRoleSelect(role.id)} className={`p-4 rounded-2xl border text-left transition-all ${selectedRoleId === role.id ? 'bg-orange-600/10 border-orange-600 text-orange-500 scale-[1.02]' : 'bg-slate-50 dark:bg-black border-slate-100 dark:border-white/5 text-slate-500 hover:border-orange-500/30'}`}>
+                  <button key={role.id} onClick={() => handleRoleSelect(role.id)} className={`p-4 rounded-2xl border text-left transition-all ${selectedRoleId === role.id ? 'bg-orange-600/10 border-orange-600 text-orange-500 scale-[1.02]' : 'bg-slate-50 dark:bg-[#0a0a0a] border-slate-100 dark:border-white/5 text-slate-500 hover:border-orange-500/30'}`}>
                     <p className="text-[10px] font-bold tracking-tight leading-tight">{role.name}</p>
                   </button>
                 ))}
               </div>
             ) : (
               <textarea
-                className="w-full h-[184px] bg-slate-50 dark:bg-black/60 border border-slate-100 dark:border-white/10 rounded-[32px] p-6 text-xs text-slate-800 dark:text-white focus:ring-4 focus:ring-orange-600/10 outline-none resize-none transition-all font-bold placeholder:opacity-30 shadow-inner"
+                className="w-full h-[184px] bg-slate-50 dark:bg-[#0a0a0a]/60 border border-slate-100 dark:border-white/10 rounded-[32px] p-6 text-xs text-slate-800 dark:text-white focus:ring-4 focus:ring-orange-600/10 outline-none resize-none transition-all font-bold placeholder:opacity-30 shadow-inner"
                 placeholder="Paste job description here..."
                 value={jdText}
                 onChange={(e) => setJdText(e.target.value)}

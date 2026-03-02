@@ -756,9 +756,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     }
 
     return createPortal(
-        <div className={`fixed inset-0 z-[9999] flex flex-col bg-slate-100 dark:bg-[#050505] animate-fade-in overflow-hidden transition-all duration-300 ${isClosing ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'} ${isFullscreen ? 'p-0' : ''}`}>
+        <div className={`fixed inset-0 z-[9999] flex flex-col bg-slate-100 dark:bg-[#0a0a0a] animate-fade-in overflow-hidden transition-all duration-300 ${isClosing ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'} ${isFullscreen ? 'p-0' : ''}`}>
             {/* Toolbar */}
-            <div className="flex items-center justify-between px-4 md:px-6 h-16 md:h-20 bg-white/80 dark:bg-black/80 backdrop-blur-2xl border-b border-slate-200 dark:border-white/5 z-50">
+            <div className="flex items-center justify-between px-4 md:px-6 h-16 md:h-20 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-2xl border-b border-slate-200 dark:border-white/5 z-50">
                 <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
                     <button
                         onClick={handleClose}

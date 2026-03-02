@@ -55,7 +55,7 @@ const FreshersKit: React.FC = () => {
       </header>
 
       {/* Progress Bar */}
-      <div className="glass-panel p-5 rounded-2xl border dark:border-white/5 bg-white dark:bg-black shadow-sm">
+      <div className="glass-panel p-5 rounded-2xl border dark:border-white/5 bg-white dark:bg-[#0a0a0a] shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Progress</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-500">{progress.done}/{progress.total} — {progress.pct}%</span>
@@ -73,7 +73,7 @@ const FreshersKit: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {categories.map(cat => (
-          <div key={cat} className="glass-panel p-6 rounded-2xl border dark:border-white/5 bg-white dark:bg-black shadow-sm">
+          <div key={cat} className="glass-panel p-6 rounded-2xl border dark:border-white/5 bg-white dark:bg-[#0a0a0a] shadow-sm">
             <h3 className="text-xs font-black text-orange-600 dark:text-orange-500 uppercase tracking-[0.2em] mb-6 border-b border-slate-100 dark:border-white/5 pb-4">
               {cat}
             </h3>

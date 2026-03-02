@@ -77,7 +77,7 @@ const HelpSection: React.FC = () => {
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           placeholder="Search FAQs..."
-          className="w-full pl-12 pr-5 py-4 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black text-sm font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500/30 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 placeholder:font-bold"
+          className="w-full pl-12 pr-5 py-4 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0a0a0a] text-sm font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500/30 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 placeholder:font-bold"
         />
         {searchQuery && (
           <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase tracking-widest text-orange-500">
@@ -93,7 +93,7 @@ const HelpSection: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredFaqs.map((cat, idx) => (
-            <div key={idx} className="glass-panel p-8 rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-black flex flex-col h-full shadow-sm hover:shadow-xl transition-all">
+            <div key={idx} className="glass-panel p-8 rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#0a0a0a] flex flex-col h-full shadow-sm hover:shadow-xl transition-all">
               <h3 className="text-[10px] font-black text-orange-600 dark:text-orange-500 uppercase tracking-[0.3em] mb-6 border-b border-slate-100 dark:border-white/5 pb-4">{cat.category}</h3>
               <div className="space-y-3 flex-1">
                 {cat.questions.map((item, qIdx) => {
@@ -132,7 +132,7 @@ const HelpSection: React.FC = () => {
         </div>
       )}
 
-      <div className="mt-12 p-10 bg-slate-900 dark:bg-black border border-slate-800 dark:border-white/5 rounded-2xl text-center shadow-2xl relative overflow-hidden group">
+      <div className="mt-12 p-10 bg-slate-900 dark:bg-[#0a0a0a] border border-slate-800 dark:border-white/5 rounded-2xl text-center shadow-2xl relative overflow-hidden group">
         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none transition-transform duration-1000 group-hover:scale-110">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" />

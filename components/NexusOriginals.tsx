@@ -190,7 +190,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
             <div className="space-y-8 animate-fade-in">
                 <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
-                        <button onClick={handleBackToCatalog} className="w-10 h-10 bg-slate-100 dark:bg-black rounded-xl flex items-center justify-center text-slate-400 hover:text-orange-600 transition-all">
+                        <button onClick={handleBackToCatalog} className="w-10 h-10 bg-slate-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center text-slate-400 hover:text-orange-600 transition-all">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                         </button>
                         <div>
@@ -203,7 +203,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                         </div>
                     </div>
 
-                    <nav className="flex bg-slate-100 dark:bg-black/40 p-1 rounded-xl border border-slate-200 dark:border-white/5">
+                    <nav className="flex bg-slate-100 dark:bg-[#0a0a0a]/40 p-1 rounded-xl border border-slate-200 dark:border-white/5">
                         {(['notes', 'quiz', 'flashcards'] as const).map(tab => (
                             <button
                                 key={tab}
@@ -278,7 +278,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                     const math = currentBlockMath;
                     currentBlockMath = '';
                     return (
-                        <div key={i} className="equation-box my-10 p-10 bg-slate-50 dark:bg-black/50 border border-slate-100 dark:border-white/5 rounded-[32px] shadow-sm flex items-center justify-center overflow-x-auto text-lg md:text-xl">
+                        <div key={i} className="equation-box my-10 p-10 bg-slate-50 dark:bg-[#0a0a0a]/50 border border-slate-100 dark:border-white/5 rounded-[32px] shadow-sm flex items-center justify-center overflow-x-auto text-lg md:text-xl">
                             <BlockMath math={math} />
                         </div>
                     );
@@ -288,7 +288,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                     if (trimmedLine.length > 2 && trimmedLine.endsWith('$$')) {
                         isBlockMath = false;
                         return (
-                            <div key={i} className="equation-box my-10 p-10 bg-slate-50 dark:bg-black/50 border border-slate-100 dark:border-white/5 rounded-[32px] shadow-sm flex items-center justify-center overflow-x-auto text-lg md:text-xl">
+                            <div key={i} className="equation-box my-10 p-10 bg-slate-50 dark:bg-[#0a0a0a]/50 border border-slate-100 dark:border-white/5 rounded-[32px] shadow-sm flex items-center justify-center overflow-x-auto text-lg md:text-xl">
                                 <BlockMath math={trimmedLine.slice(2, -2)} />
                             </div>
                         );
@@ -398,7 +398,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
         const note = activeSubjectData.content.notes[selectedNoteIdx];
         return (
             <div className="max-w-4xl mx-auto space-y-8 animate-slide-up pb-20">
-                <header className="flex items-center justify-between sticky top-0 py-4 bg-white/80 dark:bg-black/80 backdrop-blur-md z-30">
+                <header className="flex items-center justify-between sticky top-0 py-4 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md z-30">
                     <div className="flex items-center gap-4">
                         <button onClick={handleBackToUnits} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:text-orange-600 transition-all">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>

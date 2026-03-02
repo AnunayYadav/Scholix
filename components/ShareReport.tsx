@@ -47,7 +47,7 @@ const ShareReport: React.FC = () => {
 
   return (
     <div className="max-w-xl mx-auto animate-fade-in py-8 px-4 md:py-12">
-      <div className="relative glass-panel rounded-[40px] overflow-hidden shadow-[0_32px_80px_-20px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-white/10 p-1 bg-white dark:bg-black">
+      <div className="relative glass-panel rounded-[40px] overflow-hidden shadow-[0_32px_80px_-20px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-white/10 p-1 bg-white dark:bg-[#0a0a0a]">
 
         {/* Aesthetic Decals */}
         <div className="absolute top-0 right-0 w-48 h-48 bg-orange-600/10 blur-[80px] pointer-events-none rounded-full -mr-24 -mt-24" />
@@ -112,7 +112,7 @@ const ShareReport: React.FC = () => {
                       <p className="text-[9px] font-black text-slate-800 dark:text-white uppercase tracking-tight truncate">{sub.n}</p>
                       <p className="text-[7px] font-bold text-slate-400 uppercase mt-0.5">{sub.c} Credits Protocol</p>
                     </div>
-                    <div className="w-8 h-8 rounded-xl bg-white dark:bg-black border border-slate-100 dark:border-white/10 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-xl bg-white dark:bg-[#0a0a0a] border border-slate-100 dark:border-white/10 flex items-center justify-center">
                       <span className="font-black text-orange-600 text-[10px]">{sub.g}</span>
                     </div>
                   </div>
