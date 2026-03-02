@@ -4,7 +4,6 @@ import NexusServer from '../services/nexusServer.ts';
 import { generateSubjectOriginals } from '../services/geminiService.ts';
 import { extractTextFromPdf } from '../services/pdfUtils.ts';
 import { showToast } from './Toast.tsx';
-import { nexusOriginalsData } from '../data/nexusOriginalsData.ts';
 
 interface NexusOriginalsProps {
     userProfile: UserProfile | null;
@@ -34,11 +33,12 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
     const loadOriginals = async () => {
         setLoading(true);
         try {
-            // Robust matching for local data
+            // Dynamic import to keep bundle size small
+            const { nexusOriginalsData } = await import('../data/nexusOriginalsData.ts');
+
             const localResult = nexusOriginalsData.find(d => {
                 const normActiveSub = activeSubject.toLowerCase();
                 const normDataSub = d.subject.toLowerCase();
-                // Match if name is contained or if ECE249 matches ECE249
                 const subjectMatch = normDataSub.includes(normActiveSub) ||
                     normActiveSub.includes(normDataSub.split(':')[0].toLowerCase().trim());
 
@@ -121,7 +121,6 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
 
     return (
         <div className="space-y-8 animate-fade-in">
-            {/* Consistent Header */}
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                     <button
