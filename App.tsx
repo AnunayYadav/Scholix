@@ -443,7 +443,7 @@ const AppContent: React.FC = () => {
                 <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3" />
               </svg>
             </button>
-            <span className="md:hidden text-2xl font-black bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tight cursor-pointer ml-1" onClick={() => navigate('/')}>LPU-Nexus</span>
+            <span className="md:hidden text-xl font-black bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tight cursor-pointer ml-1" onClick={() => navigate('/')}>LPU-Nexus</span>
           </div>
           <div className="flex items-center space-x-3 ml-auto">
             <NotificationBell userProfile={userProfile} />
