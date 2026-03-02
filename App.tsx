@@ -284,6 +284,72 @@ const DashboardHero: React.FC = React.memo(() => {
   );
 });
 
+const FeatureCard = React.memo(({ f, navigate }: { f: any, navigate: any }) => {
+  const [transform, setTransform] = React.useState('');
+  const [isHovered, setIsHovered] = React.useState(false);
+  const cardRef = React.useRef<HTMLButtonElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Calculate rotation (-10 to 10 degrees max) for smoothness
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -10;
+    const rotateY = ((x - centerX) / centerX) * 10;
+
+    // Lift card using translateY and scale
+    setTransform(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px) scale(1.02)`);
+  };
+
+  const handleMouseEnter = () => setIsHovered(true);
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setTransform('perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale(1)');
+  };
+
+  return (
+    <button
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={() => navigate(`/${f.id}`)}
+      style={{
+        transform: transform || 'perspective(1000px) rotateX(0deg) rotateY(0deg)',
+        transition: isHovered ? 'transform 0.1s ease-out, box-shadow 0.3s ease, border 0.3s ease' : 'transform 0.5s ease-out, box-shadow 0.5s ease, border 0.5s ease',
+        transformStyle: 'preserve-3d'
+      }}
+      className={`group relative p-3 sm:p-6 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl rounded-[24px] sm:rounded-[32px] border border-slate-200 dark:border-white/10 text-center sm:text-left cursor-pointer overflow-hidden ${isHovered ? 'shadow-[0_45px_120px_-20px_rgba(0,0,0,0.4)] dark:shadow-[0_45px_120px_-20px_rgba(0,0,0,0.8)] border-orange-500/40 z-10' : ''}`}
+    >
+      <div className={`absolute inset-0 bg-gradient-to-br from-orange-500 to-red-600 transition-opacity duration-500 ${isHovered ? 'opacity-[0.03] dark:opacity-[0.07]' : 'opacity-0'}`} />
+
+      {/* Wrapping content with translateZ for parallax effect inside the card */}
+      <div style={{ transform: isHovered ? 'translateZ(40px)' : 'translateZ(0)', transition: 'transform 0.4s ease-out', pointerEvents: 'none' }} className="w-full h-full relative">
+        <div className={`relative w-12 h-12 mx-auto sm:mx-0 rounded-[14px] sm:rounded-[16px] bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white mb-3 sm:mb-6 shadow-2xl transition-all duration-500 ${isHovered ? 'shadow-orange-500/50 scale-[1.15] rotate-3' : 'shadow-orange-500/20'}`}>
+          <div className={`absolute inset-0 rounded-[14px] sm:rounded-[16px] bg-inherit -z-10 transition-all duration-500 ${isHovered ? 'blur-2xl opacity-70' : 'blur-xl opacity-40'}`} />
+          <div className="scale-90">
+            {f.icon}
+          </div>
+        </div>
+
+        <div className="relative space-y-1 sm:space-y-2 text-center sm:text-left">
+          <h4 className="text-[12px] sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight sm:leading-none">{f.name}</h4>
+          <p className="hidden sm:block text-[11px] font-bold text-slate-500 dark:text-slate-400/80 leading-relaxed max-w-[90%] mt-1">{f.desc}</p>
+        </div>
+
+        <div className={`hidden sm:block absolute top-2 right-2 text-slate-300 dark:text-white/10 transition-all duration-500 ${isHovered ? 'text-orange-500 translate-x-1 -translate-y-1 scale-110' : ''}`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
+        </div>
+      </div>
+    </button>
+  );
+});
+
 const Dashboard: React.FC = React.memo(() => {
   const navigate = useNavigate();
 
@@ -307,32 +373,9 @@ const Dashboard: React.FC = React.memo(() => {
       <TodaysSchedule />
       <div className="max-w-6xl mx-auto px-6 mb-10">
         <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400 ml-1 mb-8">Categories</h3>
-        <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {features.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => navigate(`/${f.id}`)}
-              className="group relative p-3 sm:p-6 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl rounded-[24px] sm:rounded-[32px] border border-slate-200 dark:border-white/10 text-center sm:text-left transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1.5 hover:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.7)] hover:border-orange-500/40 active:scale-95 cursor-pointer overflow-hidden"
-            >
-              {/* Ambient Background Glow on Hover */}
-              <div className={`absolute inset-0 bg-gradient-to-br from-orange-500 to-red-600 opacity-0 group-hover:opacity-[0.03] dark:group-hover:opacity-[0.07] transition-opacity duration-500`} />
-
-              <div className={`relative w-10 h-10 sm:w-12 sm:h-12 mx-auto sm:mx-0 rounded-[12px] sm:rounded-[16px] bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white mb-3 sm:mb-6 shadow-2xl shadow-orange-500/20 group-hover:scale-110 transition-all duration-500 group-hover:rotate-3`}>
-                <div className="absolute inset-0 rounded-[12px] sm:rounded-[16px] blur-xl opacity-40 bg-inherit -z-10 group-hover:blur-2xl transition-all" />
-                <div className="scale-75 sm:scale-90">
-                  {f.icon}
-                </div>
-              </div>
-
-              <div className="relative space-y-1 sm:space-y-2">
-                <h4 className="text-[10px] sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-tight sm:leading-none">{f.name}</h4>
-                <p className="hidden sm:block text-[10px] font-bold text-slate-500 dark:text-slate-400/80 leading-relaxed max-w-[90%]">{f.desc}</p>
-              </div>
-
-              <div className="hidden sm:block absolute top-8 right-8 text-slate-300 dark:text-white/10 group-hover:text-orange-500 transition-all duration-500 group-hover:translate-x-1 group-hover:-translate-y-1">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
-              </div>
-            </button>
+            <FeatureCard key={f.id} f={f} navigate={navigate} />
           ))}
         </div>
       </div>
@@ -436,7 +479,7 @@ const AppContent: React.FC = () => {
           <div className="flex items-center">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="md:hidden w-11 h-11 flex items-center justify-center rounded-xl text-slate-700 dark:text-white mr-4 border-none active:scale-75 transition-all bg-transparent group"
+              className="md:hidden w-11 h-11 flex items-center justify-center rounded-xl text-slate-700 dark:text-white mr-1 border-none active:scale-75 transition-all bg-transparent group"
               aria-label="Open menu"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="w-8 h-8 transition-transform group-hover:scale-110" viewBox="0 0 16 16">
