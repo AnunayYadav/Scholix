@@ -232,7 +232,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               onClick={() => setModule(ModuleType.DASHBOARD)}
             />
             <div className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) flex flex-col overflow-hidden ${isHovered || isMobileMenuOpen ? 'max-w-[200px] opacity-100 ml-4' : 'max-w-0 opacity-0 ml-0'}`}>
-              <h1 className="text-2xl font-black bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tighter whitespace-nowrap">
+              <h1 className="text-2xl font-black bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tight whitespace-nowrap">
                 LPU-Nexus
               </h1>
               <p className="text-[9px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-600 whitespace-nowrap">Student Intelligence</p>

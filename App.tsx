@@ -231,7 +231,7 @@ const TodaysSchedule: React.FC = () => {
               <div className="relative p-5 space-y-5">
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
-                    <h4 className="text-2xl font-bold text-white tracking-tighter leading-none drop-shadow-md">{slot.subject}</h4>
+                    <h4 className="text-2xl font-bold text-white tracking-tight leading-none drop-shadow-md">{slot.subject}</h4>
                     <p className="text-[10px] font-black text-white tracking-[0.1em]">{slot.room} • {slot.type}</p>
                   </div>
 
@@ -325,7 +325,7 @@ const Dashboard: React.FC = React.memo(() => {
               </div>
 
               <div className="relative space-y-1 sm:space-y-2">
-                <h4 className="text-[10px] sm:text-lg font-bold text-slate-900 dark:text-white tracking-tighter leading-tight sm:leading-none">{f.name}</h4>
+                <h4 className="text-[10px] sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-tight sm:leading-none">{f.name}</h4>
                 <p className="hidden sm:block text-[10px] font-bold text-slate-500 dark:text-slate-400/80 leading-relaxed max-w-[90%]">{f.desc}</p>
               </div>
 
@@ -443,7 +443,7 @@ const AppContent: React.FC = () => {
                 <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3" />
               </svg>
             </button>
-            <span className="md:hidden font-bold text-xl text-orange-600 dark:text-orange-500 cursor-pointer ml-1" onClick={() => navigate('/')}>LPU-Nexus</span>
+            <span className="md:hidden text-2xl font-black bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tight cursor-pointer ml-1" onClick={() => navigate('/')}>LPU-Nexus</span>
           </div>
           <div className="flex items-center space-x-3 ml-auto">
             <NotificationBell userProfile={userProfile} />
