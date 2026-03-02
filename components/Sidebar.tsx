@@ -231,7 +231,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               className="w-8 h-8 rounded-lg flex-shrink-0 shadow-lg shadow-orange-600/10 active:scale-90 transition-transform cursor-pointer"
               onClick={() => setModule(ModuleType.DASHBOARD)}
             />
-            <div className={`ml-4 transition-all duration-300 ease-out flex flex-col ${isHovered ? 'opacity-100 translate-x-0 visible' : 'opacity-0 -translate-x-4 invisible absolute'}`}>
+            <div className={`ml-4 transition-all duration-300 ease-out flex flex-col ${(isHovered || isMobileMenuOpen) ? 'opacity-100 translate-x-0 visible' : 'opacity-0 -translate-x-4 invisible absolute'}`}>
               <h1 className="text-xl font-black bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tighter whitespace-nowrap">
                 LPU-Nexus
               </h1>
@@ -259,7 +259,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center transition-transform group-hover:scale-110">
                   {item.icon}
                 </span>
-                <span className={`ml-4 font-bold text-sm tracking-tight whitespace-nowrap transition-all duration-300 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute'}`}>
+                <span className={`ml-4 font-bold text-sm tracking-tight whitespace-nowrap transition-all duration-300 ${(isHovered || isMobileMenuOpen) ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute'}`}>
                   {item.label}
                 </span>
               </div>
@@ -283,7 +283,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <span className="flex-shrink-0 text-slate-400 dark:text-slate-500 group-hover:text-orange-600 transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 transition-transform group-hover:rotate-12"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
               </span>
-              <span className={`ml-4 text-sm font-bold text-slate-400 dark:text-slate-500 group-hover:text-orange-600 transition-all duration-300 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute'}`}>
+              <span className={`ml-4 text-sm font-bold text-slate-400 dark:text-slate-500 group-hover:text-orange-600 transition-all duration-300 ${(isHovered || isMobileMenuOpen) ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute'}`}>
                 Feedback
               </span>
             </div>
