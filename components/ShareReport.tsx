@@ -62,7 +62,7 @@ const ShareReport: React.FC = () => {
                 <div className="w-6 h-6 rounded-lg bg-orange-600 flex items-center justify-center">
                   <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3.5 h-3.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                 </div>
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-orange-600 dark:text-orange-500">LPU-NEXUS PROTOCOL</span>
+                <span className="text-[8px] font-medium text-orange-600 dark:text-orange-500">LPU-NEXUS PROTOCOL</span>
               </div>
               <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase">VERIFIED INSIGHT</h1>
               <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest">NS-{Math.floor(data.ts / 100000)}</p>
@@ -81,9 +81,9 @@ const ShareReport: React.FC = () => {
 
           {/* Main Score Display */}
           <div className="text-center py-2 relative">
-            <p className="text-slate-400 text-[8px] font-black uppercase tracking-[0.3em] mb-2">Semester {data.sem} standing</p>
+            <p className="text-slate-400 text-[8px] font-medium mb-2">Semester {data.sem} standing</p>
             <div className="relative inline-block">
-              <p className="text-8xl md:text-9xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-slate-700 leading-none">
+              <p className="text-8xl md:text-9xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-slate-700 leading-none">
                 {data.sgpa}
               </p>
               <div className="absolute -top-2 -right-8 px-3 py-1 bg-orange-600 text-white rounded-xl font-black text-[7px] uppercase tracking-widest shadow-lg rotate-12">
@@ -100,7 +100,7 @@ const ShareReport: React.FC = () => {
           {/* Detailed Subject Ledger */}
           {data.subjects && data.subjects.length > 0 && (
             <section className="space-y-4">
-              <h4 className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 text-center flex items-center justify-center gap-4">
+              <h4 className="text-[8px] font-medium text-slate-400 text-center flex items-center justify-center gap-4">
                 <span className="h-px bg-slate-100 dark:bg-white/5 flex-1" />
                 LEDGER
                 <span className="h-px bg-slate-100 dark:bg-white/5 flex-1" />
@@ -124,11 +124,11 @@ const ShareReport: React.FC = () => {
           {/* Footer Summary */}
           <div className="grid grid-cols-2 gap-4 py-6 border-y border-slate-100 dark:border-white/5">
             <div className="text-center border-r border-slate-100 dark:border-white/5 pr-4">
-              <p className="text-[7px] font-black uppercase tracking-widest text-slate-400 mb-1">CUMULATIVE</p>
+              <p className="text-[7px] font-medium text-slate-400 mb-1">CUMULATIVE</p>
               <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{data.cgpa}</p>
             </div>
             <div className="text-center pl-4">
-              <p className="text-[7px] font-black uppercase tracking-widest text-slate-400 mb-1">TOTAL CREDITS</p>
+              <p className="text-[7px] font-medium text-slate-400 mb-1">TOTAL CREDITS</p>
               <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{data.credits}</p>
             </div>
           </div>

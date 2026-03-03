@@ -243,7 +243,7 @@ const PageRenderer = React.memo<{
                 {/* Dynamic Watermark */}
                 <div className="absolute inset-0 pointer-events-none opacity-[0.04] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
                     {Array.from({ length: 9 }).map((_, i) => (
-                        <span key={i} className="text-[35px] font-black uppercase rotate-[-35deg] whitespace-nowrap m-16 text-slate-900 dark:text-white tracking-widest">
+                        <span key={i} className="text-[35px] font-medium rotate-[-35deg] whitespace-nowrap m-16 text-slate-900 dark:text-white tracking-widest">
                             LPU NEXUS
                         </span>
                     ))}
@@ -748,7 +748,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     </div>
                     <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Connection Fault</h3>
                     <p className="text-xs text-slate-500 font-bold uppercase tracking-widest leading-relaxed">{error}</p>
-                    <button onClick={handleClose} className="bg-white text-black px-10 py-4 rounded-3xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl">Abort Protocol</button>
+                    <button onClick={handleClose} className="bg-white text-black px-10 py-4 rounded-3xl text-[10px] font-medium hover:scale-105 active:scale-95 transition-all shadow-xl">Abort Protocol</button>
                 </div>
             </div>,
             document.getElementById('modal-root') || document.body

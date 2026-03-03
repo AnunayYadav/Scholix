@@ -76,7 +76,7 @@ const ToastItemComponent: React.FC<{ toast: ToastItem; onDismiss: (id: number) =
             <div className={`w-8 h-8 rounded-xl ${s.bg} border ${s.border} flex items-center justify-center flex-shrink-0 ${s.icon}`}>
                 <s.IconComp />
             </div>
-            <p className="text-[11px] font-black uppercase tracking-wide text-slate-800 dark:text-white leading-snug flex-1">
+            <p className="text-[11px] font-medium tracking-wide text-slate-800 dark:text-white leading-snug flex-1">
                 {toast.message}
             </p>
             <button

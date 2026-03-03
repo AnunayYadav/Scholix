@@ -68,7 +68,7 @@ const GlobalBroadcaster: React.FC = () => {
                                     key={t}
                                     type="button"
                                     onClick={() => setType(t)}
-                                    className={`flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${type === t
+                                    className={`flex-1 py-2 rounded-xl text-[9px] font-medium transition-all ${type === t
                                         ? 'bg-orange-600 text-white shadow-lg'
                                         : 'text-slate-400 hover:text-slate-600 dark:hover:text-white'
                                         }`}
@@ -112,7 +112,7 @@ const GlobalBroadcaster: React.FC = () => {
                 </div>
 
                 {status && (
-                    <div className={`mt-4 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center border ${status.error ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                    <div className={`mt-4 p-4 rounded-2xl text-[10px] font-medium text-center border ${status.error ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                         }`}>
                         {status.msg}
                     </div>
@@ -155,7 +155,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
         <div className="space-y-8 pb-20">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Nexus Intelligence</h1>
+                    <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white uppercase">Nexus Intelligence</h1>
                     <p className="text-slate-500 dark:text-slate-400 font-medium">Real-time engagement metrics and performance stats.</p>
                 </div>
                 <button
@@ -201,9 +201,9 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr className="bg-slate-50/50 dark:bg-white/[0.01]">
-                                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Path</th>
-                                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Visitors</th>
-                                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Page Views</th>
+                                            <th className="px-6 py-4 text-[10px] font-medium text-slate-400">Path</th>
+                                            <th className="px-6 py-4 text-[10px] font-medium text-slate-400">Visitors</th>
+                                            <th className="px-6 py-4 text-[10px] font-medium text-slate-400 text-right">Page Views</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 dark:divide-white/5">
@@ -234,9 +234,9 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr className="bg-slate-50/50 dark:bg-white/[0.01]">
-                                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Event Name</th>
-                                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Total Count</th>
-                                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Last Triggered</th>
+                                            <th className="px-6 py-4 text-[10px] font-medium text-slate-400">Event Name</th>
+                                            <th className="px-6 py-4 text-[10px] font-medium text-slate-400">Total Count</th>
+                                            <th className="px-6 py-4 text-[10px] font-medium text-slate-400 text-right">Last Triggered</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 dark:divide-white/5">

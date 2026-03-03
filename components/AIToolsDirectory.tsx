@@ -202,7 +202,7 @@ const AIToolsDirectory: React.FC = () => {
                 <div className="flex flex-col items-center justify-center gap-3">
                     <div className="flex items-center gap-2">
                         <div className="h-[1px] w-8 md:w-16 bg-slate-200 dark:bg-white/10" />
-                        <p className="text-slate-500 text-[10px] md:text-[12px] font-black uppercase tracking-[0.3em] leading-none">
+                        <p className="text-slate-500 text-[10px] md:text-[12px] font-medium leading-none">
                             Intelligence Hub Nexus
                         </p>
                         <div className="h-[1px] w-8 md:w-16 bg-slate-200 dark:bg-white/10" />
@@ -304,7 +304,7 @@ const AIToolsDirectory: React.FC = () => {
                                             <span className="text-[10px]">✨</span>
                                         </div>
                                     ) : <div />}
-                                    <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border ${tool.pricing === 'Free' ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5' :
+                                    <span className={`text-[9px] font-semibold px-3 py-1.5 rounded-full border ${tool.pricing === 'Free' ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5' :
                                         tool.pricing === 'Freemium' ? 'text-orange-500 border-orange-500/20 bg-orange-500/5' :
                                             'text-blue-500 border-blue-500/20 bg-blue-500/5'
                                         }`}>
@@ -330,7 +330,7 @@ const AIToolsDirectory: React.FC = () => {
 
                                 <div className="flex flex-wrap gap-2 pt-2">
                                     {tool.tags.map(tag => (
-                                        <span key={tag} className="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-slate-100 dark:border-white/5">
+                                        <span key={tag} className="text-[8px] font-semibold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-slate-100 dark:border-white/5">
                                             {tag}
                                         </span>
                                     ))}
@@ -341,7 +341,7 @@ const AIToolsDirectory: React.FC = () => {
                                 href={tool.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`relative z-10 mt-8 group/btn h-14 flex items-center justify-center gap-2 rounded-[24px] text-[10px] font-black tracking-[0.2em] uppercase transition-all duration-300 no-underline shadow-lg active:scale-95 ${tool.isHero
+                                className={`relative z-10 mt-8 group/btn h-14 flex items-center justify-center gap-2 rounded-[24px] text-[10px] font-bold uppercase transition-all duration-300 no-underline shadow-lg active:scale-95 ${tool.isHero
                                     ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-orange-500/25 hover:-translate-y-0.5'
                                     : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white dark:hover:text-white'
                                     }`}
@@ -356,7 +356,7 @@ const AIToolsDirectory: React.FC = () => {
                         <div className="w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto text-slate-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-10 h-10"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M12 12l4 4M12 12l-4-4" /></svg>
                         </div>
-                        <p className="text-slate-400 font-black uppercase tracking-widest text-xs">No intelligence found in the forge.</p>
+                        <p className="text-slate-400 font-medium text-xs">No intelligence found in the forge.</p>
                     </div>
                 )}
             </div>

@@ -229,7 +229,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                     </div>
 
                     <div className="px-5 pt-3 mt-2 border-t border-slate-100 dark:border-white/5">
-                        <button className="w-full py-3 rounded-2xl bg-slate-100 dark:bg-white/5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-white/40 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 transition-all border-none cursor-not-allowed">
+                        <button className="w-full py-3 rounded-2xl bg-slate-100 dark:bg-white/5 text-[9px] font-medium text-slate-500 dark:text-white/40 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 transition-all border-none cursor-not-allowed">
                             View All History
                         </button>
                     </div>

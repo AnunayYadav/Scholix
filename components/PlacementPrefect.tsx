@@ -66,8 +66,8 @@ const ScoreAura = ({ score, label }: { score: number; label: string }) => {
       </svg>
 
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-20">
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-1">{label}</p>
-        <p className="text-7xl font-black tracking-tighter text-slate-900 dark:text-white">{score}%</p>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{label}</p>
+        <p className="text-7xl font-bold tracking-tight text-slate-900 dark:text-white">{score}%</p>
       </div>
     </div>
   );
@@ -225,8 +225,8 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
           </div>
         </div>
         <div className="text-center space-y-2">
-          <h3 className="text-2xl font-black uppercase tracking-[0.3em] text-slate-800 dark:text-white">Analyzing Resume</h3>
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest animate-pulse">Checking your content...</p>
+          <h3 className="text-2xl font-medium text-slate-800 dark:text-white">Analyzing Resume</h3>
+          <p className="text-xs font-semibold text-slate-500 tracking-widest animate-pulse">Checking your content...</p>
         </div>
       </div>
     );
@@ -243,12 +243,12 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
           >
             <div className="space-y-4">
               <div>
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-500 mb-1.5 flex items-center gap-2">Feedback</p>
+                <p className="text-[9px] font-medium text-orange-500 mb-1.5 flex items-center gap-2">Feedback</p>
                 <p className="text-[11px] font-bold text-white leading-relaxed">{hoveredFragment.reason || "Good point."}</p>
               </div>
               {hoveredFragment.suggestion && (
                 <div className="pt-3 border-t border-white/10">
-                  <p className="text-[8px] font-black uppercase tracking-widest text-emerald-500 mb-1">Tip</p>
+                  <p className="text-[8px] font-medium text-emerald-500 mb-1">Tip</p>
                   <p className="text-[10px] font-medium text-slate-300 leading-relaxed italic">"{hoveredFragment.suggestion}"</p>
                 </div>
               )}
@@ -259,17 +259,17 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
 
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tighter uppercase mb-1">Resume Feedback</h2>
-            <p className="text-slate-500 font-bold uppercase tracking-widest text-[9px] flex items-center gap-2">
+            <h2 className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight mb-1">Resume Feedback</h2>
+            <p className="text-slate-500 font-semibold tracking-widest text-[9px] flex items-center gap-2">
 
               File: {fileName}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button onClick={handleSaveReport} className="px-5 py-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white rounded-xl font-black text-[9px] uppercase tracking-widest transition-all hover:border-orange-500 flex items-center gap-2 shadow-sm">
+            <button onClick={handleSaveReport} className="px-5 py-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white rounded-xl font-bold text-[9px] tracking-widest transition-all hover:border-orange-500 flex items-center gap-2 shadow-sm">
               Save Review
             </button>
-            <button onClick={() => setResult(null)} className="px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-black rounded-xl font-black text-[9px] uppercase tracking-widest active:scale-95 transition-all border-none">Try New Resume</button>
+            <button onClick={() => setResult(null)} className="px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-[9px] tracking-widest active:scale-95 transition-all border-none">Try New Resume</button>
           </div>
         </header>
 
@@ -283,7 +283,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
             <div className="space-y-3">
               {result.flags.map((flag, idx) => (
                 <div key={idx} className={`p-4 rounded-2xl border flex items-start gap-3 ${flag.type === 'critical' ? 'bg-red-500/10 border-red-500/20 text-red-500' : flag.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'}`}>
-                  <p className="text-[11px] font-black uppercase leading-tight">{flag.message}</p>
+                  <p className="text-[11px] font-medium leading-tight">{flag.message}</p>
                 </div>
               ))}
             </div>
@@ -293,8 +293,8 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
         <div className="glass-panel p-6 md:p-8 rounded-[56px] shadow-2xl space-y-6 animate-fade-in relative overflow-visible">
           <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-100 dark:border-white/5 pb-8">
             <div>
-              <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Content Check</h3>
-              <p className="text-[9px] font-black text-orange-600 uppercase tracking-[0.4em] mt-1.5">Hover over sections for feedback</p>
+              <h3 className="text-2xl font-mediumer text-slate-800 dark:text-white">Content Check</h3>
+              <p className="text-[9px] font-bold text-orange-600 tracking-widest mt-1.5">Hover over sections for feedback</p>
             </div>
           </header>
 
@@ -319,8 +319,8 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
                 onClick={() => setActiveCategory(cat.id)}
                 className={`p-4 rounded-[32px] border text-left transition-all h-full flex flex-col justify-between group ${isActive ? 'bg-orange-600 border-orange-500 shadow-xl shadow-orange-600/20 text-white scale-[1.02]' : 'bg-white dark:bg-[#0a0a0a] border-slate-100 dark:border-white/10 text-slate-500 hover:border-orange-500/30'}`}
               >
-                <p className={`text-xl font-black ${isActive ? 'text-white' : 'text-slate-900 dark:text-white group-hover:text-orange-600'}`}>{catData.score}%</p>
-                <p className={`text-[8px] font-black uppercase tracking-tight leading-tight ${isActive ? 'text-white/80' : 'text-slate-400'}`}>{cat.label}</p>
+                <p className={`text-xl font-bold ${isActive ? 'text-white' : 'text-slate-900 dark:text-white group-hover:text-orange-600'}`}>{catData.score}%</p>
+                <p className={`text-[8px] font-semibold leading-tight ${isActive ? 'text-white/80' : 'text-slate-400'}`}>{cat.label}</p>
               </button>
             );
           })}
@@ -333,7 +333,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
     <div className="max-w-4xl mx-auto space-y-12 animate-fade-in pb-20 px-4 md:px-0">
       <header className="text-center space-y-4">
         <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tighter leading-none">Placement <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Prefect</span></h2>
-        <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px]">Get AI Feedback to help your placement prep</p>
+        <p className="text-slate-500 font-semibold tracking-widest text-[10px]">Get AI Feedback to help your placement prep</p>
       </header>
 
       {error && (
@@ -342,10 +342,10 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
           </div>
           <div className="space-y-1">
-            <h4 className="text-sm font-black uppercase text-red-500 tracking-widest">Analysis Error</h4>
+            <h4 className="text-sm font-medium text-red-500 tracking-widest">Analysis Error</h4>
             <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed max-w-md mx-auto">{error}</p>
           </div>
-          <button onClick={() => setError(null)} className="px-6 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all border-none">Acknowledge</button>
+          <button onClick={() => setError(null)} className="px-6 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 rounded-xl font-bold text-[9px] tracking-widest transition-all border-none">Acknowledge</button>
         </div>
       )}
 
@@ -353,13 +353,13 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <div className="space-y-5">
             <div className="flex items-center gap-3">
-              <div className="w-7 h-7 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600 font-black text-[10px]">1</div>
-              <label className="text-[9px] font-black uppercase text-slate-400 tracking-[0.2em] block">Your Resume</label>
+              <div className="w-7 h-7 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600 font-bold text-[10px]">1</div>
+              <label className="text-[9px] font-medium text-slate-400 tracking-[0.2em] block">Your Resume</label>
             </div>
             <div className="relative border-4 border-dashed border-slate-100 dark:border-white/5 rounded-[40px] p-8 text-center hover:border-orange-500/40 transition-all bg-slate-50 dark:bg-white/[0.02] group cursor-pointer shadow-inner">
               <input type="file" accept=".pdf" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
               <IconFile />
-              <p className="text-sm font-black uppercase tracking-widest text-slate-400 group-hover:text-orange-600 transition-colors">
+              <p className="text-sm font-medium text-slate-400 group-hover:text-orange-600 transition-colors">
                 {fileName ? fileName : "Upload PDF Resume"}
               </p>
             </div>
@@ -368,19 +368,19 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
           <div className="space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600 font-black text-[10px]">2</div>
-                <label className="text-[9px] font-black uppercase text-slate-400 tracking-[0.2em] block">Target Role</label>
+                <div className="w-7 h-7 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600 font-bold text-[10px]">2</div>
+                <label className="text-[9px] font-medium text-slate-400 tracking-[0.2em] block">Target Role</label>
               </div>
               <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-[16px]">
-                <button onClick={() => setAnalysisMode('trend')} className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase transition-all ${analysisMode === 'trend' ? 'bg-orange-600 text-white shadow-lg' : 'text-slate-500'}`}>Presets</button>
-                <button onClick={() => setAnalysisMode('custom')} className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase transition-all ${analysisMode === 'custom' ? 'bg-orange-600 text-white shadow-lg' : 'text-slate-500'}`}>Paste JD</button>
+                <button onClick={() => setAnalysisMode('trend')} className={`px-4 py-1.5 rounded-xl text-[9px] font-medium transition-all ${analysisMode === 'trend' ? 'bg-orange-600 text-white shadow-lg' : 'text-slate-500'}`}>Presets</button>
+                <button onClick={() => setAnalysisMode('custom')} className={`px-4 py-1.5 rounded-xl text-[9px] font-medium transition-all ${analysisMode === 'custom' ? 'bg-orange-600 text-white shadow-lg' : 'text-slate-500'}`}>Paste JD</button>
               </div>
             </div>
             {analysisMode === 'trend' ? (
               <div className="grid grid-cols-2 gap-2">
                 {INDUSTRY_ROLES.map(role => (
                   <button key={role.id} onClick={() => handleRoleSelect(role.id)} className={`p-4 rounded-2xl border text-left transition-all ${selectedRoleId === role.id ? 'bg-orange-600/10 border-orange-600 text-orange-500 scale-[1.02]' : 'bg-slate-50 dark:bg-[#0a0a0a] border-slate-100 dark:border-white/5 text-slate-500 hover:border-orange-500/30'}`}>
-                    <p className="text-[10px] font-bold tracking-tight leading-tight">{role.name}</p>
+                    <p className="text-[10px] font-semibold tracking-tight leading-tight">{role.name}</p>
                   </button>
                 ))}
               </div>
@@ -402,13 +402,13 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
           >
             <div className={`w-3 h-3 rounded-full transition-all ${deepAnalysis ? 'bg-white' : 'bg-slate-400 group-hover:bg-red-500'}`} />
             <div className="text-left">
-              <span className={`text-[9px] font-black uppercase tracking-widest block ${deepAnalysis ? 'text-white' : 'text-slate-400 group-hover:text-red-500'}`}>Detailed Review</span>
+              <span className={`text-[9px] font-medium block ${deepAnalysis ? 'text-white' : 'text-slate-400 group-hover:text-red-500'}`}>Detailed Review</span>
             </div>
           </button>
           <button
             onClick={handleAnalyze}
             disabled={!resumeText || !jdText || loading}
-            className="flex-1 py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-[24px] font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-orange-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 border-none disabled:opacity-50"
+            className="flex-1 py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-[24px] font-bold text-[10px] tracking-widest shadow-xl shadow-orange-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 border-none disabled:opacity-50"
           >
             Analyze Resume
           </button>

@@ -117,7 +117,7 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                         <h2 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white tracking-tighter leading-none">
                             Roommate <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Finder</span>
                         </h2>
-                        <p className="text-slate-500 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Find your perfect match to share your space.</p>
+                        <p className="text-slate-500 dark:text-slate-500 text-[10px] font-medium">Find your perfect match to share your space.</p>
                     </div>
 
                     <div className="flex items-center gap-3 w-full md:w-auto">
@@ -127,7 +127,7 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                             title="Back to Market"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><polyline points="15 18 9 12 15 6" /></svg>
-                            <span className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap">Market Hub</span>
+                            <span className="text-[9px] font-medium whitespace-nowrap">Market Hub</span>
                         </button>
                         <div className="h-8 w-[1px] bg-slate-200 dark:bg-white/10 mx-1 hidden md:block" />
                         <button
@@ -192,27 +192,27 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                         <h4 className="text-[16px] font-bold text-slate-900 dark:text-white tracking-tight leading-tight">{req.user_username || 'Anonymous Verto'}</h4>
                                         <VerifiedBadge isAdmin={req.user_is_admin} size="w-4 h-4" />
                                     </div>
-                                    <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-500 rounded text-[7px] font-black uppercase tracking-widest">{req.status}</span>
+                                    <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-500 rounded text-[7px] font-medium">{req.status}</span>
                                 </div>
                                 <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight italic line-clamp-1">"{req.preferences}"</p>
                                 <div className="flex flex-wrap gap-4 pt-1">
                                     <div className="flex items-center gap-1.5 text-slate-400 dark:text-white/20">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                                        <span className="text-[8px] font-black uppercase tracking-widest">{req.location}</span>
+                                        <span className="text-[8px] font-medium">{req.location}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5 text-slate-400 dark:text-white/20">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></svg>
-                                        <span className="text-[8px] font-black uppercase tracking-widest">Budget: {req.budget}</span>
+                                        <span className="text-[8px] font-medium">Budget: {req.budget}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <button className="w-full md:w-auto px-4 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white dark:hover:text-white transition-all border-none cursor-pointer shadow-lg shadow-black/5">
+                            <button className="w-full md:w-auto px-4 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-[9px] font-medium hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white dark:hover:text-white transition-all border-none cursor-pointer shadow-lg shadow-black/5">
                                 Connect
                             </button>
                         </div>
                     ))}
-                    {filteredRequests.length === 0 && <div className="py-20 text-center text-slate-400 font-black uppercase tracking-widest opacity-40 text-[10px]">No requests found yet.</div>}
+                    {filteredRequests.length === 0 && <div className="py-20 text-center text-slate-400 font-medium opacity-40 text-[10px]">No requests found yet.</div>}
                 </div>
             )}
 
@@ -228,16 +228,16 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                         <form onSubmit={handleSubmit} className="space-y-4 text-left">
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Preferred Location</label>
+                                    <label className="block text-[8px] font-medium text-slate-400 mb-1 ml-1">Preferred Location</label>
                                     <input type="text" required value={newRequest.location} onChange={e => setNewRequest({ ...newRequest, location: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white" placeholder="e.g. Law Gate" />
                                 </div>
                                 <div>
-                                    <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Budget Range</label>
+                                    <label className="block text-[8px] font-medium text-slate-400 mb-1 ml-1">Budget Range</label>
                                     <input type="text" required value={newRequest.budget} onChange={e => setNewRequest({ ...newRequest, budget: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white" placeholder="e.g. 5k-7k" />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Lifestyle Preferences</label>
+                                <label className="block text-[8px] font-medium text-slate-400 mb-1 ml-1">Lifestyle Preferences</label>
                                 <textarea required value={newRequest.preferences} onChange={e => setNewRequest({ ...newRequest, preferences: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 min-h-[80px] text-slate-800 dark:text-white" placeholder="e.g. Non-smoker, Vegan, Late sleeper..." />
                             </div>
                             <button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none cursor-pointer">

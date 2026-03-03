@@ -212,7 +212,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   if (initializing) return (
     <div className="h-[60vh] flex flex-col items-center justify-center space-y-6 animate-fade-in">
       <div className="w-12 h-12 border-4 border-orange-500/10 border-t-orange-600 rounded-full animate-spin" />
-      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Setting up your subjects...</p>
+      <p className="text-[10px] font-medium text-slate-500">Setting up your subjects...</p>
     </div>
   );
 
@@ -223,7 +223,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
         <div className="absolute inset-0 w-24 h-24 border-8 border-orange-600 border-t-transparent rounded-full animate-spin" />
       </div>
       <div className="text-center space-y-2">
-        <h3 className="text-2xl font-black uppercase tracking-[0.3em] text-slate-800 dark:text-white">Starting Quiz</h3>
+        <h3 className="text-2xl font-medium text-slate-800 dark:text-white">Starting Quiz</h3>
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest animate-pulse">{status}</p>
       </div>
     </div>
@@ -238,13 +238,13 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
         <header className="flex items-center justify-between px-2">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <p className="text-[9px] font-black uppercase tracking-[0.4em] text-orange-600 leading-none">Quiz Portal</p>
-              {isCached && <span className="bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded text-[7px] font-black uppercase border border-emerald-500/20">Saved Data</span>}
+              <p className="text-[9px] font-medium text-orange-600 leading-none">Quiz Portal</p>
+              {isCached && <span className="bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded text-[7px] font-medium border border-emerald-500/20">Saved Data</span>}
             </div>
-            <h2 className="text-2xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">Question {currentQuestionIdx + 1} of {quizQuestions.length}</h2>
+            <h2 className="text-2xl font-bold tracking-tight uppercase text-slate-900 dark:text-white">Question {currentQuestionIdx + 1} of {quizQuestions.length}</h2>
           </div>
           <div className="text-right">
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 leading-none">Subject</p>
+            <p className="text-[9px] font-medium text-slate-500 leading-none">Subject</p>
             <p className="text-sm font-bold text-slate-800 dark:text-white uppercase">{selectedSubject?.name}</p>
           </div>
         </header>
@@ -253,7 +253,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
         </div>
         <div className="glass-panel p-8 md:p-12 rounded-[48px] shadow-2xl space-y-10">
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-slate-100 dark:bg-dark-800 text-slate-500 dark:text-slate-400 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border border-slate-200 dark:border-white/5">Unit {q.unit} Content</span>
+            <span className="bg-slate-100 dark:bg-dark-800 text-slate-500 dark:text-slate-400 px-3 py-1 rounded-full text-[8px] font-medium border border-slate-200 dark:border-white/5">Unit {q.unit} Content</span>
           </div>
           <h3 className="text-xl md:text-2xl font-bold leading-relaxed text-slate-900 dark:text-white">{q.question}</h3>
           <div className="grid grid-cols-1 gap-4">
@@ -274,7 +274,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
           </div>
           {isShowingExplanation && (
             <div className="p-8 bg-orange-600/5 border border-orange-600/20 rounded-[32px] animate-fade-in space-y-4">
-              <div className="flex items-center gap-3"><div className="w-1.5 h-1.5 rounded-full bg-orange-600" /><h4 className="text-[10px] font-black uppercase tracking-widest text-orange-600">Explanation</h4></div>
+              <div className="flex items-center gap-3"><div className="w-1.5 h-1.5 rounded-full bg-orange-600" /><h4 className="text-[10px] font-medium text-orange-600">Explanation</h4></div>
               <p className="text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed italic">"{q.explanation}"</p>
               <button onClick={nextQuestion} className="w-full py-4 mt-4 bg-orange-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">{currentQuestionIdx === quizQuestions.length - 1 ? 'Finish Quiz' : 'Next Question'}</button>
             </div>
@@ -291,8 +291,8 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           <div className="lg:col-span-4 glass-panel p-10 rounded-[56px] bg-gradient-to-br from-orange-600 to-red-700 text-white border-none shadow-2xl flex flex-col items-center justify-center text-center relative overflow-hidden">
             <div className="relative z-10">
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-80 mb-6">Final Score</p>
-              <div className="text-8xl font-black tracking-tighter mb-4">{score}<span className="text-3xl opacity-50">/{quizQuestions.length}</span></div>
+              <p className="text-[10px] font-medium opacity-80 mb-6">Final Score</p>
+              <div className="text-8xl font-bold tracking-tight mb-4">{score}<span className="text-3xl opacity-50">/{quizQuestions.length}</span></div>
               <div className="px-6 py-2 bg-dark-950/40 rounded-full font-black text-[10px] uppercase tracking-widest border border-white/10">
                 {percentage >= 80 ? 'Mastery' : percentage >= 50 ? 'Average' : 'Keep Practicing'}
               </div>
@@ -304,14 +304,14 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
             <div className="flex justify-between items-start mb-8">
               <h3 className="text-[10px] font-black text-orange-600 uppercase tracking-[0.3em]">Subject Breakdown</h3>
               <div className="flex gap-2">
-                <button onClick={handleDownloadPDF} className="px-4 py-2 bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Save PDF</button>
+                <button onClick={handleDownloadPDF} className="px-4 py-2 bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-white rounded-xl text-[9px] font-medium hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Save PDF</button>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-6">
                 {unitAnalysis.map((u, i) => (
                   <div key={i} className="space-y-2">
-                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                    <div className="flex justify-between items-center text-[10px] font-medium">
                       <span className="dark:text-white">Unit {u.unit}</span>
                       <span className="text-slate-500">{u.correct}/{u.total} Correct</span>
                     </div>
@@ -345,7 +345,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 space-y-3">
                       <div className="flex items-center gap-2">
-                        <span className={`px-2 py-0.5 rounded-lg text-[7px] font-black uppercase tracking-widest ${isCorrect ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`}>
+                        <span className={`px-2 py-0.5 rounded-lg text-[7px] font-medium ${isCorrect ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`}>
                           {isCorrect ? 'CORRECT' : 'WRONG'}
                         </span>
                         <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Unit {q.unit}</span>
@@ -389,9 +389,9 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
           <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center mx-auto text-red-500">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
           </div>
-          <h4 className="text-xs font-black uppercase text-red-500 tracking-widest">Protocol Interrupted</h4>
+          <h4 className="text-xs font-medium text-red-500 tracking-widest">Protocol Interrupted</h4>
           <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{error}</p>
-          <button onClick={() => setError(null)} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-orange-500 transition-colors">Dismiss</button>
+          <button onClick={() => setError(null)} className="text-[9px] font-medium text-slate-400 hover:text-orange-500 transition-colors">Dismiss</button>
         </div>
       )}
 
@@ -400,12 +400,12 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
           <div className="space-y-6">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600 font-black text-[10px]">1</div>
-              <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Select Subject</label>
+              <label className="text-[10px] font-medium text-slate-400 tracking-widest">Select Subject</label>
             </div>
             <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto no-scrollbar pr-2">
               {subjectsWithSyllabi.map(s => (
                 <button key={s.id} onClick={() => setSelectedSubject(s)} className={`p-4 rounded-2xl border text-left transition-all ${selectedSubject?.id === s.id ? 'bg-orange-600 border-orange-500 text-white shadow-lg' : 'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 text-slate-500 hover:border-orange-500/30'}`}>
-                  <p className="text-xs font-black uppercase tracking-tight">{s.name}</p>
+                  <p className="text-xs font-medium">{s.name}</p>
                 </button>
               ))}
               {subjectsWithSyllabi.length === 0 && !initializing && (
@@ -419,13 +419,13 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
           <div className="space-y-6">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600 font-black text-[10px]">2</div>
-              <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Select Units</label>
+              <label className="text-[10px] font-medium text-slate-400 tracking-widest">Select Units</label>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[1, 2, 3, 4, 5, 6].map(u => (
                 <button key={u} onClick={() => toggleUnit(u)} className={`p-6 rounded-[32px] border transition-all flex flex-col items-center justify-center group ${selectedUnits.includes(u) ? 'bg-orange-600/10 border-orange-600 shadow-xl scale-105' : 'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 hover:border-orange-500/30'}`}>
-                  <span className={`text-2xl font-black tracking-tighter ${selectedUnits.includes(u) ? 'text-orange-600' : 'text-slate-300 dark:text-slate-700'}`}>0{u}</span>
-                  <span className={`text-[8px] font-black uppercase tracking-widest mt-1 ${selectedUnits.includes(u) ? 'text-orange-500' : 'text-slate-500 opacity-40'}`}>Unit {u}</span>
+                  <span className={`text-2xl font-bold tracking-tight ${selectedUnits.includes(u) ? 'text-orange-600' : 'text-slate-300 dark:text-slate-700'}`}>0{u}</span>
+                  <span className={`text-[8px] font-medium mt-1 ${selectedUnits.includes(u) ? 'text-orange-500' : 'text-slate-500 opacity-40'}`}>Unit {u}</span>
                 </button>
               ))}
             </div>

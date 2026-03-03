@@ -244,7 +244,7 @@ const AttendanceTracker: React.FC = () => {
                 <div className="flex items-center bg-red-600 rounded-2xl overflow-hidden shadow-xl animate-fade-in">
                   <button
                     onClick={() => setWipingAll(false)}
-                    className="px-3 md:px-4 py-2.5 md:py-3 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/70 hover:text-white"
+                    className="px-3 md:px-4 py-2.5 md:py-3 text-[9px] md:text-[10px] font-bold text-white/70 hover:text-white"
                   >
                     No
                   </button>
@@ -258,7 +258,7 @@ const AttendanceTracker: React.FC = () => {
               ) : (
                 <button
                   onClick={(e) => { e.stopPropagation(); setWipingAll(true); }}
-                  className="flex items-center space-x-2 px-4 md:px-6 py-2.5 md:py-3 bg-slate-100 dark:bg-[#0a0a0a] rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                  className="flex items-center space-x-2 px-4 md:px-6 py-2.5 md:py-3 bg-slate-100 dark:bg-[#0a0a0a] rounded-2xl text-[9px] md:text-[10px] font-bold text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 md:w-4 h-3.5 md:h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
                   <span>Clear All</span>
@@ -269,7 +269,7 @@ const AttendanceTracker: React.FC = () => {
 
           <button
             onClick={() => setShowArchived(!showArchived)}
-            className={`flex items-center space-x-2 px-4 md:px-6 py-2.5 md:py-3 rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${showArchived ? 'bg-orange-600 text-white' : 'bg-slate-100 dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400'}`}
+            className={`flex items-center space-x-2 px-4 md:px-6 py-2.5 md:py-3 rounded-2xl text-[9px] md:text-[10px] font-bold transition-all shadow-sm ${showArchived ? 'bg-orange-600 text-white' : 'bg-slate-100 dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400'}`}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 md:w-4 h-3.5 md:h-4"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
             <span>{showArchived ? 'Active Subjects' : 'Archived'}</span>
@@ -280,7 +280,7 @@ const AttendanceTracker: React.FC = () => {
       <div className="glass-panel p-5 md:p-8 rounded-[32px] md:rounded-[40px] bg-white dark:bg-[#0a0a0a]/50 border border-slate-200 dark:border-white/5 shadow-2xl relative z-0">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 items-end">
           <div className="md:col-span-4">
-            <label className="block text-[9px] md:text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">
+            <label className="block text-[9px] md:text-[10px] font-medium text-slate-400 mb-2 ml-1 tracking-widest">
               Subject Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -298,7 +298,7 @@ const AttendanceTracker: React.FC = () => {
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-[9px] md:text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Present / Total</label>
+            <label className="block text-[9px] md:text-[10px] font-medium text-slate-400 mb-2 ml-1 tracking-widest">Present / Total</label>
             <div className="flex items-center space-x-2">
               <input
                 type="number" placeholder="P" value={newSub.present}
@@ -314,7 +314,7 @@ const AttendanceTracker: React.FC = () => {
             </div>
           </div>
           <div className="md:col-span-2">
-            <label className="block text-[9px] md:text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Goal %</label>
+            <label className="block text-[9px] md:text-[10px] font-medium text-slate-400 mb-2 ml-1 tracking-widest">Goal %</label>
             <input
               type="number" placeholder="75" value={newSub.goal}
               onChange={(e) => setNewSub({ ...newSub, goal: e.target.value })}
@@ -366,14 +366,14 @@ const AttendanceTracker: React.FC = () => {
                       {sub.name}
                     </h3>
                     <div className="flex items-center gap-2">
-                      <span className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded text-[6px] md:text-[7px] font-black uppercase text-slate-500">
+                      <span className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded text-[6px] md:text-[7px] font-medium text-slate-500">
                         {sub.present}/{sub.total} S
                       </span>
                     </div>
                   </div>
 
                   <div className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl ${accentBg} border border-transparent group-hover:border-current/10 transition-all`}>
-                    <span className={`${accentColor} text-base sm:text-lg md:text-xl font-black tracking-tighter`}>
+                    <span className={`${accentColor} text-base sm:text-lg md:text-xl font-bold tracking-tight`}>
                       {percentage.toFixed(1)}
                       <span className="text-[8px] sm:text-[9px] opacity-40 ml-0.5 font-bold">%</span>
                     </span>
@@ -428,7 +428,7 @@ const AttendanceTracker: React.FC = () => {
                 {/* Footer Analysis */}
                 <div className="mt-auto flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/5">
                   <div className={`
-                    px-3 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-widest flex items-center gap-2
+                    px-3 py-1.5 rounded-xl text-[8px] font-bold flex items-center gap-2
                     ${isBelowGoal ? 'bg-red-500/5 text-red-500' : 'bg-emerald-500/5 text-emerald-500'}
                   `}>
                     <div className={`w-1.5 h-1.5 rounded-full ${isBelowGoal ? 'bg-red-500' : 'bg-emerald-500'} animate-pulse`} />
@@ -444,13 +444,13 @@ const AttendanceTracker: React.FC = () => {
                       <div className="flex items-center gap-1 animate-fade-in">
                         <button
                           onClick={(e) => { e.stopPropagation(); setDeletingId(null); }}
-                          className="px-2 py-1.5 bg-slate-100 dark:bg-white/5 text-[8px] font-black uppercase text-slate-400 rounded-lg hover:text-white transition-colors border-none"
+                          className="px-2 py-1.5 bg-slate-100 dark:bg-white/5 text-[8px] font-medium text-slate-400 rounded-lg hover:text-white transition-colors border-none"
                         >
                           No
                         </button>
                         <button
                           onClick={executeDelete}
-                          className="px-2 py-1.5 bg-red-600 text-[8px] font-black uppercase text-white rounded-lg shadow-md hover:bg-red-700 transition-colors border-none"
+                          className="px-2 py-1.5 bg-red-600 text-[8px] font-medium text-white rounded-lg shadow-md hover:bg-red-700 transition-colors border-none"
                         >
                           Del
                         </button>
@@ -507,13 +507,13 @@ const AttendanceTracker: React.FC = () => {
               <button onClick={handleClose} className="absolute top-5 right-5 md:top-6 md:right-6 p-2 text-white/50 hover:text-white transition-colors border-none bg-transparent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
-              <h3 className="text-lg md:text-xl font-black tracking-tighter uppercase leading-none mb-1">Modify Entry</h3>
-              <p className="text-white/60 text-[9px] md:text-[10px] font-black uppercase tracking-widest">Update subject details</p>
+              <h3 className="text-lg md:text-xl font-bold tracking-tight uppercase leading-none mb-1">Modify Entry</h3>
+              <p className="text-white/60 text-[9px] md:text-[10px] font-medium">Update subject details</p>
             </div>
 
             <div className="p-6 md:p-7 space-y-4 md:space-y-5">
               <div>
-                <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 ml-1">Subject Name</label>
+                <label className="block text-[9px] md:text-[10px] font-medium text-zinc-400 mb-2 ml-1">Subject Name</label>
                 <input
                   type="text"
                   value={editingSubject.name}
@@ -524,7 +524,7 @@ const AttendanceTracker: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3 md:gap-4">
                 <div>
-                  <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 ml-1">Present</label>
+                  <label className="block text-[9px] md:text-[10px] font-medium text-zinc-400 mb-2 ml-1">Present</label>
                   <input
                     type="number"
                     value={editingSubject.present}
@@ -533,7 +533,7 @@ const AttendanceTracker: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 ml-1">Total</label>
+                  <label className="block text-[9px] md:text-[10px] font-medium text-zinc-400 mb-2 ml-1">Total</label>
                   <input
                     type="number"
                     value={editingSubject.total}
@@ -544,7 +544,7 @@ const AttendanceTracker: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 ml-1">Target (%)</label>
+                <label className="block text-[9px] md:text-[10px] font-medium text-zinc-400 mb-2 ml-1">Target (%)</label>
                 <input
                   type="number"
                   value={editingSubject.goal}
@@ -557,7 +557,7 @@ const AttendanceTracker: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="flex-1 py-3.5 md:py-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent"
+                  className="flex-1 py-3.5 md:py-4 text-[9px] md:text-[10px] font-medium text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent"
                 >
                   Cancel
                 </button>

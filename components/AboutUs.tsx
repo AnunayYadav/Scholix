@@ -38,11 +38,11 @@ const StatCounter: React.FC<{ target: number; label: string; subLabel: string; a
 
   return (
     <div className="space-y-1">
-      <p className={`text-[10px] font-black uppercase tracking-[0.4em] ${accentColor} opacity-80`}>{label}</p>
+      <p className={`text-[8px] font-black uppercase tracking-[0.2em] ${accentColor} opacity-80`}>{label}</p>
       <h4 className="text-5xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">
         {count.toLocaleString()}{(!label.includes('Global') && !isAdmin) ? '' : '+'}
       </h4>
-      <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-2">{subLabel}</p>
+      <p className="text-[7px] font-black text-slate-500 uppercase tracking-[0.2em] mt-2">{subLabel}</p>
     </div>
   );
 };
@@ -127,27 +127,27 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
           {/* Main Content (Left) */}
           <div className="lg:col-span-7 space-y-10">
             <div>
-              <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-500 mb-6">Architect & Heritage</h3>
-              <p className="text-3xl md:text-5xl font-black tracking-tighter mb-4 leading-tight text-slate-800 dark:text-white">
-                <span className="whitespace-nowrap">Made with <span className="text-orange-500 underline decoration-slate-200 dark:decoration-white/10 underline-offset-8">Purpose</span>.</span><br />
+              <h3 className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] mb-6">Architect & Heritage</h3>
+              <p className="text-4xl md:text-6xl font-black tracking-tighter mb-4 leading-none text-slate-800 dark:text-white">
+                <span className="whitespace-nowrap">Made with <span className="text-orange-500 underline decoration-white/10 underline-offset-8">Purpose</span>.</span><br />
                 <span className="whitespace-nowrap">For the <span className="text-orange-500">Future</span>.</span>
               </p>
             </div>
 
             <div className="space-y-6">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Lead Developer</p>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Lead Developer</p>
                 <p className="text-4xl font-black text-slate-800 dark:text-white tracking-tight">Anunay Yadav</p>
               </div>
 
               <div className="flex gap-12 pt-4">
                 <div>
-                  <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 mb-1">Batch</p>
-                  <p className="text-lg font-black text-slate-800 dark:text-white">2025-29</p>
+                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Batch</p>
+                  <p className="text-xl font-black text-slate-800 dark:text-white">2025-29</p>
                 </div>
                 <div>
-                  <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 mb-1">Branch</p>
-                  <p className="text-lg font-black text-slate-800 dark:text-white">CSE</p>
+                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Branch</p>
+                  <p className="text-xl font-black text-slate-800 dark:text-white">CSE</p>
                 </div>
               </div>
             </div>
@@ -176,7 +176,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
                   >
                     {link.icon}
                   </svg>
-                  <span className="text-[10px] font-black uppercase tracking-widest opacity-70 group-hover:opacity-100 transition-opacity">{link.label}</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest opacity-70 group-hover:opacity-100 transition-opacity">{link.label}</span>
                 </a>
               ))}
             </div>
@@ -227,7 +227,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
       </section>
 
       <footer className="text-center pt-8">
-        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 opacity-50">
+        <p className="text-[10px] font-medium text-slate-400 opacity-50">
           LPU-Nexus v1.3.0 • Independent Student Project
         </p>
       </footer>

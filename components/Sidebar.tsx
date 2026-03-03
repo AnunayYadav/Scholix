@@ -161,7 +161,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-10 h-10"><polyline points="20 6 9 17 4 12" /></svg>
                 </div>
                 <div>
-                  <h3 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none mb-2">Success!</h3>
+                  <h3 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-2">Success!</h3>
                   <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest">Your feedback has been received.</p>
                 </div>
               </div>
@@ -171,8 +171,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-orange-600"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
                 </div>
 
-                <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-2 tracking-tighter uppercase leading-none">Feedback</h3>
-                <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-8">Found a bug or have a suggestion? Let us know.</p>
+                <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight leading-none">Feedback</h3>
+                <p className="text-slate-500 text-xs mb-8">Found a bug or have a suggestion? Let us know.</p>
 
                 <div className="relative group">
                   <textarea
@@ -188,14 +188,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                   <button
                     onClick={() => setShowFeedbackModal(false)}
                     disabled={isSubmitting}
-                    className="flex-1 py-4 text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white font-black text-xs uppercase tracking-widest border-none bg-transparent transition-colors"
+                    className="flex-1 py-4 text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white font-bold text-sm border-none bg-transparent transition-colors"
                   >
                     Dismiss
                   </button>
                   <button
                     onClick={submitFeedback}
                     disabled={isSubmitting || !feedbackText.trim()}
-                    className="flex-[2] py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-[24px] font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-orange-600/20 active:scale-95 transition-all flex items-center justify-center gap-3 border-none disabled:opacity-50"
+                    className="flex-[2] py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-[24px] font-bold text-sm shadow-xl shadow-orange-600/20 active:scale-95 transition-all flex items-center justify-center gap-3 border-none disabled:opacity-50"
                   >
                     {isSubmitting ? (
                       <div className="w-4 h-4 border-3 border-white border-t-transparent rounded-full animate-spin" />
@@ -241,7 +241,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               onClick={() => setModule(ModuleType.DASHBOARD)}
             />
             <div className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) flex flex-col overflow-hidden ${isHovered || isMobileMenuOpen ? 'max-w-[200px] opacity-100 ml-4' : 'max-w-0 opacity-0 ml-0'}`}>
-              <h1 className="text-2xl font-black bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tight whitespace-nowrap">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tight whitespace-nowrap">
                 LPU-Nexus
               </h1>
               <p className="text-[9px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-600 whitespace-nowrap">Student Intelligence</p>

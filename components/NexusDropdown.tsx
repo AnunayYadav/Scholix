@@ -39,7 +39,7 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
     return (
         <div ref={dropdownRef} className={`relative ${isOpen ? 'z-50' : ''} ${className}`}>
             {label && (
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1 mb-2 block">
+                <label className="text-[10px] font-medium text-slate-500 ml-1 mb-2 block">
                     {label}
                 </label>
             )}
@@ -77,7 +77,7 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
                                         onChange(option);
                                         setIsOpen(false);
                                     }}
-                                    className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${value === option
+                                    className={`w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-semibold transition-all flex items-center justify-between group border-none ${value === option
                                         ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
                                         : 'text-slate-600 dark:text-slate-400 bg-transparent hover:bg-slate-100 dark:hover:bg-white/5 hover:text-orange-600'
                                         }`}

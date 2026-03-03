@@ -50,15 +50,15 @@ const FreshersKit: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-20">
       <header className="mb-8">
-        <h2 className="text-3xl font-black text-slate-800 dark:text-white mb-2 tracking-tighter">Freshmen <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Kit</span></h2>
-        <p className="text-slate-600 dark:text-slate-400 font-medium">The essential checklist for a seamless start at LPU.</p>
+        <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-2 tracking-tight">Freshmen <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Kit</span></h2>
+        <p className="text-slate-600 dark:text-slate-400 font-semibold">The essential checklist for a seamless start at LPU.</p>
       </header>
 
       {/* Progress Bar */}
       <div className="glass-panel p-5 rounded-2xl border dark:border-white/5 bg-white dark:bg-[#0a0a0a] shadow-sm">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Progress</span>
-          <span className="text-[10px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-500">{progress.done}/{progress.total} — {progress.pct}%</span>
+          <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">Progress</span>
+          <span className="text-[10px] font-semibold text-orange-600 dark:text-orange-500">{progress.done}/{progress.total} — {progress.pct}%</span>
         </div>
         <div className="h-2.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
           <div
@@ -67,14 +67,14 @@ const FreshersKit: React.FC = () => {
           />
         </div>
         {progress.pct === 100 && (
-          <p className="text-[10px] font-black uppercase tracking-widest text-green-500 mt-3 text-center animate-pulse">🎉 All packed! You're ready for LPU.</p>
+          <p className="text-[10px] font-semibold text-green-500 mt-3 text-center animate-pulse">🎉 All packed! You're ready for LPU.</p>
         )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {categories.map(cat => (
           <div key={cat} className="glass-panel p-6 rounded-2xl border dark:border-white/5 bg-white dark:bg-[#0a0a0a] shadow-sm">
-            <h3 className="text-xs font-black text-orange-600 dark:text-orange-500 uppercase tracking-[0.2em] mb-6 border-b border-slate-100 dark:border-white/5 pb-4">
+            <h3 className="text-xs font-bold text-orange-600 dark:text-orange-500 tracking-tight mb-6 border-b border-slate-100 dark:border-white/5 pb-4">
               {cat}
             </h3>
             <ul className="space-y-4">
@@ -98,7 +98,7 @@ const FreshersKit: React.FC = () => {
                     </span>
                   </div>
                   {item.link && (
-                    <a href={item.link} target="_blank" rel="noreferrer" className="text-[10px] font-black uppercase tracking-widest text-orange-500 hover:text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity bg-orange-500/10 px-3 py-1.5 rounded-lg">Get ↗</a>
+                    <a href={item.link} target="_blank" rel="noreferrer" className="text-[10px] font-medium text-orange-500 hover:text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity bg-orange-500/10 px-3 py-1.5 rounded-lg">Get ↗</a>
                   )}
                 </li>
               ))}
@@ -113,8 +113,8 @@ const FreshersKit: React.FC = () => {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" /><path d="M12 16V12" /><path d="M12 8H12.01" /></svg>
           </div>
           <div>
-            <h3 className="font-black text-xs uppercase tracking-[0.2em] mb-2 opacity-80">Pro Student Tip</h3>
-            <p className="text-sm font-medium leading-relaxed">
+            <h3 className="font-bold text-xs tracking-tight mb-2 opacity-80">Pro Student Tip</h3>
+            <p className="text-sm font-semibold leading-relaxed">
               Don't buy heavy textbooks yet. Use the <strong>Content Library</strong> to find verified digital notes first. Save that money for fests!
             </p>
           </div>

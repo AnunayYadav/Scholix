@@ -80,7 +80,7 @@ const HelpSection: React.FC = () => {
           className="w-full pl-12 pr-5 py-4 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0a0a0a] text-sm font-bold text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500/30 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 placeholder:font-bold"
         />
         {searchQuery && (
-          <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase tracking-widest text-orange-500">
+          <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[9px] font-medium text-orange-500">
             {totalResults} result{totalResults !== 1 ? 's' : ''}
           </span>
         )}
@@ -88,7 +88,7 @@ const HelpSection: React.FC = () => {
 
       {filteredFaqs.length === 0 ? (
         <div className="text-center py-16 border-4 border-dashed border-slate-100 dark:border-white/5 rounded-2xl opacity-40">
-          <p className="text-[10px] font-black uppercase tracking-widest">No matching questions found</p>
+          <p className="text-[10px] font-medium">No matching questions found</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
