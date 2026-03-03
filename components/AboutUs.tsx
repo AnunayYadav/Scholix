@@ -38,11 +38,11 @@ const StatCounter: React.FC<{ target: number; label: string; subLabel: string; a
 
   return (
     <div className="space-y-1">
-      <p className={`text-[8px] font-black uppercase tracking-[0.2em] ${accentColor} opacity-80`}>{label}</p>
+      <p className={`text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] ${accentColor} opacity-80`}>{label}</p>
       <h4 className="text-5xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">
         {count.toLocaleString()}{(!label.includes('Global') && !isAdmin) ? '' : '+'}
       </h4>
-      <p className="text-[7px] font-black text-slate-500 uppercase tracking-[0.2em] mt-2">{subLabel}</p>
+      <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] mt-2">{subLabel}</p>
     </div>
   );
 };
@@ -99,7 +99,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/5 space-y-4">
-          <h3 className="text-[10px] font-black text-orange-600 uppercase tracking-widest border-b border-slate-100 dark:border-white/5 pb-4">The Mission</h3>
+          <h3 className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest border-b border-slate-100 dark:border-white/5 pb-4">The Mission</h3>
           <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
             LPU-Nexus was born from a simple observation: campus life is complex. Between tracking attendance, calculating CGPA, and preparing for placements, students are often overwhelmed.
             <br /><br />
@@ -108,7 +108,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
         </div>
 
         <div className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/5 space-y-4">
-          <h3 className="text-[10px] font-black text-orange-600 uppercase tracking-widest border-b border-slate-100 dark:border-white/5 pb-4">Key Innovation</h3>
+          <h3 className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest border-b border-slate-100 dark:border-white/5 pb-4">Key Innovation</h3>
           <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
             By integrating <strong>Google's Gemini AI</strong>, we provide tools that don't just calculate numbers but offer strategic insights.
             From "Placement Prefect" to "Global Gateway", Nexus is designed to be your academic advantage.
@@ -127,7 +127,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
           {/* Main Content (Left) */}
           <div className="lg:col-span-7 space-y-10">
             <div>
-              <h3 className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] mb-6">Architect & Heritage</h3>
+              <h3 className="text-[11px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.3em] mb-6">Architect & Heritage</h3>
               <p className="text-4xl md:text-6xl font-black tracking-tighter mb-4 leading-none text-slate-800 dark:text-white">
                 <span className="whitespace-nowrap">Made with <span className="text-orange-500 underline decoration-white/10 underline-offset-8">Purpose</span>.</span><br />
                 <span className="whitespace-nowrap">For the <span className="text-orange-500">Future</span>.</span>
@@ -136,17 +136,17 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
 
             <div className="space-y-6">
               <div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Lead Developer</p>
+                <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Lead Developer</p>
                 <p className="text-4xl font-black text-slate-800 dark:text-white tracking-tight">Anunay Yadav</p>
               </div>
 
               <div className="flex gap-12 pt-4">
                 <div>
-                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Batch</p>
+                  <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Batch</p>
                   <p className="text-xl font-black text-slate-800 dark:text-white">2025-29</p>
                 </div>
                 <div>
-                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Branch</p>
+                  <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Branch</p>
                   <p className="text-xl font-black text-slate-800 dark:text-white">CSE</p>
                 </div>
               </div>
@@ -176,7 +176,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
                   >
                     {link.icon}
                   </svg>
-                  <span className="text-[9px] font-black uppercase tracking-widest opacity-70 group-hover:opacity-100 transition-opacity">{link.label}</span>
+                  <span className="text-[11px] sm:text-xs font-black uppercase tracking-widest opacity-70 group-hover:opacity-100 transition-opacity">{link.label}</span>
                 </a>
               ))}
             </div>
@@ -227,7 +227,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
       </section>
 
       <footer className="text-center pt-8">
-        <p className="text-[10px] font-medium text-slate-400 opacity-50">
+        <p className="text-[11px] sm:text-xs font-medium text-slate-400 opacity-50">
           LPU-Nexus v1.3.0 • Independent Student Project
         </p>
       </footer>

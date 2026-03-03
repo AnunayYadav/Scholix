@@ -213,7 +213,7 @@ const EmergencyContacts: React.FC = () => {
                 </h2>
                 <div className="flex items-center justify-center gap-2">
                     <div className="h-[1px] w-8 md:w-12 bg-slate-200 dark:bg-white/10" />
-                    <p className="text-slate-500 text-[10px] md:text-[12px] font-medium leading-none">
+                    <p className="text-slate-500 text-[11px] sm:text-xs font-medium leading-none">
                         Essential Services Directory
                     </p>
                     <div className="h-[1px] w-8 md:w-12 bg-slate-200 dark:bg-white/10" />
@@ -230,7 +230,7 @@ const EmergencyContacts: React.FC = () => {
                         {contact.icon}
                         <div className="relative z-20 h-full flex flex-col justify-between space-y-4 md:space-y-6">
                             <div className="space-y-1">
-                                <p className="text-[8px] md:text-[12px] font-medium md:tracking-[0.2em] text-white/70">{contact.title}</p>
+                                <p className="text-[11px] sm:text-xs font-medium md:tracking-[0.2em] text-white/70">{contact.title}</p>
                                 <h3 className="text-xl md:text-3xl font-black text-white tracking-tighter leading-none">{contact.status}</h3>
                             </div>
                             <div className="space-y-2 md:space-y-3">
@@ -321,7 +321,7 @@ const EmergencyContacts: React.FC = () => {
                                                 category === 'Hospital' ? 'External Referral Hospitals' :
                                                     category === 'Administrative' ? 'University Services' : category}
                                         </h3>
-                                        <p className="text-[10px] md:text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none mt-1">{categoryItems.length} Records Found</p>
+                                        <p className="text-[11px] sm:text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none mt-1">{categoryItems.length} Records Found</p>
                                     </div>
                                 </div>
                                 <div className={`w-8 h-8 md:w-9 md:h-9 rounded-full bg-slate-50 dark:bg-white/5 flex items-center justify-center text-slate-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
@@ -337,8 +337,8 @@ const EmergencyContacts: React.FC = () => {
                                                 <div className="flex justify-between items-start gap-2">
                                                     <div className="min-w-0 text-left">
                                                         <h4 className="text-[14px] md:text-lg font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-tight">{item.title}</h4>
-                                                        {item.subTitle && <p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-tight mt-0.5">{item.subTitle}</p>}
-                                                        {item.description && <p className="text-[8px] md:text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-2 italic leading-tight">{item.description}</p>}
+                                                        {item.subTitle && <p className="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-tight mt-0.5">{item.subTitle}</p>}
+                                                        {item.description && <p className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 mt-2 italic leading-tight">{item.description}</p>}
                                                     </div>
                                                     <div className="p-2 rounded-lg md:rounded-xl bg-slate-50 dark:bg-white/10 text-slate-400 group-hover:text-orange-600 transition-all shrink-0">
                                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 md:w-5 md:h-5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
@@ -347,7 +347,7 @@ const EmergencyContacts: React.FC = () => {
 
                                                 {item.blocks && (
                                                     <div className="border-t border-slate-100 dark:border-white/5 pt-3 flex flex-col md:flex-row md:items-center justify-between gap-1">
-                                                        <span className="text-[8px] md:text-[11px] font-medium text-slate-400 tracking-widest leading-none">Main Line</span>
+                                                        <span className="text-[11px] sm:text-xs font-medium text-slate-400 tracking-widest leading-none">Main Line</span>
                                                         <span className="text-[10px] md:text-[13px] font-black text-slate-700 dark:text-slate-200 leading-none">{item.blocks[0].number}</span>
                                                     </div>
                                                 )}
@@ -355,19 +355,19 @@ const EmergencyContacts: React.FC = () => {
                                                 {item.availability && (
                                                     <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/5 rounded-full border border-emerald-500/10">
                                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                                        <span className="text-[8px] md:text-[10px] font-medium text-emerald-600 leading-none">{item.availability}</span>
+                                                        <span className="text-[11px] sm:text-xs font-medium text-emerald-600 leading-none">{item.availability}</span>
                                                     </div>
                                                 )}
                                             </div>
 
                                             <div className="mt-4 md:mt-6">
                                                 {item.numbers.length > 0 ? (
-                                                    <a href={`tel:${item.numbers[0]}`} className="w-full h-10 md:h-12 flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl md:rounded-2xl text-[10px] md:text-[11px] font-medium hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white dark:hover:text-white transition-all no-underline text-center">
+                                                    <a href={`tel:${item.numbers[0]}`} className="w-full h-10 md:h-12 flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl md:rounded-2xl text-[11px] sm:text-xs font-medium hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white dark:hover:text-white transition-all no-underline text-center">
                                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 md:w-4 md:h-4"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
                                                         Call
                                                     </a>
                                                 ) : (
-                                                    <div className="w-full h-10 md:h-12 border border-dotted border-slate-200 dark:border-white/10 flex items-center justify-center rounded-xl md:rounded-2xl text-[9px] md:text-[11px] font-bold uppercase text-slate-400 tracking-wider italic">
+                                                    <div className="w-full h-10 md:h-12 border border-dotted border-slate-200 dark:border-white/10 flex items-center justify-center rounded-xl md:rounded-2xl text-[11px] sm:text-xs font-bold uppercase text-slate-400 tracking-wider italic">
                                                         Internal
                                                     </div>
                                                 )}
@@ -385,11 +385,11 @@ const EmergencyContacts: React.FC = () => {
             <div className="bg-white dark:bg-white/[0.03] rounded-[32px] md:rounded-[48px] p-6 md:p-10 border border-slate-200 dark:border-white/10 shadow-xl space-y-8 md:space-y-10">
                 <div className="flex flex-col md:flex-row justify-between items-start gap-6 border-b border-slate-100 dark:border-white/5 pb-8">
                     <div className="space-y-3">
-                        <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-red-600/10 text-red-600 rounded-full text-[8px] font-medium text-left">
+                        <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-red-600/10 text-red-600 rounded-full text-[11px] sm:text-xs font-medium text-left">
                             Official Directory
                         </div>
                         <h3 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tighter leading-none text-left">Uni Health Centre</h3>
-                        <p className="text-slate-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-left">UNI Health Centre – Block 03, LPU • Open 24x7 | 365 Days</p>
+                        <p className="text-slate-500 text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] text-left">UNI Health Centre – Block 03, LPU • Open 24x7 | 365 Days</p>
                     </div>
                     <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-[24px] border border-slate-100 dark:border-white/5 max-w-xs w-full text-left">
                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 text-center">Referral Hospital Concessions</p>
@@ -399,7 +399,7 @@ const EmergencyContacts: React.FC = () => {
                             <li className="flex justify-between"><span>Patel Hospital</span> <span className="text-orange-600">5% Off</span></li>
                             <li className="flex justify-between"><span>Diagnostics</span> <span className="text-orange-600">Up to 20%</span></li>
                         </ul>
-                        <p className="text-[7px] mt-3 text-slate-400 font-medium text-center italic">Carry UID Card for Concession</p>
+                        <p className="text-[11px] sm:text-xs mt-3 text-slate-400 font-medium text-center italic">Carry UID Card for Concession</p>
                     </div>
                 </div>
 
@@ -411,7 +411,7 @@ const EmergencyContacts: React.FC = () => {
                         </div>
                         <div className="space-y-2">
                             <h4 className="text-[15px] md:text-[17px] font-bold text-slate-900 dark:text-white tracking-tighter uppercase">Medical Facilities</h4>
-                            <ul className="space-y-1 text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-relaxed">
+                            <ul className="space-y-1 text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-relaxed">
                                 <li>Diagnostic Laboratory</li>
                                 <li>ECG & Cardiac Monitor</li>
                                 <li>Oxygen & Nebulization</li>
@@ -429,7 +429,7 @@ const EmergencyContacts: React.FC = () => {
                         </div>
                         <div className="space-y-2">
                             <h4 className="text-[15px] md:text-[17px] font-bold text-slate-900 dark:text-white tracking-tighter uppercase">OPD Specialties</h4>
-                            <ul className="space-y-1 text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-relaxed">
+                            <ul className="space-y-1 text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-relaxed">
                                 <li>General Medicine & Surgery</li>
                                 <li>Eye Testing, Dental & Gynae</li>
                                 <li>ENT, Skin & Ayurvedic</li>
@@ -446,7 +446,7 @@ const EmergencyContacts: React.FC = () => {
                         </div>
                         <div className="space-y-2">
                             <h4 className="text-[15px] md:text-[17px] font-bold text-slate-900 dark:text-white tracking-tighter uppercase">Indoor Facilities</h4>
-                            <ul className="space-y-1 text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-relaxed">
+                            <ul className="space-y-1 text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-relaxed">
                                 <li>31 Beds Available</li>
                                 <li>Separate Male & Female Wards</li>
                                 <li>No Admission Charges</li>
@@ -463,7 +463,7 @@ const EmergencyContacts: React.FC = () => {
                         </div>
                         <div className="space-y-2">
                             <h4 className="text-[15px] md:text-[17px] font-bold text-slate-900 dark:text-white tracking-tighter uppercase">Emergency Support</h4>
-                            <ul className="space-y-1 text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-relaxed">
+                            <ul className="space-y-1 text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-relaxed">
                                 <li>6 Active Ambulances</li>
                                 <li className="text-red-500">Free for Seriously Ill</li>
                                 <li>24x7 Emergency Support</li>
@@ -480,7 +480,7 @@ const EmergencyContacts: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-tr from-orange-600/5 to-transparent opacity-50" />
                 <div className="relative z-10 space-y-3 md:space-y-4">
                     <h3 className="text-xl md:text-2xl font-black text-white tracking-tighter uppercase leading-none">Global Helpdesk</h3>
-                    <p className="text-slate-500 text-[10px] md:text-[12px] font-medium max-w-sm mx-auto">Access 24/7 university assistance through the official campus hotline or student relationship portal.</p>
+                    <p className="text-slate-500 text-[11px] sm:text-xs font-medium max-w-sm mx-auto">Access 24/7 university assistance through the official campus hotline or student relationship portal.</p>
                 </div>
             </div>
         </div>

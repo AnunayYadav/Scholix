@@ -170,10 +170,10 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                 {/* Top Row: Title and Main Actions */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div className="space-y-1 text-left">
-                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
+                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
                             LPU <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Market</span>
                         </h2>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Buy, Sell & Trade within the LPU Community</p>
+                        <p className="text-[11px] sm:text-xs font-bold text-slate-400 tracking-wider ml-1">Buy, Sell & Trade within the LPU Community</p>
                     </div>
 
                     <div className="flex items-center gap-3 w-full md:w-auto">
@@ -183,7 +183,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                             title="Find Roommates"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                            <span className="text-[9px] font-medium whitespace-nowrap">Roommates</span>
+                            <span className="text-[11px] sm:text-xs font-medium whitespace-nowrap">Roommates</span>
                         </button>
                         <button
                             onClick={() => setShowUserOnly(!showUserOnly)}
@@ -200,7 +200,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                 if (!userProfile) showToast("Please sign in to list items", "info");
                                 else setShowSellModal(true);
                             }}
-                            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-black px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl hover:shadow-2xl border-none cursor-pointer"
+                            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-black px-6 py-4 rounded-2xl font-bold text-[11px] sm:text-xs tracking-wider hover:scale-[1.02] active:scale-95 transition-all shadow-xl hover:shadow-2xl border-none cursor-pointer"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                             Post Ad
@@ -214,7 +214,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                         <button
                             key={c}
                             onClick={() => setFilter(c)}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-medium tracking-wider transition-all border-none cursor-pointer whitespace-nowrap ${filter === c
+                            className={`px-4 py-2 rounded-xl text-[11px] sm:text-xs font-medium tracking-wider transition-all border-none cursor-pointer whitespace-nowrap ${filter === c
                                 ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-600/20'
                                 : 'text-slate-400 hover:text-orange-500 dark:text-slate-500 dark:hover:text-white bg-transparent'
                                 }`}
@@ -269,41 +269,41 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                 ) : (
                                     <div className="flex flex-col items-center gap-2 opacity-20">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 md:w-12 md:h-12 text-slate-900 dark:text-white"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
-                                        <span className="text-[8px] font-medium">No Image</span>
+                                        <span className="text-[11px] sm:text-xs font-medium">No Image</span>
                                     </div>
                                 )}
 
                                 <div className="absolute top-3 right-3 md:top-4 md:right-4 z-20">
                                     <div className="px-2 py-0.5 md:px-3 md:py-1 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg shadow-lg shadow-orange-600/20 flex items-center gap-1 group-hover:scale-110 transition-transform duration-500">
-                                        <span className="text-[8px] md:text-[9px] font-black opacity-70">₹</span>
-                                        <span className="text-[10px] md:text-[11px] font-black tracking-tight">{item.price}</span>
+                                        <span className="text-[11px] sm:text-xs font-black opacity-70">₹</span>
+                                        <span className="text-[11px] sm:text-xs font-black tracking-tight">{item.price}</span>
                                     </div>
                                 </div>
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             </div>
 
                             <div className="flex flex-col gap-1 text-left mb-3 min-w-0 px-1">
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-1.5 line-clamp-1">
                                     <div className="w-1 h-1 rounded-full bg-orange-600 animate-pulse" />
-                                    <span className="text-[7px] md:text-[8px] font-black text-orange-600 uppercase tracking-widest leading-none">{item.category}</span>
-                                    <span className="text-[7px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">•</span>
-                                    <span className="text-[7px] md:text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">{item.condition}</span>
+                                    <span className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest leading-none">{item.category}</span>
+                                    <span className="text-[11px] sm:text-xs font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">•</span>
+                                    <span className="text-[11px] sm:text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">{item.condition}</span>
                                 </div>
                                 <h3 className="text-[13px] md:text-[15px] font-black text-slate-900 dark:text-white tracking-tight leading-tight truncate">{item.title}</h3>
-                                {item.description && <p className="text-[9px] md:text-[10px] font-medium text-slate-500 dark:text-slate-400 line-clamp-1 opacity-70">{item.description}</p>}
+                                {item.description && <p className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 line-clamp-1 opacity-70">{item.description}</p>}
                             </div>
 
                             <div className="pt-4 mt-auto border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
                                 <div className="flex items-center gap-2 min-w-0">
-                                    <div className="w-8 h-8 rounded-lg bg-orange-600/10 flex items-center justify-center text-orange-600 font-black text-[10px] shrink-0 border border-orange-600/5">
+                                    <div className="w-8 h-8 rounded-lg bg-orange-600/10 flex items-center justify-center text-orange-600 font-black text-[11px] sm:text-xs shrink-0 border border-orange-600/5">
                                         {item.seller_username?.[0]?.toUpperCase() || 'V'}
                                     </div>
                                     <div className="flex flex-col text-left min-w-0 pr-2">
                                         <div className="flex items-center gap-1 min-w-0 pr-2">
-                                            <span className="text-[9px] font-black text-slate-800 dark:text-white uppercase tracking-wider truncate">{item.seller_username || 'Verto'}</span>
+                                            <span className="text-[11px] sm:text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider truncate">{item.seller_username || 'Verto'}</span>
                                             <VerifiedBadge isAdmin={item.seller_is_admin} size="w-3 h-3" />
                                         </div>
-                                        {item.location && <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight opacity-70 truncate line-clamp-1">{item.location}</span>}
+                                        {item.location && <span className="text-[11px] sm:text-xs font-bold text-orange-600 uppercase tracking-tight opacity-70 truncate line-clamp-1">{item.location}</span>}
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
@@ -330,7 +330,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                         </div>
                     ))}
                     {filteredItems.length === 0 && (
-                        <div className="col-span-full py-32 text-center text-slate-400 font-medium opacity-30 text-[10px]">
+                        <div className="col-span-full py-32 text-center text-slate-400 font-medium opacity-30 text-[11px] sm:text-xs">
                             No treasures found in this category.
                         </div>
                     )}
@@ -365,8 +365,8 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                             <div className="space-y-6">
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-3">
-                                        <span className="px-3 py-1 bg-orange-600/10 text-orange-600 rounded-lg text-[9px] font-medium">{selectedItem.category}</span>
-                                        <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-white/40 rounded-lg text-[9px] font-medium">{selectedItem.condition} Condition</span>
+                                        <span className="px-3 py-1 bg-orange-600/10 text-orange-600 rounded-lg text-[11px] sm:text-xs font-medium">{selectedItem.category}</span>
+                                        <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-white/40 rounded-lg text-[11px] sm:text-xs font-medium">{selectedItem.condition} Condition</span>
                                     </div>
                                     <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">{selectedItem.title}</h2>
                                     <div className="hidden md:block py-4">
@@ -375,7 +375,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                 </div>
 
                                 <div className="space-y-4">
-                                    <h5 className="text-[10px] font-medium text-slate-400">Description</h5>
+                                    <h5 className="text-[11px] sm:text-xs font-medium text-slate-400 mb-1">Description</h5>
                                     <p className="text-sm md:text-base text-slate-600 dark:text-slate-400/80 leading-relaxed font-medium">{selectedItem.description}</p>
                                 </div>
 
@@ -385,12 +385,12 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                             {(selectedItem.seller_username && selectedItem.seller_username.length > 0) ? selectedItem.seller_username[0].toUpperCase() : 'V'}
                                         </div>
                                         <div>
-                                            <h5 className="text-[10px] font-medium text-slate-400 mb-1">Listed By</h5>
+                                            <h5 className="text-[11px] sm:text-xs font-medium text-slate-400 mb-1">Listed By</h5>
                                             <div className="flex items-center gap-2">
                                                 <p className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">{selectedItem.seller_username || 'Anonymous Verto'}</p>
                                                 <VerifiedBadge isAdmin={selectedItem.seller_is_admin} size="w-5 h-5" />
                                             </div>
-                                            {selectedItem.location && <p className="text-[10px] font-bold text-orange-600 uppercase tracking-widest mt-0.5">{selectedItem.location}</p>}
+                                            {selectedItem.location && <p className="text-[11px] sm:text-xs font-bold text-orange-600 uppercase tracking-widest mt-0.5">{selectedItem.location}</p>}
                                         </div>
                                     </div>
 
@@ -430,48 +430,48 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                     onClick={(e) => { if (e.target === e.currentTarget) handleCloseSell(); }}>
                     <div className={`nexus-modal w-full max-w-md p-6 ${isClosingSell ? 'closing' : ''}`}>
                         <button onClick={handleCloseSell} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
-                        <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1 tracking-tighter uppercase">{editingItem ? 'Edit Listing' : 'List Item'}</h3>
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-6">Ready to pass your gear to the next Verto?</p>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 tracking-tighter">{editingItem ? 'Edit Listing' : 'List Item'}</h3>
+                        <p className="text-[11px] sm:text-xs font-bold text-slate-400 tracking-wider mb-6">Ready to pass your gear to the next Verto?</p>
 
                         <div className="max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar text-left">
                             <form onSubmit={handleSellSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-[8px] font-medium text-slate-400 mb-2 ml-1">Product Photo</label>
+                                    <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2 ml-1">Product Photo</label>
                                     <div className="group relative w-full h-32 bg-slate-50 dark:bg-white/5 rounded-2xl border-2 border-dashed border-slate-200 dark:border-white/10 hover:border-orange-500/50 transition-all overflow-hidden flex items-center justify-center cursor-pointer" onClick={() => document.getElementById('market-image-upload')?.click()}>
                                         {imagePreview ? (
                                             <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                                         ) : (
                                             <div className="text-center space-y-1">
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6 mx-auto text-slate-300"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
-                                                <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Click to upload</p>
+                                                <p className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest">Click to upload</p>
                                             </div>
                                         )}
                                         <input id="market-image-upload" type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[8px] font-medium text-slate-400 mb-1 ml-1">Title</label>
-                                    <input type="text" required value={newItem.title} onChange={e => setNewItem({ ...newItem, title: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white" placeholder="What are you selling?" />
+                                    <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-1 ml-1">Title</label>
+                                    <input type="text" required value={newItem.title} onChange={e => setNewItem({ ...newItem, title: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-[11px] sm:text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white" placeholder="What are you selling?" />
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-[8px] font-medium text-slate-400 mb-1 ml-1">Price (₹)</label>
-                                        <input type="number" required value={newItem.price} onChange={e => setNewItem({ ...newItem, price: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white" placeholder="Price" />
+                                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-1 ml-1">Price (₹)</label>
+                                        <input type="number" required value={newItem.price} onChange={e => setNewItem({ ...newItem, price: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-[11px] sm:text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white" placeholder="Price" />
                                     </div>
                                     <div>
-                                        <label className="block text-[8px] font-medium text-slate-400 mb-1 ml-1">Category</label>
-                                        <select value={newItem.category} onChange={e => setNewItem({ ...newItem, category: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white appearance-none">
+                                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-1 ml-1">Category</label>
+                                        <select value={newItem.category} onChange={e => setNewItem({ ...newItem, category: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-[11px] sm:text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white appearance-none">
                                             {categories.filter(c => c !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
                                         </select>
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[8px] font-medium text-slate-400 mb-1 ml-1">Description</label>
-                                    <textarea required value={newItem.description} onChange={e => setNewItem({ ...newItem, description: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 min-h-[80px] text-slate-800 dark:text-white" placeholder="Brief details about the item's state..." />
+                                    <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-1 ml-1">Description</label>
+                                    <textarea required value={newItem.description} onChange={e => setNewItem({ ...newItem, description: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-[11px] sm:text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 min-h-[80px] text-slate-800 dark:text-white" placeholder="Brief details about the item's state..." />
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-[8px] font-medium text-slate-400 mb-1 ml-1">Contact Number</label>
+                                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-1 ml-1">Contact Number</label>
                                         <input
                                             type="text"
                                             required
@@ -480,16 +480,16 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                                 const val = e.target.value;
                                                 if (/^\d*$/.test(val)) setNewItem({ ...newItem, phone: val });
                                             }}
-                                            className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white"
+                                            className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-[11px] sm:text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white"
                                             placeholder="e.g. 98150XXXXX"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-[8px] font-medium text-slate-400 mb-1 ml-1">Hostel / Address</label>
-                                        <input type="text" required value={newItem.location} onChange={e => setNewItem({ ...newItem, location: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white" placeholder="e.g. BH-4, 502" />
+                                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-1 ml-1">Hostel / Address</label>
+                                        <input type="text" required value={newItem.location} onChange={e => setNewItem({ ...newItem, location: e.target.value })} className="w-full bg-slate-50 dark:bg-white/5 px-4 py-3 rounded-xl text-[11px] sm:text-xs font-bold border border-slate-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-slate-800 dark:text-white" placeholder="e.g. BH-4, 502" />
                                     </div>
                                 </div>
-                                <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none cursor-pointer disabled:opacity-50">
+                                <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-black text-[11px] sm:text-xs uppercase tracking-[0.2em] shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none cursor-pointer disabled:opacity-50">
                                     {loading ? (editingItem ? 'Updating...' : 'Listing...') : (editingItem ? 'Save Changes' : 'List Now')}
                                 </button>
                             </form>

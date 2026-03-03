@@ -169,7 +169,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
         <div className="mt-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-600/5 border border-orange-600/10 mb-6 group/badge cursor-default hover:bg-orange-600/10 transition-colors">
             <div className="w-2 h-2 rounded-full bg-orange-600 animate-pulse" />
-            <span className="text-[9px] font-medium text-orange-600">Verification Active</span>
+            <span className="text-[11px] sm:text-xs font-medium text-orange-600">Verification Active</span>
           </div>
           <h2 className="text-6xl md:text-7xl font-black text-slate-800 dark:text-white tracking-tighter uppercase leading-none mb-4 italic drop-shadow-2xl flex items-center justify-center gap-4">
             {userProfile.username || 'Citizen Verto'}
@@ -194,12 +194,12 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6 text-orange-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                 </div>
                 <div>
-                  <h3 className="text-[11px] font-medium text-orange-600 mb-1 leading-none">Security Core</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Profile Visibility Control</p>
+                  <h3 className="text-[11px] sm:text-xs font-medium text-orange-600 mb-1 leading-none">Security Core</h3>
+                  <p className="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest leading-none">Profile Visibility Control</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-[9px] font-medium text-slate-400 mr-2">{form.is_public ? 'Public' : 'Secure'}</span>
+                <span className="text-[11px] sm:text-xs font-medium text-slate-400 mr-2">{form.is_public ? 'Public' : 'Secure'}</span>
                 <button
                   onClick={() => setForm({ ...form, is_public: !form.is_public })}
                   className={`relative w-14 h-7 rounded-full transition-all border-none outline-none ${form.is_public ? 'bg-orange-600' : 'bg-slate-200 dark:bg-white/5 shadow-inner'}`}
@@ -212,7 +212,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <div>
-                  <label className="block text-[10px] font-medium text-slate-400 mb-3 ml-1 tracking-widest opacity-60">Verto Alias</label>
+                  <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-3 ml-1 tracking-widest opacity-60">Verto Alias</label>
                   <div className="relative group/input">
                     <span className="absolute left-5 top-1/2 -translate-y-1/2 text-orange-600 font-bold tracking-tight text-lg transition-transform group-focus-within/input:scale-125">@</span>
                     <input
@@ -229,14 +229,14 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                           <div key={i} className={`w-3 h-1 rounded-full ${i <= recentChanges.length ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-orange-600/20'}`} />
                         ))}
                       </div>
-                      <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Rate Limit {recentChanges.length}/2</p>
+                      <p className="text-[11px] sm:text-xs text-slate-400 font-bold uppercase tracking-widest">Rate Limit {recentChanges.length}/2</p>
                     </div>
-                    <p className="text-[7px] text-slate-300 dark:text-slate-600 font-bold">14-DAY ROTATION</p>
+                    <p className="text-[11px] sm:text-xs text-slate-300 dark:text-slate-600 font-bold">14-DAY ROTATION</p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-medium text-slate-400 mb-3 ml-1 tracking-widest opacity-60">Academic Program</label>
+                  <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-3 ml-1 tracking-widest opacity-60">Academic Program</label>
                   <div className="relative group/input">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within/input:text-orange-600 transition-colors"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
                     <input
@@ -251,7 +251,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-medium text-slate-400 mb-3 ml-1 tracking-widest opacity-60">Registry ID</label>
+                    <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-3 ml-1 tracking-widest opacity-60">Registry ID</label>
                     <input
                       type="text" value={form.registration_number} placeholder="1241...."
                       onChange={(e) => setForm({ ...form, registration_number: e.target.value.replace(/[^0-9]/g, '').slice(0, 8) })}
@@ -259,7 +259,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-medium text-slate-400 mb-3 ml-1 tracking-widest opacity-60">Batch Cycle</label>
+                    <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-3 ml-1 tracking-widest opacity-60">Batch Cycle</label>
                     <input
                       type="text" value={form.batch} placeholder="2024-28"
                       onChange={(e) => setForm({ ...form, batch: e.target.value })}
@@ -269,7 +269,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-medium text-slate-400 mb-3 ml-1 tracking-widest opacity-60">Bio Stream</label>
+                  <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-3 ml-1 tracking-widest opacity-60">Bio Stream</label>
                   <div className="relative group/input">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="absolute left-5 top-5 w-4 h-4 text-slate-500 group-focus-within/input:text-orange-600 transition-colors"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
                     <textarea
@@ -283,7 +283,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
             </div>
 
             {message && (
-              <div className={`p-5 rounded-[24px] text-[10px] font-medium text-center border animate-fade-in ${message.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
+              <div className={`p-5 rounded-[24px] text-[11px] sm:text-xs font-medium text-center border animate-fade-in ${message.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
                 <div className="flex items-center justify-center gap-3">
                   <span className={`w-2 h-2 rounded-full animate-pulse ${message.type === 'success' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'}`} />
                   {message.text}
@@ -305,12 +305,12 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
         <div className="mt-12 flex flex-col items-center">
           <button
             onClick={async () => { await NexusServer.signOut(); navigateToModule(ModuleType.DASHBOARD); }}
-            className="group px-12 py-5 text-red-500/40 hover:text-red-500 font-black text-[10px] uppercase tracking-[0.4em] transition-all flex items-center justify-center gap-3 border border-red-500/10 hover:border-red-500/30 rounded-[32px] bg-white/5 backdrop-blur-sm active:scale-95"
+            className="group px-12 py-5 text-red-500/40 hover:text-red-500 font-black text-[11px] sm:text-xs uppercase tracking-[0.4em] transition-all flex items-center justify-center gap-3 border border-red-500/10 hover:border-red-500/30 rounded-[32px] bg-white/5 backdrop-blur-sm active:scale-95"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 transition-transform group-hover:rotate-12"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
             Terminate Session
           </button>
-          <p className="mt-8 text-[8px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.3em] opacity-40">Build Version 2.5a • Secure Protocol</p>
+          <p className="mt-8 text-[11px] sm:text-xs font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.3em] opacity-40">Build Version 2.5a • Secure Protocol</p>
         </div>
       </div>
     </div>

@@ -202,12 +202,12 @@ const AIToolsDirectory: React.FC = () => {
                 <div className="flex flex-col items-center justify-center gap-3">
                     <div className="flex items-center gap-2">
                         <div className="h-[1px] w-8 md:w-16 bg-slate-200 dark:bg-white/10" />
-                        <p className="text-slate-500 text-[10px] md:text-[12px] font-medium leading-none">
+                        <p className="text-slate-500 text-[11px] sm:text-xs font-medium leading-none">
                             Intelligence Hub Nexus
                         </p>
                         <div className="h-[1px] w-8 md:w-16 bg-slate-200 dark:bg-white/10" />
                     </div>
-                    <p className="text-[10px] md:text-[11px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-[0.5em] mt-2">
+                    <p className="text-[11px] sm:text-xs font-bold text-slate-400 dark:text-white/30 uppercase tracking-[0.5em] mt-2">
                         Discovery of <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500 font-black">500+</span> Premium AI Solutions
                     </p>
                 </div>
@@ -227,8 +227,8 @@ const AIToolsDirectory: React.FC = () => {
                             className="w-full pl-16 pr-24 h-[62px] bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-[28px] text-[13px] md:text-[14px] font-bold outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500/40 transition-all dark:text-white shadow-2xl shadow-black/5"
                         />
                         <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
-                            <kbd className="hidden md:flex h-6 px-1.5 items-center justify-center rounded-md bg-slate-100 dark:bg-white/10 text-[10px] font-black text-slate-400 dark:text-slate-500">CMD</kbd>
-                            <kbd className="hidden md:flex h-6 px-1.5 items-center justify-center rounded-md bg-slate-100 dark:bg-white/10 text-[10px] font-black text-slate-400 dark:text-slate-500">K</kbd>
+                            <kbd className="hidden md:flex h-6 px-1.5 items-center justify-center rounded-md bg-slate-100 dark:bg-white/10 text-[11px] sm:text-xs font-black text-slate-400 dark:text-slate-500">CMD</kbd>
+                            <kbd className="hidden md:flex h-6 px-1.5 items-center justify-center rounded-md bg-slate-100 dark:bg-white/10 text-[11px] sm:text-xs font-black text-slate-400 dark:text-slate-500">K</kbd>
                         </div>
                     </div>
 
@@ -262,7 +262,7 @@ const AIToolsDirectory: React.FC = () => {
                                             </svg>
                                             {cat}
                                         </span>
-                                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black border transition-colors ${filter === cat
+                                        <span className={`px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-black border transition-colors ${filter === cat
                                             ? 'bg-white/20 border-white/30 text-white'
                                             : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-400 dark:text-slate-500'
                                             }`}>
@@ -300,11 +300,11 @@ const AIToolsDirectory: React.FC = () => {
                                 <div className="flex items-center justify-between">
                                     {tool.isHero ? (
                                         <div className="flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-white/5 rounded-full border border-slate-200 dark:border-white/10 shadow-sm">
-                                            <span className="text-[7px] font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600 uppercase tracking-widest">Nexus Pick</span>
-                                            <span className="text-[10px]">✨</span>
+                                            <span className="text-[11px] sm:text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600 uppercase tracking-widest">Nexus Pick</span>
+                                            <span className="text-xs">✨</span>
                                         </div>
                                     ) : <div />}
-                                    <span className={`text-[9px] font-semibold px-3 py-1.5 rounded-full border ${tool.pricing === 'Free' ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5' :
+                                    <span className={`text-[11px] sm:text-xs font-semibold px-3 py-1.5 rounded-full border ${tool.pricing === 'Free' ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5' :
                                         tool.pricing === 'Freemium' ? 'text-orange-500 border-orange-500/20 bg-orange-500/5' :
                                             'text-blue-500 border-blue-500/20 bg-blue-500/5'
                                         }`}>
@@ -323,14 +323,14 @@ const AIToolsDirectory: React.FC = () => {
                                     <h4 className="text-xl font-bold text-slate-900 dark:text-white tracking-tighter leading-none">
                                         {tool.name}
                                     </h4>
-                                    <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 tracking-wide">
+                                    <p className="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 tracking-wide">
                                         {tool.description}
                                     </p>
                                 </div>
 
                                 <div className="flex flex-wrap gap-2 pt-2">
                                     {tool.tags.map(tag => (
-                                        <span key={tag} className="text-[8px] font-semibold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-slate-100 dark:border-white/5">
+                                        <span key={tag} className="text-[11px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-slate-100 dark:border-white/5">
                                             {tag}
                                         </span>
                                     ))}
@@ -341,7 +341,7 @@ const AIToolsDirectory: React.FC = () => {
                                 href={tool.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`relative z-10 mt-8 group/btn h-14 flex items-center justify-center gap-2 rounded-[24px] text-[10px] font-bold uppercase transition-all duration-300 no-underline shadow-lg active:scale-95 ${tool.isHero
+                                className={`relative z-10 mt-8 group/btn h-14 flex items-center justify-center gap-2 rounded-[24px] text-[11px] sm:text-xs font-bold uppercase transition-all duration-300 no-underline shadow-lg active:scale-95 ${tool.isHero
                                     ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-orange-500/25 hover:-translate-y-0.5'
                                     : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white dark:hover:text-white'
                                     }`}

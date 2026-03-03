@@ -43,14 +43,14 @@ const GlobalBroadcaster: React.FC = () => {
                 </div>
                 <div>
                     <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">Announcements</h3>
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Send a notification to everyone</p>
+                    <p className="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Send a notification to everyone</p>
                 </div>
             </div>
 
             <form onSubmit={handleBroadcast} className="space-y-6 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Notification Title</label>
+                        <label className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest ml-4">Notification Title</label>
                         <input
                             type="text"
                             value={title}
@@ -61,14 +61,14 @@ const GlobalBroadcaster: React.FC = () => {
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Notification Type</label>
+                        <label className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest ml-4">Notification Type</label>
                         <div className="flex gap-2 p-1 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
                             {(['info', 'success', 'warning', 'error'] as const).map((t) => (
                                 <button
                                     key={t}
                                     type="button"
                                     onClick={() => setType(t)}
-                                    className={`flex-1 py-2 rounded-xl text-[9px] font-medium transition-all ${type === t
+                                    className={`flex-1 py-2 rounded-xl text-[11px] sm:text-xs font-medium transition-all ${type === t
                                         ? 'bg-orange-600 text-white shadow-lg'
                                         : 'text-slate-400 hover:text-slate-600 dark:hover:text-white'
                                         }`}
@@ -81,7 +81,7 @@ const GlobalBroadcaster: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Message Content</label>
+                    <label className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest ml-4">Message Content</label>
                     <textarea
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
@@ -93,7 +93,7 @@ const GlobalBroadcaster: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                     <div className="md:col-span-2 space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Target Link (Optional)</label>
+                        <label className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest ml-4">Target Link (Optional)</label>
                         <input
                             type="text"
                             value={link}
@@ -112,7 +112,7 @@ const GlobalBroadcaster: React.FC = () => {
                 </div>
 
                 {status && (
-                    <div className={`mt-4 p-4 rounded-2xl text-[10px] font-medium text-center border ${status.error ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                    <div className={`mt-4 p-4 rounded-2xl text-[11px] sm:text-xs font-medium text-center border ${status.error ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                         }`}>
                         {status.msg}
                     </div>
@@ -195,15 +195,15 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl">
                             <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
                                 <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">Page Performance</h3>
-                                <span className="text-[10px] font-bold px-3 py-1 bg-orange-500/10 text-orange-500 rounded-full border border-orange-500/20 uppercase">By Views</span>
+                                <span className="text-[11px] sm:text-xs font-bold px-3 py-1 bg-orange-500/10 text-orange-500 rounded-full border border-orange-500/20 uppercase">By Views</span>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr className="bg-slate-50/50 dark:bg-white/[0.01]">
-                                            <th className="px-6 py-4 text-[10px] font-medium text-slate-400">Path</th>
-                                            <th className="px-6 py-4 text-[10px] font-medium text-slate-400">Visitors</th>
-                                            <th className="px-6 py-4 text-[10px] font-medium text-slate-400 text-right">Page Views</th>
+                                            <th className="px-6 py-4 text-[11px] sm:text-xs font-medium text-slate-400">Path</th>
+                                            <th className="px-6 py-4 text-[11px] sm:text-xs font-medium text-slate-400">Visitors</th>
+                                            <th className="px-6 py-4 text-[11px] sm:text-xs font-medium text-slate-400 text-right">Page Views</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 dark:divide-white/5">
@@ -228,15 +228,15 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl">
                             <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
                                 <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">Interaction Events</h3>
-                                <span className="text-[10px] font-bold px-3 py-1 bg-red-500/10 text-red-500 rounded-full border border-red-500/20 uppercase">Live Pulse</span>
+                                <span className="text-[11px] sm:text-xs font-bold px-3 py-1 bg-red-500/10 text-red-500 rounded-full border border-red-500/20 uppercase">Live Pulse</span>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr className="bg-slate-50/50 dark:bg-white/[0.01]">
-                                            <th className="px-6 py-4 text-[10px] font-medium text-slate-400">Event Name</th>
-                                            <th className="px-6 py-4 text-[10px] font-medium text-slate-400">Total Count</th>
-                                            <th className="px-6 py-4 text-[10px] font-medium text-slate-400 text-right">Last Triggered</th>
+                                            <th className="px-6 py-4 text-[11px] sm:text-xs font-medium text-slate-400">Event Name</th>
+                                            <th className="px-6 py-4 text-[11px] sm:text-xs font-medium text-slate-400">Total Count</th>
+                                            <th className="px-6 py-4 text-[11px] sm:text-xs font-medium text-slate-400 text-right">Last Triggered</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 dark:divide-white/5">
@@ -244,7 +244,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                             <tr key={stat.event_name} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
                                                 <td className="px-6 py-4 font-black text-slate-900 dark:text-white capitalize">{stat.event_name.replace(/_/g, ' ')}</td>
                                                 <td className="px-6 py-4 font-black text-2xl text-orange-600 drop-shadow-sm">{stat.count.toLocaleString()}</td>
-                                                <td className="px-6 py-4 text-[10px] text-slate-500 dark:text-slate-400 text-right">
+                                                <td className="px-6 py-4 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 text-right">
                                                     {new Date(stat.last_triggered).toLocaleDateString()} <br />
                                                     {new Date(stat.last_triggered).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </td>
@@ -267,19 +267,19 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                             <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-2">Platform Summary</h3>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-8">
                                 <div>
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Views</p>
+                                    <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Total Views</p>
                                     <p className="text-3xl font-black text-white">{stats?.pageStats.reduce((acc, curr) => acc + Number(curr.views), 0).toLocaleString()}</p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Visitors</p>
+                                    <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Total Visitors</p>
                                     <p className="text-3xl font-black text-white">{stats?.pageStats.reduce((acc, curr) => acc + Number(curr.visitors), 0).toLocaleString()}</p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Active Events</p>
+                                    <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Active Events</p>
                                     <p className="text-3xl font-black text-white">{stats?.eventStats.length || 0}</p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Health Status</p>
+                                    <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Health Status</p>
                                     <p className="text-3xl font-black text-emerald-500">OPTIMAL</p>
                                 </div>
                             </div>

@@ -204,9 +204,9 @@ const TodaysSchedule: React.FC = () => {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-slate-400 group-hover/header:translate-x-1 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
         </button>
         <div className="flex flex-col items-end">
-          <span className="text-xs font-medium text-orange-500">{today}</span>
+          <span className="text-[11px] sm:text-xs font-medium text-orange-500">{today}</span>
           {timetable?.ownerName && (
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-[150px]">
+            <span className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 truncate max-w-[150px]">
               {timetable.ownerName}
             </span>
           )}
@@ -232,10 +232,10 @@ const TodaysSchedule: React.FC = () => {
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
                     <h4 className="text-2xl font-bold text-white tracking-tight leading-none drop-shadow-md">{slot.subject}</h4>
-                    <p className="text-[10px] font-medium text-white/80">{slot.room} • {slot.type}</p>
+                    <p className="text-[11px] sm:text-xs font-medium text-white/80">{slot.room} • {slot.type}</p>
                   </div>
 
-                  <div className={`px-3 py-1.5 rounded-2xl text-[9px] font-semibold backdrop-blur-md flex items-center gap-1.5 ${isGoingOn ? 'bg-white text-orange-600 shadow-lg' : 'bg-black/20 text-white'}`}>
+                  <div className={`px-3 py-1.5 rounded-2xl text-[11px] sm:text-xs font-semibold backdrop-blur-md flex items-center gap-1.5 ${isGoingOn ? 'bg-white text-orange-600 shadow-lg' : 'bg-black/20 text-white'}`}>
                     {isGoingOn && (
                       <span className="flex h-1.5 w-1.5 relative">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
@@ -248,7 +248,7 @@ const TodaysSchedule: React.FC = () => {
 
                 <div className="pt-6 border-t border-white/20 flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <p className="text-[10px] text-white/60">Time</p>
+                    <p className="text-[11px] sm:text-xs text-white/60">Time</p>
                     <p className="text-sm font-bold text-white">{slot.startTime} – {slot.endTime}</p>
                   </div>
                   {isGoingOn && (
@@ -339,7 +339,7 @@ const FeatureCard = React.memo(({ f, navigate }: { f: any, navigate: any }) => {
 
         <div className="relative space-y-1 sm:space-y-2 text-left w-full">
           <h4 className="text-[13px] sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-tight sm:leading-none">{f.name}</h4>
-          <p className="text-[9px] sm:text-xs text-slate-500 dark:text-slate-400/80 leading-relaxed max-w-[95%] sm:max-w-[90%] mt-1 line-clamp-2">{f.desc}</p>
+          <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400/80 leading-relaxed max-w-[95%] sm:max-w-[90%] mt-1 line-clamp-2">{f.desc}</p>
         </div>
 
         <div className={`absolute top-2 right-2 text-slate-300 dark:text-white/10 transition-all duration-500 ${isHovered ? 'text-orange-500 translate-x-1 -translate-y-1 scale-110' : ''}`}>
@@ -369,7 +369,7 @@ const Dashboard: React.FC = React.memo(() => {
   ];
 
   return (
-    <div className="w-full h-full pb-20 pt-10">
+    <div className="w-full h-full pb-20 pt-10 animate-fade-in">
       <TodaysSchedule />
       <div className="max-w-6xl mx-auto px-6 mb-10">
         <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1 mb-8">Categories</h3>
@@ -514,20 +514,20 @@ const AppContent: React.FC = () => {
                       <div className="fixed inset-0 z-40 bg-transparent" onClick={handleProfileClose} />
                       <div className={`absolute right-0 mt-3 w-56 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-50 animate-fade-in backdrop-blur-xl transition-all duration-300 ${isClosingProfile ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
                         <div className="px-5 py-3 border-b border-slate-100 dark:border-white/5 mb-2 flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600 font-bold text-[10px] shrink-0 border border-orange-600/5 overflow-hidden">
+                          <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600 font-bold text-[11px] sm:text-xs shrink-0 border border-orange-600/5 overflow-hidden">
                             {userProfile.avatar_url ? <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" /> : (userProfile.username?.[0]?.toUpperCase() || 'V')}
                           </div>
                           <div className="flex flex-col text-left min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <p className="font-bold text-slate-800 dark:text-white tracking-wider text-[11px] truncate">{userProfile.username || 'Verto'}</p>
+                              <p className="font-bold text-slate-800 dark:text-white tracking-wider text-[11px] sm:text-xs truncate">{userProfile.username || 'Verto'}</p>
                               <VerifiedBadge isAdmin={userProfile.is_admin} size="w-3.5 h-3.5" />
                             </div>
-                            <p className="text-[8px] font-bold text-slate-400 tracking-widest truncate">{userProfile.email}</p>
+                            <p className="text-[11px] sm:text-xs font-bold text-slate-400 tracking-widest truncate">{userProfile.email}</p>
                           </div>
                         </div>
                         <button
                           onClick={() => { navigate('/profile'); handleProfileClose(); }}
-                          className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-white/70 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
+                          className="w-full text-left px-5 py-3 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-slate-600 dark:text-white/70 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
                         >
                           <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-600/20 transition-colors">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
@@ -537,7 +537,7 @@ const AppContent: React.FC = () => {
                         {userProfile.is_admin && (
                           <button
                             onClick={() => { navigate('/admin-stats'); handleProfileClose(); }}
-                            className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-white/70 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
+                            className="w-full text-left px-5 py-3 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-slate-600 dark:text-white/70 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
                           >
                             <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-600/20 transition-colors">
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
@@ -547,7 +547,7 @@ const AppContent: React.FC = () => {
                         )}
                         <button
                           onClick={async () => { await NexusServer.signOut(); navigate('/'); handleProfileClose(); }}
-                          className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-red-500 hover:bg-red-500/10 border-none bg-transparent flex items-center gap-3 transition-all"
+                          className="w-full text-left px-5 py-3 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-red-500 hover:bg-red-500/10 border-none bg-transparent flex items-center gap-3 transition-all"
                         >
                           <div className="w-8 h-8 rounded-full bg-red-500/5 flex items-center justify-center">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>

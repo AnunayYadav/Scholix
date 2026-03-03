@@ -175,7 +175,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
           <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white uppercase leading-none mb-2">
             {isLogin ? 'Welcome Back' : 'Join Nexus'}
           </h3>
-          <p className="text-slate-500 dark:text-white/40 text-[10px] font-medium flex items-center justify-center gap-2">
+          <p className="text-slate-500 dark:text-white/40 text-[11px] sm:text-xs font-medium flex items-center justify-center gap-2">
             <span className="w-1.5 h-1.5 bg-orange-600 rounded-full shadow-[0_0_10px_rgba(234,88,12,0.5)]" />
             {isLogin ? 'Sign in to your account' : 'Apply for student access'}
           </p>
@@ -187,9 +187,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
               <div className="p-5 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl animate-fade-in">
                 <div className="flex items-center gap-2 mb-1">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="11.99" y2="16" /></svg>
-                  <span className="text-[10px] font-medium">Error detected</span>
+                  <span className="text-[11px] sm:text-xs font-medium">Error detected</span>
                 </div>
-                <p className="text-[11px] font-bold opacity-90 leading-relaxed">{error}</p>
+                <p className="text-[11px] sm:text-xs font-bold opacity-90 leading-relaxed">{error}</p>
               </div>
             )}
 
@@ -197,7 +197,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
               {isLogin ? (
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-[10px] font-medium text-slate-400 mb-2.5 ml-1">Email or Username</label>
+                    <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Email or Username</label>
                     <div className="relative group">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                       <input
@@ -210,7 +210,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-medium text-slate-400 mb-2.5 ml-1">Password</label>
+                    <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Password</label>
                     <div className="relative group">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                       <input
@@ -225,7 +225,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="md:col-span-2">
-                    <label className="block text-[10px] font-medium text-slate-400 mb-2.5 ml-1">Unique Username</label>
+                    <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Unique Username</label>
                     <div className="relative group">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm group-focus-within:text-orange-600">@</span>
                       <input
@@ -245,7 +245,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-medium text-slate-400 mb-2.5 ml-1">Official Email</label>
+                    <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Official Email</label>
                     <div className="relative group">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
                       <input
@@ -258,7 +258,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-medium text-slate-400 mb-2.5 ml-1">Reg Number</label>
+                    <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Reg Number</label>
                     <div className="relative group">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><path d="M7 21v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4" /><circle cx="12" cy="11" r="3" /></svg>
                       <input
@@ -271,7 +271,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-[10px] font-medium text-slate-400 mb-2.5 ml-1">Secure Password</label>
+                    <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Secure Password</label>
                     <div className="relative group">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                       <input
@@ -292,7 +292,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                             />
                           ))}
                         </div>
-                        <p className={`text-[9px] font-medium ${passwordStrength.score <= 1 ? 'text-red-500' :
+                        <p className={`text-[11px] sm:text-xs font-medium ${passwordStrength.score <= 1 ? 'text-red-500' :
                           passwordStrength.score <= 2 ? 'text-orange-500' :
                             passwordStrength.score <= 3 ? 'text-yellow-500' : 'text-emerald-500'
                           }`}>
@@ -319,7 +319,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             <button
               type="button"
               onClick={() => { setIsLogin(!isLogin); setError(null); setPassword(''); }}
-              className="w-full text-[10px] font-medium text-slate-400 hover:text-orange-500 transition-colors py-6 bg-transparent border-none"
+              className="w-full text-[11px] sm:text-xs font-medium text-slate-400 hover:text-orange-500 transition-colors py-6 bg-transparent border-none"
             >
               {isLogin ? "New here? Create an account" : "Have an account? Sign in"}
             </button>

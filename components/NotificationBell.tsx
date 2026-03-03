@@ -171,7 +171,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                         {unreadCount > 0 && (
                             <button
                                 onClick={markAllAsRead}
-                                className="text-[10px] font-black text-orange-600 uppercase tracking-widest hover:underline bg-transparent border-none p-0 cursor-pointer"
+                                className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest hover:underline bg-transparent border-none p-0 cursor-pointer"
                             >
                                 Clear All
                             </button>
@@ -184,8 +184,8 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                                 <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400 dark:text-white/10 mx-auto mb-4">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
                                 </div>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No Notifications</p>
-                                <p className="text-[8px] text-slate-400/60 mt-1 uppercase tracking-wider">You're all caught up</p>
+                                <p className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest">No Notifications</p>
+                                <p className="text-[11px] sm:text-xs text-slate-400/60 mt-1 uppercase tracking-wider">You're all caught up</p>
                             </div>
                         ) : (
                             allNotifications.map((item) => {
@@ -217,8 +217,8 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                                                 </div>
                                                 {isUnread && <div className="w-2 h-2 rounded-full bg-orange-600 shrink-0 mt-1" />}
                                             </div>
-                                            <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{item.message}</p>
-                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                                            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{item.message}</p>
+                                            <p className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest mt-1">
                                                 {new Date(item.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
@@ -229,7 +229,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                     </div>
 
                     <div className="px-5 pt-3 mt-2 border-t border-slate-100 dark:border-white/5">
-                        <button className="w-full py-3 rounded-2xl bg-slate-100 dark:bg-white/5 text-[9px] font-medium text-slate-500 dark:text-white/40 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 transition-all border-none cursor-not-allowed">
+                        <button className="w-full py-3 rounded-2xl bg-slate-100 dark:bg-white/5 text-[11px] sm:text-xs font-medium text-slate-500 dark:text-white/40 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 transition-all border-none cursor-not-allowed">
                             View All History
                         </button>
                     </div>

@@ -162,7 +162,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 </div>
                 <div>
                   <h3 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-2">Success!</h3>
-                  <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest">Your feedback has been received.</p>
+                  <p className="text-slate-500 font-bold text-[11px] sm:text-xs uppercase tracking-widest">Your feedback has been received.</p>
                 </div>
               </div>
             ) : (
@@ -244,7 +244,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tight whitespace-nowrap">
                 LPU-Nexus
               </h1>
-              <p className="text-[9px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-600 whitespace-nowrap">Student Intelligence</p>
+              <p className="text-[9px] font-medium tracking-[0.2em] text-slate-400 dark:text-slate-600 whitespace-nowrap">Student Intelligence</p>
             </div>
           </div>
         </div>
