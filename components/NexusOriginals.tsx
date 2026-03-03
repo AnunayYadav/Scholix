@@ -445,6 +445,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                 if (text.toLowerCase() === 'table of contents') return null;
 
                 let number = '';
+                const isReallyFirst = isFirstH1;
                 if (isFirstH1) {
                     isFirstH1 = false;
                 } else {
@@ -453,7 +454,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                     h3Counter = 0;
                     number = `${h1Counter}. `;
                 }
-                return <h1 key={i} id={getSlug(text)} className="text-xl font-bold text-slate-900 dark:text-white mt-10 mb-4 pt-6 border-t border-slate-100 dark:border-white/5 scroll-mt-20">{number}{parseLine(text)}</h1>;
+                return <h1 key={i} id={getSlug(text)} className={`text-xl font-bold text-slate-900 dark:text-white mb-4 pt-6 scroll-mt-[140px] ${isReallyFirst ? '' : 'mt-10 border-t border-slate-100 dark:border-white/5'}`}>{number}{parseLine(text)}</h1>;
             }
             if (trimmedLine.startsWith('## ')) {
                 const text = trimmedLine.replace('## ', '').trim();
@@ -462,7 +463,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                 h2Counter++;
                 h3Counter = 0;
                 const number = h1Counter > 0 ? `${h1Counter}.${h2Counter}. ` : `${h2Counter}. `;
-                return <h2 key={i} id={getSlug(text)} className="text-lg font-bold text-slate-800 dark:text-white mt-8 mb-3 scroll-mt-20">{number}{parseLine(text)}</h2>;
+                return <h2 key={i} id={getSlug(text)} className="text-lg font-bold text-slate-800 dark:text-white mt-8 mb-3 scroll-mt-[140px]">{number}{parseLine(text)}</h2>;
             }
             if (trimmedLine.startsWith('### ')) {
                 const text = trimmedLine.replace('### ', '').trim();
@@ -471,7 +472,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                 h3Counter++;
                 const prefix = h1Counter > 0 ? `${h1Counter}.${h2Counter}` : `${h2Counter}`;
                 const number = `${prefix}.${h3Counter}. `;
-                return <h3 key={i} id={getSlug(text)} className="text-base font-semibold text-slate-700 dark:text-slate-200 mt-6 mb-2 scroll-mt-20">{number}{parseLine(text)}</h3>;
+                return <h3 key={i} id={getSlug(text)} className="text-base font-semibold text-slate-700 dark:text-slate-200 mt-6 mb-2 scroll-mt-[140px]">{number}{parseLine(text)}</h3>;
             }
 
             // Bullet points
