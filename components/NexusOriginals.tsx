@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { UserProfile, NexusOriginal, Flashcard, QuizQuestion } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import { generateSubjectOriginals } from '../services/geminiService.ts';
@@ -30,6 +31,27 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
     const [activeSubjectData, setActiveSubjectData] = useState<NexusOriginal | null>(null);
     const [viewMode, setViewMode] = useState<'catalog' | 'units' | 'notes' | 'quiz' | 'flashcards'>('catalog');
     const [selectedUnitIdx, setSelectedUnitIdx] = useState<number | null>(null);
+    const progressBarRef = useRef<HTMLDivElement>(null);
+
+    // Optimized Scroll Progress Handler (Direct DOM manipulation for 0-latency)
+    useEffect(() => {
+        const scrollArea = document.getElementById('main-content-area');
+
+        const updateProgress = () => {
+            if (viewMode !== 'notes' || !scrollArea || !progressBarRef.current) return;
+            const scrollTop = scrollArea.scrollTop;
+            const totalHeight = scrollArea.scrollHeight - scrollArea.clientHeight;
+            const progress = totalHeight > 0 ? (scrollTop / totalHeight) : 0;
+            progressBarRef.current.style.transform = `scaleX(${Math.min(1, Math.max(0, progress))})`;
+        };
+
+        if (viewMode === 'notes' && scrollArea) {
+            scrollArea.addEventListener('scroll', updateProgress, { passive: true });
+            updateProgress(); // Initial check
+        }
+
+        return () => scrollArea?.removeEventListener('scroll', updateProgress);
+    }, [viewMode, selectedUnitIdx]);
 
     useEffect(() => {
         loadAllData();
@@ -602,7 +624,18 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
             .filter(Boolean) as { text: string; slug: string; level: number; number: string }[];
 
         return (
-            <div key={`notes-${selectedUnitIdx}`} className="space-y-6 animate-fade-in pb-20">
+            <div key={`notes-${selectedUnitIdx}`} className="space-y-6 animate-fade-in pb-20 relative">
+                {/* Scroll Progress Bar - Ref-based for 60fps performance */}
+                {createPortal(
+                    <div className="absolute bottom-0 left-0 w-full h-[4px] z-[60] bg-transparent pointer-events-none overflow-hidden">
+                        <div
+                            ref={progressBarRef}
+                            className="h-full bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 transition-transform duration-75 ease-out origin-left will-change-transform shadow-[0_2px_10px_rgba(249,115,22,0.8)]"
+                            style={{ transform: 'scaleX(0)' }}
+                        />
+                    </div>,
+                    document.getElementById('app-navbar') || document.body
+                )}
                 {/* Modern Header Section */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 py-2">
                     <div className="space-y-3">

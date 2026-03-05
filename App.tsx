@@ -475,7 +475,7 @@ const AppContent: React.FC = () => {
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative bg-slate-50 dark:bg-[#0a0a0a]">
         <BackgroundEffects />
 
-        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-white/5 bg-white/90 dark:bg-[#0a0a0a] z-10">
+        <div id="app-navbar" className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-white/5 bg-white/90 dark:bg-[#0a0a0a] z-10 relative">
           <div className="flex items-center">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
