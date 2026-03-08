@@ -78,24 +78,19 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
   }, [userProfile]);
 
   const loadHistory = async () => {
-    if (!userProfile) return;
     try {
-      const records = await NexusServer.fetchRecords(userProfile.id, 'cgpa_snapshot');
+      const records = await NexusServer.fetchRecords(userProfile?.id || null, 'cgpa_snapshot');
       setHistory(records);
     } catch (e) { console.error(e); }
   };
 
   const saveSnapshot = async () => {
-    if (!userProfile) {
-      showToast("Please sign in to save reports to your vault.", "info");
-      return;
-    }
     setIsSaving(true);
     const content = {
       courses, prevCGPA, prevTotalCredits, targetCGPA, manualAdjustments, currentSemester, inputMode
     };
     try {
-      await NexusServer.saveRecord(userProfile.id, 'cgpa_snapshot', `Saved: Sem ${currentSemester}`, content);
+      await NexusServer.saveRecord(userProfile?.id || null, 'cgpa_snapshot', `Saved: Sem ${currentSemester}`, content);
       await loadHistory();
       showToast("Report successfully archived in your vault.", "success");
     } catch (e) {
@@ -119,10 +114,9 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
 
   const deleteHistory = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!userProfile) return;
     const confirmed = await showConfirm("Delete this archive permanently?");
     if (confirmed) {
-      await NexusServer.deleteRecord(id, 'cgpa_snapshot', userProfile.id);
+      await NexusServer.deleteRecord(id, 'cgpa_snapshot', userProfile?.id || null);
       loadHistory();
     }
   };

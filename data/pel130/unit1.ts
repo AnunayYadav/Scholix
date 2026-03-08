@@ -1,98 +1,120 @@
 export const unit1Title = "Unit 1: Substitution and Ellipsis";
-export const unit1Body = `
-# Unit 1: Substitution and Ellipsis
 
-In advanced English discourse, repetition is often considered a stylistic flaw. Mastery of substitution and ellipsis allows you to communicate ideas with precision, fluidity, and a high degree of naturalness. This unit explores how to refer back to previously mentioned ideas without repeating words.
+export const unit1Body = `# Unit 1: Substitution and Ellipsis
 
----
+## Empty Subject 'It' and 'There'
 
-## Empty Subject: "It" and "There"
+* **Definition:**
+  In English, every sentence must have a subject. When a sentence doesn't have a real subject to perform the action, we use "empty" subjects like **It** or **There** just to fill the grammatical slot.
 
-In English, every sentence (except imperatives) needs a subject. When no real subject exists, we use "it" or "there" as placeholders.
+* **Formula:**
+  Empty It + Be verb + Adjective/Noun + ...
+  Empty There + Be verb + Noun Phrase
 
-### "It" as a Prop Subject
-We use "it" to talk about:
-- **Environment & Time:** *It's freezing today.* / *It was half-past six when the meeting ended.*
-- **Distance:** *It's about 500 meters from the hostel to the block.*
-- **Preparatory Subject (Anticipatory It):** This is highly common in academic writing to postpone the real subject.
-  - *Standard:* To finish the syllabus in one week is impossible.
-  - *Advanced:* **It is impossible** to finish the syllabus in one week.
-  - *Structure:* It + be + adjective + (for someone) + to-infinitive.
+* **Explanation:**
+  We use **It** for time, weather, temperature, distance, and to introduce an idea. We use **There** to say that something exists in a specific place or at a specific time.
 
-### "There" as an Introductory Subject
-We use "there" to introduce the existence of something new.
-- **Pattern:** There + be/seem/appear + subject.
-- *There remains a significant gap in our competence mapping.*
-- *There appeared to be no solution to the technical jargon conflict.*
+* **Example:**
+  "**It** is raining." (What is raining? The sky? No, 'it' just holds the subject place).
+  "**There** is a spider on the wall." (We are stating the existence of a spider).
 
----
+* **Solution Steps for Exam:**
+  If the question asks about the weather, time, or an abstract idea, use **It** ("It is hard to believe").
+  If the question asks to introduce the existence of nouns, use **There** ("There are many students").
 
-## Substitution: Replacing Clauses and Nouns
+### Common Mistakes
+* Saying "Is raining" instead of "It is raining" (English sentences cannot drop the subject).
+* Confusing 'There' with 'They're' or 'Their'.
 
-Substitution involves using a small word (pro-form) to stand in for a longer phrase.
+## Substitution: One and Ones
 
-### "One" and "Ones"
-Avoid repeating countable nouns.
-- *I checked the LinkedIn profiles; the **one** with the GitHub link was the most impressive.*
-- *Are these the latest SWOT reports? No, the **ones** on the table are from last year.*
-- **Constraint:** Use "one/ones" only for countable nouns. Do not use them for uncountable nouns (e.g., *I like red wine better than white ~~one~~*).
+* **Definition:**
+  Substitution means replacing a noun that was already mentioned with a pronoun so we don't sound repetitive. We use **One** for singular nouns and **Ones** for plural nouns.
 
-### Functional Substitution: "So", "Do so", "The same"
-- **"So" with report verbs:** *Will the exam be tough? I'm afraid **so**.* (Replaces the entire clause *that the exam will be tough*).
-- **"Do so" for actions:** *The professor asked us to design a portfolio, and we **did so** immediately.*
-- **"The same" for identical choices:** *I'll have a coffee. I'll have **the same**, please.*
+* **Formula:**
+  Old phrase: "I want the red apple, not the green apple."
+  Substitution: "I want the red **apple**, not the green **one**."
 
----
+* **Explanation:**
+  "One" directly replaces the countable noun you just talked about.
 
-## Ellipsis: The Art of Omission
+* **Example:**
+  "Which shoes do you like?" -> "I like the black **ones**."
+  "This car is too expensive. Let's look at a cheaper **one**."
 
-Ellipsis is the removal of words that are technically necessary but clearly understood from context. It makes speech feel "native" and efficient.
+* **Exam Tip:**
+  You CANNOT use "one" or "ones" for uncountable nouns. (e.g., "I don't like this coffee, give me a fresh one" -> WRONG. "Give me fresh coffee" -> CORRECT).
 
-### Textual Ellipsis
-Omitting words to avoid repetition across clauses.
-- **Subject Omission:** *He entered the room and [he] sat down.*
-- **Verb Omission:** *She attended the debate, and her friend [attended] the presentation.*
+## Substitution: So and Do so
 
-### Situational Ellipsis
-Common in informal spoken English where the beginning of a sentence is dropped.
-- *[Do you] Want a coffee?*
-- *[I] See you tomorrow!*
-- *[It] Sounds good to me.*
+* **Definition:**
+  Just as 'one' replaces a noun, **so** replaces a whole clause or adjective. **Do so** replaces an entire action (a verb phrase).
 
-### Comparative Ellipsis
-Shortening sentences during comparisons.
-- *He is more skilled at coding than I am [skilled at coding].*
+* **Formula:**
+  So: Replaces a 'that' clause (think, hope, suppose, believe).
+  Do so: Replaces the verb + object.
 
----
+* **Explanation:**
+  We do this to avoid repeating a long piece of information.
 
-## Professional Implementation & Examples
+* **Example (So):**
+  "Will it rain tomorrow?" -> "I think **so**." (Means: I think *that it will rain tomorrow*).
+  "Is he angry?" -> "I hope not." (Negative of 'so').
 
-| Strategy | Basic Example | Advanced Professional Context |
-| :--- | :--- | :--- |
-| **It** | To speak well is good. | **It is imperative** to articulate your inferences enticingly. |
-| **Substitution** | I want that pen. | Regarding the proposals, I prefer the **one** emphasizing scalability. |
-| **Ellipsis** | He likes tea but I don't. | The CEO attended the meeting, but the CTO **couldn't**. |
+* **Example (Do so):**
+  "He told me to clean the room, and I did **so** immediately." (Did so = cleaned the room).
 
----
+## Leaving Words Out (Ellipsis)
 
-## Key Takeaways
-- Use **"It is..."** to sound more objective and formal in academic reports.
-- Use **"one/ones"** only for things you can count.
-- **Ellipsis** is your best friend in speaking, but use it carefully in very formal writing to ensure clarity isn't lost.
+* **Definition:**
+  Ellipsis is the act of dropping words out of a sentence entirely because the meaning is already perfectly clear from the context.
 
----
+* **Formula:**
+  Full: "Are you coming to the party?" -> "Yes, I am (coming to the party)."
+  Ellipsis: "Are you coming?" -> "Yes, I am."
 
-## Self-Assessment
+* **Explanation:**
+  We most commonly leave out words after auxiliary verbs (am, is, do, have, will) or after the word "to".
 
-**Q1. Rewrite for better flow:**
-*The marketing strategy we used in 2023 was successful, but the marketing strategy we used in 2024 was a failure.*
-> **Answer:** The marketing strategy we used in 2023 was successful, but the **one** we used in 2024 was a failure.
+* **Example:**
+  "Who took my pen?" -> "John did." (Instead of 'John took your pen').
+  "Do you want to play?" -> "I'd love to." (Instead of 'to play').
 
-**Q2. Use 'There' to introduce a problem:**
-*A misunderstanding exists regarding the skill tree requirements.*
-> **Answer:** There is a misunderstanding regarding the skill tree requirements.
+### Recognition Trick
+Look at the end of the sentence. Does it end abruptly with a helping verb or "to"? If yes, it's Ellipsis!
+"Are you ready? I think I am."
 
-**Q3. Apply ellipsis:**
-*Would you like to join the LinkedIn workshop? Yes, I would like to join the LinkedIn workshop.*
-> **Answer:** Yes, I would love to / Yes, I would.
+## Leaving out Subjects and Objects
+
+* **Definition:**
+  In informal speaking, or in compound sentences with "and"/"but", we can drop the subject or object if it is exactly the same as the previous one.
+
+* **Explanation:**
+  If the subject does two actions in a row, you don't need to say the subject twice.
+
+* **Example:**
+  "**She** opened the door and **(she)** walked inside."
+  "I gave **the book** to Mary and **(the book)** to John."
+
+* **Exam Tip:**
+  Only drop the subject if it remains exactly the same! If the subject changes, you MUST state the new subject.
+
+## Final Summary Table
+
+| Concept | Usage | Example |
+|---|---|---|
+| Empty It | Weather, time, distance | It is 5 o'clock. |
+| Empty There | Stating existence | There is a cat here. |
+| One / Ones | Replaces countable nouns | I want the blue one. |
+| So | Replaces a belief/clause | I believe so. |
+| Do So | Replaces an action | He told me to run, and I did so. |
+| Ellipsis | Dropping known words | "Did you win?" "Yes, I did." |
+
+## Self Assessment
+
+1. Fill the blank: "______ is very cold today." (It / There)
+2. Choose the correct word: "I don't like these glasses, show me those ______." (one / ones)
+3. Rewrite using 'so': "Do you think we will pass? I hope that we will pass."
+4. What is the grammatical term for completely leaving out words to avoid repetition?
+5. Why is this sentence incorrect: "I need some water. Give me a fresh one."
 `;

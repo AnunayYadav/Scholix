@@ -1,96 +1,100 @@
 export const unit3Title = "Unit 3: Conditionals";
-export const unit3Body = `
-# Unit 3: Conditionals
 
-Conditionals allow us to talk about possibilities, certainties, and hypothetical scenarios. In professional environments, they are indispensable for risk assessment, planning, and expressing regret or advice.
+export const unit3Body = `# Unit 3: Conditionals
 
----
+## Real, Unreal, and Mixed Conditionals
 
-## The Core Conditional Spectrum
+* **Definition:**
+  Conditionals describe the result of a certain condition. The 'if' clause tells you the condition, and the main clause tells you the result.
+  **Real Conditionals (Type 0 and 1):** Things that are generally true or very likely to happen.
+  **Unreal Conditionals (Type 2 and 3):** Imaginary, hypothetical situations (dreams or regrets).
+  **Mixed Conditionals:** A past unreal condition with a present unreal result, or vice versa.
 
-### The Fact (Zero Conditional)
-Used for general truths and scientific facts.
-- *Formula:* If + Present Simple, Present Simple.
-- *Example:* **If** you **press** the submit button, the data **uploads** to the server.
+* **Formulas:**
+  **Type 0 (Fact):** If + Present Simple, Present Simple.
+  **Type 1 (Likely):** If + Present Simple, Will/Can/May + Base Verb.
+  **Type 2 (Unreal Present/Future dream):** If + Past Simple, Would/Could + Base Verb. (Note: use 'were' for all subjects with 'Be').
+  **Type 3 (Unreal Past regret):** If + Past Perfect, Would have + Past Participle (V3).
+  **Mixed:** If + Past Perfect (Type 3 condition), Would + Base Verb (Type 2 result).
 
-### The Plan (First Conditional)
-Used for real and possible future situations.
-- *Formula:* If + Present Simple, Will + Bare Infinitive.
-- *Example:* **If** we **complete** the skill tree today, we **will be** ready for the interview.
+* **Explanation:**
+  The higher the "Type" number, the further back in time we shift the tense to show it is "unreal".
 
-### The Dream (Second Conditional)
-Used for hypothetical present or highly unlikely future situations.
-- *Formula:* If + Past Simple, Would + Bare Infinitive.
-- *Example:* **If** I **were** the department head, I **would implement** LinkedIn training.
-- **Note:** Use "were" even for I/He/She in formal context (*If she were here...*).
+* **Example:**
+  Type 0: "If you heat ice, it melts." (Scientific fact)
+  Type 1: "If it rains tomorrow, I will stay home." (Likely to happen)
+  Type 2: "If I won the lottery, I would buy an island." (Imaginary present)
+  Type 3: "If I had studied harder last night, I would have passed the test." (Past regret, cannot be changed).
+  Mixed: "If I had studied harder last night (Past action), I would be happy now (Present result)."
 
-### The Regret (Third Conditional)
-Used for unreal past situations (imagining a different past).
-- *Formula:* If + Past Perfect, Would have + Past Participle.
-- *Example:* **If** they **had followed** the technical jargon guide, the client **would have understood** the proposal.
+* **Solution Steps for Exam:**
+  1. Identify the 'if' clause tense.
+  2. If it is Present Simple -> Look for Present Simple (fact) or Will (future).
+  3. If it is Past Simple -> Look for 'Would + V1'.
+  4. If it is Past Perfect -> Look for 'Would have + V3'.
 
----
+### Memory Trick
+Think of the conditional types like a time machine!
+Present (Real) -> Push back to Past (Unreal) -> push back further to Past Perfect (Impossible Regret).
 
-## Mixed Conditionals
+### Common Mistakes
+* Putting 'will' or 'would' in the 'if' clause itself. "If I will go..." is WRONG. "If I go..." is CORRECT.
 
-Sometimes the "if-clause" and the "result-clause" belong to different time zones.
+## Order and Punctuation Marks in Conditionals
 
-### Past Cause -> Present Result
-- *Situation:* Something I did in the past affects my current state.
-- *Formula:* If + Past Perfect, Would + Verb.
-- *Example:* **If** I **had practiced** my extempore more (Past), I **would be** more confident now (Present).
+* **Definition:**
+  The order of the clauses (If clause vs. Main clause) does not change the meaning, but it changes the punctuation!
 
-### Present Cause -> Past Result
-- *Situation:* A general permanent state caused a past event.
-- *Formula:* If + Past Simple (General State), Would have + V3.
-- *Example:* **If** she **were** more organized (General), she **would have designed** her portfolio months ago (Past).
+* **Formula:**
+  If clause + **,** + Main clause.
+  Main clause + If clause. (NO COMMA!)
 
----
+* **Explanation:**
+  When the 'if' clause comes first, use a comma. When it comes second, acts as connecting glue, so no comma is needed.
 
-## Advanced Structures & Connectors
+* **Example:**
+  "**If you call me,** I will come."
+  "I will come **if you call me**."
 
-### Inversion (Formal/Academic)
-You can omit "if" by inverting the auxillary verb and subject.
-- **Should** you need any help, contact the mentor. (First)
-- **Were** I to win the debate, I'd celebrate. (Second)
-- **Had** they submitted the file earlier, they'd have passed. (Third)
+## Usage of: only if, even if, unless, whether, if so
 
-### Specific Connectors
-- **Unless:** If ... not. (*Unless you map skills, you can't improve.*)
-- **Provided that / As long as:** Stronger versions of 'if'.
-- **Even if:** Shows that the result will happen regardless of the condition.
-- **But for / If it were not for:** *But for your help, I would have failed SWOT analysis.*
+* **Definition:**
+  These are alternative conjunctions that replace 'if' or add specific meaning to the condition.
+  **Only if:** A strict condition (means: this is the ONLY way).
+  **Even if:** Shows that the condition does NOT matter, the result will happen anyway.
+  **Unless:** Means "If not" or "Except if".
+  **Whether:** Shows two distinct possibilities (often paired with 'or not').
+  **If so:** A short phrase meaning "if that is true".
 
----
+* **Explanation:**
+  Use "unless" only with a positive verb to create a negative meaning. "Unless you don't study" is a double negative and is grammatically WRONG.
 
-## Conditional Phrases
-- **If so / If not:** *Is there a debate? **If so**, prepare your points. **If not**, join the audience.*
-- **If any:** *Correct the errors, **if any**, in the GitHub repo.*
+* **Example:**
+  "I will go **only if** you go with me." (I absolutely will not go alone).
+  "I will go **even if** it rains." (The rain won't stop me).
+  "You will fail **unless** you study." (You will fail **if** you do **not** study).
+  "I don't know **whether** he will come or not." (Two options).
+  "Is the train delayed? **If so**, we should grab coffee."
 
----
+* **Exam Tip:**
+  Whenever you see 'unless', mentally replace it with 'if not' to test the sentence logic. "Unless he helps me" = "If he does not help me."
 
-## Professional Scenarios
+## Final Summary Table
 
-| Conditional | Context | Usage Example |
-| :--- | :--- | :--- |
-| **First** | Practical Scheduling | *If the lab is open, we'll finish the practicals.* |
-| **Second** | Brainstorming | *If we had a larger budget, we could hire a designer.* |
-| **Third** | Post-Mortem | *If we had tested the link, it wouldn't have broken.* |
-| **Inversion**| Formal Email | *Had I known the details, I would have replied sooner.* |
+| Conditional Type | If Clause | Main Clause |
+|---|---|---|
+| 0 (Fact) | Present Simple | Present Simple |
+| 1 (Likely) | Present Simple | Will + V1 |
+| 2 (Unreal Pres) | Past Simple | Would + V1 |
+| 3 (Unreal Past) | Past Perfect | Would have + V3 |
+| Mixed | Past Perfect | Would + V1 (pres result) |
+| Special words | unless = if not | even if = doesn't matter |
 
----
+## Self Assessment
 
-## Self-Assessment
-
-**Q1. Complete with a Mixed Conditional:**
-*He isn't a good speaker (Present state). He didn't win the debate yesterday (Past action).*
-> **Answer:** If he **were** a good speaker, he **would have won** the debate yesterday.
-
-**Q2. Use Inversion for this Third Conditional:**
-*If the team had communicated better, they would have succeeded.*
-> **Answer:** **Had the team communicated** better, they would have succeeded.
-
-**Q3. Fill with 'Unless' or 'Provided that':**
-*You can use the LinkedIn premium features _________ you pay the subscription fee.*
-> **Answer:** Provided that.
+1. Which conditional type is this: "If I were you, I would take the job."?
+2. Find the error: "If it will rain, we will cancel the picnic."
+3. Rewrite using 'unless': "If you don't wear a coat, you will catch a cold."
+4. Does this need a comma? "I would have helped you if you had asked."
+5. What does 'even if' mean in a sentence compared to 'only if'?
 `;

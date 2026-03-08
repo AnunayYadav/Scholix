@@ -1,92 +1,88 @@
 export const unit6Title = "Unit 6: Professional Vocabulary";
-export const unit6Body = `
-# Unit 6: Professional Vocabulary
 
-Mastering professional vocabulary is not just about learning "big words"; it is about choosing the most precise tool for the job. This unit focuses on elevating your register for business and academic environments.
+export const unit6Body = `# Unit 6: Professional Vocabulary
 
----
+## One Word Substitution
 
-## Advanced One-Word Substitutions
+* **Definition:**
+  One word substitution is the process of using a single, specific word to replace a long, descriptive phrase. This makes professional communication more concise, clear, and impactful.
 
-Precise vocabulary makes you sound more intelligent and saves time.
+* **Formula:**
+  Descriptive Phrase = Single Vocabulary Word.
 
-- **Academic/General:**
-  - *Able to be seen or felt:* **Palpable**
-  - *Something that lasts for a very short time:* **Ephemeral**
-  - *Hard to understand; unclear:* **Obscure**
-  - *Having many different skills or facets:* **Versatile**
-- **Societal/Professional:**
-  - *A person who lacks professional skill:* **Layman**
-  - *A standard or point of reference against which things may be compared:* **Benchmark**
-  - *To make something clear or explain it:* **Elucidate**
+* **Explanation:**
+  In business and technical writing, brevity (keeping it short) is valued. Using the exact right word instead of five words makes you sound more intelligent and professional.
 
----
+* **Examples:**
+  A person who strictly follows rules/details = **Pedant**
+  A solution or remedy for all diseases/problems = **Panacea**
+  A person who is incapable of making mistakes = **Infallible**
+  Things that cannot be read because the handwriting is so bad = **Illegible**
+  A short stay at a place = **Sojourn**
+  A person who does not believe in God = **Atheist**
+  A person who knows many languages = **Polyglot**
 
-## Technical Jargon (The Language of Industry)
+* **Exam Tip:**
+  Pay attention to the roots of words.
+  *Poly* = Many. *Glot* = Tongue/Language.
+  *In* = Not. *Fallible* = Capable of failing.
 
-Jargon is specialized language used by a particular profession.
+### Memory Trick
+Think of one-word substitutions as **Zip Files**. You are taking a large, clunky paragraph and compressing it into a single, efficient word.
 
-### Management & Strategy
-- **Bottleneck:** A point of congestion in a system that stops or slows progress.
-- **Leverage:** To use something to its maximum advantage.
-- **Paradigm Shift:** A fundamental change in approach or underlying assumptions.
-- **Synergy:** The interaction or cooperation of two or more organizations to produce a combined effect greater than the sum of their separate effects.
+## Basic Technical Jargons
 
-### IT & Technology
-- **Backend/Frontend:** The underlying logic vs. the user interface.
-- **Scalability:** The ability of a system to handle increased load.
-- **Bandwidth:** The capacity for data transfer (or figuratively, a person's mental capacity for work).
+* **Definition:**
+  Jargon is specialized terminology used by a particular profession or group. It acts as a shorthand for complex concepts that people within that industry need to discuss frequently.
 
----
+* **Explanation:**
+  While jargon is useful within a team (e.g., software engineers talking to software engineers), using too much jargon with outsiders (like clients) can cause confusion.
 
-## Business Idioms (Corporate Metaphors)
+* **Common IT/Engineering Jargons:**
+  **Bandwidth:** The energy or mental capacity required to deal with a situation. ("I don't have the bandwidth for this project right now.")
+  **Scalable:** A system's ability to handle growing amounts of work or its potential to be enlarged.
+  **Agile:** A project management methodology characterized by breaking tasks into short phases of work and frequent reassessment.
+  **Deliverable:** A tangible or intangible good/service produced as a result of a project that is intended to be delivered to a customer.
+  **Synergy:** The interaction of two or more organizations to produce a combined effect greater than the sum of their separate effects.
 
-Idioms add flavor and cultural competence to your speech.
+* **Solution Steps for Exam:**
+  If asked for jargon meaning, look at the context clue in the sentence. Does it relate to time/energy (Bandwidth)? Does it relate to teamwork (Synergy)? Does it relate to growth (Scalable)?
 
-- **Get the ball rolling:** To start a project or process.
-- **Keep your eye on the ball:** Stay alert and focused on the objective.
-- **Big picture:** The entire perspective on a situation.
-- **Think outside the box:** Approach problems with creative, unconventional logic.
-- **In the loop:** To be kept informed about something.
-- **On the same page:** To have the same understanding or agreement.
-- **The bottom line:** The most important fact or the final profit/loss.
+## Business Idioms
 
----
+* **Definition:**
+  Business idioms are phrases common in the corporate world that have a figurative meaning completely different from the literal meaning of the words.
 
-## Academic Collocations
+* **Explanation:**
+  You cannot translate an idiom word-for-word. They are cultural expressions that you must memorize to understand native business conversations.
 
-Collocations are words that naturally "live together". Using them makes you sound more native.
+* **Common Business Idioms:**
+  1. **Get down to brass tacks:** To start discussing the most important or basic facts of a situation. (e.g., "Let's stop chatting and get down to brass tacks on this budget.")
+  2. **Touch base:** To briefly contact someone to update them or be updated. (e.g., "I'll touch base with you tomorrow morning.")
+  3. **Learn the ropes:** To learn the basics of a new job, task, or profession. (e.g., "It will take him a few weeks to learn the ropes.")
+  4. **Corner the market:** To dominate a particular sector. (e.g., "Amazon has cornered the market on online retail.")
+  5. **Cut corners:** To do something the easiest, cheapest, or fastest way, usually resulting in a poor quality product. (e.g., "We cannot afford to cut corners on safety.")
 
-| Adjective | Noun | Example |
-| :--- | :--- | :--- |
-| **Empirical** | Evidence | *We need **empirical evidence** to prove the SWOT.* |
-| **Stark** | Contrast | *There is a **stark contrast** between the two portfolios.* |
-| **Vital** | Role | *GitHub plays a **vital role** in modern hiring.* |
-| **Comprehensive** | Review | *Conduct a **comprehensive review** of technical jargons.* |
+### Recognition Trick
+Look at the literal image the words create, and apply it to an office setting. "Cutting corners" literally means skipping the sharp, hard turns of a track to finish a race faster. In business, it means skipping crucial steps to save time/money.
 
----
+## Final Summary Table
 
-## Register and Tone
+| Category | Example Term | Meaning |
+|---|---|---|
+| One-Word Sub | Panacea | A cure-all solution |
+| One-Word Sub | Illegible | Impossible to read |
+| Tech Jargon | Bandwidth | Mental capacity / Time |
+| Tech Jargon | Scalable | Able to grow without breaking |
+| Business Idiom | Touch base | Briefly check-in |
+| Business Idiom | Learn the ropes| Learn the basics of a job |
+| Business Idiom | Cut corners | Skip steps to save time/money |
 
-Knowing **when** to use a word is as important as knowing the word itself.
+## Self Assessment
 
-- **Informal:** Look into. -> **Formal:** Investigate.
-- **Informal:** Get better. -> **Formal:** Improve / Ameliorate.
-- **Informal:** Give up. -> **Formal:** Relinquish / Concede.
-- **Informal:** Bad. -> **Formal:** Adverse / Detrimental.
-
----
-
-## Self-Assessment
-
-**Q1. Substitute with one word:**
-*The interaction of two things to produce a result greater than the sum of their parts.*
-> **Answer:** Synergy.
-
-**Q2. Which idiom means 'to start over from the beginning'?**
-> **Answer:** Back to the drawing board.
-
-**Q3. Fill with a collocation:**
-*The study provides ________ evidence (evidence based on observation rather than theory).*
-> **Answer:** empirical.
+1. What is the one-word substitution for "a person who is incapable of making a mistake"?
+2. Use the word "bandwidth" correctly in a sentence describing your workload.
+3. What does it mean if a company says they need to "get down to brass tacks"?
+4. If a manager accused a team of "cutting corners", what did the team do wrong?
+5. Match the term 'Synergy' to its definition: (A) A project output, (B) Combined teamwork output, (C) An error-free system.
 `;

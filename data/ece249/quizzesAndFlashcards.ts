@@ -1,100 +1,33 @@
+import { unit1Quizzes } from './quizzes/unit1.ts';
+import { unit2Quizzes } from './quizzes/unit2.ts';
+import { unit3Quizzes } from './quizzes/unit3.ts';
+import { unit4Quizzes } from './quizzes/unit4.ts';
+import { unit5Quizzes } from './quizzes/unit5.ts';
+import { unit6Quizzes } from './quizzes/unit6.ts';
+
+import { unit1Flashcards } from './flashcards/unit1.ts';
+import { unit2Flashcards } from './flashcards/unit2.ts';
+import { unit3Flashcards } from './flashcards/unit3.ts';
+import { unit4Flashcards } from './flashcards/unit4.ts';
+import { unit5Flashcards } from './flashcards/unit5.ts';
+import { unit6Flashcards } from './flashcards/unit6.ts';
+
 import { QuizQuestion, Flashcard } from "../../types.ts";
 
 export const ece249Quizzes: QuizQuestion[] = [
-    // Unit 1 Questions
-    { unit: 1, question: "According to Ohm's Law, if V = 20V and R = 5Ω, what is the current?", options: ["2A", "4A", "10A", "100A"], correctAnswer: 1, explanation: "Using Ohm's Law: I = V/R = 20/5 = 4A" },
-    { unit: 1, question: "Kirchhoff's Current Law (KCL) is based on the principle of conservation of:", options: ["Energy", "Momentum", "Electric Charge", "Mass"], correctAnswer: 2, explanation: "KCL states that the algebraic sum of currents at a node is zero, based on conservation of electric charge." },
-    { unit: 1, question: "In the voltage division rule for resistors R₁ and R₂ in series, the voltage across R₁ is:", options: ["V × R₂/(R₁+R₂)", "V × R₁/(R₁+R₂)", "V × R₁×R₂", "V/(R₁+R₂)"], correctAnswer: 1, explanation: "Voltage Division Rule: V₁ = V × R₁/(R₁+R₂)" },
-    { unit: 1, question: "The energy band gap of Silicon at room temperature is approximately:", options: ["0.3 eV", "0.72 eV", "1.1 eV", "2.5 eV"], correctAnswer: 2, explanation: "Silicon has a band gap of approximately 1.1 eV, while Germanium has 0.72 eV." },
-    { unit: 1, question: "In an N-type semiconductor, the majority charge carriers are:", options: ["Holes", "Electrons", "Protons", "Neutrons"], correctAnswer: 1, explanation: "N-type semiconductor is doped with pentavalent impurities, making electrons the majority carriers." },
-    { unit: 1, question: "The barrier potential of a Silicon PN junction diode is approximately:", options: ["0.1V", "0.3V", "0.7V", "1.1V"], correctAnswer: 2, explanation: "Silicon diode has a barrier potential of approximately 0.7V, Germanium has 0.3V." },
-    { unit: 1, question: "The ripple factor of a half-wave rectifier is:", options: ["0.48", "0.82", "1.21", "1.57"], correctAnswer: 2, explanation: "The ripple factor of a half-wave rectifier is 1.21, indicating high ripple content." },
-    { unit: 1, question: "In a BJT CE configuration, if β = 100 and I_B = 10μA, then I_C is:", options: ["0.1mA", "1mA", "10mA", "100mA"], correctAnswer: 1, explanation: "I_C = β × I_B = 100 × 10μA = 1000μA = 1mA" },
-    { unit: 1, question: "If α = 0.98 for a transistor, what is β?", options: ["49", "50", "98", "196"], correctAnswer: 0, explanation: "β = α/(1-α) = 0.98/(1-0.98) = 0.98/0.02 = 49" },
-    { unit: 1, question: "A transistor in saturation mode has both junctions:", options: ["Forward biased", "Reverse biased", "E-B forward, C-B reverse", "E-B reverse, C-B forward"], correctAnswer: 0, explanation: "In saturation mode, both E-B and C-B junctions are forward biased. The transistor acts as a closed switch." },
-
-    // Unit 2 Questions
-    { unit: 2, question: "Arduino UNO uses which microcontroller?", options: ["ATmega8", "ATmega168", "ATmega328P", "ATmega2560"], correctAnswer: 2, explanation: "Arduino UNO is based on the ATmega328P microcontroller with 32KB flash memory." },
-    { unit: 2, question: "What is the ADC resolution of Arduino UNO?", options: ["8-bit", "10-bit", "12-bit", "16-bit"], correctAnswer: 1, explanation: "Arduino UNO has a 10-bit ADC, giving digital values from 0 to 1023." },
-    { unit: 2, question: "How many analog input pins does Arduino UNO have?", options: ["4", "6", "8", "14"], correctAnswer: 1, explanation: "Arduino UNO has 6 analog input pins (A0 to A5)." },
-    { unit: 2, question: "The operating frequency of an HC-SR04 ultrasonic sensor is:", options: ["20 kHz", "30 kHz", "40 kHz", "60 kHz"], correctAnswer: 2, explanation: "HC-SR04 ultrasonic sensor operates at 40 kHz frequency." },
-    { unit: 2, question: "Which Arduino function reads analog voltage?", options: ["digitalRead()", "analogRead()", "analogWrite()", "Serial.read()"], correctAnswer: 1, explanation: "analogRead(pin) reads the analog voltage on the specified pin and returns a value from 0-1023." },
-    { unit: 2, question: "LDR resistance in darkness is approximately:", options: ["100 Ω", "1 kΩ", "10 kΩ", "1 MΩ or higher"], correctAnswer: 3, explanation: "In darkness, LDR resistance is very high (~1 MΩ or more). In bright light, it drops to a few hundred ohms." },
-    { unit: 2, question: "DHT22 temperature measurement range is:", options: ["0°C to 50°C", "-20°C to 60°C", "-40°C to 80°C", "-50°C to 100°C"], correctAnswer: 2, explanation: "DHT22 can measure temperature from -40°C to 80°C with ±0.5°C accuracy." },
-    { unit: 2, question: "Which pins on Arduino UNO support PWM?", options: ["0,1,2,3,4,5", "3,5,6,9,10,11", "A0-A5", "All digital pins"], correctAnswer: 1, explanation: "PWM output is supported on pins 3, 5, 6, 9, 10, and 11 (marked with ~)." },
-
-    // Unit 3 Questions
-    { unit: 3, question: "The binary equivalent of decimal 25 is:", options: ["10011", "11001", "10101", "11010"], correctAnswer: 1, explanation: "25 = 16+8+1 = 2⁴+2³+2⁰ = 11001" },
-    { unit: 3, question: "The 2's complement of binary 1010 is:", options: ["0101", "0110", "1011", "1001"], correctAnswer: 1, explanation: "1's complement = 0101, then 2's complement = 0101 + 1 = 0110" },
-    { unit: 3, question: "Convert Gray code 1110 to binary:", options: ["1010", "1011", "1001", "1100"], correctAnswer: 1, explanation: "B₃=1, B₂=1⊕0=1, B₁=1⊕1=0, B₀=0⊕1=1 → Binary = 1011" },
-    { unit: 3, question: "The Excess-3 code for decimal 4 is:", options: ["0100", "0111", "1000", "1001"], correctAnswer: 1, explanation: "Excess-3 = BCD + 3. BCD of 4 = 0100, 0100 + 0011 = 0111" },
-    { unit: 3, question: "The output of XOR gate when both inputs are 1 is:", options: ["0", "1", "Undefined", "High impedance"], correctAnswer: 0, explanation: "XOR gate gives output 1 when inputs are different. When both inputs are 1, output is 0." },
-    { unit: 3, question: "According to De Morgan's theorem, (A+B)' equals:", options: ["A'+B'", "A'·B'", "A·B", "(AB)'"], correctAnswer: 1, explanation: "De Morgan's first theorem: complement of a sum equals the product of complements, (A+B)' = A'·B'" },
-    { unit: 3, question: "NAND and NOR gates are called universal gates because:", options: ["They are fastest", "They can implement any Boolean function", "They use least power", "They have most inputs"], correctAnswer: 1, explanation: "NAND and NOR are universal because any Boolean function (AND, OR, NOT) can be implemented using only NAND or only NOR gates." },
-    { unit: 3, question: "In a K-Map, adjacent cells differ by:", options: ["2 variables", "1 variable", "All variables", "No variables"], correctAnswer: 1, explanation: "In a K-Map, adjacent cells differ by exactly one variable (Gray code ordering), which allows grouping for simplification." },
-
-    // Unit 4 Questions
-    { unit: 4, question: "The Sum output of a half adder is given by:", options: ["A·B", "A+B", "A⊕B", "A⊕B + AB"], correctAnswer: 2, explanation: "Half adder Sum = A XOR B = A⊕B" },
-    { unit: 4, question: "A full adder has how many inputs?", options: ["1", "2", "3", "4"], correctAnswer: 2, explanation: "A full adder has 3 inputs: A, B, and Carry-in (Cᵢₙ)" },
-    { unit: 4, question: "A 4:1 multiplexer has how many select lines?", options: ["1", "2", "3", "4"], correctAnswer: 1, explanation: "A 4:1 MUX needs 2 select lines (2² = 4 inputs)." },
-    { unit: 4, question: "A decoder with 3 inputs has how many outputs?", options: ["3", "6", "8", "16"], correctAnswer: 2, explanation: "An n-to-2ⁿ decoder: 3 inputs give 2³ = 8 outputs." },
-    { unit: 4, question: "The borrow output of a half subtractor is:", options: ["A·B", "A'·B", "A⊕B", "A+B"], correctAnswer: 1, explanation: "Borrow = A'·B (borrow is needed when A=0 and B=1)" },
-    { unit: 4, question: "A priority encoder handles the case when:", options: ["No input is active", "Multiple inputs are active", "All inputs are 0", "Clock is missing"], correctAnswer: 1, explanation: "A priority encoder resolves conflicts when multiple inputs are active by encoding the highest-priority input." },
-    { unit: 4, question: "In a 1-bit comparator, A=B output is given by:", options: ["A⊕B", "A⊕B (XNOR)", "A·B", "A+B"], correctAnswer: 1, explanation: "A=B is detected by XNOR gate: output is 1 when both inputs are same." },
-    { unit: 4, question: "A demultiplexer with 2 select lines can route data to how many outputs?", options: ["2", "4", "8", "16"], correctAnswer: 1, explanation: "With 2 select lines, a DEMUX has 2² = 4 output lines." },
-
-    // Unit 5 Questions
-    { unit: 5, question: "A latch is which type of device?", options: ["Edge-triggered", "Level-triggered", "Pulse-triggered", "Clock-independent"], correctAnswer: 1, explanation: "A latch is level-triggered — its output can change as long as the enable input is at the active level." },
-    { unit: 5, question: "The forbidden condition in an SR latch occurs when:", options: ["S=0, R=0", "S=0, R=1", "S=1, R=0", "S=1, R=1"], correctAnswer: 3, explanation: "When S=R=1 in a NOR-based SR latch, both Q and Q' try to become 0, creating an invalid/unpredictable state." },
-    { unit: 5, question: "The characteristic equation of a JK flip-flop is:", options: ["Q(n+1) = D", "Q(n+1) = T⊕Qn", "Q(n+1) = JQ'n + K'Qn", "Q(n+1) = S + R'Qn"], correctAnswer: 2, explanation: "JK flip-flop: Q(n+1) = JQ̄n + K̄Qn. It sets, resets, holds, or toggles based on J and K values." },
-    { unit: 5, question: "When J=K=1 in a JK flip-flop, the output:", options: ["Sets to 1", "Resets to 0", "Toggles", "Doesn't change"], correctAnswer: 2, explanation: "When J=K=1, the JK flip-flop toggles — if Q was 0, it becomes 1; if Q was 1, it becomes 0." },
-    { unit: 5, question: "A T flip-flop is derived from a JK flip-flop by:", options: ["J=0, K=0", "J=1, K=0", "J=T, K=T", "J=0, K=T"], correctAnswer: 2, explanation: "T flip-flop: connect J=K=T. When T=1, it toggles; when T=0, it holds." },
-    { unit: 5, question: "The Master-Slave flip-flop solves which problem?", options: ["Power consumption", "Fan-out", "Race-around condition", "Propagation delay"], correctAnswer: 2, explanation: "Master-Slave architecture prevents the race-around condition where output toggles multiple times when J=K=1 and clock is HIGH." },
-    { unit: 5, question: "To convert a JK flip-flop to a D flip-flop:", options: ["J=D, K=D", "J=D, K=D'", "J=D', K=D", "J=0, K=D"], correctAnswer: 1, explanation: "JK to D: Connect J=D and K=D̄ (complement of D). This ensures only set or reset, matching D flip-flop behavior." },
-    { unit: 5, question: "The characteristic equation of a D flip-flop is:", options: ["Q(n+1) = D", "Q(n+1) = T⊕Q", "Q(n+1) = JQ'+K'Q", "Q(n+1) = S+R'Q"], correctAnswer: 0, explanation: "D flip-flop simply stores the input: Q(n+1) = D. Whatever D is at the clock edge, that becomes the output." },
-
-    // Unit 6 Questions
-    { unit: 6, question: "A 4-bit SISO register needs how many clock pulses to load 4 bits?", options: ["1", "2", "4", "8"], correctAnswer: 2, explanation: "SISO register loads data one bit at a time, so 4 bits need 4 clock pulses." },
-    { unit: 6, question: "Which shift register type performs serial-to-parallel conversion?", options: ["SISO", "SIPO", "PISO", "PIPO"], correctAnswer: 1, explanation: "SIPO (Serial In Parallel Out) converts serial data to parallel form." },
-    { unit: 6, question: "A 3-bit binary counter has a modulus of:", options: ["3", "6", "8", "16"], correctAnswer: 2, explanation: "A 3-bit counter has 2³ = 8 states (Mod-8), counting from 0 to 7." },
-    { unit: 6, question: "In an asynchronous counter, the main disadvantage is:", options: ["High cost", "Complex design", "Cumulative propagation delay", "Low modulus"], correctAnswer: 2, explanation: "In ripple counters, each flip-flop is clocked by the output of the previous one, causing delays to accumulate." },
-    { unit: 6, question: "A 4-bit ring counter has a modulus of:", options: ["2", "4", "8", "16"], correctAnswer: 1, explanation: "Ring counter modulus = n (number of flip-flops). A 4-bit ring counter has Mod-4." },
-    { unit: 6, question: "A 4-bit Johnson counter has a modulus of:", options: ["4", "8", "12", "16"], correctAnswer: 1, explanation: "Johnson counter modulus = 2n. A 4-bit Johnson counter has Mod-8 (2×4 = 8 unique states)." },
-    { unit: 6, question: "How many flip-flops are needed for a Mod-10 counter?", options: ["3", "4", "5", "10"], correctAnswer: 1, explanation: "Number of flip-flops = ⌈log₂(10)⌉ = ⌈3.32⌉ = 4 flip-flops." },
-    { unit: 6, question: "In a synchronous UP counter, T₂ (toggle input of 3rd flip-flop) equals:", options: ["1", "Q₀", "Q₀·Q₁", "Q₀+Q₁"], correctAnswer: 2, explanation: "In a synchronous UP counter, each flip-flop toggles when all lower flip-flops are 1: T₂ = Q₀·Q₁." },
+    ...unit1Quizzes,
+    ...unit2Quizzes,
+    ...unit3Quizzes,
+    ...unit4Quizzes,
+    ...unit5Quizzes,
+    ...unit6Quizzes
 ];
 
 export const ece249Flashcards: Flashcard[] = [
-    { front: "Ohm's Law", back: "V = IR — Voltage equals Current times Resistance. Current is directly proportional to voltage and inversely proportional to resistance." },
-    { front: "KCL (Kirchhoff's Current Law)", back: "The algebraic sum of all currents at a node is zero. ΣI_in = ΣI_out. Based on conservation of charge." },
-    { front: "KVL (Kirchhoff's Voltage Law)", back: "The algebraic sum of all voltages around a closed loop is zero. ΣV = 0. Based on conservation of energy." },
-    { front: "Intrinsic Semiconductor", back: "A pure semiconductor without impurities. At room temperature, electron-hole pairs are generated. nᵢ = nₑ = nₕ." },
-    { front: "N-Type Semiconductor", back: "Doped with pentavalent impurities (P, As, Sb). Majority carriers: Electrons. Impurity is called Donor." },
-    { front: "P-Type Semiconductor", back: "Doped with trivalent impurities (B, Al, Ga). Majority carriers: Holes. Impurity is called Acceptor." },
-    { front: "PN Junction Depletion Region", back: "Region at the junction depleted of free carriers. Forms a built-in potential barrier: ~0.7V for Si, ~0.3V for Ge." },
-    { front: "BJT Current Gain (β)", back: "β = I_C/I_B (CE config). Also β = α/(1-α). Typical range: 20-500. Relates collector and base currents." },
-    { front: "Half-Wave Rectifier", back: "Single diode, converts one half of AC to DC. Vdc = Vm/π. Ripple factor = 1.21. Efficiency = 40.6%." },
-    { front: "Arduino UNO ADC", back: "10-bit ADC, converts 0-5V to 0-1023 digital values. Resolution = 5/1023 ≈ 4.88mV per step." },
-    { front: "Ultrasonic Distance Formula", back: "d = (0.0343 × t)/2 cm, where t is echo time in μs. Uses speed of sound ≈ 343 m/s." },
-    { front: "DHT11 vs DHT22", back: "DHT11: 0-50°C, ±2°C. DHT22: -40 to 80°C, ±0.5°C. DHT22 is more accurate but slower and costlier." },
-    { front: "2's Complement", back: "Invert all bits (1's complement), then add 1. Used to represent negative numbers in binary. Enables subtraction via addition." },
-    { front: "De Morgan's Theorems", back: "Theorem 1: (A+B)' = A'·B'. Theorem 2: (A·B)' = A'+B'. Break the bar, change the sign." },
-    { front: "XOR Gate", back: "Output is HIGH when inputs are different. Y = A⊕B = AB' + A'B. Used in adders, parity checkers." },
-    { front: "K-Map (Karnaugh Map)", back: "Graphical Boolean simplification tool. Groups of 2ⁿ adjacent 1s eliminate n variables. Gray code ordering ensures adjacency." },
-    { front: "Half Adder", back: "Adds two 1-bit numbers. Sum = A⊕B, Carry = A·B. Cannot handle carry-in from previous stage." },
-    { front: "Full Adder", back: "Adds three 1-bit numbers (A, B, Cᵢₙ). Sum = A⊕B⊕Cᵢₙ. Cout = AB + Cᵢₙ(A⊕B)." },
-    { front: "Multiplexer (MUX)", back: "Data selector: routes one of 2ⁿ inputs to single output using n select lines. A 4:1 MUX has 2 select lines." },
-    { front: "Decoder", back: "Converts n-bit binary input to 2ⁿ output lines, only one active at a time. Used in memory addressing." },
-    { front: "SR Latch", back: "Level-triggered memory element. S=1,R=0: Set. S=0,R=1: Reset. S=R=0: Hold. S=R=1: Invalid/Forbidden." },
-    { front: "JK Flip-Flop", back: "Edge-triggered. Eliminates SR invalid state. J=K=1 → Toggle. Most versatile flip-flop. Q(n+1) = JQ̄n + K̄Qn." },
-    { front: "D Flip-Flop", back: "Stores input D at clock edge. Q(n+1) = D. Simplest flip-flop. Used in registers and data storage." },
-    { front: "T Flip-Flop", back: "Toggle flip-flop. T=1: toggles, T=0: holds. Q(n+1) = T⊕Qn. Fundamental building block of counters." },
-    { front: "Master-Slave Flip-Flop", back: "Two FF in series. Master captures on one clock edge, Slave transfers on opposite edge. Eliminates race-around condition." },
-    { front: "SISO Shift Register", back: "Serial In Serial Out. Data enters and exits one bit at a time. Needs n clocks to load n bits. Slowest mode." },
-    { front: "PIPO Shift Register", back: "Parallel In Parallel Out. All bits load and read simultaneously. Transfers in 1 clock pulse. Fastest mode." },
-    { front: "Asynchronous Counter", back: "Ripple counter. First FF gets clock, rest clocked by previous FF output. Simple but has cumulative propagation delay." },
-    { front: "Synchronous Counter", back: "All flip-flops share the same clock. No accumulated delay. Higher speed but more complex design." },
-    { front: "Ring Counter", back: "Shift register with last output fed back to first input. Modulus = n (number of FFs). No decoding needed." },
-    { front: "Johnson Counter", back: "Twisted ring counter. Q̄ of last FF feeds first FF input. Modulus = 2n. Decoding needs only 2-input AND gates." },
-    { front: "Mod-N Counter Formula", back: "Number of flip-flops = ⌈log₂(N)⌉. For Mod-10: need 4 FFs. Max count = 2ⁿ - 1." },
+    ...unit1Flashcards,
+    ...unit2Flashcards,
+    ...unit3Flashcards,
+    ...unit4Flashcards,
+    ...unit5Flashcards,
+    ...unit6Flashcards
 ];

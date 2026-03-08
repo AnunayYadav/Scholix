@@ -417,7 +417,8 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     NexusServer.trackPageView(location.pathname);
-  }, [location.pathname]);
+    NexusServer.saveRecord(userProfile?.id || null, 'feature_access', `Accessed ${currentModule}`, { path: location.pathname });
+  }, [location.pathname, currentModule, userProfile?.id]);
 
   useEffect(() => {
     NexusServer.recordVisit();

@@ -1,94 +1,114 @@
 export const unit2Title = "Unit 2: Sentence Structure";
-export const unit2Body = `
-# Unit 2: Sentence Structure
 
-The structure of your sentences determines the rhythm and clarity of your communication. Advanced communication requires a balance between simplicity for directness and complexity for detail.
+export const unit2Body = `# Unit 2: Sentence Structure
 
----
+## Simple, Compound, and Complex Sentences
 
-## The Four Houses of Sentence Structure
+* **Definition:**
+  A **Simple Sentence** has only one independent clause (one subject and one verb that expresses a complete thought).
+  A **Compound Sentence** has two or more independent clauses joined by coordinating conjunctions (FANBOYS: For, And, Nor, But, Or, Yet, So).
+  A **Complex Sentence** has one independent clause and at least one dependent (subordinate) clause joined by words like *because, since, although, when*.
 
-### Simple Sentences
-A single independent clause expressing a complete thought.
-- *Structure:* Subject + Verb + (Object/Complement).
-- *Example:* **The student** (S) **optimized** (V) **the LinkedIn profile** (O).
-- **Pro Tip:** Use simple sentences for impact, conclusions, or emphasis.
+* **Formula:**
+  Simple: S + V.
+  Compound: S + V, **[FANBOYS]** S + V.
+  Complex: S + V **[subordinator]** S + V.
 
-### Compound Sentences
-Two or more independent clauses joined by a coordinating conjunction (**FANBOYS**: For, And, Nor, But, Or, Yet, So).
-- *Example:* *Coding is challenging, **but** it is rewarding.*
-- **Punctuation:** Always use a comma before the conjunction.
+* **Explanation:**
+  Independent clauses can stand alone. Dependent clauses cannot (e.g., "Because I am tired" -> What happened? You need an independent clause: "I slept, because I am tired").
 
-### Complex Sentences
-One independent clause joined by one or more dependent (subordinate) clauses.
-- *Key Subordinators:* although, because, since, while, if, since.
-- *Example:* ***Because** the portfolio was elementary (Dependent), the candidate was rejected (Independent).*
+* **Example:**
+  Simple: "The sun is shining hot."
+  Compound: "The sun is hot, **but** the wind is cool."
+  Complex: "I took my jacket **because** the wind is cool."
 
-### Compound-Complex Sentences
-The pinnacle of sentence architecture. Contains at least two independent clauses and at least one dependent clause.
-- *Example:* ***While** I was mapping my skills (Dependent), I realized I lacked technical jargon (Independent), **so** I enrolled in a workshop (Independent).*
+* **Exam Tip:**
+  If a sentence starts with a subordinator (Because, Although, If), you MUST put a comma between the two clauses! ("Because it rained**,** I stayed home.")
 
----
+### Memory Trick
+Think of FANBOYS for compound sentences: **F**or, **A**nd, **N**or, **B**ut, **O**r, **Y**et, **S**o. If you see one of these joining two full sentences, it's a Compound Sentence.
 
-## Advanced Subject and Object Analysis
+## Subject and Object
 
-### The Direct and Indirect Object
-Some verbs (ditransitive) take two objects. The **Direct Object** (DO) is the thing given, and the **Indirect Object** (IO) is the recipient.
-- *Pattern:* Subject + Verb + IO + DO.
-- *Example:* *The mentor (S) gave **the class** (IO) **a briefing** (DO).*
-- **Alternative:** *The mentor gave **a briefing** to **the class**.* (Using 'to' moves the IO to a prepositional phrase).
+* **Definition:**
+  The **Subject** is the noun performing the action. The **Object** is the noun receiving the action.
 
-### 2.2 Subject and Object Complements
-Complements provide more info about the subject or object.
-- **Subject Complement:** Follows a linking verb.
-  - *The SWOT analysis was **comprehensive**.*
-- **Object Complement:** Describes the result of an action on the object.
-  - *The professor considered the portfolio **excellent**.*
+* **Formula:**
+  Subject (Who did it?) + Verb + Object (To whom/what?)
 
----
+* **Explanation:**
+  Understanding subject/object order is crucial because English relies heavily on word order, unlike some languages that use suffixes to show subjects.
 
-## 3. Verbs with Clauses
+* **Example:**
+  "**The dog** (Subject) caught **the ball** (Object)."
 
-Often, the entire object of a sentence is another clause.
-- **That-Clauses:** *He inferred **that the project was failing**.*
-- **Wh-Clauses:** *I asked **how the GitHub repository should be structured**.*
-- **-Ing Clauses:** *I suggest **using more business idioms**.*
+* **Solution Steps for Exam:**
+  Look at the verb. Ask "Who or what did this verb?" (Answer = Subject). Ask "Who or what was this verb done to?" (Answer = Object).
 
----
+## Verbs with Indirect Objects and Clauses
 
-## Linking Verbs (State of Being)
+* **Definition:**
+  Some verbs take TWO objects. A **Direct Object** tells *what* was received. An **Indirect Object** tells *to whom* or *for whom* the action was done. Clause objects happen when an entire clause (a mini-sentence) acts as the object.
 
-Linking verbs connect the subject to a description rather than an action.
-- *Sensory:* look, sound, smell, feel, taste.
-- *State:* be, seem, appear, become, remain.
-- **Mistake Alert:** In professional English, avoid using adverbs with linking verbs.
-  - *Wrong:* The presentation sounded **professionally**.
-  - *Right:* The presentation sounded **professional**.
+* **Formula:**
+  Subject + Verb + Indirect Object + Direct Object
+  OR: Subject + Verb + Direct Object + to/for + Indirect Object
+  Clause: Subject + Verb + "that" + Subject + Verb...
 
----
+* **Explanation:**
+  Common two-object verbs: *give, send, bring, show, buy, teach, offer.*
+  Sometimes the object is a whole idea (a clause), not just a noun.
 
-## Summary Table
+* **Example (Two Objects):**
+  "He gave **Mary** (Indirect) a **book** (Direct)."
+  "He gave a **book** (Direct) to **Mary** (Indirect)."
+  "She bought **him** (Indirect) a **car** (Direct)."
 
-| Type | Clauses | Purpose |
-| :--- | :--- | :--- |
-| **Simple** | 1 Indep. | Clarity, Speed |
-| **Compound** | 2+ Indep. | Balancing Ideas |
-| **Complex** | 1 Indep + 1+ Dep. | Showing Relationships (Cause/Effect) |
-| **Compound-Complex**| 2+ Indep + 1+ Dep. | High-level synthesis |
+* **Example (Clause Object):**
+  "She realized **[that she had lost her keys]**." (The whole clause answers 'what' she realized).
 
----
+### Recognition Trick
+To find the direct object, ask "What exactly was transferred/done?".
+To find the indirect object, ask "Who got it?".
 
-## Self-Assessment
+### Common Mistakes
+* Adding "to" unnecessarily in the first pattern. "He gave to Mary a book" is WRONG. "He gave Mary a book" is CORRECT.
 
-**Q1. Identify the structure:**
-*Although the deadline was tight, we completed the competence mapping, and the teacher was impressed.*
-> **Answer:** Compound-Complex (1 Dep, 2 Indep).
+## Linking Verbs
 
-**Q2. Transform this sentence to use an Indirect Object first:**
-*He sent an email to the HR manager.*
-> **Answer:** He sent the HR manager an email.
+* **Definition:**
+  Linking verbs do not show physical action. They act as an "=" sign, connecting the Subject to a description (an adjective or noun) called a Subject Complement.
 
-**Q3. Correct the linking verb error:**
-*The new технический жаргон sounds accurately.*
-> **Answer:** The new technical jargon sounds **accurate**.
+* **Formula:**
+  Subject + Linking Verb + Adjective/Noun
+
+* **Explanation:**
+  Common linking verbs: *Be (am, is, are, was), seem, look, feel, taste, sound, smell, become, appear*.
+
+* **Example:**
+  "The soup **tastes** good." (Soup = good).
+  "She **became** a doctor." (She = doctor).
+  "He **looks** tired." (He = tired).
+
+* **Exam Tip:**
+  Linking verbs are NEVER followed by Adverbs of manner ending in '-ly' to describe the subject! "The soup tastes beautifully" is WRONG. "The soup tastes beautiful" is CORRECT.
+
+## Final Summary Table
+
+| Structure Type | Identifying Feature | Example |
+|---|---|---|
+| Simple Sentence | One independent clause | I like apples. |
+| Compound Sentence| FANBOYS joining two clauses | I like apples, but he hates them. |
+| Complex Sentence | Subordinator (because, if) | I eat apples because they are healthy. |
+| Direct Object | The thing receiving action | I threw the **ball**. |
+| Indirect Object | The person receiving the DO | I threw **John** the ball. |
+| Linking Verb | Acts as an "=" sign to Adj/Noun | The car **is** fast. (Car = fast). |
+
+## Self Assessment
+
+1. Is the following sentence simple, compound, or complex? "Although it was raining, they played football."
+2. Identify the direct object in: "The teacher gave the class a really hard test."
+3. Rewrite this using 'to' or 'for': "My dad bought me a laptop."
+4. Find the grammar error: "He felt terribly after the accident."
+5. What are the FANBOYS conjunctions used for?
 `;

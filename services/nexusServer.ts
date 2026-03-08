@@ -424,10 +424,25 @@ class NexusServer {
     if (dbErr) throw dbErr;
   }
 
+  static getAnonSessionId(): string {
+    if (typeof window === 'undefined') return 'anon-server';
+    let anonId = localStorage.getItem('nexus_anon_session_id');
+    if (!anonId) {
+      anonId = crypto.randomUUID();
+      localStorage.setItem('nexus_anon_session_id', anonId);
+    }
+    return anonId;
+  }
+
   static async fetchRecords(uid: string | null, type: string) {
     const client = getSupabase();
-    if (client && uid) {
-      const { data, error } = await client.from('user_history').select('*').eq('user_id', uid).eq('type', type).order('created_at', { ascending: false });
+    const targetUid = uid || this.getAnonSessionId();
+    if (client && targetUid) {
+      const { data, error } = await client.from('user_history')
+        .select('*')
+        .or(`user_id.eq.${targetUid},session_id.eq.${targetUid}`)
+        .eq('type', type)
+        .order('created_at', { ascending: false });
       if (error) {
         console.error(`Fetch Records Error (${type}):`, error);
         throw error;
@@ -439,7 +454,27 @@ class NexusServer {
 
   static async saveRecord(uid: string | null, type: string, label: string, content: any) {
     const client = getSupabase();
-    if (client && uid) await client.from('user_history').insert([{ user_id: uid, type, label, content }]);
+    if (!client) return;
+
+    const session_id = this.getAnonSessionId();
+
+    // If uid is provided, use it. Otherwise user_id is null and we rely on session_id.
+    const record: any = {
+      user_id: uid || null,
+      session_id: session_id,
+      type,
+      label,
+      content
+    };
+
+    try {
+      const { error } = await client.from('user_history').insert([record]);
+      if (error) {
+        console.error('Save Record Error:', error);
+      }
+    } catch (e) {
+      console.error('Save Record Exception:', e);
+    }
   }
 
   static async deleteRecord(id: string, type: string, uid: string | null) {

@@ -287,8 +287,8 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
   }, []);
 
   useEffect(() => {
-    if (userProfile && !myTimetable) loadMyTimetableFromServer();
-  }, [userProfile]);
+    if (!myTimetable) loadMyTimetableFromServer();
+  }, [userProfile, myTimetable]);
 
   const loadCommunityPresets = async () => {
     const data = await NexusServer.fetchCommunityTimetables();
@@ -296,12 +296,11 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
   };
 
   const loadMyTimetableFromServer = async () => {
-    if (!userProfile) return;
-    const records = await NexusServer.fetchRecords(userProfile.id, 'timetable_main');
+    const records = await NexusServer.fetchRecords(userProfile?.id || null, 'timetable_main');
     if (records && records.length > 0) {
       setMyTimetable(records[0].content);
     } else {
-      setMyTimetable({ ownerId: userProfile.id, ownerName: userProfile.username || 'My Profile', schedule: [] });
+      setMyTimetable({ ownerId: userProfile?.id || 'local-me', ownerName: userProfile?.username || 'My Profile', schedule: [] });
     }
   };
 
@@ -311,9 +310,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     if (renameTargetId === 'me' && myTimetable) {
       const updated = { ...myTimetable, ownerName: newName.trim() };
       setMyTimetable(updated);
-      if (userProfile) {
-        await NexusServer.saveRecord(userProfile.id, 'timetable_main', 'My Timetable', updated);
-      }
+      await NexusServer.saveRecord(userProfile?.id || null, 'timetable_main', 'My Timetable', updated);
     } else {
       setFriendTimetables(prev => prev.map(f => f.ownerId === renameTargetId ? { ...f, ownerName: newName.trim() } : f));
     }
@@ -398,7 +395,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
         if (myTimetable && (myTimetable.ownerId === editingPresetId || editingPresetId === 'me' || editingPresetId === (userProfile?.id || 'local-me'))) {
           const updated = { ...myTimetable, ...metadata, ownerName: generatedName };
           setMyTimetable(updated);
-          if (userProfile) await NexusServer.saveRecord(userProfile.id, 'timetable_main', generatedName, updated);
+          await NexusServer.saveRecord(userProfile?.id || null, 'timetable_main', generatedName, updated);
         } else {
           setFriendTimetables(prev => prev.map(f => f.ownerId === editingPresetId ? { ...f, ...metadata, ownerName: generatedName } : f));
         }
@@ -423,9 +420,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     };
 
     if (targetForAction === 'me') {
-      if (userProfile) {
-        await NexusServer.saveRecord(userProfile.id, 'timetable_main', generatedName, data);
-      }
+      await NexusServer.saveRecord(userProfile?.id || null, 'timetable_main', generatedName, data);
       setMyTimetable(data);
       setSelectedEntityId('me');
     } else {
@@ -550,7 +545,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     };
 
     if (targetForAction === 'me' && !targetId) {
-      if (userProfile) await NexusServer.saveRecord(userProfile.id, 'timetable_main', batch.name, data);
+      await NexusServer.saveRecord(userProfile?.id || null, 'timetable_main', batch.name, data);
       setMyTimetable(data);
       setSelectedEntityId('me');
     } else {

@@ -1,105 +1,660 @@
-# Nexus Originals: AI Content Generation Guide
+# Nexus Originals — AI Master Content Creation Protocol
 
-This guide defines the standards for creating premium subject notes, quizzes, and flashcards for the "Nexus Originals" section of the LPU-Nexus application. Any AI assisting with the expansion of this section MUST follow these rules to maintain the established aesthetics and functionality.
+This document defines the **strict rules and quality standards** for generating premium educational content for **LPU Nexus**.
 
----
+The goal is simple:
 
-## 1. Directory Structure
-All subject data must be organized as follows:
-- `data/[subject_code]/unit[N].ts`: Contains the markdown body for each unit.
-- `data/[subject_code]/quizzesAndFlashcards.ts`: Contains the `QuizQuestion[]` and `Flashcard[]` arrays.
-- `data/nexusOriginalsData.ts`: The central registry where the subject is imported and added.
+> A student should be able to study **only from Nexus Originals and still score full marks in exams**.
+
+Content must therefore be **complete, simple, visual, exam-focused, and memory friendly**.
 
 ---
 
-## 2. Note Creation (unit[N].ts)
+# 1. Core Philosophy
 
-### 2.1 Technical Format
-- **Export Variables**: Must export `unit[N]Title` and `unit[N]Body`.
-- **Markdown Header**: The first line of `unit[N]Body` MUST be an H1 header with the unit name (e.g., `# Unit 1: Substitution and Ellipsis`).
-- **NO Manual Numbering**: Do NOT add "1.", "1.1", "2." prefix to headings. The system's markdown renderer adds these automatically.
-- **Dividers**: Use `---` frequently to separate major sections for clarity.
+Every note must follow these principles.
 
-### 2.2 Content Aesthetic (Premium & Professional)
-- **Brief yet Detailed**: Avoid walls of text. Use bullet points and bold keywords (`**keyword**`).
-- **Industry Context**: Relate topics to professional life (e.g., "In a technical interview," "When presenting to a CEO").
-- **Tables**: Use markdown tables for comparisons or summarizes.
-- **Assessment**: End every unit with a `## Self-Assessment` section containing 3 practice questions (Q&A format).
+## 1.1 Simplicity First
 
----
+Explain everything in **very simple English**.
 
-## 3. Quantity Standards
+Rules:
 
-### 3.1 MCQ Quantity (Per Unit)
-- **Secondary Subjects (PEL, Soft Skills, etc.)**: Minimum **5 MCQs**.
-- **Important/Core Subjects (Math, Physics, CSE, Engineering)**: Minimum **10 MCQs**.
-- **Difficulty**: Progressive. 30% basic, 40% applied/scenarios, 30% complex/tricky.
+* Sentences must be short
+* Avoid complex vocabulary
+* Explain like teaching a **first-year student**
+* No academic fluff
 
-### 3.2 Flashcard Quantity (Per Unit)
-- **All Subjects**: Minimum **6-8 Flashcards**.
-- **Focus**: Key definitions, acronyms, formulas, or "Exam Favorite" concepts.
+Bad example:
+
+The aforementioned phenomenon illustrates the fundamental proportionality relationship.
+
+Good example:
+
+This means when one value increases, the other also increases.
 
 ---
 
-## 4. Scoring for Full Marks (Detailed Notes)
+## 1.2 Teach Like a Great Teacher
 
-To ensure students can score maximum marks, every topic MUST strictly follow this **4-Part Template** using the exact bullet-point naming shown below:
+Content should feel like:
 
-### 4.1 The Strict Topic Format
-- **Definition:** Clear, concise explanation using **Simple English**. No academic jargon; explain like the reader is in 8th grade.
-- **Formula:** Use LaTeX for all mathematical expressions (e.g., `$V = IR$`). For language, use the grammatical structure.
-- **Explanation:** (Optional but Recommended) A brief bridge connecting the formula to the definition.
-- **Example:** A real-world or numerical scenario.
-- **Solution:** (For Numerical/Grammar) The step-by-step resolution of the example.
+* a friendly professor
+* a clear YouTube teacher
+* a good textbook
+* a smart exam guide
 
-### 4.2 Example Content Block
-```markdown
+Combined together.
+
+---
+
+## 1.3 Visual Learning Priority
+
+Humans remember **visual patterns better than plain text**.
+
+Every major concept should include at least one of these:
+
+* tables
+* comparison charts
+* flow explanations
+* step lists
+* pattern rules
+* recognition tricks
+
+---
+
+## 1.4 Exam-Oriented Design
+
+Notes must help students:
+
+* understand concepts
+* recognize question patterns quickly
+* solve problems faster in exams
+* avoid common mistakes
+
+---
+
+# 2. Directory Structure
+
+All subject data must follow this structure.
+
+data/
+[subject_code]/
+unit1.ts
+unit2.ts
+unit3.ts
+quizzesAndFlashcards.ts
+
+data/
+nexusOriginalsData.ts
+
+Each unit file must export:
+
+export const unit[N]Title
+export const unit[N]Body
+
+---
+
+# 3. Markdown Rules
+
+## 3.1 Header Rules
+
+The first line MUST always be:
+
+# Unit N: Unit Name
+
+Example:
+
+# Unit 1: Ordinary Differential Equations
+
+Do NOT manually number subsections.
+
+Correct:
+
+## Exact Differential Equations
+
+Wrong:
+
+2.1 Exact Differential Equations
+
+The UI automatically adds numbering.
+
+---
+
+## 3.2 Section Structure (Heading Separator)
+
+Do NOT use markdown dividers (`---`) to separate sections.
+
+Instead, create separation using **clear headings**, which the UI automatically renders with a horizontal line.
+
+Example:
+
+## Exact Differential Equations
+
+## Integrating Factors
+
+## Clairaut's Equation
+
+The UI automatically displays the heading with a horizontal line below it.
+
+---
+
+## 3.3 Heading Hierarchy
+
+Use headings to organize content.
+
+# Unit Title
+
+## Major Topic
+
+### Subtopic
+
+#### Small Concept
+
+Example:
+
+# Unit 1: Differential Equations
+
+## Exact Differential Equations
+
+### Definition
+
+### Necessary and Sufficient Condition
+
+### Method of Solution
+
+## Equations Reducible to Exact
+
+### Homogeneous Equations
+
+### Integrating Factors
+
+## Clairaut's Equation
+
+---
+
+## 3.4 Readability Formatting
+
+Use:
+
+**Bold for keywords**
+
+Use bullet lists instead of long paragraphs.
+
+Avoid very large blocks of text.
+
+---
+
+# 4. Mandatory Topic Structure
+
+Every topic MUST follow this format.
+
+## Topic Name
+
+* **Definition**
+* **Formula**
+* **Explanation**
+* **Example**
+* **Solution**
+* **Exam Tip**
+
+---
+
+### Example
+
 ## Ohm's Law
 
-- **Definition:** Ohm's Law states that the current flowing through a conductor is directly proportional to the voltage across it, provided temperature stays constant.
-- **Formula:** $V = IR$
-- **Explanation:** If we increase voltage while keeping resistance the same, the current will also increase.
-- **Example:** Find the current if $V = 20V$ and $R = 10\Omega$.
-- **Solution:** Using $I = V/R$, we get $I = 20/10 = 2A$.
-```
+* **Definition:**
+  Ohm's Law says current increases when voltage increases if resistance stays the same.
 
-### 4.3 Mark-Boosting Rules
-- **Bold Keywords:** Examiners look for specific terms. **BOLD** them every time they appear.
-- **Visual Dividers:** Use `---` after every primary topic to keep the UI clean.
-- **Simple English Policy:** Use words like "clear," "help," "start" instead of "elucidate," "facilitate," "commence."
+* **Formula:**
 
----
+V = IR
 
-## 5. Cognitive Design & Memorization Hacks
+* **Explanation:**
+  Voltage pushes electric current through a conductor.
+  More voltage means more current if resistance does not change.
 
-Notes should be designed for **instant recognition and long-term retention**.
+* **Example:**
+  Voltage = 20V
+  Resistance = 10Ω
 
-### 5.1 Mnemonics & Analogies
-Every unit should include at least one "Memory Hack":
-- **Mnemonics**: Use acronyms (e.g., "FANBOYS" for conjunctions).
-- **Analogies**: Relate complex concepts to daily life (e.g., "A CPU is like a Kitchen, and RAM is the Counter Space").
+Find current.
 
-### 5.2 Recognition Tricks
-- **The "Look For" Rule**: Give students a specific trigger word or pattern to recognize a concept (e.g., "If the sentence starts with 'It is...', look for a preparatory subject").
-- **Visual Cues**: Use consistent formatting for formulas vs definitions.
+* **Solution:**
 
-### 5.3 Quick-Memory Tables
-Use summary tables at the end of sections to condense 3 pages of notes into 1 glance.
+I = V / R
+
+I = 20 / 10
+
+I = 2A
+
+* **Exam Tip:**
+  If voltage and resistance are given, immediately apply the formula **I = V / R**.
 
 ---
 
-## 6. UI/UX Constraints & Gotchas
-- **Sticky Header Offset**: Headings use `scroll-mt-[140px]` in `NexusOriginals.tsx`.
-- **Images**: Use the `note.image` property in the metadata rather than raw HTML.
+# 5. Memory Design (Important)
+
+Notes should help students **remember quickly**.
 
 ---
 
-## 7. Metadata Registry (nexusOriginalsData.ts)
-When adding a new subject:
-1.  Import all unit headers and all quizzes/flashcards.
-2.  Assign a unique `id` (next increment).
-3.  Set `premium: true`.
+## 5.1 Memory Hacks
+
+Include at least one:
+
+* mnemonic
+* analogy
+* real-life comparison
+
+Example:
+
+### Memory Trick
+
+Think of CPU like a kitchen.
+
+CPU → Chef
+RAM → Kitchen counter
+Hard disk → Refrigerator
 
 ---
 
-*This guide ensures LPU-Nexus remains the most premium educational platform for students.*
+## 5.2 Recognition Tricks
+
+Teach students how to identify question types quickly.
+
+Example:
+
+### Recognition Trick
+
+If the equation is:
+
+Mdx + Ndy = 0
+
+Check this condition first:
+
+∂M/∂y = ∂N/∂x
+
+If both are equal → Exact equation.
+
+---
+
+# 6. Problem Solving Strategy
+
+Students must learn **step-by-step solving methods**.
+
+Every numerical topic must include:
+
+### Step Method
+
+Example:
+
+Step 1 → Identify M and N
+Step 2 → Calculate ∂M/∂y
+Step 3 → Calculate ∂N/∂x
+Step 4 → Compare the results
+
+---
+
+# 7. Concept Flow Explanations
+
+When a topic involves decision making, explain the logic clearly.
+
+Example:
+
+### How to Identify Equation Type
+
+1. Write equation as Mdx + Ndy = 0
+2. Check ∂M/∂y and ∂N/∂x
+3. If equal → Exact equation
+4. If not equal → Use integrating factor
+
+---
+
+# 8. Common Mistakes
+
+Each major topic must include a **Common Mistakes** section.
+
+Example:
+
+### Common Mistakes
+
+* Forgetting to treat y as constant while integrating Mdx
+* Mixing up partial derivatives
+* Missing the constant of integration
+
+---
+
+# 9. Quick Revision Section
+
+Each major section should end with:
+
+## Quick Revision
+
+Example table:
+
+| Concept              | Key Idea                        |
+| -------------------- | ------------------------------- |
+| Exact Equation       | ∂M/∂y = ∂N/∂x                   |
+| Integrating Factor   | Used when equation is not exact |
+| Homogeneous Equation | M and N same degree             |
+
+---
+
+# 10. Final Summary Table
+
+Each unit must end with a **formula summary table**.
+
+Example:
+
+| Type        | Form            | Solution          |
+| ----------- | --------------- | ----------------- |
+| Exact       | Mdx + Ndy = 0   | Integrate M and N |
+| Homogeneous | M,N same degree | IF = 1/(Mx+Ny)    |
+| Linear      | dy/dx + Py = Q  | IF = e^(∫Pdx)     |
+
+---
+
+# 11. Self Assessment
+
+Every unit must end with:
+
+## Self Assessment
+
+Include:
+
+* conceptual questions
+* numerical problems
+
+Example:
+
+1. What condition makes a differential equation exact?
+2. What is an integrating factor?
+3. When is an equation called homogeneous?
+
+---
+
+# 12. Quiz Generation
+
+Questions are stored in:
+
+quizzesAndFlashcards.ts
+
+---
+
+# 13. Content Completeness & Generation Strategy
+
+AI models often try to generate everything in a single response, which leads to:
+
+* short explanations
+* skipped topics
+* missing formulas
+* incomplete examples
+
+To prevent this, the AI must follow these rules.
+
+---
+
+## 13.1 Full Syllabus Coverage
+
+AI must cover **every topic and subtopic** from the syllabus.
+
+No topic should be skipped.
+
+Each topic must include:
+
+* definition
+* explanation
+* formulas
+* examples
+* exam tips
+
+---
+
+## 13.2 Depth Requirement
+
+Notes must be **complete learning material**, not summaries.
+
+Every topic must include:
+
+* Definition
+* Explanation
+* Formula
+* Example
+* Step-by-step solution
+* Exam tip
+
+Major topics should include **multiple examples**.
+
+---
+
+## 13.3 Length Requirement
+
+AI must **not compress explanations**.
+
+Notes must be detailed enough so a student can **learn the topic from scratch**.
+
+Avoid:
+
+* very short explanations
+* missing steps
+* single sentence concepts
+
+---
+
+## 13.4 Multi-Section Generation Strategy
+
+To avoid short notes, generate units in stages:
+
+1. Core theory
+2. Examples
+3. Tricks and shortcuts
+4. Common mistakes
+5. Summary tables
+6. Practice questions
+7. Flashcards
+
+---
+
+# 14. Question Bank Requirements
+
+Practice questions are essential for exam preparation.
+
+---
+
+## 14.1 Question Count Rules
+
+### Soft / Secondary Subjects (PEL, communication etc.)
+
+Minimum **30 questions per unit**
+
+Include:
+
+* MCQs
+* short answer
+* conceptual questions
+
+---
+
+### Core Subjects (Math, CSE, Physics, Engineering)
+
+Minimum **50 questions per unit**
+
+Include:
+
+* conceptual questions
+* numerical problems
+* tricky exam-style questions
+* applied problems
+
+---
+
+## 14.2 Difficulty Distribution
+
+30% Easy
+40% Medium
+30% Difficult
+
+Easy → concept check
+Medium → application
+Hard → tricky exam questions
+
+---
+
+## 14.3 Question Variety
+
+Questions should include:
+
+* MCQs
+* short answer
+* numerical problems
+* reasoning questions
+* case-based questions
+
+---
+
+# 15. Flashcard Requirements
+
+Flashcards are used for quick revision.
+
+Each unit must contain **10–15 flashcards**.
+
+Flashcards should include:
+
+* definitions
+* formulas
+* tricks
+* exam keywords
+* common mistakes
+
+Example:
+
+Q: Condition for exact differential equation?
+
+A: ∂M/∂y = ∂N/∂x
+
+---
+
+# 16. Mathematical Formula Rendering Standard
+
+Many subjects such as **Mathematics, Physics, Engineering, and CSE** require proper display of formulas.
+
+All formulas MUST be written using **LaTeX syntax** so that they can be rendered properly in the UI using **KaTeX**.
+
+This ensures formulas display clearly and professionally.
+
+---
+
+## 16.1 Formula Writing Rules
+
+Inline formulas should use:
+
+$ formula $
+
+Example:
+
+$ I = V/R $
+
+Block formulas should use:
+
+$$
+formula
+$$
+
+Example:
+
+$$
+F = ma
+$$
+
+---
+
+## 16.2 Common Formula Examples
+
+Derivative:
+
+$$
+\frac{dy}{dx}
+$$
+
+Partial derivative:
+
+$$
+\frac{\partial M}{\partial y}
+$$
+
+Integral:
+
+$$
+\int x^2 dx = \frac{x^3}{3} + C
+$$
+
+Matrix:
+
+$$
+\begin{bmatrix}
+1 & 2 \
+3 & 4
+\end{bmatrix}
+$$
+
+Vector:
+
+$$
+\vec{F} = m\vec{a}
+$$
+
+---
+
+## 16.3 Important Rule
+
+Never write formulas like plain text:
+
+Wrong:
+
+dy/dx + Py = Q
+
+Correct:
+
+$$
+\frac{dy}{dx} + Py = Q
+$$
+
+---
+
+## 16.4 Recommended Rendering Stack
+
+The frontend should render formulas using:
+
+react-markdown
+remark-math
+rehype-katex
+katex
+
+---
+
+# 17. Final Quality Check
+
+Before completing a unit, AI must verify:
+
+✔ all syllabus topics included
+✔ explanations are simple
+✔ examples exist
+✔ exam tricks included
+✔ summary tables included
+✔ required question count satisfied
+✔ required flashcards included
+✔ formulas written using LaTeX
+
+If these conditions are not satisfied, the unit is **not considered complete**.
+
+---
+
+# Final Goal
+
+When a student studies from **Nexus Originals**, they should feel:
+
+"I don't need YouTube or Google anymore."
+
+Everything required for **understanding, practice, and exam preparation** must already exist inside the platform.

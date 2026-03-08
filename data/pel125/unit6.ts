@@ -1,128 +1,138 @@
-export const unit6Title = "Unit 6: Vocabulary, Word Formation, and Idiomatic Expressions";
+export const unit6Title = "Unit 6: Vocabulary";
 
-export const unit6Body = `# Vocabulary, Word Formation, and Idiomatic Expressions
+export const unit6Body = `# Unit 6: Vocabulary
 
-## Table of Contents
-- [Multi-word Verbs: Meaning and Word Order](#multi-word-verbs-meaning-and-word-order)
-- [Noun Formation: Comprehensive Suffix List](#noun-formation-comprehensive-suffix-list)
-- [Verb Formation: Prefixes and Suffixes](#verb-formation-prefixes-and-suffixes)
-- [Adjective Formation from Nouns and Verbs](#adjective-formation-from-nouns-and-verbs)
-- [Negative Prefixes: The Logical System](#negative-prefixes-the-logical-system)
-- [Academic and Professional Vocabulary](#academic-and-professional-vocabulary)
-- [Idioms: Social, Professional, and Abstract](#idioms-social-professional-and-abstract)
-- [Proverbs for Life and Leadership](#proverbs-for-life-and-leadership)
-- [Practice Questions](#practice-questions)
+## Two- and Three-Word Verbs (Phrasal Verbs)
 
----
+* **Definition:**
+  Phrasal verbs are verbs made of a main verb and one or two particles (prepositions or adverbs). Together, they create a completely new meaning.
+  *Two-word verbs:* verb + particle (look up, give up)
+  *Three-word verbs:* verb + particle + preposition (look forward to, put up with)
 
-## Multi-word Verbs: Meaning and Word Order
+* **Word Order Rules:**
+  **Inseparable (No separation):** The verb and particle must stay together.
+  Example: "I ran into an old friend." (You cannot say "I ran an old friend into").
+  **Separable (Can be separated):** The object can go between the verb and the particle, or after.
+  Example: "Turn off the TV" OR "Turn the TV off."
 
-* **Phrasal Verbs (Two-part):**
-  - **Separable:** "Turn the TV **off**." / "Turn **off** the TV."
-  - **Inseparable:** "I ran **into** an old friend."
-* **Prepositional Verbs:** Always take an object. "Explain it **to** me."
-* **Three-part Phrasal Verbs:** Always inseparable.
-  - "I can't **put up with** this noise." (Tolerate)
-  - "We've **run out of** milk." (Finish)
+* **The Pronoun Rule (Crucial):**
+  If the object is a pronoun (it, them, him, her), it MUST go in the middle of a separable verb.
+  Example: "Turn **it** off." (You can NEVER say "Turn off it").
 
----
+* **Exam Tip:**
+  If a test gives you options like A: "Take off it" B: "Take it off", always remember the Pronoun Rule. Pronouns hate being at the end!
 
-## Noun Formation: Comprehensive Suffix List
+## Common Noun Suffixes
 
-| Suffix | Function | Examples |
-|--------|----------|----------|
-| -ation | Process | Organization, Imagination |
-| -ity | State | Minority, Diversity |
-| -ness | Abstract Quality| Weakness, Loneliness |
-| -ship | Relationship | Partnership, Citizenship |
-| -dom | Domain/State | Freedom, Wisdom |
-| -ment | Outcome | Investment, Requirement |
-| -hood | Group/Status | Brotherhood, Childhood |
+* **Definition:**
+  Suffixes are endings added to a word to change its part of speech. Noun suffixes turn verbs or adjectives into nouns (things, concepts, people).
 
----
+* **Formula:**
+  Base Word + Suffix = Noun
 
-## Verb Formation: Prefixes and Suffixes
+* **Common Suffixes and Meanings:**
+  - **-er / -or** (person who does): teach → teacher, act → actor
+  - **-tion / -sion** (state or action): educate → education, confuse → confusion
+  - **-ment** (result or action): agree → agreement, develop → development
+  - **-ness / -ity** (state of being): happy → happiness, active → activity
 
-### Suffixes
-- **-ize/-ise:** (Meaning: to make) Modernize, Stabilize.
-- **-en:** (Meaning: to cause to be) Sharpen, Deepen, Weaken.
-- **-ify:** (Meaning: to turn into) Clarify, Purify.
+* **Explanation:**
+  If you know the base word, adding a suffix helps you understand the noun version without memorizing a new word.
 
-### Prefixes
-- **En- / Em-:** Enable, Empower, Enrich.
-- **Over-:** Overdo, Overrate.
-- **Mis-:** Mishandle, Misinterpret.
+## Common Verb Suffixes
 
----
+* **Definition:**
+  Verb suffixes turn nouns or adjectives into verbs (action words).
 
-## Adjective Formation from Nouns and Verbs
+* **Formula:**
+  Noun/Adjective + Suffix = Verb
 
-* **From Nouns:**
-  - **-al:** Cultural, Musical.
-  - **-ic:** Heroic, Artistic.
-  - **-ous:** Joyous, Piteous.
-  - **-y:** Healthy, Wealthy.
-* **From Verbs:**
-  - **-able/-ible:** Predictable, Incomprehensible.
-  - **-ive:** Collaborative, Protective.
+* **Common Suffixes and Meanings:**
+  - **-ize / -ise** (make or become): modern → modernize, memory → memorize
+  - **-en** (make): short → shorten, dark → darken
+  - **-ify** (make or cause to be): pure → purify, simple → simplify
+  - **-ate** (become or form): active → activate, formula → formulate
 
----
+* **Example:**
+  "We need to **shorten** the meeting because we are out of time."
 
-## Negative Prefixes: The Logical System
+## Common Adjective Suffixes
 
-1. **Un-:** The most common. "Unlucky", "Unusual."
-2. **In-:** Often with Latin roots. "Inaccurate", "Insecure."
-3. **Im-:** Before words starting with **P** or **M**. "Impatient", "Immature."
-4. **Il-:** Before words starting with **L**. "Illegal", "Illegible."
-5. **Ir-:** Before words starting with **R**. "Irrelevant", "Irregular."
-6. **Dis-:** For actions or qualities. "Disconnect", "Dishonest."
+* **Definition:**
+  Adjective suffixes turn nouns or verbs into describing words (adjectives).
 
----
+* **Formula:**
+  Noun/Verb + Suffix = Adjective
 
-## Academic and Professional Vocabulary
+* **Common Suffixes and Meanings:**
+  - **-ful** (full of): care → careful, beauty → beautiful
+  - **-less** (without): care → careless, harm → harmless
+  - **-ous** (having qualities of): danger → dangerous, fame → famous
+  - **-al / -ic** (relating to): nation → national, magic → magic/magical
+  - **-able / -ible** (capable of being): read → readable, flex → flexible
 
-* **Analyze:** Break down into parts for study.
-* **Corroborate:** Confirm or give support to.
-* **Synthesize:** Combine ideas to form a theory.
-* **Pragmatic:** Dealing with things sensibly and realistically.
+### Recognition Trick
+Look at the end of a word!
+Ends in -ment? -> Noun
+Ends in -ify? -> Verb
+Ends in -able? -> Adjective
 
----
+## Common and Negative Prefixes
 
-## Idioms: Social, Professional, and Abstract
+* **Definition:**
+  Prefixes are added to the beginning of a word to change its meaning. Negative prefixes give the word its opposite meaning.
 
-* **Social:**
-  - "To see eye to eye" (Agree)
-  - "To spill the beans" (Tell a secret)
-* **Professional:**
-  - "To stay on the ball" (Be alert/capable)
-  - "To cut corners" (Do something poorly to save time/money)
-* **Abstract:**
-  - "Once in a blue moon" (Very rarely)
-  - "Burning the midnight oil" (Working late)
+* **Formula:**
+  Prefix + Base Word = New Word
 
----
+* **Negative Prefixes:**
+  - **un-** (not): happy → unhappy, do → undo
+  - **in- / im- / il- / ir-** (not): active → inactive, possible → impossible (use *im* before p/m), legal → illegal (use *il* before l), regular → irregular (use *ir* before r)
+  - **dis-** (opposite action): agree → disagree, connect → disconnect
+  - **mis-** (wrongly): understand → misunderstand, spell → misspell
 
-## Proverbs for Life and Leadership
+* **Other Common Prefixes:**
+  - **re-** (again): write → rewrite, do → redo
+  - **pre- / post-** (before/after): war → pre-war / post-war
+  - **over- / under-** (too much/not enough): cook → overcook / undercook
 
-* "**Don't count your chickens before they hatch.**" (Don't depend on something that hasn't happened yet)
-* "**Every cloud has a silver lining.**" (There's something good in every bad situation)
-* "**All that glitters is not gold.**" (Appearances can be deceptive)
+## Idioms and Proverbs
 
----
+* **Definition:**
+  *Idioms:* Phrases that have a hidden meaning different from the individual words (e.g., "Kick the bucket" means to die).
+  *Proverbs:* Short, well-known sayings that state a general truth or piece of advice (e.g., "A stitch in time saves nine").
 
-## Practice Questions
+* **Explanation:**
+  Idioms cannot be translated word-for-word. Proverbs are cultural wisdom.
 
-### Conceptual Questions
-1. List and explain three different negative prefixes with examples.
-2. What is the difference between a separable and inseparable phrasal verb?
-3. Define 'Corroborate' and use it in a professional sentence.
+* **Common Idioms:**
+  1. **Break the ice:** Start a conversation in an awkward situation.
+  2. **Bite the bullet:** Force yourself to do something difficult or unpleasant.
+  3. **Under the weather:** Feeling slightly ill.
 
-### Exercise: Word Transformation
-1. Noun of 'Strong' -> ______
-2. Opposite of 'Literate' -> ______
-3. Verb of 'Simple' -> ______
+* **Common Proverbs:**
+  1. **Actions speak louder than words:** What you do is more important than what you say.
+  2. **Don't judge a book by its cover:** Don't judge based solely on appearances.
+  3. **The early bird catches the worm:** Success comes to those who prepare well and act early.
 
-### Exercise: Idiom Completion
-1. He is really sick today; he is feeling under the ______.
-2. We need to start the meeting. Who will break the ______?
-3. That exam was so easy! It was a ______ of cake.`;
+## Final Summary Table
+
+| Concept | Structure | Examples |
+|---|---|---|
+| Inseparable Phrasal | Verb + Particle stays together | Look after my dog |
+| Separable Phrasal | Object can go between | Turn it off |
+| Noun Suffix | -tion, -ness, -ment, -er | education, happiness |
+| Verb Suffix | -ize, -ify, -en | memorize, simplify, shorten |
+| Adjective Suffix | -ful, -less, -ous, -able | careful, careless, dangerous |
+| Negative Prefix | un-, in-, im-, ir-, il- | unhappy, impossible, illegal |
+| Idiom | Hidden meaning | Under the weather (sick) |
+| Proverb | Cultural Advice | Early bird catches the worm |
+
+## Self Assessment
+
+1. Where should the object "it" be placed in the sentence "Put on your jacket" to make it correct?
+2. Which prefix makes the opposite of logical? (il/im/in)
+3. Turn the adjective "active" into a verb using a suffix.
+4. What is the meaning of the idiom "bite the bullet"?
+5. Add a suffix to "danger" to make it an adjective, and to "agree" to make it a noun.
+`;

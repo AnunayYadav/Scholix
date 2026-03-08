@@ -198,6 +198,7 @@ export interface Folder {
 }
 
 export interface Flashcard {
+  unit?: number;
   front: string;
   back: string;
 }
