@@ -154,8 +154,9 @@ export interface ResumeAnalysisResult {
 export interface QuizQuestion {
   unit: number;
   question: string;
-  options: string[];
-  correctAnswer: number;
+  type?: 'mcq' | 'subjective';
+  options?: string[];
+  correctAnswer?: number;
   explanation: string;
 }
 
