@@ -10,8 +10,26 @@ const requestQueue: (() => void)[] = [];
 let lastRequestTimestamp = 0;
 const MIN_REQUEST_SPACING = 2000; // 2 seconds between successful calls
 
+import { GoogleGenAI } from "@google/genai";
+
+const getGenAIClient = () => {
+  // Try to find the key in modern Vite or legacy fallback configurations
+  const apiKey =
+    //@ts-ignore
+    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) ||
+    //@ts-ignore
+    (typeof process !== 'undefined' && process.env && (process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY)) ||
+    "";
+
+  if (!apiKey) {
+    throw new Error("Gemini API key is missing. Please set VITE_GEMINI_API_KEY in your Vercel Environment Variables.");
+  }
+
+  return new GoogleGenAI({ apiKey });
+};
+
 /**
- * Internal helper to communicate with the backend Gemini proxy
+ * Internal helper to communicate directly with Gemini from the frontend
  */
 const callGeminiProxy = async (action: string, payload: any, retries = 2, delay = 2000) => {
   // 1. Queue management (Semaphore)
@@ -28,41 +46,109 @@ const callGeminiProxy = async (action: string, payload: any, retries = 2, delay 
       await new Promise(r => setTimeout(r, MIN_REQUEST_SPACING - timeSinceLast));
     }
 
+    const ai = getGenAIClient();
+
     for (let i = 0; i <= retries; i++) {
       try {
-        const res = await fetch("/api/gemini", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action, payload }),
-        });
+        let responseText = "";
+        let groundingData = null;
 
-        if (res.ok) {
-          lastRequestTimestamp = Date.now();
-          return await res.json();
+        switch (action) {
+          case "ANALYZE_RESUME": {
+            const response = await ai.models.generateContent({
+              model: "gemini-3.1-flash-lite-preview",
+              contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
+              config: {
+                responseMimeType: "application/json",
+                responseSchema: payload.schema,
+                temperature: payload.deep ? 0.2 : 0.4,
+              },
+            });
+            responseText = response.text || "";
+            break;
+          }
+
+          case "GENERATE_QUIZ": {
+            const response = await ai.models.generateContent({
+              model: "gemini-3.1-flash-lite-preview",
+              contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
+              config: {
+                responseMimeType: "application/json",
+                responseSchema: payload.schema,
+                temperature: 0.7,
+              },
+            });
+            responseText = response.text || "";
+            break;
+          }
+
+          case "EXTRACT_TIMETABLE": {
+            const response = await ai.models.generateContent({
+              model: "gemini-3.1-flash-lite-preview",
+              contents: [{
+                role: 'user',
+                parts: [
+                  { text: payload.prompt },
+                  { inlineData: { mimeType: "image/png", data: payload.imageData } }
+                ]
+              }],
+              config: {
+                responseMimeType: "application/json",
+                responseSchema: payload.schema,
+                temperature: 0.1,
+              },
+            });
+            responseText = response.text || "";
+            break;
+          }
+
+          case "GENERATE_SUBJECT_ORIGINALS": {
+            const response = await ai.models.generateContent({
+              model: "gemini-3.1-flash-lite-preview",
+              contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
+              config: {
+                responseMimeType: "application/json",
+                responseSchema: payload.schema,
+                temperature: 0.2,
+              },
+            });
+            responseText = response.text || "";
+            break;
+          }
+
+          default:
+            throw new Error("Invalid protocol action requested.");
         }
 
-        const errData = await res.json().catch(() => ({}));
+        lastRequestTimestamp = Date.now();
+        return { text: responseText, groundingChunks: groundingData };
 
-        // If it's a rate limit or server overload and we have retries left
-        if ((res.status === 429 || res.status === 503) && i < retries) {
-          const multiplier = res.status === 429 ? 2 : 2;
+      } catch (e: any) {
+        const errorMsg = e.message || String(e);
+        const isRateLimit =
+          errorMsg.includes("429") ||
+          errorMsg.toLowerCase().includes("quota") ||
+          errorMsg.toLowerCase().includes("rate limit") ||
+          e.status === 429 ||
+          e.code === 429;
+
+        if (isRateLimit && i < retries) {
+          const multiplier = 2;
           const jitter = Math.random() * 1000;
           const backoff = (delay * Math.pow(multiplier, i)) + jitter;
           await new Promise(resolve => setTimeout(resolve, backoff));
           continue;
         }
 
-        if (res.status === 429) {
-          const errMsg = errData.rawError ? `API REJECTED: ${errData.rawError}` : (errData.error || "Too many requests. Please wait.");
-          throw new Error(errMsg);
+        if (i === retries) {
+          if (isRateLimit) {
+            throw new Error("Google Gemini Quota Exhausted: The system is under heavy load or the free-tier limit has been reached. Please try again in 60 seconds.");
+          }
+          if (errorMsg.includes("500") || errorMsg.includes("503") || errorMsg.toLowerCase().includes("overloaded")) {
+            throw new Error("AI Engine Overloaded: Google's servers are temporarily unable to process this request. Please try again shortly.");
+          }
+          throw e;
         }
-        if (res.status >= 500) {
-          const errMsg = errData.rawError || errData.details || errData.error || "AI Service temporary overload. Try again later.";
-          throw new Error(`SERVER ERROR: ${errMsg}`);
-        }
-        throw new Error(errData.error || `Error ${res.status}`);
-      } catch (e: any) {
-        if (i === retries) throw e;
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
