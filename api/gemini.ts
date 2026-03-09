@@ -1,24 +1,31 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 
-export const config = {
-  runtime: 'edge',
-};
+export default async function handler(req: any, res: any) {
+  // Add CORS headers just in case
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
 
-export default async function handler(req: Request) {
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return new Response(JSON.stringify({
-      error: "Gateway configuration missing. The server is unable to process intelligence requests at this time."
-    }), { status: 500 });
+    return res.status(500).json({ error: "Gateway configuration missing. The server is unable to process intelligence requests at this time." });
   }
 
   try {
-    const { action, payload } = await req.json();
+    const { action, payload } = req.body || {};
     const ai = new GoogleGenAI({ apiKey });
 
     let responseText = "";
@@ -88,18 +95,16 @@ export default async function handler(req: Request) {
       }
 
       default:
-        return new Response(JSON.stringify({ error: "Invalid protocol action requested." }), { status: 400 });
+        return res.status(400).json({ error: "Invalid protocol action requested." });
     }
 
-    return new Response(JSON.stringify({
+    return res.status(200).json({
       text: responseText,
       groundingChunks: groundingData
-    }), { status: 200 });
+    });
 
   } catch (error: any) {
     const errorMsg = error.message || String(error);
-    // Silenced console.error as requested for cleaner logs
-    // Original: console.error("Backend Gemini Error Context:", { message: errorMsg, ... });
 
     // Detect Rate Limits (Quota) - Enhanced check
     const isRateLimit =
@@ -110,31 +115,29 @@ export default async function handler(req: Request) {
       error.code === 429;
 
     if (isRateLimit) {
-      return new Response(JSON.stringify({
+      res.setHeader('Retry-After', '60');
+      return res.status(429).json({
         error: "Google Gemini Quota Exhausted: The system is under heavy load or the free-tier limit has been reached. Please try again in 60 seconds.",
         type: "RATE_LIMIT",
         source: "google_ai_sdk"
-      }), {
-        status: 429,
-        headers: { "Content-Type": "application/json", "Retry-After": "60" }
       });
     }
 
     // Detect Overload/Server Issues
     if (errorMsg.includes("500") || errorMsg.includes("503") || errorMsg.toLowerCase().includes("overloaded")) {
-      return new Response(JSON.stringify({
+      return res.status(503).json({
         error: "AI Engine Overloaded: Google's servers are temporarily unable to process this request. Please try again shortly.",
         type: "SERVER_OVERLOAD"
-      }), { status: 503 });
+      });
     }
 
-    return new Response(JSON.stringify({
+    return res.status(500).json({
       error: "Intelligence Gateway Error: An unexpected failure occurred in the AI bridge.",
       details: errorMsg,
       debug: {
         status: error.status,
         code: error.code
       }
-    }), { status: 500 });
+    });
   }
 }
