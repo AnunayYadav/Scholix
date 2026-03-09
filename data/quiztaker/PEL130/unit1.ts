@@ -1,6 +1,39 @@
 import { QuizQuestion } from "../../../types.ts";
 
-export const pel130Unit1MCQs: QuizQuestion[] = [
+export const unit1Quizzes: QuizQuestion[] = [
+    // Grammar - Empty Subjects, Substitution, Ellipsis
+    { unit: 1, question: "Why do we use 'It' or 'There' as empty subjects?", options: ["To add emphasis", "Because every English sentence needs a grammatical subject", "To replace a noun", "To ask a question"], correctAnswer: 1, explanation: "English syntax requires a subject. Without a real actor, we insert an 'empty' subject." },
+    { unit: 1, question: "Identify the empty subject sentence:", options: ["The dog is barking.", "She walked home.", "It is raining outside.", "I like pizza."], correctAnswer: 2, explanation: "'It' does not refer to a specific noun; it just holds the subject place for weather." },
+    { unit: 1, question: "Which empty subject is used to indicate existence?", options: ["It", "There", "Here", "This"], correctAnswer: 1, explanation: "'There is a spider on the wall' indicates a spider exists in that location." },
+    { unit: 1, question: "Fill the blank: '______ is a long way to London.'", options: ["There", "This", "That", "It"], correctAnswer: 3, explanation: "We use 'It' for statements about distance." },
+    { unit: 1, question: "Fill the blank: '______ appears to be a mistake in the report.'", options: ["It", "There", "That", "One"], correctAnswer: 1, explanation: "We are stating the existence of a mistake, so we use 'There'." },
+    { unit: 1, question: "What is substitution in grammar?", options: ["Replacing a subject with another noun", "Using a word to replace a previously mentioned noun or phrase to avoid repetition", "Changing the tense of a verb", "Adding descriptive adjectives"], correctAnswer: 1, explanation: "e.g., replacing 'the red apple' with 'the red one'." },
+    { unit: 1, question: "Fill the blank: 'I don't like the red car, I prefer the blue ______.'", options: ["one", "ones", "car", "some"], correctAnswer: 0, explanation: "'One' replaces the singular countable noun 'car'." },
+    { unit: 1, question: "Can we use 'one/ones' for uncountable nouns?", options: ["Yes, always", "No, never", "Only if it is preceded by 'the'", "Only in formal writing"], correctAnswer: 1, explanation: "You cannot say 'I need some water, give me a fresh one'. You just say 'Give me fresh water'." },
+    { unit: 1, question: "Identify the error: 'These shoes are dirty, let me change into clean ones.'", options: ["These", "shoes", "clean", "No error"], correctAnswer: 3, explanation: "The sentence correctly uses 'ones' to replace the plural noun 'shoes'." },
+    { unit: 1, question: "Find the error: 'I need advice. Please give me a good one.'", options: ["I need", "advice", "give me", "a good one"], correctAnswer: 3, explanation: "'Advice' is uncountable, so you cannot use 'a good one'. You must say 'some good advice'." },
+    { unit: 1, question: "What does 'so' substitute for?", options: ["A single noun", "A verb action", "An entire clause, usually expressing a belief", "A preposition"], correctAnswer: 2, explanation: "e.g., 'Will it rain?' -> 'I think so' (so = that it will rain)." },
+    { unit: 1, question: "Fill the blank: 'Are they winning?' -> 'I hope ______.'", options: ["so", "it", "that", "this"], correctAnswer: 0, explanation: "'So' replaces the 'that' clause (that they are winning)." },
+    { unit: 1, question: "What replaces a complete verb phrase/action?", options: ["So", "Do so", "One", "It"], correctAnswer: 1, explanation: "e.g., 'He told me to run, and I did so'." },
+    { unit: 1, question: "Identify the usage of 'do so': 'She asked him to lock the door, and he _______ immediately.'", options: ["did it", "done so", "did so", "so did"], correctAnswer: 2, explanation: "'Did so' cleanly substitutes the action 'locked the door'." },
+    { unit: 1, question: "Which reply is grammatically correct to 'Is he coming?'", options: ["I think.", "I think it.", "I think so.", "I do so think."], correctAnswer: 2, explanation: "Use 'so' to substitute the clause holding the thought." },
+    { unit: 1, question: "What is Ellipsis?", options: ["Adding extra words for emphasis", "Leaving out words whose meaning can be understood from context", "Repeating words for rhetorical effect", "Replacing a noun with a pronoun"], correctAnswer: 1, explanation: "e.g., 'Do you like tea?' -> 'Yes, I do (like tea)'." },
+    { unit: 1, question: "Identify Ellipsis: 'Who wrote this letter?'", options: ["I wrote the letter.", "I did.", "The letter was written by me.", "It was me who wrote it."], correctAnswer: 1, explanation: "'I did' drops the rest of the sentence to avoid repetition." },
+    { unit: 1, question: "Fill the blank using ellipsis: 'Are you going to the party?' -> 'I am not sure, but I want ______.'", options: ["go", "to", "to go", "going"], correctAnswer: 1, explanation: "Ellipsis often drops everything after 'to'." },
+    { unit: 1, question: "In a compound sentence, when can you leave out the subject in the second clause?", options: ["Never", "Always", "Only if the subject is exactly the same as in the first clause", "If you use a comma"], correctAnswer: 2, explanation: "e.g., 'John ran inside and (John) grabbed his coat'." },
+    { unit: 1, question: "Which sentence correctly uses subject dropping?", options: ["She ate dinner and went to bed.", "She ate dinner and he went to bed.", "She ate dinner, went to bed.", "Because she ate dinner went to bed."], correctAnswer: 0, explanation: "'She' is the subject of both 'ate' and 'went', so it can be dropped the second time." },
+    { unit: 1, question: "Find the error: 'John opened the door and Mary walked in.'", options: ["opened", "and", "walked", "No error"], correctAnswer: 3, explanation: "Because the subjects are different (John vs Mary), you CANNOT drop the second subject. So the sentence is correct." },
+    { unit: 1, question: "What type of empty subject is needed? '______ was a time when computers were huge.'", options: ["It", "There", "This", "That"], correctAnswer: 1, explanation: "Stating the existence of a past era -> 'There'." },
+    { unit: 1, question: "Fill the blank: 'Did you lock the car?' -> 'Yes, I ________.'", options: ["locked", "did lock", "did", "do"], correctAnswer: 2, explanation: "Ellipsis using the auxiliary 'did'." },
+    { unit: 1, question: "Rewrite using 'so': 'I don't think that he is guilty.' -> 'I _________.'", options: ["don't think so", "think not so", "do so not think", "think not"], correctAnswer: 0, explanation: "'So' replaces 'that he is guilty'." },
+    { unit: 1, question: "Which replaces the underlined noun? 'I prefer dark chocolates over milk _chocolates_.'", options: ["one", "ones", "some", "them"], correctAnswer: 1, explanation: "Plural noun replacement -> ones." },
+    { unit: 1, question: "Find the error: 'The weather is hot. Is hard to work.'", options: ["weather", "hot", "Is", "to work"], correctAnswer: 2, explanation: "English needs an empty subject: 'IT is hard to work'." },
+    { unit: 1, question: "Is this sentence correct? 'I told him to sit down, and he did it so.'", options: ["Yes", "No, it should be 'he did so'", "No, it should be 'so he did it'", "No, it should be 'he so did'"], correctAnswer: 1, explanation: "'Did it' and 'did so' both work, but 'did it so' is redundant and wrong." },
+    { unit: 1, question: "Ellipsis requires what to usually remain at the end of the shortened sentence?", options: ["An adjective", "A preposition", "An auxiliary verb or 'to'", "A main verb"], correctAnswer: 2, explanation: "e.g., 'Yes, I CAN', 'Yes, I DO', 'I want TO'." },
+    { unit: 1, question: "Fill the blank comparing two cars: 'This car is fast, but the red ______ is faster.'", options: ["car", "one", "ones", "it"], correctAnswer: 1, explanation: "'One' avoids repeating the singular noun 'car'." },
+    { unit: 1, question: "Empty 'It' is primarily used to introduce:", options: ["People", "Abstract ideas, time, and weather", "Locations", "Plural nouns"], correctAnswer: 1, explanation: "e.g., 'It is obvious...', 'It is raining...', 'It is 5 PM...'." },
+
+    // Professional Communication & Soft Skills
     {
         unit: 1,
         question: "What is the primary focus of 'Communication Skills II' (PEL130)?",
@@ -67,8 +100,8 @@ export const pel130Unit1MCQs: QuizQuestion[] = [
     {
         unit: 1,
         question: "What does 'Body Language' in an interview reveal?",
-        options: ["Only your height", "Confidence, honesty, and openness", "Exactly what you are thinking in words", "Your favorite color"],
-        correctAnswer: 1,
+        options: ["Confidence, honesty, and openness", "Only your height", "Exactly what you are thinking in words", "Your favorite color"],
+        correctAnswer: 0,
         explanation: "Your non-verbal cues (posture, eye contact) speak as much as your words."
     },
     {

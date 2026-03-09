@@ -1,11 +1,11 @@
 import { QuizQuestion, Flashcard } from "../../types.ts";
 
-import { unit1Quizzes } from "./quizzes/unit1.ts";
-import { unit2Quizzes } from "./quizzes/unit2.ts";
-import { unit3Quizzes } from "./quizzes/unit3.ts";
-import { unit4Quizzes } from "./quizzes/unit4.ts";
-import { unit5Quizzes } from "./quizzes/unit5.ts";
-import { unit6Quizzes } from "./quizzes/unit6.ts";
+import { unit1Quizzes } from "../quiztaker/PEL130/unit1.ts";
+import { unit2Quizzes } from "../quiztaker/PEL130/unit2.ts";
+import { unit3Quizzes } from "../quiztaker/PEL130/unit3.ts";
+import { unit4Quizzes } from "../quiztaker/PEL130/unit4.ts";
+import { unit5Quizzes } from "../quiztaker/PEL130/unit5.ts";
+import { unit6Quizzes } from "../quiztaker/PEL130/unit6.ts";
 
 import { unit1Flashcards } from "./flashcards/unit1.ts";
 import { unit2Flashcards } from "./flashcards/unit2.ts";

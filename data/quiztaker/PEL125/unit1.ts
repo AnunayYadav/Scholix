@@ -1,6 +1,39 @@
 import { QuizQuestion } from "../../../types.ts";
 
-export const pel125Unit1MCQs: QuizQuestion[] = [
+export const unit1Quizzes: QuizQuestion[] = [
+    // Grammar - Tenses
+    { unit: 1, question: "Which tense states facts and habits?", options: ["Simple Present", "Present Continuous", "Past Perfect", "Future Perfect"], correctAnswer: 0, explanation: "Simple present is used for facts and habitual actions." },
+    { unit: 1, question: "Identify the tense: 'She is writing an email.'", options: ["Simple Present", "Simple Past", "Present Continuous", "Past Continuous"], correctAnswer: 2, explanation: "is + V-ing indicates Present Continuous." },
+    { unit: 1, question: "Which is a stative verb?", options: ["Run", "Understand", "Play", "Cook"], correctAnswer: 1, explanation: "'Understand' refers to a state of mind, not a physical action." },
+    { unit: 1, question: "What is wrong: 'He is knowing the truth'?", options: ["Spelling error", "Wrong subject", "Stative verbs do not take -ing", "None"], correctAnswer: 2, explanation: "'Know' is a stative verb and usually doesn't take the continuous form." },
+    { unit: 1, question: "Identify the correct stative verb use:", options: ["I am having a car.", "I have a car.", "I has a car.", "I having a car."], correctAnswer: 1, explanation: "'Have' indicating possession is a state, not an action." },
+    { unit: 1, question: "When do we use Present Perfect?", options: ["Finished past time", "Actions connected to the present", "Future habits", "Past habits"], correctAnswer: 1, explanation: "Present perfect links the past to the present." },
+    { unit: 1, question: "Fill the blank: 'I _____ to Paris twice.'", options: ["have been", "went", "had gone", "go"], correctAnswer: 0, explanation: "Unspecific past time touching the present uses Present Perfect (have been)." },
+    { unit: 1, question: "Identify the tense: 'I finished my homework yesterday.'", options: ["Present Perfect", "Past Perfect", "Simple Past", "Present Continuous"], correctAnswer: 2, explanation: "Specific finished time ('yesterday') requires Simple Past." },
+    { unit: 1, question: "Choose the correct sentence:", options: ["I have seen him yesterday.", "I saw him yesterday.", "I had seen him yesterday.", "I seeing him yesterday."], correctAnswer: 1, explanation: "'Yesterday' requires Simple Past." },
+    { unit: 1, question: "What connects a recent past action to a present result?", options: ["Past Perfect", "Simple Past", "Present Perfect", "Future Simple"], correctAnswer: 2, explanation: "Present Perfect focuses on the present result of a recent action." },
+    { unit: 1, question: "Which tense shows an action going on currently resulting in a state?", options: ["Past Perfect", "Present Perfect Continuous", "Simple Past", "Future Perfect"], correctAnswer: 1, explanation: "Present Perfect Continuous (has been studying) focuses on ongoing duration reaching the present." },
+    { unit: 1, question: "Fill the blank: 'It _____ raining for two hours.'", options: ["has been", "is", "was", "will have"], correctAnswer: 0, explanation: "'for two hours' shows duration reaching present -> Present Perfect Continuous." },
+    { unit: 1, question: "For an action that completed before another past action, we use:", options: ["Simple Past", "Present Perfect", "Past Perfect", "Future Perfect"], correctAnswer: 2, explanation: "Past perfect is the 'past of the past'." },
+    { unit: 1, question: "The train _____ before I reached the station.", options: ["leaves", "had left", "has left", "leaving"], correctAnswer: 1, explanation: "Train leaving happened first -> Past Perfect (had left)." },
+    { unit: 1, question: "I realized I ________ my keys at home.", options: ["had forgotten", "have forgotten", "forgot", "forget"], correctAnswer: 0, explanation: "Forgetting happened before the realizing -> Past Perfect." },
+    { unit: 1, question: "Choose the correct: 'By the time she arrived, we _____ waiting for an hour.'", options: ["were", "have been", "had been", "will be"], correctAnswer: 2, explanation: "Duration (for an hour) before another past point (arrived) -> Past Perfect Continuous." },
+    { unit: 1, question: "Past Perfect Continuous focuses on:", options: ["Future outcome", "Ongoing duration before a past point", "A single past event", "Present result"], correctAnswer: 1, explanation: "It highlights the continuity of an action before a specific past moment." },
+    { unit: 1, question: "Which future form is best for instant decisions?", options: ["Going to", "Present Continuous", "Will", "Past perfect"], correctAnswer: 2, explanation: "'Will' is used for spontaneous, on-the-spot decisions." },
+    { unit: 1, question: "Which future form represents a prediction based on clear evidence?", options: ["Will", "Going to", "Simple Present", "Present Perfect"], correctAnswer: 1, explanation: "We use 'Going to' when we see evidence now (e.g. dark clouds -> going to rain)." },
+    { unit: 1, question: "Fill the blank: 'Look at those clouds! It _____ rain.'", options: ["will", "is going to", "shall", "is to"], correctAnswer: 1, explanation: "Prediction based on evidence (dark clouds)." },
+    { unit: 1, question: "For fixed, confirmed personal arrangements, use:", options: ["Will", "Simple Present", "Present Continuous", "Past Continuous"], correctAnswer: 2, explanation: "Present Continuous (I am meeting John) is for fixed arrangements." },
+    { unit: 1, question: "Fill the blank: 'I _____ tomorrow at 8 PM, I have the tickets.'", options: ["fly", "will fly", "am flying", "shall fly"], correctAnswer: 2, explanation: "Having tickets means it's a confirmed arrangement -> Present Continuous." },
+    { unit: 1, question: "What tense shows an action completed by a certain future time?", options: ["Future Continuous", "Future Perfect", "Future Simple", "Present Perfect"], correctAnswer: 1, explanation: "'Will have done' shows it will be complete by a future point." },
+    { unit: 1, question: "Fill the blank: 'By next year, I _____ graduated.'", options: ["will be", "will have", "have", "am"], correctAnswer: 1, explanation: "'By next year' triggers Future Perfect (will have)." },
+    { unit: 1, question: "What tense focuses on duration leading up to a future point?", options: ["Future Perfect Continuous", "Future Perfect", "Future Continuous", "Simple Future"], correctAnswer: 0, explanation: "'Will have been studying' shows the continuous duration up to the future." },
+    { unit: 1, question: "Fill the blank: 'By 5 PM, I _____ studying for three hours.'", options: ["will have been", "will be", "am", "have"], correctAnswer: 0, explanation: "'By 5 PM' + duration 'for three hours' -> Future Perfect Continuous." },
+    { unit: 1, question: "What structure expresses official arrangements or orders?", options: ["Going to", "Will", "Be to + Infinitive", "Present Perfect"], correctAnswer: 2, explanation: "'The President is to visit...' shows a formal, official schedule." },
+    { unit: 1, question: "Fill the blank: 'You _____ report to the principal immediately.'", options: ["were to", "are to", "will have to", "going to"], correctAnswer: 1, explanation: "Formal instruction or command -> 'are to'." },
+    { unit: 1, question: "The Simple Present indicates future time ONLY when:", options: ["making a promise", "referring to a scheduled timetable event", "threatening someone", "predicting weather"], correctAnswer: 1, explanation: "'The train leaves at 5' is a fixed timetable." },
+    { unit: 1, question: "Which sentence is grammatically INCORRECT?", options: ["I will call you.", "The sun is rising in the east.", "He usually arrives late.", "Listen! She is singing."], correctAnswer: 1, explanation: "Universal facts must use Simple Present: 'The sun rises in the east'." },
+
+    // Communication Basics
     {
         unit: 1,
         question: "What is the primary purpose of 'Communication'?",
