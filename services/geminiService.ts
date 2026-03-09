@@ -31,7 +31,7 @@ const getGenAIClient = () => {
 /**
  * Internal helper to communicate directly with Gemini from the frontend
  */
-const callGeminiProxy = async (action: string, payload: any, retries = 5, delay = 3000) => {
+const callGeminiProxy = async (action: string, payload: any, retries = 2, delay = 2000) => {
   // 1. Queue management (Semaphore)
   if (isProcessingRequest) {
     await new Promise<void>(resolve => requestQueue.push(resolve));
@@ -56,7 +56,7 @@ const callGeminiProxy = async (action: string, payload: any, retries = 5, delay 
         switch (action) {
           case "ANALYZE_RESUME": {
             const response = await ai.models.generateContent({
-              model: payload.deep ? "gemini-1.5-pro" : "gemini-2.0-flash",
+              model: "gemini-3.1-flash-lite",
               contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
               config: {
                 responseMimeType: "application/json",
@@ -70,7 +70,7 @@ const callGeminiProxy = async (action: string, payload: any, retries = 5, delay 
 
           case "GENERATE_QUIZ": {
             const response = await ai.models.generateContent({
-              model: "gemini-2.0-flash",
+              model: "gemini-3.1-flash-lite",
               contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
               config: {
                 responseMimeType: "application/json",
@@ -84,7 +84,7 @@ const callGeminiProxy = async (action: string, payload: any, retries = 5, delay 
 
           case "EXTRACT_TIMETABLE": {
             const response = await ai.models.generateContent({
-              model: "gemini-2.0-flash",
+              model: "gemini-3.1-flash-lite",
               contents: [{
                 role: 'user',
                 parts: [
@@ -104,7 +104,7 @@ const callGeminiProxy = async (action: string, payload: any, retries = 5, delay 
 
           case "GENERATE_SUBJECT_ORIGINALS": {
             const response = await ai.models.generateContent({
-              model: "gemini-1.5-pro",
+              model: "gemini-3.1-flash-lite",
               contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
               config: {
                 responseMimeType: "application/json",
@@ -133,8 +133,8 @@ const callGeminiProxy = async (action: string, payload: any, retries = 5, delay 
           e.code === 429;
 
         if (isRateLimit && i < retries) {
-          const multiplier = 2.5;
-          const jitter = Math.random() * 2000;
+          const multiplier = 2;
+          const jitter = Math.random() * 1000;
           const backoff = (delay * Math.pow(multiplier, i)) + jitter;
           await new Promise(resolve => setTimeout(resolve, backoff));
           continue;
