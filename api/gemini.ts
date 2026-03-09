@@ -34,7 +34,7 @@ export default async function handler(req: any, res: any) {
     switch (action) {
       case "ANALYZE_RESUME": {
         const response = await ai.models.generateContent({
-          model: payload.deep ? "gemini-1.5-pro" : "gemini-2.0-flash",
+          model: "gemini-3.1-flash-lite-preview",
           contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
           config: {
             responseMimeType: "application/json",
@@ -48,7 +48,7 @@ export default async function handler(req: any, res: any) {
 
       case "GENERATE_QUIZ": {
         const response = await ai.models.generateContent({
-          model: "gemini-2.0-flash",
+          model: "gemini-3.1-flash-lite-preview",
           contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
           config: {
             responseMimeType: "application/json",
@@ -62,7 +62,7 @@ export default async function handler(req: any, res: any) {
 
       case "EXTRACT_TIMETABLE": {
         const response = await ai.models.generateContent({
-          model: "gemini-2.0-flash",
+          model: "gemini-3.1-flash-lite-preview",
           contents: [{
             role: 'user',
             parts: [
@@ -82,7 +82,7 @@ export default async function handler(req: any, res: any) {
 
       case "GENERATE_SUBJECT_ORIGINALS": {
         const response = await ai.models.generateContent({
-          model: "gemini-1.5-pro",
+          model: "gemini-3.1-flash-lite-preview",
           contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
           config: {
             responseMimeType: "application/json",
