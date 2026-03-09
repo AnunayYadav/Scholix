@@ -56,7 +56,10 @@ const callGeminiProxy = async (action: string, payload: any, retries = 2, delay 
           const errMsg = errData.rawError ? `API REJECTED: ${errData.rawError}` : (errData.error || "Too many requests. Please wait.");
           throw new Error(errMsg);
         }
-        if (res.status >= 500) throw new Error("AI Service temporary overload. Try again later.");
+        if (res.status >= 500) {
+          const errMsg = errData.rawError || errData.details || errData.error || "AI Service temporary overload. Try again later.";
+          throw new Error(`SERVER ERROR: ${errMsg}`);
+        }
         throw new Error(errData.error || `Error ${res.status}`);
       } catch (e: any) {
         if (i === retries) throw e;

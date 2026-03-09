@@ -128,7 +128,8 @@ export default async function handler(req: any, res: any) {
     if (errorMsg.includes("500") || errorMsg.includes("503") || errorMsg.toLowerCase().includes("overloaded")) {
       return res.status(503).json({
         error: "AI Engine Overloaded: Google's servers are temporarily unable to process this request. Please try again shortly.",
-        type: "SERVER_OVERLOAD"
+        type: "SERVER_OVERLOAD",
+        rawError: errorMsg
       });
     }
 
