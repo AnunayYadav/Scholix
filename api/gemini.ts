@@ -119,7 +119,8 @@ export default async function handler(req: any, res: any) {
       return res.status(429).json({
         error: "Google Gemini Quota Exhausted: The system is under heavy load or the free-tier limit has been reached. Please try again in 60 seconds.",
         type: "RATE_LIMIT",
-        source: "google_ai_sdk"
+        source: "google_ai_sdk",
+        rawError: errorMsg
       });
     }
 
