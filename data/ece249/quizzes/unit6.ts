@@ -1,34 +1,124 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const unit6Quizzes: QuizQuestion[] = [
-    { unit: 6, question: "A basic N-bit register is composed of how many flip-flops?", options: ["1", "N", "2N", "N^2"], correctAnswer: 1, explanation: "One flip-flop is required per bit of data." },
-    { unit: 6, question: "What memory element is most commonly used inside a shift register?", options: ["SR Latch", "D Flip-Flop", "T Flip-Flop", "JK Latch"], correctAnswer: 1, explanation: "D flip-flops delay data by exactly one clock cycle, perfect for shifting operations." },
-    { unit: 6, question: "Which shift register type takes data in serially (one bit at a time) and brings it out serially?", options: ["SIPO", "PISO", "PIPO", "SISO"], correctAnswer: 3, explanation: "Serial In, Serial Out." },
-    { unit: 6, question: "How many clock pulses are needed to load 8 bits of data completely into an 8-bit SISO shift register?", options: ["1", "2", "8", "64"], correctAnswer: 2, explanation: "One clock pulse pushes one bit into the first flip-flop." },
-    { unit: 6, question: "How many ADDITIONAL clock pulses are needed to completely read out all 8 bits from a fully loaded 8-bit SISO register?", options: ["0", "1", "7", "8"], correctAnswer: 3, explanation: "The bits must travel one by one out of the last output pin." },
-    { unit: 6, question: "To convert a Serial data stream into a Parallel data format, which register is used?", options: ["SISO", "SIPO", "PISO", "PIPO"], correctAnswer: 1, explanation: "Serial In, Parallel Out. Useful for converting USB data to an internal CPU bus." },
-    { unit: 6, question: "How many clock pulses does an 8-bit PIPO (Parallel-in, Parallel-out) register need to completely load 8 bits?", options: ["1", "2", "4", "8"], correctAnswer: 0, explanation: "All bits are loaded into their respective flip-flops simultaneously on the exact same clock edge." },
-    { unit: 6, question: "Which shift register is commonly used to convert data from an 8-bit parallel CPU bus into a single serial line for transmission over a wire?", options: ["SIPO", "PISO", "SISO", "PIPO"], correctAnswer: 1, explanation: "Parallel In, Serial Out." },
-    { unit: 6, question: "A sequential circuit designed purely to cycle through a predetermined sequence of binary states is called a:", options: ["Multiplexer", "Encoder", "Register", "Counter"], correctAnswer: 3, explanation: "They essentially 'count' the number of clock pulses received." },
-    { unit: 6, question: "In an Asynchronous counter (Ripple Counter), what acts as the 'clock' for the second and subsequent flip-flops?", options: ["The main master clock", "A 555 timer chip", "The output (`Q` or `Q'`) of the previous flip-flop", "An external sensor"], correctAnswer: 2, explanation: "The signal effectively 'ripples' down the chain of flip-flops." },
-    { unit: 6, question: "What is a major disadvantage of an Asynchronous (Ripple) counter when dealing with high-frequency clocks?", options: ["Very complex wiring", "Propagation delay accumulates and limits speed", "It cannot count downwards", "It uses too much power"], correctAnswer: 1, explanation: "The total delay is the delay of one flip-flop multiplied by the number of flip-flops." },
-    { unit: 6, question: "How does a Synchronous counter solve the propagation delay issue of ripple counters?", options: ["It uses faster silicon gates", "All flip-flops receive the EXACT same master clock signal simultaneously", "It removes the clock entirely", "It connects all flip-flops in parallel with no combined logic"], correctAnswer: 1, explanation: "All flip-flops transition precisely together." },
-    { unit: 6, question: "A 4-bit standard binary counter has a maximum count sequence from `0000` to:", options: ["1000", "0111", "1111", "0000"], correctAnswer: 2, explanation: "Which represents the decimal bounds 0 through 15 (16 total states)." },
-    { unit: 6, question: "A Modulo-N (Mod-N) counter is a counter that:", options: ["Requires N flip-flops", "Has exactly N stable counting states before resetting to 0", "Can only count upwards", "Needs N clock pulses to change a single bit"], correctAnswer: 1, explanation: "For example, a Mod-10 counter counts from 0 to 9." },
-    { unit: 6, question: "To design a Mod-10 counter using an Asynchronous ripple counter, which logic gate is primarily used to detect the '10' (`1010`) state and trigger a reset to `0000`?", options: ["NOR gate", "XOR gate", "Inverter", "AND / NAND gate"], correctAnswer: 3, explanation: "When the outputs representing 8 and 2 both go HIGH simultaneously, the gate forcefully invokes the preset/clear pins on the flip-flops." },
-    { unit: 6, question: "How many minimum flip-flops are needed to construct a Mod-5 counter?", options: ["2", "3", "4", "5"], correctAnswer: 1, explanation: "Because 2 flip-flops max at 4 states (not enough), 3 max at 8 states (enough to cover 5)." },
-    { unit: 6, question: "How many minimum flip-flops are necessary to build a Mod-16 counter?", options: ["3", "4", "8", "16"], correctAnswer: 1, explanation: "Because `2^4 = 16`. A standard 4-bit ripple counter is inherently a Mod-16 counter." },
-    { unit: 6, question: "A dual UP/DOWN Mod-N counter contains an extra control pin. If the mode pin is `H` for UP and `L` for DOWN, what controls the direction transition between states?", options: ["Combinational logic gates routing the `Q` or `Q'` outputs to the next clocks", "Reversing the power supply", "Disconnecting flip-flops", "Using different clocks"], correctAnswer: 0, explanation: "Depending on the mode, the next clock is triggered by either the true or complementary output of the previous stage." },
-    { unit: 6, question: "In a 'Ring Counter', how is the feedback connected to create the loop?", options: ["The `Q` output of the last flip-flop feeds into the `D` input of the first flip-flop", "The `Q'` output of the last feeds into the `D` input of the first", "All outputs feed into an OR gate", "The first output feeds into the last input"], correctAnswer: 0, explanation: "It circulates a distinct pattern (typically a single `1`) forever." },
-    { unit: 6, question: "A 4-bit Ring Counter initialized with `1000` will have how many distinct counting states before returning to `1000`?", options: ["4", "8", "15", "16"], correctAnswer: 0, explanation: "Unlike a standard 4-bit counter (16 states), an N-bit Ring counter has exactly N states." },
-    { unit: 6, question: "The sequence generated by a 4-bit Ring counter starting at `1000` is:", options: ["1000 -> 1100 -> 1110 -> 1111", "0000 -> 0001 -> 0010 -> 0011", "1000 -> 0100 -> 0010 -> 0001", "1000 -> 0011 -> 0110 -> 1100"], correctAnswer: 2, explanation: "The `1` linearly shifts through the register over and over." },
-    { unit: 6, question: "In a 'Johnson Ring Counter' (or Twisted Ring Counter), how is the feedback connected?", options: ["The true `Q` output of the last flip-flop feeds into the first", "The complete opposite: all inputs are grounded", "The inverted `Q'` output of the last flip-flop feeds directly into the `D` input of the first.", "It has no feedback"], correctAnswer: 2, explanation: "This 'twist' creates a more complex counting sequence." },
-    { unit: 6, question: "A 4-bit Johnson Ring counter will cycle through how many distinct valid states?", options: ["4", "8", "15", "16"], correctAnswer: 1, explanation: "An N-bit Johnson counter always has `2N` distinct states." },
-    { unit: 6, question: "What is the sequence of states for a 3-bit Johnson Ring Counter starting at `000`?", options: ["100 -> 010 -> 001 -> 100", "000 -> 100 -> 110 -> 111 -> 011 -> 001 -> 000", "000 -> 001 -> 010 -> 011", "000 -> 111 -> 000"], correctAnswer: 1, explanation: "It shifts the inverted value of the last bit repeatedly. Here 3 bits * 2 = 6 states." },
-    { unit: 6, question: "Which flip-flops are universally used to build ripple counters by tying specific inputs HIGH permanently?", options: ["D and SR", "T and JK where J=K=1", "Any flip-flop with no clock", "Latches"], correctAnswer: 1, explanation: "T and JK flip-flops set to toggle mode will continuously halve the frequency they receive from the previous stage." },
-    { unit: 6, question: "A single T flip-flop configured to toggle acts as a 'Divide by ____' frequency divider.", options: ["1", "2", "4", "10"], correctAnswer: 1, explanation: "It takes two clock pulses (two rising edges) to create one complete output cycle (rising and falling edge)." },
-    { unit: 6, question: "You have an input clock of 100 kHz. You pass it through three T flip-flops connected as a ripple counter. What is the frequency at the final output?", options: ["100 kHz", "50 kHz", "25 kHz", "12.5 kHz"], correctAnswer: 3, explanation: "First divides by 2 (50), second by 2 (25), third by 2 (12.5)." },
-    { unit: 6, question: "A synchronous decade counter (Mod-10 counter) is designed to jump from state `1001` (binary 9) directly to state `0000` (binary 0) unconditionally on the next clock pulse.", options: ["True", "False", "Only if there's no clock", "Only when asynchronous"], correctAnswer: 0, explanation: "The combinational logic explicitly forces this transition, avoiding state 10 entirely." },
-    { unit: 6, question: "In a sequential circuit diagram, a clock input shaped as a triangle `>` indicates:", options: ["It is an active-low Level Triggered latch", "It is simply an enable pin", "It requires a full square wave to function", "It is a Positive Edge-Triggered flip-flop"], correctAnswer: 3, explanation: "The triangle explicitly marks Edge Triggering." },
-    { unit: 6, question: "Adding a small circle (`o`) before the clock triangle input (`o>`) indicates:", options: ["It uses negative logic exclusively", "It is Level Triggered", "It doesn't use a clock", "It is a Negative Edge-Triggered flip-flop"], correctAnswer: 3, explanation: "It only responds precisely when the clock transitions from HIGH down to LOW." }
+    {
+        unit: 6,
+        question: "What is the physical structure of an n-bit register?",
+        options: [
+            "A sequential logic gate composed of n independent NAND gates",
+            "A discrete combinational multiplexer outputting n digital signals",
+            "Exactly n independent interconnected latches arranged logically",
+            "A structured group of n individual edge-triggered flip-flops"
+        ],
+        correctAnswer: 3,
+        explanation: "Every register is structurally composed of flip-flops. Each flip-flop stores precisely one distinct binary bit."
+    },
+    {
+        unit: 6,
+        question: "What primary operation specifically defines a Shift Register?",
+        options: [
+            "Storing data permanently",
+            "Shifting data bit-by-bit from one flip-flop to the next synchronously",
+            "Converting analog signals to digital",
+            "Adding binary numbers together directly"
+        ],
+        correctAnswer: 1,
+        explanation: "A shift register explicitly moves (shifts) stored binary data laterally from one internal flip-flop directly into the adjacent one exactly at each active clock pulse."
+    },
+    {
+        unit: 6,
+        question: "In a definitive Right Shift operation, what is the precise direction of data movement?",
+        options: [
+            "From LSB (right) to MSB (left)",
+            "From MSB (left) to LSB (right)",
+            "Data swaps between odd and even positions",
+            "Data outputs in parallel simultaneously"
+        ],
+        correctAnswer: 1,
+        explanation: "During a Right Shift operation, binary data moves explicitly from left to right (from the Most Significant Bit precisely down toward the Least Significant Bit direction)."
+    },
+    {
+        unit: 6,
+        question: "What does the abbreviation SISO precisely stand for regarding shift registers?",
+        options: [
+            "Simultaneous In Sequential Out",
+            "Synchronous Input Serial Output",
+            "Serial In Serial Out",
+            "Static In Static Out"
+        ],
+        correctAnswer: 2,
+        explanation: "SISO stands for Serial In Serial Out, meaning binary data enters the register precisely one bit at a time and identically exits one bit at a time sequentially."
+    },
+    {
+        unit: 6,
+        question: "Why is the SISO shift register considered structurally the slowest classification?",
+        options: [
+            "It solely operates using significantly slower latch components",
+            "It requires exactly n explicit clock pulses to merely load n bits, and another n pulses systematically to logically read them all",
+            "It possesses excessive internal capacitance physically limiting maximum frequency",
+            "It uses complex decoding logic mathematically delaying processing identically"
+        ],
+        correctAnswer: 1,
+        explanation: "Because the SISO architecture is strictly fully serial, it mandatorily requires n discrete clock pulses continuously fully sequentially to load the entire specific binary word, and an additional necessary n clock pulses linearly to completely logically shift it completely out."
+    },
+    {
+        unit: 6,
+        question: "Which specific type of shift register configuration serves uniquely as a 'Serial-to-Parallel' electronic converter?",
+        options: [
+            "SISO",
+            "PISO",
+            "PIPO",
+            "SIPO"
+        ],
+        correctAnswer: 3,
+        explanation: "A SIPO (Serial In Parallel Out) shift register accepts input bits serially, then effectively makes the complete stored binary word available completely in parallel exactly logically at the outputs."
+    },
+    {
+        unit: 6,
+        question: "How many actual clock pulses are technically required logically to completely load an n-bit PISO or PIPO parallel shift register?",
+        options: [
+            "1",
+            "n-1",
+            "n",
+            "2n"
+        ],
+        correctAnswer: 0,
+        explanation: "Since structurally data is mathematically cleanly entered in parallel simultaneously, it requires exactly 1 logic clock pulse."
+    },
+    {
+        unit: 6,
+        question: "What defines an Asynchronous (Ripple) counter?",
+        options: [
+            "All flip-flops receive the clock signal simultaneously",
+            "It does not require flip-flops",
+            "Flip-flops are triggered by the output of the previous flip-flop",
+            "It cannot count downwards"
+        ],
+        correctAnswer: 2,
+        explanation: "In an asynchronous counter, only the first flip-flop receives the external clock. Subsequent flip-flops are clocked by the output of the preceding one."
+    },
+    {
+        unit: 6,
+        question: "What is a major disadvantage of asynchronous counters compared to synchronous counters?",
+        options: [
+            "They are more complex to design",
+            "They consume significantly more power",
+            "Propagation delay accumulates, limiting maximum frequency",
+            "They require more flip-flops for the same modulus"
+        ],
+        correctAnswer: 2,
+        explanation: "Because clock signals ripple through each stage sequentially, the propagation delays add up, which can cause reading glitches and limits operational frequency."
+    },
+    {
+        unit: 6,
+        question: "How many state combinations (modulus) does an n-bit Ring Counter have?",
+        options: [
+            "2^n",
+            "n",
+            "2n",
+            "2^{n-1}"
+        ],
+        correctAnswer: 1,
+        explanation: "A ring counter circulates a single 1 through its flip-flops, so an n-bit ring counter features exactly n unique states."
+    }
 ];

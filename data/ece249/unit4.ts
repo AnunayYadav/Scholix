@@ -1,41 +1,44 @@
-export const unit4Title = "Unit 4: Introduction to Combinational Logic Circuits";
+export const unit4Title = "Unit 4: Combinational Logic Circuits";
 
-export const unit4Body = `# Introduction to Combinational Logic Circuits
-
-## Table of Contents
-- [Combinational vs Sequential Circuits](#combinational-vs-sequential-circuits)
-- [Adders](#adders)
-- [Subtractors](#subtractors)
-- [Multiplexers](#multiplexers)
-- [Demultiplexers](#demultiplexers)
-- [Decoders](#decoders)
-- [Encoders](#encoders)
-- [Comparators](#comparators)
-- [Practice Questions](#practice-questions)
-
----
+export const unit4Body = `# Unit 4: Combinational Logic Circuits
 
 ## Combinational vs Sequential Circuits
 
-* **Definition:** A combinational circuit is a digital circuit whose output depends only on the present combination of inputs and not on previous inputs or states. It has no memory or feedback.
+**Definition**
 
-| Feature | Combinational Circuit | Sequential Circuit |
-|---------|----------------------|-------------------|
-| Memory | No | Yes (uses flip-flops) |
-| Output depends on | Present inputs only | Present inputs + past states |
-| Feedback | No | Yes |
-| Clock | Not required | Required |
-| Examples | Adder, MUX, Decoder | Counter, Register, Flip-flop |
+Digital circuits are divided into two main categories: Combinational and Sequential. 
 
----
+- **Combinational Circuit:** A circuit where the output depends **only** on the present inputs. It has no memory.
+- **Sequential Circuit:** A circuit where the output depends on both present inputs and past states. It has memory (like flip-flops).
+
+**Explanation**
+
+Think of a combinational circuit like a traditional calculator. If you press $5+5$, it immediately shows $10$. It doesn't remember what you did yesterday. A sequential circuit is like a combination lock on a safe. It only opens if you remember the previous numbers you entered in the correct order.
+
+| Feature | Combinational | Sequential |
+|---------|---------------|------------|
+| Memory | No | Yes |
+| Output depends on | Present inputs | Present inputs + Past states |
+| Clock Signal | Not needed | Needed |
+| Example | Adders, Multiplexers | Counters, Flip-flops |
 
 ## Adders
 
+**Definition**
+
+Adders are combinational circuits used to add binary numbers. They are the core of the Arithmetic Logic Unit (ALU) in computers.
+
 ### Half Adder
 
-* **Definition:** A half adder is a combinational circuit that adds two single-bit binary numbers and produces a **Sum** and a **Carry** output. It does not account for any carry input from a previous stage.
+**Definition**
 
-**Truth Table:**
+A half adder adds two 1-bit binary numbers ($A$ and $B$) and produces two outputs: Sum ($S$) and Carry ($C$).
+
+**Explanation**
+
+It is called "half" because it cannot accept a carry input from a previous addition stage. 
+
+**Truth Table**
 
 | A | B | Sum (S) | Carry (C) |
 |---|---|---------|-----------|
@@ -44,287 +47,308 @@ export const unit4Body = `# Introduction to Combinational Logic Circuits
 | 1 | 0 | 1 | 0 |
 | 1 | 1 | 0 | 1 |
 
-* **Formula:** Sum: $S = A \\oplus B$ (XOR gate)
+**Formula**
 
-* **Formula:** Carry: $C = A \\cdot B$ (AND gate)
+$$
+S = A \\oplus B
+$$
+$$
+C = A \\cdot B
+$$
 
-* **Explanation:** The half adder uses one XOR gate for the Sum and one AND gate for the Carry. It is called "half" because it cannot handle carry input from a previous addition.
+**Exam Tip**
+
+A half adder is built using exactly one XOR gate (for Sum) and one AND gate (for Carry).
 
 ### Full Adder
 
-* **Definition:** A full adder is a combinational circuit that adds three single-bit binary numbers — two significant bits ($A$, $B$) and a carry input ($C_{in}$) from a previous stage — and produces a Sum ($S$) and Carry Output ($C_{out}$).
+**Definition**
 
-**Truth Table:**
+A full adder adds three 1-bit binary numbers: two data bits ($A$, $B$) and one carry-in bit ($C_{in}$) from a previous stage. It produces a Sum ($S$) and a Carry-out ($C_{out}$).
+
+**Explanation**
+
+A full adder can be built by connecting two half adders and an OR gate.
+
+**Truth Table**
 
 | A | B | $C_{in}$ | Sum (S) | $C_{out}$ |
 |---|---|----------|---------|-----------|
 | 0 | 0 | 0 | 0 | 0 |
-| 0 | 0 | 1 | 1 | 0 |
-| 0 | 1 | 0 | 1 | 0 |
 | 0 | 1 | 1 | 0 | 1 |
-| 1 | 0 | 0 | 1 | 0 |
 | 1 | 0 | 1 | 0 | 1 |
 | 1 | 1 | 0 | 0 | 1 |
 | 1 | 1 | 1 | 1 | 1 |
 
-* **Formula:** Sum: $S = A \\oplus B \\oplus C_{in}$
+*(Note: Shows only few key rows for simplicity, but know that 1+1+1 = Sum 1, Carry 1).*
 
-* **Formula:** Carry: $C_{out} = AB + BC_{in} + AC_{in}$ or equivalently $C_{out} = AB + C_{in}(A \\oplus B)$
+**Formula**
 
-* **Explanation:** A full adder can be built using two half adders and one OR gate. The first half adder computes $A \\oplus B$, the second adds $C_{in}$, and the OR gate combines the carry outputs.
+$$
+S = A \\oplus B \\oplus C_{in}
+$$
+$$
+C_{out} = AB + BC_{in} + AC_{in}
+$$
 
 ### n-bit Ripple Carry Adder
-- Cascading $n$ full adders to add two $n$-bit numbers
-- The carry output of each stage connects to the carry input of the next stage
-- **Limitation:** Carry must "ripple" through all stages, causing propagation delay
 
----
+**Definition**
+
+To add large numbers (like 4-bit or 8-bit numbers), we cascade (connect) multiple full adders in a chain, where the $C_{out}$ of one adder connects to the $C_{in}$ of the next.
 
 ## Subtractors
 
+**Definition**
+
+Subtractors are combinational circuits that perform the subtraction of binary numbers.
+
 ### Half Subtractor
 
-* **Definition:** A half subtractor is a combinational circuit that subtracts one single-bit binary number (B) from another (A) and produces a **Difference** and a **Borrow** output.
+**Definition**
 
-**Truth Table:**
+A half subtractor subtracts one bit ($B$) from another bit ($A$) and produces two outputs: Difference ($D$) and Borrow ($B_{out}$).
 
-| A | B | Difference (D) | Borrow (Bo) |
-|---|---|----------------|-------------|
+**Truth Table**
+
+| A | B | Difference (D) | Borrow ($B_{out}$) |
+|---|---|----------------|--------------------|
 | 0 | 0 | 0 | 0 |
 | 0 | 1 | 1 | 1 |
 | 1 | 0 | 1 | 0 |
 | 1 | 1 | 0 | 0 |
 
-* **Formula:** Difference: $D = A \\oplus B$
+**Formula**
 
-* **Formula:** Borrow: $Bo = \\overline{A} \\cdot B$
+$$
+D = A \\oplus B
+$$
+$$
+B_{out} = \\overline{A} \\cdot B
+$$
+
+**Exam Tip**
+
+The Difference formula is exactly the same as the Sum formula in an adder (XOR). Only the Carry/Borrow formula changes.
 
 ### Full Subtractor
 
-* **Definition:** A full subtractor subtracts two bits with a borrow input from a previous stage and produces a Difference and Borrow output.
+**Definition**
 
-**Truth Table:**
+A full subtractor subtracts two bits and a borrow-in ($B_{in}$) from a previous stage.
 
-| A | B | $B_{in}$ | D | $B_{out}$ |
-|---|---|----------|---|-----------|
-| 0 | 0 | 0 | 0 | 0 |
-| 0 | 0 | 1 | 1 | 1 |
-| 0 | 1 | 0 | 1 | 1 |
-| 0 | 1 | 1 | 0 | 1 |
-| 1 | 0 | 0 | 1 | 0 |
-| 1 | 0 | 1 | 0 | 0 |
-| 1 | 1 | 0 | 0 | 0 |
-| 1 | 1 | 1 | 1 | 1 |
+**Formula**
 
-* **Formula:** Difference: $D = A \\oplus B \\oplus B_{in}$
-
-* **Formula:** Borrow: $B_{out} = \\overline{A}B + \\overline{A}B_{in} + BB_{in}$ or $B_{out} = \\overline{A}B + B_{in}(\\overline{A \\oplus B})$
-
----
+$$
+D = A \\oplus B \\oplus B_{in}
+$$
+$$
+B_{out} = \\overline{A}B + \\overline{A}B_{in} + B B_{in}
+$$
 
 ## Multiplexers
 
-* **Definition:** A Multiplexer (MUX) is a combinational circuit that selects one of $2^n$ input data lines and routes it to a single output line based on $n$ selection (control) lines. It is also called a **data selector**.
+**Definition**
+
+A Multiplexer (MUX) is a data selector. It takes many inputs but only allows one input to pass through to the single output line. 
+
+**Explanation**
+
+Think of a TV. The TV receives hundreds of channels (inputs) from the cable, but you use the remote control (select lines) to choose exactly one channel (output) to watch on the screen.
+
+- If there are $n$ select lines, there can be $2^n$ input lines.
 
 ### 2:1 Multiplexer
-- Inputs: $I_0$, $I_1$; Select line: $S$; Output: $Y$
 
-* **Formula:** $Y = \\overline{S} \\cdot I_0 + S \\cdot I_1$
+**Definition**
 
-| S | Y |
-|---|---|
-| 0 | $I_0$ |
-| 1 | $I_1$ |
+Has 2 inputs ($I_0, I_1$), 1 select line ($S$), and 1 output ($Y$).
+
+**Formula**
+
+$$
+Y = \\overline{S} \\cdot I_0 + S \\cdot I_1
+$$
+
+**Explanation**
+
+If $S=0$, $Y$ equals $I_0$. If $S=1$, $Y$ equals $I_1$.
 
 ### 4:1 Multiplexer
-- Inputs: $I_0, I_1, I_2, I_3$; Select lines: $S_1, S_0$; Output: $Y$
 
-* **Formula:** $Y = \\overline{S_1}\\overline{S_0} \\cdot I_0 + \\overline{S_1}S_0 \\cdot I_1 + S_1\\overline{S_0} \\cdot I_2 + S_1 S_0 \\cdot I_3$
+**Definition**
 
-| $S_1$ | $S_0$ | Y |
-|-------|-------|---|
-| 0 | 0 | $I_0$ |
-| 0 | 1 | $I_1$ |
-| 1 | 0 | $I_2$ |
-| 1 | 1 | $I_3$ |
+Has 4 inputs ($I_0, I_1, I_2, I_3$), 2 select lines ($S_1, S_0$), and 1 output ($Y$).
 
-### 8:1 Multiplexer
-- 8 data inputs, 3 select lines, 1 output
-- $Y = \\sum_{i=0}^{7} m_i \\cdot I_i$ where $m_i$ are minterms of select lines
+**Formula**
 
-> A $2^n$-to-1 MUX can implement any Boolean function of $n$ variables directly.
+$$
+Y = \\overline{S_1} \\overline{S_0} I_0 + \\overline{S_1} S_0 I_1 + S_1 \\overline{S_0} I_2 + S_1 S_0 I_3
+$$
 
-### Applications
-- Data routing and selection
-- Parallel-to-serial data conversion
-- Boolean function implementation
-- Communication systems
+### Common Mistakes
 
----
+- Confusing $S_1$ and $S_0$. Ensure the MSB is $S_1$ and LSB is $S_0$ when looking at the truth table.
 
 ## Demultiplexers
 
-* **Definition:** A Demultiplexer (DEMUX) is a combinational circuit that takes a single input and distributes it to one of $2^n$ output lines based on $n$ selection lines. It is the reverse of a multiplexer, also called a **data distributor**.
+**Definition**
+
+A Demultiplexer (DEMUX) does the exact opposite of a MUX. It takes a single input line and routes it to one of many output lines, controlled by select pins.
+
+**Explanation**
+
+Think of a mail sorter. One pile of mail comes in (input), and the sorter looks at the zip code (select lines) to put each letter into one of many specific city boxes (outputs).
 
 ### 1:4 Demultiplexer
-- Input: $D$; Select lines: $S_1, S_0$; Outputs: $Y_0, Y_1, Y_2, Y_3$
 
-* **Formula:** $Y_0 = \\overline{S_1}\\overline{S_0} \\cdot D$
-* **Formula:** $Y_1 = \\overline{S_1}S_0 \\cdot D$
-* **Formula:** $Y_2 = S_1\\overline{S_0} \\cdot D$
-* **Formula:** $Y_3 = S_1 S_0 \\cdot D$
+**Definition**
 
-| $S_1$ | $S_0$ | Selected Output |
-|-------|-------|----------------|
-| 0 | 0 | $Y_0 = D$ |
-| 0 | 1 | $Y_1 = D$ |
-| 1 | 0 | $Y_2 = D$ |
-| 1 | 1 | $Y_3 = D$ |
+Has 1 data input ($D$), 2 select lines ($S_1, S_0$), and 4 outputs ($Y_0, Y_1, Y_2, Y_3$).
 
-### Applications
-- Data distribution
-- Serial-to-parallel data conversion
-- Address decoding in memory systems
+**Formula**
 
----
+$$
+Y_0 = \\overline{S_1} \\overline{S_0} D
+$$
+$$
+Y_3 = S_1 S_0 D
+$$
+
+*(Only the selected output gets the data $D$. The rest of the outputs are forced to 0).*
 
 ## Decoders
 
-* **Definition:** A Decoder is a combinational circuit that converts an $n$-bit binary input code into $2^n$ unique output lines, of which only one is activated (HIGH) at a time.
+**Definition**
+
+A decoder translates an $n$-bit binary code into $2^n$ separate output lines. Only **one** output line is HIGH at a time, based on the binary input value.
+
+**Explanation**
+
+Think of an elevator panel. The computer inside knows you are on floor binary "10" (which is Decimal 2). It activates only the single light behind the button "Floor 2".
 
 ### 2-to-4 Decoder
-- Inputs: $A_1, A_0$; Outputs: $D_0, D_1, D_2, D_3$
 
-* **Formula:** $D_0 = \\overline{A_1}\\overline{A_0}$, $D_1 = \\overline{A_1}A_0$, $D_2 = A_1\\overline{A_0}$, $D_3 = A_1 A_0$
+**Definition**
 
-| $A_1$ | $A_0$ | $D_0$ | $D_1$ | $D_2$ | $D_3$ |
-|-------|-------|-------|-------|-------|-------|
-| 0 | 0 | 1 | 0 | 0 | 0 |
-| 0 | 1 | 0 | 1 | 0 | 0 |
-| 1 | 0 | 0 | 0 | 1 | 0 |
-| 1 | 1 | 0 | 0 | 0 | 1 |
+Takes 2 input lines ($A_1, A_0$) and produces 4 output lines ($D_0, D_1, D_2, D_3$).
 
-### 3-to-8 Decoder
-- Inputs: $A_2, A_1, A_0$; Outputs: $D_0$ to $D_7$
-- Each output represents one minterm of the input variables
-- Used for memory address decoding
+**Formula**
 
-### Enable Input
-- Most decoders have an **Enable (E)** input
-- When $E = 0$, all outputs are forced to 0 (inactive)
-- Enables cascading of smaller decoders to build larger ones
+$$
+D_2 = A_1 \\overline{A_0}
+$$
 
-### Applications
-- Memory address decoding
-- Instruction decoding in CPUs
-- Data demultiplexing
-- Seven-segment display drivers
-- Minterm generation for Boolean functions
+*(If input is 10, then $D_2$ is HIGH, everything else is LOW).*
 
----
+**Exam Tip**
+
+Decoders are identical to Demultiplexers mathematically! A 1:4 DEMUX is basically a 2-to-4 Decoder where the DEMUX input $D$ acts as an "Enable" pin for the Decoder.
 
 ## Encoders
 
-* **Definition:** An Encoder is a combinational circuit that performs the reverse operation of a decoder. It converts $2^n$ input lines into an $n$-bit binary code. Only one input should be active (HIGH) at a time.
+**Definition**
+
+An encoder performs the reverse operation of a decoder. It takes $2^n$ input lines (where only one is HIGH at a time) and converts them to an $n$-bit binary output code.
 
 ### 4-to-2 Encoder
-- Inputs: $D_0, D_1, D_2, D_3$ (only one active at a time)
-- Outputs: $A_1, A_0$
 
-* **Formula:** $A_0 = D_1 + D_3$
-* **Formula:** $A_1 = D_2 + D_3$
+**Definition**
 
-| $D_3$ | $D_2$ | $D_1$ | $D_0$ | $A_1$ | $A_0$ |
-|-------|-------|-------|-------|-------|-------|
-| 0 | 0 | 0 | 1 | 0 | 0 |
-| 0 | 0 | 1 | 0 | 0 | 1 |
-| 0 | 1 | 0 | 0 | 1 | 0 |
-| 1 | 0 | 0 | 0 | 1 | 1 |
+Takes 4 inputs ($D_0, D_1, D_2, D_3$) and outputs a 2-bit binary number ($A_1, A_0$).
 
-### 8-to-3 Encoder (Octal to Binary)
-- 8 inputs ($D_0$ to $D_7$), 3 outputs ($A_2, A_1, A_0$)
+**Formula**
+
+$$
+A_0 = D_1 + D_3
+$$
+$$
+A_1 = D_2 + D_3
+$$
 
 ### Priority Encoder
 
-* **Definition:** A priority encoder handles the case where multiple inputs are active simultaneously. It encodes the **highest-priority** (highest-numbered) active input and ignores the rest. It also has a **Valid (V)** output bit.
+**Definition**
 
-* **Explanation:** In a standard encoder, undefined behavior occurs when multiple inputs are active. A priority encoder solves this by assigning priority levels. The input with the highest priority determines the output.
-
-### Applications
-- Keyboard encoding
-- Interrupt handling in processors
-- Decimal to BCD conversion
-
----
+A standard encoder breaks if the user presses two buttons at the same time. A priority encoder fixes this by only encoding the input with the highest priority (highest number) and ignoring the rest.
 
 ## Comparators
 
-* **Definition:** A comparator (or magnitude comparator) is a combinational circuit that compares two binary numbers and determines their relative magnitude — whether one is greater than, less than, or equal to the other.
+**Definition**
+
+A magnitude comparator is a combinational circuit that compares two binary numbers ($A$ and $B$) and determines if $A>B$, $A=B$, or $A<B$.
 
 ### 1-Bit Comparator
-- Compares two 1-bit inputs $A$ and $B$
-- Three outputs: $A > B$, $A = B$, $A < B$
 
-* **Formula:** $A > B = A\\overline{B}$
-* **Formula:** $A = B = A \\odot B = AB + \\overline{A}\\overline{B}$ (XNOR)
-* **Formula:** $A < B = \\overline{A}B$
+**Definition**
 
-| A | B | A>B | A=B | A<B |
-|---|---|-----|-----|-----|
-| 0 | 0 | 0 | 1 | 0 |
-| 0 | 1 | 0 | 0 | 1 |
-| 1 | 0 | 1 | 0 | 0 |
-| 1 | 1 | 0 | 1 | 0 |
+Compares exactly two 1-bit numbers.
+
+**Formula**
+
+$$
+(A > B) = A \\overline{B}
+$$
+$$
+(A = B) = A \\odot B
+$$
+$$
+(A < B) = \\overline{A} B
+$$
+
+**Explanation**
+
+If $A=1$ and $B=0$, then $A>B$ is TRUE ($1 \\cdot \\overline{0} = 1$). 
+For equality, we use the XNOR gate because it outputs 1 when both inputs are identical.
 
 ### 2-Bit Comparator
 
-* **Definition:** A 2-bit magnitude comparator compares two 2-bit binary numbers $A = A_1A_0$ and $B = B_1B_0$ and provides three outputs indicating their relative magnitude.
+**Definition**
 
-- Let $x_1 = A_1 \\odot B_1$ and $x_0 = A_0 \\odot B_0$ (bit-wise equality checks)
+Compares two 2-bit numbers ($A_1 A_0$ and $B_1 B_0$). 
 
-* **Formula:** $(A = B) = x_1 \\cdot x_0$
+**Explanation**
 
-* **Formula:** $(A > B) = A_1\\overline{B_1} + x_1 \\cdot A_0\\overline{B_0}$
+The circuit first looks at the Most Significant Bits ($A_1$ and $B_1$). If $A_1$ is 1 and $B_1$ is 0, then $A$ is definitely greater than $B$. It only checks the lowest bits ($A_0, B_0$) if the highest bits are exactly the same!
 
-* **Formula:** $(A < B) = \\overline{A_1}B_1 + x_1 \\cdot \\overline{A_0}B_0$
+**Example**
 
-* **Explanation:** The comparator first checks the MSBs. If $A_1 > B_1$, then $A > B$ regardless of lower bits. If MSBs are equal ($x_1 = 1$), it then checks the LSBs.
+Compare $A=10$ and $B=01$.
 
-* **Example:** Compare $A = 10$ and $B = 01$ using 2-bit comparator.
+**Solution**
 
-**Solution:**
-$A_1 = 1, A_0 = 0, B_1 = 0, B_0 = 1$
-$A_1\\overline{B_1} = 1 \\cdot 1 = 1$
-So $(A > B) = 1$ → **A is greater than B** ($2 > 1$) ✓
+### Step Method
 
-### IC 7485 — 4-Bit Magnitude Comparator
-- Compares two 4-bit numbers
-- Has cascading inputs for expanding to larger bit widths
-- Outputs: A>B, A=B, A<B
+Step 1 → Look at MSB: $A_1 = 1, B_1 = 0$.
+Step 2 → Since $1 > 0$, we know $A > B$ immediately. 
+Step 3 → No need to check $A_0$ and $B_0$. Final result: $A > B$.
 
-### Applications
-- Data sorting
-- Process control
-- Arithmetic circuits
-- Password verification systems
+## Quick Revision
 
----
+| Concept | Key Point |
+|---------|-----------|
+| Combinational | Outputs depend ONLY on present inputs |
+| Half Adder | Sum = XOR, Carry = AND |
+| Multiplexer | Data Selector (Many-to-One) |
+| Demultiplexer | Data Distributor (One-to-Many) |
+| Decoder | Converts binary code to 1-of-N lines |
+| Priority Encoder | Solves the overlapping input problem |
 
-## Practice Questions
+## Final Summary Table
 
-### Conceptual Questions
-1. Differentiate between combinational and sequential circuits.
-2. Design a half adder using logic gates and derive its Boolean expressions.
-3. Explain the working of a full adder. How is it constructed using two half adders?
-4. What is a multiplexer? Explain the working of a 4:1 MUX.
-5. Differentiate between encoder and decoder with truth tables.
-6. What is a priority encoder? Why is it preferred over a simple encoder?
-7. Explain the working of a 2-bit magnitude comparator.
-8. How can a decoder be used as a demultiplexer?
+| Circuit | Input | Output | Formula / Key Operation |
+|---------|-------|--------|-------------------------|
+| Half Adder | $A, B$ | $S, C$ | $S = A \\oplus B$, $C = AB$ |
+| Half Subtractor | $A, B$ | $D, B_{out}$ | $D = A \\oplus B$, $B_{out} = \\overline{A}B$ |
+| 4:1 MUX | 4 Data, 2 Select | 1 Output | Routes one data pin to output |
+| 2:4 Decoder | 2 Inputs | 4 Outputs | Makes exactly one output HIGH |
+| 1-bit Comparator | $A, B$ | $>, =, <$ | $(A = B) = A \\odot B$ |
 
-### Numerical Problems
-1. Design a full subtractor using logic gates. Write its truth table and Boolean expressions.
-2. Implement the Boolean function $F(A,B,C) = \\sum m(1,2,6,7)$ using an 8:1 MUX.
-3. Design a 3-to-8 decoder and show how it generates all 8 minterms of 3 variables.
-4. Compare the two 2-bit numbers $A = 11$ and $B = 10$ using a 2-bit comparator. Show all output values.
-5. Implement a full adder using only NAND gates.`;
+## Self Assessment
+
+1 Define a Combinational Circuit and give two examples.
+2 Draw the truth table of a Half Adder.
+3 Why is a Multiplexer called a "Data Selector"?
+4 Write the boolean expression for the 2:1 Multiplexer's output.
+5 Explain why a Priority Encoder is better than a standard Encoder.
+`;

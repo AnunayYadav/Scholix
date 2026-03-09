@@ -1,337 +1,441 @@
-export const unit1Title = "Unit 1: Fundamentals of Electrical Laws, Semiconductor Devices and its Applications";
+export const unit1Title = "Unit 1: Fundamentals of Electrical Laws, Semiconductor Devices and Applications";
 
-export const unit1Body = `# Fundamentals of Electrical Laws, Semiconductor Devices and Applications
-
-## Table of Contents
-- [Ohm's Law](#ohms-law)
-- [Kirchhoff's Laws](#kirchhoffs-laws)
-- [Voltage Division Rule](#voltage-division-rule)
-- [Current Division Rule](#current-division-rule)
-- [Basics of Semiconductors](#basics-of-semiconductors)
-- [PN Junction Diode](#pn-junction-diode)
-- [Applications of PN Junction Diode](#applications-of-pn-junction-diode)
-- [Bipolar Junction Transistor (BJT)](#bipolar-junction-transistor-bjt)
-- [Practice Questions](#practice-questions)
-
----
+export const unit1Body = `# Unit 1: Fundamentals of Electrical Laws, Semiconductor Devices and Applications
 
 ## Ohm's Law
 
-* **Definition:** Ohm's Law states that the current flowing through a conductor between two points is directly proportional to the voltage across the two points, provided the temperature and other physical conditions remain constant.
+**Definition**
 
-* **Formula:** $V = IR$
+Ohm's Law states that the current flowing through a conductor is directly proportional to the voltage across it, assuming temperature remains constant.
+
+**Formula**
+
+$$
+V = IR
+$$
 
 Where:
-- $V$ = Voltage (in Volts, V)
-- $I$ = Current (in Amperes, A)
-- $R$ = Resistance (in Ohms, Ω)
+- $V$ = Voltage (in Volts)
+- $I$ = Current (in Amperes)
+- $R$ = Resistance (in Ohms)
 
-$$V = IR$$
+**Explanation**
 
-* **Explanation:** If we increase the voltage across a resistor while keeping the resistance constant, the current increases proportionally. Similarly, if resistance increases, current decreases for the same voltage.
+Think of water flowing through a pipe. Voltage is the water pressure, current is the water flow, and resistance is the pipe size. More pressure (voltage) means more flow (current). A narrower pipe (more resistance) means less flow.
 
-### Derived Forms of Ohm's Law
+**Example**
 
-* **Formula:** $I = \\frac{V}{R}$
+A resistor of $10\\,\\Omega$ is connected across a $20\\,V$ battery. Find the current flowing through it.
 
-* **Formula:** $R = \\frac{V}{I}$
+**Solution**
 
-### Power Relations from Ohm's Law
+### Step Method
 
-* **Formula:** $P = VI = I^2R = \\frac{V^2}{R}$
+Step 1 → Identify variables: $V = 20\\,V$, $R = 10\\,\\Omega$
+Step 2 → Apply Ohm's Law formula: $I = \\frac{V}{R}$
+Step 3 → Substitute values: $I = \\frac{20}{10}$
+Step 4 → Solve and verify units: $I = 2\\,A$
 
-Where $P$ is the power dissipated in Watts (W).
+**Exam Tip**
 
-### Solved Examples
+Always check if the components are non-linear (like diodes) because Ohm's law does not apply to them.
 
-* **Example:** A resistor of $10\\,\\Omega$ is connected across a $20\\,V$ battery. Find the current flowing through it.
+### Common Mistakes
 
-**Solution:**
-Using Ohm's Law: $I = \\frac{V}{R} = \\frac{20}{10} = 2\\,A$
-
-* **Example:** A current of $5\\,A$ flows through a wire when $25\\,V$ is applied. Find the resistance and power dissipated.
-
-**Solution:**
-$R = \\frac{V}{I} = \\frac{25}{5} = 5\\,\\Omega$
-$P = VI = 25 \\times 5 = 125\\,W$
-
-### Limitations of Ohm's Law
-- Not valid for non-linear devices (diodes, transistors)
-- Not valid at very high temperatures
-- Not applicable for unilateral elements
-
----
+- Forgetting to convert units (e.g., $k\\Omega$ to $\\Omega$ or $mA$ to $A$).
+- Applying Ohm's law to semiconductors (it only applies to linear conductors).
 
 ## Kirchhoff's Laws
 
+**Definition**
+
+Kirchhoff's Laws are two rules used to find unknown currents and voltages in complex circuits. They are based on the conservation of charge and energy.
+
 ### Kirchhoff's Current Law (KCL)
 
-* **Statement:** The algebraic sum of all currents entering and leaving a node (junction) in an electrical circuit is zero.
+**Definition**
 
-* **Formula:** $\\sum I_{in} = \\sum I_{out}$
+The total current entering a node exactly equals the total current leaving the node. No charge is stored at the junction.
 
-Or equivalently:
+**Formula**
 
-$$\\sum_{k=1}^{n} I_k = 0$$
+$$
+\\sum I_{in} = \\sum I_{out}
+$$
 
-* **Explanation:** KCL is based on the law of conservation of electric charge. No charge can accumulate at a node, so whatever current enters must leave.
+**Explanation**
 
-* **Example:** At a junction, three currents $I_1 = 3\\,A$, $I_2 = 5\\,A$ enter, and $I_3$ leaves. Find $I_3$.
+Imagine a water junction where 3 pipes meet. The amount of water coming in from one pipe must equal the total water going out from the other two.
 
-**Solution:**
-By KCL: $I_1 + I_2 = I_3$
-$I_3 = 3 + 5 = 8\\,A$
+**Example**
+
+At a junction, currents $I_1 = 3\\,A$ and $I_2 = 5\\,A$ enter. The current $I_3$ leaves. Find $I_3$.
+
+**Solution**
+
+### Step Method
+
+Step 1 → Identify entering currents: $I_{in} = 3\\,A + 5\\,A = 8\\,A$
+Step 2 → Apply KCL: $I_{in} = I_{out}$
+Step 3 → Set leaving current: $I_3 = 8\\,A$
 
 ### Kirchhoff's Voltage Law (KVL)
 
-* **Statement:** The algebraic sum of all voltages around any closed loop (mesh) in a circuit is zero.
+**Definition**
 
-* **Formula:** $\\sum V = 0$ (around a closed loop)
+The sum of all voltages around any closed loop in a circuit is exactly zero. Energy given by the battery equals energy used by the resistors.
 
-$$\\sum_{k=1}^{n} V_k = 0$$
+**Formula**
 
-* **Explanation:** KVL is based on the law of conservation of energy. The total energy supplied by sources equals the total energy consumed by resistors in a closed loop.
+$$
+\\sum V = 0
+$$
 
-* **Example:** In a series circuit with a $12\\,V$ battery and two resistors $R_1 = 4\\,\\Omega$ and $R_2 = 8\\,\\Omega$, find the voltage drop across each resistor.
+**Explanation**
 
-**Solution:**
-Total resistance: $R_T = R_1 + R_2 = 4 + 8 = 12\\,\\Omega$
-Current: $I = \\frac{V}{R_T} = \\frac{12}{12} = 1\\,A$
-$V_1 = IR_1 = 1 \\times 4 = 4\\,V$
-$V_2 = IR_2 = 1 \\times 8 = 8\\,V$
-Verification (KVL): $12 - 4 - 8 = 0$ ✓
+Think of a hiking trip. If you start at base camp (0 height), hike up a mountain (+ voltage), and hike back down (- voltage drops), your total change in height when back at base camp is zero.
 
----
+**Example**
+
+A $12\\,V$ battery connects to resistors $R_1 = 4\\,\\Omega$ and $R_2 = 8\\,\\Omega$ in series. Find the voltage drop across each.
+
+**Solution**
+
+### Step Method
+
+Step 1 → Find total resistance: $R = 4+8 = 12\\,\\Omega$
+Step 2 → Find current using Ohm's law: $I = \\frac{12}{12} = 1\\,A$
+Step 3 → Calculate individual voltage drops: $V_1 = 1 \\times 4 = 4\\,V$, and $V_2 = 1 \\times 8 = 8\\,V$
+Step 4 → Verify KVL: $12 - 4 - 8 = 0$
+
+**Exam Tip**
+
+When writing KVL equations, always pick a direction (clockwise) and stick to standard sign conventions for voltage drops.
+
+### Common Mistakes
+
+- Messing up the + and - signs when going around a loop in KVL.
+- Applying KCL on a single wire instead of a node.
 
 ## Voltage Division Rule
 
-* **Definition:** The Voltage Division Rule (VDR) is used to find the voltage across a particular resistor in a series circuit without calculating the current first.
+**Definition**
 
-* **Formula:** For resistors $R_1$ and $R_2$ in series with total voltage $V$:
+The Voltage Division Rule (VDR) helps you directly calculate the voltage across a specific resistor in a series circuit without finding the total current first.
 
-$$V_1 = V \\times \\frac{R_1}{R_1 + R_2}$$
+**Formula**
 
-$$V_2 = V \\times \\frac{R_2}{R_1 + R_2}$$
+For resistor $R_1$:
 
-* **Explanation:** In a series circuit, the voltage divides across each resistor in proportion to its resistance value. The larger resistor gets a larger share of the voltage.
+$$
+V_1 = V \\times \\frac{R_1}{R_1 + R_2}
+$$
 
-* **Example:** Two resistors $R_1 = 6\\,\\Omega$ and $R_2 = 3\\,\\Omega$ are connected in series across a $18\\,V$ source. Find voltage across each.
+**Explanation**
 
-**Solution:**
-$V_1 = 18 \\times \\frac{6}{6+3} = 18 \\times \\frac{6}{9} = 12\\,V$
-$V_2 = 18 \\times \\frac{3}{6+3} = 18 \\times \\frac{3}{9} = 6\\,V$
+In a series circuit, voltage divides proportionally to resistance. A larger resistor gets a larger share of the total voltage.
 
----
+**Example**
+
+Two resistors $R_1 = 6\\,\\Omega$ and $R_2 = 3\\,\\Omega$ are in series across $18\\,V$. Find the voltage across $R_1$.
+
+**Solution**
+
+$$
+V_1 = 18 \\times \\frac{6}{6+3} = 18 \\times \\frac{6}{9} = 12\\,V
+$$
+
+**Exam Tip**
+
+VDR only works for series circuits. Never use it for parallel resistors!
 
 ## Current Division Rule
 
-* **Definition:** The Current Division Rule (CDR) is used to find the current through a particular resistor in a parallel circuit without calculating individual voltages first.
+**Definition**
 
-* **Formula:** For two resistors $R_1$ and $R_2$ in parallel with total current $I$:
+The Current Division Rule (CDR) helps you directly calculate the current flowing through a specific resistor in a parallel circuit without finding the total voltage first.
 
-$$I_1 = I \\times \\frac{R_2}{R_1 + R_2}$$
+**Formula**
 
-$$I_2 = I \\times \\frac{R_1}{R_1 + R_2}$$
+For resistor $R_1$:
 
-* **Explanation:** In a parallel circuit, the current divides inversely proportional to the resistances. The smaller resistor carries the larger current.
+$$
+I_1 = I \\times \\frac{R_2}{R_1 + R_2}
+$$
 
-* **Example:** Two resistors $R_1 = 4\\,\\Omega$ and $R_2 = 12\\,\\Omega$ are in parallel. Total current is $8\\,A$. Find individual currents.
+**Explanation**
 
-**Solution:**
-$I_1 = 8 \\times \\frac{12}{4+12} = 8 \\times \\frac{12}{16} = 6\\,A$
-$I_2 = 8 \\times \\frac{4}{4+12} = 8 \\times \\frac{4}{16} = 2\\,A$
+In a parallel circuit, current takes the path of least resistance. The smaller resistor allows a larger share of the total current. Notice the formula uses the **opposite** resistor on top.
 
----
+**Example**
+
+Total current is $8\\,A$. Two parallel resistors are $4\\,\\Omega$ and $12\\,\\Omega$. Find the current through $4\\,\\Omega$.
+
+**Solution**
+
+$$
+I_{4\\Omega} = 8 \\times \\frac{12}{4+12} = 8 \\times \\frac{12}{16} = 6\\,A
+$$
+
+**Exam Tip**
+
+CDR formula places the OTHER resistor in the numerator. VDR places the SAME resistor in the numerator.
+
+### Common Mistakes
+
+- Using VDR in parallel circuits and CDR in series circuits.
+- Forgetting to put the opposite resistor in the numerator for CDR.
 
 ## Basics of Semiconductors
 
-* **Definition:** A semiconductor is a material whose electrical conductivity lies between that of a conductor (e.g., copper) and an insulator (e.g., glass). Common examples: Silicon (Si) and Germanium (Ge).
+**Definition**
+
+A semiconductor is a material with electrical conductivity between a conductor (like copper) and an insulator (like rubber). Silicon (Si) and Germanium (Ge) are common examples.
+
+**Explanation**
+
+Think of a club with a VIP section (Conduction Band) and a general section (Valence Band). In an insulator, there is a massive wall between them. In conductors, the wall is broken. In a semiconductor, there is a small gate (Energy Gap). With a little energy (heat or voltage), people (electrons) can jump the gate.
 
 ### Energy Band Theory
-- **Valence Band:** The outermost energy band filled with electrons.
-- **Conduction Band:** The energy band where electrons are free to move and conduct electricity.
-- **Forbidden Energy Gap ($E_g$):** The gap between the valence and conduction bands.
-  - For Silicon: $E_g = 1.1\\,eV$
-  - For Germanium: $E_g = 0.72\\,eV$
 
-### Intrinsic Semiconductors
+- **Valence Band:** Outside band filled with electrons.
+- **Conduction Band:** Band where electrons are free to move.
+- **Forbidden Energy Gap ($E_g$):** Gap between valence and conduction bands. $1.1\\,eV$ for Silicon.
 
-* **Definition:** A pure semiconductor without any impurity is called an intrinsic semiconductor. At absolute zero ($0\\,K$), it behaves as an insulator.
+### Intrinsic Semiconductor
 
-- At room temperature, some electrons gain energy and jump to the conduction band, leaving behind **holes** in the valence band.
-- In an intrinsic semiconductor: $n_i = n_e = n_h$
-  Where $n_i$ = intrinsic carrier concentration, $n_e$ = electron concentration, $n_h$ = hole concentration.
+**Definition**
 
-* **Formula:** $n_i^2 = n_e \\times n_h$
+A pure semiconductor with no added impurities.
 
-### Extrinsic Semiconductors
+**Explanation**
 
-* **Definition:** A semiconductor doped with impurity atoms to increase its conductivity is called an extrinsic semiconductor.
+At $0\\,K$, it is a perfect insulator. At room temperature, heat energy causes some electrons to jump to the conduction band, leaving empty spots called "holes." Number of electrons equals number of holes.
+
+### Extrinsic Semiconductor
+
+**Definition**
+
+A semiconductor where impurities are intentionally added to increase conductivity. This process is called doping.
 
 ### N-Type Semiconductor
-- Doped with **pentavalent** impurities (P, As, Sb — Group V elements)
-- **Majority carriers:** Electrons
-- **Minority carriers:** Holes
-- The impurity atom is called a **Donor** (donates an electron)
+
+**Definition**
+
+An extrinsic semiconductor doped with pentavalent impurities (5 outer electrons like Phosphorus).
+
+**Explanation**
+
+The extra electron from the impurity becomes free to conduct. Think of "N" for Negative, because the majority carriers are Negative electrons.
 
 ### P-Type Semiconductor
-- Doped with **trivalent** impurities (B, Al, Ga — Group III elements)
-- **Majority carriers:** Holes
-- **Minority carriers:** Electrons
-- The impurity atom is called an **Acceptor** (accepts an electron)
 
-> In N-type, electrons are majority carriers. In P-type, holes are majority carriers. The semiconductor remains electrically neutral overall.
+**Definition**
 
----
+An extrinsic semiconductor doped with trivalent impurities (3 outer electrons like Boron).
+
+**Explanation**
+
+The missing electron creates a "hole". Think of "P" for Positive, because the majority carriers are Positive holes.
+
+**Exam Tip**
+
+N-type majority carriers = Electrons. P-type majority carriers = Holes.
+
+### Common Mistakes
+
+- Thinking N-Type or P-Type semiconductors carry a net electrical charge. They are electrically neutral because the total protons still equal total electrons.
 
 ## PN Junction Diode
 
-* **Definition:** A PN junction diode is formed when a P-type semiconductor is joined with an N-type semiconductor. It is the most basic semiconductor device.
+**Definition**
 
-### Formation of Depletion Region
-- When P and N materials are joined, electrons from N-side diffuse to P-side and holes from P-side diffuse to N-side.
-- This creates a region depleted of free carriers called the **Depletion Region** or **Space Charge Region**.
-- A built-in potential barrier ($V_0$) is formed:
-  - For Silicon: $V_0 \\approx 0.7\\,V$
-  - For Germanium: $V_0 \\approx 0.3\\,V$
+A basic semiconductor device formed by joining P-type and N-type materials. It allows current to flow easily in only one direction.
+
+### Depletion Region
+
+**Definition**
+
+When P and N materials meet, electrons and holes combine near the junction, creating a zone empty of free charge carriers.
+
+**Explanation**
+
+It acts like a physical barrier or a wall that stops more charges from crossing unless external voltage is applied.
 
 ### Forward Bias
-- **P-side** is connected to **positive terminal** and **N-side** to **negative terminal** of the battery.
-- The depletion region narrows, and current flows when voltage exceeds the barrier potential.
+
+**Definition**
+
+When the P-side connects to the positive battery terminal and the N-side to the negative terminal.
+
+**Explanation**
+
+The battery pushes carriers forcefully across the junction, shrinking the depletion region and allowing heavy current flow.
 
 ### Reverse Bias
-- **P-side** is connected to **negative terminal** and **N-side** to **positive terminal**.
-- The depletion region widens, and only a small **reverse saturation current** flows due to minority carriers.
 
-### Diode Current Equation (Shockley Equation)
+**Definition**
 
-* **Formula:** $I = I_0 \\left( e^{\\frac{V}{\\eta V_T}} - 1 \\right)$
+When the P-side connects to the negative terminal and the N-side to the positive terminal.
 
-Where:
-- $I_0$ = Reverse saturation current
-- $V$ = Applied voltage
-- $\\eta$ = Ideality factor (1 for Ge, 2 for Si)
-- $V_T = \\frac{kT}{q} \\approx 26\\,mV$ at room temperature ($T = 300\\,K$)
+**Explanation**
 
----
+The battery pulls carriers away from the junction, widening the depletion region. Only a tiny "leakage current" flows.
+
+### Diode Current Equation
+
+**Formula**
+
+Shockley Equation:
+$$
+I = I_0 \\left( e^{\\frac{V}{\\eta V_T}} - 1 \\right)
+$$
+
+**Exam Tip**
+
+In numericals, $V_T$ is often taken as $26\\,mV$ at room temperature.
 
 ## Applications of PN Junction Diode
 
+**Definition**
+
+Diodes are mainly used to convert AC (Alternating Current) to DC (Direct Current). This is called rectification.
+
 ### Half-Wave Rectifier
 
-* **Definition:** A half-wave rectifier converts only one half of the AC input cycle into pulsating DC output using a single diode.
+**Definition**
 
-* **Formula:** DC Output Voltage: $V_{dc} = \\frac{V_m}{\\pi}$
+Uses a single diode to allow only the positive half of the AC cycle to pass, blocking the negative half.
 
-* **Formula:** Ripple Factor: $\\gamma = 1.21$
+**Formula**
 
-* **Formula:** Efficiency: $\\eta = 40.6\\%$
+$$
+V_{dc} = \\frac{V_m}{\\pi}
+$$
 
-* **Formula:** PIV (Peak Inverse Voltage): $PIV = V_m$
+**Explanation**
 
-### Full-Wave Rectifier (Center-Tapped)
+Think of a one-way street toll booth that only lets daytime traffic pass and blocks night traffic.
 
-* **Definition:** A full-wave rectifier converts both halves of the AC input cycle into pulsating DC using two diodes and a center-tapped transformer.
+### Full-Wave Rectifier
 
-* **Formula:** DC Output Voltage: $V_{dc} = \\frac{2V_m}{\\pi}$
+**Definition**
 
-* **Formula:** Ripple Factor: $\\gamma = 0.48$
+Uses two diodes and a center-tapped transformer to convert both positive and negative halves of AC into positive DC.
 
-* **Formula:** Efficiency: $\\eta = 81.2\\%$
+**Formula**
 
-* **Formula:** PIV: $PIV = 2V_m$
+$$
+V_{dc} = \\frac{2V_m}{\\pi}
+$$
 
 ### Bridge Rectifier
 
-* **Definition:** A bridge rectifier uses four diodes in a bridge configuration to achieve full-wave rectification without a center-tapped transformer.
+**Definition**
 
-* **Formula:** $V_{dc} = \\frac{2V_m}{\\pi}$ (same as full-wave)
+Uses four diodes arranged in a bridge. It achives full-wave rectification without needing an expensive center-tapped transformer.
 
-* **Formula:** PIV: $PIV = V_m$ (advantage over center-tap)
+**Formula**
 
-### Diode as a Switch
-- In **forward bias**, the diode acts as a **closed switch** (ON state).
-- In **reverse bias**, the diode acts as an **open switch** (OFF state).
-- Used in digital logic circuits, clamping, and clipping circuits.
+$$
+V_{dc} = \\frac{2V_m}{\\pi}
+$$
 
----
+**Exam Tip**
+
+The Bridge Rectifier has lower Peak Inverse Voltage ($PIV = V_m$) compared to a center-tap rectifier ($PIV = 2V_m$), making it cheaper and safer.
 
 ## Bipolar Junction Transistor (BJT)
 
-* **Definition:** A Bipolar Junction Transistor (BJT) is a three-terminal semiconductor device (Emitter E, Base B, Collector C) used for amplification and switching. It uses both electrons and holes as charge carriers.
+**Definition**
+
+A BJT is a three-terminal device (Emitter, Base, Collector) that acts as an amplifier or a switch. It relies on both electrons and holes.
 
 ### Types of BJT
-- **NPN Transistor:** Two N-type regions separated by a thin P-type base. Current flows from collector to emitter. More commonly used.
-- **PNP Transistor:** Two P-type regions separated by a thin N-type base. Current flows from emitter to collector.
 
-### Construction
-- **Emitter:** Heavily doped, provides charge carriers.
-- **Base:** Very thin and lightly doped, controls carrier flow.
-- **Collector:** Moderately doped, collects charge carriers. Physically the largest region.
+- **NPN Transistor:** P-type base sandwiched between two N-type regions.
+- **PNP Transistor:** N-type base sandwiched between two P-type regions.
+
+### Construction of BJT
+
+- **Emitter:** Heavily doped to inject carriers.
+- **Base:** Very thin and lightly doped to smoothly pass carriers.
+- **Collector:** Moderately doped, largest area to collect carriers and dissipate heat.
 
 ### Modes of Operation
 
-| Mode | E-B Junction | C-B Junction | Application |
-|------|-------------|-------------|-------------|
-| Active | Forward Biased | Reverse Biased | Amplification |
-| Saturation | Forward Biased | Forward Biased | Switch (ON) |
-| Cut-off | Reverse Biased | Reverse Biased | Switch (OFF) |
-| Reverse Active | Reverse Biased | Forward Biased | Rarely used |
+**Explanation**
+
+Depending on how we bias the two junctions (Emitter-Base and Collector-Base), the BJT does different jobs:
+
+| Mode | E-B Junction | C-B Junction | Job |
+|------|-------------|-------------|-----|
+| Active | Forward | Reverse | Amplifier |
+| Saturation | Forward | Forward | ON Switch |
+| Cut-off | Reverse | Reverse | OFF Switch |
 
 ### Common Emitter (CE) Configuration
 
-* **Definition:** In the CE configuration, the emitter terminal is common to both input and output circuits. It is the most widely used configuration for amplification.
+**Definition**
 
-**Key Parameters:**
+The Emitter terminal is common to both input and output. This is the most popular way to connect a BJT because it provides high voltage and current gain.
 
-* **Formula:** Current Gain (β or $h_{FE}$): $\\beta = \\frac{I_C}{I_B}$
+**Formula**
 
-* **Formula:** Relation between $\\alpha$ and $\\beta$: $\\beta = \\frac{\\alpha}{1 - \\alpha}$
+$$
+I_E = I_B + I_C
+$$
+$$
+\\beta = \\frac{I_C}{I_B}
+$$
 
-* **Formula:** Also: $\\alpha = \\frac{\\beta}{1 + \\beta}$
+**Explanation**
 
-* **Formula:** $I_C = \\beta I_B$
+Think of a water faucet. The Base is the handle. A small turn (Base current) controls a massive flow of water (Collector current) from the pipe (Emitter).
 
-* **Formula:** $I_E = I_C + I_B = (\\beta + 1) I_B$
+**Example**
 
-Where:
-- $\\alpha$ = Common Base current gain ($I_C / I_E$), typically 0.95 to 0.99
-- $\\beta$ = Common Emitter current gain ($I_C / I_B$), typically 20 to 500
+In a CE circuit, $\\beta = 100$ and $I_B = 20\\,\\mu A$. Find $I_C$.
 
-**CE Configuration Characteristics:**
-- **Input Characteristics:** Plot of $I_B$ vs $V_{BE}$ at constant $V_{CE}$ — similar to a forward-biased diode.
-- **Output Characteristics:** Plot of $I_C$ vs $V_{CE}$ at constant $I_B$ — shows Active, Saturation, and Cut-off regions.
-- Provides **high voltage gain**, **high current gain**, and **high power gain**.
-- Output signal is **180° out of phase** with input.
+**Solution**
 
-* **Example:** In a CE configuration, $\\beta = 100$ and $I_B = 20\\,\\mu A$. Find $I_C$ and $I_E$.
+### Step Method
 
-**Solution:**
-$I_C = \\beta \\times I_B = 100 \\times 20\\,\\mu A = 2\\,mA$
-$I_E = I_C + I_B = 2\\,mA + 0.02\\,mA = 2.02\\,mA$
+Step 1 → Identify formula: $I_C = \\beta \\times I_B$
+Step 2 → Substitute: $I_C = 100 \\times 20\\,\\mu A$
+Step 3 → Convert and solve: $I_C = 2000\\,\\mu A = 2\\,mA$
 
-* **Example:** If $\\alpha = 0.98$, find $\\beta$.
+### Common Mistakes
 
-**Solution:**
-$\\beta = \\frac{\\alpha}{1 - \\alpha} = \\frac{0.98}{1 - 0.98} = \\frac{0.98}{0.02} = 49$
+- Forgetting that $\\beta$ connects collector and base currents ($I_C / I_B$), while $\\alpha$ connects collector and emitter currents ($I_C / I_E$).
 
----
+## Quick Revision
 
-## Practice Questions
+| Concept | Key Idea |
+|---------|----------|
+| Ohm's Law | V = IR |
+| KVL | Sum of loop voltages = 0 |
+| KCL | Incoming current = Outgoing current |
+| N-Type | Majority electrons (Pentavalent) |
+| P-Type | Majority holes (Trivalent) |
+| BJT Active Mode | E-B Forward, C-B Reverse |
 
-### Conceptual Questions
-1. State and explain Ohm's Law with its limitations.
-2. State KCL and KVL with examples.
-3. Differentiate between intrinsic and extrinsic semiconductors.
-4. Explain the formation of depletion region in a PN junction.
-5. Explain the working of a PN junction diode under forward and reverse bias.
-6. Compare half-wave and full-wave rectifiers.
-7. Explain the three modes of operation of a BJT.
-8. Draw and explain the input and output characteristics of CE configuration.
+## Final Summary Table
 
-### Numerical Problems
-1. Three resistors of $3\\,\\Omega$, $6\\,\\Omega$, and $9\\,\\Omega$ are connected in series across a $36\\,V$ battery. Find the current and voltage across each resistor.
-2. A current of $12\\,A$ divides into two parallel branches of $4\\,\\Omega$ and $6\\,\\Omega$. Find individual branch currents using CDR.
-3. A half-wave rectifier has $V_m = 100\\,V$. Calculate $V_{dc}$ and the PIV rating of the diode.
-4. In a BJT CE circuit, $\\beta = 150$ and $I_C = 3\\,mA$. Find $I_B$ and $I_E$.
-5. Calculate $\\beta$ if $\\alpha = 0.99$.`;
+| Topic | Key Formula |
+|-------|-------------|
+| Ohm's Law | V = IR |
+| VDR | $V_1 = V \\times (R_1 / (R_1+R_2))$ |
+| CDR | $I_1 = I \\times (R_2 / (R_1+R_2))$ |
+| Half-Wave | $V_{dc} = V_m / \\pi$ |
+| Full-Wave | $V_{dc} = 2V_m / \\pi$ |
+| BJT $\\beta$ | $\\beta = I_C / I_B$ |
+
+## Self Assessment
+
+1 Define Ohm's Law and its limitations.
+2 Calculate the unknown current if $5\\,A$ and $2\\,A$ enter a node, and one current leaves.
+3 Compare N-Type and P-Type semiconductors.
+4 Explain the working of a Bridge Rectifier with a diagram.
+5 A BJT has $\\beta = 150$ and base current $10\\,\\mu A$. Find the collector current.
+`;

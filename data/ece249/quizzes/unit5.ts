@@ -1,34 +1,244 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const unit5Quizzes: QuizQuestion[] = [
-    { unit: 5, question: "What is the primary difference between combinational logic and sequential logic?", options: ["Sequential logic has no memory", "Combinational logic relies on past inputs", "Sequential logic outputs depend on current inputs AND past states", "Combinational logic requires a clock"], correctAnswer: 2, explanation: "Memory elements are the cornerstone of sequential logic." },
-    { unit: 5, question: "A latch is a bistable multivibrator. What does 'bistable' mean?", options: ["It uses two clock pulses to change", "It has two stable states (`0` and `1`) in which it can remain indefinitely", "It requires two inputs to function", "It can only be built with two gates"], correctAnswer: 1, explanation: "Once set, it stays set. Once reset, it stays reset." },
-    { unit: 5, question: "Latches are typically ________-sensitive, while Flip-Flops are ________-triggered.", options: ["Level, Edge", "Edge, Level", "Positive, Negative", "Feedback, Clock"], correctAnswer: 0, explanation: "Latches respond continuously while enabled; flip-flops respond only on the exact moment the clock transitions." },
-    { unit: 5, question: "An SR Latch can be constructed using cross-coupled:", options: ["AND gates only", "OR gates only", "NAND or NOR gates", "XOR gates"], correctAnswer: 2, explanation: "These universal gates allow for feedback loops." },
-    { unit: 5, question: "In a basic NOR-gate SR latch, what input condition represents the 'forbidden' or 'invalid' state?", options: ["S=0, R=0", "S=0, R=1", "S=1, R=0", "S=1, R=1"], correctAnswer: 3, explanation: "It forces both outputs (Q and Q') to identical values (usually 0), which violates the definition of complementary outputs." },
-    { unit: 5, question: "In an SR latch, what happens when `S=0, R=0`?", options: ["It enters the forbidden state", "It sets the output to 1", "It resets the output to 0", "It enters the memory state (no change)"], correctAnswer: 3, explanation: "It simply holds its previous value." },
-    { unit: 5, question: "How does a D (Data) Latch resolve the 'forbidden state' of an SR latch?", options: ["By using a clock", "By adding an extra NAND gate", "By ensuring S and R inputs are always opposites using an inverter", "By ignoring `S=1, R=1`"], correctAnswer: 2, explanation: "The single 'D' input either goes to S as `D` or R as `D'`, preventing them from ever being equal." },
-    { unit: 5, question: "The output `Q` of a D latch while it is enabled exactly follows:", options: ["The clock", "The previous state", "The `D` input", "The inverted `D` input"], correctAnswer: 2, explanation: "It is often called a 'transparent' latch for this reason." },
-    { unit: 5, question: "A Flip-Flop is essentially a latch with an added:", options: ["Inverter", "Edge-triggered clock circuit", "Extra input pin", "Feedback loop"], correctAnswer: 1, explanation: "It only reads inputs precisely when the clock rises or falls." },
-    { unit: 5, question: "What does 'edge-triggered' mean regarding a clock pulse?", options: ["The circuit responds anytime the clock is HIGH (logic 1)", "The circuit responds anytime the clock is LOW (logic 0)", "The circuit only responds at the exact graphical transition point between LOW and HIGH", "The circuit ignores the clock entirely"], correctAnswer: 2, explanation: "It limits the window of opportunity for inputs to affect the output to a tiny sliver of time." },
-    { unit: 5, question: "Which flip-flop was designed to eliminate the invalid state of the SR flip-flop while retaining its functionality?", options: ["D Flip-Flop", "T Flip-Flop", "JK Flip-Flop", "Master-Slave Flip-Flop"], correctAnswer: 2, explanation: "JK maps the `1,1` input combination to a useful 'toggle' function." },
-    { unit: 5, question: "In a JK flip-flop, what happens when `J=1` and `K=1`?", options: ["Forbidden state", "The output toggles (flips to its opposite state) every clock edge", "Memory state", "Output locks at 0"], correctAnswer: 1, explanation: "It flips: `1` becomes `0`, and `0` becomes `1`." },
-    { unit: 5, question: "What is the 'Race Around' condition in a standard JK flip-flop?", options: ["When J and K inputs act too slowly", "When `J=1, K=1` and the clock pulse is longer than the gate propagation delay, causing multiple uncontrollable toggles per clock pulse", "When the clock fails to reach the flip-flop", "When outputs race to become exactly 0"], correctAnswer: 1, explanation: "The feedback loop cycles uncontrollably!" },
-    { unit: 5, question: "How is the 'Race Around' condition in a JK flip-flop solved?", options: ["By removing the clock", "By adding a resistor", "By using a Master-Slave configuration", "By only using D flip-flops"], correctAnswer: 2, explanation: "The Master catches the input, the Slave holds the output. They never talk at the same time." },
-    { unit: 5, question: "A Master-Slave flip-flop consists of:", options: ["Two D latches in parallel", "One SR flip-flop and one inverter", "Two clocked flip-flops in series with complementary clocks", "A single XOR gate"], correctAnswer: 2, explanation: "When the Master is enabled (Clock HIGH), the Slave is disabled, and vice versa." },
-    { unit: 5, question: "The T (Toggle) flip-flop can be constructed by:", options: ["Tying the S and R inputs together", "Tying the J and K inputs of a JK flip-flop together", "Tying the D input to Q", "Removing the clock from a D flip-flop"], correctAnswer: 1, explanation: "It forms a single input pin 'T'. If `T=1`, it toggles the JK's `1,1` state." },
-    { unit: 5, question: "The characteristic equation for a D flip-flop is:", options: ["Q_next = Q", "Q_next = D'", "Q_next = D", "Q_next = D ⊕ Q"], correctAnswer: 2, explanation: "The next state is simply whatever data is presented at D during the clock edge." },
-    { unit: 5, question: "The characteristic equation for a T flip-flop is:", options: ["Q_next = T", "Q_next = T'", "Q_next = T . Q", "Q_next = T ⊕ Q"], correctAnswer: 3, explanation: "If `T=1`, it toggles (inverts `Q`). If `T=0`, it holds (`Q`)." },
-    { unit: 5, question: "To convert an SR flip-flop to a D flip-flop, what combinational logic is needed?", options: ["An AND gate", "An OR gate", "A single Inverter (NOT gate) between S and R", "An XOR gate"], correctAnswer: 2, explanation: "Let `S = D` and `R = D'`." },
-    { unit: 5, question: "What tool is primarily used to easily derive the input equations when converting one type of flip-flop to another?", options: ["Kirchhoff's Laws", "Karnaugh Maps (K-Maps) and Excitation Tables", "Truth Tables", "Ohm's Law"], correctAnswer: 1, explanation: "K-Maps simplify the excitation table logic into minimal Boolean expressions." },
-    { unit: 5, question: "An excitation table shows:", options: ["The required inputs for a desired state transition from `Q_current` to `Q_next`", "The output given the inputs", "The physical pinout of a chip", "The voltage levels"], correctAnswer: 0, explanation: "It tells you 'If you are at 0 and want to go to 1, what must your inputs be?'" },
-    { unit: 5, question: "In the excitation table for an SR flip-flop, what is required to transition from `0` to `1`?", options: ["S=0, R=0", "S=1, R=0", "S=0, R=1", "S=1, R=1"], correctAnswer: 1, explanation: "You must explicitly SET it." },
-    { unit: 5, question: "In the excitation table for a D flip-flop, what is required to transition from `1` to `0`?", options: ["D=1", "D=0", "D doesn't matter", "D must toggle"], correctAnswer: 1, explanation: "Since `Q_next = D`, D must simply be `0`." },
-    { unit: 5, question: "Which flip-flop type is most commonly used to build basic shift registers because it simply accepts and holds a value?", options: ["SR", "T", "D", "JK"], correctAnswer: 2, explanation: "The Delay/Data flip-flop perfectly shifts bits one clock at a time." },
-    { unit: 5, question: "Which flip-flop type is most commonly used to build counters because of its ability to easily change states repeatedly?", options: ["SR", "D", "T or JK", "Latch"], correctAnswer: 2, explanation: "Toggling is the basis of binary counting (`...0, 1, 0, 1...`)." },
-    { unit: 5, question: "If the clock is NOT present on an edge-triggered flip-flop, and the inputs change wildly, what happens to the output?", options: ["It changes wildly", "It holds its last known state indefinitely", "It resets to 0", "It enters the forbidden state"], correctAnswer: 1, explanation: "The inputs are completely locked out without the clock edge!" },
-    { unit: 5, question: "A positive-edge triggered flip-flop records data when the clock goes from:", options: ["HIGH to LOW", "LOW to HIGH", "It stays HIGH", "It stays LOW"], correctAnswer: 1, explanation: "The rising edge of the signal." },
-    { unit: 5, question: "A sequential circuit requires a memory loop. Which logic gate inherently creates this loop when cross-coupled?", options: ["NOR or NAND gates", "AND or OR gates", "XOR gates", "Inverters only"], correctAnswer: 0, explanation: "Their outputs feed directly back into each other's inputs." },
-    { unit: 5, question: "What is typically considered the 'default' or primary output of a flip-flop?", options: ["Q'", "S", "R", "Q"], correctAnswer: 3, explanation: "`Q` is the true output, while `Q'` is the complementary output." },
-    { unit: 5, question: "True or False: A T flip-flop acts as a divide-by-2 circuit when its input is permanently set to `1`.", options: ["True", "False", "Only if it is level-sensitive", "Only if its clock is removed"], correctAnswer: 0, explanation: "It completes one full HIGH/LOW cycle for every TWO clock pulses!" }
+    {
+        unit: 5,
+        question: "What is the primary feature that distinguishes sequential logic circuits from combinational logic circuits?",
+        options: [
+            "Sequential circuits use only NAND gates",
+            "Sequential circuits have no propagation delay",
+            "Sequential circuits contain memory elements and depend on past states",
+            "Sequential circuits cannot perform arithmetic operations"
+        ],
+        correctAnswer: 2,
+        explanation: "Sequential circuits use memory elements (like latches and flip-flops) to store past states, meaning their output depends on both current inputs and the previous state."
+    },
+    {
+        unit: 5,
+        question: "What is the fundamental difference between a latch and a flip-flop?",
+        options: [
+            "A latch is edge-triggered; a flip-flop is level-triggered",
+            "A latch is level-triggered; a flip-flop is edge-triggered",
+            "A latch requires a clock signal; a flip-flop does not",
+            "A latch stores multiple bits; a flip-flop stores one bit"
+        ],
+        correctAnswer: 1,
+        explanation: "Latches are level-triggered (transparent when active), whereas flip-flops are edge-triggered (change state only at the rising or falling edge of the clock)."
+    },
+    {
+        unit: 5,
+        question: "In an SR latch constructed using NOR gates, which input combination results in a forbidden or invalid state?",
+        options: [
+            "$S = 0, R = 0$",
+            "$S = 0, R = 1$",
+            "$S = 1, R = 0$",
+            "$S = 1, R = 1$"
+        ],
+        correctAnswer: 3,
+        explanation: "When $S=1$ and $R=1$, both outputs try to become $0$, which violates the complementary rule and leads to an unpredictable state when inputs return to $0$."
+    },
+    {
+        unit: 5,
+        question: "What is the characteristic equation of an SR flip-flop?",
+        options: [
+            "$Q_{n+1} = S + \\overline{R} \\cdot Q_n$",
+            "$Q_{n+1} = S \\cdot R + Q_n$",
+            "$Q_{n+1} = \\overline{S} + R \\cdot Q_n$",
+            "$Q_{n+1} = S \\oplus R$"
+        ],
+        correctAnswer: 0,
+        explanation: "The characteristic equation is $Q_{n+1} = S + \\overline{R} \\cdot Q_n$, subject to the constraint $SR = 0$."
+    },
+    {
+        unit: 5,
+        question: "How does a D latch solve the forbidden state problem of the SR latch?",
+        options: [
+            "By adding a clock signal",
+            "By ensuring $S$ and $R$ are never logically equal via an inverter",
+            "By using only NAND gates",
+            "By adding a third input pin"
+        ],
+        correctAnswer: 1,
+        explanation: "In a D latch, the $D$ input is connected to $S$, and $\\overline{D}$ is connected to $R$. This ensures $S$ and $R$ are always complementary, preventing the $1,1$ state."
+    },
+    {
+        unit: 5,
+        question: "Which input condition causes a JK flip-flop to toggle its output state ($Q_{n+1} = \\overline{Q_n}$)?",
+        options: [
+            "$J = 0, K = 0$",
+            "$J = 0, K = 1$",
+            "$J = 1, K = 0$",
+            "$J = 1, K = 1$"
+        ],
+        correctAnswer: 3,
+        explanation: "Unlike the SR flip-flop which enters an invalid state, a JK flip-flop toggles (inverts its current state) when $J=1$ and $K=1$."
+    },
+    {
+        unit: 5,
+        question: "What is the characteristic equation of a JK flip-flop?",
+        options: [
+            "$Q_{n+1} = JQ_n + K\\overline{Q_n}$",
+            "$Q_{n+1} = J\\overline{Q_n} + \\overline{K}Q_n$",
+            "$Q_{n+1} = J \\oplus K$",
+            "$Q_{n+1} = J\\overline{K} + \\overline{J}K$"
+        ],
+        correctAnswer: 1,
+        explanation: "The next state $Q_{n+1}$ is determined by $J\\overline{Q_n} + \\overline{K}Q_n$, which defines the Set, Reset, Hold, and Toggle operations."
+    },
+    {
+        unit: 5,
+        question: "What is the 'race-around condition' in sequential circuits?",
+        options: [
+            "When signals propagate too slowly through logic gates",
+            "When output continuously toggles multiple times during a single HIGH clock pulse in a JK flip-flop",
+            "When asynchronous inputs override the clock signal",
+            "When the clock frequency is too low"
+        ],
+        correctAnswer: 1,
+        explanation: "In a JK flip-flop with $J=K=1$, if the clock pulse width is longer than the flip-flop's propagation delay, the output toggles unpredictably multiple times."
+    },
+    {
+        unit: 5,
+        question: "Which of the following architectures is explicitly designed to eliminate the race-around condition?",
+        options: [
+            "D Latch",
+            "T Flip-Flop",
+            "Master-Slave Flip-Flop",
+            "Asynchronous Ripple Counter"
+        ],
+        correctAnswer: 2,
+        explanation: "The Master-Slave flip-flop uses two cascaded stages clocked on opposite edges, ensuring the output changes only once per full clock cycle."
+    },
+    {
+        unit: 5,
+        question: "What is the characteristic equation for a D flip-flop?",
+        options: [
+            "$Q_{n+1} = \\overline{D}$",
+            "$Q_{n+1} = D \\oplus Q_n$",
+            "$Q_{n+1} = D \\cdot Q_n$",
+            "$Q_{n+1} = D$"
+        ],
+        correctAnswer: 3,
+        explanation: "A D flip-flop simply captures and stores the data input $D$ at the active clock edge, so $Q_{n+1} = D$."
+    },
+    {
+        unit: 5,
+        question: "What is the characteristic equation for a T (Toggle) flip-flop?",
+        options: [
+            "$Q_{n+1} = T + Q_n$",
+            "$Q_{n+1} = T \\oplus Q_n$",
+            "$Q_{n+1} = T \\cdot Q_n$",
+            "$Q_{n+1} = \\overline{T} \\oplus Q_n$"
+        ],
+        correctAnswer: 1,
+        explanation: "When $T=1$, the output toggles (inverts $Q_n$). When $T=0$, $Q_n$ holds. This behavior matches the XOR logic: $T \\oplus Q_n$."
+    },
+    {
+        unit: 5,
+        question: "How is a T flip-flop typically constructed from a JK flip-flop?",
+        options: [
+            "By setting $J=1$ and $K=0$",
+            "By tying $J$ and $K$ together ($J = K = T$)",
+            "By connecting $J$ to the clock and $K$ to ground",
+            "By using an inverter between $J$ and $K$"
+        ],
+        correctAnswer: 1,
+        explanation: "Connecting both $J$ and $K$ inputs to a single logic signal $T$ creates a toggle flip-flop, since $J=K=1$ toggles and $J=K=0$ holds."
+    },
+    {
+        unit: 5,
+        question: "What type of shift register takes $n$ clock pulses to load data and requires outputs to be read one bit at a time?",
+        options: [
+            "SIPO (Serial In Parallel Out)",
+            "PISO (Parallel In Serial Out)",
+            "PIPO (Parallel In Parallel Out)",
+            "SISO (Serial In Serial Out)"
+        ],
+        correctAnswer: 3,
+        explanation: "A SISO shift register is the slowest type; inputs enter serially and exit serially, meaning it takes $n$ pulses to load and $n$ pulses to read."
+    },
+    {
+        unit: 5,
+        question: "Which shift register configuration is best suited for serial-to-parallel data conversion?",
+        options: [
+            "SISO",
+            "SIPO",
+            "PISO",
+            "PIPO"
+        ],
+        correctAnswer: 1,
+        explanation: "SIPO (Serial In Parallel Out) accepts data sequentially and, after loading, makes all bits available simultaneously on parallel output lines."
+    },
+    {
+        unit: 5,
+        question: "What defines an Asynchronous (Ripple) counter?",
+        options: [
+            "All flip-flops receive the clock signal simultaneously",
+            "It does not require flip-flops",
+            "Flip-flops are triggered by the output of the previous flip-flop",
+            "It cannot count downwards"
+        ],
+        correctAnswer: 2,
+        explanation: "In an asynchronous counter, only the first flip-flop receives the external clock. Subsequent flip-flops are clocked by the output of the preceding one."
+    },
+    {
+        unit: 5,
+        question: "What is a major disadvantage of asynchronous counters compared to synchronous counters?",
+        options: [
+            "They are more complex to design",
+            "They consume significantly more power",
+            "Propagation delay accumulates, limiting maximum frequency",
+            "They require more flip-flops for the same modulus"
+        ],
+        correctAnswer: 2,
+        explanation: "Because clock signals ripple through each stage sequentially, the propagation delays add up, which can cause reading glitches and limits operational frequency."
+    },
+    {
+        unit: 5,
+        question: "How many state combinations (modulus) does an $n$-bit Ring Counter have?",
+        options: [
+            "$2^n$",
+            "$n$",
+            "$2n$",
+            "$2^{n-1}$"
+        ],
+        correctAnswer: 1,
+        explanation: "A ring counter circulates a single $1$ through its flip-flops, so an $n$-bit ring counter features exactly $n$ unique states."
+    },
+    {
+        unit: 5,
+        question: "What is the modulus of a 4-bit Johnson (Twisted Ring) counter?",
+        options: [
+            "4",
+            "8",
+            "10",
+            "16"
+        ],
+        correctAnswer: 1,
+        explanation: "A Johnson counter has a modulus equal to $2n$. For 4 bits, the modulus is $2 \\times 4 = 8$."
+    },
+    {
+        unit: 5,
+        question: "To convert a JK flip-flop into a D flip-flop, what excitation logic is required for inputs $J$ and $K$?",
+        options: [
+            "$J = D$, $K = D$",
+            "$J = \\overline{D}$, $K = D$",
+            "$J = D$, $K = \\overline{D}$",
+            "$J = 1$, $K = \\overline{D}$"
+        ],
+        correctAnswer: 2,
+        explanation: "Connecting $J$ directly to $D$ and $K$ to $\\overline{D}$ ensures that the JK flip-flop explicitly Sets when $D=1$ and Resets when $D=0$, mirroring exactly a D flip-flop."
+    },
+    {
+        unit: 5,
+        question: "To design a synchronous Mod-10 counter, what is the minimum number of flip-flops required?",
+        options: [
+            "3",
+            "4",
+            "5",
+            "10"
+        ],
+        correctAnswer: 1,
+        explanation: "The minimum number of flip-flops $n$ must satisfy $2^n \\geq N$. For $N=10$, $2^3 = 8$ is too small, but $2^4 = 16$ is sufficient. Thus, 4 flip-flops are needed."
+    }
 ];

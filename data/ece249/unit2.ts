@@ -1,323 +1,299 @@
-export const unit2Title = "Unit 2: Introduction of Arduino and Sensors";
+export const unit2Title = "Unit 2: Introduction to Arduino and Sensors";
 
-export const unit2Body = `# Introduction of Arduino and Sensors
-
-## Table of Contents
-- [Analog and Digital Signals](#analog-and-digital-signals)
-- [Arduino Board](#arduino-board)
-- [IR Sensor](#ir-sensor)
-- [LDR (Light Dependent Resistor)](#ldr-light-dependent-resistor)
-- [Ultrasonic Sensor](#ultrasonic-sensor)
-- [Temperature Sensor (DHT11/DHT22)](#temperature-sensor-dht11dht22)
-- [Practice Questions](#practice-questions)
-
----
+export const unit2Body = `# Unit 2: Introduction to Arduino and Sensors
 
 ## Analog and Digital Signals
 
+**Definition**
+
+In electronics, signals carry information. They can be either analog (continuous) or digital (discrete). 
+
+**Explanation**
+
+Think of a ramp vs stairs. A ramp represents an analog signal because you can stand at any exact height (e.g., $1.23\\,m$, $1.24\\,m$). Stairs represent a digital signal because you can only be on specific steps (Step 1, Step 2, but nothing in between).
+
 ### Analog Signals
 
-* **Definition:** An analog signal is a continuous signal that varies smoothly over time and can take any value within a given range. It represents physical quantities like temperature, pressure, and sound.
+**Definition**
 
-- Varies continuously with time
-- Can have infinite possible values between any two points
-- More susceptible to noise
-- Examples: Audio signals, temperature readings, sine waves
+A continuous signal that smoothly varies over time and can have any value within a range. 
+
+**Explanation**
+
+Examples include the human voice, temperature, and audio waves. They are very sensitive to noise because any small change in voltage changes the information.
 
 ### Digital Signals
 
-* **Definition:** A digital signal is a discrete signal that can only take specific values, typically represented as binary (0 and 1). It represents data in two distinct states: HIGH (1) and LOW (0).
+**Definition**
 
-- Exists in only two states: HIGH (typically $5\\,V$ or $3.3\\,V$) and LOW ($0\\,V$)
-- More immune to noise compared to analog signals
-- Easier to store, process, and transmit
-- Examples: Computer data, digital clock, switch states
+A discrete signal represented by only two specific voltage levels: HIGH (usually $5\\,V$ or $3.3\\,V$, representing binary 1) and LOW ($0\\,V$, representing binary 0).
 
-### Key Differences
+**Explanation**
 
-| Parameter | Analog Signal | Digital Signal |
-|-----------|--------------|----------------|
-| Nature | Continuous | Discrete |
-| Values | Infinite | Only 0 and 1 |
-| Noise immunity | Low | High |
-| Hardware | Complex | Simple |
-| Example | Sine wave | Square wave |
-| Bandwidth | Low | High |
+Examples include computer data and switch states. Because they only care if the voltage is "high" or "low", they easily ignore small noise.
 
 ### Analog to Digital Conversion (ADC)
-- Arduino has a built-in **10-bit ADC**
-- Converts analog voltage ($0-5\\,V$) to digital values ($0-1023$)
-- Resolution = $\\frac{5}{1023} \\approx 4.88\\,mV$ per step
 
-* **Formula:** Digital Value $= \\frac{V_{in}}{V_{ref}} \\times (2^n - 1)$
+**Definition**
 
-Where $n$ = number of bits (10 for Arduino UNO)
+The process of converting a continuous analog voltage into a digital number that a microcontroller (like Arduino) can understand.
 
-* **Example:** If an analog sensor outputs $2.5\\,V$, what is the digital reading on Arduino?
+**Explanation**
 
-**Solution:**
-Digital Value $= \\frac{2.5}{5} \\times 1023 = 511.5 \\approx 512$
+Arduino UNO has a 10-bit ADC. This means it can divide the $0$ to $5\\,V$ range into $2^{10} = 1024$ discrete steps (from 0 to 1023).
 
----
+**Formula**
+
+$$
+\\text{Digital Value} = \\frac{V_{in}}{V_{ref}} \\times (2^n - 1)
+$$
+
+Where:
+- $V_{in}$ = Analog voltage input
+- $V_{ref}$ = Maximum reference voltage (usually $5\\,V$)
+- $n$ = Number of bits (10 for Arduino UNO)
+
+**Example**
+
+An analog sensor outputs $2.5\\,V$. What will the Arduino's ADC read?
+
+**Solution**
+
+### Step Method
+
+Step 1 → Identify variables: $V_{in} = 2.5\\,V$, $V_{ref} = 5\\,V$, $n = 10$.
+Step 2 → Note that $2^{10} - 1 = 1023$.
+Step 3 → Apply formula: $\\text{Digital Value} = \\frac{2.5}{5} \\times 1023$
+Step 4 → Calculate: $0.5 \\times 1023 = 511.5 \\approx 512$.
+
+**Exam Tip**
+
+An ADC reading of 0 always means $0\\,V$. For a $5\\,V$ Arduino, a reading of 1023 always means $5\\,V$. A reading of 512 means $2.5\\,V$.
+
+### Common Mistakes
+
+- Forgetting that the max value of a 10-bit ADC is 1023, not 1024 (because we start counting at 0).
 
 ## Arduino Board
 
-* **Definition:** Arduino is an open-source electronics platform based on easy-to-use hardware and software. The most popular board is the **Arduino UNO** which uses the **ATmega328P** microcontroller.
+**Definition**
+
+Arduino is an open-source electronics platform based on easy-to-use hardware and software. The most common board is the Arduino UNO, powered by the ATmega328P microcontroller.
+
+**Explanation**
+
+Think of the Arduino as the "brain". You can connect "senses" (sensors like temperature or light) to the input pins, and "muscles" (actuators like motors or LEDs) to the output pins. The code you write tells the brain how to react.
 
 ### Arduino UNO Pin Configuration
 
-**Microcontroller Specifications:**
-- Microcontroller: ATmega328P
-- Operating Voltage: $5\\,V$
-- Input Voltage (recommended): $7-12\\,V$
-- Input Voltage (limits): $6-20\\,V$
-- Clock Speed: $16\\,MHz$
-- Flash Memory: $32\\,KB$ (0.5 KB used by bootloader)
-- SRAM: $2\\,KB$
-- EEPROM: $1\\,KB$
+**Explanation**
 
-### Pin Description
-
-**Digital I/O Pins (0-13):**
-- Total: 14 digital pins
-- Can be configured as INPUT or OUTPUT
-- Operate at $5\\,V$ logic
-- Maximum current per pin: $20\\,mA$ (absolute max: $40\\,mA$)
-- Pins 0 and 1 are also used for serial communication (TX and RX)
-- Pins marked with **~** (3, 5, 6, 9, 10, 11) support **PWM** (Pulse Width Modulation) output
-
-**Analog Input Pins (A0-A5):**
-- Total: 6 analog input pins
-- 10-bit ADC resolution (values from 0 to 1023)
-- Can also be used as digital I/O pins
-- Reference voltage: $5\\,V$ (default)
-
-**Power Pins:**
-- **VIN:** Supply voltage to the board (when using external power)
-- **5V:** Regulated $5\\,V$ output from the onboard regulator
-- **3.3V:** Regulated $3.3\\,V$ output (max $50\\,mA$)
-- **GND:** Ground pins (multiple available)
-- **RESET:** Active LOW reset pin
-
-**Communication Pins:**
-- **Serial (UART):** Pins 0 (RX) and 1 (TX)
-- **SPI:** Pins 10 (SS), 11 (MOSI), 12 (MISO), 13 (SCK)
-- **I2C:** A4 (SDA) and A5 (SCL)
-
-**Special Pins:**
-- Pin 13: Built-in LED
-- AREF: Analog Reference voltage
-- RESET: Reset the microcontroller
+The UNO has different types of pins for different tasks:
+- **Digital I/O Pins (0-13):** 14 pins used for digital input or output (HIGH/LOW).
+- **PWM Pins (3, 5, 6, 9, 10, 11):** Marked with a tilde (~). They can simulate analog output.
+- **Analog Input Pins (A0-A5):** 6 pins used to read analog voltages ($0-5\\,V$) via the 10-bit ADC.
+- **Power Pins:** $5\\,V$, $3.3\\,V$, GND (Ground), and VIN (Voltage In).
 
 ### Basic Arduino Programming Structure
 
-**setup() function:** Runs once when the board powers up or resets. Used to initialize pins, serial communication, etc.
+**Definition**
 
-**loop() function:** Runs continuously after setup(). Contains the main logic of the program.
+Every Arduino program (called a Sketch) has two main and mandatory functions: \`setup()\` and \`loop()\`.
+
+**Explanation**
+
+- **\`setup()\`:** Think of this as the morning routine. It runs exactly once when you power on the board. You use it to set up pins as INPUT or OUTPUT.
+- **\`loop()\`:** Think of this as breathing. It runs over and over forever. Your main logic (reading sensors, turning on LEDs) goes here.
 
 ### Key Arduino Functions
-- **pinMode(pin, mode):** Set pin as INPUT or OUTPUT
-- **digitalWrite(pin, value):** Write HIGH or LOW to a digital pin
-- **digitalRead(pin):** Read HIGH or LOW from a digital pin
-- **analogRead(pin):** Read analog value (0-1023) from analog pin
-- **analogWrite(pin, value):** Write PWM value (0-255) to a PWM pin
-- **delay(ms):** Pause program for specified milliseconds
-- **Serial.begin(baud):** Initialize serial communication
-- **Serial.println(data):** Print data to serial monitor
 
----
+To code an Arduino, you need basic commands:
+- **\`pinMode(pin, mode)\`**: Tells the board if a pin is an INPUT or OUTPUT.
+- **\`digitalWrite(pin, value)\`**: Outputs HIGH ($5\\,V$) or LOW ($0\\,V$) to a pin.
+- **\`digitalRead(pin)\`**: Checks if a pin is HIGH or LOW.
+- **\`analogRead(pin)\`**: Reads an analog pin and returns 0 to 1023.
 
 ## IR Sensor
 
-* **Definition:** An Infrared (IR) sensor is an electronic device that detects infrared radiation in its surrounding environment. It consists of an IR LED (transmitter) and a photodiode (receiver).
+**Definition**
+
+An Infrared (IR) sensor is an electronic module that detects obstacles by emitting and receiving infrared light.
+
+**Explanation**
+
+Think of a bat using echolocation, but with invisible light instead of sound. 
 
 ### Working Principle
-- The **IR LED** emits infrared light
-- When an object is placed in front, the IR light reflects back
-- The **photodiode** detects the reflected IR light
-- The sensor outputs a **digital signal**: LOW (object detected) or HIGH (no object)
 
-### Key Specifications
-- Operating Voltage: $3.3\\,V$ to $5\\,V$
-- Detection Range: $2\\,cm$ to $30\\,cm$ (adjustable via potentiometer)
-- Output: Digital (HIGH/LOW)
-- Active Buzzer: Some modules include onboard LED indicator
+The sensor has two main parts:
+- **IR Transmitter (LED):** Shines an invisible infrared beam forward.
+- **IR Receiver (Photodiode):** Detects if the beam bounces back off an object.
 
-### Applications
-- Obstacle detection in robots
-- Line following robots (black line on white surface)
-- Object counting systems
-- Proximity sensing
-- Automatic door systems
+If the invisible beam hits something and bounces back, the receiver catches it and sends a LOW signal to the Arduino. If the beam doesn't bounce back (no obstacle), it sends a HIGH signal.
 
 ### Arduino Connection
-- **VCC** → $5\\,V$
-- **GND** → GND
-- **OUT** → Digital Pin (e.g., Pin 2)
 
----
+- **VCC:** Connect to $5\\,V$.
+- **GND:** Connect to GND.
+- **OUT:** Connect to any digital pin (e.g., Pin 2) because it gives a digital HIGH/LOW output.
+
+**Exam Tip**
+
+IR sensors usually output LOW when an object is detected. This is called "active low" logic. Black surfaces absorb IR light, so the sensor might not detect a black object!
 
 ## LDR (Light Dependent Resistor)
 
-* **Definition:** A Light Dependent Resistor (LDR) is a passive electronic component whose resistance decreases with increasing incident light intensity. It is also called a photoresistor or photocell.
+**Definition**
 
-### Working Principle
-- Made of semiconductor material (Cadmium Sulphide, CdS)
-- In **darkness**: Resistance is very high ($\\sim 1\\,M\\Omega$)
-- In **bright light**: Resistance drops significantly ($\\sim 100\\,\\Omega$ to $1\\,k\\Omega$)
-- This change in resistance is used to measure light intensity
+An LDR (also known as a photoresistor) is a special resistor whose resistance decreases when light shines on it.
 
-### Characteristics
-- **Dark Resistance:** $\\sim 1\\,M\\Omega$ or higher
-- **Light Resistance:** $\\sim 100\\,\\Omega$ to few $k\\Omega$
-- **Spectral Response:** Most sensitive to visible light
-- **Response Time:** Relatively slow (tens of milliseconds)
+**Explanation**
+
+Think of the LDR as a night owl. In the dark, it is very strong (high resistance, over $1\\,M\\Omega$). When bright light hits it, it gets weak (low resistance, drops to a few hundred ohms).
 
 ### Voltage Divider Circuit with LDR
 
-* **Formula:** $V_{out} = V_{in} \\times \\frac{R}{R + R_{LDR}}$
+**Definition**
 
-Where $R$ is a fixed resistor in series with the LDR.
+Because Arduino cannot directly "read" resistance, we must convert the changing resistance of the LDR into a changing voltage using a Voltage Divider circuit.
 
-* **Explanation:** As light increases, $R_{LDR}$ decreases, so $V_{out}$ increases. This changing voltage is read by Arduino's analog pin.
+**Formula**
 
-### Applications
-- Automatic street lights
-- Light intensity measurement
-- Day/night detection
-- Camera light meters
-- Automatic brightness control
+$$
+V_{out} = V_{in} \\times \\frac{R}{R + R_{LDR}}
+$$
 
-### Arduino Connection
-- One leg of LDR → $5\\,V$
-- Other leg → Analog Pin (e.g., A0) AND through a $10\\,k\\Omega$ resistor to GND
+Where:
+- $V_{in}$ = Usually $5\\,V$ from Arduino
+- $R$ = Fixed resistor (usually $10\\,k\\Omega$)
+- $R_{LDR}$ = Changing resistance of the LDR
 
----
+**Example**
+
+In bright light, an LDR has $R_{LDR} = 1\\,k\\Omega$. We use a fixed resistor $R = 10\\,k\\Omega$ and $V_{in} = 5\\,V$. Find $V_{out}$.
+
+**Solution**
+
+### Step Method
+
+Step 1 → Identify variables: $V_{in} = 5\\,V$, $R = 10\\,k\\Omega$, $R_{LDR} = 1\\,k\\Omega$.
+Step 2 → Apply formula: $V_{out} = 5 \\times \\frac{10}{10 + 1}$
+Step 3 → Solve: $V_{out} = 5 \\times \\frac{10}{11} \\approx 4.54\\,V$
+
+The Arduino's analog pin reads this $4.54\\,V$ to know it is bright outside!
+
+### Common Mistakes
+
+- Connecting the LDR directly to an analog pin without a fixed pull-down resistor. The Arduino will just read $5\\,V$ randomly.
 
 ## Ultrasonic Sensor
 
-* **Definition:** An ultrasonic sensor is a device that measures distance by sending ultrasonic sound waves ($40\\,kHz$) and measuring the time taken for the echo to return after bouncing off an object.
+**Definition**
 
-### Basic Principle
+An ultrasonic sensor (like HC-SR04) measures distance by shooting high-frequency sound waves and timing how long the echo takes to return.
 
-* **Statement:** The sensor sends a short ultrasonic pulse (trigger) and measures the time it takes for the echo to return. Distance is calculated using the speed of sound.
+**Explanation**
 
-* **Formula:** $d = \\frac{v \\times t}{2}$
+This is exactly how a submarine uses sonar to find the ocean floor. 
+
+### Working Principle
+
+1. The sensor fires a short burst of sound at $40\\,kHz$ (too high for humans to hear).
+2. A built-in timer starts.
+3. The sound wave hits an object and bounces back.
+4. When the sensor hears the echo, the timer stops.
+
+### Distance Formula
+
+**Formula**
+
+$$
+d = \\frac{v \\times t}{2}
+$$
 
 Where:
-- $d$ = Distance to object
-- $v$ = Speed of sound in air $\\approx 343\\,m/s$ (or $0.0343\\,cm/\\mu s$)
-- $t$ = Total time for echo (divided by 2 because sound travels to object and back)
+- $d$ = Distance (in cm)
+- $v$ = Speed of sound in air (approx $0.0343\\,cm/\\mu s$)
+- $t$ = Total time the echo took (in $\\mu s$)
 
-$$d = \\frac{0.0343 \\times t}{2}\\,\\text{cm}$$
+We divide by 2 because the sound had to travel *to* the object and *back*.
 
-### HC-SR04 Ultrasonic Sensor Specifications
-- Operating Voltage: $5\\,V$ DC
-- Operating Current: $15\\,mA$
-- Measuring Range: $2\\,cm$ to $400\\,cm$
-- Measuring Angle: $15°$
-- Trigger Input Signal: $10\\,\\mu s$ TTL pulse
-- Resolution: $0.3\\,cm$
+**Example**
+
+The sensor's echo takes $500\\,\\mu s$ to return. What is the distance to the object?
+
+**Solution**
+
+### Step Method
+
+Step 1 → Identify variables: $v = 0.0343\\,cm/\\mu s$, $t = 500\\,\\mu s$.
+Step 2 → Apply formula: $d = \\frac{0.0343 \\times 500}{2}$
+Step 3 → Solve: $d = \\frac{17.15}{2} = 8.575\\,cm$.
 
 ### Pin Configuration
-- **VCC:** $5\\,V$ power supply
-- **Trig:** Trigger pin (INPUT — sends ultrasonic pulse)
-- **Echo:** Echo pin (OUTPUT — receives reflected pulse)
-- **GND:** Ground
 
-### Working Steps
-1. Arduino sends a $10\\,\\mu s$ HIGH pulse to the **Trig** pin
-2. Sensor transmits 8 ultrasonic pulses at $40\\,kHz$
-3. Sound waves hit the object and reflect back
-4. **Echo** pin goes HIGH for the duration proportional to distance
-5. Arduino measures this duration using **pulseIn()** function
-6. Distance is calculated using the formula
-
-* **Example:** The echo pin of an ultrasonic sensor stays HIGH for $580\\,\\mu s$. Calculate the distance of the object.
-
-**Solution:**
-$d = \\frac{0.0343 \\times 580}{2} = \\frac{19.894}{2} = 9.95\\,cm \\approx 10\\,cm$
-
-### Applications
-- Distance measurement
-- Obstacle avoidance in robotics
-- Water level monitoring
-- Parking assistance systems
-- Object detection
-
----
+- **VCC:** $5\\,V$ power.
+- **Trig:** The Arduino sends a $10\\,\\mu s$ pulse here to "pull the trigger" and fire the sound.
+- **Echo:** This pin stays HIGH for the exact amount of time the sound took to return.
+- **GND:** Ground.
 
 ## Temperature Sensor (DHT11/DHT22)
 
-* **Definition:** DHT11 and DHT22 are digital temperature and humidity sensors that provide calibrated digital output. They contain a resistive humidity sensing element and a thermistor (NTC) for temperature measurement.
+**Definition**
+
+DHT series sensors are digital devices that measure both temperature and humidity at the same time. 
+
+**Explanation**
+
+Inside the plastic shell is a thermistor (for temperature) and a moisture-holding capacitor (for humidity). A tiny built-in chip reads them and sends a neat digital signal to the Arduino.
 
 ### DHT11 Specifications
-- Operating Voltage: $3.3\\,V$ to $5\\,V$
-- Temperature Range: $0°C$ to $50°C$
-- Temperature Accuracy: $\\pm 2°C$
-- Humidity Range: $20\\%$ to $80\\%$ RH
-- Humidity Accuracy: $\\pm 5\\%$ RH
-- Sampling Rate: $1\\,Hz$ (one reading per second)
-- Output: Digital signal (single-wire)
 
-### DHT22 (AM2302) Specifications
-- Operating Voltage: $3.3\\,V$ to $5\\,V$
-- Temperature Range: $-40°C$ to $80°C$
-- Temperature Accuracy: $\\pm 0.5°C$
-- Humidity Range: $0\\%$ to $100\\%$ RH
-- Humidity Accuracy: $\\pm 2\\%$ RH
-- Sampling Rate: $0.5\\,Hz$ (one reading every 2 seconds)
-- Output: Digital signal (single-wire)
+- Blue color.
+- Temperature: $0^\\circ C$ to $50^\\circ C$ (Accuracy $\\pm 2^\\circ C$)
+- Humidity: $20\\%$ to $80\\%$
+- Slower delivery (1 reading per second)
+- Cheap and good for basic student projects.
 
-### DHT11 vs DHT22 Comparison
+### DHT22 Specifications
 
-| Parameter | DHT11 | DHT22 |
-|-----------|-------|-------|
-| Temperature Range | $0°C$ to $50°C$ | $-40°C$ to $80°C$ |
-| Temp Accuracy | $\\pm 2°C$ | $\\pm 0.5°C$ |
-| Humidity Range | $20-80\\%$ | $0-100\\%$ |
-| Sampling Rate | $1\\,Hz$ | $0.5\\,Hz$ |
-| Cost | Lower | Higher |
-| Body Size | Smaller (blue) | Larger (white) |
+- White color.
+- Temperature: $-40^\\circ C$ to $80^\\circ C$ (Accuracy $\\pm 0.5^\\circ C$)
+- Humidity: $0\\%$ to $100\\%$
+- Slightly slower delivery (1 reading every 2 seconds)
+- More expensive, used in precise weather stations.
 
-### Working Principle
-- Uses a **capacitive humidity sensor** and a **thermistor**
-- The humidity sensor has two electrodes with a moisture-holding substrate between them
-- As humidity changes, the substrate's conductivity changes, which changes the resistance
-- The thermistor (NTC) changes resistance with temperature
-- An internal chip converts the analog readings to a digital signal
+**Exam Tip**
 
-### Pin Configuration
-- **VCC:** $3.3\\,V$ to $5\\,V$
-- **DATA:** Digital output pin (connect to any digital pin on Arduino)
-- **NC:** Not Connected (DHT11 has 4 pins, pin 3 is NC)
-- **GND:** Ground
-- A **$10\\,k\\Omega$ pull-up resistor** is needed between VCC and DATA pin
+If an exam asks for a high-accuracy, wide-range sensor, choose the DHT22. If asked for a cheap, indoor sensor, choose DHT11.
 
-### Applications
-- Weather stations
-- Home automation (HVAC control)
-- Environmental monitoring
-- Agriculture (greenhouse monitoring)
-- Industrial temperature control
+## Quick Revision
 
----
+| Sensor/Concept | Key Idea |
+|----------------|----------|
+| Analog Signal | Continuous values (e.g., Voice) |
+| Digital Signal | Discrete values (0 or 1) |
+| ADC | Converts Analog to Digital |
+| IR Sensor | Outputs LOW when obstacle detected |
+| LDR | Resistance drops in bright light |
+| Ultrasonic | Measures distance using sound echoes |
+| DHT11/22 | Measures Temp and Humidity |
 
-## Practice Questions
+## Final Summary Table
 
-### Conceptual Questions
-1. Differentiate between analog and digital signals with examples.
-2. Explain the pin configuration of Arduino UNO board.
-3. What is the resolution of Arduino ADC? How many discrete levels can it represent?
-4. Explain the working principle of an IR sensor.
-5. What is an LDR? Explain how its resistance varies with light intensity.
-6. Explain the basic principle of an ultrasonic sensor for distance measurement.
-7. Compare DHT11 and DHT22 temperature sensors.
-8. What is PWM? Which Arduino pins support it?
+| Formula/Rule | Equation/Value |
+|--------------|----------------|
+| ADC Value | $(V_{in} / V_{ref}) \\times 1023$ |
+| LDR Voltage | $V_{out} = V_{in} \\times (R / (R+R_{ldr}))$ |
+| Distance | $d = (v \\times t) / 2$ |
+| Speed of Sound | $0.0343\\,cm/\\mu s$ |
+| UNO ADC bits | 10 bits |
 
-### Numerical Problems
-1. If an analog sensor gives $3.7\\,V$ output, what will be the ADC reading on Arduino UNO?
-2. An ultrasonic sensor echo pin is HIGH for $1160\\,\\mu s$. Calculate the distance of the object.
-3. In an LDR voltage divider circuit, $V_{in} = 5\\,V$, $R = 10\\,k\\Omega$, and $R_{LDR} = 5\\,k\\Omega$ in light. Find $V_{out}$.
-4. If Arduino's ADC reads a value of 768, what is the corresponding voltage?
-5. An ultrasonic sensor measures a distance of $25\\,cm$. What is the echo pulse duration?`;
+## Self Assessment
+
+1 Calculate the digital ADC value on an Arduino UNO if an analog sensor outputs $1.2\\,V$.
+2 Explain the difference between the \`setup()\` and \`loop()\` functions in Arduino.
+3 Why do we need a voltage divider circuit when using an LDR?
+4 An ultrasonic sensor's echo takes $1000\\,\\mu s$ to return. Calculate the distance in cm.
+5 Detail the four pins of the HC-SR04 ultrasonic sensor and their functions.
+`;
