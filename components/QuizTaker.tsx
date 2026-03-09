@@ -7,6 +7,9 @@ import jsPDF from 'jspdf';
 import { showToast } from './Toast.tsx';
 import html2canvas from 'html2canvas';
 
+import { SYLLABUS_DATA } from '../data/syllabusData.ts';
+
+
 // Static Bank - keeping this for fallback/demo
 const PEL130_STATIC_BANK = [
   { unit: 1, question: "Fill in the blank with correct adjective order. I have bought a _________ bag.", options: ["Tiny red Prada", "Red tiny Prada", "Prada red tiny", "Prada tiny red"], answer: "Tiny red Prada" },
@@ -53,18 +56,13 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const loadValidSubjects = async () => {
     setInitializing(true);
     try {
-      const allFiles = await NexusServer.fetchFiles('All');
-      const syllabusFiles = allFiles.filter(f =>
-        (f.name.toLowerCase().includes('syllabus') ||
-          (f.type && f.type.toLowerCase().includes('syllabus'))) &&
-        f.status === 'approved'
-      );
       const subjectsMap = new Map<string, SubjectWithSyllabus>();
-      syllabusFiles.forEach(file => {
-        const key = file.subject.trim().toUpperCase();
-        if (!subjectsMap.has(key)) {
-          subjectsMap.set(key, { id: file.id, name: file.subject, syllabusFile: file });
-        }
+      Object.keys(SYLLABUS_DATA).forEach((subjectName, index) => {
+        subjectsMap.set(subjectName, {
+          id: `STATIC_SUB_${index}`,
+          name: subjectName,
+          syllabusFile: null as any
+        });
       });
       setSubjectsWithSyllabi(Array.from(subjectsMap.values()).sort((a, b) => a.name.localeCompare(b.name)));
     } catch (err) {
@@ -117,14 +115,8 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
 
       // 3. AI Generation
       setStatus('Analyzing syllabus document...');
-      const syllabusFile = selectedSubject.syllabusFile;
-      if (!syllabusFile || !syllabusFile.storage_path) throw new Error("Syllabus file not found.");
-
-      const url = await NexusServer.getFileUrl(syllabusFile.storage_path);
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const file = new File([blob], "syllabus.pdf", { type: "application/pdf" });
-      const syllabusText = await extractTextFromPdf(file);
+      const syllabusText = SYLLABUS_DATA[selectedSubject.name];
+      if (!syllabusText) throw new Error("Syllabus text not found for " + selectedSubject.name);
 
       setStatus(`AI is generating questions for Units: ${selectedUnits.join(', ')}...`);
       const questions = await generateQuizFromSyllabus(selectedSubject.name, syllabusText, selectedUnits);
