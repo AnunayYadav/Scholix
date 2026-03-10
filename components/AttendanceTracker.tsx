@@ -6,15 +6,17 @@ interface Subject {
   name: string;
   present: number;
   total: number;
+  dutyLeaves?: number;
   goal: number;
   archived?: boolean;
 }
 
 interface HistoryItem {
   id: string;
-  type: 'present' | 'absent';
+  type: 'present' | 'absent' | 'duty';
   prevPresent: number;
   prevTotal: number;
+  prevDutyLeaves: number;
   timestamp: number;
 }
 
@@ -43,6 +45,7 @@ const AttendanceTracker: React.FC = () => {
         const parsed = JSON.parse(saved);
         setSubjects(parsed.map((s: any) => ({
           ...s,
+          dutyLeaves: s.dutyLeaves || 0,
           goal: s.goal || 75,
           archived: !!s.archived
         })));
@@ -78,6 +81,7 @@ const AttendanceTracker: React.FC = () => {
     name: '',
     present: '0',
     total: '0',
+    dutyLeaves: '0',
     goal: '75'
   });
 
@@ -105,6 +109,7 @@ const AttendanceTracker: React.FC = () => {
     setShowValidation(false);
     const present = parseInt(newSub.present) || 0;
     const total = parseInt(newSub.total) || 0;
+    const dutyLeaves = parseInt(newSub.dutyLeaves) || 0;
     const goal = parseInt(newSub.goal) || 75;
 
     setSubjects(prev => [...prev, {
@@ -112,11 +117,12 @@ const AttendanceTracker: React.FC = () => {
       name: newSub.name,
       present: Math.min(present, total),
       total: total,
+      dutyLeaves: dutyLeaves,
       goal: goal,
       archived: false
     }]);
 
-    setNewSub({ name: '', present: '0', total: '0', goal: '75' });
+    setNewSub({ name: '', present: '0', total: '0', dutyLeaves: '0', goal: '75' });
   };
 
   const handleEdit = (sub: Subject, e: React.MouseEvent) => {
@@ -158,7 +164,7 @@ const AttendanceTracker: React.FC = () => {
     setWipingAll(false);
   };
 
-  const updateAttendance = (id: string, type: 'present' | 'absent', e: React.MouseEvent) => {
+  const updateAttendance = (id: string, type: 'present' | 'absent' | 'duty', e: React.MouseEvent) => {
     e.stopPropagation();
     setSubjects(prevSubjects => {
       const subject = prevSubjects.find(s => s.id === id);
@@ -168,12 +174,19 @@ const AttendanceTracker: React.FC = () => {
           type,
           prevPresent: subject.present,
           prevTotal: subject.total,
+          prevDutyLeaves: subject.dutyLeaves || 0,
           timestamp: Date.now()
         }, ...prev].slice(0, 50));
       }
 
       return prevSubjects.map(s => {
         if (s.id === id) {
+          if (type === 'duty') {
+            return {
+              ...s,
+              dutyLeaves: (s.dutyLeaves || 0) + 1
+            };
+          }
           return {
             ...s,
             present: type === 'present' ? s.present + 1 : s.present,
@@ -197,7 +210,8 @@ const AttendanceTracker: React.FC = () => {
         return {
           ...s,
           present: action.prevPresent,
-          total: action.prevTotal
+          total: action.prevTotal,
+          dutyLeaves: action.prevDutyLeaves
         };
       }
       return s;
@@ -208,23 +222,24 @@ const AttendanceTracker: React.FC = () => {
 
   const calculateStats = (s: Subject) => {
     const goal = s.goal || 75;
-    const percentage = s.total === 0 ? 0 : (s.present / s.total) * 100;
+    const effectivePresent = Math.min(s.present + (s.dutyLeaves || 0), s.total);
+    const percentage = s.total === 0 ? 0 : (effectivePresent / s.total) * 100;
 
     let needed = 0;
     if (percentage < goal && goal < 100) {
-      needed = Math.ceil(((goal / 100) * s.total - s.present) / (1 - (goal / 100)));
+      needed = Math.ceil(((goal / 100) * s.total - effectivePresent) / (1 - (goal / 100)));
     } else if (percentage < goal && goal === 100) {
       needed = 999;
     }
 
     let skippable = 0;
     if (percentage >= goal && goal > 0) {
-      skippable = Math.floor((100 * s.present - goal * s.total) / goal);
+      skippable = Math.floor((100 * effectivePresent - goal * s.total) / goal);
     } else if (percentage >= goal && goal === 0) {
       skippable = 999;
     }
 
-    return { percentage, needed, skippable, goal };
+    return { percentage, needed, skippable, goal, effectivePresent };
   };
 
   const filteredSubjects = subjects.filter(s => showArchived ? s.archived : !s.archived);
@@ -233,7 +248,7 @@ const AttendanceTracker: React.FC = () => {
     <div className="max-w-5xl mx-auto space-y-6 md:space-y-8 animate-fade-in pb-24 px-4 md:px-0">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
         <div>
-          <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-2 tracking-tighter">Attendance <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Tracker</span></h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Attendance <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Tracker</span></h2>
           <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-medium tracking-tight">Keep track of your classes and attendance.</p>
         </div>
 
@@ -279,8 +294,8 @@ const AttendanceTracker: React.FC = () => {
 
       <div className="glass-panel p-5 md:p-8 rounded-[32px] md:rounded-[40px] bg-white dark:bg-[#0a0a0a]/50 border border-slate-200 dark:border-white/5 shadow-2xl relative z-0">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 items-end">
-          <div className="md:col-span-4">
-            <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2 ml-1 tracking-widest">
+          <div className="md:col-span-3">
+            <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2 ml-1">
               Subject Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -298,7 +313,7 @@ const AttendanceTracker: React.FC = () => {
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2 ml-1 tracking-widest">Present / Total</label>
+            <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2 ml-1">Present / Total</label>
             <div className="flex items-center space-x-2">
               <input
                 type="number" placeholder="P" value={newSub.present}
@@ -314,17 +329,25 @@ const AttendanceTracker: React.FC = () => {
             </div>
           </div>
           <div className="md:col-span-2">
-            <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2 ml-1 tracking-widest">Goal %</label>
+            <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2 ml-1">Initial DL</label>
+            <input
+              type="number" placeholder="0" value={newSub.dutyLeaves}
+              onChange={(e) => setNewSub({ ...newSub, dutyLeaves: e.target.value })}
+              className="w-full bg-slate-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-5 py-3.5 md:py-4 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all text-sm text-center font-bold shadow-inner"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2 ml-1">Goal %</label>
             <input
               type="number" placeholder="75" value={newSub.goal}
               onChange={(e) => setNewSub({ ...newSub, goal: e.target.value })}
               className="w-full bg-slate-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-5 py-3.5 md:py-4 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all text-sm text-center font-bold shadow-inner"
             />
           </div>
-          <div className="md:col-span-3">
+          <div className="md:col-span-2">
             <button
               onClick={addSubject}
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3.5 md:py-[1.15rem] rounded-2xl font-black text-[11px] sm:text-xs uppercase tracking-widest transition-all shadow-xl shadow-orange-600/20 active:scale-95 flex items-center justify-center whitespace-nowrap"
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3.5 md:py-[1.15rem] rounded-2xl font-bold text-[13px] tracking-tight transition-all shadow-xl shadow-orange-600/20 active:scale-95 flex items-center justify-center whitespace-nowrap"
             >
               Track Subject
             </button>
@@ -362,12 +385,12 @@ const AttendanceTracker: React.FC = () => {
                 {/* Top Section: Name and Percentage */}
                 <div className="flex justify-between items-start mb-2.5">
                   <div className="space-y-0.5">
-                    <h3 className="text-base sm:text-lg md:text-xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none truncate max-w-[70px] sm:max-w-none">
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-slate-800 dark:text-white tracking-tight truncate max-w-[70px] sm:max-w-none">
                       {sub.name}
                     </h3>
                     <div className="flex items-center gap-2">
                       <span className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded text-[11px] sm:text-xs font-medium text-slate-500">
-                        {sub.present}/{sub.total} S
+                        {sub.present}{sub.dutyLeaves ? `+${sub.dutyLeaves}` : ''}/{sub.total} S
                       </span>
                     </div>
                   </div>
@@ -375,7 +398,7 @@ const AttendanceTracker: React.FC = () => {
                   <div className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl ${accentBg} border border-transparent group-hover:border-current/10 transition-all`}>
                     <span className={`${accentColor} text-base sm:text-lg md:text-xl font-bold tracking-tight`}>
                       {percentage.toFixed(1)}
-                      <span className="text-[11px] sm:text-xs opacity-40 ml-0.5 font-bold">%</span>
+                      <span className="text-[11px] sm:text-xs opacity-60 ml-0.5 font-semibold">%</span>
                     </span>
                   </div>
                 </div>
@@ -383,8 +406,8 @@ const AttendanceTracker: React.FC = () => {
                 {/* Progress Bar Section */}
                 <div className="mb-4">
                   <div className="flex justify-between items-center mb-1.5 px-0.5">
-                    <p className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest">PROGRESS</p>
-                    <p className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest">GOAL: {sub.goal}%</p>
+                    <p className="text-[11px] sm:text-xs font-semibold text-slate-400">Progress</p>
+                    <p className="text-[11px] sm:text-xs font-semibold text-orange-600">Goal: {sub.goal}%</p>
                   </div>
                   <div className="h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden relative">
                     {/* Goal Marker */}
@@ -407,20 +430,27 @@ const AttendanceTracker: React.FC = () => {
 
                 {/* Action Buttons */}
                 {!showArchived && (
-                  <div className="grid grid-cols-2 gap-1.5 mb-3.5">
+                  <div className="grid grid-cols-3 gap-1.5 mb-3.5">
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'present', e)}
-                      className="group/btn h-7 bg-white dark:bg-white text-black rounded-full font-black text-[11px] sm:text-xs uppercase tracking-widest hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center justify-center gap-1 border-none"
+                      className="group/btn h-8 bg-white dark:bg-white text-black rounded-full font-semibold text-[11px] sm:text-xs hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center justify-center gap-1.5 border-none px-2 shadow-sm"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5 text-emerald-600"><path d="M20 6L9 17l-5-5" /></svg>
-                      PRESENT
+                      Present
+                    </button>
+                    <button
+                      onClick={(e) => updateAttendance(sub.id, 'duty', e)}
+                      className="group/btn h-8 bg-orange-100/50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-full font-semibold text-[11px] sm:text-xs hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center justify-center gap-1.5 border border-orange-200/50 dark:border-orange-500/20 px-2 shadow-sm"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                      DL
                     </button>
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'absent', e)}
-                      className="group/btn h-7 bg-slate-100/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-full font-black text-[11px] sm:text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 hover:scale-[1.05] active:scale-[0.95] transition-all border border-slate-200/50 dark:border-white/10 flex items-center justify-center gap-1"
+                      className="group/btn h-8 bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-full font-semibold text-[11px] sm:text-xs hover:bg-slate-100 dark:hover:bg-white/10 hover:scale-[1.05] active:scale-[0.95] transition-all border border-slate-200/50 dark:border-white/10 flex items-center justify-center gap-1.5 px-2 shadow-sm"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5 opacity-50"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                      ABSENT
+                      Absent
                     </button>
                   </div>
                 )}
@@ -543,14 +573,25 @@ const AttendanceTracker: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2 ml-1">Target (%)</label>
-                <input
-                  type="number"
-                  value={editingSubject.goal}
-                  onChange={(e) => setEditingSubject({ ...editingSubject, goal: parseInt(e.target.value) || 0 })}
-                  className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white text-center"
-                />
+              <div className="grid grid-cols-2 gap-3 md:gap-4">
+                <div>
+                  <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2 ml-1">Duty Leaves</label>
+                  <input
+                    type="number"
+                    value={editingSubject.dutyLeaves || 0}
+                    onChange={(e) => setEditingSubject({ ...editingSubject, dutyLeaves: parseInt(e.target.value) || 0 })}
+                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white text-center"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2 ml-1">Target (%)</label>
+                  <input
+                    type="number"
+                    value={editingSubject.goal}
+                    onChange={(e) => setEditingSubject({ ...editingSubject, goal: parseInt(e.target.value) || 0 })}
+                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white text-center"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-3 md:gap-4 pt-2">

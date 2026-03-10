@@ -70,6 +70,26 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     return Array.from(units).sort((a, b) => a - b);
   }, [selectedSubject]);
 
+  const sectionInfo = useMemo(() => {
+    let mcqCount = 0;
+    let subjCount = 0;
+    const mapping = quizQuestions.map(q => {
+      if (q.type === 'subjective') {
+        subjCount++;
+        return subjCount;
+      } else {
+        mcqCount++;
+        return mcqCount;
+      }
+    });
+
+    return {
+      mapping,
+      totalMCQs: mcqCount,
+      totalSubjs: subjCount
+    };
+  }, [quizQuestions]);
+
   const hasMCQs = useMemo(() => {
     if (!selectedSubject) return false;
     return (QUIZTAKER_DATA[selectedSubject.name]?.mcqs?.length || 0) > 0;
@@ -300,7 +320,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
               {isSubjectiveSection ? 'Subjective Section' : 'MCQ Section'}
             </h2>
             <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-              Question <span className="text-slate-900 dark:text-white">{currentQuestionIdx + 1}</span> / {quizQuestions.length}
+              Question <span className="text-slate-900 dark:text-white">{sectionInfo.mapping[currentQuestionIdx]}</span> / {isSubjectiveSection ? sectionInfo.totalSubjs : sectionInfo.totalMCQs}
             </p>
           </div>
 
@@ -330,7 +350,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
             <div className="glass-panel p-10 md:p-12 rounded-[48px] shadow-2xl bg-white/80 dark:bg-slate-900/50 border-slate-200 dark:border-white/5 relative">
               <div className="space-y-10">
                 <div className="flex items-center gap-3">
-                  <span className="bg-orange-600/10 dark:bg-orange-600/20 text-orange-600 dark:text-orange-500 px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest">Question {currentQuestionIdx + 1}</span>
+                  <span className="bg-orange-600/10 dark:bg-orange-600/20 text-orange-600 dark:text-orange-500 px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest">Question {sectionInfo.mapping[currentQuestionIdx]}</span>
                   <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest">Unit {q.unit}</span>
                 </div>
 
@@ -465,7 +485,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                         }}
                         className={`h-11 w-full rounded-xl flex items-center justify-center text-xs font-bold transition-all border-2 ${isCurrent ? 'border-orange-400' : 'border-transparent'} ${bgColor}`}
                       >
-                        {idx + 1}
+                        {sectionInfo.mapping[idx]}
                       </button>
                     );
                   })}
@@ -501,7 +521,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                           }}
                           className={`h-11 w-full rounded-xl flex items-center justify-center text-xs font-bold transition-all border-2 ${isCurrent ? 'border-orange-400' : 'border-transparent'} ${bgColor}`}
                         >
-                          {idx + 1}
+                          {sectionInfo.mapping[idx]}
                         </button>
                       );
                     })}
@@ -666,8 +686,8 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   return (
     <div className="max-w-4xl mx-auto space-y-12 animate-fade-in pb-20 px-4 md:px-0">
       <header className="text-center space-y-3">
-        <h2 className="text-2xl md:text-4xl font-semibold text-slate-900 dark:text-white tracking-tighter leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Portal</span></h2>
-        <p className="text-slate-500 font-medium text-xs">AI-Powered Assessment Engine</p>
+        <h2 className="text-2xl md:text-4xl font-semibold text-slate-900 dark:text-white tracking-tighter leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Taker</span></h2>
+        <p className="text-slate-500 font-medium text-xs">Comprehensive Assessment Engine</p>
       </header>
 
       {error && (
