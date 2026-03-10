@@ -39,7 +39,7 @@ const StatCounter: React.FC<{ target: number; label: string; subLabel: string; a
   return (
     <div className="space-y-1">
       <p className={`text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] ${accentColor} opacity-80`}>{label}</p>
-      <h4 className="text-5xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">
+      <h4 className="text-4xl lg:text-5xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">
         {count.toLocaleString()}{(!label.includes('Global') && !isAdmin) ? '' : '+'}
       </h4>
       <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] mt-2">{subLabel}</p>
@@ -128,7 +128,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
           <div className="lg:col-span-7 space-y-10">
             <div>
               <h3 className="text-[11px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.3em] mb-6">Architect & Heritage</h3>
-              <p className="text-4xl md:text-6xl font-black tracking-tighter mb-4 leading-none text-slate-800 dark:text-white">
+              <p className="text-4xl lg:text-[42px] font-black tracking-tighter mb-4 leading-tight text-slate-800 dark:text-white">
                 <span className="whitespace-nowrap">Made with <span className="text-orange-500 underline decoration-white/10 underline-offset-8">Purpose</span>.</span><br />
                 <span className="whitespace-nowrap">For the <span className="text-orange-500">Future</span>.</span>
               </p>

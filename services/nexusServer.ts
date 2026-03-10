@@ -157,16 +157,25 @@ class NexusServer {
 
     // 1. Raw View Tracking (Every reload/view)
     try {
-      await client.from('site_views').insert([{}]);
-    } catch (e) { }
+      const { error } = await client.from('site_views').insert([{}]);
+      if (error) console.warn("site_views tracking failed:", error.message);
+    } catch (e) {
+      console.warn("site_views tracking exception:", e);
+    }
 
     // 2. Session-based Visitor Tracking
     const SESSION_KEY = 'nexus_session_logged';
     if (!sessionStorage.getItem(SESSION_KEY)) {
       try {
-        await client.from('site_visits').insert([{}]);
-        sessionStorage.setItem(SESSION_KEY, 'true');
-      } catch (e) { }
+        const { error } = await client.from('site_visits').insert([{}]);
+        if (error) {
+          console.warn("site_visits tracking failed:", error.message);
+        } else {
+          sessionStorage.setItem(SESSION_KEY, 'true');
+        }
+      } catch (e) {
+        console.warn("site_visits tracking exception:", e);
+      }
     }
   }
 
@@ -205,10 +214,15 @@ class NexusServer {
     const isNewVisitor = !sessionStorage.getItem(SESSION_KEY);
 
     try {
-      await client.rpc('increment_page_stat', { p_path: path, p_is_new_visitor: isNewVisitor });
-      if (isNewVisitor) sessionStorage.setItem(SESSION_KEY, 'true');
+      const { error } = await client.rpc('increment_page_stat', { p_path: path, p_is_new_visitor: isNewVisitor });
+      if (error) {
+        console.warn("Page tracking legacy fallback (RPC error):", error.message);
+        await this.recordVisit();
+      } else if (isNewVisitor) {
+        sessionStorage.setItem(SESSION_KEY, 'true');
+      }
     } catch (e) {
-      console.warn("Page tracking legacy fallback:", e);
+      console.warn("Page tracking legacy fallback exception:", e);
       // Fallback if RPC is not available (simple insert into site_views)
       await this.recordVisit();
     }
