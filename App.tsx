@@ -20,6 +20,7 @@ import RoommateFinder from './components/RoommateFinder.tsx';
 import EmergencyContacts from './components/EmergencyContacts.tsx';
 import AIToolsDirectory from './components/AIToolsDirectory.tsx';
 import AdminStats from './components/AdminStats.tsx';
+import NexusVoiceAssistant from './components/NexusVoiceAssistant.tsx';
 import { ModuleType, UserProfile, TimetableData } from './types.ts';
 import NexusServer from './services/nexusServer.ts';
 import { Analytics } from "@vercel/analytics/react";
@@ -594,6 +595,8 @@ const AppContent: React.FC = () => {
         </div>
         {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       </main>
+      {/* Persistent AI Voice Assistant */}
+      <NexusVoiceAssistant userProfile={userProfile} />
       <Analytics />
       <SpeedInsights />
       <ToastContainer />
