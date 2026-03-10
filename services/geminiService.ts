@@ -1,6 +1,6 @@
 
 import { Type } from "@google/genai";
-import { ResumeAnalysisResult, DaySchedule, QuizQuestion } from "../types.ts";
+import { ResumeAnalysisResult, DaySchedule, QuizQuestion, UserProfile } from "../types.ts";
 
 /**
  * Global request queue state to prevent 429s (Too Many Requests)
@@ -437,6 +437,26 @@ export const generateSubjectOriginals = async (subjectName: string, syllabusText
 
   const data = await callGeminiProxy("GENERATE_SUBJECT_ORIGINALS", { prompt, schema });
   return JSON.parse(data.text);
+};/**
+ * Real-time Chat with Nexus AI (intended for Voice/Text interaction)
+ */
+export const chatWithNexusAI = async (userInput: string, userProfile?: UserProfile | null) => {
+  const context = userProfile 
+    ? `The user's username is ${userProfile.username}, a student at LPU. User profile details: ${JSON.stringify(userProfile)}.`
+    : "The user is an anonymous student at LPU (Lovely Professional University).";
+  
+  const prompt = `
+    Context: You are the Nexus AI Teacher for LPU (Lovely Professional University) students. 
+    LPU is in Phagwara, Punjab. 
+    Your goal is to be helpful, concise, and professional. 
+    Provide short, voice-friendly answers (limit to 1-3 sentences unless asked for more details).
+    ${context}
+    
+    User message: "${userInput}"
+    Assistant response:
+  `;
+
+  // General action for voice-to-text chat
+  const responseData = await callGeminiProxy("VOICE_CHAT", { prompt });
+  return responseData.text;
 };
-
-
