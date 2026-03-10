@@ -913,10 +913,10 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                         'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 hover:border-orange-500/30'
                       }`}
                   >
-                    {!isAvailable && (
+                    {selectedSubject && !isAvailable && (
                       <span className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-200 dark:bg-white/10 text-slate-500 dark:text-slate-400 text-[10px] font-medium border border-slate-300/50 dark:border-white/10">
                         <svg viewBox="0 0 24 24" fill="currentColor" className="w-2.5 h-2.5"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm3 8H9V7a3 3 0 0 1 6 0v3z" /></svg>
-                        Locked
+                        Coming soon
                       </span>
                     )}
                     <span className={`text-2xl font-bold tracking-tight ${isSelected ? 'text-orange-600' : isAvailable ? 'text-slate-400 dark:text-slate-600' : 'text-slate-400 dark:text-slate-600'}`}>0{u}</span>
