@@ -6,10 +6,30 @@ import { extractTextFromPdf } from '../services/pdfUtils.ts';
 import jsPDF from 'jspdf';
 import { showToast } from './Toast.tsx';
 import html2canvas from 'html2canvas';
+import 'katex/dist/katex.min.css';
+import { InlineMath, BlockMath } from 'react-katex';
 
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
 import { QUIZTAKER_DATA } from '../data/quiztaker/quizData.ts';
 
+const parseText = (text: string | undefined) => {
+  if (!text) return null;
+  const parts = text.split(/(\$\$[\s\S]*?\$\$|\$.*?\$|\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('$$') && part.endsWith('$$')) {
+      const math = part.slice(2, -2);
+      return <div key={i} className="my-2 overflow-x-auto flex justify-center"><BlockMath math={math} /></div>;
+    }
+    if (part.startsWith('$') && part.endsWith('$')) {
+      const math = part.slice(1, -1);
+      return <InlineMath key={i} math={math} />;
+    }
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="font-bold">{part.slice(2, -2)}</strong>;
+    }
+    return <React.Fragment key={i}>{part}</React.Fragment>;
+  });
+};
 
 // Static Bank - keeping this for fallback/demo
 const PEL130_STATIC_BANK = [
@@ -57,6 +77,8 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [timeLeft, setTimeLeft] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
   const [isPracticeMode, setIsPracticeMode] = useState(false);
+  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
 
   const resultRef = useRef<HTMLDivElement>(null);
 
@@ -69,6 +91,33 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     (data.subjective || []).forEach(q => units.add(q.unit));
     return Array.from(units).sort((a, b) => a - b);
   }, [selectedSubject]);
+
+  const availableTopicsByUnit = useMemo(() => {
+    if (!selectedSubject) return {};
+    const data = QUIZTAKER_DATA[selectedSubject.name];
+    if (!data) return {};
+    const topicsMap: Record<number, Set<string>> = {};
+    const filterByUnits = (qs: QuizQuestion[]) => selectedUnits.length > 0 ? qs.filter(q => selectedUnits.includes(q.unit)) : qs;
+    
+    filterByUnits(data.mcqs || []).forEach(q => {
+      if (q.topic) {
+        if (!topicsMap[q.unit]) topicsMap[q.unit] = new Set();
+        topicsMap[q.unit].add(q.topic);
+      }
+    });
+    filterByUnits(data.subjective || []).forEach(q => {
+      if (q.topic) {
+        if (!topicsMap[q.unit]) topicsMap[q.unit] = new Set();
+        topicsMap[q.unit].add(q.topic);
+      }
+    });
+
+    const result: Record<number, string[]> = {};
+    Object.keys(topicsMap).forEach(k => {
+      result[parseInt(k)] = Array.from(topicsMap[parseInt(k)]).sort();
+    });
+    return result;
+  }, [selectedSubject, selectedUnits]);
 
   const sectionInfo = useMemo(() => {
     let mcqCount = 0;
@@ -113,7 +162,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     } else if (timeLeft === 0 && timerActive) {
       setQuizCompleted(true);
       setTimerActive(false);
-      showToast("Time is up!", "warning");
+      showToast("Time is up!", "info");
     }
     return () => clearInterval(timer);
   }, [timerActive, timeLeft]);
@@ -165,8 +214,30 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
       let finalSelection: QuizQuestion[] = [];
 
       const filterByUnits = (qs: QuizQuestion[]) => (qs || []).filter(q => selectedUnits.includes(q.unit));
-      const availableMcqs = filterByUnits(subjectData.mcqs || []);
-      const availableSubj = filterByUnits(subjectData.subjective || []);
+      let availableMcqs = filterByUnits(subjectData.mcqs || []);
+      let availableSubj = filterByUnits(subjectData.subjective || []);
+
+      if (selectedDifficulties.length > 0) {
+        availableMcqs = availableMcqs.filter(q => selectedDifficulties.includes(q.difficulty || 'medium'));
+        availableSubj = availableSubj.filter(q => selectedDifficulties.includes(q.difficulty || 'medium'));
+      }
+      if (selectedTopics.length > 0) {
+        const unitsWithSpecificTopicsSelected = new Set<number>();
+        [...(subjectData.mcqs || []), ...(subjectData.subjective || [])].forEach(q => {
+          if (q.topic && selectedTopics.includes(q.topic)) {
+            unitsWithSpecificTopicsSelected.add(q.unit);
+          }
+        });
+
+        availableMcqs = availableMcqs.filter(q => {
+          if (!unitsWithSpecificTopicsSelected.has(q.unit)) return true;
+          return selectedTopics.includes(q.topic || '');
+        });
+        availableSubj = availableSubj.filter(q => {
+          if (!unitsWithSpecificTopicsSelected.has(q.unit)) return true;
+          return selectedTopics.includes(q.topic || '');
+        });
+      }
 
       // Independent selection based on individual counts
       const pickedMcq = [...availableMcqs].sort(() => 0.5 - Math.random()).slice(0, numMCQ);
@@ -349,13 +420,27 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
           <div className="lg:col-span-8 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
             <div className="glass-panel p-10 md:p-12 rounded-[48px] shadow-2xl bg-white/80 dark:bg-slate-900/50 border-slate-200 dark:border-white/5 relative">
               <div className="space-y-10">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center flex-wrap gap-3">
                   <span className="bg-orange-600/10 dark:bg-orange-600/20 text-orange-600 dark:text-orange-500 px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest">Question {sectionInfo.mapping[currentQuestionIdx]}</span>
                   <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest">Unit {q.unit}</span>
+                  {q.difficulty && (
+                    <span className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest ${
+                      q.difficulty === 'easy' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
+                      q.difficulty === 'medium' ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' :
+                      'bg-red-500/10 text-red-600 dark:text-red-400'
+                    }`}>
+                      {q.difficulty}
+                    </span>
+                  )}
+                  {q.topic && (
+                    <span className="bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 px-4 py-1.5 rounded-xl text-[10px] font-bold tracking-widest">
+                      {q.topic}
+                    </span>
+                  )}
                 </div>
 
                 <h3 className="text-lg md:text-xl font-semibold leading-relaxed text-slate-900 dark:text-white">
-                  {q.question}
+                  {parseText(q.question)}
                 </h3>
 
                 {q.type === 'subjective' ? (
@@ -384,7 +469,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                           <div className="w-2 h-2 rounded-full bg-emerald-500" />
                           <h4 className="text-xs font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-widest">Model Solution</h4>
                         </div>
-                        <p className="text-base font-medium text-slate-700 dark:text-slate-300 leading-relaxed border-l-4 border-emerald-500/30 dark:border-emerald-500/30 pl-6">{q.explanation}</p>
+                        <div className="text-base font-medium text-slate-700 dark:text-slate-300 leading-relaxed border-l-4 border-emerald-500/30 dark:border-emerald-500/30 pl-6">{parseText(q.explanation)}</div>
                       </div>
                     )}
                   </div>
@@ -411,7 +496,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                           </div>
                           <span className="font-medium text-[13px] md:text-sm tracking-tight flex items-center gap-2">
                             <span className="text-slate-400 dark:text-slate-500 font-bold">{String.fromCharCode(65 + i)}.</span>
-                            {opt}
+                            <span className="flex-1">{parseText(opt)}</span>
                           </span>
                         </button>
                       );
@@ -420,7 +505,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                     {isShowingExplanation && (
                       <div className="p-8 mt-6 bg-orange-600/[0.03] dark:bg-orange-600/5 border border-orange-500/20 dark:border-orange-600/10 rounded-[32px] animate-in fade-in slide-in-from-top-4 duration-500">
                         <p className="text-[10px] font-bold text-orange-600 uppercase tracking-widest mb-3">Expert Insights</p>
-                        <p className="text-base font-medium text-slate-600 dark:text-slate-400 leading-relaxed italic border-l-2 border-orange-500/30 dark:border-orange-600/30 pl-6">{q.explanation}</p>
+                        <div className="text-base font-medium text-slate-600 dark:text-slate-400 leading-relaxed italic border-l-2 border-orange-500/30 dark:border-orange-600/30 pl-6">{parseText(q.explanation)}</div>
                       </div>
                     )}
                   </div>
@@ -556,54 +641,73 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   if (quizCompleted || reviewMode) {
     const percentage = quizQuestions.length > 0 ? (score / quizQuestions.length) * 100 : 0;
     return (
-      <div className="max-w-5xl mx-auto py-12 space-y-10 animate-fade-in pb-32 px-4 md:px-0" ref={resultRef} id="quiz-result">
+      <div className="max-w-5xl mx-auto py-12 space-y-12 animate-fade-in pb-32 px-4 md:px-0" ref={resultRef} id="quiz-result">
         {/* Professional Result Header */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Score Card */}
-          <div className="lg:col-span-5 glass-panel p-10 rounded-[48px] bg-gradient-to-br from-slate-900 to-slate-800 text-white border-none shadow-2xl relative overflow-hidden flex flex-col items-center justify-center text-center">
-            <div className="relative z-10 space-y-4">
-              <p className="text-xs font-semibold text-orange-500">Performance Report</p>
-              <div className="flex items-baseline justify-center">
-                <span className="text-6xl md:text-7xl font-semibold tracking-tighter">{score}</span>
-                <span className="text-2xl font-medium opacity-40 ml-2">/ {quizQuestions.length}</span>
+          <div className="lg:col-span-5 relative overflow-hidden glass-panel rounded-[40px] p-10 flex flex-col items-center justify-center text-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white border border-white/10 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
+            <div className="relative z-10 space-y-6 w-full">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-2">
+                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                <span className="text-xs font-semibold text-slate-300 uppercase tracking-widest">Performance Report</span>
               </div>
-              <div className="inline-block px-6 py-2 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-md">
-                <p className="text-xs font-semibold leading-none">
-                  {percentage >= 80 ? '🎯 Mastered' : percentage >= 60 ? '⚡ Proficient' : '📚 Learning'}
+              
+              <div className="flex items-baseline justify-center">
+                <span className="text-7xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-slate-400">{score}</span>
+                <span className="text-3xl font-bold text-slate-500 ml-2">/ {quizQuestions.length}</span>
+              </div>
+              
+              <div className="inline-block px-8 py-3 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-md shadow-inner">
+                <p className="text-sm font-bold tracking-wide">
+                  {percentage >= 80 ? '🎯 Mastered Performance' : percentage >= 60 ? '⚡ Proficient Understanding' : '📚 Learning Phase'}
                 </p>
               </div>
-              <p className="text-[9px] font-medium text-slate-400 max-w-[200px] mx-auto leading-relaxed">
-                You've completed the assessment for <span className="text-white font-bold">{selectedSubject?.name}</span>.
+              
+              <p className="text-xs font-medium text-slate-400 max-w-[240px] mx-auto leading-relaxed pt-4 border-t border-white/10">
+                You've completed the assessment for <span className="text-white font-bold">{selectedSubject?.name || 'this test'}</span>.
               </p>
             </div>
-            {/* Background elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600/20 blur-[80px] rounded-full" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-600/10 blur-[80px] rounded-full" />
+            
+            {/* Immersive Background elements */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/20 blur-[100px] rounded-full mix-blend-screen" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/20 blur-[100px] rounded-full mix-blend-screen" />
+            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
           </div>
 
           {/* Detailed Breakdown */}
-          <div className="lg:col-span-7 glass-panel p-8 md:p-10 rounded-[48px] shadow-xl border-slate-100 dark:border-white/5 space-y-8">
+          <div className="lg:col-span-7 glass-panel p-8 md:p-10 rounded-[40px] shadow-xl bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 flex flex-col justify-between space-y-8">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-semibold text-slate-400">Unit Analysis</h3>
-              <button onClick={handleDownloadPDF} className="flex items-center gap-2 px-4 py-2 bg-orange-600/10 text-orange-600 rounded-xl text-xs font-semibold hover:bg-orange-600 hover:text-white transition-all">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Unit Analysis</h3>
+                <p className="text-xs font-medium text-slate-500 mt-1">Breakdown of your performance by topic</p>
+              </div>
+              <button onClick={handleDownloadPDF} className="group flex items-center gap-2 px-5 py-2.5 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 rounded-xl text-sm font-semibold hover:bg-orange-600 hover:text-white transition-all shadow-sm border border-orange-200 dark:border-orange-500/20 hover:border-orange-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 transition-transform group-hover:-translate-y-0.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
                 Export PDF
               </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-6 flex-1">
               {unitAnalysis.map((u, i) => (
-                <div key={i} className="group">
-                  <div className="flex justify-between items-end mb-2">
-                    <div>
-                      <span className="text-[11px] font-medium text-slate-500 block mb-0.5">Unit 0{u.unit}</span>
-                      <span className="text-sm font-semibold text-slate-900 dark:text-white">Conceptual Application</span>
+                <div key={i} className="group bg-slate-50 dark:bg-white/[0.02] p-4 rounded-2xl border border-slate-100 dark:border-white/5 transition-all hover:border-slate-300 dark:hover:border-white/10">
+                  <div className="flex justify-between items-end mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${u.accuracy >= 70 ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' : u.accuracy >= 40 ? 'bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400' : 'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400'}`}>
+                        0{u.unit}
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-0.5">Unit</span>
+                        <span className="text-sm md:text-base font-semibold text-slate-900 dark:text-white leading-tight block">Conceptual Application</span>
+                      </div>
                     </div>
-                    <span className="text-xs font-medium text-slate-400">{u.correct}/{u.total} Correct</span>
+                    <div className="text-right">
+                      <span className="text-lg font-bold text-slate-900 dark:text-white">{u.accuracy}%</span>
+                      <span className="text-xs font-medium text-slate-500 block">{u.correct}/{u.total} Correct</span>
+                    </div>
                   </div>
-                  <div className="h-2 w-full bg-slate-100 dark:bg-dark-800 rounded-full overflow-hidden">
+                  <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div
-                      className={`h-full transition-all duration-1000 ${u.accuracy >= 70 ? 'bg-emerald-500' : u.accuracy >= 40 ? 'bg-orange-500' : 'bg-red-500'}`}
+                      className={`h-full transition-all duration-1000 origin-left ${u.accuracy >= 70 ? 'bg-emerald-500' : u.accuracy >= 40 ? 'bg-orange-500' : 'bg-red-500'}`}
                       style={{ width: `${u.accuracy}%` }}
                     />
                   </div>
@@ -611,68 +715,125 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
               ))}
             </div>
 
-            <div className="pt-6 border-t border-slate-100 dark:border-white/5 flex flex-wrap gap-3">
+            <div className="pt-6 border-t border-slate-200 dark:border-white/10 flex flex-wrap gap-4">
               <button
                 onClick={handleGenerate}
-                className="flex-1 min-w-[140px] px-6 py-3.5 bg-orange-600 text-white rounded-2xl text-xs font-semibold shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none"
+                className="flex-1 min-w-[140px] px-6 py-4 bg-orange-600 text-white rounded-2xl text-sm font-semibold shadow-[0_8px_20px_-8px_#ea580c] hover:shadow-[0_8px_25px_-5px_#ea580c] hover:-translate-y-0.5 active:translate-y-0 transition-all border-none flex items-center justify-center gap-2"
               >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
                 Re-take Quiz
               </button>
               <button
                 onClick={() => { setQuizQuestions([]); setQuizCompleted(false); setSelectedSubject(null); }}
-                className="flex-1 min-w-[140px] px-6 py-3.5 bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white rounded-2xl text-xs font-semibold border border-slate-200 dark:border-white/10 hover:border-orange-500/50 hover:text-orange-600 transition-all"
+                className="flex-1 min-w-[140px] px-6 py-4 glass-panel bg-white/50 dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-2xl text-sm font-semibold border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-white/10 transition-all flex items-center justify-center gap-2"
               >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                 Return Home
               </button>
             </div>
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-4">
-            <h3 className="text-[10px] font-medium text-slate-500">Question Review</h3>
-            <span className="text-[9px] font-bold text-slate-400">{quizQuestions.length} Items</span>
+        {/* Question Review Section */}
+        <div className="space-y-8 pt-8 border-t border-slate-200 dark:border-white/10">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Question Review</h3>
+              <p className="text-sm font-medium text-slate-500 mt-1">Detailed evaluation of your answers</p>
+            </div>
+            <div className="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 inline-flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{quizQuestions.length} Items Total</span>
+            </div>
           </div>
-          <div className="grid grid-cols-1 gap-4">
+          
+          <div className="grid grid-cols-1 gap-6">
             {quizQuestions.map((q, i) => {
               const isSubjective = q.type === 'subjective';
               const isCorrect = !isSubjective && userAnswers[i] === q.correctAnswer;
+              
+              const statusColorOptions = isSubjective 
+                ? 'bg-orange-50 border-orange-200 dark:bg-orange-500/5 dark:border-orange-500/20 text-orange-600 dark:text-orange-400' 
+                : isCorrect 
+                  ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-500/5 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400' 
+                  : 'bg-red-50 border-red-200 dark:bg-red-500/5 dark:border-red-500/20 text-red-600 dark:text-red-400';
+              
+              const badgeColors = isSubjective 
+                ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 border-orange-200 dark:border-orange-500/30' 
+                : isCorrect 
+                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30' 
+                  : 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 border-red-200 dark:border-red-500/30';
+
               return (
-                <div key={i} className={`p-5 rounded-[24px] border transition-all ${isSubjective ? 'bg-orange-500/[0.02] border-orange-500/10' : isCorrect ? 'bg-emerald-500/[0.02] border-emerald-500/10' : 'bg-red-500/[0.02] border-red-500/10'}`}>
-                  <div className="flex items-start gap-4">
-                    <div className="flex-1 space-y-2.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`px-2 py-0.5 rounded-lg text-[7px] font-black uppercase tracking-widest ${isSubjective ? 'bg-orange-500/20 text-orange-600' : isCorrect ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`}>
-                          {isSubjective ? 'Subjective' : isCorrect ? 'Correct' : 'Incorrect'}
+                <div key={i} className={`p-6 md:p-8 rounded-[32px] border shadow-sm transition-all ${statusColorOptions}`}>
+                  <div className="flex flex-col space-y-5">
+                    
+                    {/* Header Row */}
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border ${badgeColors}`}>
+                        {isSubjective ? 'Subjective' : isCorrect ? 'Correct' : 'Incorrect'}
+                      </span>
+                      <span className="px-3 py-1 bg-white dark:bg-slate-800 rounded-lg text-[10px] font-bold text-slate-500 border border-slate-200 dark:border-slate-700 uppercase tracking-wider shadow-sm">
+                        Unit 0{q.unit}
+                      </span>
+                      {q.difficulty && (
+                        <span className="px-3 py-1 bg-white dark:bg-slate-800 rounded-lg text-[10px] font-bold text-slate-500 border border-slate-200 dark:border-slate-700 uppercase tracking-wider shadow-sm">
+                          {q.difficulty}
                         </span>
-                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Unit 0{q.unit}</span>
-                      </div>
-                      <h4 className="text-sm font-bold text-slate-800 dark:text-white leading-snug">{q.question}</h4>
-
-                      {!isSubjective ? (
-                        <div className="flex flex-wrap gap-x-6 gap-y-2 text-[10px]">
-                          <div>
-                            <span className="text-slate-400 font-bold block mb-0.5 uppercase text-[7px] tracking-widest">Your Answer</span>
-                            <span className={`font-bold ${isCorrect ? 'text-emerald-500' : 'text-red-500'}`}>{q.options?.[userAnswers[i]] || 'Skipped'}</span>
-                          </div>
-                          {!isCorrect && (
-                            <div>
-                              <span className="text-slate-400 font-bold block mb-0.5 uppercase text-[7px] tracking-widest">Correct Solution</span>
-                              <span className="font-bold text-emerald-500">{q.options?.[q.correctAnswer ?? 0]}</span>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-[10px]">
-                          <span className="text-slate-400 font-bold block mb-0.5 uppercase text-[7px] tracking-widest">Feedback</span>
-                          <span className="font-bold text-orange-600">Self-evaluated model answer check.</span>
-                        </div>
                       )}
+                    </div>
+                    
+                    {/* Question Text */}
+                    <h4 className="text-base md:text-lg font-bold text-slate-800 dark:text-slate-100 leading-relaxed">
+                      {parseText(q.question)}
+                    </h4>
 
-                      <div className="mt-2 p-3 bg-slate-50 dark:bg-white/[0.02] rounded-xl border border-slate-100 dark:border-white/5">
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium italic">"{q.explanation}"</p>
+                    {/* Options/Answers Row */}
+                    {!isSubjective ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                        <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5 text-slate-800 dark:text-slate-200">
+                          <span className="text-slate-500 dark:text-slate-400 font-bold block mb-1.5 uppercase text-[10px] tracking-widest flex items-center gap-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M20 6L9 17l-5-5" /></svg>
+                            Your Answer
+                          </span>
+                          <span className={`font-semibold text-sm ${isCorrect ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {userAnswers[i] !== undefined ? parseText(q.options?.[userAnswers[i]]) : 'Skipped'}
+                          </span>
+                        </div>
+                        {!isCorrect && (
+                          <div className="p-4 bg-emerald-50/50 dark:bg-emerald-500/10 rounded-2xl border border-emerald-100 dark:border-emerald-500/20 text-slate-800 dark:text-slate-200">
+                            <span className="text-emerald-600/70 dark:text-emerald-400/70 font-bold block mb-1.5 uppercase text-[10px] tracking-widest flex items-center gap-1">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                              Correct Solution
+                            </span>
+                            <span className="font-semibold text-sm text-emerald-700 dark:text-emerald-400">
+                              {parseText(q.options?.[q.correctAnswer ?? 0])}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5 mt-2">
+                        <span className="text-orange-500/70 dark:text-orange-400/70 font-bold block mb-1.5 uppercase text-[10px] tracking-widest flex items-center gap-1">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                          Feedback
+                        </span>
+                        <span className="font-semibold text-sm text-orange-700 dark:text-orange-400">
+                          Self-evaluated model answer check.
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Explanation Box */}
+                    <div className="mt-4 p-5 md:p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-white/5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                      <div className="flex items-center gap-2 mb-3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-slate-400"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Explanation</span>
+                      </div>
+                      <div className="text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                        {parseText(q.explanation)}
                       </div>
                     </div>
+
                   </div>
                 </div>
               );
@@ -733,10 +894,10 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
           {/* Step 2: Unit Selection */}
           <div className={`space-y-6 transition-all duration-700 ${!selectedSubject ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}>
             <div className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs transition-colors ${selectedUnits.length > 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-600/10 text-orange-600'}`}>
-                {selectedUnits.length > 0 ? '✓' : '2'}
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs transition-colors ${selectedUnits.length > 0 && selectedDifficulties.length > 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-600/10 text-orange-600'}`}>
+                {selectedUnits.length > 0 && selectedDifficulties.length > 0 ? '✓' : '2'}
               </div>
-              <label className="text-sm font-semibold text-slate-500 dark:text-slate-400">Select Units</label>
+              <label className="text-sm font-semibold text-slate-500 dark:text-slate-400">Select Units & Difficulty</label>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[1, 2, 3, 4, 5, 6].map(u => {
@@ -764,11 +925,39 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                 );
               })}
             </div>
+
+            <div className="pt-1">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {[
+                  { id: 'easy', num: 'L1', label: 'Easy', color: { bg: 'bg-emerald-500/10', border: 'border-emerald-500', text: 'text-emerald-600', subText: 'text-emerald-500', hover: 'hover:border-emerald-500/30' } },
+                  { id: 'medium', num: 'L2', label: 'Medium', color: { bg: 'bg-amber-500/10', border: 'border-amber-500', text: 'text-amber-600', subText: 'text-amber-500', hover: 'hover:border-amber-500/30' } },
+                  { id: 'hard', num: 'L3', label: 'Hard', color: { bg: 'bg-red-500/10', border: 'border-red-500', text: 'text-red-600', subText: 'text-red-500', hover: 'hover:border-red-500/30' } }
+                ].map(lvl => {
+                  const isSelected = selectedDifficulties.includes(lvl.id);
+                  const toggleDifficulty = (id: string) => {
+                    setSelectedDifficulties(prev => prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]);
+                  };
+                  return (
+                    <button
+                      key={lvl.id}
+                      onClick={() => toggleDifficulty(lvl.id)}
+                      className={`relative p-5 rounded-[28px] border transition-all flex flex-col items-center justify-center group ${
+                        isSelected ? `${lvl.color.bg} ${lvl.color.border} shadow-xl scale-105` :
+                        `bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 ${lvl.color.hover}`
+                      }`}
+                    >
+                      <span className={`text-xl font-bold tracking-tight ${isSelected ? lvl.color.text : 'text-slate-400 dark:text-slate-600'}`}>{lvl.num}</span>
+                      <span className={`text-[10px] font-medium mt-1 ${isSelected ? lvl.color.subText : 'text-slate-500 opacity-60'}`}>{lvl.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Step 3: Customization - Progressive Disclosure */}
-        {selectedUnits.length > 0 && (
+        {selectedUnits.length > 0 && selectedDifficulties.length > 0 && (
           <div className="pt-10 border-t border-slate-100 dark:border-white/5 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="space-y-6">
               <div className="flex items-center gap-3">
@@ -776,9 +965,9 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                 <label className="text-sm font-semibold text-slate-500 dark:text-slate-400">Customization</label>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col md:flex-row gap-4 w-full">
                 {hasMCQs && (
-                  <div className="space-y-2 animate-in fade-in slide-in-from-right-2 duration-500">
+                  <div className="flex-1 space-y-2 animate-in fade-in slide-in-from-right-2 duration-500">
                     <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">MCQ Count</p>
                     <input
                       type="number" min="0" max="500" value={numMCQ}
@@ -789,7 +978,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                 )}
 
                 {hasSubjective && (
-                  <div className="space-y-2 animate-in fade-in slide-in-from-left-2 duration-500">
+                  <div className="flex-1 space-y-2 animate-in fade-in slide-in-from-left-2 duration-500">
                     <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Subjective Count</p>
                     <input
                       type="number" min="0" max="500" value={numSubjective}
@@ -798,8 +987,8 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                     />
                   </div>
                 )}
-
-                <div className={`space-y-2 ${!hasSubjective ? 'animate-in fade-in slide-in-from-left-2 duration-500' : 'md:col-span-2'}`}>
+                
+                <div className="flex-1 space-y-2 animate-in fade-in slide-in-from-left-2 duration-500">
                   <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Duration (Minutes)</p>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
@@ -812,6 +1001,66 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                     />
                   </div>
                 </div>
+              </div>
+
+              <div className="space-y-3 animate-in fade-in slide-in-from-left-2 duration-500">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Topics</p>
+                </div>
+                <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 no-scrollbar">
+                  {Object.entries(availableTopicsByUnit).sort((a,b) => Number(a[0]) - Number(b[0])).map(([unit, topics]) => {
+                    const isUnitAllSelected = !(topics as string[]).some(t => selectedTopics.includes(t));
+                    return (
+                      <div key={unit} className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Unit {unit}</h4>
+                          <div className="h-px bg-slate-200 dark:bg-white/5 flex-grow"></div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          <button
+                            onClick={() => setSelectedTopics(prev => prev.filter(t => !(topics as string[]).includes(t)))}
+                            className={`col-span-1 md:col-span-2 flex items-center text-left gap-3 p-3 rounded-xl border transition-all ${
+                              isUnitAllSelected ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-500/50 shadow-sm' :
+                              'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 hover:border-orange-500/30'
+                            }`}
+                          >
+                            <div className={`min-w-4 w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                              isUnitAllSelected ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-dark-900'
+                            }`}>
+                              {isUnitAllSelected && <svg viewBox="0 0 14 14" fill="none" className="w-2.5 h-2.5"><path d="M3 7.5L5.5 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                            </div>
+                            <span className={`text-sm font-semibold leading-relaxed ${isUnitAllSelected ? 'text-orange-700 dark:text-orange-400' : 'text-slate-600 dark:text-slate-400'}`}>
+                              All Unit {unit} Topics
+                            </span>
+                          </button>
+                          {(topics as string[]).map(topic => {
+                            const isSelected = selectedTopics.includes(topic);
+                            return (
+                              <button
+                                key={topic}
+                                onClick={() => setSelectedTopics(prev => prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic])}
+                                className={`flex items-start text-left gap-3 p-3 rounded-xl border transition-all ${
+                                  isSelected ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-500/50 shadow-sm' :
+                                  'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 hover:border-orange-500/30'
+                                }`}
+                              >
+                                <div className={`mt-0.5 min-w-4 w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                                  isSelected ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-dark-900'
+                                }`}>
+                                  {isSelected && <svg viewBox="0 0 14 14" fill="none" className="w-2.5 h-2.5"><path d="M3 7.5L5.5 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                </div>
+                                <span className={`text-xs font-medium leading-relaxed ${isSelected ? 'text-orange-700 dark:text-orange-400' : 'text-slate-600 dark:text-slate-400'}`}>
+                                  {topic}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
 
                 {hasMCQs && (
                   <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -852,7 +1101,6 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                     </button>
                   </div>
                 )}
-              </div>
               <button
                 onClick={handleGenerate}
                 disabled={loading}

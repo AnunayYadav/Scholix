@@ -11,7 +11,9 @@ export const unit6Quizzes: QuizQuestion[] = [
             "A structured group of n individual edge-triggered flip-flops"
         ],
         correctAnswer: 3,
-        explanation: "Every register is structurally composed of flip-flops. Each flip-flop stores precisely one distinct binary bit."
+        explanation: "Every register is structurally composed of flip-flops. Each flip-flop stores precisely one distinct binary bit.",
+difficulty: 'easy',
+topic: 'Shift Register Operations'
     },
     {
         unit: 6,
@@ -23,7 +25,9 @@ export const unit6Quizzes: QuizQuestion[] = [
             "Adding binary numbers together directly"
         ],
         correctAnswer: 1,
-        explanation: "A shift register explicitly moves (shifts) stored binary data laterally from one internal flip-flop directly into the adjacent one exactly at each active clock pulse."
+        explanation: "A shift register explicitly moves (shifts) stored binary data laterally from one internal flip-flop directly into the adjacent one exactly at each active clock pulse.",
+difficulty: 'easy',
+topic: 'Shift Register Operations'
     },
     {
         unit: 6,
@@ -35,7 +39,9 @@ export const unit6Quizzes: QuizQuestion[] = [
             "Data outputs in parallel simultaneously"
         ],
         correctAnswer: 1,
-        explanation: "During a Right Shift operation, binary data moves explicitly from left to right (from the Most Significant Bit precisely down toward the Least Significant Bit direction)."
+        explanation: "During a Right Shift operation, binary data moves explicitly from left to right (from the Most Significant Bit precisely down toward the Least Significant Bit direction).",
+difficulty: 'medium',
+topic: 'Shift Register Operations'
     },
     {
         unit: 6,
@@ -47,7 +53,9 @@ export const unit6Quizzes: QuizQuestion[] = [
             "Static In Static Out"
         ],
         correctAnswer: 2,
-        explanation: "SISO stands for Serial In Serial Out, meaning binary data enters the register precisely one bit at a time and identically exits one bit at a time sequentially."
+        explanation: "SISO stands for Serial In Serial Out, meaning binary data enters the register precisely one bit at a time and identically exits one bit at a time sequentially.",
+difficulty: 'medium',
+topic: 'Shift Register Operations'
     },
     {
         unit: 6,
@@ -59,7 +67,9 @@ export const unit6Quizzes: QuizQuestion[] = [
             "It uses complex decoding logic mathematically delaying processing identically"
         ],
         correctAnswer: 1,
-        explanation: "Because the SISO architecture is strictly fully serial, it mandatorily requires n discrete clock pulses continuously fully sequentially to load the entire specific binary word, and an additional necessary n clock pulses linearly to completely logically shift it completely out."
+        explanation: "Because the SISO architecture is strictly fully serial, it mandatorily requires n discrete clock pulses continuously fully sequentially to load the entire specific binary word, and an additional necessary n clock pulses linearly to completely logically shift it completely out.",
+difficulty: 'medium',
+topic: 'Shift Register Operations'
     },
     {
         unit: 6,
@@ -71,7 +81,9 @@ export const unit6Quizzes: QuizQuestion[] = [
             "SIPO"
         ],
         correctAnswer: 3,
-        explanation: "A SIPO (Serial In Parallel Out) shift register accepts input bits serially, then effectively makes the complete stored binary word available completely in parallel exactly logically at the outputs."
+        explanation: "A SIPO (Serial In Parallel Out) shift register accepts input bits serially, then effectively makes the complete stored binary word available completely in parallel exactly logically at the outputs.",
+difficulty: 'medium',
+topic: 'Shift Register Operations'
     },
     {
         unit: 6,
@@ -83,7 +95,9 @@ export const unit6Quizzes: QuizQuestion[] = [
             "2n"
         ],
         correctAnswer: 0,
-        explanation: "Since structurally data is mathematically cleanly entered in parallel simultaneously, it requires exactly 1 logic clock pulse."
+        explanation: "Since structurally data is mathematically cleanly entered in parallel simultaneously, it requires exactly 1 logic clock pulse.",
+difficulty: 'medium',
+topic: 'Shift Register Operations'
     },
     {
         unit: 6,
@@ -95,7 +109,9 @@ export const unit6Quizzes: QuizQuestion[] = [
             "It cannot count downwards"
         ],
         correctAnswer: 2,
-        explanation: "In an asynchronous counter, only the first flip-flop receives the external clock. Subsequent flip-flops are clocked by the output of the preceding one."
+        explanation: "In an asynchronous counter, only the first flip-flop receives the external clock. Subsequent flip-flops are clocked by the output of the preceding one.",
+difficulty: 'easy',
+topic: 'Ring Counter and Johnson Ring Counter'
     },
     {
         unit: 6,
@@ -107,7 +123,9 @@ export const unit6Quizzes: QuizQuestion[] = [
             "They require more flip-flops for the same modulus"
         ],
         correctAnswer: 2,
-        explanation: "Because clock signals ripple through each stage sequentially, the propagation delays add up, which can cause reading glitches and limits operational frequency."
+        explanation: "Because clock signals ripple through each stage sequentially, the propagation delays add up, which can cause reading glitches and limits operational frequency.",
+difficulty: 'medium',
+topic: 'Asynchronous Counters'
     },
     {
         unit: 6,
@@ -119,6 +137,8 @@ export const unit6Quizzes: QuizQuestion[] = [
             "2^{n-1}"
         ],
         correctAnswer: 1,
-        explanation: "A ring counter circulates a single 1 through its flip-flops, so an n-bit ring counter features exactly n unique states."
+        explanation: "A ring counter circulates a single 1 through its flip-flops, so an n-bit ring counter features exactly n unique states.",
+difficulty: 'medium',
+topic: 'Ring Counter and Johnson Ring Counter'
     }
 ];

@@ -2,36 +2,96 @@ import { QuizQuestion } from "../../../types.ts";
 
 export const unit1Quizzes: QuizQuestion[] = [
     // Grammar - Empty Subjects, Substitution, Ellipsis
-    { unit: 1, question: "Why do we use 'It' or 'There' as empty subjects?", options: ["To add emphasis", "Because every English sentence needs a grammatical subject", "To replace a noun", "To ask a question"], correctAnswer: 1, explanation: "English syntax requires a subject. Without a real actor, we insert an 'empty' subject." },
-    { unit: 1, question: "Identify the empty subject sentence:", options: ["The dog is barking.", "She walked home.", "It is raining outside.", "I like pizza."], correctAnswer: 2, explanation: "'It' does not refer to a specific noun; it just holds the subject place for weather." },
-    { unit: 1, question: "Which empty subject is used to indicate existence?", options: ["It", "There", "Here", "This"], correctAnswer: 1, explanation: "'There is a spider on the wall' indicates a spider exists in that location." },
-    { unit: 1, question: "Fill the blank: '______ is a long way to London.'", options: ["There", "This", "That", "It"], correctAnswer: 3, explanation: "We use 'It' for statements about distance." },
-    { unit: 1, question: "Fill the blank: '______ appears to be a mistake in the report.'", options: ["It", "There", "That", "One"], correctAnswer: 1, explanation: "We are stating the existence of a mistake, so we use 'There'." },
-    { unit: 1, question: "What is substitution in grammar?", options: ["Replacing a subject with another noun", "Using a word to replace a previously mentioned noun or phrase to avoid repetition", "Changing the tense of a verb", "Adding descriptive adjectives"], correctAnswer: 1, explanation: "e.g., replacing 'the red apple' with 'the red one'." },
-    { unit: 1, question: "Fill the blank: 'I don't like the red car, I prefer the blue ______.'", options: ["one", "ones", "car", "some"], correctAnswer: 0, explanation: "'One' replaces the singular countable noun 'car'." },
-    { unit: 1, question: "Can we use 'one/ones' for uncountable nouns?", options: ["Yes, always", "No, never", "Only if it is preceded by 'the'", "Only in formal writing"], correctAnswer: 1, explanation: "You cannot say 'I need some water, give me a fresh one'. You just say 'Give me fresh water'." },
-    { unit: 1, question: "Identify the error: 'These shoes are dirty, let me change into clean ones.'", options: ["These", "shoes", "clean", "No error"], correctAnswer: 3, explanation: "The sentence correctly uses 'ones' to replace the plural noun 'shoes'." },
-    { unit: 1, question: "Find the error: 'I need advice. Please give me a good one.'", options: ["I need", "advice", "give me", "a good one"], correctAnswer: 3, explanation: "'Advice' is uncountable, so you cannot use 'a good one'. You must say 'some good advice'." },
-    { unit: 1, question: "What does 'so' substitute for?", options: ["A single noun", "A verb action", "An entire clause, usually expressing a belief", "A preposition"], correctAnswer: 2, explanation: "e.g., 'Will it rain?' -> 'I think so' (so = that it will rain)." },
-    { unit: 1, question: "Fill the blank: 'Are they winning?' -> 'I hope ______.'", options: ["so", "it", "that", "this"], correctAnswer: 0, explanation: "'So' replaces the 'that' clause (that they are winning)." },
-    { unit: 1, question: "What replaces a complete verb phrase/action?", options: ["So", "Do so", "One", "It"], correctAnswer: 1, explanation: "e.g., 'He told me to run, and I did so'." },
-    { unit: 1, question: "Identify the usage of 'do so': 'She asked him to lock the door, and he _______ immediately.'", options: ["did it", "done so", "did so", "so did"], correctAnswer: 2, explanation: "'Did so' cleanly substitutes the action 'locked the door'." },
-    { unit: 1, question: "Which reply is grammatically correct to 'Is he coming?'", options: ["I think.", "I think it.", "I think so.", "I do so think."], correctAnswer: 2, explanation: "Use 'so' to substitute the clause holding the thought." },
-    { unit: 1, question: "What is Ellipsis?", options: ["Adding extra words for emphasis", "Leaving out words whose meaning can be understood from context", "Repeating words for rhetorical effect", "Replacing a noun with a pronoun"], correctAnswer: 1, explanation: "e.g., 'Do you like tea?' -> 'Yes, I do (like tea)'." },
-    { unit: 1, question: "Identify Ellipsis: 'Who wrote this letter?'", options: ["I wrote the letter.", "I did.", "The letter was written by me.", "It was me who wrote it."], correctAnswer: 1, explanation: "'I did' drops the rest of the sentence to avoid repetition." },
-    { unit: 1, question: "Fill the blank using ellipsis: 'Are you going to the party?' -> 'I am not sure, but I want ______.'", options: ["go", "to", "to go", "going"], correctAnswer: 1, explanation: "Ellipsis often drops everything after 'to'." },
-    { unit: 1, question: "In a compound sentence, when can you leave out the subject in the second clause?", options: ["Never", "Always", "Only if the subject is exactly the same as in the first clause", "If you use a comma"], correctAnswer: 2, explanation: "e.g., 'John ran inside and (John) grabbed his coat'." },
-    { unit: 1, question: "Which sentence correctly uses subject dropping?", options: ["She ate dinner and went to bed.", "She ate dinner and he went to bed.", "She ate dinner, went to bed.", "Because she ate dinner went to bed."], correctAnswer: 0, explanation: "'She' is the subject of both 'ate' and 'went', so it can be dropped the second time." },
-    { unit: 1, question: "Find the error: 'John opened the door and Mary walked in.'", options: ["opened", "and", "walked", "No error"], correctAnswer: 3, explanation: "Because the subjects are different (John vs Mary), you CANNOT drop the second subject. So the sentence is correct." },
-    { unit: 1, question: "What type of empty subject is needed? '______ was a time when computers were huge.'", options: ["It", "There", "This", "That"], correctAnswer: 1, explanation: "Stating the existence of a past era -> 'There'." },
-    { unit: 1, question: "Fill the blank: 'Did you lock the car?' -> 'Yes, I ________.'", options: ["locked", "did lock", "did", "do"], correctAnswer: 2, explanation: "Ellipsis using the auxiliary 'did'." },
-    { unit: 1, question: "Rewrite using 'so': 'I don't think that he is guilty.' -> 'I _________.'", options: ["don't think so", "think not so", "do so not think", "think not"], correctAnswer: 0, explanation: "'So' replaces 'that he is guilty'." },
-    { unit: 1, question: "Which replaces the underlined noun? 'I prefer dark chocolates over milk _chocolates_.'", options: ["one", "ones", "some", "them"], correctAnswer: 1, explanation: "Plural noun replacement -> ones." },
-    { unit: 1, question: "Find the error: 'The weather is hot. Is hard to work.'", options: ["weather", "hot", "Is", "to work"], correctAnswer: 2, explanation: "English needs an empty subject: 'IT is hard to work'." },
-    { unit: 1, question: "Is this sentence correct? 'I told him to sit down, and he did it so.'", options: ["Yes", "No, it should be 'he did so'", "No, it should be 'so he did it'", "No, it should be 'he so did'"], correctAnswer: 1, explanation: "'Did it' and 'did so' both work, but 'did it so' is redundant and wrong." },
-    { unit: 1, question: "Ellipsis requires what to usually remain at the end of the shortened sentence?", options: ["An adjective", "A preposition", "An auxiliary verb or 'to'", "A main verb"], correctAnswer: 2, explanation: "e.g., 'Yes, I CAN', 'Yes, I DO', 'I want TO'." },
-    { unit: 1, question: "Fill the blank comparing two cars: 'This car is fast, but the red ______ is faster.'", options: ["car", "one", "ones", "it"], correctAnswer: 1, explanation: "'One' avoids repeating the singular noun 'car'." },
-    { unit: 1, question: "Empty 'It' is primarily used to introduce:", options: ["People", "Abstract ideas, time, and weather", "Locations", "Plural nouns"], correctAnswer: 1, explanation: "e.g., 'It is obvious...', 'It is raining...', 'It is 5 PM...'." },
+    { unit: 1, question: "Why do we use 'It' or 'There' as empty subjects?", options: ["To add emphasis", "Because every English sentence needs a grammatical subject", "To replace a noun", "To ask a question"], correctAnswer: 1, explanation: "English syntax requires a subject. Without a real actor, we insert an 'empty' subject.",
+difficulty: 'easy',
+topic: 'Empty Subject \'It\' and \'There\'' },
+    { unit: 1, question: "Identify the empty subject sentence:", options: ["The dog is barking.", "She walked home.", "It is raining outside.", "I like pizza."], correctAnswer: 2, explanation: "'It' does not refer to a specific noun; it just holds the subject place for weather.",
+difficulty: 'easy',
+topic: 'Empty Subject \'It\' and \'There\'' },
+    { unit: 1, question: "Which empty subject is used to indicate existence?", options: ["It", "There", "Here", "This"], correctAnswer: 1, explanation: "'There is a spider on the wall' indicates a spider exists in that location.",
+difficulty: 'easy',
+topic: 'Empty Subject \'It\' and \'There\'' },
+    { unit: 1, question: "Fill the blank: '______ is a long way to London.'", options: ["There", "This", "That", "It"], correctAnswer: 3, explanation: "We use 'It' for statements about distance.",
+difficulty: 'easy',
+topic: 'Empty Subject \'It\' and \'There\'' },
+    { unit: 1, question: "Fill the blank: '______ appears to be a mistake in the report.'", options: ["It", "There", "That", "One"], correctAnswer: 1, explanation: "We are stating the existence of a mistake, so we use 'There'.",
+difficulty: 'easy',
+topic: 'Substitution: So and Do so' },
+    { unit: 1, question: "What is substitution in grammar?", options: ["Replacing a subject with another noun", "Using a word to replace a previously mentioned noun or phrase to avoid repetition", "Changing the tense of a verb", "Adding descriptive adjectives"], correctAnswer: 1, explanation: "e.g., replacing 'the red apple' with 'the red one'.",
+difficulty: 'easy',
+topic: 'Substitution: One and Ones' },
+    { unit: 1, question: "Fill the blank: 'I don't like the red car, I prefer the blue ______.'", options: ["one", "ones", "car", "some"], correctAnswer: 0, explanation: "'One' replaces the singular countable noun 'car'.",
+difficulty: 'easy',
+topic: 'Substitution: One and Ones' },
+    { unit: 1, question: "Can we use 'one/ones' for uncountable nouns?", options: ["Yes, always", "No, never", "Only if it is preceded by 'the'", "Only in formal writing"], correctAnswer: 1, explanation: "You cannot say 'I need some water, give me a fresh one'. You just say 'Give me fresh water'.",
+difficulty: 'easy',
+topic: 'Substitution: One and Ones' },
+    { unit: 1, question: "Identify the error: 'These shoes are dirty, let me change into clean ones.'", options: ["These", "shoes", "clean", "No error"], correctAnswer: 3, explanation: "The sentence correctly uses 'ones' to replace the plural noun 'shoes'.",
+difficulty: 'medium',
+topic: 'Substitution: One and Ones' },
+    { unit: 1, question: "Find the error: 'I need advice. Please give me a good one.'", options: ["I need", "advice", "give me", "a good one"], correctAnswer: 3, explanation: "'Advice' is uncountable, so you cannot use 'a good one'. You must say 'some good advice'.",
+difficulty: 'easy',
+topic: 'Substitution: So and Do so' },
+    { unit: 1, question: "What does 'so' substitute for?", options: ["A single noun", "A verb action", "An entire clause, usually expressing a belief", "A preposition"], correctAnswer: 2, explanation: "e.g., 'Will it rain?' -> 'I think so' (so = that it will rain).",
+difficulty: 'easy',
+topic: 'Substitution: So and Do so' },
+    { unit: 1, question: "Fill the blank: 'Are they winning?' -> 'I hope ______.'", options: ["so", "it", "that", "this"], correctAnswer: 0, explanation: "'So' replaces the 'that' clause (that they are winning).",
+difficulty: 'easy',
+topic: 'Substitution: So and Do so' },
+    { unit: 1, question: "What replaces a complete verb phrase/action?", options: ["So", "Do so", "One", "It"], correctAnswer: 1, explanation: "e.g., 'He told me to run, and I did so'.",
+difficulty: 'easy',
+topic: 'Substitution: So and Do so' },
+    { unit: 1, question: "Identify the usage of 'do so': 'She asked him to lock the door, and he _______ immediately.'", options: ["did it", "done so", "did so", "so did"], correctAnswer: 2, explanation: "'Did so' cleanly substitutes the action 'locked the door'.",
+difficulty: 'medium',
+topic: 'Substitution: So and Do so' },
+    { unit: 1, question: "Which reply is grammatically correct to 'Is he coming?'", options: ["I think.", "I think it.", "I think so.", "I do so think."], correctAnswer: 2, explanation: "Use 'so' to substitute the clause holding the thought.",
+difficulty: 'easy',
+topic: 'Substitution: So and Do so' },
+    { unit: 1, question: "What is Ellipsis?", options: ["Adding extra words for emphasis", "Leaving out words whose meaning can be understood from context", "Repeating words for rhetorical effect", "Replacing a noun with a pronoun"], correctAnswer: 1, explanation: "e.g., 'Do you like tea?' -> 'Yes, I do (like tea)'.",
+difficulty: 'easy',
+topic: 'Leaving Words Out (Ellipsis)' },
+    { unit: 1, question: "Identify Ellipsis: 'Who wrote this letter?'", options: ["I wrote the letter.", "I did.", "The letter was written by me.", "It was me who wrote it."], correctAnswer: 1, explanation: "'I did' drops the rest of the sentence to avoid repetition.",
+difficulty: 'easy',
+topic: 'Leaving Words Out (Ellipsis)' },
+    { unit: 1, question: "Fill the blank using ellipsis: 'Are you going to the party?' -> 'I am not sure, but I want ______.'", options: ["go", "to", "to go", "going"], correctAnswer: 1, explanation: "Ellipsis often drops everything after 'to'.",
+difficulty: 'medium',
+topic: 'Leaving Words Out (Ellipsis)' },
+    { unit: 1, question: "In a compound sentence, when can you leave out the subject in the second clause?", options: ["Never", "Always", "Only if the subject is exactly the same as in the first clause", "If you use a comma"], correctAnswer: 2, explanation: "e.g., 'John ran inside and (John) grabbed his coat'.",
+difficulty: 'medium',
+topic: 'Empty Subject \'It\' and \'There\'' },
+    { unit: 1, question: "Which sentence correctly uses subject dropping?", options: ["She ate dinner and went to bed.", "She ate dinner and he went to bed.", "She ate dinner, went to bed.", "Because she ate dinner went to bed."], correctAnswer: 0, explanation: "'She' is the subject of both 'ate' and 'went', so it can be dropped the second time.",
+difficulty: 'easy',
+topic: 'Empty Subject \'It\' and \'There\'' },
+    { unit: 1, question: "Find the error: 'John opened the door and Mary walked in.'", options: ["opened", "and", "walked", "No error"], correctAnswer: 3, explanation: "Because the subjects are different (John vs Mary), you CANNOT drop the second subject. So the sentence is correct.",
+difficulty: 'easy',
+topic: 'Empty Subject \'It\' and \'There\'' },
+    { unit: 1, question: "What type of empty subject is needed? '______ was a time when computers were huge.'", options: ["It", "There", "This", "That"], correctAnswer: 1, explanation: "Stating the existence of a past era -> 'There'.",
+difficulty: 'medium',
+topic: 'Empty Subject \'It\' and \'There\'' },
+    { unit: 1, question: "Fill the blank: 'Did you lock the car?' -> 'Yes, I ________.'", options: ["locked", "did lock", "did", "do"], correctAnswer: 2, explanation: "Ellipsis using the auxiliary 'did'.",
+difficulty: 'easy',
+topic: 'Leaving Words Out (Ellipsis)' },
+    { unit: 1, question: "Rewrite using 'so': 'I don't think that he is guilty.' -> 'I _________.'", options: ["don't think so", "think not so", "do so not think", "think not"], correctAnswer: 0, explanation: "'So' replaces 'that he is guilty'.",
+difficulty: 'medium',
+topic: 'Substitution: So and Do so' },
+    { unit: 1, question: "Which replaces the underlined noun? 'I prefer dark chocolates over milk _chocolates_.'", options: ["one", "ones", "some", "them"], correctAnswer: 1, explanation: "Plural noun replacement -> ones.",
+difficulty: 'medium',
+topic: 'Substitution: One and Ones' },
+    { unit: 1, question: "Find the error: 'The weather is hot. Is hard to work.'", options: ["weather", "hot", "Is", "to work"], correctAnswer: 2, explanation: "English needs an empty subject: 'IT is hard to work'.",
+difficulty: 'easy',
+topic: 'Empty Subject \'It\' and \'There\'' },
+    { unit: 1, question: "Is this sentence correct? 'I told him to sit down, and he did it so.'", options: ["Yes", "No, it should be 'he did so'", "No, it should be 'so he did it'", "No, it should be 'he so did'"], correctAnswer: 1, explanation: "'Did it' and 'did so' both work, but 'did it so' is redundant and wrong.",
+difficulty: 'easy',
+topic: 'Substitution: So and Do so' },
+    { unit: 1, question: "Ellipsis requires what to usually remain at the end of the shortened sentence?", options: ["An adjective", "A preposition", "An auxiliary verb or 'to'", "A main verb"], correctAnswer: 2, explanation: "e.g., 'Yes, I CAN', 'Yes, I DO', 'I want TO'.",
+difficulty: 'medium',
+topic: 'Leaving Words Out (Ellipsis)' },
+    { unit: 1, question: "Fill the blank comparing two cars: 'This car is fast, but the red ______ is faster.'", options: ["car", "one", "ones", "it"], correctAnswer: 1, explanation: "'One' avoids repeating the singular noun 'car'.",
+difficulty: 'medium',
+topic: 'Substitution: One and Ones' },
+    { unit: 1, question: "Empty 'It' is primarily used to introduce:", options: ["People", "Abstract ideas, time, and weather", "Locations", "Plural nouns"], correctAnswer: 1, explanation: "e.g., 'It is obvious...', 'It is raining...', 'It is 5 PM...'.",
+difficulty: 'easy',
+topic: 'Empty Subject \'It\' and \'There\'' },
 
     // Professional Communication & Soft Skills
     {
@@ -39,139 +99,179 @@ export const unit1Quizzes: QuizQuestion[] = [
         question: "What is the primary focus of 'Communication Skills II' (PEL130)?",
         options: ["Learning basic grammar", "Professional and advanced communication in workplace and social contexts", "Learning to write code", "Basic math calculations"],
         correctAnswer: 1,
-        explanation: "Level II building on basics to focus on professional readiness."
+        explanation: "Level II building on basics to focus on professional readiness.",
+difficulty: 'easy',
+topic: 'Substitution: So and Do so'
     },
     {
         unit: 1,
         question: "What is 'Emotional Intelligence' (EI)?",
         options: ["Being very smart in math", "The ability to recognize, understand, and manage our own emotions and those of others", "Suppressing all emotions", "Reading many books about psychology"],
         correctAnswer: 1,
-        explanation: "EI is crucial for leadership and collaborative environments."
+        explanation: "EI is crucial for leadership and collaborative environments.",
+difficulty: 'easy',
+topic: 'Empty Subject \'It\' and \'There\''
     },
     {
         unit: 1,
         question: "In a 'Group Discussion' (GD), what is being assessed?",
         options: ["Your ability to shout the loudest", "Coordination, leadership, communication, and knowledge", "Your physical strength", "The speed of your speech"],
         correctAnswer: 1,
-        explanation: "GDs test how well you fit into a team and communicate ideas."
+        explanation: "GDs test how well you fit into a team and communicate ideas.",
+difficulty: 'easy',
+topic: 'Leaving Words Out (Ellipsis)'
     },
     {
         unit: 1,
         question: "What is a 'Resume' primarily used for?",
         options: ["As a legal birth certificate", "To showcase skills, education, and experience to potential employers", "To write a personal diary", "To list every single person you know"],
         correctAnswer: 1,
-        explanation: "A resume is a marketing tool for your professional self."
+        explanation: "A resume is a marketing tool for your professional self.",
+difficulty: 'easy',
+topic: 'Self Assessment'
     },
     {
         unit: 1,
         question: "What is the 'STAR' method used for in interviews?",
         options: ["Looking at the stars", "Situation, Task, Action, Result", "Singing, Talking, Acting, Running", "Strategy, Tactics, Aim, Role"],
         correctAnswer: 1,
-        explanation: "The STAR method helps in providing structured answers to behavioral questions."
+        explanation: "The STAR method helps in providing structured answers to behavioral questions.",
+difficulty: 'easy',
+topic: 'Leaving out Subjects and Objects'
     },
     {
         unit: 1,
         question: "What is 'Professional Etiquette'?",
         options: ["The code of ethical and polite behavior in the workplace", "The speed of the internet in the office", "The technical skills required for the job", "The way the office is decorated"],
         correctAnswer: 0,
-        explanation: "Etiquette ensures a respectful and productive work environment."
+        explanation: "Etiquette ensures a respectful and productive work environment.",
+difficulty: 'easy',
+topic: 'Substitution: One and Ones'
     },
     {
         unit: 1,
         question: "A 'Cover Letter' is usually sent with:",
         options: ["A birthday card", "A resume", "A shopping list", "A technical manual"],
         correctAnswer: 1,
-        explanation: "A cover letter introduces you and explains why you are interested in the specific job."
+        explanation: "A cover letter introduces you and explains why you are interested in the specific job.",
+difficulty: 'easy',
+topic: 'Leaving Words Out (Ellipsis)'
     },
     {
         unit: 1,
         question: "What is 'Critical Thinking'?",
         options: ["Thinking only about criticisms", "Objective analysis and evaluation of an issue to form a judgment", "Thinking as fast as possible", "Memorizing facts and figures"],
         correctAnswer: 1,
-        explanation: "Critical thinking involves logic and evidence-based reasoning."
+        explanation: "Critical thinking involves logic and evidence-based reasoning.",
+difficulty: 'easy',
+topic: 'Substitution: So and Do so'
     },
     {
         unit: 1,
         question: "In a presentation, what is the 'Hook'?",
         options: ["A literal metal hook", "An opening statement or element designed to grab the audience's attention", "The last slide of the presentation", "The laser pointer used by the speaker"],
         correctAnswer: 1,
-        explanation: "The hook sets the tone and keeps the audience engaged from the start."
+        explanation: "The hook sets the tone and keeps the audience engaged from the start.",
+difficulty: 'easy',
+topic: 'Self Assessment'
     },
     {
         unit: 1,
         question: "What does 'Body Language' in an interview reveal?",
         options: ["Confidence, honesty, and openness", "Only your height", "Exactly what you are thinking in words", "Your favorite color"],
         correctAnswer: 0,
-        explanation: "Your non-verbal cues (posture, eye contact) speak as much as your words."
+        explanation: "Your non-verbal cues (posture, eye contact) speak as much as your words.",
+difficulty: 'easy',
+topic: 'Leaving Words Out (Ellipsis)'
     },
     {
         unit: 1,
         question: "What is 'Conflict Resolution'?",
         options: ["Winning every fight", "Finding a peaceful and workable solution to a disagreement", "Ignoring problems until they go away", "Firing anyone who disagrees"],
         correctAnswer: 1,
-        explanation: "Resolution requires negotiation and compromise."
+        explanation: "Resolution requires negotiation and compromise.",
+difficulty: 'easy',
+topic: 'Substitution: One and Ones'
     },
     {
         unit: 1,
         question: "Which of the following is a key element of a 'Winning Pitch'?",
         options: ["Making it as long as possible", "Focusing on the value/problem solved for the listener", "Using only technical jargon", "Never making eye contact"],
         correctAnswer: 1,
-        explanation: "A pitch should be concise and benefit-oriented."
+        explanation: "A pitch should be concise and benefit-oriented.",
+difficulty: 'easy',
+topic: 'Empty Subject \'It\' and \'There\''
     },
     {
         unit: 1,
         question: "What is 'Public Speaking' anxiety often called?",
         options: ["Glossophobia", "Arachnophobia", "Claustrophobia", "Hydrophobia"],
         correctAnswer: 0,
-        explanation: "Glossophobia is the common fear of speaking in public."
+        explanation: "Glossophobia is the common fear of speaking in public.",
+difficulty: 'easy',
+topic: 'Leaving Words Out (Ellipsis)'
     },
     {
         unit: 1,
         question: "In professional writing, what does 'Brevity' mean?",
         options: ["Being very rude", "Using short and concise language", "Writing as many pages as possible", "Using very small fonts"],
         correctAnswer: 1,
-        explanation: "Brevity saves the reader's time and ensures the message is clear."
+        explanation: "Brevity saves the reader's time and ensures the message is clear.",
+difficulty: 'easy',
+topic: 'Substitution: One and Ones'
     },
     {
         unit: 1,
         question: "What is the 'Elevator Pitch'?",
         options: ["A pitch given in a sports stadium", "A very short summary (30-60s) of who you are or what you do", "A long 2-hour lecture", "A pitch given while running"],
         correctAnswer: 1,
-        explanation: "It's named for the time it takes for an elevator ride."
+        explanation: "It's named for the time it takes for an elevator ride.",
+difficulty: 'easy',
+topic: 'Empty Subject \'It\' and \'There\''
     },
     {
         unit: 1,
         question: "Which of the following is 'Email Etiquette'?",
         options: ["Using all capital letters (ALL CAPS)", "Using a clear and concise subject line", "Sending emails at 2 AM to everyone", "Using many emojis in a formal mail"],
         correctAnswer: 1,
-        explanation: "Subject lines help the recipient understand the priority and context."
+        explanation: "Subject lines help the recipient understand the priority and context.",
+difficulty: 'easy',
+topic: 'Empty Subject \'It\' and \'There\''
     },
     {
         unit: 1,
         question: "What is 'Active Feedback'?",
         options: ["Waiting for someone to finish and saying nothing", "Providing specific, constructive, and timely responses", "Shouting at someone when they make a mistake", "Deleting feedback emails"],
         correctAnswer: 1,
-        explanation: "Constructive feedback helps others grow and improve."
+        explanation: "Constructive feedback helps others grow and improve.",
+difficulty: 'easy',
+topic: 'Self Assessment'
     },
     {
         unit: 1,
         question: "What are 'Transferable Skills'?",
         options: ["Skills that only work in one specific job", "Skills like communication or leadership that are useful across different roles/industries", "Skills involving the transfer of money", "Skills for moving furniture"],
         correctAnswer: 1,
-        explanation: "Transferable skills make you a flexible and valuable candidate."
+        explanation: "Transferable skills make you a flexible and valuable candidate.",
+difficulty: 'easy',
+topic: 'Leaving out Subjects and Objects'
     },
     {
         unit: 1,
         question: "What is the purpose of a 'Mock Interview'?",
         options: ["To make fun of someone", "To practice and prepare for a real job interview", "To hire someone immediately", "To test the internet connection"],
         correctAnswer: 1,
-        explanation: "Mocks help reduce anxiety and improve performance through practice."
+        explanation: "Mocks help reduce anxiety and improve performance through practice.",
+difficulty: 'easy',
+topic: 'Substitution: One and Ones'
     },
     {
         unit: 1,
         question: "Which of the following is a part of 'Professional Appearance'?",
         options: ["Dressing appropriately for the industry/company culture", "Always wearing a tuxedo", "Wearing gym clothes to the office", "Wearing a costume"],
         correctAnswer: 0,
-        explanation: "Appearance reflects your respect for the professional environment."
+        explanation: "Appearance reflects your respect for the professional environment.",
+difficulty: 'easy',
+topic: 'Leaving out Subjects and Objects'
     }
 ];

@@ -11,7 +11,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "Sequential circuits cannot perform arithmetic operations"
         ],
         correctAnswer: 2,
-        explanation: "Sequential circuits use memory elements (like latches and flip-flops) to store past states, meaning their output depends on both current inputs and the previous state."
+        explanation: "Sequential circuits use memory elements (like latches and flip-flops) to store past states, meaning their output depends on both current inputs and the previous state.",
+difficulty: 'medium',
+topic: 'Sequential Circuits Overview'
     },
     {
         unit: 5,
@@ -23,7 +25,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "A latch stores multiple bits; a flip-flop stores one bit"
         ],
         correctAnswer: 1,
-        explanation: "Latches are level-triggered (transparent when active), whereas flip-flops are edge-triggered (change state only at the rising or falling edge of the clock)."
+        explanation: "Latches are level-triggered (transparent when active), whereas flip-flops are edge-triggered (change state only at the rising or falling edge of the clock).",
+difficulty: 'easy',
+topic: 'Flip-Flops'
     },
     {
         unit: 5,
@@ -35,7 +39,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "$S = 1, R = 1$"
         ],
         correctAnswer: 3,
-        explanation: "When $S=1$ and $R=1$, both outputs try to become $0$, which violates the complementary rule and leads to an unpredictable state when inputs return to $0$."
+        explanation: "When $S=1$ and $R=1$, both outputs try to become $0$, which violates the complementary rule and leads to an unpredictable state when inputs return to $0$.",
+difficulty: 'medium',
+topic: 'Table of Contents'
     },
     {
         unit: 5,
@@ -47,7 +53,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "$Q_{n+1} = S \\oplus R$"
         ],
         correctAnswer: 0,
-        explanation: "The characteristic equation is $Q_{n+1} = S + \\overline{R} \\cdot Q_n$, subject to the constraint $SR = 0$."
+        explanation: "The characteristic equation is $Q_{n+1} = S + \\overline{R} \\cdot Q_n$, subject to the constraint $SR = 0$.",
+difficulty: 'easy',
+topic: 'Master-Slave Flip-Flop'
     },
     {
         unit: 5,
@@ -59,7 +67,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "By adding a third input pin"
         ],
         correctAnswer: 1,
-        explanation: "In a D latch, the $D$ input is connected to $S$, and $\\overline{D}$ is connected to $R$. This ensures $S$ and $R$ are always complementary, preventing the $1,1$ state."
+        explanation: "In a D latch, the $D$ input is connected to $S$, and $\\overline{D}$ is connected to $R$. This ensures $S$ and $R$ are always complementary, preventing the $1,1$ state.",
+difficulty: 'easy',
+topic: 'Latches'
     },
     {
         unit: 5,
@@ -71,7 +81,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "$J = 1, K = 1$"
         ],
         correctAnswer: 3,
-        explanation: "Unlike the SR flip-flop which enters an invalid state, a JK flip-flop toggles (inverts its current state) when $J=1$ and $K=1$."
+        explanation: "Unlike the SR flip-flop which enters an invalid state, a JK flip-flop toggles (inverts its current state) when $J=1$ and $K=1$.",
+difficulty: 'medium',
+topic: 'Master-Slave Flip-Flop'
     },
     {
         unit: 5,
@@ -83,7 +95,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "$Q_{n+1} = J\\overline{K} + \\overline{J}K$"
         ],
         correctAnswer: 1,
-        explanation: "The next state $Q_{n+1}$ is determined by $J\\overline{Q_n} + \\overline{K}Q_n$, which defines the Set, Reset, Hold, and Toggle operations."
+        explanation: "The next state $Q_{n+1}$ is determined by $J\\overline{Q_n} + \\overline{K}Q_n$, which defines the Set, Reset, Hold, and Toggle operations.",
+difficulty: 'easy',
+topic: 'Master-Slave Flip-Flop'
     },
     {
         unit: 5,
@@ -95,7 +109,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "When the clock frequency is too low"
         ],
         correctAnswer: 1,
-        explanation: "In a JK flip-flop with $J=K=1$, if the clock pulse width is longer than the flip-flop's propagation delay, the output toggles unpredictably multiple times."
+        explanation: "In a JK flip-flop with $J=K=1$, if the clock pulse width is longer than the flip-flop's propagation delay, the output toggles unpredictably multiple times.",
+difficulty: 'easy',
+topic: 'Sequential Circuits Overview'
     },
     {
         unit: 5,
@@ -107,7 +123,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "Asynchronous Ripple Counter"
         ],
         correctAnswer: 2,
-        explanation: "The Master-Slave flip-flop uses two cascaded stages clocked on opposite edges, ensuring the output changes only once per full clock cycle."
+        explanation: "The Master-Slave flip-flop uses two cascaded stages clocked on opposite edges, ensuring the output changes only once per full clock cycle.",
+difficulty: 'medium',
+topic: 'Master-Slave Flip-Flop'
     },
     {
         unit: 5,
@@ -119,7 +137,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "$Q_{n+1} = D$"
         ],
         correctAnswer: 3,
-        explanation: "A D flip-flop simply captures and stores the data input $D$ at the active clock edge, so $Q_{n+1} = D$."
+        explanation: "A D flip-flop simply captures and stores the data input $D$ at the active clock edge, so $Q_{n+1} = D$.",
+difficulty: 'easy',
+topic: 'Master-Slave Flip-Flop'
     },
     {
         unit: 5,
@@ -131,7 +151,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "$Q_{n+1} = \\overline{T} \\oplus Q_n$"
         ],
         correctAnswer: 1,
-        explanation: "When $T=1$, the output toggles (inverts $Q_n$). When $T=0$, $Q_n$ holds. This behavior matches the XOR logic: $T \\oplus Q_n$."
+        explanation: "When $T=1$, the output toggles (inverts $Q_n$). When $T=0$, $Q_n$ holds. This behavior matches the XOR logic: $T \\oplus Q_n$.",
+difficulty: 'easy',
+topic: 'Master-Slave Flip-Flop'
     },
     {
         unit: 5,
@@ -143,7 +165,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "By using an inverter between $J$ and $K$"
         ],
         correctAnswer: 1,
-        explanation: "Connecting both $J$ and $K$ inputs to a single logic signal $T$ creates a toggle flip-flop, since $J=K=1$ toggles and $J=K=0$ holds."
+        explanation: "Connecting both $J$ and $K$ inputs to a single logic signal $T$ creates a toggle flip-flop, since $J=K=1$ toggles and $J=K=0$ holds.",
+difficulty: 'easy',
+topic: 'Master-Slave Flip-Flop'
     },
     {
         unit: 5,
@@ -155,7 +179,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "SISO (Serial In Serial Out)"
         ],
         correctAnswer: 3,
-        explanation: "A SISO shift register is the slowest type; inputs enter serially and exit serially, meaning it takes $n$ pulses to load and $n$ pulses to read."
+        explanation: "A SISO shift register is the slowest type; inputs enter serially and exit serially, meaning it takes $n$ pulses to load and $n$ pulses to read.",
+difficulty: 'medium',
+topic: 'Conversion of Flip-Flops'
     },
     {
         unit: 5,
@@ -167,7 +193,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "PIPO"
         ],
         correctAnswer: 1,
-        explanation: "SIPO (Serial In Parallel Out) accepts data sequentially and, after loading, makes all bits available simultaneously on parallel output lines."
+        explanation: "SIPO (Serial In Parallel Out) accepts data sequentially and, after loading, makes all bits available simultaneously on parallel output lines.",
+difficulty: 'medium',
+topic: 'Conversion of Flip-Flops'
     },
     {
         unit: 5,
@@ -179,7 +207,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "It cannot count downwards"
         ],
         correctAnswer: 2,
-        explanation: "In an asynchronous counter, only the first flip-flop receives the external clock. Subsequent flip-flops are clocked by the output of the preceding one."
+        explanation: "In an asynchronous counter, only the first flip-flop receives the external clock. Subsequent flip-flops are clocked by the output of the preceding one.",
+difficulty: 'easy',
+topic: 'Flip-Flops'
     },
     {
         unit: 5,
@@ -191,7 +221,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "They require more flip-flops for the same modulus"
         ],
         correctAnswer: 2,
-        explanation: "Because clock signals ripple through each stage sequentially, the propagation delays add up, which can cause reading glitches and limits operational frequency."
+        explanation: "Because clock signals ripple through each stage sequentially, the propagation delays add up, which can cause reading glitches and limits operational frequency.",
+difficulty: 'medium',
+topic: 'Sequential Circuits Overview'
     },
     {
         unit: 5,
@@ -203,7 +235,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "$2^{n-1}$"
         ],
         correctAnswer: 1,
-        explanation: "A ring counter circulates a single $1$ through its flip-flops, so an $n$-bit ring counter features exactly $n$ unique states."
+        explanation: "A ring counter circulates a single $1$ through its flip-flops, so an $n$-bit ring counter features exactly $n$ unique states.",
+difficulty: 'medium',
+topic: 'Flip-Flops'
     },
     {
         unit: 5,
@@ -215,7 +249,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "16"
         ],
         correctAnswer: 1,
-        explanation: "A Johnson counter has a modulus equal to $2n$. For 4 bits, the modulus is $2 \\times 4 = 8$."
+        explanation: "A Johnson counter has a modulus equal to $2n$. For 4 bits, the modulus is $2 \\times 4 = 8$.",
+difficulty: 'easy',
+topic: 'Table of Contents'
     },
     {
         unit: 5,
@@ -227,7 +263,9 @@ export const unit5Quizzes: QuizQuestion[] = [
             "$J = 1$, $K = \\overline{D}$"
         ],
         correctAnswer: 2,
-        explanation: "Connecting $J$ directly to $D$ and $K$ to $\\overline{D}$ ensures that the JK flip-flop explicitly Sets when $D=1$ and Resets when $D=0$, mirroring exactly a D flip-flop."
+        explanation: "Connecting $J$ directly to $D$ and $K$ to $\\overline{D}$ ensures that the JK flip-flop explicitly Sets when $D=1$ and Resets when $D=0$, mirroring exactly a D flip-flop.",
+difficulty: 'medium',
+topic: 'Master-Slave Flip-Flop'
     },
     {
         unit: 5,
@@ -239,6 +277,8 @@ export const unit5Quizzes: QuizQuestion[] = [
             "10"
         ],
         correctAnswer: 1,
-        explanation: "The minimum number of flip-flops $n$ must satisfy $2^n \\geq N$. For $N=10$, $2^3 = 8$ is too small, but $2^4 = 16$ is sufficient. Thus, 4 flip-flops are needed."
+        explanation: "The minimum number of flip-flops $n$ must satisfy $2^n \\geq N$. For $N=10$, $2^3 = 8$ is too small, but $2^4 = 16$ is sufficient. Thus, 4 flip-flops are needed.",
+difficulty: 'medium',
+topic: 'Flip-Flops'
     }
 ];
