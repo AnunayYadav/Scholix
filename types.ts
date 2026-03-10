@@ -17,8 +17,7 @@ export enum ModuleType {
   ROOMMATE = 'ROOMMATE',
   EMERGENCY = 'EMERGENCY',
   AI_TOOLS = 'AI_TOOLS',
-  ADMIN_STATS = 'ADMIN_STATS',
-  VOICE_CHAT = 'VOICE_CHAT'
+  ADMIN_STATS = 'ADMIN_STATS'
 }
 
 export interface MarketplaceItem {
