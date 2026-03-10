@@ -538,9 +538,9 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
             </div>
           </div>
 
-          <div className="lg:col-span-4 glass-panel p-8 rounded-[40px] shadow-2xl bg-white/90 dark:bg-black/40 border-slate-200 dark:border-white/5 space-y-10">
-            <div className="space-y-8">
-              <h4 className="text-xs font-semibold text-slate-500 text-center">Question Palette</h4>
+          <aside className="lg:col-span-4 sticky top-8 max-h-[calc(100vh-120px)] flex flex-col glass-panel p-8 rounded-[40px] shadow-2xl bg-white/90 dark:bg-black/40 border-slate-200 dark:border-white/5 overflow-hidden">
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-8">
+              <h4 className="text-xs font-semibold text-slate-500 text-center sticky top-0 bg-inherit py-2 z-10">Question Palette</h4>
 
               {/* Section 1: Objective */}
               <div className="space-y-4">
@@ -632,7 +632,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                 </div>
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
     );
