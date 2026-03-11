@@ -891,5 +891,14 @@ topic: 'Data types'
         explanation: "Linking creates the final executable.",
 difficulty: 'medium',
 topic: 'The C character set'
+    },
+    {
+        unit: 1,
+        question: "C language was developed at ___.",
+        options: ["Microsoft", "AT&T Bell Labs", "Google", "IBM"],
+        correctAnswer: 1,
+        explanation: "Dennis Ritchie developed C at AT&T Bell Laboratories.",
+        difficulty: 'easy',
+        topic: 'Basics'
     }
 ];

@@ -75,5 +75,110 @@ Pointers, Dynamic memory allocation and Strings : Pointer declaration and initia
 Unit VI
 Derived types including structures and unions : Declaration of a structure, Definition and initialization of structures, Accessing structures, Structures and pointers, Nested structures, Declaration of a union
 Concepts and Basics of C++ Programming : Reading and writing data using cin and cout, Creating classes, Class objects, Accessing class members, Inline and Non-Inline member functions, Differences between Structures, Unions, Enumerations and Classes, Static data members and static member functions, Difference between procedural and object oriented programming paradigms
-    `
+    `,
+  "MTH166: Differential Equations and Vector Calculus": `
+Unit I
+Ordinary differential equations : exact equations, equations reducible to exact equations, equations of the first order and higher degree, Clairaut's equation
+
+Unit II
+Differential equations of higher order : introduction to linear differential equation, Solution of linear differential equation, linear dependence and linear independence of solution, method of solution of linear differential equation- Differential operator, solution of second order homogeneous linear differential equation with constant coefficient, solution of higher order homogeneous linear differential equations with constant coefficient
+
+Unit III
+Linear differential equation : solution of non-homogeneous linear differential equations with constant coefficients using operator method, method of variation of parameters, method of undetermined coefficient, solution of Euler-Cauchy equation, simultaneous differential equations by operator method
+
+Unit IV
+Partial differential equation : introduction to partial differential equation, method of Separation of Variables, solution of wave equation, solution of heat equation, solution of Laplace equation
+
+Unit V
+Vector calculus I : limit, continuity and differentiability of vector functions, length of space curve, motion of a body or particle on a curve, gradient of a scalar field and directional derivatives, divergence and curl of vector field
+
+Unit VI
+Vector calculus II : line integral, Greens' theorem, surface area and Surface integral, Stokes' theorem, Gauss's divergence theorem
+  `,
+  "INT306: Database Management Systems": `
+Unit I
+Introduction to database : purpose of database systems, components of dbms, applications of dbms, three tier dbms architecture, data independence, database schema, instance, data modeling, entity relationship model, relational model, Comparison of relational and non-relational databases
+
+Unit II
+Relational query language : introduction to data definition language, data manipulation, data control and transaction control language, integrity constraints, database keys, SQL basic operations
+
+Unit III
+Relational Operations : Aggregate functions, Sql joins, set operators, views, subqueries, relational algebra, Window functions, Hashing, Indexing and Query Optimization.
+
+Unit IV
+Relational Database Design : data integrity rules, functional dependency, need of normalization, first normal form, second normal form, third normal form, boyce codd normal form, multivalued dependencies, fourth normal form
+
+Unit V
+Programming Constructs in Databases : flow control statements, functions, stored procedures, cursors, triggers, exception handling
+Database Transaction Processing : transaction system concepts, desirable properties of transactions, schedules, serializability of schedules, concurrency control, recoverability
+
+Unit VI
+NoSQLDatabases : Introduction of MongoDB, DynamoDB, Serverless cloud database, Structure of MongoDB, SQL vs NoSql, Working with MongoDB, JSON databases, JSON representation of part of the dataset, Index creation & performance comparison using EXPLAIN, Vector Databases
+  `,
+  "CSE326: Internet Programming Laboratory": `
+Unit I
+Exposure To HTML : HTML document structure, Working with HTML basic elements like title, head, body, Working with Root and Metadata, Horizontal Rules and line breaks and paragraph, working with citation, quotation, definitions and comments, Types of Tags in HTML
+
+Unit II
+Working with Text, Links, Images and Tables in HTML : Formatting text with HTML physical style elements, Formatting text with HTML logical style elements, Arranging text, Exploring the Hyperlinks and linking to a mail system, Exploring the link relations, Working with images in a web page, Displaying Plain, Bold, Italic, Small, Subscripted, Superscripted text, Displaying Program Code, Program Output, Keyboard text, Emphasizing text, Defining New Terms, Short and long Quotations, Creating Links with anchor tag
+
+Unit III
+Introduction to Cascading Style Sheets : CSS rules like link and style, CSS properties like text controlling and text formatting, CSS selectors like type, id, class, Introduction To CSS and types of CSS, Inline CSS, Internal CSS, External CSS, CSS Box Model- Padding, Margin, Border, Div and Span Tag in CSS, Working with background Images
+
+Unit IV
+Working with Tables : Working With Tables-Colspan and Rowspan, applying css on tables, creating hoverable tables
+Working with Forms : Working with Forms- action attribute, get and post methods, Form Elements and Controls Like Text Inputs, TextArea, Buttons, CheckBoxes, Dropdown Boxes, Radio Buttons, Select and File Select, applying css on all controls of forms
+CSS Grids and Webpage Layouts : Grid introduction, Grid container, Grid Item, Creating different layouts for webpage
+
+Unit V
+JavaScript Application Development : Incorporating JavaScript in the HEAD and BODY element, Using an External JavaScript file, Using variables and operators, Using control statements such as if...else, switch, break and continue, Using looping statements such as while, do...while, for, Using Popup boxes such as Alert, Confirm, and Prompt, Working with JavaScript Objects,Properties and Methods
+JavaScript Functions,Events and Validation : Working with Functions-Using function arguments and return statement, Working with JavaScript Events like Form Based, Keyboard Based and Mouse Based, JavaScript Form Validation
+
+Unit VI
+Javascript DOM : DOM introduction, DOM methods, DOM document, DOM elements, DOM HTML, DOM CSS, DOM Events
+  `,
+  "INT108: Python Programming": `
+Unit I
+Setting up your Programming Environment : Python versions, Python on windows, running a 'Hello World' program
+Variables, Expression and Statements: : Naming and using variables, Avoiding Name Error when using variables, Values and types, variables, variables name and keywords, statements, operators and operand, order of operations, operations on string, composition and comments
+
+Unit II
+Conditional statements : modulus operator, Random numbers, Boolean expressions, logic operators, conditional, nested conditionals
+Iterative statements : while statements, for loop statement, Nested for, Nested while, Random numbers in loops, encapsulation and generalization
+
+Unit III
+Functions and recursion : function calls, type conversion and coercion, math functions, adding new function, parameters and argument, recursion and its use
+
+Unit IV
+String : string a compound data type, length, string traversal, string slices, comparision, find function, looping and counting
+Lists : list values, length, membership, operations, slices, deletion, accessing elements, list and for loops, list parameters and nested list
+Tuples and Dictionaries : mutability and tuples, tuple assignment, tuple as return values, dictionaries operations and methods, sparse matrices, aliasing and coping
+
+Unit V
+Classes and objects : Creating classes, creating instance objects, accessing attributes
+Object oriented programming terminology : Class Inheritance, Overriding Methods, Data Hiding, Function Overloading
+
+Unit VI
+Files and Exceptions : text files, writing variables, Reading from a file, writing to a file, directories, pickling, handling the zero Division error exception, using try-except blocks, The else block, Handling the File Not found error exception
+Regular Expressions : Concept of regular expression, various types of regular expressions, using match function, Web Scraping by using Regular Expressions
+  `,
+  "PHY110: Engineering Physics": `
+Unit I
+Electromagnetic theory : scalar and vectors fields, concept of gradient, divergence and curl, Gauss theorem and Stokes theorem (qualitative), Poisson and Laplace equations, continuity equation, Maxwell electromagnetic equations (differential and integral forms), physical significance of Maxwell equations, Ampere Circuital Law, Maxwell displacement current and correction in Ampere Circuital Law
+
+Unit II
+Lasers and applications : fundamentals of laser- energy levels in atoms, Radiation matter interaction, Absorption of light, spontaneous emission of light, stimulated emission of light, population of energy levels, Einstein A and B coefficients, metastable state, population inversion, resonant cavity, excitation mechanisms, Nd - YAG, He-Ne Laser, Semiconductor Laser, lasing action, properties of laser, applications of laser: holography
+
+Unit III
+Fiber optics : fiber optics introduction, optical fiber as a dielectric wave guide, total internal reflection, acceptance angle, numerical aperture, relative refractive index, V-number, step index and graded index fibers, losses associated with optical fibers
+
+Unit IV
+Quantum mechanics : need of quantum mechanics, photoelectric effect, concept of de Broglie matter waves, wavelength of matter waves in different forms, Heisenberg uncertainty principle, concept of phase velocity and group velocity (qualitative), wave function and its significance, Schrodinger time dependent and independent equation, particle in a box, tunneling effect (Qualitative idea)
+
+Unit V
+Solid state physics : free electron theory (Introduction), diffusion and drift current (qualitative), fermi energy, fermi-dirac distribution function, and theory of solids -formation of allowed and forbidden energy bands, concept of effective mass - electrons and holes, Hall effect (with derivation), semiconductors and insulators, fermi level for intrinsic and extrinsic semiconductors, direct and indirect band gap semiconductors, solar cell basics
+
+Unit VI
+Introduction to engineering materials : dielectric materials definition, dielectric constant, magnetic materials: dia, para, ferromagnetic materials, magnetic data storage, piezoelectric materials: direct and inverse piezoelectric methods, superconducting materials: properties, Meissner effect, Type I & Type II superconductors, applications
+  `
 };

@@ -25,6 +25,41 @@ import { cse320Unit4MCQs } from "./CSE320/unit4.ts";
 import { cse320Unit5MCQs } from "./CSE320/unit5.ts";
 import { cse320Unit6MCQs } from "./CSE320/unit6.ts";
 
+import { cse326Unit1MCQs } from "./CSE326/unit1.ts";
+import { cse326Unit2MCQs } from "./CSE326/unit2.ts";
+import { cse326Unit3MCQs } from "./CSE326/unit3.ts";
+import { cse326Unit4MCQs } from "./CSE326/unit4.ts";
+import { cse326Unit5MCQs } from "./CSE326/unit5.ts";
+import { cse326Unit6MCQs } from "./CSE326/unit6.ts";
+
+import { int108Unit1MCQs } from "./INT108/unit1.ts";
+import { int108Unit2MCQs } from "./INT108/unit2.ts";
+import { int108Unit3MCQs } from "./INT108/unit3.ts";
+import { int108Unit4MCQs } from "./INT108/unit4.ts";
+import { int108Unit5MCQs } from "./INT108/unit5.ts";
+import { int108Unit6MCQs } from "./INT108/unit6.ts";
+
+import { int306Unit1MCQs } from "./INT306/unit1.ts";
+import { int306Unit2MCQs } from "./INT306/unit2.ts";
+import { int306Unit3MCQs } from "./INT306/unit3.ts";
+import { int306Unit4MCQs } from "./INT306/unit4.ts";
+import { int306Unit5MCQs } from "./INT306/unit5.ts";
+import { int306Unit6MCQs } from "./INT306/unit6.ts";
+
+import { mth166Unit1MCQs } from "./MTH166/unit1.ts";
+import { mth166Unit2MCQs } from "./MTH166/unit2.ts";
+import { mth166Unit3MCQs } from "./MTH166/unit3.ts";
+import { mth166Unit4MCQs } from "./MTH166/unit4.ts";
+import { mth166Unit5MCQs } from "./MTH166/unit5.ts";
+import { mth166Unit6MCQs } from "./MTH166/unit6.ts";
+
+import { phy110Unit1MCQs } from "./PHY110/unit1.ts";
+import { phy110Unit2MCQs } from "./PHY110/unit2.ts";
+import { phy110Unit3MCQs } from "./PHY110/unit3.ts";
+import { phy110Unit4MCQs } from "./PHY110/unit4.ts";
+import { phy110Unit5MCQs } from "./PHY110/unit5.ts";
+import { phy110Unit6MCQs } from "./PHY110/unit6.ts";
+
 
 import { unit1Quizzes as ece249U1 } from "./ECE249/unit1.ts";
 import { unit2Quizzes as ece249U2 } from "./ECE249/unit2.ts";
@@ -101,6 +136,26 @@ export const QUIZTAKER_DATA: Record<string, { mcqs: QuizQuestion[], subjective: 
     },
     "PEL130": {
         mcqs: [...pel130U1, ...pel130U2, ...pel130U3, ...pel130U4, ...pel130U5, ...pel130U6],
+        subjective: []
+    },
+    "CSE326": {
+        mcqs: [...cse326Unit1MCQs, ...cse326Unit2MCQs, ...cse326Unit3MCQs, ...cse326Unit4MCQs, ...cse326Unit5MCQs, ...cse326Unit6MCQs],
+        subjective: []
+    },
+    "INT108": {
+        mcqs: [...int108Unit1MCQs, ...int108Unit2MCQs, ...int108Unit3MCQs, ...int108Unit4MCQs, ...int108Unit5MCQs, ...int108Unit6MCQs],
+        subjective: []
+    },
+    "INT306": {
+        mcqs: [...int306Unit1MCQs, ...int306Unit2MCQs, ...int306Unit3MCQs, ...int306Unit4MCQs, ...int306Unit5MCQs, ...int306Unit6MCQs],
+        subjective: []
+    },
+    "MTH166": {
+        mcqs: [...mth166Unit1MCQs, ...mth166Unit2MCQs, ...mth166Unit3MCQs, ...mth166Unit4MCQs, ...mth166Unit5MCQs, ...mth166Unit6MCQs],
+        subjective: []
+    },
+    "PHY110": {
+        mcqs: [...phy110Unit1MCQs, ...phy110Unit2MCQs, ...phy110Unit3MCQs, ...phy110Unit4MCQs, ...phy110Unit5MCQs, ...phy110Unit6MCQs],
         subjective: []
     }
 };
