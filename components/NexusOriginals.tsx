@@ -16,6 +16,25 @@ interface NexusOriginalsProps {
     onBack: () => void;
 }
 
+const parseLine = (text: string | undefined) => {
+    if (!text) return null;
+    const parts = text.split(/(\$\$[\s\S]*?\$\$|\$.*?\$|\*\*.*?\*\*)/g);
+    return parts.map((part, i) => {
+        if (part.startsWith('$$') && part.endsWith('$$')) {
+            const math = part.slice(2, -2);
+            return <div key={i} className="my-2 overflow-x-auto flex justify-center"><BlockMath math={math} /></div>;
+        }
+        if (part.startsWith('$') && part.endsWith('$')) {
+            const math = part.slice(1, -1);
+            return <InlineMath key={i} math={math} />;
+        }
+        if (part.startsWith('**') && part.endsWith('**')) {
+            return <strong key={i} className="font-bold">{part.slice(2, -2)}</strong>;
+        }
+        return <React.Fragment key={i}>{part}</React.Fragment>;
+    });
+};
+
 const NexusOriginals: React.FC<NexusOriginalsProps> = ({
     userProfile,
     activeSubject: initialSubject,
@@ -165,21 +184,6 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
         return Math.max(1, Math.ceil(wordCount / 200));
     };
 
-    // Parse inline formatting (bold + math)
-    const parseLine = (text: string) => {
-        const parts = text.split(/(\*\*.*?\*\*|\$.*?\$)/g);
-        return parts.map((part, i) => {
-            if (part.startsWith('**') && part.endsWith('**')) {
-                return <strong key={i} className="font-bold text-slate-800 dark:text-white">{part.slice(2, -2)}</strong>;
-            }
-            if (part.startsWith('$') && part.endsWith('$')) {
-                const math = part.slice(1, -1);
-                return <InlineMath key={i} math={math} />;
-            }
-            return part;
-        });
-    };
-
     // --- LOADING STATE ---
     if (loading) return (
         <div className="animate-fade-in h-[60vh] flex flex-col items-center justify-center">
@@ -191,7 +195,6 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
             </div>
         </div>
     );
-
     // ===========================================
     // --- 1. CATALOG VIEW ---
     // ===========================================
@@ -375,7 +378,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                         <thead>
                             <tr className="bg-slate-50 dark:bg-white/5">
                                 {headers.map((h, hi) => (
-                                    <th key={hi} className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 border-b border-slate-100 dark:border-white/5">{h.trim()}</th>
+                                    <th key={hi} className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 border-b border-slate-100 dark:border-white/5">{parseLine(h.trim())}</th>
                                 ))}
                             </tr>
                         </thead>
@@ -902,7 +905,7 @@ const UnitQuiz: React.FC<{ questions: QuizQuestion[]; unitNum: number }> = ({ qu
 
             {/* Question */}
             <div className="p-6 rounded-2xl border border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 space-y-4">
-                <p className="text-base font-medium text-slate-800 dark:text-white leading-relaxed">{q.question}</p>
+                <p className="text-base font-medium text-slate-800 dark:text-white leading-relaxed">{parseLine(q.question)}</p>
 
                 <div className="space-y-2.5">
                     {q.options.map((option, idx) => {
@@ -925,7 +928,7 @@ const UnitQuiz: React.FC<{ questions: QuizQuestion[]; unitNum: number }> = ({ qu
                                 className={`w-full text-left p-4 rounded-xl border text-sm transition-all ${optionStyle} ${selectedAnswer === null ? 'active:scale-[0.98] cursor-pointer' : 'cursor-default'}`}
                             >
                                 <span className="font-semibold mr-2 text-xs">{String.fromCharCode(65 + idx)}.</span>
-                                {option}
+                                {parseLine(option)}
                             </button>
                         );
                     })}
@@ -934,7 +937,7 @@ const UnitQuiz: React.FC<{ questions: QuizQuestion[]; unitNum: number }> = ({ qu
                 {showExplanation && (
                     <div className="p-4 bg-blue-50 dark:bg-blue-600/10 border border-blue-200 dark:border-blue-600/20 rounded-xl animate-fade-in">
                         <p className="text-xs font-semibold text-blue-600 mb-1">Explanation</p>
-                        <p className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed">{q.explanation}</p>
+                        <p className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed">{parseLine(q.explanation)}</p>
                     </div>
                 )}
 
@@ -972,12 +975,12 @@ const FlashcardStack = ({ cards }: { cards: Flashcard[] }) => {
                 <div className={`relative w-full h-full transition-all duration-700 preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
                     <div className="absolute inset-0 backface-hidden flex flex-col items-center justify-center p-8 text-center rounded-2xl shadow-lg border border-slate-100 dark:border-white/10 bg-white dark:bg-[#0a0a0a]/60">
                         <p className="text-xs text-orange-600 mb-4 font-medium">Concept</p>
-                        <h3 className="text-lg font-bold leading-tight text-slate-800 dark:text-white">{card.front}</h3>
+                        <h3 className="text-lg font-bold leading-tight text-slate-800 dark:text-white">{parseLine(card.front)}</h3>
                         <div className="absolute bottom-6 text-xs text-slate-400">Tap to reveal</div>
                     </div>
                     <div className="absolute inset-0 backface-hidden rotate-y-180 flex flex-col items-center justify-center p-8 text-center rounded-2xl shadow-lg bg-gradient-to-br from-orange-600 to-red-600 text-white border-none">
                         <p className="text-xs text-white/60 mb-4 font-medium">Answer</p>
-                        <p className="text-sm leading-relaxed">{card.back}</p>
+                        <div className="text-sm leading-relaxed">{parseLine(card.back)}</div>
                         <div className="absolute bottom-6 text-xs text-white/50">Tap to hide</div>
                     </div>
                 </div>
