@@ -2,6 +2,7 @@ import { QuizQuestion } from '../../../types.ts';
 
 export const phy110Unit2MCQs: QuizQuestion[] = [
     {
+        id: "phy110-u2-1",
         unit: 2,
         topic: 'Introduction to Lasers',
         difficulty: 'easy',
@@ -11,6 +12,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "LASER is an acronym describing the process of generating coherent light through stimulated emission."
     },
     {
+        id: "phy110-u2-2",
         unit: 2,
         topic: 'Emission Process',
         difficulty: 'medium',
@@ -20,6 +22,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "Stimulated emission produces photons with the same frequency, phase, and direction as the incident photon, leading to amplification."
     },
     {
+        id: "phy110-u2-3",
         unit: 2,
         topic: 'Spontaneous Emission',
         difficulty: 'easy',
@@ -29,6 +32,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "Spontaneous emission occurs randomly after a certain lifetime in an excited state."
     },
     {
+        id: "phy110-u2-4",
         unit: 2,
         topic: 'Stimulated Emission',
         difficulty: 'hard',
@@ -38,6 +42,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "Einstein predicted stimulated emission while deriving Planck's radiation law."
     },
     {
+        id: "phy110-u2-5",
         unit: 2,
         topic: 'Population Inversion',
         difficulty: 'medium',
@@ -47,6 +52,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "Population inversion is a non-equilibrium state required for laser action."
     },
     {
+        id: "phy110-u2-6",
         unit: 2,
         topic: 'Pumping',
         difficulty: 'medium',
@@ -56,6 +62,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "Pumping moves atoms from lower energy levels to higher ones using light, electricity, or other energy sources."
     },
     {
+        id: "phy110-u2-7",
         unit: 2,
         topic: 'Metastable State',
         difficulty: 'hard',
@@ -65,6 +72,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "Metastable states allow atoms to accumulate in the excited level, facilitating population inversion."
     },
     {
+        id: "phy110-u2-8",
         unit: 2,
         topic: 'Monochromaticity',
         difficulty: 'easy',
@@ -74,6 +82,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "Lasers emit light within a very narrow range of wavelengths."
     },
     {
+        id: "phy110-u2-9",
         unit: 2,
         topic: 'Coherence',
         difficulty: 'medium',
@@ -83,6 +92,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "Coherence allows for the stable interference patterns used in holography."
     },
     {
+        id: "phy110-u2-10",
         unit: 2,
         topic: 'Directionality',
         difficulty: 'easy',
@@ -92,6 +102,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "Laser beams have very low divergence compared to conventional light sources."
     },
     {
+        id: "phy110-u2-11",
         unit: 2,
         topic: 'Ruby Laser',
         difficulty: 'medium',
@@ -101,6 +112,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "Maiman operated the first ruby laser at Hughes Research Laboratories."
     },
     {
+        id: "phy110-u2-12",
         unit: 2,
         topic: 'Ruby Laser',
         difficulty: 'hard',
@@ -110,6 +122,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "The Cr3+ ions replace some Al atoms and provide the necessary energy levels for lasing."
     },
     {
+        id: "phy110-u2-13",
         unit: 2,
         topic: 'Ruby Laser',
         difficulty: 'medium',
@@ -119,6 +132,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "A helical flash lamp provides intense light to pump the ruby rod."
     },
     {
+        id: "phy110-u2-14",
         unit: 2,
         topic: 'He-Ne Laser',
         difficulty: 'medium',
@@ -128,6 +142,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "It uses a mixture of Helium and Neon gas as the active medium."
     },
     {
+        id: "phy110-u2-15",
         unit: 2,
         topic: 'He-Ne Laser',
         difficulty: 'hard',
@@ -137,6 +152,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "Helium atoms transfer energy to Neon atoms via collisions; Neon atoms then emit the laser light."
     },
     {
+        id: "phy110-u2-16",
         unit: 2,
         topic: 'Nd-YAG Laser',
         difficulty: 'hard',
@@ -146,6 +162,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "It is a highly efficient four-level solid-state laser."
     },
     {
+        id: "phy110-u2-17",
         unit: 2,
         topic: 'Laser Components',
         difficulty: 'medium',
@@ -155,6 +172,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "The resonator provides the feedback needed to sustain the chain reaction of stimulated emission."
     },
     {
+        id: "phy110-u2-18",
         unit: 2,
         topic: 'Population Inversion',
         difficulty: 'hard',
@@ -164,6 +182,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "In equilibrium, higher energy states are always less populated than lower ones."
     },
     {
+        id: "phy110-u2-19",
         unit: 2,
         topic: 'Einstein Coefficients',
         difficulty: 'hard',
@@ -173,6 +192,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         explanation: "This means spontaneous emission dominates at higher frequencies (like X-rays)."
     },
     {
+        id: "phy110-u2-20",
         unit: 2,
         topic: 'Laser Characteristics',
         difficulty: 'medium',
@@ -181,84 +201,84 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Coherence allows the amplitudes of millions of photons to add up constructively."
     },
-    { unit: 2, topic: 'Emissions', difficulty: 'easy', question: "Which emission produces incoherent light?", options: ["Spontaneous", "Stimulated", "Both", "Neither"], correctAnswer: 0, explanation: "Spontaneous emission occurs in random directions and phases." },
-    { unit: 2, topic: 'Pumping', difficulty: 'medium', question: "Electric discharge pumping is most common in ___ lasers.", options: ["Gas", "Solid-state", "Ruby", "Dye"], correctAnswer: 0, explanation: "High voltage excites the gas atoms directly." },
-    { unit: 2, topic: 'Active medium', difficulty: 'medium', question: "The region in a laser where population inversion is maintained is the ___.", options: ["Active Medium", "Resonator", "Pump", "Heat sink"], correctAnswer: 0, explanation: "It can be a solid, gas, or liquid." },
-    { unit: 2, topic: 'Einstein Coefficients', difficulty: 'hard', question: "A and B coefficients represent ___ and ___ respectively.", options: ["Spontaneous emission, Stimulated emission/absorption", "Absorption, Emission", "Gain, Loss", "None"], correctAnswer: 0, explanation: "A21 is spontaneous rate, B21 is stimulated emission rate." },
-    { unit: 2, topic: 'Ruby Laser', difficulty: 'hard', question: "The Ruby laser is a ___ level laser system.", options: ["Three", "Two", "Four", "Five"], correctAnswer: 0, explanation: "It involves ground, excited, and metastable states." },
-    { unit: 2, topic: 'Nd-YAG', difficulty: 'hard', question: "The Nd-YAG laser is a ___ level laser system.", options: ["Four", "Three", "Six", "One"], correctAnswer: 0, explanation: "Four-level systems are more efficient for maintaining inversion." },
-    { unit: 2, topic: 'He-Ne', difficulty: 'medium', question: "The common wavelength of a red He-Ne laser is ___.", options: ["632.8 nm", "694.3 nm", "1.06 μm", "488 nm"], correctAnswer: 0, explanation: "Ruby is 694.3nm; He-Ne is 632.8nm." },
-    { unit: 2, topic: 'Ruby', difficulty: 'medium', question: "The output of a Ruby laser is typically ___.", options: ["Pulsed", "Continuous", "Invisible", "Random"], correctAnswer: 0, explanation: "The optical pumping is usually done in pulses." },
-    { unit: 2, topic: 'He-Ne', difficulty: 'medium', question: "The output of a He-Ne laser is typically ___.", options: ["Continuous", "Pulsed", "High power", "Single photon"], correctAnswer: 0, explanation: "Gas lasers are great for steady continuous wave (CW) beams." },
-    { unit: 2, topic: 'Divergence', difficulty: 'hard', question: "Angular divergence θ of a laser is roughly proportional to ___.", options: ["λ / D", "D / λ", "λ * D", "1"], correctAnswer: 0, explanation: "D is the aperture diameter; wave diffraction limits the beam." },
-    { unit: 2, topic: 'Applications', difficulty: 'easy', question: "Which device uses a laser to read information from a disc?", options: ["CD/DVD player", "Magnetic tape", "Microphone", "Speaker"], correctAnswer: 0, explanation: "Small laser diodes are used for high-density reading." },
-    { unit: 2, topic: 'Applications', difficulty: 'easy', question: "Lasers used in surgery for bloodless cutting use the principle of ___.", options: ["Localized heating / Vaporization", "Radioactivity", "Freezing", "Impact"], correctAnswer: 0, explanation: "High intensity light cauterizes as it cuts." },
-    { unit: 2, topic: 'LIDAR', difficulty: 'medium', question: "LIDAR stands for Light Detection and ___.", options: ["Ranging", "Radiation", "Reflection", "Refraction"], correctAnswer: 0, explanation: "It uses laser pulses to measure distance." },
-    { unit: 2, topic: 'Holography', difficulty: 'hard', question: "Holography requires a light source with high ___.", options: ["Coherence", "Speed", "Frequency", "Power"], correctAnswer: 0, explanation: "The phase information must be preserved." },
-    { unit: 2, topic: 'Metastable', difficulty: 'medium', question: "Why is an ordinary excited state (~10^-8 s) not good for lasing?", options: ["Atoms drop back too fast to build up population", "Too high energy", "No light emitted", "Too stable"], correctAnswer: 0, explanation: "You need the 'bottleneck' of the metastable state." },
-    { unit: 2, topic: 'Einstein', difficulty: 'hard', question: "Stimulated emission is proportional to the ___ of the radiation field.", options: ["Energy density", "Frequency", "Volume", "Color"], correctAnswer: 0, explanation: "Rate ∝ B * u(ν)." },
-    { unit: 2, topic: 'Characteristics', difficulty: 'easy', question: "Laser light is much ___ than sunlight.", options: ["Brighter (Higher intensity)", "Heavier", "Slower", "Hotter only"], correctAnswer: 0, explanation: "The energy is concentrated in space and time." },
-    { unit: 2, topic: 'Spatial Coherence', difficulty: 'hard', question: "Spatial coherence describes phase correlation across the ___.", options: ["Wavefront", "Time axis", "Vacuum", "Medium"], correctAnswer: 0, explanation: "Relates to the size of the light source." },
-    { unit: 2, topic: 'Temporal Coherence', difficulty: 'hard', question: "Temporal coherence relates to the ___ of the light.", options: ["Spectral purity / Monochromaticity", "Shape", "Source area", "Heat"], correctAnswer: 0, explanation: "Stable phase over time requires a narrow frequency range." },
-    { unit: 2, topic: 'Optical Cavity', difficulty: 'medium', question: "The mirror with lower reflectivity is where the ___.", options: ["Laser beam exits", "Pumping happens", "Source is kept", "None"], correctAnswer: 0, explanation: "One mirror is partially transparent to let the light out." },
-    { unit: 2, topic: 'Types', difficulty: 'medium', question: "CO2 laser is a powerful ___ laser used in industry.", options: ["Gas", "Solid", "Liquid", "Bio"], correctAnswer: 0, explanation: "Used for cutting thick steel plates." },
-    { unit: 2, topic: 'Types', difficulty: 'medium', question: "Semiconductor lasers are primarily used in ___.", options: ["Fiber optic communications", "Nuclear reactors", "Steel cutting", "Street lights"], correctAnswer: 0, explanation: "They are compact and easy to modulate." },
-    { unit: 2, topic: 'Emission', difficulty: 'hard', question: "Is spontaneous emission triggered by external light?", options: ["No", "Yes", "Only in gas", "Always"], correctAnswer: 0, explanation: "It is an intrinsic property based on probability." },
-    { unit: 2, topic: 'Emission', difficulty: 'medium', question: "Stimulated emission produces a photon identical in ___.", options: ["All of these", "Frequency", "Direction", "Polarization"], correctAnswer: 0, explanation: "The outgoing photon is a clone of the triggering one." },
-    { unit: 2, topic: 'Levels', difficulty: 'hard', question: "Why is a 4-level system better than 3-level?", options: ["It requires less pumping to maintain inversion", "More power", "More colors", "Simpler"], correctAnswer: 0, explanation: "The lower laser level is quickly emptied in 4-level systems." },
-    { unit: 2, topic: 'Nd-YAG', difficulty: 'hard', question: "What is the typical output wavelength of an Nd-YAG laser?", options: ["1064 nm (Infrared)", "532 nm", "632 nm", "700 nm"], correctAnswer: 0, explanation: "Commonly used in industry and medicine (IR range)." },
-    { unit: 2, topic: 'Laser', difficulty: 'easy', question: "Can a laser beam be focused to a much smaller spot than ordinary light?", options: ["Yes", "No", "Depends on weather", "Only in space"], correctAnswer: 0, explanation: "High directionality and coherence allow diffraction-limited focusing." },
-    { unit: 2, topic: 'Safety', difficulty: 'easy', question: "Why should you never look directly into a laser beam?", options: ["Strong intensity can damage the retina", "It turns you blind instantly forever", "It is radioactive", "None"], correctAnswer: 0, explanation: "The eye focuses the beam to a tiny spot on the retina, causing burns." },
-    { unit: 2, topic: 'Ruby', difficulty: 'medium', question: "Which ion is responsible for the red color in the Ruby laser?", options: ["Cr3+", "Al3+", "O2-", "Ne"], correctAnswer: 0, explanation: "The energy levels of Chromium ions emit red photons." },
-    { unit: 2, topic: 'Threshold', difficulty: 'hard', question: "For lasing to start, the gain in the medium must ___ the total losses.", options: ["Exceed or equal", "Be exactly half", "Be zero", "Be negative"], correctAnswer: 0, explanation: "The 'threshold condition' for oscillation." },
-    { unit: 2, topic: 'He-Ne', difficulty: 'hard', question: "The ratio of He to Ne in the gas laser is typically ___.", options: ["10 : 1", "1 : 1", "1 : 10", "100 : 1"], correctAnswer: 0, explanation: "A large excess of He is needed to efficiently pump the fewer Ne atoms." },
-    { unit: 2, topic: 'Application', difficulty: 'easy', question: "Bar code scanners in grocery stores use ___.", options: ["Lasers", "X-rays", "Magnets", "Sound"], correctAnswer: 0, explanation: "Precise scans of the bars." },
-    { unit: 2, topic: 'Application', difficulty: 'medium', question: "Printing with high speed and precision often uses ___ printing.", options: ["Laser", "Inkjet", "Dot matrix", "Hand"], correctAnswer: 0, explanation: "The laser beam 'writes' the image on a drum." },
-    { unit: 2, topic: 'Characteristics', difficulty: 'medium', question: "A laser's 'brightness' is strictly termed as its ___.", options: ["Radiance", "Voltage", "Hue", "Saturation"], correctAnswer: 0, explanation: "Energy per unit area per unit solid angle." },
-    { unit: 2, topic: 'Einstein', difficulty: 'hard', question: "Relation between A21 and B21?", options: ["A21/B21 = 8πhν³/c³", "A21 = B21", "A21/B21 = c/ν", "None"], correctAnswer: 0, explanation: "Derived from blackbody radiation statistics." },
-    { unit: 2, topic: 'Laser Output', difficulty: 'medium', question: "Frequency doubling a 1064 nm Nd-YAG laser results in ___ light.", options: ["Green (532 nm)", "Blue (212 nm)", "Red (2128 nm)", "Ultraviolet"], correctAnswer: 0, explanation: "Certain crystals can halve the wavelength/double the frequency." },
-    { unit: 2, topic: 'Ruby', difficulty: 'hard', question: "Ruby laser is inefficient because it is a 3-level system and requires ___.", options: ["Brute force pumping (Ground state depopulation)", "Constant cooling", "Zero gravity", "None"], correctAnswer: 0, explanation: "More than half the atoms must be pumped out of the ground state." },
-    { unit: 2, topic: 'Process', difficulty: 'easy', question: "Stimulated emission produces light that is ___ with the trigger.", options: ["In phase", "Out of phase", "180 deg shifted", "Randomly phased"], correctAnswer: 0, explanation: "This is why lasers are coherent." },
-    { unit: 2, topic: 'Process', difficulty: 'easy', question: "Does stimulated emission require the atom to be in an excited state?", options: ["Yes", "No", "Only for metals", "Sometimes"], correctAnswer: 0, explanation: "You can't stimulate emission from an atom already in the ground state." },
-    { unit: 2, topic: 'Material', difficulty: 'medium', question: "GaAs is a common material for ___ lasers.", options: ["Semiconductor / Diode", "Gas", "Liquid", "Bio"], correctAnswer: 0, explanation: "Gallium Arsenide has a direct bandgap." },
-    { unit: 2, topic: 'Active Medium', difficulty: 'medium', question: "Can a dye (liquid) be used as an active medium?", options: ["Yes", "No", "Only for medicine", "Only for weapons"], correctAnswer: 0, explanation: "Dye lasers are known for being tunable over many colors." },
-    { unit: 2, topic: 'Excitation', difficulty: 'hard', question: "Metastable states usually exist due to ___ rules.", options: ["Selection rules (Forbidden transitions)", "Maxwell's rules", "Gravity", "Thermodynamics"], correctAnswer: 0, explanation: "Quantum rules that prevent fast spontaneous decay." },
-    { unit: 2, topic: 'Laser', difficulty: 'medium', question: "The output power of a typical lab He-Ne laser is ___.", options: ["A few milliwatts", "Kilo-watts", "Mega-watts", "Zero"], correctAnswer: 0, explanation: "They are low power but very stable/precise." },
-    { unit: 2, topic: 'Ruby', difficulty: 'medium', question: "Main disadvantage of Ruby laser?", options: ["Low efficiency (~1%)", "Too small", "Wrong color", "Gas leaks"], correctAnswer: 0, explanation: "Being a 3-level system makes it power hungry." },
-    { unit: 2, topic: 'History', difficulty: 'easy', question: "The precursor to the Laser was the ___ (Microwave).", options: ["MASER", "TASER", "RADAR", "SONAR"], correctAnswer: 0, explanation: "Microwave Amplification by Stimulated Emission of Radiation." },
-    { unit: 2, topic: 'History', difficulty: 'hard', question: "Who shared the 1964 Nobel Prize for the Maser-Laser principle?", options: ["Townes, Basov, and Prokhorov", "Einstein", "Maiman", "Bohr"], correctAnswer: 0, explanation: "They laid the theoretical and experimental groundwork." },
-    { unit: 2, topic: 'Properties', difficulty: 'medium', question: "Intensity of laser radiation is limited by ___.", options: ["Pumping power and gain", "The speed of light", "The color of the box", "None"], correctAnswer: 0, explanation: "The more energy you pump in, the more stimulated emission occurs." },
-    { unit: 2, topic: 'States', difficulty: 'medium', question: "Is population inversion possible in a two-level system?", options: ["No (at most 50/50)", "Yes", "Only in space", "Always"], correctAnswer: 0, explanation: "Absorption and stimulated emission rates would equalize." },
-    { unit: 2, topic: 'Interaction', difficulty: 'hard', question: "Absorption rate depends on ___.", options: ["Intensity of light and number of ground state atoms", "Gravity", "Temperature only", "None"], correctAnswer: 0, explanation: "More light or more atoms = more transitions up." },
-    { unit: 2, topic: 'Types', difficulty: 'medium', question: "Argon Ion laser is commonly used for its ___ output.", options: ["Green/Blue (Visible)", "Radio", "Microwave", "X-ray"], correctAnswer: 0, explanation: "Used in entertainment and medical procedures." },
-    { unit: 2, topic: 'Components', difficulty: 'easy', question: "Most lasers use a ___ to dissipate the excess heat.", options: ["Cooling system", "Flashlight", "Submarine", "Battery"], correctAnswer: 0, explanation: "Waste heat can damage the medium or stop lasing." },
-    { unit: 2, topic: 'Active medium', difficulty: 'easy', question: "Can a fiber optic cable itself act as a laser?", options: ["Yes (Fiber laser)", "No", "Only for internet", "Never"], correctAnswer: 0, explanation: "Doped fibers are very efficient high-power lasers." },
-    { unit: 2, topic: 'He-Ne', difficulty: 'hard', question: "Collision of the second kind relates to which laser?", options: ["He-Ne", "Ruby", "Dye", "Semiconductor"], correctAnswer: 0, explanation: "Energy transfer from excited He to ground Ne." },
-    { unit: 2, topic: 'He-Ne', difficulty: 'hard', question: "Why is the He-Ne tube narrow?", options: ["To help Ne atoms collide with walls and relax", "To save gas", "For aesthetic", "None"], correctAnswer: 0, explanation: "Wall collisions help empty the lower energy level of Neon." },
-    { unit: 2, topic: 'Measurement', difficulty: 'easy', question: "Lasers can measure distance precisely using ___.", options: ["Time-of-flight (Pulses)", "Weight", "Magnetism", "Sound speed"], correctAnswer: 0, explanation: "Knowing the speed of light allows distance calculation." },
-    { unit: 2, topic: 'Industrial', difficulty: 'medium', question: "Lasers can weld metals because of their high ___.", options: ["Energy density", "Color", "Transparency", "Static charge"], correctAnswer: 0, explanation: "Focusing power melts localized areas." },
-    { unit: 2, topic: 'Optical Communication', difficulty: 'medium', question: "Laser diodes are ideal for fiber optics because they are ___.", options: ["Small and fast-switching", "Huge and heavy", "Cold", "Slow"], correctAnswer: 0, explanation: "They can be turned on/off billions of times per second (GHz)." },
-    { unit: 2, topic: 'Coherence', difficulty: 'medium', question: "Ordinary white light has ___ coherence.", options: ["Very low", "Very high", "Infinite", "None"], correctAnswer: 0, explanation: "Random wavelengths and phases." },
-    { unit: 2, topic: 'Characteristics', difficulty: 'easy', question: "Which property makes lasers different from a bulb?", options: ["All of these", "Directionality", "Coherence", "Monochromaticity"], correctAnswer: 0, explanation: "Combination of these creates the unique laser beam." },
-    { unit: 2, topic: 'Divergence', difficulty: 'hard', question: "A beam with dθ = 1 milliradian spreads by 1 m after traveling ___.", options: ["1000 m", "1 m", "10 m", "100 m"], correctAnswer: 0, explanation: "Distance = Spread / Angle (in radians)." },
-    { unit: 2, topic: 'Levels', difficulty: 'hard', question: "Pumping level is usually ___ than the upper laser level.", options: ["Higher", "Lower", "Same", "Zero"], correctAnswer: 0, explanation: "Atoms drop from pump level to the upper laser (metastable) level." },
-    { unit: 2, topic: 'Resonator', difficulty: 'medium', question: "The length of the laser cavity usually matches an integer number of ___.", options: ["Half-wavelengths", "Meters", "Kilometers", "Atomic radii"], correctAnswer: 0, explanation: "Forms standing waves (modes)." },
-    { unit: 2, topic: 'Mode', difficulty: 'hard', question: "TEM00 stands for ___ mode.", options: ["Transverse Electromagnetic (Lowest order)", "Temporary Emission", "Total Energy Max", "None"], correctAnswer: 0, explanation: "The smoothest, Gaussian-shaped beam." },
-    { unit: 2, topic: 'Process', difficulty: 'easy', question: "Stimulated absorption moves an atom to ___ state.", options: ["Higher", "Lower", "Ground", "Ionized"], correctAnswer: 0, explanation: "Absorbs a photon and jumps up." },
-    { unit: 2, topic: 'Characteristics', difficulty: 'medium', question: "Intensity of light I is the ___ per unit area.", options: ["Power", "Force", "Pressure", "Mass"], correctAnswer: 0, explanation: "Watts/m²." },
-    { unit: 2, topic: 'Types', difficulty: 'medium', question: "Which is a tunable laser?", options: ["Liquid Dye laser", "Ruby", "He-Ne", "Nd-YAG"], correctAnswer: 0, explanation: "Can change output wavelength by changing dye or resonator." },
-    { unit: 2, topic: 'Ruby', difficulty: 'medium', question: "The Ruby laser output wavelength is in ___ part of spectrum.", options: ["Visible (Red)", "Invisible", "Ultraviolet", "Radio"], correctAnswer: 0, explanation: "694.3nm." },
-    { unit: 2, topic: 'Nd-YAG', difficulty: 'medium', question: "Nd ions are used in ___ lasers.", options: ["Solid State", "Gas", "Metal", "X-ray"], correctAnswer: 0, explanation: "Hosted in crystals like YAG." },
-    { unit: 2, topic: 'Nd-YAG', difficulty: 'medium', question: "What is the host crystal for Nd-YAG?", options: ["Yttrium Aluminum Garnet", "Ruby", "Salt", "Glass"], correctAnswer: 0, explanation: "YAG provides stable platform for Nd ions." },
-    { unit: 2, topic: 'Emission', difficulty: 'medium', question: "Is spontaneous emission phase-related to incident light?", options: ["No", "Yes", "Always", "Partially"], correctAnswer: 0, explanation: "It is random." },
-    { unit: 2, topic: 'He-Ne', difficulty: 'medium', question: "Why is Helium necessary in He-Ne?", options: ["To excite Neon through collisions", "Neon is too heavy", "Helium emits red light", "None"], correctAnswer: 0, explanation: "Neon is hard to excite directly with discharge; He is easy." },
-    { unit: 2, topic: 'Threshold', difficulty: 'hard', question: "Schawlow-Townes condition relates to ___.", options: ["Laser linewidth", "Speed of light", "Relativity", "None"], correctAnswer: 0, explanation: "Theoretical limit of laser purity." },
-    { unit: 2, topic: 'Process', difficulty: 'easy', question: "In laser, emission must be ___ than absorption.", options: ["Greater", "Less", "Equal", "Zero"], correctAnswer: 0, explanation: "Requires population inversion." },
-    { unit: 2, topic: 'Atmosphere', difficulty: 'medium', question: "Lasers can be used to scan atmospheric pollution using ___.", options: ["LIDAR", "RADAR", "SONAR", "X-rays"], correctAnswer: 0, explanation: "Absorption of specific colors by pollutants." },
-    { unit: 2, topic: 'Medical', difficulty: 'easy', question: "Correcting near/farsightedness using lasers is called ___.", options: ["LASIK", "Lasek", "X-raying", "Tanning"], correctAnswer: 0, explanation: "Laser-Assisted in Situ Keratomileusis." },
-    { unit: 2, topic: 'Level', difficulty: 'medium', question: "Normal life time of atom is 10^-8 sec but metastable is ___.", options: ["10^-3 sec", "10^-12 sec", "1 year", "1 sec"], correctAnswer: 0, explanation: "Significantly longer stay." },
-    { unit: 2, topic: 'Optical Pumping', difficulty: 'medium', question: "Is optical pumping suitable for gas lasers?", options: ["Generally No (Discharge is better)", "Yes always", "Only for medicine", "None"], correctAnswer: 0, explanation: "Gases have low absorption cross-sections for broad light." },
-    { unit: 2, topic: 'Laser', difficulty: 'easy', question: "A laser's coherence means it can produce ___.", options: ["Interference patterns", "Heat", "Noise", "Shadows"], correctAnswer: 0, explanation: "Required for stable phase-sensitive effects." },
-    { unit: 2, topic: 'States', difficulty: 'medium', question: "Does stimulated emission lead to a gain in energy of light?", options: ["Yes (Light amplification)", "No", "Energy is lost", "Energy turns into mass"], correctAnswer: 0, explanation: "One photon in, two photons out." },
-    { unit: 2, topic: 'Pumping', difficulty: 'hard', question: "Chemical pumping uses ___ to excite the medium.", options: ["Chemical reactions", "Flashlight", "Nuclear decay", "Heat"], correctAnswer: 0, explanation: "Used in powerful military chemical lasers (e.g. HF laser)." }
+    { id: "phy110-u2-21", unit: 2, topic: 'Emissions', difficulty: 'easy', question: "Which emission produces incoherent light?", options: ["Spontaneous", "Stimulated", "Both", "Neither"], correctAnswer: 0, explanation: "Spontaneous emission occurs in random directions and phases." },
+    { id: "phy110-u2-22", unit: 2, topic: 'Pumping', difficulty: 'medium', question: "Electric discharge pumping is most common in ___ lasers.", options: ["Gas", "Solid-state", "Ruby", "Dye"], correctAnswer: 0, explanation: "High voltage excites the gas atoms directly." },
+    { id: "phy110-u2-23", unit: 2, topic: 'Active medium', difficulty: 'medium', question: "The region in a laser where population inversion is maintained is the ___.", options: ["Active Medium", "Resonator", "Pump", "Heat sink"], correctAnswer: 0, explanation: "It can be a solid, gas, or liquid." },
+    { id: "phy110-u2-24", unit: 2, topic: 'Einstein Coefficients', difficulty: 'hard', question: "A and B coefficients represent ___ and ___ respectively.", options: ["Spontaneous emission, Stimulated emission/absorption", "Absorption, Emission", "Gain, Loss", "None"], correctAnswer: 0, explanation: "A21 is spontaneous rate, B21 is stimulated emission rate." },
+    { id: "phy110-u2-25", unit: 2, topic: 'Ruby Laser', difficulty: 'hard', question: "The Ruby laser is a ___ level laser system.", options: ["Three", "Two", "Four", "Five"], correctAnswer: 0, explanation: "It involves ground, excited, and metastable states." },
+    { id: "phy110-u2-26", unit: 2, topic: 'Nd-YAG', difficulty: 'hard', question: "The Nd-YAG laser is a ___ level laser system.", options: ["Four", "Three", "Six", "One"], correctAnswer: 0, explanation: "Four-level systems are more efficient for maintaining inversion." },
+    { id: "phy110-u2-27", unit: 2, topic: 'He-Ne', difficulty: 'medium', question: "The common wavelength of a red He-Ne laser is ___.", options: ["632.8 nm", "694.3 nm", "1.06 μm", "488 nm"], correctAnswer: 0, explanation: "Ruby is 694.3nm; He-Ne is 632.8nm." },
+    { id: "phy110-u2-28", unit: 2, topic: 'Ruby', difficulty: 'medium', question: "The output of a Ruby laser is typically ___.", options: ["Pulsed", "Continuous", "Invisible", "Random"], correctAnswer: 0, explanation: "The optical pumping is usually done in pulses." },
+    { id: "phy110-u2-29", unit: 2, topic: 'He-Ne', difficulty: 'medium', question: "The output of a He-Ne laser is typically ___.", options: ["Continuous", "Pulsed", "High power", "Single photon"], correctAnswer: 0, explanation: "Gas lasers are great for steady continuous wave (CW) beams." },
+    { id: "phy110-u2-30", unit: 2, topic: 'Divergence', difficulty: 'hard', question: "Angular divergence θ of a laser is roughly proportional to ___.", options: ["λ / D", "D / λ", "λ * D", "1"], correctAnswer: 0, explanation: "D is the aperture diameter; wave diffraction limits the beam." },
+    { id: "phy110-u2-31", unit: 2, topic: 'Applications', difficulty: 'easy', question: "Which device uses a laser to read information from a disc?", options: ["CD/DVD player", "Magnetic tape", "Microphone", "Speaker"], correctAnswer: 0, explanation: "Small laser diodes are used for high-density reading." },
+    { id: "phy110-u2-32", unit: 2, topic: 'Applications', difficulty: 'easy', question: "Lasers used in surgery for bloodless cutting use the principle of ___.", options: ["Localized heating / Vaporization", "Radioactivity", "Freezing", "Impact"], correctAnswer: 0, explanation: "High intensity light cauterizes as it cuts." },
+    { id: "phy110-u2-33", unit: 2, topic: 'LIDAR', difficulty: 'medium', question: "LIDAR stands for Light Detection and ___.", options: ["Ranging", "Radiation", "Reflection", "Refraction"], correctAnswer: 0, explanation: "It uses laser pulses to measure distance." },
+    { id: "phy110-u2-34", unit: 2, topic: 'Holography', difficulty: 'hard', question: "Holography requires a light source with high ___.", options: ["Coherence", "Speed", "Frequency", "Power"], correctAnswer: 0, explanation: "The phase information must be preserved." },
+    { id: "phy110-u2-35", unit: 2, topic: 'Metastable', difficulty: 'medium', question: "Why is an ordinary excited state (~10^-8 s) not good for lasing?", options: ["Atoms drop back too fast to build up population", "Too high energy", "No light emitted", "Too stable"], correctAnswer: 0, explanation: "You need the 'bottleneck' of the metastable state." },
+    { id: "phy110-u2-36", unit: 2, topic: 'Einstein', difficulty: 'hard', question: "Stimulated emission is proportional to the ___ of the radiation field.", options: ["Energy density", "Frequency", "Volume", "Color"], correctAnswer: 0, explanation: "Rate ∝ B * u(ν)." },
+    { id: "phy110-u2-37", unit: 2, topic: 'Characteristics', difficulty: 'easy', question: "Laser light is much ___ than sunlight.", options: ["Brighter (Higher intensity)", "Heavier", "Slower", "Hotter only"], correctAnswer: 0, explanation: "The energy is concentrated in space and time." },
+    { id: "phy110-u2-38", unit: 2, topic: 'Spatial Coherence', difficulty: 'hard', question: "Spatial coherence describes phase correlation across the ___.", options: ["Wavefront", "Time axis", "Vacuum", "Medium"], correctAnswer: 0, explanation: "Relates to the size of the light source." },
+    { id: "phy110-u2-39", unit: 2, topic: 'Temporal Coherence', difficulty: 'hard', question: "Temporal coherence relates to the ___ of the light.", options: ["Spectral purity / Monochromaticity", "Shape", "Source area", "Heat"], correctAnswer: 0, explanation: "Stable phase over time requires a narrow frequency range." },
+    { id: "phy110-u2-40", unit: 2, topic: 'Optical Cavity', difficulty: 'medium', question: "The mirror with lower reflectivity is where the ___.", options: ["Laser beam exits", "Pumping happens", "Source is kept", "None"], correctAnswer: 0, explanation: "One mirror is partially transparent to let the light out." },
+    { id: "phy110-u2-41", unit: 2, topic: 'Types', difficulty: 'medium', question: "CO2 laser is a powerful ___ laser used in industry.", options: ["Gas", "Solid", "Liquid", "Bio"], correctAnswer: 0, explanation: "Used for cutting thick steel plates." },
+    { id: "phy110-u2-42", unit: 2, topic: 'Types', difficulty: 'medium', question: "Semiconductor lasers are primarily used in ___.", options: ["Fiber optic communications", "Nuclear reactors", "Steel cutting", "Street lights"], correctAnswer: 0, explanation: "They are compact and easy to modulate." },
+    { id: "phy110-u2-43", unit: 2, topic: 'Emission', difficulty: 'hard', question: "Is spontaneous emission triggered by external light?", options: ["No", "Yes", "Only in gas", "Always"], correctAnswer: 0, explanation: "It is an intrinsic property based on probability." },
+    { id: "phy110-u2-44", unit: 2, topic: 'Emission', difficulty: 'medium', question: "Stimulated emission produces a photon identical in ___.", options: ["All of these", "Frequency", "Direction", "Polarization"], correctAnswer: 0, explanation: "The outgoing photon is a clone of the triggering one." },
+    { id: "phy110-u2-45", unit: 2, topic: 'Levels', difficulty: 'hard', question: "Why is a 4-level system better than 3-level?", options: ["It requires less pumping to maintain inversion", "More power", "More colors", "Simpler"], correctAnswer: 0, explanation: "The lower laser level is quickly emptied in 4-level systems." },
+    { id: "phy110-u2-46", unit: 2, topic: 'Nd-YAG', difficulty: 'hard', question: "What is the typical output wavelength of an Nd-YAG laser?", options: ["1064 nm (Infrared)", "532 nm", "632 nm", "700 nm"], correctAnswer: 0, explanation: "Commonly used in industry and medicine (IR range)." },
+    { id: "phy110-u2-47", unit: 2, topic: 'Laser', difficulty: 'easy', question: "Can a laser beam be focused to a much smaller spot than ordinary light?", options: ["Yes", "No", "Depends on weather", "Only in space"], correctAnswer: 0, explanation: "High directionality and coherence allow diffraction-limited focusing." },
+    { id: "phy110-u2-48", unit: 2, topic: 'Safety', difficulty: 'easy', question: "Why should you never look directly into a laser beam?", options: ["Strong intensity can damage the retina", "It turns you blind instantly forever", "It is radioactive", "None"], correctAnswer: 0, explanation: "The eye focuses the beam to a tiny spot on the retina, causing burns." },
+    { id: "phy110-u2-49", unit: 2, topic: 'Ruby', difficulty: 'medium', question: "Which ion is responsible for the red color in the Ruby laser?", options: ["Cr3+", "Al3+", "O2-", "Ne"], correctAnswer: 0, explanation: "The energy levels of Chromium ions emit red photons." },
+    { id: "phy110-u2-50", unit: 2, topic: 'Threshold', difficulty: 'hard', question: "For lasing to start, the gain in the medium must ___ the total losses.", options: ["Exceed or equal", "Be exactly half", "Be zero", "Be negative"], correctAnswer: 0, explanation: "The 'threshold condition' for oscillation." },
+    { id: "phy110-u2-51", unit: 2, topic: 'He-Ne', difficulty: 'hard', question: "The ratio of He to Ne in the gas laser is typically ___.", options: ["10 : 1", "1 : 1", "1 : 10", "100 : 1"], correctAnswer: 0, explanation: "A large excess of He is needed to efficiently pump the fewer Ne atoms." },
+    { id: "phy110-u2-52", unit: 2, topic: 'Application', difficulty: 'easy', question: "Bar code scanners in grocery stores use ___.", options: ["Lasers", "X-rays", "Magnets", "Sound"], correctAnswer: 0, explanation: "Precise scans of the bars." },
+    { id: "phy110-u2-53", unit: 2, topic: 'Application', difficulty: 'medium', question: "Printing with high speed and precision often uses ___ printing.", options: ["Laser", "Inkjet", "Dot matrix", "Hand"], correctAnswer: 0, explanation: "The laser beam 'writes' the image on a drum." },
+    { id: "phy110-u2-54", unit: 2, topic: 'Characteristics', difficulty: 'medium', question: "A laser's 'brightness' is strictly termed as its ___.", options: ["Radiance", "Voltage", "Hue", "Saturation"], correctAnswer: 0, explanation: "Energy per unit area per unit solid angle." },
+    { id: "phy110-u2-55", unit: 2, topic: 'Einstein', difficulty: 'hard', question: "Relation between A21 and B21?", options: ["A21/B21 = 8πhν³/c³", "A21 = B21", "A21/B21 = c/ν", "None"], correctAnswer: 0, explanation: "Derived from blackbody radiation statistics." },
+    { id: "phy110-u2-56", unit: 2, topic: 'Laser Output', difficulty: 'medium', question: "Frequency doubling a 1064 nm Nd-YAG laser results in ___ light.", options: ["Green (532 nm)", "Blue (212 nm)", "Red (2128 nm)", "Ultraviolet"], correctAnswer: 0, explanation: "Certain crystals can halve the wavelength/double the frequency." },
+    { id: "phy110-u2-57", unit: 2, topic: 'Ruby', difficulty: 'hard', question: "Ruby laser is inefficient because it is a 3-level system and requires ___.", options: ["Brute force pumping (Ground state depopulation)", "Constant cooling", "Zero gravity", "None"], correctAnswer: 0, explanation: "More than half the atoms must be pumped out of the ground state." },
+    { id: "phy110-u2-58", unit: 2, topic: 'Process', difficulty: 'easy', question: "Stimulated emission produces light that is ___ with the trigger.", options: ["In phase", "Out of phase", "180 deg shifted", "Randomly phased"], correctAnswer: 0, explanation: "This is why lasers are coherent." },
+    { id: "phy110-u2-59", unit: 2, topic: 'Process', difficulty: 'easy', question: "Does stimulated emission require the atom to be in an excited state?", options: ["Yes", "No", "Only for metals", "Sometimes"], correctAnswer: 0, explanation: "You can't stimulate emission from an atom already in the ground state." },
+    { id: "phy110-u2-60", unit: 2, topic: 'Material', difficulty: 'medium', question: "GaAs is a common material for ___ lasers.", options: ["Semiconductor / Diode", "Gas", "Liquid", "Bio"], correctAnswer: 0, explanation: "Gallium Arsenide has a direct bandgap." },
+    { id: "phy110-u2-61", unit: 2, topic: 'Active Medium', difficulty: 'medium', question: "Can a dye (liquid) be used as an active medium?", options: ["Yes", "No", "Only for medicine", "Only for weapons"], correctAnswer: 0, explanation: "Dye lasers are known for being tunable over many colors." },
+    { id: "phy110-u2-62", unit: 2, topic: 'Excitation', difficulty: 'hard', question: "Metastable states usually exist due to ___ rules.", options: ["Selection rules (Forbidden transitions)", "Maxwell's rules", "Gravity", "Thermodynamics"], correctAnswer: 0, explanation: "Quantum rules that prevent fast spontaneous decay." },
+    { id: "phy110-u2-63", unit: 2, topic: 'Laser', difficulty: 'medium', question: "The output power of a typical lab He-Ne laser is ___.", options: ["A few milliwatts", "Kilo-watts", "Mega-watts", "Zero"], correctAnswer: 0, explanation: "They are low power but very stable/precise." },
+    { id: "phy110-u2-64", unit: 2, topic: 'Ruby', difficulty: 'medium', question: "Main disadvantage of Ruby laser?", options: ["Low efficiency (~1%)", "Too small", "Wrong color", "Gas leaks"], correctAnswer: 0, explanation: "Being a 3-level system makes it power hungry." },
+    { id: "phy110-u2-65", unit: 2, topic: 'History', difficulty: 'easy', question: "The precursor to the Laser was the ___ (Microwave).", options: ["MASER", "TASER", "RADAR", "SONAR"], correctAnswer: 0, explanation: "Microwave Amplification by Stimulated Emission of Radiation." },
+    { id: "phy110-u2-66", unit: 2, topic: 'History', difficulty: 'hard', question: "Who shared the 1964 Nobel Prize for the Maser-Laser principle?", options: ["Townes, Basov, and Prokhorov", "Einstein", "Maiman", "Bohr"], correctAnswer: 0, explanation: "They laid the theoretical and experimental groundwork." },
+    { id: "phy110-u2-67", unit: 2, topic: 'Properties', difficulty: 'medium', question: "Intensity of laser radiation is limited by ___.", options: ["Pumping power and gain", "The speed of light", "The color of the box", "None"], correctAnswer: 0, explanation: "The more energy you pump in, the more stimulated emission occurs." },
+    { id: "phy110-u2-68", unit: 2, topic: 'States', difficulty: 'medium', question: "Is population inversion possible in a two-level system?", options: ["No (at most 50/50)", "Yes", "Only in space", "Always"], correctAnswer: 0, explanation: "Absorption and stimulated emission rates would equalize." },
+    { id: "phy110-u2-69", unit: 2, topic: 'Interaction', difficulty: 'hard', question: "Absorption rate depends on ___.", options: ["Intensity of light and number of ground state atoms", "Gravity", "Temperature only", "None"], correctAnswer: 0, explanation: "More light or more atoms = more transitions up." },
+    { id: "phy110-u2-70", unit: 2, topic: 'Types', difficulty: 'medium', question: "Argon Ion laser is commonly used for its ___ output.", options: ["Green/Blue (Visible)", "Radio", "Microwave", "X-ray"], correctAnswer: 0, explanation: "Used in entertainment and medical procedures." },
+    { id: "phy110-u2-71", unit: 2, topic: 'Components', difficulty: 'easy', question: "Most lasers use a ___ to dissipate the excess heat.", options: ["Cooling system", "Flashlight", "Submarine", "Battery"], correctAnswer: 0, explanation: "Waste heat can damage the medium or stop lasing." },
+    { id: "phy110-u2-72", unit: 2, topic: 'Active medium', difficulty: 'easy', question: "Can a fiber optic cable itself act as a laser?", options: ["Yes (Fiber laser)", "No", "Only for internet", "Never"], correctAnswer: 0, explanation: "Doped fibers are very efficient high-power lasers." },
+    { id: "phy110-u2-73", unit: 2, topic: 'He-Ne', difficulty: 'hard', question: "Collision of the second kind relates to which laser?", options: ["He-Ne", "Ruby", "Dye", "Semiconductor"], correctAnswer: 0, explanation: "Energy transfer from excited He to ground Ne." },
+    { id: "phy110-u2-74", unit: 2, topic: 'He-Ne', difficulty: 'hard', question: "Why is the He-Ne tube narrow?", options: ["To help Ne atoms collide with walls and relax", "To save gas", "For aesthetic", "None"], correctAnswer: 0, explanation: "Wall collisions help empty the lower energy level of Neon." },
+    { id: "phy110-u2-75", unit: 2, topic: 'Measurement', difficulty: 'easy', question: "Lasers can measure distance precisely using ___.", options: ["Time-of-flight (Pulses)", "Weight", "Magnetism", "Sound speed"], correctAnswer: 0, explanation: "Knowing the speed of light allows distance calculation." },
+    { id: "phy110-u2-76", unit: 2, topic: 'Industrial', difficulty: 'medium', question: "Lasers can weld metals because of their high ___.", options: ["Energy density", "Color", "Transparency", "Static charge"], correctAnswer: 0, explanation: "Focusing power melts localized areas." },
+    { id: "phy110-u2-77", unit: 2, topic: 'Optical Communication', difficulty: 'medium', question: "Laser diodes are ideal for fiber optics because they are ___.", options: ["Small and fast-switching", "Huge and heavy", "Cold", "Slow"], correctAnswer: 0, explanation: "They can be turned on/off billions of times per second (GHz)." },
+    { id: "phy110-u2-78", unit: 2, topic: 'Coherence', difficulty: 'medium', question: "Ordinary white light has ___ coherence.", options: ["Very low", "Very high", "Infinite", "None"], correctAnswer: 0, explanation: "Random wavelengths and phases." },
+    { id: "phy110-u2-79", unit: 2, topic: 'Characteristics', difficulty: 'easy', question: "Which property makes lasers different from a bulb?", options: ["All of these", "Directionality", "Coherence", "Monochromaticity"], correctAnswer: 0, explanation: "Combination of these creates the unique laser beam." },
+    { id: "phy110-u2-80", unit: 2, topic: 'Divergence', difficulty: 'hard', question: "A beam with dθ = 1 milliradian spreads by 1 m after traveling ___.", options: ["1000 m", "1 m", "10 m", "100 m"], correctAnswer: 0, explanation: "Distance = Spread / Angle (in radians)." },
+    { id: "phy110-u2-81", unit: 2, topic: 'Levels', difficulty: 'hard', question: "Pumping level is usually ___ than the upper laser level.", options: ["Higher", "Lower", "Same", "Zero"], correctAnswer: 0, explanation: "Atoms drop from pump level to the upper laser (metastable) level." },
+    { id: "phy110-u2-82", unit: 2, topic: 'Resonator', difficulty: 'medium', question: "The length of the laser cavity usually matches an integer number of ___.", options: ["Half-wavelengths", "Meters", "Kilometers", "Atomic radii"], correctAnswer: 0, explanation: "Forms standing waves (modes)." },
+    { id: "phy110-u2-83", unit: 2, topic: 'Mode', difficulty: 'hard', question: "TEM00 stands for ___ mode.", options: ["Transverse Electromagnetic (Lowest order)", "Temporary Emission", "Total Energy Max", "None"], correctAnswer: 0, explanation: "The smoothest, Gaussian-shaped beam." },
+    { id: "phy110-u2-84", unit: 2, topic: 'Process', difficulty: 'easy', question: "Stimulated absorption moves an atom to ___ state.", options: ["Higher", "Lower", "Ground", "Ionized"], correctAnswer: 0, explanation: "Absorbs a photon and jumps up." },
+    { id: "phy110-u2-85", unit: 2, topic: 'Characteristics', difficulty: 'medium', question: "Intensity of light I is the ___ per unit area.", options: ["Power", "Force", "Pressure", "Mass"], correctAnswer: 0, explanation: "Watts/m²." },
+    { id: "phy110-u2-86", unit: 2, topic: 'Types', difficulty: 'medium', question: "Which is a tunable laser?", options: ["Liquid Dye laser", "Ruby", "He-Ne", "Nd-YAG"], correctAnswer: 0, explanation: "Can change output wavelength by changing dye or resonator." },
+    { id: "phy110-u2-87", unit: 2, topic: 'Ruby', difficulty: 'medium', question: "The Ruby laser output wavelength is in ___ part of spectrum.", options: ["Visible (Red)", "Invisible", "Ultraviolet", "Radio"], correctAnswer: 0, explanation: "694.3nm." },
+    { id: "phy110-u2-88", unit: 2, topic: 'Nd-YAG', difficulty: 'medium', question: "Nd ions are used in ___ lasers.", options: ["Solid State", "Gas", "Metal", "X-ray"], correctAnswer: 0, explanation: "Hosted in crystals like YAG." },
+    { id: "phy110-u2-89", unit: 2, topic: 'Nd-YAG', difficulty: 'medium', question: "What is the host crystal for Nd-YAG?", options: ["Yttrium Aluminum Garnet", "Ruby", "Salt", "Glass"], correctAnswer: 0, explanation: "YAG provides stable platform for Nd ions." },
+    { id: "phy110-u2-90", unit: 2, topic: 'Emission', difficulty: 'medium', question: "Is spontaneous emission phase-related to incident light?", options: ["No", "Yes", "Always", "Partially"], correctAnswer: 0, explanation: "It is random." },
+    { id: "phy110-u2-91", unit: 2, topic: 'He-Ne', difficulty: 'medium', question: "Why is Helium necessary in He-Ne?", options: ["To excite Neon through collisions", "Neon is too heavy", "Helium emits red light", "None"], correctAnswer: 0, explanation: "Neon is hard to excite directly with discharge; He is easy." },
+    { id: "phy110-u2-92", unit: 2, topic: 'Threshold', difficulty: 'hard', question: "Schawlow-Townes condition relates to ___.", options: ["Laser linewidth", "Speed of light", "Relativity", "None"], correctAnswer: 0, explanation: "Theoretical limit of laser purity." },
+    { id: "phy110-u2-93", unit: 2, topic: 'Process', difficulty: 'easy', question: "In laser, emission must be ___ than absorption.", options: ["Greater", "Less", "Equal", "Zero"], correctAnswer: 0, explanation: "Requires population inversion." },
+    { id: "phy110-u2-94", unit: 2, topic: 'Atmosphere', difficulty: 'medium', question: "Lasers can be used to scan atmospheric pollution using ___.", options: ["LIDAR", "RADAR", "SONAR", "X-rays"], correctAnswer: 0, explanation: "Absorption of specific colors by pollutants." },
+    { id: "phy110-u2-95", unit: 2, topic: 'Medical', difficulty: 'easy', question: "Correcting near/farsightedness using lasers is called ___.", options: ["LASIK", "Lasek", "X-raying", "Tanning"], correctAnswer: 0, explanation: "Laser-Assisted in Situ Keratomileusis." },
+    { id: "phy110-u2-96", unit: 2, topic: 'Level', difficulty: 'medium', question: "Normal life time of atom is 10^-8 sec but metastable is ___.", options: ["10^-3 sec", "10^-12 sec", "1 year", "1 sec"], correctAnswer: 0, explanation: "Significantly longer stay." },
+    { id: "phy110-u2-97", unit: 2, topic: 'Optical Pumping', difficulty: 'medium', question: "Is optical pumping suitable for gas lasers?", options: ["Generally No (Discharge is better)", "Yes always", "Only for medicine", "None"], correctAnswer: 0, explanation: "Gases have low absorption cross-sections for broad light." },
+    { id: "phy110-u2-98", unit: 2, topic: 'Laser', difficulty: 'easy', question: "A laser's coherence means it can produce ___.", options: ["Interference patterns", "Heat", "Noise", "Shadows"], correctAnswer: 0, explanation: "Required for stable phase-sensitive effects." },
+    { id: "phy110-u2-99", unit: 2, topic: 'States', difficulty: 'medium', question: "Does stimulated emission lead to a gain in energy of light?", options: ["Yes (Light amplification)", "No", "Energy is lost", "Energy turns into mass"], correctAnswer: 0, explanation: "One photon in, two photons out." },
+    { id: "phy110-u2-100", unit: 2, topic: 'Pumping', difficulty: 'hard', question: "Chemical pumping uses ___ to excite the medium.", options: ["Chemical reactions", "Flashlight", "Nuclear decay", "Heat"], correctAnswer: 0, explanation: "Used in powerful military chemical lasers (e.g. HF laser)." }
 ];

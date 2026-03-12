@@ -29,7 +29,7 @@ const parseLine = (text: string | undefined) => {
             return <InlineMath key={i} math={math} />;
         }
         if (part.startsWith('**') && part.endsWith('**')) {
-            return <strong key={i} className="font-bold">{part.slice(2, -2)}</strong>;
+            return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
         }
         return <React.Fragment key={i}>{part}</React.Fragment>;
     });
@@ -905,7 +905,7 @@ const UnitQuiz: React.FC<{ questions: QuizQuestion[]; unitNum: number }> = ({ qu
 
             {/* Question */}
             <div className="p-6 rounded-2xl border border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 space-y-4">
-                <p className="text-base font-medium text-slate-800 dark:text-white leading-relaxed">{parseLine(q.question)}</p>
+                <p className="text-base font-light text-slate-800 dark:text-white leading-relaxed">Q) {parseLine(q.question)}</p>
 
                 <div className="space-y-2.5">
                     {q.options.map((option, idx) => {

@@ -152,6 +152,7 @@ export interface ResumeAnalysisResult {
 }
 
 export interface QuizQuestion {
+  id: string;
   unit: number;
   question: string;
   type?: 'mcq' | 'subjective';
@@ -161,7 +162,20 @@ export interface QuizQuestion {
   difficulty?: 'easy' | 'medium' | 'hard';
   topic?: string;
 }
-
+export interface QuizAttempt {
+  id: string;
+  user_id: string;
+  subject: string;
+  score: number;
+  total_questions: number;
+  date: string;
+  is_cached: boolean;
+  selected_units: number[];
+  selected_difficulties: string[];
+  answers: Record<number, number | string>;
+  questions: QuizQuestion[];
+  time_spent?: number;
+}
 
 
 export interface LibraryFile {

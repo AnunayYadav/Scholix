@@ -2,7 +2,8 @@ import { QuizQuestion } from '../../../types.ts';
 
 export const mth166Unit2MCQs: QuizQuestion[] = [
     {
-        unit: 2,
+        id: "mth166-u2-1",
+        unit:unit:unit: 2,
         topic: 'Linear Differential Equations',
         difficulty: 'easy',
         question: "What is the general form of a linear differential equation of order n?",
@@ -11,7 +12,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "A linear DE has dependent variable and its derivatives in first degree and not multiplied together."
     },
     {
-        unit: 2,
+        id: "mth166-u2-2",
+        unit:unit:unit: 2,
         topic: 'Differential Operator',
         difficulty: 'easy',
         question: "In the context of ODEs, what does the operator 'D' represent?",
@@ -20,7 +22,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "D is the standard differential operator d/dx."
     },
     {
-        unit: 2,
+        id: "mth166-u2-3",
+        unit:unit:unit: 2,
         topic: 'Linear Independence',
         difficulty: 'medium',
         question: "Two solutions y1 and y2 are linearly independent if their Wronskian W(y1, y2) is:",
@@ -29,7 +32,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "The Wronskian must be non-zero for linear independence."
     },
     {
-        unit: 2,
+        id: "mth166-u2-4",
+        unit:unit:unit: 2,
         topic: 'Homogeneous Equations',
         difficulty: 'easy',
         question: "An ODE is called homogeneous if the right-hand side R(x) is:",
@@ -38,7 +42,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "A homogeneous equation has no term independent of y or its derivatives."
     },
     {
-        unit: 2,
+        id: "mth166-u2-5",
+        unit:unit:unit: 2,
         topic: 'Auxiliary Equation',
         difficulty: 'medium',
         question: "The auxiliary equation of (D² + 3D + 2)y = 0 is:",
@@ -47,7 +52,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Replacing D with m gives the auxiliary equation."
     },
     {
-        unit: 2,
+        id: "mth166-u2-6",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "If the roots of the auxiliary equation are m1 = 2 and m2 = 3, the complementary function (CF) is:",
@@ -56,7 +62,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "For distinct real roots, CF is a sum of exponentials."
     },
     {
-        unit: 2,
+        id: "mth166-u2-7",
+        unit:unit:unit: 2,
         topic: 'Repeated Roots',
         difficulty: 'medium',
         question: "If the auxiliary equation has repeated roots m1 = m2 = m, the CF is:",
@@ -65,7 +72,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Repeated roots require adding a factor of x for independence."
     },
     {
-        unit: 2,
+        id: "mth166-u2-8",
+        unit:unit:unit: 2,
         topic: 'Complex Roots',
         difficulty: 'hard',
         question: "If the roots of the AE are complex conjugates α ± iβ, the CF is:",
@@ -74,7 +82,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Complex roots involve oscillating trigonometric functions with an exponential multiplier."
     },
     {
-        unit: 2,
+        id: "mth166-u2-9",
+        unit:unit:unit: 2,
         topic: 'Differential Operator',
         difficulty: 'medium',
         question: "The expression (D - a)(D - b)y is equivalent to:",
@@ -83,7 +92,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Differential operators with constant coefficients follow algebraic polynomial rules."
     },
     {
-        unit: 2,
+        id: "mth166-u2-10",
+        unit:unit:unit: 2,
         topic: 'Second Order ODE',
         difficulty: 'medium',
         question: "Find the CF of (D² - 4)y = 0.",
@@ -92,7 +102,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m² - 4 = 0 => m = ±2."
     },
     {
-        unit: 2,
+        id: "mth166-u2-11",
+        unit:unit:unit: 2,
         topic: 'Second Order ODE',
         difficulty: 'medium',
         question: "Find the CF of (D² + 4)y = 0.",
@@ -101,7 +112,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m² + 4 = 0 => m = ±2i."
     },
     {
-        unit: 2,
+        id: "mth166-u2-12",
+        unit:unit:unit: 2,
         topic: 'Third Order ODE',
         difficulty: 'hard',
         question: "The number of arbitrary constants in the general solution of a 3rd order ODE is:",
@@ -110,7 +122,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "The order of the differential equation equals the number of arbitrary constants in its general solution."
     },
     {
-        unit: 2,
+        id: "mth166-u2-13",
+        unit:unit:unit: 2,
         topic: 'Higher Order ODE',
         difficulty: 'hard',
         question: "Find the CF of (D - 1)³y = 0.",
@@ -119,7 +132,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "For three repeated roots, use powers of x up to x²."
     },
     {
-        unit: 2,
+        id: "mth166-u2-14",
+        unit:unit:unit: 2,
         topic: 'Linear Independence',
         difficulty: 'medium',
         question: "If y1 = e^x and y2 = e^(2x), are they linearly independent?",
@@ -128,7 +142,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Wronskian W = e^x(2e^(2x)) - e^(2x)(e^x) = e^(3x) ≠ 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-15",
+        unit:unit:unit: 2,
         topic: 'Operator Theory',
         difficulty: 'medium',
         question: "D(sinh x) is:",
@@ -137,7 +152,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Derivative of sinh x is cosh x."
     },
     {
-        unit: 2,
+        id: "mth166-u2-16",
+        unit:unit:unit: 2,
         topic: 'Operator Theory',
         difficulty: 'medium',
         question: "D(cosh x) is:",
@@ -146,7 +162,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Derivative of cosh x is sinh x."
     },
     {
-        unit: 2,
+        id: "mth166-u2-17",
+        unit:unit:unit: 2,
         topic: 'Complementary Function',
         difficulty: 'medium',
         question: "Roots of m² + 2m + 1 = 0 are:",
@@ -155,7 +172,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "(m+1)² = 0 => m = -1 (repeated)."
     },
     {
-        unit: 2,
+        id: "mth166-u2-18",
+        unit:unit:unit: 2,
         topic: 'Higher Order ODE',
         difficulty: 'medium',
         question: "Equation (D² + D + 1)y = 0 has roots:",
@@ -164,7 +182,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Using quadratic formula: m = [-1 ± √(1-4)]/2."
     },
     {
-        unit: 2,
+        id: "mth166-u2-19",
+        unit:unit:unit: 2,
         topic: 'Differential Operator',
         difficulty: 'easy',
         question: "Is the operator D linear?",
@@ -173,7 +192,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "D(af + bg) = aD(f) + bD(g), hence it is linear."
     },
     {
-        unit: 2,
+        id: "mth166-u2-20",
+        unit:unit:unit: 2,
         topic: 'Homogeneous Equations',
         difficulty: 'medium',
         question: "The principle of superposition states that if y1 and y2 are solutions, then:",
@@ -182,7 +202,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Linear combinations of solutions to homogeneous linear DEs are also solutions."
     },
     {
-        unit: 2,
+        id: "mth166-u2-21",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "If the roots of AE are 0, 1, 2, the CF is:",
@@ -191,7 +212,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m=0 gives C1 e^(0x) = C1."
     },
     {
-        unit: 2,
+        id: "mth166-u2-22",
+        unit:unit:unit: 2,
         topic: 'Differential Operator',
         difficulty: 'medium',
         question: "Which of the following is an example of a 2nd order linear homogeneous DE?",
@@ -200,7 +222,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Coefficients of y and its derivatives are functions of x (or constants) and RHS is 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-23",
+        unit:unit:unit: 2,
         topic: 'Auxiliary Equation',
         difficulty: 'medium',
         question: "The auxiliary equation is obtained by substituting ___ into the differential equation.",
@@ -209,7 +232,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "This substitution reflects the exponential nature of solutions to constant-coefficient linear DEs."
     },
     {
-        unit: 2,
+        id: "mth166-u2-24",
+        unit:unit:unit: 2,
         topic: 'Wronskian',
         difficulty: 'hard',
         question: "The Wronskian of y1 = cos x and y2 = sin x is:",
@@ -218,7 +242,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "W = cos x(cos x) - sin x(-sin x) = cos²x + sin²x = 1."
     },
     {
-        unit: 2,
+        id: "mth166-u2-25",
+        unit:unit:unit: 2,
         topic: 'Differential Operator',
         difficulty: 'easy',
         question: "The degree of the operator D² + 3D + 2 is:",
@@ -227,7 +252,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Refers to the highest power of the differential operator."
     },
     {
-        unit: 2,
+        id: "mth166-u2-26",
+        unit:unit:unit: 2,
         topic: 'Linear ODE',
         difficulty: 'easy',
         question: "Is y''' + 6y'' + 11y' + 6y = 0 linear?",
@@ -236,7 +262,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "All y terms and their derivatives are in first degree."
     },
     {
-        unit: 2,
+        id: "mth166-u2-27",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "If roots of AE are m = 3, 3, the CF is:",
@@ -245,7 +272,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Repeated roots case."
     },
     {
-        unit: 2,
+        id: "mth166-u2-28",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "If roots of AE are m = ±i, the CF is:",
@@ -254,7 +282,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Purely imaginary roots lead to sine and cosine."
     },
     {
-        unit: 2,
+        id: "mth166-u2-29",
+        unit:unit:unit: 2,
         topic: 'Fundamental Set',
         difficulty: 'hard',
         question: "A set of n linearly independent solutions of an nth order linear DE is called:",
@@ -263,7 +292,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "They form a basis for the solution space."
     },
     {
-        unit: 2,
+        id: "mth166-u2-30",
+        unit:unit:unit: 2,
         topic: 'Wronskian',
         difficulty: 'medium',
         question: "If W(y1, y2) = 0 for all x in an interval, then y1 and y2 are:",
@@ -272,7 +302,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Standard property of the Wronskian for solutions of linear DEs."
     },
     {
-        unit: 2,
+        id: "mth166-u2-31",
+        unit:unit:unit: 2,
         topic: 'Repeated Complex Roots',
         difficulty: 'hard',
         question: "If roots are (1±2i) repeated twice, the CF involves:",
@@ -281,7 +312,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Apply the 'repeated roots' rule to the complex terms."
     },
     {
-        unit: 2,
+        id: "mth166-u2-32",
+        unit:unit:unit: 2,
         topic: 'Differential Operator',
         difficulty: 'medium',
         question: "The inverse operator 1/D stands for:",
@@ -290,7 +322,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "1/D is defined such that D(1/D)y = y."
     },
     {
-        unit: 2,
+        id: "mth166-u2-33",
+        unit:unit:unit: 2,
         topic: 'Homogeneous ODE',
         difficulty: 'easy',
         question: "The equation y'' - y = 0 is a:",
@@ -299,7 +332,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Order-2, rhs=0, linear."
     },
     {
-        unit: 2,
+        id: "mth166-u2-34",
+        unit:unit:unit: 2,
         topic: 'Solution curve',
         difficulty: 'medium',
         question: "Does y = e^x satisfy y'' - y = 0?",
@@ -308,7 +342,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "y' = e^x, y'' = e^x. e^x - e^x = 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-35",
+        unit:unit:unit: 2,
         topic: 'Solution curve',
         difficulty: 'medium',
         question: "Does y = e^-x satisfy y'' - y = 0?",
@@ -317,7 +352,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "y' = -e^-x, y'' = e^-x. e^-x - e^-x = 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-36",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "For (D² - 5D + 6)y = 0, the roots are:",
@@ -326,7 +362,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m² - 5m + 6 = (m-2)(m-3) = 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-37",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "For (D² + 2D + 5)y = 0, the roots are:",
@@ -335,7 +372,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m = [-2 ± √(4 - 20)] / 2 = -1 ± 2i."
     },
     {
-        unit: 2,
+        id: "mth166-u2-38",
+        unit:unit:unit: 2,
         topic: 'Operator Theory',
         difficulty: 'medium',
         question: "f(D) y = 0 has a solution y = c e^(mx) if:",
@@ -344,7 +382,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m must be a root of the auxiliary polynomial."
     },
     {
-        unit: 2,
+        id: "mth166-u2-39",
+        unit:unit:unit: 2,
         topic: 'Initial Value Problem',
         difficulty: 'hard',
         question: "A 2nd order DE with conditions y(0)=a, y'(0)=b is an:",
@@ -353,7 +392,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Conditions are specified at a single point."
     },
     {
-        unit: 2,
+        id: "mth166-u2-40",
+        unit:unit:unit: 2,
         topic: 'Boundary Value Problem',
         difficulty: 'hard',
         question: "A 2nd order DE with conditions y(0)=a, y(1)=b is a:",
@@ -362,7 +402,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Conditions are specified at different points (boundaries)."
     },
     {
-        unit: 2,
+        id: "mth166-u2-41",
+        unit:unit:unit: 2,
         topic: 'Linear ODE',
         difficulty: 'medium',
         question: "In y'' + P(x)y' + Q(x)y = 0, P and Q must be continuous for:",
@@ -371,7 +412,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Required for the fundamental existence and uniqueness theorem."
     },
     {
-        unit: 2,
+        id: "mth166-u2-42",
+        unit:unit:unit: 2,
         topic: 'Auxiliary Equation',
         difficulty: 'easy',
         question: "What is the AE of y'' - 9y = 0?",
@@ -380,7 +422,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "D is replaced by m."
     },
     {
-        unit: 2,
+        id: "mth166-u2-43",
+        unit:unit:unit: 2,
         topic: 'General Solution',
         difficulty: 'medium',
         question: "The general solution of y'' - 9y = 0 is:",
@@ -389,7 +432,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m = ±3."
     },
     {
-        unit: 2,
+        id: "mth166-u2-44",
+        unit:unit:unit: 2,
         topic: 'General Solution',
         difficulty: 'medium',
         question: "The general solution of y'' + 9y = 0 is:",
@@ -398,7 +442,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m = ±3i."
     },
     {
-        unit: 2,
+        id: "mth166-u2-45",
+        unit:unit:unit: 2,
         topic: 'Third Order ODE',
         difficulty: 'medium',
         question: "The auxiliary equation of y''' - y'' = 0 is:",
@@ -407,7 +452,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m²(m-1) = 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-46",
+        unit:unit:unit: 2,
         topic: 'Third Order ODE',
         difficulty: 'hard',
         question: "The roots of m³ - m² = 0 are:",
@@ -416,7 +462,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m=0 (repeated) and m=1."
     },
     {
-        unit: 2,
+        id: "mth166-u2-47",
+        unit:unit:unit: 2,
         topic: 'Third Order ODE',
         difficulty: 'hard',
         question: "The CF for r oots 0, 0, 1 is:",
@@ -425,7 +472,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "(C1 + C2x)e^(0x) + C3 e^(1x)."
     },
     {
-        unit: 2,
+        id: "mth166-u2-48",
+        unit:unit:unit: 2,
         topic: 'Linear independence',
         difficulty: 'medium',
         question: "Are x and x² linearly independent?",
@@ -434,7 +482,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Their ratio x²/x = x is not a constant."
     },
     {
-        unit: 2,
+        id: "mth166-u2-49",
+        unit:unit:unit: 2,
         topic: 'Higher Order ODE',
         difficulty: 'hard',
         question: "A DE of order 4 has how many independent solutions?",
@@ -443,7 +492,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Matches the order n."
     },
     {
-        unit: 2,
+        id: "mth166-u2-50",
+        unit:unit:unit: 2,
         topic: 'Auxiliary Equation',
         difficulty: 'medium',
         question: "The AE of (D² + 1)²y = 0 is:",
@@ -452,7 +502,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Direct substitution."
     },
     {
-        unit: 2,
+        id: "mth166-u2-51",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'hard',
         question: "The roots of (m² + 1)² = 0 are:",
@@ -461,7 +512,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m² = -1 solved twice."
     },
     {
-        unit: 2,
+        id: "mth166-u2-52",
+        unit:unit:unit: 2,
         topic: 'General Solution',
         difficulty: 'hard',
         question: "CF for roots ±i, ±i is:",
@@ -470,7 +522,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Repeated complex roots rule."
     },
     {
-        unit: 2,
+        id: "mth166-u2-53",
+        unit:unit:unit: 2,
         topic: 'ODE Property',
         difficulty: 'medium',
         question: "Linear DEs with constant coefficients are always solvable?",
@@ -479,7 +532,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "We can always find roots of the polynomial (though finding them analytically might be hard for high degrees)."
     },
     {
-        unit: 2,
+        id: "mth166-u2-54",
+        unit:unit:unit: 2,
         topic: 'Operator Theory',
         difficulty: 'medium',
         question: "Is D(fg) = fDg + gDf?",
@@ -488,7 +542,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Product rule for differentiation."
     },
     {
-        unit: 2,
+        id: "mth166-u2-55",
+        unit:unit:unit: 2,
         topic: 'Exponential solution',
         difficulty: 'easy',
         question: "If m is a root of AE, then ___ is a solution of homogeneous DE.",
@@ -497,7 +552,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Standard form for constant coefficient linear DEs."
     },
     {
-        unit: 2,
+        id: "mth166-u2-56",
+        unit:unit:unit: 2,
         topic: 'Wronskian',
         difficulty: 'hard',
         question: "Abel's Identity relates the Wronskian to the ___ of the DE.",
@@ -506,7 +562,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "W(x) = C e^-∫P1(x)dx."
     },
     {
-        unit: 2,
+        id: "mth166-u2-57",
+        unit:unit:unit: 2,
         topic: 'Existence',
         difficulty: 'medium',
         question: "The general solution of an nth order linear DE has exactly n arbitrary constants?",
@@ -515,7 +572,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "By definition and uniqueness theorems."
     },
     {
-        unit: 2,
+        id: "mth166-u2-58",
+        unit:unit:unit: 2,
         topic: 'Operator Theory',
         difficulty: 'medium',
         question: "The value of f(D) e^(ax) is:",
@@ -524,7 +582,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Basic property of the differential operator acting on an exponential."
     },
     {
-        unit: 2,
+        id: "mth166-u2-59",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "Roots of m² - 2m + 1 = 0 are:",
@@ -533,7 +592,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "(m-1)² = 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-60",
+        unit:unit:unit: 2,
         topic: 'General Solution',
         difficulty: 'medium',
         question: "General solution of y'' - 2y' + y = 0 is:",
@@ -542,7 +602,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Repeated roots m=1."
     },
     {
-        unit: 2,
+        id: "mth166-u2-61",
+        unit:unit:unit: 2,
         topic: 'Linear independence',
         difficulty: 'easy',
         question: "Are e^x and 2e^x linearly independent?",
@@ -551,7 +612,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "One is a constant multiple of the other."
     },
     {
-        unit: 2,
+        id: "mth166-u2-62",
+        unit:unit:unit: 2,
         topic: 'Operator Theory',
         difficulty: 'easy',
         question: "D² (sin x) =",
@@ -560,7 +622,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "D(sin x) = cos x, D(cos x) = -sin x."
     },
     {
-        unit: 2,
+        id: "mth166-u2-63",
+        unit:unit:unit: 2,
         topic: 'Operator Theory',
         difficulty: 'easy',
         question: "D² (e^2x) =",
@@ -569,7 +632,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Derivative of e^ax is a e^ax, second is a² e^ax."
     },
     {
-        unit: 2,
+        id: "mth166-u2-64",
+        unit:unit:unit: 2,
         topic: 'Higher Order ODE',
         difficulty: 'medium',
         question: "Order of (D² + 1)³ y = 0?",
@@ -578,7 +642,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Expanding operator gives highest power D⁶."
     },
     {
-        unit: 2,
+        id: "mth166-u2-65",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "Roots of m³ - 1 = 0 are:",
@@ -587,7 +652,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Cube roots of unity (1 and complex conjugates)."
     },
     {
-        unit: 2,
+        id: "mth166-u2-66",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'hard',
         question: "CF for roots 1, -1/2 ± i√3/2 is:",
@@ -596,7 +662,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Standard complex root formula application."
     },
     {
-        unit: 2,
+        id: "mth166-u2-67",
+        unit:unit:unit: 2,
         topic: 'Linear independence',
         difficulty: 'medium',
         question: "Wronskian of e^x and xe^x is:",
@@ -605,7 +672,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "W = e^x(e^x + xe^x) - xe^x(e^x) = e^(2x) + xe^(2x) - xe^(2x) = e^(2x)."
     },
     {
-        unit: 2,
+        id: "mth166-u2-68",
+        unit:unit:unit: 2,
         topic: 'Higher Order ODE',
         difficulty: 'easy',
         question: "Which term is missing in a homogeneous DE?",
@@ -614,7 +682,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "RHS must be 0 for it to be homogeneous."
     },
     {
-        unit: 2,
+        id: "mth166-u2-69",
+        unit:unit:unit: 2,
         topic: 'Formation',
         difficulty: 'hard',
         question: "The DE satisfying y = C1 cos x + C2 sin x is:",
@@ -623,7 +692,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m = ±i => m² = -1 => D² + 1 = 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-70",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "Roots of m² + 4m + 4 = 0 are:",
@@ -632,7 +702,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "(m+2)² = 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-71",
+        unit:unit:unit: 2,
         topic: 'General Solution',
         difficulty: 'medium',
         question: "Solution of y'' + 4y' + 4y = 0:",
@@ -641,7 +712,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Repeated roots m=-2."
     },
     {
-        unit: 2,
+        id: "mth166-u2-72",
+        unit:unit:unit: 2,
         topic: 'Operator Theory',
         difficulty: 'medium',
         question: "If y = CF + PI, and it is a homogeneous equation, then PI is:",
@@ -650,7 +722,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Homogeneous equations have 0 on RHS, so PI is 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-73",
+        unit:unit:unit: 2,
         topic: 'Linear ODE',
         difficulty: 'easy',
         question: "Is y'' + 5y' + 6y = 0 a valid linear ODE with constant coefficients?",
@@ -659,7 +732,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Coefficients are 1, 5, 6 (constants)."
     },
     {
-        unit: 2,
+        id: "mth166-u2-74",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "Roots of AE for y'' + 5y' + 6y = 0 are:",
@@ -668,7 +742,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m² + 5m + 6 = (m+2)(m+3) = 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-75",
+        unit:unit:unit: 2,
         topic: 'Differential Operator',
         difficulty: 'medium',
         question: "D² (x²) =",
@@ -677,7 +752,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "D(x²) = 2x, D(2x) = 2."
     },
     {
-        unit: 2,
+        id: "mth166-u2-76",
+        unit:unit:unit: 2,
         topic: 'Differential Operator',
         difficulty: 'medium',
         question: "D³ (x²) =",
@@ -686,7 +762,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Derivative of a constant (2) is 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-77",
+        unit:unit:unit: 2,
         topic: 'Operator Theory',
         difficulty: 'hard',
         question: "f(D) (y1 + y2) is equal to:",
@@ -695,7 +772,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Property of linear operators."
     },
     {
-        unit: 2,
+        id: "mth166-u2-78",
+        unit:unit:unit: 2,
         topic: 'Higher Order ODE',
         difficulty: 'medium',
         question: "How many constants in y''' = 0?",
@@ -704,7 +782,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Integration constant added thrice: Ax² + Bx + C."
     },
     {
-        unit: 2,
+        id: "mth166-u2-79",
+        unit:unit:unit: 2,
         topic: 'General Solution',
         difficulty: 'medium',
         question: "General solution of y''' = 0 is:",
@@ -713,7 +792,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Obtained by successive integration."
     },
     {
-        unit: 2,
+        id: "mth166-u2-80",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "For (D² - 1)y = 0, solution is:",
@@ -722,7 +802,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Linear combinations of exponentials can be rewritten using hyperbolic functions."
     },
     {
-        unit: 2,
+        id: "mth166-u2-81",
+        unit:unit:unit: 2,
         topic: 'Solution type',
         difficulty: 'easy',
         question: "A solution which contains NO arbitrary constants is called:",
@@ -731,7 +812,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Depending on whether it can be derived from the general solution."
     },
     {
-        unit: 2,
+        id: "mth166-u2-82",
+        unit:unit:unit: 2,
         topic: 'Existence',
         difficulty: 'medium',
         question: "Differential equation of all parabolas y² = 4ax has order:",
@@ -740,7 +822,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Only one arbitrary constant 'a'."
     },
     {
-        unit: 2,
+        id: "mth166-u2-83",
+        unit:unit:unit: 2,
         topic: 'Linear independent',
         difficulty: 'medium',
         question: "Are sin x and cos x linearly independent?",
@@ -749,7 +832,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Wronskian is 1 ≠ 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-84",
+        unit:unit:unit: 2,
         topic: 'Linear independent',
         difficulty: 'medium',
         question: "Are sin x and sin(x+π) linearly independent?",
@@ -758,7 +842,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "sin(x+π) = -sin x, which is a multiple of sin x."
     },
     {
-        unit: 2,
+        id: "mth166-u2-85",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "Roots for y'' = 0 are:",
@@ -767,7 +852,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m² = 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-86",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "Roots for y'' - y' = 0 are:",
@@ -776,7 +862,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m(m-1) = 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-87",
+        unit:unit:unit: 2,
         topic: 'Solution curve',
         difficulty: 'easy',
         question: "y = x is a solution to y'' = 0?",
@@ -785,7 +872,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "y' = 1, y'' = 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-88",
+        unit:unit:unit: 2,
         topic: 'Operator Theory',
         difficulty: 'medium',
         question: "Value of (D - a) e^(ax) is:",
@@ -794,7 +882,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "D(e^ax) = a e^ax, so (D-a)e^ax = 0."
     },
     {
-        unit: 2,
+        id: "mth166-u2-89",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "If roots of a 4th order DE are 1, 1, 1, 1, CF is:",
@@ -803,7 +892,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Each repeated root adds a power of x."
     },
     {
-        unit: 2,
+        id: "mth166-u2-90",
+        unit:unit:unit: 2,
         topic: 'Wronskian',
         difficulty: 'hard',
         question: "The Wronskian of 1, x, x² is:",
@@ -812,7 +902,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Determinant of [[1, x, x²], [0, 1, 2x], [0, 0, 2]] = 2."
     },
     {
-        unit: 2,
+        id: "mth166-u2-91",
+        unit:unit:unit: 2,
         topic: 'Roots of AE',
         difficulty: 'medium',
         question: "AE of y'' + 2y' + 2y = 0 roots are:",
@@ -821,7 +912,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "m = [-2 ± √(4-8)]/2 = -1 ± i."
     },
     {
-        unit: 2,
+        id: "mth166-u2-92",
+        unit:unit:unit: 2,
         topic: 'General Solution',
         difficulty: 'medium',
         question: "Solution of y'' + 2y' + 2y = 0 is:",
@@ -830,7 +922,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "α = -1, β = 1."
     },
     {
-        unit: 2,
+        id: "mth166-u2-93",
+        unit:unit:unit: 2,
         topic: 'Linearity',
         difficulty: 'easy',
         question: "Is y'' + sin y = 0 linear?",
@@ -839,7 +932,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "sin y term violates linearity."
     },
     {
-        unit: 2,
+        id: "mth166-u2-94",
+        unit:unit:unit: 2,
         topic: 'Linearity',
         difficulty: 'easy',
         question: "Is y'' + x²y = 0 linear?",
@@ -848,7 +942,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Coefficients can be functions of x."
     },
     {
-        unit: 2,
+        id: "mth166-u2-95",
+        unit:unit:unit: 2,
         topic: 'Order',
         difficulty: 'easy',
         question: "Order of the DE (dy/dx)⁴ + y = 0 is:",
@@ -857,7 +952,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Highest derivative is 1st order."
     },
     {
-        unit: 2,
+        id: "mth166-u2-96",
+        unit:unit:unit: 2,
         topic: 'Standard form',
         difficulty: 'easy',
         question: "For n=2, linear DE is y'' + Py' + Qy = R. If P, Q are constants, it is:",
@@ -866,7 +962,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Standard terminology."
     },
     {
-        unit: 2,
+        id: "mth166-u2-97",
+        unit:unit:unit: 2,
         topic: 'Solution Space',
         difficulty: 'hard',
         question: "The set of solutions to a homogeneous linear DE forms a:",
@@ -875,7 +972,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "Standard linear algebra result for DEs."
     },
     {
-        unit: 2,
+        id: "mth166-u2-98",
+        unit:unit:unit: 2,
         topic: 'Dimension',
         difficulty: 'hard',
         question: "Dimension of solution space for nth order homogeneous linear DE is:",
@@ -884,7 +982,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "There are n linearly independent basic solutions."
     },
     {
-        unit: 2,
+        id: "mth166-u2-99",
+        unit:unit:unit: 2,
         topic: 'Differential Operator',
         difficulty: 'medium',
         question: "(D - 1)(D + 1) y is:",
@@ -893,7 +992,8 @@ export const mth166Unit2MCQs: QuizQuestion[] = [
         explanation: "D² - 1 operator applied to y."
     },
     {
-        unit: 2,
+        id: "mth166-u2-100",
+        unit:unit:unit: 2,
         topic: 'Operator Theory',
         difficulty: 'medium',
         question: "Does (D-a)(D-b) = (D-b)(D-a)?",

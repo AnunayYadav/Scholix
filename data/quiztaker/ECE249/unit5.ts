@@ -2,6 +2,7 @@ import { QuizQuestion } from "../../../types.ts";
 
 export const unit5Quizzes: QuizQuestion[] = [
     {
+        id: "ece249-u5-1",
         unit: 5,
         question: "What is the primary feature that distinguishes sequential logic circuits from combinational logic circuits?",
         options: [
@@ -16,6 +17,7 @@ difficulty: 'medium',
 topic: 'Sequential Circuits Overview'
     },
     {
+        id: "ece249-u5-2",
         unit: 5,
         question: "What is the fundamental difference between a latch and a flip-flop?",
         options: [
@@ -30,6 +32,7 @@ difficulty: 'easy',
 topic: 'Flip-Flops'
     },
     {
+        id: "ece249-u5-3",
         unit: 5,
         question: "In an SR latch constructed using NOR gates, which input combination results in a forbidden or invalid state?",
         options: [
@@ -44,6 +47,7 @@ difficulty: 'medium',
 topic: 'Table of Contents'
     },
     {
+        id: "ece249-u5-4",
         unit: 5,
         question: "What is the characteristic equation of an SR flip-flop?",
         options: [
@@ -58,6 +62,7 @@ difficulty: 'easy',
 topic: 'Master-Slave Flip-Flop'
     },
     {
+        id: "ece249-u5-5",
         unit: 5,
         question: "How does a D latch solve the forbidden state problem of the SR latch?",
         options: [
@@ -72,6 +77,7 @@ difficulty: 'easy',
 topic: 'Latches'
     },
     {
+        id: "ece249-u5-6",
         unit: 5,
         question: "Which input condition causes a JK flip-flop to toggle its output state ($Q_{n+1} = \\overline{Q_n}$)?",
         options: [
@@ -86,6 +92,7 @@ difficulty: 'medium',
 topic: 'Master-Slave Flip-Flop'
     },
     {
+        id: "ece249-u5-7",
         unit: 5,
         question: "What is the characteristic equation of a JK flip-flop?",
         options: [
@@ -100,6 +107,7 @@ difficulty: 'easy',
 topic: 'Master-Slave Flip-Flop'
     },
     {
+        id: "ece249-u5-8",
         unit: 5,
         question: "What is the 'race-around condition' in sequential circuits?",
         options: [
@@ -114,6 +122,7 @@ difficulty: 'easy',
 topic: 'Sequential Circuits Overview'
     },
     {
+        id: "ece249-u5-9",
         unit: 5,
         question: "Which of the following architectures is explicitly designed to eliminate the race-around condition?",
         options: [
@@ -128,6 +137,7 @@ difficulty: 'medium',
 topic: 'Master-Slave Flip-Flop'
     },
     {
+        id: "ece249-u5-10",
         unit: 5,
         question: "What is the characteristic equation for a D flip-flop?",
         options: [
@@ -142,6 +152,7 @@ difficulty: 'easy',
 topic: 'Master-Slave Flip-Flop'
     },
     {
+        id: "ece249-u5-11",
         unit: 5,
         question: "What is the characteristic equation for a T (Toggle) flip-flop?",
         options: [
@@ -156,6 +167,7 @@ difficulty: 'easy',
 topic: 'Master-Slave Flip-Flop'
     },
     {
+        id: "ece249-u5-12",
         unit: 5,
         question: "How is a T flip-flop typically constructed from a JK flip-flop?",
         options: [
@@ -170,6 +182,7 @@ difficulty: 'easy',
 topic: 'Master-Slave Flip-Flop'
     },
     {
+        id: "ece249-u5-13",
         unit: 5,
         question: "What type of shift register takes $n$ clock pulses to load data and requires outputs to be read one bit at a time?",
         options: [
@@ -184,6 +197,7 @@ difficulty: 'medium',
 topic: 'Conversion of Flip-Flops'
     },
     {
+        id: "ece249-u5-14",
         unit: 5,
         question: "Which shift register configuration is best suited for serial-to-parallel data conversion?",
         options: [
@@ -198,6 +212,7 @@ difficulty: 'medium',
 topic: 'Conversion of Flip-Flops'
     },
     {
+        id: "ece249-u5-15",
         unit: 5,
         question: "What defines an Asynchronous (Ripple) counter?",
         options: [
@@ -212,6 +227,7 @@ difficulty: 'easy',
 topic: 'Flip-Flops'
     },
     {
+        id: "ece249-u5-16",
         unit: 5,
         question: "What is a major disadvantage of asynchronous counters compared to synchronous counters?",
         options: [
@@ -226,6 +242,7 @@ difficulty: 'medium',
 topic: 'Sequential Circuits Overview'
     },
     {
+        id: "ece249-u5-17",
         unit: 5,
         question: "How many state combinations (modulus) does an $n$-bit Ring Counter have?",
         options: [
@@ -240,6 +257,7 @@ difficulty: 'medium',
 topic: 'Flip-Flops'
     },
     {
+        id: "ece249-u5-18",
         unit: 5,
         question: "What is the modulus of a 4-bit Johnson (Twisted Ring) counter?",
         options: [
@@ -254,6 +272,7 @@ difficulty: 'easy',
 topic: 'Table of Contents'
     },
     {
+        id: "ece249-u5-19",
         unit: 5,
         question: "To convert a JK flip-flop into a D flip-flop, what excitation logic is required for inputs $J$ and $K$?",
         options: [
@@ -268,6 +287,7 @@ difficulty: 'medium',
 topic: 'Master-Slave Flip-Flop'
     },
     {
+        id: "ece249-u5-20",
         unit: 5,
         question: "To design a synchronous Mod-10 counter, what is the minimum number of flip-flops required?",
         options: [
@@ -282,84 +302,84 @@ difficulty: 'medium',
 topic: 'Flip-Flops'
     },
     // Expansion
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "A latch is a ___ device.", options: ["Level sensitive", "Edge sensitive", "Frequency sensitive", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "A flip-flop is a ___ device.", options: ["Level sensitive", "Edge sensitive", "Speed sensitive", "None"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Which flip-flop has no invalid state?", options: ["SR", "JK", "D", "Both JK and D"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'medium', question: "Clock frequency of counter is $10$ MHz. If MOD is 5, output frequency is:", options: ["$2$ MHz", "$10$ MHz", "$50$ MHz", "$0.5$ MHz"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Master-Slave Flip-Flop', difficulty: 'hard', question: "Master-Slave JK flip-flop is free from race around because:", options: ["It uses two stages", "Output changes only on clock edge", "Master is active during pulse, Slave at edge", "All of above"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Conversion of Flip-Flops', difficulty: 'hard', question: "To convert D to T flip-flop, use:", options: ["XOR gate", "AND gate", "OR gate", "NOT gate"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Excitation table for D flip-flop:", options: ["$D = Q_{next}$", "$D = Q_{prev}$", "$D = 1$", "$D = 0$"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Conversion of Flip-Flops', difficulty: 'easy', question: "Register used to store data is:", options: ["Counter", "Memory Register", "Latch", "Decoder"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'medium', question: "Minimum number of flip-flops to count to 100:", options: ["$6$", "$7$", "$10$", "$100$"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Preset and Clear are:", options: ["Synchronous", "Asynchronous", "Clocked", "None"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Conversion of Flip-Flops', difficulty: 'easy', question: "Serial to Parallel converter is:", options: ["SISO", "SIPO", "PISO", "PIPO"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "For a JK flip-flop, if $J=0, K=1$, next state is:", options: ["$0$", "$1$", "Toggle", "No change"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "For a JK flip-flop, if $J=1, K=0$, next state is:", options: ["$0$", "$1$", "Toggle", "No change"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'easy', question: "Up-down counter can count:", options: ["Up only", "Down only", "Both", "None"], correctAnswer: 2, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Symbol for positive edge trigger is:", options: ["Bubble", "Triangle", "Dot", "Square"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'hard', question: "A ripple counter with $N$ flip-flops has modulus:", options: ["$2^N$", "$N$", "$2N$", "$N^2$"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Conversion of Flip-Flops', difficulty: 'medium', question: "Universal Shift Register can:", options: ["Shift left", "Shift right", "Parallel load", "All of above"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Which input is 'Data' input?", options: ["S", "R", "D", "K"], correctAnswer: 2, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "SR latch with $S=1, R=0$ results in:", options: ["$Q=1$", "$Q=0$", "No change", "Invalid"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Toggling happens when:", options: ["$T=0$", "$T=1$", "Clock stops", "Always"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'hard', question: "Synchronous counter speed is:", options: ["Higher than asynchronous", "Lower", "Same", "Zero"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Bistable multivibrator is a:", options: ["Latch", "Flip-flop", "Register", "All"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'medium', question: "Self-starting counter is one that:", options: ["Always reaches main cycle", "Has memory", "Is fast", "Locked"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Conversion of Flip-Flops', difficulty: 'easy', question: "Buffer register stores:", options: ["1 bit", "Word of bits", "Addresses", "Instructions"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Output of D flip-flop depends on clock and:", options: ["Previous state", "Input D", "Reset", "All"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'hard', question: "Modulo 6 counter needs ___ flip flops.", options: ["$2$", "$3$", "$4$", "$6$"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "What happens when $J=K=0$ in JK flip-flop?", options: ["Toggle", "Set", "Reset", "No change"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Conversion of Flip-Flops', difficulty: 'hard', question: "Bidirectional shift register shifts:", options: ["Both directions", "Clockwise", "Anti-clockwise", "Zero"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Hold time is:", options: ["Time input must be stable after clock", "Before clock", "During toggle", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Setup time is:", options: ["Before clock edge", "After clock edge", "During pulse", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'easy', question: "State table defines:", options: ["Input/Output/State relations", "Gate count", "Power", "Voltage"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "A transparent latch is:", options: ["D latch", "SR latch", "T latch", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Shift Registers', difficulty: 'medium', question: "PIPO register is used for:", options: ["Data storage", "S-to-P", "P-to-S", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Counters', difficulty: 'medium', question: "MOD-16 counter counts from:", options: ["$0-15$", "$1-16$", "$0-16$", "$0-7$"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "JK flip-flop is better than SR because:", options: ["It is smaller", "It avoids invalid state", "It is faster", "None"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'hard', question: "Excitation table for JK:", options: ["$J = 1, K = X$", "$J, K$ terms for needed transition", "All 1s", "All 0s"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Shift Registers', difficulty: 'hard', question: "Number of clock cycles to load 4-bit SISO:", options: ["$1$", "$2$", "$4$", "$8$"], correctAnswer: 2, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Counters', difficulty: 'medium', question: "Decade counter is MOD:", options: ["$8$", "$10$", "$12$", "$16$"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Primary use of T flip-flop:", options: ["Frequency division", "Memory", "Amplification", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Master-Slave flip-flop output is active at:", options: ["Trailing edge", "Leading edge", "High pulse", "Low pulse"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'easy', question: "Feedback is essential in:", options: ["Combinational", "Sequential", "Logic gates", "Buffer"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Counters', difficulty: 'medium', question: "Synchronous counter clock is connected to:", options: ["Stage $0$ only", "All stages", "Odd stages", "Even stages"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Output $Q$ and $\\overline{Q}$ must be:", options: ["Same", "Complementary", "Zero", "One"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Shift Registers', difficulty: 'easy', question: "Data shifting is used for:", options: ["Multiplication/Division", "Storage only", "Display", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Counters', difficulty: 'medium', question: "Ring counter uses:", options: ["D flip-flops", "SR flip-flops", "JK", "Both A and C"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "An edge-triggered flip-flop is also called:", options: ["Flip-flop", "Latch", "Pulse-triggered", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Counters', difficulty: 'hard', question: "Which counter has highest speed?", options: ["Ripple", "Synchronous", "Serial", "None"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'medium', question: "A counter that counts $0, 1, 2, 0, 1, 2$ is MOD:", options: ["$2$", "$3$", "$4$", "$1$"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Which has Toggle mode?", options: ["SR", "JK", "D", "None"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Shift Registers', difficulty: 'medium', question: "Static shift register uses:", options: ["Flip-flops", "Capacitors", "Resistors", "Inductors"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Counters', difficulty: 'medium', question: "Frequency of output of MOD-2 counter:", options: ["$f/2$", "$2f$", "$f$", "$f/4$"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Characteristic eq of T flip-flop:", options: ["$TQ' + T'Q$", "$T+Q$", "$TQ$", "$T \oplus Q$"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'easy', question: "RAM is a type of:", options: ["Sequential circuit", "Combinational circuit", "Analog", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Counters', difficulty: 'medium', question: "4-bit Ripple counter uses how many XOR?", options: ["$0$", "$1$", "$4$", "$8$"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Gating a clock is used for:", options: ["Power saving", "Increasing speed", "Toggling", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Shift Registers', difficulty: 'medium', question: "A shift register that can clear all bits at once has:", options: ["Reset input", "Clock", "Toggle", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Counters', difficulty: 'hard', question: "Glitch in ripple counter happens at:", options: ["Transition", "High level", "Low level", "Idle"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Which latch is called active-low SR latch?", options: ["NAND SR", "NOR SR", "JK", "D"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Counters', difficulty: 'medium', question: "Johnson counter is also called:", options: ["Creeping counter", "Walking counter", "Twisted ring", "All"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'easy', question: "Computer clock is a:", options: ["Square wave", "Sine wave", "Sawtooth", "Triangle"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "D flip-flop is basically a ___ delay.", options: ["$1$ clock pulse", "$2$ pulse", "Zero", "Variable"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Shift Registers', difficulty: 'medium', question: "Register size for 16-bit word:", options: ["$4$ bit", "$8$ bit", "$16$ bit", "$32$ bit"], correctAnswer: 2, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Toggle flip-flop is also called:", options: ["T flip-flop", "JK flip-flop", "SR", "D"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Counters', difficulty: 'medium', question: "A counter with $M=10$ is called:", options: ["Decade", "Hex", "Octal", "Binary"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'medium', question: "Max propagation delay is in:", options: ["Ripple counter", "Synchronous", "Combinational", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "SR flip-flop has ___ inputs.", options: ["$2$", "$3$", "$1$", "$4$"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Shift Registers', difficulty: 'medium', question: "PISO needs ___ control signal.", options: ["Load/Shift", "Clock only", "Enable", "Toggle"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Counters', difficulty: 'hard', question: "Which counter is non-self-starting usually?", options: ["Ring", "Ripple", "Synchronous", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'easy', question: "Smallest unit of memory:", options: ["Flip-flop", "Byte", "NIBBLE", "WORD"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Forbidden state in SR latch is:", options: ["$0,0$", "$0,1$", "$1,0$", "$1,1$"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Counters', difficulty: 'medium', question: "Frequency divider is a:", options: ["Counter", "Register", "MUX", "Decoder"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Clock used in flip-flop for:", options: ["Synchronization", "Power", "Voltage", "Current"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Shift Registers', difficulty: 'medium', question: "Serial data is transferred bit by bit via ___ line.", options: ["Single", "Multiple", "Parallel", "Bus"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Which gate implements D latch from SR latch?", options: ["NOT", "AND", "OR", "XOR"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Counters', difficulty: 'medium', question: "Modulus of 2 cascaded MOD-4 counters:", options: ["$8$", "$16$", "$4$", "$2$"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'easy', question: "State transition diagram is for:", options: ["Sequential circuits", "Combinational", "Resistors", "Capacitors"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "If $Q_n=1$ and $J=1, K=1$, then $Q_{n+1}=$", options: ["$0$", "$1$", "No change", "Invalid"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Counters', difficulty: 'medium', question: "Up-counter using negative edge trigger needs:", options: ["$Q$ connected to clock", "$Q'$ connected to clock", "Both", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Shift Registers', difficulty: 'easy', question: "Register that rotates data is:", options: ["Shift register", "Counter", "Accumulator", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
-    { unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "JK flip-flop is also called:", options: ["Universal flip-flop", "Base", "Primary", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." }
+    { id: "ece249-u5-21", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "A latch is a ___ device.", options: ["Level sensitive", "Edge sensitive", "Frequency sensitive", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-22", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "A flip-flop is a ___ device.", options: ["Level sensitive", "Edge sensitive", "Speed sensitive", "None"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-23", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Which flip-flop has no invalid state?", options: ["SR", "JK", "D", "Both JK and D"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-24", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'medium', question: "Clock frequency of counter is $10$ MHz. If MOD is 5, output frequency is:", options: ["$2$ MHz", "$10$ MHz", "$50$ MHz", "$0.5$ MHz"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-25", unit: 5, topic: 'Master-Slave Flip-Flop', difficulty: 'hard', question: "Master-Slave JK flip-flop is free from race around because:", options: ["It uses two stages", "Output changes only on clock edge", "Master is active during pulse, Slave at edge", "All of above"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-26", unit: 5, topic: 'Conversion of Flip-Flops', difficulty: 'hard', question: "To convert D to T flip-flop, use:", options: ["XOR gate", "AND gate", "OR gate", "NOT gate"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-27", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Excitation table for D flip-flop:", options: ["$D = Q_{ next}$", "$D = Q_{ prev}$", "$D = 1$", "$D = 0$"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-28", unit: 5, topic: 'Conversion of Flip-Flops', difficulty: 'easy', question: "Register used to store data is:", options: ["Counter", "Memory Register", "Latch", "Decoder"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-29", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'medium', question: "Minimum number of flip-flops to count to 100:", options: ["$6$", "$7$", "$10$", "$100$"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-30", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Preset and Clear are:", options: ["Synchronous", "Asynchronous", "Clocked", "None"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-31", unit: 5, topic: 'Conversion of Flip-Flops', difficulty: 'easy', question: "Serial to Parallel converter is:", options: ["SISO", "SIPO", "PISO", "PIPO"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-32", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "For a JK flip-flop, if $J=0, K=1$, next state is:", options: ["$0$", "$1$", "Toggle", "No change"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-33", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "For a JK flip-flop, if $J=1, K=0$, next state is:", options: ["$0$", "$1$", "Toggle", "No change"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-34", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'easy', question: "Up-down counter can count:", options: ["Up only", "Down only", "Both", "None"], correctAnswer: 2, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-35", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Symbol for positive edge trigger is:", options: ["Bubble", "Triangle", "Dot", "Square"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-36", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'hard', question: "A ripple counter with $N$ flip-flops has modulus:", options: ["$2^N$", "$N$", "$2N$", "$N^2$"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-37", unit: 5, topic: 'Conversion of Flip-Flops', difficulty: 'medium', question: "Universal Shift Register can:", options: ["Shift left", "Shift right", "Parallel load", "All of above"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-38", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Which input is 'Data' input?", options: ["S", "R", "D", "K"], correctAnswer: 2, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-39", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "SR latch with $S=1, R=0$ results in:", options: ["$Q=1$", "$Q=0$", "No change", "Invalid"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-40", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Toggling happens when:", options: ["$T=0$", "$T=1$", "Clock stops", "Always"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-41", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'hard', question: "Synchronous counter speed is:", options: ["Higher than asynchronous", "Lower", "Same", "Zero"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-42", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Bistable multivibrator is a:", options: ["Latch", "Flip-flop", "Register", "All"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-43", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'medium', question: "Self-starting counter is one that:", options: ["Always reaches main cycle", "Has memory", "Is fast", "Locked"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-44", unit: 5, topic: 'Conversion of Flip-Flops', difficulty: 'easy', question: "Buffer register stores:", options: ["1 bit", "Word of bits", "Addresses", "Instructions"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-45", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Output of D flip-flop depends on clock and:", options: ["Previous state", "Input D", "Reset", "All"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-46", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'hard', question: "Modulo 6 counter needs ___ flip flops.", options: ["$2$", "$3$", "$4$", "$6$"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-47", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "What happens when $J=K=0$ in JK flip-flop?", options: ["Toggle", "Set", "Reset", "No change"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-48", unit: 5, topic: 'Conversion of Flip-Flops', difficulty: 'hard', question: "Bidirectional shift register shifts:", options: ["Both directions", "Clockwise", "Anti-clockwise", "Zero"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-49", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Hold time is:", options: ["Time input must be stable after clock", "Before clock", "During toggle", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-50", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Setup time is:", options: ["Before clock edge", "After clock edge", "During pulse", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-51", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'easy', question: "State table defines:", options: ["Input/Output/State relations", "Gate count", "Power", "Voltage"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-52", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "A transparent latch is:", options: ["D latch", "SR latch", "T latch", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-53", unit: 5, topic: 'Shift Registers', difficulty: 'medium', question: "PIPO register is used for:", options: ["Data storage", "S-to-P", "P-to-S", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-54", unit: 5, topic: 'Counters', difficulty: 'medium', question: "MOD-16 counter counts from:", options: ["$0-15$", "$1-16$", "$0-16$", "$0-7$"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-55", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "JK flip-flop is better than SR because:", options: ["It is smaller", "It avoids invalid state", "It is faster", "None"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-56", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'hard', question: "Excitation table for JK:", options: ["$J = 1, K = X$", "$J, K$ terms for needed transition", "All 1s", "All 0s"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-57", unit: 5, topic: 'Shift Registers', difficulty: 'hard', question: "Number of clock cycles to load 4-bit SISO:", options: ["$1$", "$2$", "$4$", "$8$"], correctAnswer: 2, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-58", unit: 5, topic: 'Counters', difficulty: 'medium', question: "Decade counter is MOD:", options: ["$8$", "$10$", "$12$", "$16$"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-59", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Primary use of T flip-flop:", options: ["Frequency division", "Memory", "Amplification", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-60", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Master-Slave flip-flop output is active at:", options: ["Trailing edge", "Leading edge", "High pulse", "Low pulse"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-61", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'easy', question: "Feedback is essential in:", options: ["Combinational", "Sequential", "Logic gates", "Buffer"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-62", unit: 5, topic: 'Counters', difficulty: 'medium', question: "Synchronous counter clock is connected to:", options: ["Stage $0$ only", "All stages", "Odd stages", "Even stages"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-63", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Output $Q$ and $\\overline{ Q}$ must be:", options: ["Same", "Complementary", "Zero", "One"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-64", unit: 5, topic: 'Shift Registers', difficulty: 'easy', question: "Data shifting is used for:", options: ["Multiplication/Division", "Storage only", "Display", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-65", unit: 5, topic: 'Counters', difficulty: 'medium', question: "Ring counter uses:", options: ["D flip-flops", "SR flip-flops", "JK", "Both A and C"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-66", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "An edge-triggered flip-flop is also called:", options: ["Flip-flop", "Latch", "Pulse-triggered", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-67", unit: 5, topic: 'Counters', difficulty: 'hard', question: "Which counter has highest speed?", options: ["Ripple", "Synchronous", "Serial", "None"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-68", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'medium', question: "A counter that counts $0, 1, 2, 0, 1, 2$ is MOD:", options: ["$2$", "$3$", "$4$", "$1$"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-69", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Which has Toggle mode?", options: ["SR", "JK", "D", "None"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-70", unit: 5, topic: 'Shift Registers', difficulty: 'medium', question: "Static shift register uses:", options: ["Flip-flops", "Capacitors", "Resistors", "Inductors"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-71", unit: 5, topic: 'Counters', difficulty: 'medium', question: "Frequency of output of MOD-2 counter:", options: ["$f/2$", "$2f$", "$f$", "$f/4$"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-72", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Characteristic eq of T flip-flop:", options: ["$TQ' + T'Q$", "$T+Q$", "$TQ$", "$T \oplus Q$"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-73", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'easy', question: "RAM is a type of:", options: ["Sequential circuit", "Combinational circuit", "Analog", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-74", unit: 5, topic: 'Counters', difficulty: 'medium', question: "4-bit Ripple counter uses how many XOR?", options: ["$0$", "$1$", "$4$", "$8$"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-75", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Gating a clock is used for:", options: ["Power saving", "Increasing speed", "Toggling", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-76", unit: 5, topic: 'Shift Registers', difficulty: 'medium', question: "A shift register that can clear all bits at once has:", options: ["Reset input", "Clock", "Toggle", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-77", unit: 5, topic: 'Counters', difficulty: 'hard', question: "Glitch in ripple counter happens at:", options: ["Transition", "High level", "Low level", "Idle"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-78", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Which latch is called active-low SR latch?", options: ["NAND SR", "NOR SR", "JK", "D"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-79", unit: 5, topic: 'Counters', difficulty: 'medium', question: "Johnson counter is also called:", options: ["Creeping counter", "Walking counter", "Twisted ring", "All"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-80", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'easy', question: "Computer clock is a:", options: ["Square wave", "Sine wave", "Sawtooth", "Triangle"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-81", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "D flip-flop is basically a ___ delay.", options: ["$1$ clock pulse", "$2$ pulse", "Zero", "Variable"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-82", unit: 5, topic: 'Shift Registers', difficulty: 'medium', question: "Register size for 16-bit word:", options: ["$4$ bit", "$8$ bit", "$16$ bit", "$32$ bit"], correctAnswer: 2, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-83", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Toggle flip-flop is also called:", options: ["T flip-flop", "JK flip-flop", "SR", "D"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-84", unit: 5, topic: 'Counters', difficulty: 'medium', question: "A counter with $M=10$ is called:", options: ["Decade", "Hex", "Octal", "Binary"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-85", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'medium', question: "Max propagation delay is in:", options: ["Ripple counter", "Synchronous", "Combinational", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-86", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "SR flip-flop has ___ inputs.", options: ["$2$", "$3$", "$1$", "$4$"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-87", unit: 5, topic: 'Shift Registers', difficulty: 'medium', question: "PISO needs ___ control signal.", options: ["Load/Shift", "Clock only", "Enable", "Toggle"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-88", unit: 5, topic: 'Counters', difficulty: 'hard', question: "Which counter is non-self-starting usually?", options: ["Ring", "Ripple", "Synchronous", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-89", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'easy', question: "Smallest unit of memory:", options: ["Flip-flop", "Byte", "NIBBLE", "WORD"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-90", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Forbidden state in SR latch is:", options: ["$0,0$", "$0,1$", "$1,0$", "$1,1$"], correctAnswer: 3, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-91", unit: 5, topic: 'Counters', difficulty: 'medium', question: "Frequency divider is a:", options: ["Counter", "Register", "MUX", "Decoder"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-92", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "Clock used in flip-flop for:", options: ["Synchronization", "Power", "Voltage", "Current"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-93", unit: 5, topic: 'Shift Registers', difficulty: 'medium', question: "Serial data is transferred bit by bit via ___ line.", options: ["Single", "Multiple", "Parallel", "Bus"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-94", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "Which gate implements D latch from SR latch?", options: ["NOT", "AND", "OR", "XOR"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-95", unit: 5, topic: 'Counters', difficulty: 'medium', question: "Modulus of 2 cascaded MOD-4 counters:", options: ["$8$", "$16$", "$4$", "$2$"], correctAnswer: 1, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-96", unit: 5, topic: 'Sequential Circuits Overview', difficulty: 'easy', question: "State transition diagram is for:", options: ["Sequential circuits", "Combinational", "Resistors", "Capacitors"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-97", unit: 5, topic: 'Flip-Flops', difficulty: 'medium', question: "If $Q_n=1$ and $J=1, K=1$, then $Q_{ n+1}=$", options: ["$0$", "$1$", "No change", "Invalid"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-98", unit: 5, topic: 'Counters', difficulty: 'medium', question: "Up-counter using negative edge trigger needs:", options: ["$Q$ connected to clock", "$Q'$ connected to clock", "Both", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-99", unit: 5, topic: 'Shift Registers', difficulty: 'easy', question: "Register that rotates data is:", options: ["Shift register", "Counter", "Accumulator", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." },
+    { id: "ece249-u5-100", unit: 5, topic: 'Flip-Flops', difficulty: 'easy', question: "JK flip-flop is also called:", options: ["Universal flip-flop", "Base", "Primary", "None"], correctAnswer: 0, explanation: "Correct answer based on English grammar and context." }
 ];

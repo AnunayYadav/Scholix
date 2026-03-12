@@ -2,7 +2,8 @@ import { QuizQuestion } from "../../../types.ts";
 
 export const cse101Unit1MCQs: QuizQuestion[] = [
     {
-        unit: 1,
+        id: "cse101-u1-1",
+        unit:unit:unit: 1,
         question: "Who developed the C programming language?",
         options: ["Dennis Ritchie", "Bjarne Stroustrup", "Guido van Rossum", "James Gosling"],
         correctAnswer: 0,
@@ -11,7 +12,8 @@ difficulty: 'easy',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-2",
+        unit:unit:unit: 1,
         question: "Which of the following is an invalid identifier in C?",
         options: ["my_variable", "_temp", "2ndVar", "totalSales"],
         correctAnswer: 2,
@@ -20,7 +22,8 @@ difficulty: 'easy',
 topic: 'Identifiers and keywords'
     },
     {
-        unit: 1,
+        id: "cse101-u1-3",
+        unit:unit:unit: 1,
         question: "How many keywords are there in the standard C89/C90 library?",
         options: ["24", "32", "48", "64"],
         correctAnswer: 1,
@@ -29,7 +32,8 @@ difficulty: 'easy',
 topic: 'Identifiers and keywords'
     },
     {
-        unit: 1,
+        id: "cse101-u1-4",
+        unit:unit:unit: 1,
         question: "What is the size of the 'char' data type in C?",
         options: ["1 byte", "2 bytes", "4 bytes", "8 bytes"],
         correctAnswer: 0,
@@ -38,7 +42,8 @@ difficulty: 'easy',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-5",
+        unit:unit:unit: 1,
         question: "Which operator is used to find the remainder of a division?",
         options: ["/", "%", "&", "#"],
         correctAnswer: 1,
@@ -47,7 +52,8 @@ difficulty: 'easy',
 topic: 'Arithmetic operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-6",
+        unit:unit:unit: 1,
         question: "What is the output of the expression 10 + 5 * 2?",
         options: ["30", "20", "25", "15"],
         correctAnswer: 1,
@@ -56,7 +62,8 @@ difficulty: 'easy',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-7",
+        unit:unit:unit: 1,
         question: "Which of the following is a logical operator?",
         options: ["&", "==", "&&", "|"],
         correctAnswer: 2,
@@ -65,7 +72,8 @@ difficulty: 'easy',
 topic: 'Logical'
     },
     {
-        unit: 1,
+        id: "cse101-u1-8",
+        unit:unit:unit: 1,
         question: "What is the value of 'x' if int x = 5; x++;?",
         options: ["4", "5", "6", "0"],
         correctAnswer: 2,
@@ -74,7 +82,8 @@ difficulty: 'easy',
 topic: 'Arithmetic operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-9",
+        unit:unit:unit: 1,
         question: "Which of these is a bitwise AND operator?",
         options: ["&&", "&", "|", "^"],
         correctAnswer: 1,
@@ -83,7 +92,8 @@ difficulty: 'easy',
 topic: 'Bitwise operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-10",
+        unit:unit:unit: 1,
         question: "Which data type would you use to store a decimal number?",
         options: ["int", "char", "float", "long"],
         correctAnswer: 2,
@@ -92,7 +102,8 @@ difficulty: 'easy',
 topic: 'Data types'
     },
     {
-        unit: 1,
+        id: "cse101-u1-11",
+        unit:unit:unit: 1,
         question: "The 'void' data type is used for:",
         options: ["Storing integers", "Functions that do not return a value", "Storing text", "Defining constants"],
         correctAnswer: 1,
@@ -101,7 +112,8 @@ difficulty: 'easy',
 topic: 'Data types'
     },
     {
-        unit: 1,
+        id: "cse101-u1-12",
+        unit:unit:unit: 1,
         question: "Which assignment operator is equivalent to a = a + 5?",
         options: ["a =+ 5", "a += 5", "a + 5", "a == 5"],
         correctAnswer: 1,
@@ -110,7 +122,8 @@ difficulty: 'easy',
 topic: 'Assignment and conditional operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-13",
+        unit:unit:unit: 1,
         question: "What is a 'Constant' in C?",
         options: ["A variable that changes value frequently", "An identifier whose value cannot be altered during program execution", "A type of loop", "A function name"],
         correctAnswer: 1,
@@ -119,7 +132,8 @@ difficulty: 'easy',
 topic: 'Constants and variables'
     },
     {
-        unit: 1,
+        id: "cse101-u1-14",
+        unit:unit:unit: 1,
         question: "Which of the following is a Relational operator?",
         options: ["+", "=", ">=", "!"],
         correctAnswer: 2,
@@ -128,7 +142,8 @@ difficulty: 'easy',
 topic: 'Relational'
     },
     {
-        unit: 1,
+        id: "cse101-u1-15",
+        unit:unit:unit: 1,
         question: "What is the character set of C?",
         options: ["Only letters A-Z", "Digits 0-9", "Special characters like #, $, %", "All of the above"],
         correctAnswer: 3,
@@ -137,7 +152,8 @@ difficulty: 'easy',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-16",
+        unit:unit:unit: 1,
         question: "Which operator has the highest precedence in C?",
         options: ["+", "*", "()", "="],
         correctAnswer: 2,
@@ -146,7 +162,8 @@ difficulty: 'easy',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-17",
+        unit:unit:unit: 1,
         question: "The '&' operator when used as 'unary' (e.g. &x) returns:",
         options: ["Value of x", "Address of x", "Bitwise AND of x", "Negative of x"],
         correctAnswer: 1,
@@ -155,7 +172,8 @@ difficulty: 'easy',
 topic: 'Unary'
     },
     {
-        unit: 1,
+        id: "cse101-u1-18",
+        unit:unit:unit: 1,
         question: "Which data type is specifically used to store true/false values in modern C (C99+)?",
         options: ["bit", "bool (via <stdbool.h>)", "truth", "logic"],
         correctAnswer: 1,
@@ -164,7 +182,8 @@ difficulty: 'medium',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-19",
+        unit:unit:unit: 1,
         question: "What is an 'Expression' in C?",
         options: ["A single variable", "A combination of operators and operands that evaluates to a single value", "A print statement", "A loop header"],
         correctAnswer: 1,
@@ -173,7 +192,8 @@ difficulty: 'easy',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-20",
+        unit:unit:unit: 1,
         question: "What will be the result of 5 / 2 in integer division?",
         options: ["2.5", "2", "3", "0"],
         correctAnswer: 1,
@@ -182,7 +202,8 @@ difficulty: 'easy',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-21",
+        unit:unit:unit: 1,
         question: "What is the output of 'printf(\"%d\", 5 % 2);'?",
         options: ["2.5", "2", "1", "0"],
         correctAnswer: 2,
@@ -191,7 +212,8 @@ difficulty: 'easy',
 topic: 'Data types'
     },
     {
-        unit: 1,
+        id: "cse101-u1-22",
+        unit:unit:unit: 1,
         question: "Which of the following is used to terminate a statement in C?",
         options: [":", ";", ".", "!"],
         correctAnswer: 1,
@@ -200,7 +222,8 @@ difficulty: 'easy',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-23",
+        unit:unit:unit: 1,
         question: "Which escape sequence is used for a new line in C?",
         options: ["\\n", "\\t", "\\r", "\\a"],
         correctAnswer: 0,
@@ -209,7 +232,8 @@ difficulty: 'easy',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-24",
+        unit:unit:unit: 1,
         question: "Which of these is a keyword in C?",
         options: ["integer", "main", "switch", "value"],
         correctAnswer: 2,
@@ -218,7 +242,8 @@ difficulty: 'easy',
 topic: 'Identifiers and keywords'
     },
     {
-        unit: 1,
+        id: "cse101-u1-25",
+        unit:unit:unit: 1,
         question: "What will happen if you increment a float variable?",
         options: ["Error", "Adds 1 to value", "Increments bits", "Nothing"],
         correctAnswer: 1,
@@ -227,7 +252,8 @@ difficulty: 'medium',
 topic: 'Arithmetic operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-26",
+        unit:unit:unit: 1,
         question: "Which preprocessor directive is used to define constants?",
         options: ["#include", "#def", "#define", "#const"],
         correctAnswer: 2,
@@ -236,7 +262,8 @@ difficulty: 'easy',
 topic: 'Constants and variables'
     },
     {
-        unit: 1,
+        id: "cse101-u1-27",
+        unit:unit:unit: 1,
         question: "What is the result of applying % to floating-point numbers?",
         options: ["Error", "Integer remainder", "Float remainder", "Zero"],
         correctAnswer: 0,
@@ -245,7 +272,8 @@ difficulty: 'hard',
 topic: 'Arithmetic operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-28",
+        unit:unit:unit: 1,
         question: "Which of the following is a Bitwise XOR operator?",
         options: ["&", "|", "^", "~"],
         correctAnswer: 2,
@@ -254,7 +282,8 @@ difficulty: 'easy',
 topic: 'Bitwise operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-29",
+        unit:unit:unit: 1,
         question: "What is the result of 3 << 1?",
         options: ["3", "6", "1", "0"],
         correctAnswer: 1,
@@ -263,7 +292,8 @@ difficulty: 'medium',
 topic: 'Bitwise operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-30",
+        unit:unit:unit: 1,
         question: "In C, which value represents 'True'?",
         options: ["Only 1", "Only 100", "Any non-zero value", "Any positive value"],
         correctAnswer: 2,
@@ -272,7 +302,8 @@ difficulty: 'easy',
 topic: 'Logical'
     },
     {
-        unit: 1,
+        id: "cse101-u1-31",
+        unit:unit:unit: 1,
         question: "Which type of conversion happens in (float) x?",
         options: ["Implicit", "Explicit", "Automatic", "None"],
         correctAnswer: 1,
@@ -281,7 +312,8 @@ difficulty: 'medium',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-32",
+        unit:unit:unit: 1,
         question: "What is the size of double on a 64-bit system?",
         options: ["2", "4", "8", "16"],
         correctAnswer: 2,
@@ -290,7 +322,8 @@ difficulty: 'easy',
 topic: 'Data types'
     },
     {
-        unit: 1,
+        id: "cse101-u1-33",
+        unit:unit:unit: 1,
         question: "What is the result of sizeof('A') in C?",
         options: ["1", "Usually 4 or 2 (int size)", "8", "Error"],
         correctAnswer: 1,
@@ -299,7 +332,8 @@ difficulty: 'hard',
 topic: 'Data types'
     },
     {
-        unit: 1,
+        id: "cse101-u1-34",
+        unit:unit:unit: 1,
         question: "Which keyword is used to prevent any changes to a variable?",
         options: ["fixed", "const", "static", "volatile"],
         correctAnswer: 1,
@@ -308,7 +342,8 @@ difficulty: 'easy',
 topic: 'Constants and variables'
     },
     {
-        unit: 1,
+        id: "cse101-u1-35",
+        unit:unit:unit: 1,
         question: "What is the result of 5 & 3?",
         options: ["1", "5", "3", "7"],
         correctAnswer: 0,
@@ -317,7 +352,8 @@ difficulty: 'medium',
 topic: 'Bitwise operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-36",
+        unit:unit:unit: 1,
         question: "What is the result of 5 | 3?",
         options: ["1", "5", "3", "7"],
         correctAnswer: 3,
@@ -326,7 +362,8 @@ difficulty: 'medium',
 topic: 'Bitwise operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-37",
+        unit:unit:unit: 1,
         question: "Which escape sequence represents a backspace?",
         options: ["\\b", "\\a", "\\r", "\\v"],
         correctAnswer: 0,
@@ -335,7 +372,8 @@ difficulty: 'medium',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-38",
+        unit:unit:unit: 1,
         question: "What is the difference between prefix and postfix ++?",
         options: ["No difference", "Prefix increments then uses, postfix uses then increments", "Postfix is faster", "Prefix is only for float"],
         correctAnswer: 1,
@@ -344,7 +382,8 @@ difficulty: 'medium',
 topic: 'Arithmetic operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-39",
+        unit:unit:unit: 1,
         question: "Which operator is used to get the value of a pointer?",
         options: ["&", "*", "->", "."],
         correctAnswer: 1,
@@ -353,7 +392,8 @@ difficulty: 'medium',
 topic: 'Unary'
     },
     {
-        unit: 1,
+        id: "cse101-u1-40",
+        unit:unit:unit: 1,
         question: "A variable defined outside all functions is called:",
         options: ["Local", "Global", "Static", "External"],
         correctAnswer: 1,
@@ -362,7 +402,8 @@ difficulty: 'easy',
 topic: 'Constants and variables'
     },
     {
-        unit: 1,
+        id: "cse101-u1-41",
+        unit:unit:unit: 1,
         question: "Which data type has the range roughly -2 billion to 2 billion?",
         options: ["short", "int (32-bit)", "char", "float"],
         correctAnswer: 1,
@@ -371,7 +412,8 @@ difficulty: 'medium',
 topic: 'Data types'
     },
     {
-        unit: 1,
+        id: "cse101-u1-42",
+        unit:unit:unit: 1,
         question: "What is the result of ~0 (bitwise NOT of 0)?",
         options: ["1", "-1 (in 2's complement)", "0", "None"],
         correctAnswer: 1,
@@ -380,7 +422,8 @@ difficulty: 'hard',
 topic: 'Bitwise operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-43",
+        unit:unit:unit: 1,
         question: "Which function is used for formatted input?",
         options: ["printf", "scanf", "gets", "puts"],
         correctAnswer: 1,
@@ -389,7 +432,8 @@ difficulty: 'easy',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-44",
+        unit:unit:unit: 1,
         question: "The default return type of a function in old C if not specified is:",
         options: ["void", "int", "float", "char"],
         correctAnswer: 1,
@@ -398,7 +442,8 @@ difficulty: 'medium',
 topic: 'Data types'
     },
     {
-        unit: 1,
+        id: "cse101-u1-45",
+        unit:unit:unit: 1,
         question: "Which operator is used for access to structure members via pointer?",
         options: [".", "->", "*", "&"],
         correctAnswer: 1,
@@ -407,7 +452,8 @@ difficulty: 'medium',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-46",
+        unit:unit:unit: 1,
         question: "Constants defined using #define are also called:",
         options: ["Variables", "Macros", "Functions", "Comments"],
         correctAnswer: 1,
@@ -416,7 +462,8 @@ difficulty: 'easy',
 topic: 'Constants and variables'
     },
     {
-        unit: 1,
+        id: "cse101-u1-47",
+        unit:unit:unit: 1,
         question: "Which operator is used for 'short-circuit' evaluation?",
         options: ["&", "&&", "|", "!"],
         correctAnswer: 1,
@@ -425,7 +472,8 @@ difficulty: 'hard',
 topic: 'Logical'
     },
     {
-        unit: 1,
+        id: "cse101-u1-48",
+        unit:unit:unit: 1,
         question: "What is the binary representation of decimal 5?",
         options: ["101", "110", "111", "001"],
         correctAnswer: 0,
@@ -434,7 +482,8 @@ difficulty: 'easy',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-49",
+        unit:unit:unit: 1,
         question: "Which keyword is used to return a value from a function?",
         options: ["back", "exit", "return", "send"],
         correctAnswer: 2,
@@ -443,7 +492,8 @@ difficulty: 'easy',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-50",
+        unit:unit:unit: 1,
         question: "What is 'Segmentation Fault'?",
         options: ["Compiler error", "Logical error", "Memory access violation at runtime", "Syntax error"],
         correctAnswer: 2,
@@ -452,7 +502,8 @@ difficulty: 'hard',
 topic: 'Unary'
     },
     {
-        unit: 1,
+        id: "cse101-u1-51",
+        unit:unit:unit: 1,
         question: "How many keywords does C11 define?",
         options: ["32", "44", "37", "50"],
         correctAnswer: 1,
@@ -461,7 +512,8 @@ difficulty: 'hard',
 topic: 'Identifiers and keywords'
     },
     {
-        unit: 1,
+        id: "cse101-u1-52",
+        unit:unit:unit: 1,
         question: "Which header is used for mathematical functions like sqrt()?",
         options: ["<stdio.h>", "<math.h>", "<stdlib.h>", "<string.h>"],
         correctAnswer: 1,
@@ -470,7 +522,8 @@ difficulty: 'easy',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-53",
+        unit:unit:unit: 1,
         question: "What is the result of 1 / 2.0?",
         options: ["0", "0.5", "1", "Error"],
         correctAnswer: 1,
@@ -479,7 +532,8 @@ difficulty: 'medium',
 topic: 'Arithmetic operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-54",
+        unit:unit:unit: 1,
         question: "What is the result of (int) 3.9?",
         options: ["4", "3", "0", "Error"],
         correctAnswer: 1,
@@ -488,7 +542,8 @@ difficulty: 'medium',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-55",
+        unit:unit:unit: 1,
         question: "Which of these is NOT a valid escape sequence?",
         options: ["\\n", "\\t", "\\z", "\\r"],
         correctAnswer: 2,
@@ -497,7 +552,8 @@ difficulty: 'medium',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-56",
+        unit:unit:unit: 1,
         question: "What does ASCII stand for?",
         options: ["American Standard Code for Information Interchange", "All Standard Code Interface", "Applied Standard Coding Info", "None"],
         correctAnswer: 0,
@@ -506,7 +562,8 @@ difficulty: 'easy',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-57",
+        unit:unit:unit: 1,
         question: "Size of 'int' on a 16-bit compiler?",
         options: ["1 byte", "2 bytes", "4 bytes", "8 bytes"],
         correctAnswer: 1,
@@ -515,7 +572,8 @@ difficulty: 'medium',
 topic: 'Data types'
     },
     {
-        unit: 1,
+        id: "cse101-u1-58",
+        unit:unit:unit: 1,
         question: "What is the purpose of the 'static' keyword for local variables?",
         options: ["Makes it global", "Preserves value between function calls", "Makes it constant", "None"],
         correctAnswer: 1,
@@ -524,7 +582,8 @@ difficulty: 'hard',
 topic: 'Constants and variables'
     },
     {
-        unit: 1,
+        id: "cse101-u1-59",
+        unit:unit:unit: 1,
         question: "Which library function generates a random number?",
         options: ["rand()", "random()", "generate()", "seed()"],
         correctAnswer: 0,
@@ -533,7 +592,8 @@ difficulty: 'medium',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-60",
+        unit:unit:unit: 1,
         question: "What is the precedence of Bitwise NOT (~)?",
         options: ["Higher than +", "Lower than +", "Same as +", "Lowest"],
         correctAnswer: 0,
@@ -542,7 +602,8 @@ difficulty: 'hard',
 topic: 'Bitwise operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-61",
+        unit:unit:unit: 1,
         question: "Which of the following is correct syntax to declare a pointer to int?",
         options: ["int p*;", "int *p;", "pointer int p;", "ptr p;"],
         correctAnswer: 1,
@@ -551,7 +612,8 @@ difficulty: 'easy',
 topic: 'Unary'
     },
     {
-        unit: 1,
+        id: "cse101-u1-62",
+        unit:unit:unit: 1,
         question: "What is a 'null pointer'?",
         options: ["Points to garbage", "Points to address 0 (nothing)", "Points to main", "Error"],
         correctAnswer: 1,
@@ -560,7 +622,8 @@ difficulty: 'medium',
 topic: 'Unary'
     },
     {
-        unit: 1,
+        id: "cse101-u1-63",
+        unit:unit:unit: 1,
         question: "Which operator is used to determine if two values are equal?",
         options: ["=", "==", "===", "!="],
         correctAnswer: 1,
@@ -569,7 +632,8 @@ difficulty: 'easy',
 topic: 'Relational'
     },
     {
-        unit: 1,
+        id: "cse101-u1-64",
+        unit:unit:unit: 1,
         question: "Result of 5 > 3 && 2 < 1?",
         options: ["True", "False", "1", "Error"],
         correctAnswer: 1,
@@ -578,7 +642,8 @@ difficulty: 'easy',
 topic: 'Logical'
     },
     {
-        unit: 1,
+        id: "cse101-u1-65",
+        unit:unit:unit: 1,
         question: "What is 'Floating Point Overflow'?",
         options: ["Result too small", "Result too large for type", "Divide by zero", "None"],
         correctAnswer: 1,
@@ -587,7 +652,8 @@ difficulty: 'medium',
 topic: 'Arithmetic operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-66",
+        unit:unit:unit: 1,
         question: "Which directive ensures a header file is included only once?",
         options: ["#include", "#ifndef / #define", "#once", "None"],
         correctAnswer: 1,
@@ -596,7 +662,8 @@ difficulty: 'hard',
 topic: 'Constants and variables'
     },
     {
-        unit: 1,
+        id: "cse101-u1-67",
+        unit:unit:unit: 1,
         question: "Which data type is used for 'long' integers?",
         options: ["ll", "long", "bigint", "int64"],
         correctAnswer: 1,
@@ -605,7 +672,8 @@ difficulty: 'easy',
 topic: 'Data types'
     },
     {
-        unit: 1,
+        id: "cse101-u1-68",
+        unit:unit:unit: 1,
         question: "What is an 'Operand'?",
         options: ["Symbols like +", "Variables/Values on which operators act", "The compiler", "The CPU"],
         correctAnswer: 1,
@@ -614,7 +682,8 @@ difficulty: 'easy',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-69",
+        unit:unit:unit: 1,
         question: "Which operator is 'Right-to-Left' associative?",
         options: ["+", "==", "=", "/"],
         correctAnswer: 2,
@@ -623,7 +692,8 @@ difficulty: 'hard',
 topic: 'Assignment and conditional operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-70",
+        unit:unit:unit: 1,
         question: "Does C support nested comments?",
         options: ["Yes", "No", "Depends on compiler", "Only with //"],
         correctAnswer: 1,
@@ -632,7 +702,8 @@ difficulty: 'hard',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-71",
+        unit:unit:unit: 1,
         question: "What is 'White Space' in C?",
         options: ["Blank spaces, tabs, newlines", "Empty variables", "Comments", "Memory gaps"],
         correctAnswer: 0,
@@ -641,7 +712,8 @@ difficulty: 'easy',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-72",
+        unit:unit:unit: 1,
         question: "Which data type is used to store memory addresses?",
         options: ["int", "long", "pointer", "void"],
         correctAnswer: 2,
@@ -650,7 +722,8 @@ difficulty: 'medium',
 topic: 'Unary'
     },
     {
-        unit: 1,
+        id: "cse101-u1-73",
+        unit:unit:unit: 1,
         question: "What is the value of EOF?",
         options: ["0", "1", "Usually -1", "Null"],
         correctAnswer: 2,
@@ -659,7 +732,8 @@ difficulty: 'medium',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-74",
+        unit:unit:unit: 1,
         question: "Which operator has the lowest precedence overall?",
         options: ["Comma (,)", "Assignment (=)", "Logical OR (||)", "Relational (>)"],
         correctAnswer: 0,
@@ -668,7 +742,8 @@ difficulty: 'hard',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-75",
+        unit:unit:unit: 1,
         question: "Can an identifier contain a special character like $?",
         options: ["Yes", "No", "Only at start", "Only at end"],
         correctAnswer: 1,
@@ -677,7 +752,8 @@ difficulty: 'easy',
 topic: 'Identifiers and keywords'
     },
     {
-        unit: 1,
+        id: "cse101-u1-76",
+        unit:unit:unit: 1,
         question: "The 'volatile' keyword tells the compiler:",
         options: ["Variable is constant", "Variable may change externally (don't optimize)", "Variable is fast", "Variable is local"],
         correctAnswer: 1,
@@ -686,7 +762,8 @@ difficulty: 'hard',
 topic: 'Constants and variables'
     },
     {
-        unit: 1,
+        id: "cse101-u1-77",
+        unit:unit:unit: 1,
         question: "What is the decimal value of hex 0xA?",
         options: ["10", "11", "12", "15"],
         correctAnswer: 0,
@@ -695,7 +772,8 @@ difficulty: 'easy',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-78",
+        unit:unit:unit: 1,
         question: "What is the decimal value of octal 010?",
         options: ["10", "8", "16", "1"],
         correctAnswer: 1,
@@ -704,7 +782,8 @@ difficulty: 'medium',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-79",
+        unit:unit:unit: 1,
         question: "Which operator is binary?",
         options: ["!", "++", "* (product)", "~"],
         correctAnswer: 2,
@@ -713,7 +792,8 @@ difficulty: 'easy',
 topic: 'Arithmetic operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-80",
+        unit:unit:unit: 1,
         question: "Result of 5 && 0?",
         options: ["5", "0", "1", "True"],
         correctAnswer: 1,
@@ -722,7 +802,8 @@ difficulty: 'easy',
 topic: 'Logical'
     },
     {
-        unit: 1,
+        id: "cse101-u1-81",
+        unit:unit:unit: 1,
         question: "Which function allocates memory on the heap?",
         options: ["malloc()", "scanf()", "printf()", "alloc()"],
         correctAnswer: 0,
@@ -731,7 +812,8 @@ difficulty: 'medium',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-82",
+        unit:unit:unit: 1,
         question: "What returns the number of characters printed by printf?",
         options: ["void", "int", "char", "None"],
         correctAnswer: 1,
@@ -740,7 +822,8 @@ difficulty: 'hard',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-83",
+        unit:unit:unit: 1,
         question: "What is the escape sequence for single quote?",
         options: ["\\s", "\\'", "\\q", "\\\""],
         correctAnswer: 1,
@@ -749,7 +832,8 @@ difficulty: 'medium',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-84",
+        unit:unit:unit: 1,
         question: "Which of these is a valid integer constant?",
         options: ["1,000", "0XFF", "1.0", "1 00"],
         correctAnswer: 1,
@@ -758,7 +842,8 @@ difficulty: 'easy',
 topic: 'Constants and variables'
     },
     {
-        unit: 1,
+        id: "cse101-u1-85",
+        unit:unit:unit: 1,
         question: "In float x = (5/2); what is x?",
         options: ["2.5", "2.0", "3.0", "Error"],
         correctAnswer: 1,
@@ -767,7 +852,8 @@ difficulty: 'hard',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-86",
+        unit:unit:unit: 1,
         question: "What is the result of 10 == 10?",
         options: ["1", "10", "True", "Nothing"],
         correctAnswer: 0,
@@ -776,7 +862,8 @@ difficulty: 'easy',
 topic: 'Relational'
     },
     {
-        unit: 1,
+        id: "cse101-u1-87",
+        unit:unit:unit: 1,
         question: "Which header is used for exit() function?",
         options: ["<stdio.h>", "<stdlib.h>", "<math.h>", "<conio.h>"],
         correctAnswer: 1,
@@ -785,7 +872,8 @@ difficulty: 'medium',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-88",
+        unit:unit:unit: 1,
         question: "What is the result of applying sizeof to a variable name?",
         options: ["Size of name string", "Size of data type in bytes", "Memory address", "Error"],
         correctAnswer: 1,
@@ -794,7 +882,8 @@ difficulty: 'easy',
 topic: 'Arithmetic operators'
     },
     {
-        unit: 1,
+        id: "cse101-u1-89",
+        unit:unit:unit: 1,
         question: "Smallest integer data type in C?",
         options: ["int", "long", "char", "short"],
         correctAnswer: 2,
@@ -803,7 +892,8 @@ difficulty: 'medium',
 topic: 'Data types'
     },
     {
-        unit: 1,
+        id: "cse101-u1-90",
+        unit:unit:unit: 1,
         question: "Which of these is a 'Literal'?",
         options: ["int", "x", "5", "main"],
         correctAnswer: 2,
@@ -812,7 +902,8 @@ difficulty: 'easy',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-91",
+        unit:unit:unit: 1,
         question: "How do you declare a constant PI using preprocessor?",
         options: ["#define PI 3.14", "float PI = 3.14;", "const PI 3.14", "#const PI 3.14"],
         correctAnswer: 0,
@@ -821,7 +912,8 @@ difficulty: 'easy',
 topic: 'Constants and variables'
     },
     {
-        unit: 1,
+        id: "cse101-u1-92",
+        unit:unit:unit: 1,
         question: "Which of the following is NOT a reserved keyword in C?",
         options: ["sizeof", "typedef", "string", "struct"],
         correctAnswer: 2,
@@ -830,7 +922,8 @@ difficulty: 'medium',
 topic: 'Identifiers and keywords'
     },
     {
-        unit: 1,
+        id: "cse101-u1-93",
+        unit:unit:unit: 1,
         question: "What is the default return type of void main()?",
         options: ["int", "void", "Error", "None"],
         correctAnswer: 2,
@@ -839,7 +932,8 @@ difficulty: 'hard',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-94",
+        unit:unit:unit: 1,
         question: "What is 'Logical NOT' operator?",
         options: ["~", "!", "NOT", "None"],
         correctAnswer: 1,
@@ -848,7 +942,8 @@ difficulty: 'easy',
 topic: 'Logical'
     },
     {
-        unit: 1,
+        id: "cse101-u1-95",
+        unit:unit:unit: 1,
         question: "Is 'Total_Amount' a valid identifier?",
         options: ["Yes", "No", "Depends", "Only if it is global"],
         correctAnswer: 0,
@@ -857,7 +952,8 @@ difficulty: 'easy',
 topic: 'Identifiers and keywords'
     },
     {
-        unit: 1,
+        id: "cse101-u1-96",
+        unit:unit:unit: 1,
         question: "What represents 'end of string' in C?",
         options: ["\\0", "\\n", "EOF", "NULL"],
         correctAnswer: 0,
@@ -866,7 +962,8 @@ difficulty: 'easy',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-97",
+        unit:unit:unit: 1,
         question: "What is the result of double y = 7 / 2.0 + 1?",
         options: ["4.5", "4.0", "3.5", "5.0"],
         correctAnswer: 0,
@@ -875,7 +972,8 @@ difficulty: 'medium',
 topic: 'Expressions'
     },
     {
-        unit: 1,
+        id: "cse101-u1-98",
+        unit:unit:unit: 1,
         question: "Highest precision float type?",
         options: ["float", "double", "long double", "bigfloat"],
         correctAnswer: 2,
@@ -884,7 +982,8 @@ difficulty: 'easy',
 topic: 'Data types'
     },
     {
-        unit: 1,
+        id: "cse101-u1-99",
+        unit:unit:unit: 1,
         question: "What happens during 'linking'?",
         options: ["Checking syntax", "Merging object files and libraries", "Generating assembly", "Running the code"],
         correctAnswer: 1,
@@ -893,7 +992,8 @@ difficulty: 'medium',
 topic: 'The C character set'
     },
     {
-        unit: 1,
+        id: "cse101-u1-100",
+        unit:unit:unit: 1,
         question: "C language was developed at ___.",
         options: ["Microsoft", "AT&T Bell Labs", "Google", "IBM"],
         correctAnswer: 1,

@@ -2,6 +2,7 @@ import { QuizQuestion } from '../../../types.ts';
 
 export const phy110Unit4MCQs: QuizQuestion[] = [
     {
+        id: "phy110-u4-1",
         unit: 4,
         topic: 'Blackbody Radiation',
         difficulty: 'easy',
@@ -11,6 +12,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "At thermal equilibrium, it emits radiation at the same rate it absorbs."
     },
     {
+        id: "phy110-u4-2",
         unit: 4,
         topic: 'Planck Law',
         difficulty: 'hard',
@@ -20,6 +22,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "This marked the birth of Quantum Theory (1900)."
     },
     {
+        id: "phy110-u4-3",
         unit: 4,
         topic: 'De-Broglie Hypothesis',
         difficulty: 'medium',
@@ -29,6 +32,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "Matter waves hypothesis: Particles behave as waves."
     },
     {
+        id: "phy110-u4-4",
         unit: 4,
         topic: 'Wave-Particle Duality',
         difficulty: 'easy',
@@ -38,6 +42,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "λ = h/(mv). If v=0, λ is undefined/infinite."
     },
     {
+        id: "phy110-u4-5",
         unit: 4,
         topic: 'Phase and Group Velocity',
         difficulty: 'hard',
@@ -47,6 +52,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "vp = ω / k."
     },
     {
+        id: "phy110-u4-6",
         unit: 4,
         topic: 'Group Velocity',
         difficulty: 'hard',
@@ -56,6 +62,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "vg = dω / dk. It represents the particle's physical velocity."
     },
     {
+        id: "phy110-u4-7",
         unit: 4,
         topic: 'Uncertainty Principle',
         difficulty: 'medium',
@@ -65,6 +72,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "It's impossible to measure position and momentum simultaneously with perfect accuracy."
     },
     {
+        id: "phy110-u4-8",
         unit: 4,
         topic: 'Uncertainty Principle',
         difficulty: 'medium',
@@ -74,6 +82,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "Short-lived states have large energy uncertainties (broadening of spectral lines)."
     },
     {
+        id: "phy110-u4-9",
         unit: 4,
         topic: 'Wave Function',
         difficulty: 'medium',
@@ -83,6 +92,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "Contains all information about the system."
     },
     {
+        id: "phy110-u4-10",
         unit: 4,
         topic: 'Born Interpretation',
         difficulty: 'hard',
@@ -92,6 +102,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "The likelihood of finding a particle in a given region."
     },
     {
+        id: "phy110-u4-11",
         unit: 4,
         topic: 'Normalization',
         difficulty: 'hard',
@@ -101,6 +112,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "Normalization condition for a physical wave function."
     },
     {
+        id: "phy110-u4-12",
         unit: 4,
         topic: 'Schrodinger Equation',
         difficulty: 'hard',
@@ -110,6 +122,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "Derived by considering total energy = Kinetic energy (Potential V=0)."
     },
     {
+        id: "phy110-u4-13",
         unit: 4,
         topic: 'Operators',
         difficulty: 'hard',
@@ -119,6 +132,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "p-operator acts on ψ to give momentum information."
     },
     {
+        id: "phy110-u4-14",
         unit: 4,
         topic: 'Operators',
         difficulty: 'hard',
@@ -128,6 +142,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "H = T + V (Kinetic + Potential energy)."
     },
     {
+        id: "phy110-u4-15",
         unit: 4,
         topic: 'Particle in a Box',
         difficulty: 'hard',
@@ -137,6 +152,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "En = (n²h²) / (8mL²)."
     },
     {
+        id: "phy110-u4-16",
         unit: 4,
         topic: 'Zero Point Energy',
         difficulty: 'hard',
@@ -146,6 +162,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "A quantum particle can never be 'completely' at rest in a box."
     },
     {
+        id: "phy110-u4-17",
         unit: 4,
         topic: 'Wave-Function Properties',
         difficulty: 'medium',
@@ -155,6 +172,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "Physical constraints for mathematical solutions of Schrodinger's equation."
     },
     {
+        id: "phy110-u4-18",
         unit: 4,
         topic: 'De-Broglie',
         difficulty: 'medium',
@@ -164,6 +182,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "As energy increases, wavelength decreases."
     },
     {
+        id: "phy110-u4-19",
         unit: 4,
         topic: 'Schrodinger Time Dependent',
         difficulty: 'hard',
@@ -173,6 +192,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         explanation: "Relates change in wave function to energy."
     },
     {
+        id: "phy110-u4-20",
         unit: 4,
         topic: 'Eigenvalues',
         difficulty: 'hard',
@@ -181,84 +201,84 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Represents the observable value of energy for the state ψ."
     },
-    { unit: 4, topic: 'Planck', difficulty: 'easy', question: "Planck's constant (h) value is approximately ___.", options: ["6.63e-34 J·s", "3e8 m/s", "1.6e-19 C", "None"], correctAnswer: 0, explanation: "Fundamental constant of quantization." },
-    { unit: 4, topic: 'Photon', difficulty: 'easy', question: "Energy of a photon E = ___.", options: ["hν", "mc²", "1/2 mv²", "None"], correctAnswer: 0, explanation: "ν is the frequency of radiation." },
-    { unit: 4, topic: 'Wien Law', difficulty: 'medium', question: "Wien's displacement law relates peak wavelength and ___.", options: ["Temperature (λ_max * T = constant)", "Mass", "Pressure", "None"], correctAnswer: 0, explanation: "Hotter objects look bluer." },
-    { unit: 4, topic: 'De-Broglie', difficulty: 'hard', question: "λ of an electron accelerated through V volts is ___.", options: ["12.27 / √V Å", "V / 12.27 Å", "1.23 Å", "None"], correctAnswer: 0, explanation: "Practical formula for electron microscopy." },
-    { unit: 4, topic: 'Matter Waves', difficulty: 'medium', question: "Matter waves are ___.", options: ["Probability waves", "Electromagnetic waves", "Mechanical waves", "Transverse waves"], correctAnswer: 0, explanation: "They represent the likelihood of particle properties." },
-    { unit: 4, topic: 'Davisson-Germer', difficulty: 'hard', question: "The experiment confirming matter waves was ___.", options: ["Davisson-Germer Experiment", "Michelson-Morley", "Stern-Gerlach", "None"], correctAnswer: 0, explanation: "Observed electron diffraction in crystals." },
-    { unit: 4, topic: 'Heisenberg', difficulty: 'easy', question: "If position is known exactly (Δx=0), uncertainty in momentum is ___.", options: ["Infinite", "Zero", "h", "Constant"], correctAnswer: 0, explanation: "Product must be at least ħ/2." },
-    { unit: 4, topic: 'Wave function ψ', difficulty: 'medium', question: "ψ itself has ___ physical meaning.", options: ["No direct", "Direct", "Only mass", "None"], correctAnswer: 0, explanation: "ψ is usually a complex number; only |ψ|² is observable." },
-    { unit: 4, topic: 'Probability', difficulty: 'medium', question: "If ψ is normalized, ∫|ψ|² dτ = 1. What if it is 0?", options: ["The particle does not exist", "It's everywhere", "It's a mistake", "None"], correctAnswer: 0, explanation: "Probability must sum to 1 for existence." },
-    { unit: 4, topic: 'Box', difficulty: 'hard', question: "Wave functions for a 1D box are ___.", options: ["Sine functions (sin nπx/L)", "Cosine only", "Exp", "Linear"], correctAnswer: 0, explanation: "Must vanish at walls (x=0, x=L)." },
-    { unit: 4, topic: 'Box', difficulty: 'hard', question: "Number of nodes in the nth state of a 1D box (excluding walls)?", options: ["n - 1", "n", "n + 1", "0"], correctAnswer: 0, explanation: "State n=1 has 0 nodes; n=2 has 1 node." },
-    { unit: 4, topic: 'Quantum Mechanics', difficulty: 'easy', question: "Quantum mechanics works best at ___ scales.", options: ["Microscopic (Atomic)", "Macroscopic (Planets)", "Galactic", "Human"], correctAnswer: 0, explanation: "Wave effects are noticeable only when h isn't negligible." },
-    { unit: 4, topic: 'Blackbody', difficulty: 'medium', question: "Ultraviolet catastrophe was a failure of ___ physics.", options: ["Classical", "Quantum", "Relativity", "None"], correctAnswer: 0, explanation: "Rayleigh-Jeans law predicted infinite energy at short wavelengths." },
-    { unit: 4, topic: 'Stefan Law', difficulty: 'medium', question: "Total energy radiated by blackbody E ∝ ___.", options: ["T^4", "T", "T²", "1/T"], correctAnswer: 0, explanation: "Stefan-Boltzmann law." },
-    { unit: 4, topic: 'Wave Packet', difficulty: 'hard', question: "A particle is localized by ___ waves of various frequencies.", options: ["Superimposing", "Splitting", "Bending", "None"], correctAnswer: 0, explanation: "Forms a 'wave packet'." },
-    { unit: 4, topic: 'Phase Velocity', difficulty: 'hard', question: "For a relativistic particle, vp is ___ speed of light c.", options: ["Greater than", "Less than", "Equal to", "Zero"], correctAnswer: 0, explanation: "Indicates vp doesn't carry physical information directly." },
-    { unit: 4, topic: 'Group Velocity', difficulty: 'hard', question: "For any particle, vg is ___ speed of light c.", options: ["Less than (or equal to)", "Greater than", "Infinite", "None"], correctAnswer: 0, explanation: "Consistent with Relativity." },
-    { unit: 4, topic: 'Schrodinger', difficulty: 'medium', question: "Energy in time-independent Eq is ___ energy.", options: ["Total", "Kinetic", "Potential", "Internal"], correctAnswer: 0, explanation: "E = K + V." },
-    { unit: 4, topic: 'Tunnelling', difficulty: 'hard', question: "A particle crossing a potential barrier higher than its energy is ___.", options: ["Quantum Tunnelling", "Jumping", "Leaking", "None"], correctAnswer: 0, explanation: "Possible due to wave-like tail of ψ inside barrier." },
-    { unit: 4, topic: 'Expectation Value', difficulty: 'hard', question: "Average value of an observable in QM is its ___.", options: ["Expectation Value", "Mean Square", "Median", "Mode"], correctAnswer: 0, explanation: "Weighted average using ψ and operator." },
-    { unit: 4, topic: 'Compton Effect', difficulty: 'hard', question: "Confirm's light's particle-like behavior through ___.", options: ["X-ray scattering by electrons", "Interference", "Diffraction", "Refraction"], correctAnswer: 0, explanation: "Frequency shift of scattered photons." },
-    { unit: 4, topic: 'Photon', difficulty: 'easy', question: "Rest mass of a photon is ___.", options: ["Zero", "1", "9.1e-31 kg", "Infinite"], correctAnswer: 0, explanation: "Photons always travel at 'c' and have zero rest mass." },
-    { unit: 4, topic: 'Linearity', difficulty: 'hard', question: "Schrodinger equation is a ___ equation.", options: ["Linear differential", "Quadratic", "Non-linear", "None"], correctAnswer: 0, explanation: "Allows Superposition (ψ1 + ψ2 is also a solution)." },
-    { unit: 4, topic: 'Quantum numbers', difficulty: 'medium', question: "In 1D box, 'n' can take values ___.", options: ["1, 2, 3...", "0, 1, 2...", "Any real number", "Negative"], correctAnswer: 0, explanation: "n=0 would mean no particle in the box." },
-    { unit: 4, topic: 'Normalization', difficulty: 'medium', question: "Dimension of 1D wave function ψ?", options: ["L^(-1/2)", "L", "L²", "None"], correctAnswer: 0, explanation: "∫|ψ|² dx = 1 implies dimensions." },
-    { unit: 4, topic: 'Schrodinger', difficulty: 'hard', question: "Stationary states correspond to ___ solutions.", options: ["Time-independent", "Time-dependent", "Zero energy", "Infinite"], correctAnswer: 0, explanation: "Probability density doesn't change with time." },
-    { unit: 4, topic: 'Quantum Mechanics', difficulty: 'medium', question: "Planck's constant ħ (h-bar) = ___.", options: ["h / 2π", "2πh", "h", "h²"], correctAnswer: 0, explanation: "Reduced Planck constant." },
-    { unit: 4, topic: 'Momentum', difficulty: 'easy', question: "Momentum of a photon p = ___.", options: ["h / λ", "mc", "hν", "Zero"], correctAnswer: 0, explanation: "Relates wave and particle properties." },
-    { unit: 4, topic: 'Electron', difficulty: 'medium', question: "Why don't we see wave properties for a flying ball?", options: ["h is too small relative to mass", "Mass is too small", "Ball is not charged", "None"], correctAnswer: 0, explanation: "Wavelength λ = h/mv is extremely small." },
-    { unit: 4, topic: 'Blackbody', difficulty: 'medium', question: "Raleigh-Jeans result was close for ___ wavelengths.", options: ["Long", "Short", "Green", "None"], correctAnswer: 0, explanation: "Matches classical limit." },
-    { unit: 4, topic: 'Wien Approximation', difficulty: 'hard', question: "Wien's law worked well for ___ wavelengths.", options: ["Short", "Long", "All", "None"], correctAnswer: 0, explanation: "Failed to explain the infrared side." },
-    { unit: 4, topic: 'Work Function', difficulty: 'easy', question: "Minimum energy to remove electron from metal?", options: ["Work Function", "Ionization", "Binding", "None"], correctAnswer: 0, explanation: "Photoelectric threshold." },
-    { unit: 4, topic: 'Threshold Frequency', difficulty: 'medium', question: "Frequency below which no photoelectrons are emitted?", options: ["Threshold Frequency", "Resonance frequency", "Plasma frequency", "None"], correctAnswer: 0, explanation: "Characteristic of the metal." },
-    { unit: 4, topic: 'Compton Shift', difficulty: 'hard', question: "Δλ = (h/m0c) (1 - cos θ). Shift is max for ___.", options: ["θ = 180°", "θ = 90°", "θ = 0°", "None"], correctAnswer: 0, explanation: "Backscattering causes max momentum transfer." },
-    { unit: 4, topic: 'De-Broglie', difficulty: 'medium', question: "λ for thermal neutron at T Kelvin?", options: ["h / √(3mkT)", "h / √T", "kT / h", "None"], correctAnswer: 0, explanation: "Average energy is 3/2 kT." },
-    { unit: 4, topic: 'Uncertainty', difficulty: 'medium', question: "Can we find an electron inside a nucleus (~10^-15m)?", options: ["No (leads to kinetic energy > nuclear binding)", "Yes", "Maybe", "Only in space"], correctAnswer: 0, explanation: "Calculated via Uncertainty Principle." },
-    { unit: 4, topic: 'Potential', difficulty: 'hard', question: "If V(x) = infinite outside [0,L], it's a ___.", options: ["Infinite square well (1D box)", "Harmonic oscillator", "Free space", "None"], correctAnswer: 0, explanation: "Particle is strictly confined." },
-    { unit: 4, topic: 'Probability', difficulty: 'medium', question: "Where is probability max for n=1 in a 1D box?", options: ["In the middle (x = L/2)", "At the walls", "Nowhere", "Constant"], correctAnswer: 0, explanation: "sin²(π/2) = 1 (Max)." },
-    { unit: 4, topic: 'Probability', difficulty: 'medium', question: "Where is probability min for n=2 in a 1D box (besides walls)?", options: ["In the middle (x = L/2)", "At L/4", "At 3L/4", "None"], correctAnswer: 0, explanation: "The node is at center for n=2." },
-    { unit: 4, topic: 'Orthogonality', difficulty: 'hard', question: "Overlapping integral of two different eigenstates is ___.", options: ["0", "1", "Infinite", "None"], correctAnswer: 0, explanation: "States are orthogonal." },
-    { unit: 4, topic: 'Wave function', difficulty: 'medium', question: "Operator for Kinetic Energy?", options: ["-ħ²/2m * ∇²", "p", "V", "None"], correctAnswer: 0, explanation: "p²/2m substituted with momentum operator." },
-    { unit: 4, topic: 'Relativity', difficulty: 'hard', question: "Schrodinger equation is ___.", options: ["Non-relativistic", "Relativistic", "Both", "None"], correctAnswer: 0, explanation: "Uses E = p²/2m + V." },
-    { unit: 4, topic: 'Degeneracy', difficulty: 'hard', question: "Multiple states having same energy level?", options: ["Degeneracy", "Symmetry", "Quantization", "None"], correctAnswer: 0, explanation: "Does not occur in 1D box but common in 3D." },
-    { unit: 4, topic: 'Blackbody', difficulty: 'easy', question: "As T increases, peak radiation shifts to ___.", options: ["Shorter wavelength (Bluer)", "Longer", "Redder", "None"], correctAnswer: 0, explanation: "Wien's Law." },
-    { unit: 4, topic: 'Stefan constant', difficulty: 'medium', question: "Units of Stefan-Boltzmann constant σ?", options: ["W m^-2 K^-4", "J/s", "K/W", "None"], correctAnswer: 0, explanation: "Energy flux per unit temperature." },
-    { unit: 4, topic: 'Planck', difficulty: 'hard', question: "Planck's radiation law reduces to Rayleigh-Jeans at ___.", options: ["Low frequencies (hν << kT)", "High frequencies", "Zero temp", "None"], correctAnswer: 0, explanation: "Matches classical physics at large scales." },
-    { unit: 4, topic: 'Planck', difficulty: 'hard', question: "Planck's radiation law reduces to Wien's law at ___.", options: ["High frequencies (hν >> kT)", "Low freq", "Room temp", "None"], correctAnswer: 0, explanation: "In the ultraviolet region." },
-    { unit: 4, topic: 'Photon', difficulty: 'medium', question: "Can photons be accelerated by electric fields?", options: ["No (Uncharged)", "Yes", "Only in vacuum", "None"], correctAnswer: 0, explanation: "Fields affect charged particles; light is neutral." },
-    { unit: 4, topic: 'Mass', difficulty: 'hard', question: "Relativistic mass change formula?", options: ["m = m0 / √(1 - v²/c²)", "m = m0 * v/c", "m = m0", "None"], correctAnswer: 0, explanation: "Mass increases with speed." },
-    { unit: 4, topic: 'Phase Velocity', difficulty: 'hard', question: "For a wave group vp * vg = ___ (for free particles).", options: ["c² (Relativistic) or v²/2 (Non-rel)", "0", "1", "None"], correctAnswer: 0, explanation: "Fundamental relation." },
-    { unit: 4, topic: 'Phase Velocity', difficulty: 'hard', question: "Dimension of k (wave number)?", options: ["L^-1", "L", "T", "None"], correctAnswer: 0, explanation: "2π / λ." },
-    { unit: 4, topic: 'Frequency', difficulty: 'easy', question: "ω = ___.", options: ["2πν", "ν / 2π", "1/ν", "None"], correctAnswer: 0, explanation: "Angular frequency." },
-    { unit: 4, topic: 'Uncertainty', difficulty: 'medium', question: "If Δp is zero, then Δx is ___.", options: ["Infinite", "Zero", "h", "None"], correctAnswer: 0, explanation: "A particle with exact momentum is spread over all space." },
-    { unit: 4, topic: 'Normalization', difficulty: 'hard', question: "Finding 'A' in ψ(x) = A sin(nπx/L)?", options: ["A = √(2/L)", "A = L", "A = 1/L", "None"], correctAnswer: 0, explanation: "From ∫|ψ|² dx = 1." },
-    { unit: 4, topic: 'Tunneling', difficulty: 'medium', question: "Used in Scanning Tunneling Microscope (STM)?", options: ["Yes", "No", "Only for magnets", "None"], correctAnswer: 0, explanation: "Measures current of electrons leaking through gap." },
-    { unit: 4, topic: 'Box', difficulty: 'medium', question: "Does the particle always stay in the box in QM?", options: ["Yes (if potential is infinite)", "No", "Depends on speed", "None"], correctAnswer: 0, explanation: "At boundary, probability is zero." },
-    { unit: 4, topic: 'Quantum', difficulty: 'easy', question: "Who won Nobel for explaining Photoelectric effect?", options: ["Einstein", "Newton", "Planck", "Bohr"], correctAnswer: 0, explanation: "1921 prize; established light's particle nature." },
-    { unit: 4, topic: 'History', difficulty: 'medium', question: "De-Broglie suggested matter waves in ___.", options: ["1924", "1800", "1950", "2000"], correctAnswer: 0, explanation: "Confirmed later by experiments." },
-    { unit: 4, topic: 'Physics', difficulty: 'easy', question: "Subject of PHY110?", options: ["Physics", "Chemistry", "Biology", "Math"], correctAnswer: 0, explanation: "Engineering Physics course." },
-    { unit: 4, topic: 'Final', difficulty: 'easy', question: "Quantum mechanics suggests the world is ___ at small scales.", options: ["Probabilistic", "Deteriministic", "Static", "None"], correctAnswer: 0, explanation: "Uncertainty and wave functions are core." },
-    { unit: 4, topic: 'Compton', difficulty: 'hard', question: "The change in wavelength Δλ depends only on ___.", options: ["Scattering angle θ", "Incident wavelength", "Intensity", "None"], correctAnswer: 0, explanation: "Δλ = h/m0c (1-cosθ)." },
-    { unit: 4, topic: 'Planck', difficulty: 'easy', question: "Planck's constant dimensions?", options: ["Energy * Time (Angular Momentum)", "Energy", "Power", "None"], correctAnswer: 0, explanation: "J·s or kg·m²/s." },
-    { unit: 4, topic: 'Wave function', difficulty: 'easy', question: "ψ is usually a ___ function.", options: ["Complex", "Real only", "Integer", "None"], correctAnswer: 0, explanation: "Needs to represent phase and amplitude." },
-    { unit: 4, topic: 'Box', difficulty: 'medium', question: "En = (n²h²) / (8mL²). If L decreases, En ___.", options: ["Increases", "Decreases", "Stays same", "Zeroes"], correctAnswer: 0, explanation: "Tightening the box increases energy quantization." },
-    { unit: 4, topic: 'Box', difficulty: 'easy', question: "Energy levels are ___.", options: ["Discrete (Quantized)", "Continuous", "Stable", "None"], correctAnswer: 0, explanation: "Only specific values allowed." },
-    { unit: 4, topic: 'Tunneling', difficulty: 'hard', question: "In tunneling, the wave function inside the barrier is ___.", options: ["Exponentially decaying", "Oscillating", "Zero", "Constant"], correctAnswer: 0, explanation: "ψ ~ exp(-κx)." },
-    { unit: 4, topic: 'Uncertainty', difficulty: 'easy', question: "Heisenberg's first name?", options: ["Werner", "Albert", "Max", "Niels"], correctAnswer: 0, explanation: "Werner Heisenberg." },
-    { unit: 4, topic: 'Photon', difficulty: 'easy', question: "Can photons be reflected?", options: ["Yes", "No", "Only in water", "None"], correctAnswer: 0, explanation: "Standard reflection from surfaces." },
-    { unit: 4, topic: 'Quantization', difficulty: 'easy', question: "The word 'Quantum' means ___.", options: ["Packet / Discrete amount", "Continuous", "Wave", "None"], correctAnswer: 0, explanation: "Smallest indivisible unit." },
-    { unit: 4, topic: 'Physics', difficulty: 'easy', question: "Is light a wave or a particle?", options: ["Both (Duality)", "Only wave", "Only particle", "Neither"], correctAnswer: 0, explanation: "Core concept of QM." },
-    { unit: 4, topic: 'Schrodinger', difficulty: 'easy', question: "Famous thought experiment involves a ___.", options: ["Cat", "Dog", "Bird", "Box"], correctAnswer: 0, explanation: "Schrodinger's Cat (Superposition)." },
-    { unit: 4, topic: 'Operator', difficulty: 'medium', question: "Operator for Total Energy?", options: ["Hamiltonian (H)", "Momentum", "Position", "None"], correctAnswer: 0, explanation: "Sum of kinetic and potential energy operators." },
-    { unit: 4, topic: 'Stationary State', difficulty: 'hard', question: "Stationary state because |ψ|² is ___ of time.", options: ["Independent", "Dependent", "Zero", "None"], correctAnswer: 0, explanation: "Phase factors cancel out." },
-    { unit: 4, topic: 'Uncertainty', difficulty: 'medium', question: "The uncertainty principle is a result of ___.", options: ["Wave nature of matter", "Bad instruments", "Human error", "None"], correctAnswer: 0, explanation: "Intrinsic to any wave system." },
-    { unit: 4, topic: 'Particle', difficulty: 'easy', question: "An electron is a ___.", options: ["Both (has wave and particle properties)", "Only particle", "Only wave", "None"], correctAnswer: 0, explanation: "Shows diffraction but has mass/charge." },
-    { unit: 4, topic: 'Wavelength', difficulty: 'easy', question: "Visible light has ___ wavelength than Gamma rays.", options: ["Longer", "Shorter", "Same", "None"], correctAnswer: 0, explanation: "Gamma is highest energy/shortest wavelength." },
-    { unit: 4, topic: 'Quantum', difficulty: 'easy', question: "Quantum mechanics started in the year ___.", options: ["1900", "1800", "2000", "1950"], correctAnswer: 0, explanation: "Planck's blackbody paper." },
-    { unit: 4, topic: 'Quantum', difficulty: 'medium', question: "ħ is roughly ___.", options: ["1.05e-34 J·s", "6.63e-34 J·s", "2π", "None"], correctAnswer: 0, explanation: "h / (2 * 3.14159)." },
-    { unit: 4, topic: 'Quantum', difficulty: 'easy', question: "A particle is 'free' if V = ___.", options: ["0 (Constant zero potential)", "Infinite", "1", "None"], correctAnswer: 0, explanation: "No forces acting on it." },
-    { unit: 4, topic: 'Tunneling', difficulty: 'hard', question: "Alpha decay is explained using which quantum effect?", options: ["Tunneling", "Superposition", "Entanglement", "None"], correctAnswer: 0, explanation: "Alpha particles 'tunnel' through the nuclear potential barrier." }
+    { id: "phy110-u4-21", unit: 4, topic: 'Planck', difficulty: 'easy', question: "Planck's constant (h) value is approximately ___.", options: ["6.63e-34 J·s", "3e8 m/s", "1.6e-19 C", "None"], correctAnswer: 0, explanation: "Fundamental constant of quantization." },
+    { id: "phy110-u4-22", unit: 4, topic: 'Photon', difficulty: 'easy', question: "Energy of a photon E = ___.", options: ["hν", "mc²", "1/2 mv²", "None"], correctAnswer: 0, explanation: "ν is the frequency of radiation." },
+    { id: "phy110-u4-23", unit: 4, topic: 'Wien Law', difficulty: 'medium', question: "Wien's displacement law relates peak wavelength and ___.", options: ["Temperature (λ_max * T = constant)", "Mass", "Pressure", "None"], correctAnswer: 0, explanation: "Hotter objects look bluer." },
+    { id: "phy110-u4-24", unit: 4, topic: 'De-Broglie', difficulty: 'hard', question: "λ of an electron accelerated through V volts is ___.", options: ["12.27 / √V Å", "V / 12.27 Å", "1.23 Å", "None"], correctAnswer: 0, explanation: "Practical formula for electron microscopy." },
+    { id: "phy110-u4-25", unit: 4, topic: 'Matter Waves', difficulty: 'medium', question: "Matter waves are ___.", options: ["Probability waves", "Electromagnetic waves", "Mechanical waves", "Transverse waves"], correctAnswer: 0, explanation: "They represent the likelihood of particle properties." },
+    { id: "phy110-u4-26", unit: 4, topic: 'Davisson-Germer', difficulty: 'hard', question: "The experiment confirming matter waves was ___.", options: ["Davisson-Germer Experiment", "Michelson-Morley", "Stern-Gerlach", "None"], correctAnswer: 0, explanation: "Observed electron diffraction in crystals." },
+    { id: "phy110-u4-27", unit: 4, topic: 'Heisenberg', difficulty: 'easy', question: "If position is known exactly (Δx=0), uncertainty in momentum is ___.", options: ["Infinite", "Zero", "h", "Constant"], correctAnswer: 0, explanation: "Product must be at least ħ/2." },
+    { id: "phy110-u4-28", unit: 4, topic: 'Wave function ψ', difficulty: 'medium', question: "ψ itself has ___ physical meaning.", options: ["No direct", "Direct", "Only mass", "None"], correctAnswer: 0, explanation: "ψ is usually a complex number; only |ψ|² is observable." },
+    { id: "phy110-u4-29", unit: 4, topic: 'Probability', difficulty: 'medium', question: "If ψ is normalized, ∫|ψ|² dτ = 1. What if it is 0?", options: ["The particle does not exist", "It's everywhere", "It's a mistake", "None"], correctAnswer: 0, explanation: "Probability must sum to 1 for existence." },
+    { id: "phy110-u4-30", unit: 4, topic: 'Box', difficulty: 'hard', question: "Wave functions for a 1D box are ___.", options: ["Sine functions (sin nπx/L)", "Cosine only", "Exp", "Linear"], correctAnswer: 0, explanation: "Must vanish at walls (x=0, x=L)." },
+    { id: "phy110-u4-31", unit: 4, topic: 'Box', difficulty: 'hard', question: "Number of nodes in the nth state of a 1D box (excluding walls)?", options: ["n - 1", "n", "n + 1", "0"], correctAnswer: 0, explanation: "State n=1 has 0 nodes; n=2 has 1 node." },
+    { id: "phy110-u4-32", unit: 4, topic: 'Quantum Mechanics', difficulty: 'easy', question: "Quantum mechanics works best at ___ scales.", options: ["Microscopic (Atomic)", "Macroscopic (Planets)", "Galactic", "Human"], correctAnswer: 0, explanation: "Wave effects are noticeable only when h isn't negligible." },
+    { id: "phy110-u4-33", unit: 4, topic: 'Blackbody', difficulty: 'medium', question: "Ultraviolet catastrophe was a failure of ___ physics.", options: ["Classical", "Quantum", "Relativity", "None"], correctAnswer: 0, explanation: "Rayleigh-Jeans law predicted infinite energy at short wavelengths." },
+    { id: "phy110-u4-34", unit: 4, topic: 'Stefan Law', difficulty: 'medium', question: "Total energy radiated by blackbody E ∝ ___.", options: ["T^4", "T", "T²", "1/T"], correctAnswer: 0, explanation: "Stefan-Boltzmann law." },
+    { id: "phy110-u4-35", unit: 4, topic: 'Wave Packet', difficulty: 'hard', question: "A particle is localized by ___ waves of various frequencies.", options: ["Superimposing", "Splitting", "Bending", "None"], correctAnswer: 0, explanation: "Forms a 'wave packet'." },
+    { id: "phy110-u4-36", unit: 4, topic: 'Phase Velocity', difficulty: 'hard', question: "For a relativistic particle, vp is ___ speed of light c.", options: ["Greater than", "Less than", "Equal to", "Zero"], correctAnswer: 0, explanation: "Indicates vp doesn't carry physical information directly." },
+    { id: "phy110-u4-37", unit: 4, topic: 'Group Velocity', difficulty: 'hard', question: "For any particle, vg is ___ speed of light c.", options: ["Less than (or equal to)", "Greater than", "Infinite", "None"], correctAnswer: 0, explanation: "Consistent with Relativity." },
+    { id: "phy110-u4-38", unit: 4, topic: 'Schrodinger', difficulty: 'medium', question: "Energy in time-independent Eq is ___ energy.", options: ["Total", "Kinetic", "Potential", "Internal"], correctAnswer: 0, explanation: "E = K + V." },
+    { id: "phy110-u4-39", unit: 4, topic: 'Tunnelling', difficulty: 'hard', question: "A particle crossing a potential barrier higher than its energy is ___.", options: ["Quantum Tunnelling", "Jumping", "Leaking", "None"], correctAnswer: 0, explanation: "Possible due to wave-like tail of ψ inside barrier." },
+    { id: "phy110-u4-40", unit: 4, topic: 'Expectation Value', difficulty: 'hard', question: "Average value of an observable in QM is its ___.", options: ["Expectation Value", "Mean Square", "Median", "Mode"], correctAnswer: 0, explanation: "Weighted average using ψ and operator." },
+    { id: "phy110-u4-41", unit: 4, topic: 'Compton Effect', difficulty: 'hard', question: "Confirm's light's particle-like behavior through ___.", options: ["X-ray scattering by electrons", "Interference", "Diffraction", "Refraction"], correctAnswer: 0, explanation: "Frequency shift of scattered photons." },
+    { id: "phy110-u4-42", unit: 4, topic: 'Photon', difficulty: 'easy', question: "Rest mass of a photon is ___.", options: ["Zero", "1", "9.1e-31 kg", "Infinite"], correctAnswer: 0, explanation: "Photons always travel at 'c' and have zero rest mass." },
+    { id: "phy110-u4-43", unit: 4, topic: 'Linearity', difficulty: 'hard', question: "Schrodinger equation is a ___ equation.", options: ["Linear differential", "Quadratic", "Non-linear", "None"], correctAnswer: 0, explanation: "Allows Superposition (ψ1 + ψ2 is also a solution)." },
+    { id: "phy110-u4-44", unit: 4, topic: 'Quantum numbers', difficulty: 'medium', question: "In 1D box, 'n' can take values ___.", options: ["1, 2, 3...", "0, 1, 2...", "Any real number", "Negative"], correctAnswer: 0, explanation: "n=0 would mean no particle in the box." },
+    { id: "phy110-u4-45", unit: 4, topic: 'Normalization', difficulty: 'medium', question: "Dimension of 1D wave function ψ?", options: ["L^(-1/2)", "L", "L²", "None"], correctAnswer: 0, explanation: "∫|ψ|² dx = 1 implies dimensions." },
+    { id: "phy110-u4-46", unit: 4, topic: 'Schrodinger', difficulty: 'hard', question: "Stationary states correspond to ___ solutions.", options: ["Time-independent", "Time-dependent", "Zero energy", "Infinite"], correctAnswer: 0, explanation: "Probability density doesn't change with time." },
+    { id: "phy110-u4-47", unit: 4, topic: 'Quantum Mechanics', difficulty: 'medium', question: "Planck's constant ħ (h-bar) = ___.", options: ["h / 2π", "2πh", "h", "h²"], correctAnswer: 0, explanation: "Reduced Planck constant." },
+    { id: "phy110-u4-48", unit: 4, topic: 'Momentum', difficulty: 'easy', question: "Momentum of a photon p = ___.", options: ["h / λ", "mc", "hν", "Zero"], correctAnswer: 0, explanation: "Relates wave and particle properties." },
+    { id: "phy110-u4-49", unit: 4, topic: 'Electron', difficulty: 'medium', question: "Why don't we see wave properties for a flying ball?", options: ["h is too small relative to mass", "Mass is too small", "Ball is not charged", "None"], correctAnswer: 0, explanation: "Wavelength λ = h/mv is extremely small." },
+    { id: "phy110-u4-50", unit: 4, topic: 'Blackbody', difficulty: 'medium', question: "Raleigh-Jeans result was close for ___ wavelengths.", options: ["Long", "Short", "Green", "None"], correctAnswer: 0, explanation: "Matches classical limit." },
+    { id: "phy110-u4-51", unit: 4, topic: 'Wien Approximation', difficulty: 'hard', question: "Wien's law worked well for ___ wavelengths.", options: ["Short", "Long", "All", "None"], correctAnswer: 0, explanation: "Failed to explain the infrared side." },
+    { id: "phy110-u4-52", unit: 4, topic: 'Work Function', difficulty: 'easy', question: "Minimum energy to remove electron from metal?", options: ["Work Function", "Ionization", "Binding", "None"], correctAnswer: 0, explanation: "Photoelectric threshold." },
+    { id: "phy110-u4-53", unit: 4, topic: 'Threshold Frequency', difficulty: 'medium', question: "Frequency below which no photoelectrons are emitted?", options: ["Threshold Frequency", "Resonance frequency", "Plasma frequency", "None"], correctAnswer: 0, explanation: "Characteristic of the metal." },
+    { id: "phy110-u4-54", unit: 4, topic: 'Compton Shift', difficulty: 'hard', question: "Δλ = (h/m0c) (1 - cos θ). Shift is max for ___.", options: ["θ = 180°", "θ = 90°", "θ = 0°", "None"], correctAnswer: 0, explanation: "Backscattering causes max momentum transfer." },
+    { id: "phy110-u4-55", unit: 4, topic: 'De-Broglie', difficulty: 'medium', question: "λ for thermal neutron at T Kelvin?", options: ["h / √(3mkT)", "h / √T", "kT / h", "None"], correctAnswer: 0, explanation: "Average energy is 3/2 kT." },
+    { id: "phy110-u4-56", unit: 4, topic: 'Uncertainty', difficulty: 'medium', question: "Can we find an electron inside a nucleus (~10^-15m)?", options: ["No (leads to kinetic energy > nuclear binding)", "Yes", "Maybe", "Only in space"], correctAnswer: 0, explanation: "Calculated via Uncertainty Principle." },
+    { id: "phy110-u4-57", unit: 4, topic: 'Potential', difficulty: 'hard', question: "If V(x) = infinite outside [0,L], it's a ___.", options: ["Infinite square well (1D box)", "Harmonic oscillator", "Free space", "None"], correctAnswer: 0, explanation: "Particle is strictly confined." },
+    { id: "phy110-u4-58", unit: 4, topic: 'Probability', difficulty: 'medium', question: "Where is probability max for n=1 in a 1D box?", options: ["In the middle (x = L/2)", "At the walls", "Nowhere", "Constant"], correctAnswer: 0, explanation: "sin²(π/2) = 1 (Max)." },
+    { id: "phy110-u4-59", unit: 4, topic: 'Probability', difficulty: 'medium', question: "Where is probability min for n=2 in a 1D box (besides walls)?", options: ["In the middle (x = L/2)", "At L/4", "At 3L/4", "None"], correctAnswer: 0, explanation: "The node is at center for n=2." },
+    { id: "phy110-u4-60", unit: 4, topic: 'Orthogonality', difficulty: 'hard', question: "Overlapping integral of two different eigenstates is ___.", options: ["0", "1", "Infinite", "None"], correctAnswer: 0, explanation: "States are orthogonal." },
+    { id: "phy110-u4-61", unit: 4, topic: 'Wave function', difficulty: 'medium', question: "Operator for Kinetic Energy?", options: ["-ħ²/2m * ∇²", "p", "V", "None"], correctAnswer: 0, explanation: "p²/2m substituted with momentum operator." },
+    { id: "phy110-u4-62", unit: 4, topic: 'Relativity', difficulty: 'hard', question: "Schrodinger equation is ___.", options: ["Non-relativistic", "Relativistic", "Both", "None"], correctAnswer: 0, explanation: "Uses E = p²/2m + V." },
+    { id: "phy110-u4-63", unit: 4, topic: 'Degeneracy', difficulty: 'hard', question: "Multiple states having same energy level?", options: ["Degeneracy", "Symmetry", "Quantization", "None"], correctAnswer: 0, explanation: "Does not occur in 1D box but common in 3D." },
+    { id: "phy110-u4-64", unit: 4, topic: 'Blackbody', difficulty: 'easy', question: "As T increases, peak radiation shifts to ___.", options: ["Shorter wavelength (Bluer)", "Longer", "Redder", "None"], correctAnswer: 0, explanation: "Wien's Law." },
+    { id: "phy110-u4-65", unit: 4, topic: 'Stefan constant', difficulty: 'medium', question: "Units of Stefan-Boltzmann constant σ?", options: ["W m^-2 K^-4", "J/s", "K/W", "None"], correctAnswer: 0, explanation: "Energy flux per unit temperature." },
+    { id: "phy110-u4-66", unit: 4, topic: 'Planck', difficulty: 'hard', question: "Planck's radiation law reduces to Rayleigh-Jeans at ___.", options: ["Low frequencies (hν << kT)", "High frequencies", "Zero temp", "None"], correctAnswer: 0, explanation: "Matches classical physics at large scales." },
+    { id: "phy110-u4-67", unit: 4, topic: 'Planck', difficulty: 'hard', question: "Planck's radiation law reduces to Wien's law at ___.", options: ["High frequencies (hν >> kT)", "Low freq", "Room temp", "None"], correctAnswer: 0, explanation: "In the ultraviolet region." },
+    { id: "phy110-u4-68", unit: 4, topic: 'Photon', difficulty: 'medium', question: "Can photons be accelerated by electric fields?", options: ["No (Uncharged)", "Yes", "Only in vacuum", "None"], correctAnswer: 0, explanation: "Fields affect charged particles; light is neutral." },
+    { id: "phy110-u4-69", unit: 4, topic: 'Mass', difficulty: 'hard', question: "Relativistic mass change formula?", options: ["m = m0 / √(1 - v²/c²)", "m = m0 * v/c", "m = m0", "None"], correctAnswer: 0, explanation: "Mass increases with speed." },
+    { id: "phy110-u4-70", unit: 4, topic: 'Phase Velocity', difficulty: 'hard', question: "For a wave group vp * vg = ___ (for free particles).", options: ["c² (Relativistic) or v²/2 (Non-rel)", "0", "1", "None"], correctAnswer: 0, explanation: "Fundamental relation." },
+    { id: "phy110-u4-71", unit: 4, topic: 'Phase Velocity', difficulty: 'hard', question: "Dimension of k (wave number)?", options: ["L^-1", "L", "T", "None"], correctAnswer: 0, explanation: "2π / λ." },
+    { id: "phy110-u4-72", unit: 4, topic: 'Frequency', difficulty: 'easy', question: "ω = ___.", options: ["2πν", "ν / 2π", "1/ν", "None"], correctAnswer: 0, explanation: "Angular frequency." },
+    { id: "phy110-u4-73", unit: 4, topic: 'Uncertainty', difficulty: 'medium', question: "If Δp is zero, then Δx is ___.", options: ["Infinite", "Zero", "h", "None"], correctAnswer: 0, explanation: "A particle with exact momentum is spread over all space." },
+    { id: "phy110-u4-74", unit: 4, topic: 'Normalization', difficulty: 'hard', question: "Finding 'A' in ψ(x) = A sin(nπx/L)?", options: ["A = √(2/L)", "A = L", "A = 1/L", "None"], correctAnswer: 0, explanation: "From ∫|ψ|² dx = 1." },
+    { id: "phy110-u4-75", unit: 4, topic: 'Tunneling', difficulty: 'medium', question: "Used in Scanning Tunneling Microscope (STM)?", options: ["Yes", "No", "Only for magnets", "None"], correctAnswer: 0, explanation: "Measures current of electrons leaking through gap." },
+    { id: "phy110-u4-76", unit: 4, topic: 'Box', difficulty: 'medium', question: "Does the particle always stay in the box in QM?", options: ["Yes (if potential is infinite)", "No", "Depends on speed", "None"], correctAnswer: 0, explanation: "At boundary, probability is zero." },
+    { id: "phy110-u4-77", unit: 4, topic: 'Quantum', difficulty: 'easy', question: "Who won Nobel for explaining Photoelectric effect?", options: ["Einstein", "Newton", "Planck", "Bohr"], correctAnswer: 0, explanation: "1921 prize; established light's particle nature." },
+    { id: "phy110-u4-78", unit: 4, topic: 'History', difficulty: 'medium', question: "De-Broglie suggested matter waves in ___.", options: ["1924", "1800", "1950", "2000"], correctAnswer: 0, explanation: "Confirmed later by experiments." },
+    { id: "phy110-u4-79", unit: 4, topic: 'Physics', difficulty: 'easy', question: "Subject of PHY110?", options: ["Physics", "Chemistry", "Biology", "Math"], correctAnswer: 0, explanation: "Engineering Physics course." },
+    { id: "phy110-u4-80", unit: 4, topic: 'Final', difficulty: 'easy', question: "Quantum mechanics suggests the world is ___ at small scales.", options: ["Probabilistic", "Deteriministic", "Static", "None"], correctAnswer: 0, explanation: "Uncertainty and wave functions are core." },
+    { id: "phy110-u4-81", unit: 4, topic: 'Compton', difficulty: 'hard', question: "The change in wavelength Δλ depends only on ___.", options: ["Scattering angle θ", "Incident wavelength", "Intensity", "None"], correctAnswer: 0, explanation: "Δλ = h/m0c (1-cosθ)." },
+    { id: "phy110-u4-82", unit: 4, topic: 'Planck', difficulty: 'easy', question: "Planck's constant dimensions?", options: ["Energy * Time (Angular Momentum)", "Energy", "Power", "None"], correctAnswer: 0, explanation: "J·s or kg·m²/s." },
+    { id: "phy110-u4-83", unit: 4, topic: 'Wave function', difficulty: 'easy', question: "ψ is usually a ___ function.", options: ["Complex", "Real only", "Integer", "None"], correctAnswer: 0, explanation: "Needs to represent phase and amplitude." },
+    { id: "phy110-u4-84", unit: 4, topic: 'Box', difficulty: 'medium', question: "En = (n²h²) / (8mL²). If L decreases, En ___.", options: ["Increases", "Decreases", "Stays same", "Zeroes"], correctAnswer: 0, explanation: "Tightening the box increases energy quantization." },
+    { id: "phy110-u4-85", unit: 4, topic: 'Box', difficulty: 'easy', question: "Energy levels are ___.", options: ["Discrete (Quantized)", "Continuous", "Stable", "None"], correctAnswer: 0, explanation: "Only specific values allowed." },
+    { id: "phy110-u4-86", unit: 4, topic: 'Tunneling', difficulty: 'hard', question: "In tunneling, the wave function inside the barrier is ___.", options: ["Exponentially decaying", "Oscillating", "Zero", "Constant"], correctAnswer: 0, explanation: "ψ ~ exp(-κx)." },
+    { id: "phy110-u4-87", unit: 4, topic: 'Uncertainty', difficulty: 'easy', question: "Heisenberg's first name?", options: ["Werner", "Albert", "Max", "Niels"], correctAnswer: 0, explanation: "Werner Heisenberg." },
+    { id: "phy110-u4-88", unit: 4, topic: 'Photon', difficulty: 'easy', question: "Can photons be reflected?", options: ["Yes", "No", "Only in water", "None"], correctAnswer: 0, explanation: "Standard reflection from surfaces." },
+    { id: "phy110-u4-89", unit: 4, topic: 'Quantization', difficulty: 'easy', question: "The word 'Quantum' means ___.", options: ["Packet / Discrete amount", "Continuous", "Wave", "None"], correctAnswer: 0, explanation: "Smallest indivisible unit." },
+    { id: "phy110-u4-90", unit: 4, topic: 'Physics', difficulty: 'easy', question: "Is light a wave or a particle?", options: ["Both (Duality)", "Only wave", "Only particle", "Neither"], correctAnswer: 0, explanation: "Core concept of QM." },
+    { id: "phy110-u4-91", unit: 4, topic: 'Schrodinger', difficulty: 'easy', question: "Famous thought experiment involves a ___.", options: ["Cat", "Dog", "Bird", "Box"], correctAnswer: 0, explanation: "Schrodinger's Cat (Superposition)." },
+    { id: "phy110-u4-92", unit: 4, topic: 'Operator', difficulty: 'medium', question: "Operator for Total Energy?", options: ["Hamiltonian (H)", "Momentum", "Position", "None"], correctAnswer: 0, explanation: "Sum of kinetic and potential energy operators." },
+    { id: "phy110-u4-93", unit: 4, topic: 'Stationary State', difficulty: 'hard', question: "Stationary state because |ψ|² is ___ of time.", options: ["Independent", "Dependent", "Zero", "None"], correctAnswer: 0, explanation: "Phase factors cancel out." },
+    { id: "phy110-u4-94", unit: 4, topic: 'Uncertainty', difficulty: 'medium', question: "The uncertainty principle is a result of ___.", options: ["Wave nature of matter", "Bad instruments", "Human error", "None"], correctAnswer: 0, explanation: "Intrinsic to any wave system." },
+    { id: "phy110-u4-95", unit: 4, topic: 'Particle', difficulty: 'easy', question: "An electron is a ___.", options: ["Both (has wave and particle properties)", "Only particle", "Only wave", "None"], correctAnswer: 0, explanation: "Shows diffraction but has mass/charge." },
+    { id: "phy110-u4-96", unit: 4, topic: 'Wavelength', difficulty: 'easy', question: "Visible light has ___ wavelength than Gamma rays.", options: ["Longer", "Shorter", "Same", "None"], correctAnswer: 0, explanation: "Gamma is highest energy/shortest wavelength." },
+    { id: "phy110-u4-97", unit: 4, topic: 'Quantum', difficulty: 'easy', question: "Quantum mechanics started in the year ___.", options: ["1900", "1800", "2000", "1950"], correctAnswer: 0, explanation: "Planck's blackbody paper." },
+    { id: "phy110-u4-98", unit: 4, topic: 'Quantum', difficulty: 'medium', question: "ħ is roughly ___.", options: ["1.05e-34 J·s", "6.63e-34 J·s", "2π", "None"], correctAnswer: 0, explanation: "h / (2 * 3.14159)." },
+    { id: "phy110-u4-99", unit: 4, topic: 'Quantum', difficulty: 'easy', question: "A particle is 'free' if V = ___.", options: ["0 (Constant zero potential)", "Infinite", "1", "None"], correctAnswer: 0, explanation: "No forces acting on it." },
+    { id: "phy110-u4-100", unit: 4, topic: 'Tunneling', difficulty: 'hard', question: "Alpha decay is explained using which quantum effect?", options: ["Tunneling", "Superposition", "Entanglement", "None"], correctAnswer: 0, explanation: "Alpha particles 'tunnel' through the nuclear potential barrier." }
 ];

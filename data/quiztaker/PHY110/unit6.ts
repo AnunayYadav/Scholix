@@ -2,6 +2,7 @@ import { QuizQuestion } from '../../../types.ts';
 
 export const phy110Unit6MCQs: QuizQuestion[] = [
     {
+        id: "phy110-u6-1",
         unit: 6,
         topic: 'Dielectrics',
         difficulty: 'easy',
@@ -11,6 +12,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "Dielectrics store electrical energy through polarization."
     },
     {
+        id: "phy110-u6-2",
         unit: 6,
         topic: 'Dielectric Constant',
         difficulty: 'medium',
@@ -20,6 +22,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "Also known as relative permittivity."
     },
     {
+        id: "phy110-u6-3",
         unit: 6,
         topic: 'Polarization',
         difficulty: 'medium',
@@ -29,6 +32,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "P = total dipole moment / Volume."
     },
     {
+        id: "phy110-u6-4",
         unit: 6,
         topic: 'Magnetic Materials',
         difficulty: 'easy',
@@ -38,6 +42,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "Examples include Water, Bismuth, Copper."
     },
     {
+        id: "phy110-u6-5",
         unit: 6,
         topic: 'Magnetic Materials',
         difficulty: 'easy',
@@ -47,6 +52,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "Examples: Aluminum, Platinum."
     },
     {
+        id: "phy110-u6-6",
         unit: 6,
         topic: 'Magnetic Materials',
         difficulty: 'easy',
@@ -56,6 +62,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "Iron, Nickel, and Cobalt are classic examples."
     },
     {
+        id: "phy110-u6-7",
         unit: 6,
         topic: 'Domains',
         difficulty: 'medium',
@@ -65,6 +72,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "The domain theory explains hysteresis and saturation."
     },
     {
+        id: "phy110-u6-8",
         unit: 6,
         topic: 'Curie Point',
         difficulty: 'hard',
@@ -74,6 +82,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "Thermal energy overcomes the exchange interaction."
     },
     {
+        id: "phy110-u6-9",
         unit: 6,
         topic: 'Hysteresis',
         difficulty: 'hard',
@@ -83,6 +92,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "Represented by the B-H loop."
     },
     {
+        id: "phy110-u6-10",
         unit: 6,
         topic: 'Retentivity',
         difficulty: 'medium',
@@ -92,6 +102,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "High retentivity is needed for permanent magnets."
     },
     {
+        id: "phy110-u6-11",
         unit: 6,
         topic: 'Coercivity',
         difficulty: 'medium',
@@ -101,6 +112,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "Measures the resistance to demagnetization."
     },
     {
+        id: "phy110-u6-12",
         unit: 6,
         topic: 'Superconductivity',
         difficulty: 'medium',
@@ -110,6 +122,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "Discovered by H. Kamerlingh Onnes in 1911."
     },
     {
+        id: "phy110-u6-13",
         unit: 6,
         topic: 'Meissner Effect',
         difficulty: 'hard',
@@ -119,6 +132,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "Proves that a superconductor is a perfect diamagnet."
     },
     {
+        id: "phy110-u6-14",
         unit: 6,
         topic: 'Superconductors',
         difficulty: 'hard',
@@ -128,6 +142,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "They exhibit sudden loss of superconductivity at Hc."
     },
     {
+        id: "phy110-u6-15",
         unit: 6,
         topic: 'Superconductors',
         difficulty: 'hard',
@@ -137,6 +152,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "They have a 'vortex state' between the two fields."
     },
     {
+        id: "phy110-u6-16",
         unit: 6,
         topic: 'Piezoelectricity',
         difficulty: 'medium',
@@ -146,6 +162,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "Common in non-centrosymmetric crystals like Quartz."
     },
     {
+        id: "phy110-u6-17",
         unit: 6,
         topic: 'Piezoelectricity',
         difficulty: 'medium',
@@ -155,6 +172,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "Used in actuators and ultrasonic generators."
     },
     {
+        id: "phy110-u6-18",
         unit: 6,
         topic: 'Magnetic Data Storage',
         difficulty: 'easy',
@@ -164,6 +182,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "Tiny domains are oriented to represent bits 0 and 1."
     },
     {
+        id: "phy110-u6-19",
         unit: 6,
         topic: 'Superconductors',
         difficulty: 'hard',
@@ -173,6 +192,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         explanation: "Example: YBCO (Yttrium Barium Copper Oxide)."
     },
     {
+        id: "phy110-u6-20",
         unit: 6,
         topic: 'Applications',
         difficulty: 'easy',
@@ -181,84 +201,84 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Utilizes the Meissner effect and strong magnets."
     },
-    { unit: 6, topic: 'Dielectric', difficulty: 'easy', question: "Susceptibility (χ) of vacuum is ___.", options: ["0", "1", "Infinite", "Negative"], correctAnswer: 0, explanation: "Vacuum cannot be polarized." },
-    { unit: 6, topic: 'Dielectric', difficulty: 'medium', question: "Relation between εr and χ?", options: ["εr = 1 + χ", "εr = χ", "εr = 1 - χ", "None"], correctAnswer: 0, explanation: "Basic relation in linear dielectrics." },
-    { unit: 6, topic: 'Clausius-Mossotti', difficulty: 'hard', question: "Relates macroscopic εr to microscopic polarizability α?", options: ["Clausius-Mossotti Relation", "Maxwell Eq", "Ohm Law", "None"], correctAnswer: 0, explanation: "(εr-1)/(εr+2) ∝ nα." },
-    { unit: 6, topic: 'Polarization', difficulty: 'hard', question: "Orientation polarization is temperature ___.", options: ["Dependent (1/T)", "Independent", "Proportional", "None"], correctAnswer: 0, explanation: "Langevin theory." },
-    { unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "The ratio of intensity of magnetization (M) to magnetizing field (H) is?", options: ["Susceptibility (χm)", "Permeability", "Coercivity", "None"], correctAnswer: 0, explanation: "χm = M / H." },
-    { unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "For diamagnetic materials, χm is ___.", options: ["Negative and small", "Positive and large", "Zero", "Positive and small"], correctAnswer: 0, explanation: "Response opposes the applied field." },
-    { unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "For paramagnetic materials, χm is ___.", options: ["Positive and small", "Negative", "Large", "Infinite"], correctAnswer: 0, explanation: "Weak alignment with the field." },
-    { unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "For ferromagnetic materials, χm is ___.", options: ["Positive and very large", "Small", "Negative", "Zero"], correctAnswer: 0, explanation: "Strong internal alignment." },
-    { unit: 6, topic: 'Curie-Weiss Law', difficulty: 'hard', question: "χm = C / (T - θ) is known as ___.", options: ["Curie-Weiss Law", "Ohm's Law", "Planck's Law", "None"], correctAnswer: 0, explanation: "Describes ferro-para transition." },
-    { unit: 6, topic: 'Hysteresis', difficulty: 'medium', question: "Area under B-H loop represents ___.", options: ["Energy loss per cycle as heat", "Total energy stored", "Magnetic strength", "None"], correctAnswer: 0, explanation: "Larger loop = higher loss (Hard magnets)." },
-    { unit: 6, topic: 'Soft Magnets', difficulty: 'medium', question: "Materials with narrow B-H loops and low energy loss are?", options: ["Soft magnetic materials", "Hard magnetic materials", "Paramagnets", "None"], correctAnswer: 0, explanation: "Used in transformer cores (e.g., soft iron)." },
-    { unit: 6, topic: 'Hard Magnets', difficulty: 'medium', question: "Materials with wide loops and high coercivity are?", options: ["Hard magnetic materials", "Soft", "Ions", "None"], correctAnswer: 0, explanation: "Used for permanent magnets (e.g., Alnico, Steel)." },
-    { unit: 6, topic: 'Superconductivity', difficulty: 'medium', question: "Below Tc, a superconductor is a perfect ___.", options: ["Diamagnet", "Paramagnet", "Ferromagnet", "Insulator"], correctAnswer: 0, explanation: "Meissner effect prevents field penetration." },
-    { unit: 6, topic: 'Superconductivity', difficulty: 'hard', question: "Critical magnetic field Hc ___ as temperature increases.", options: ["Decreases", "Increases", "Stays same", "None"], correctAnswer: 0, explanation: "Hc(T) = Hc(0) [1 - (T/Tc)²]." },
-    { unit: 6, topic: 'SQUID', difficulty: 'hard', question: "Superconducting Quantum Interference Device is used for ___.", options: ["Measuring extremely weak magnetic fields", "Cooking", "Space travel", "None"], correctAnswer: 0, explanation: "Based on Josephson junctions." },
-    { unit: 6, topic: 'Piezo', difficulty: 'easy', question: "Piezoelectric property is used in ___.", options: ["All of these", "Quartz watches", "Lighters", "Microphones"], correctAnswer: 0, explanation: "Voltage-stress conversion applications." },
-    { unit: 6, topic: 'Dielectric', difficulty: 'medium', question: "Dielectric breakdown means the material ___.", options: ["Becomes conductive due to high field", "Melts", "Vanishes", "None"], correctAnswer: 0, explanation: "Insulating property fails." },
-    { unit: 6, topic: 'Polarity', difficulty: 'easy', question: "Materials with permanent dipoles are called ___.", options: ["Polar", "Non-polar", "Metals", "None"], correctAnswer: 0, explanation: "Usually exhibit orientational polarization." },
-    { unit: 6, topic: 'Magnetic', difficulty: 'easy', question: "Magnetism in atoms is due to ___.", options: ["Spin and orbital motion of electrons", "Protons", "Neutrons", "Gravity"], correctAnswer: 0, explanation: "Moving charge creates a magnetic field." },
-    { unit: 6, topic: 'Bohr Magneton', difficulty: 'hard', question: "The smallest unit of magnetic moment is ___.", options: ["Bohr Magneton (μB)", "Coulomb", "Ohm", "None"], correctAnswer: 0, explanation: "μB = eħ / 2m." },
-    { unit: 6, topic: 'Hard Drive', difficulty: 'medium', question: "Magnetic recording uses which effect?", options: ["Hysteresis", "TIR", "Diffraction", "None"], correctAnswer: 0, explanation: "Retaining orientation after field removal." },
-    { unit: 6, topic: 'Ferrites', difficulty: 'hard', question: "Ceramic ferromagnetic materials with high resistivity?", options: ["Ferrites", "Metals", "Alloys", "None"], correctAnswer: 0, explanation: "Used in high-frequency transformers to reduce eddy currents." },
-    { unit: 6, topic: 'Superconductivity', difficulty: 'hard', question: "Type-I superconductors exclude magnetic flux ___.", options: ["Completely (up to Hc)", "Partially", "Not at all", "None"], correctAnswer: 0, explanation: "Abrupt transition." },
-    { unit: 6, topic: 'Vortex State', difficulty: 'hard', question: "The state where magnets partially penetrate a Type-II superconductor?", options: ["Vortex / Mixed State", "Normal state", "Zero state", "None"], correctAnswer: 0, explanation: "Between Hc1 and Hc2." },
-    { unit: 6, topic: 'Piezo', difficulty: 'medium', question: "PZT (Lead Zirconate Titanate) is a common ___ material.", options: ["Piezoelectric", "Magnetic", "Superconducting", "None"], correctAnswer: 0, explanation: "Widely used ceramic transducer." },
-    { unit: 6, topic: 'Loss', difficulty: 'medium', question: "Tan δ in dielectrics represents ___.", options: ["Dielectric Loss", "Efficiency", "Phase", "None"], correctAnswer: 0, explanation: "Energy dissipated as heat." },
-    { unit: 6, topic: 'Permeability', difficulty: 'medium', question: "Relative permeability μr = 1 + ___.", options: ["χm", "χe", "1", "None"], correctAnswer: 0, explanation: "Magnetic analog of dielectric constant." },
-    { unit: 6, topic: 'Susceptibility', difficulty: 'easy', question: "χm for aluminum (+0.00002) means it is ___.", options: ["Paramagnetic", "Diamagnetic", "Ferromagnetic", "None"], correctAnswer: 0, explanation: "Small positive value." },
-    { unit: 6, topic: 'Susceptibility', difficulty: 'easy', question: "χm for copper (-0.00001) means it is ___.", options: ["Diamagnetic", "Paramagnetic", "Ferromagnetic", "None"], correctAnswer: 0, explanation: "Small negative value." },
-    { unit: 6, topic: 'Curie point', difficulty: 'easy', question: "Curie point for Iron is about ___.", options: ["770 °C", "100 °C", "0 °C", "1000 °C"], correctAnswer: 0, explanation: "Above this, iron is no longer a permanent magnet." },
-    { unit: 6, topic: 'Application', difficulty: 'medium', question: "MRI scanners use ___ magnets.", options: ["Superconducting", "Natural", "Battery", "None"], correctAnswer: 0, explanation: "Requires extremely stable and strong fields." },
-    { unit: 6, topic: 'Cryogenics', difficulty: 'easy', question: "Superconductors often need cooling with ___.", options: ["Liquid Nitrogen or Helium", "Water", "Ice", "None"], correctAnswer: 0, explanation: "To reach very low Tc." },
-    { unit: 6, topic: 'Dielectric', difficulty: 'easy', question: "Unit of dielectric constant?", options: ["None (Dimensionless)", "Farad", "Meter", "Coulomb"], correctAnswer: 0, explanation: "It's a ratio." },
-    { unit: 6, topic: 'Field', difficulty: 'medium', question: "Magnetic Induction B = ___.", options: ["μ0 (H + M)", "H + B", "μ0 H", "None"], correctAnswer: 0, explanation: "Total internal field in material." },
-    { unit: 6, topic: 'Piezo', difficulty: 'hard', question: "Piezoelectricity only occurs in ___ crystals.", options: ["Non-centrosymmetric", "Cubic", "Liquid", "None"], correctAnswer: 0, explanation: "Symmetry must be broken to allow net dipole shift." },
-    { unit: 6, topic: 'Eddy Current', difficulty: 'medium', question: "Power loss in conductive magnets under AC field?", options: ["Eddy current loss", "Hysteresis loss", "Windage", "None"], correctAnswer: 0, explanation: "Laminations or ferrites are used to minimize this." },
-    { unit: 6, topic: 'Measurement', difficulty: 'medium', question: "Gouy balance is used to measure ___.", options: ["Magnetic susceptibility", "Weight", "Length", "None"], correctAnswer: 0, explanation: "Force exerted in a gradient field." },
-    { unit: 6, topic: 'Superconductivity', difficulty: 'hard', question: "Cooper pairs are formed by ___ attraction.", options: ["Electron-phonon-electron", "Proton-neutron", "Magnetic", "None"], correctAnswer: 0, explanation: "Lattice distortion allows two electrons to pair." },
-    { unit: 6, topic: 'Ferromagnetism', difficulty: 'hard', question: "The internal 'Exchange Field' is ___.", options: ["Extremely strong (~10^7 G)", "Weak", "Zero", "None"], correctAnswer: 0, explanation: "Quantum mechanical origin (Exchange interaction)." },
-    { unit: 6, topic: 'Antiferromagnetism', difficulty: 'hard', question: "Materials where adjacent dipoles align antiparallel?", options: ["Antiferromagnetic", "Ferrimagnetic", "Ferro", "None"], correctAnswer: 0, explanation: "Example: MnO." },
-    { unit: 6, topic: 'Ferrimagnetism', difficulty: 'hard', question: "Unequal antiparallel alignment of dipoles?", options: ["Ferrimagnetism", "Anti", "Para", "None"], correctAnswer: 0, explanation: "Observed in ferrites." },
-    { unit: 6, topic: 'Application', difficulty: 'easy', question: "Mica and Ceramics are used as ___.", options: ["Dielectrics in capacitors", "Wires", "Magnets", "None"], correctAnswer: 0, explanation: "High breakdown and low loss." },
-    { unit: 6, topic: 'Dielectric', difficulty: 'medium', question: "Electronic polarization happens in ___ atoms.", options: ["All", "Only polar", "Only metals", "None"], correctAnswer: 0, explanation: "Basic displacement of electron cloud." },
-    { unit: 6, topic: 'Dielectric', difficulty: 'medium', question: "Ionic polarization is common in ___.", options: ["Ionic crystals (NaCl)", "Plastic", "Metals", "None"], correctAnswer: 0, explanation: "Offsetting of ions." },
-    { unit: 6, topic: 'Dielectric', difficulty: 'hard', question: "Local field inside a dielectric (Lorentz Field)?", options: ["E + P/(3ε0)", "E", "P", "None"], correctAnswer: 0, explanation: "The actual field felt by an atom." },
-    { unit: 6, topic: 'Application', difficulty: 'medium', question: "Transformer cores use ___ materials.", options: ["Soft magnetic / High μ", "Hard", "Glass", "None"], correctAnswer: 0, explanation: "Needs to flip magnetization quickly with low loss." },
-    { unit: 6, topic: 'Application', difficulty: 'medium', question: "Permanent magnets use ___ materials.", options: ["Hard magnetic / High coercivity", "Soft", "Silicon", "None"], correctAnswer: 0, explanation: "Must resist demagnetization." },
-    { unit: 6, topic: 'Superconductivity', difficulty: 'easy', question: "Is gold a superconductor?", options: ["No (at normal pressures/temps)", "Yes", "Always", "None"], correctAnswer: 0, explanation: "Strangely, best conductors (Ag, Au, Cu) are not superconductors." },
-    { unit: 6, topic: 'Material', difficulty: 'easy', question: "Mercury's Tc is around ___.", options: ["4.2 K", "77 K", "300 K", "0 K"], correctAnswer: 0, explanation: "Onnes' original discovery." },
-    { unit: 6, topic: 'Josephson Effect', difficulty: 'hard', question: "Tunneling of Cooper pairs through a thin insulator?", options: ["Josephson Effect", "Seebeck", "Hall", "None"], correctAnswer: 0, explanation: "Basis of SQUID and quantum computing." },
-    { unit: 6, topic: 'Piezo', difficulty: 'easy', question: "Gramophone pickups used ___.", options: ["Piezoelectric crystals", "Magnets", "Lasers", "None"], correctAnswer: 0, explanation: "Converts groove vibrations to electricity." },
-    { unit: 6, topic: 'Storage', difficulty: 'medium', question: "Floppy disks and Tapes used ___.", options: ["Magnetic storage", "Optical", "Paper", "None"], correctAnswer: 0, explanation: "Older technology based on same principle." },
-    { unit: 6, topic: 'Superconductivity', difficulty: 'medium', question: "Lossless power transmission is a goal for ___.", options: ["Superconductors", "Copper wires", "Fiber", "None"], correctAnswer: 0, explanation: "No I²R heating." },
-    { unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "Paramagnetic susceptibility depends on T as ___.", options: ["1/T (Curie Law)", "T", "T²", "None"], correctAnswer: 0, explanation: "Alignment vs thermal agitation." },
-    { unit: 6, topic: 'Dielectric', difficulty: 'medium', question: "Dielectric strength unit?", options: ["V/m", "Farad", "Newton", "None"], correctAnswer: 0, explanation: "Electric field limit." },
-    { unit: 6, topic: 'Loss', difficulty: 'hard', question: "Dielectric heating is higher at ___ frequencies.", options: ["High", "Low", "Static", "None"], correctAnswer: 0, explanation: "Dipoles flipping fast create heat." },
-    { unit: 6, topic: 'Dipole', difficulty: 'easy', question: "Water molecule is ___.", options: ["Polar", "Non-polar", "Metallic", "None"], correctAnswer: 0, explanation: "Bent shape gives permanent dipole." },
-    { unit: 6, topic: 'Dipole', difficulty: 'easy', question: "CO2 molecule is ___.", options: ["Non-polar (Linear)", "Polar", "Conductive", "None"], correctAnswer: 0, explanation: "Symmetric cancellation of dipoles." },
-    { unit: 6, topic: 'Ferro', difficulty: 'easy', question: "Ferro means ___ in Latin.", options: ["Iron", "Magnetic", "Strong", "None"], correctAnswer: 0, explanation: "Historically linked to iron." },
-    { unit: 6, topic: 'Superconductivity', difficulty: 'easy', question: "Critical Temperature Tc is ___.", options: ["Material dependent", "Same for all", "Room temperature", "None"], correctAnswer: 0, explanation: "Specific to each element/compound." },
-    { unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "Is blood magnetic?", options: ["Weakly (Diamagnetic/Paramagnetic components)", "Strongly", "No", "None"], correctAnswer: 0, explanation: "Hemoglobin state (oxy/deoxy) affects properties slightly." },
-    { unit: 6, topic: 'Piezo', difficulty: 'medium', question: "Can a lighter spark be dangerous?", options: ["Yes (High voltage)", "No", "Depends", "None"], correctAnswer: 0, explanation: "Produces several kilovolts." },
-    { unit: 6, topic: 'Dielectric', difficulty: 'easy', question: "Air is a ___.", options: ["Dielectric", "Conductor", "Superconductor", "None"], correctAnswer: 0, explanation: "Effective insulator at low fields." },
-    { unit: 6, topic: 'Flux', difficulty: 'easy', question: "Unit of magnetic flux?", options: ["Weber (Wb)", "Tesla", "Oersted", "None"], correctAnswer: 0, explanation: "Tesla per m² effectively." },
-    { unit: 6, topic: 'Tesla', difficulty: 'easy', question: "Unit of magnetic induction (B)?", options: ["Tesla (T)", "Weber", "Volt", "None"], correctAnswer: 0, explanation: "Named after Nikola Tesla." },
-    { unit: 6, topic: 'Susceptibility', difficulty: 'hard', question: "Is χm for diamagnets temperature dependent?", options: ["Mostly No", "Yes (1/T)", "Yes (T)", "None"], correctAnswer: 0, explanation: "Inherent atomic response independent of thermal motion." },
-    { unit: 6, topic: 'Hysteresis', difficulty: 'medium', question: "Residual induction is also called ___.", options: ["Remanence", "Saturation", "Coercivity", "None"], correctAnswer: 0, explanation: "B value at H=0." },
-    { unit: 6, topic: 'Superconductivity', difficulty: 'hard', question: "London Penetration Depth is ___.", options: ["Distance magnetic field penetrates a superconductor", "Length", "Radius", "None"], correctAnswer: 0, explanation: "Decays exponentially from surface." },
-    { unit: 6, topic: 'Josephson', difficulty: 'hard', question: "A Josephson Junction consists of ___.", options: ["SC - Insulator - SC", "SC - Metal - SC", "Metals", "None"], correctAnswer: 0, explanation: "Standard configuration for tunneling." },
-    { unit: 6, topic: 'Magnet', difficulty: 'easy', question: "Lodestone is a natural ___.", options: ["Magnet", "Insulator", "Laser", "None"], correctAnswer: 0, explanation: "Magnetite (Fe3O4)." },
-    { unit: 6, topic: 'Physics', difficulty: 'easy', question: "Does magnetic field affect living tissue?", options: ["Very weakly (safe for MRI)", "Strongly", "Lethally", "None"], correctAnswer: 0, explanation: "Only at extreme cosmic levels." },
-    { unit: 6, topic: 'Physics', difficulty: 'medium', question: "Can light be affected by magnetic field?", options: ["Yes (Faraday Effect)", "No", "Only blue light", "None"], correctAnswer: 0, explanation: "Rotation of polarization." },
-    { unit: 6, topic: 'Polarization', difficulty: 'medium', question: "Frequency of external field affects ___.", options: ["Total Polarization", "Color", "Weight", "None"], correctAnswer: 0, explanation: "Heavier entities (ions, dipoles) stop responding at high frequencies." },
-    { unit: 6, topic: 'Dielectric', difficulty: 'easy', question: "Which has higher εr?", options: ["Water (~80)", "Air (~1)", "Polyethylene (~2)", "None"], correctAnswer: 0, explanation: "Water's high polarity." },
-    { unit: 6, topic: 'Piezo', difficulty: 'medium', question: "Ultrasonic cleaners use ___.", options: ["Piezoelectric transducers", "Soap only", "Fire", "None"], correctAnswer: 0, explanation: "Vibrates water at high freq." },
-    { unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "B-H curve for diamagnets is ___.", options: ["Linear with negative slope", "Linear with positive slope", "Loop", "None"], correctAnswer: 0, explanation: "Straight line through origin." },
-    { unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "B-H curve for paramagnets is ___.", options: ["Linear with positive slope", "Negative", "Loop", "None"], correctAnswer: 0, explanation: "Saturation only at extreme T/B." },
-    { unit: 6, topic: 'Final', difficulty: 'easy', question: "Course code for this quiz is ___.", options: ["PHY110", "CHE110", "CSE320", "None"], correctAnswer: 0, explanation: "Engineering Physics." },
-    { unit: 6, topic: 'Final', difficulty: 'easy', question: "Unit 6 topic is ___.", options: ["Engineering Materials", "Quantum", "Lasers", "None"], correctAnswer: 0, explanation: "Final unit of the syllabus." },
-    { unit: 6, topic: 'Final', difficulty: 'easy', question: "You've finished the PHY110 set!", options: ["Yes", "Maybe", "No", "None"], correctAnswer: 0, explanation: "100 MCQs per unit done." }
+    { id: "phy110-u6-21", unit: 6, topic: 'Dielectric', difficulty: 'easy', question: "Susceptibility (χ) of vacuum is ___.", options: ["0", "1", "Infinite", "Negative"], correctAnswer: 0, explanation: "Vacuum cannot be polarized." },
+    { id: "phy110-u6-22", unit: 6, topic: 'Dielectric', difficulty: 'medium', question: "Relation between εr and χ?", options: ["εr = 1 + χ", "εr = χ", "εr = 1 - χ", "None"], correctAnswer: 0, explanation: "Basic relation in linear dielectrics." },
+    { id: "phy110-u6-23", unit: 6, topic: 'Clausius-Mossotti', difficulty: 'hard', question: "Relates macroscopic εr to microscopic polarizability α?", options: ["Clausius-Mossotti Relation", "Maxwell Eq", "Ohm Law", "None"], correctAnswer: 0, explanation: "(εr-1)/(εr+2) ∝ nα." },
+    { id: "phy110-u6-24", unit: 6, topic: 'Polarization', difficulty: 'hard', question: "Orientation polarization is temperature ___.", options: ["Dependent (1/T)", "Independent", "Proportional", "None"], correctAnswer: 0, explanation: "Langevin theory." },
+    { id: "phy110-u6-25", unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "The ratio of intensity of magnetization (M) to magnetizing field (H) is?", options: ["Susceptibility (χm)", "Permeability", "Coercivity", "None"], correctAnswer: 0, explanation: "χm = M / H." },
+    { id: "phy110-u6-26", unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "For diamagnetic materials, χm is ___.", options: ["Negative and small", "Positive and large", "Zero", "Positive and small"], correctAnswer: 0, explanation: "Response opposes the applied field." },
+    { id: "phy110-u6-27", unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "For paramagnetic materials, χm is ___.", options: ["Positive and small", "Negative", "Large", "Infinite"], correctAnswer: 0, explanation: "Weak alignment with the field." },
+    { id: "phy110-u6-28", unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "For ferromagnetic materials, χm is ___.", options: ["Positive and very large", "Small", "Negative", "Zero"], correctAnswer: 0, explanation: "Strong internal alignment." },
+    { id: "phy110-u6-29", unit: 6, topic: 'Curie-Weiss Law', difficulty: 'hard', question: "χm = C / (T - θ) is known as ___.", options: ["Curie-Weiss Law", "Ohm's Law", "Planck's Law", "None"], correctAnswer: 0, explanation: "Describes ferro-para transition." },
+    { id: "phy110-u6-30", unit: 6, topic: 'Hysteresis', difficulty: 'medium', question: "Area under B-H loop represents ___.", options: ["Energy loss per cycle as heat", "Total energy stored", "Magnetic strength", "None"], correctAnswer: 0, explanation: "Larger loop = higher loss (Hard magnets)." },
+    { id: "phy110-u6-31", unit: 6, topic: 'Soft Magnets', difficulty: 'medium', question: "Materials with narrow B-H loops and low energy loss are?", options: ["Soft magnetic materials", "Hard magnetic materials", "Paramagnets", "None"], correctAnswer: 0, explanation: "Used in transformer cores (e.g., soft iron)." },
+    { id: "phy110-u6-32", unit: 6, topic: 'Hard Magnets', difficulty: 'medium', question: "Materials with wide loops and high coercivity are?", options: ["Hard magnetic materials", "Soft", "Ions", "None"], correctAnswer: 0, explanation: "Used for permanent magnets (e.g., Alnico, Steel)." },
+    { id: "phy110-u6-33", unit: 6, topic: 'Superconductivity', difficulty: 'medium', question: "Below Tc, a superconductor is a perfect ___.", options: ["Diamagnet", "Paramagnet", "Ferromagnet", "Insulator"], correctAnswer: 0, explanation: "Meissner effect prevents field penetration." },
+    { id: "phy110-u6-34", unit: 6, topic: 'Superconductivity', difficulty: 'hard', question: "Critical magnetic field Hc ___ as temperature increases.", options: ["Decreases", "Increases", "Stays same", "None"], correctAnswer: 0, explanation: "Hc(T) = Hc(0) [1 - (T/Tc)²]." },
+    { id: "phy110-u6-35", unit: 6, topic: 'SQUID', difficulty: 'hard', question: "Superconducting Quantum Interference Device is used for ___.", options: ["Measuring extremely weak magnetic fields", "Cooking", "Space travel", "None"], correctAnswer: 0, explanation: "Based on Josephson junctions." },
+    { id: "phy110-u6-36", unit: 6, topic: 'Piezo', difficulty: 'easy', question: "Piezoelectric property is used in ___.", options: ["All of these", "Quartz watches", "Lighters", "Microphones"], correctAnswer: 0, explanation: "Voltage-stress conversion applications." },
+    { id: "phy110-u6-37", unit: 6, topic: 'Dielectric', difficulty: 'medium', question: "Dielectric breakdown means the material ___.", options: ["Becomes conductive due to high field", "Melts", "Vanishes", "None"], correctAnswer: 0, explanation: "Insulating property fails." },
+    { id: "phy110-u6-38", unit: 6, topic: 'Polarity', difficulty: 'easy', question: "Materials with permanent dipoles are called ___.", options: ["Polar", "Non-polar", "Metals", "None"], correctAnswer: 0, explanation: "Usually exhibit orientational polarization." },
+    { id: "phy110-u6-39", unit: 6, topic: 'Magnetic', difficulty: 'easy', question: "Magnetism in atoms is due to ___.", options: ["Spin and orbital motion of electrons", "Protons", "Neutrons", "Gravity"], correctAnswer: 0, explanation: "Moving charge creates a magnetic field." },
+    { id: "phy110-u6-40", unit: 6, topic: 'Bohr Magneton', difficulty: 'hard', question: "The smallest unit of magnetic moment is ___.", options: ["Bohr Magneton (μB)", "Coulomb", "Ohm", "None"], correctAnswer: 0, explanation: "μB = eħ / 2m." },
+    { id: "phy110-u6-41", unit: 6, topic: 'Hard Drive', difficulty: 'medium', question: "Magnetic recording uses which effect?", options: ["Hysteresis", "TIR", "Diffraction", "None"], correctAnswer: 0, explanation: "Retaining orientation after field removal." },
+    { id: "phy110-u6-42", unit: 6, topic: 'Ferrites', difficulty: 'hard', question: "Ceramic ferromagnetic materials with high resistivity?", options: ["Ferrites", "Metals", "Alloys", "None"], correctAnswer: 0, explanation: "Used in high-frequency transformers to reduce eddy currents." },
+    { id: "phy110-u6-43", unit: 6, topic: 'Superconductivity', difficulty: 'hard', question: "Type-I superconductors exclude magnetic flux ___.", options: ["Completely (up to Hc)", "Partially", "Not at all", "None"], correctAnswer: 0, explanation: "Abrupt transition." },
+    { id: "phy110-u6-44", unit: 6, topic: 'Vortex State', difficulty: 'hard', question: "The state where magnets partially penetrate a Type-II superconductor?", options: ["Vortex / Mixed State", "Normal state", "Zero state", "None"], correctAnswer: 0, explanation: "Between Hc1 and Hc2." },
+    { id: "phy110-u6-45", unit: 6, topic: 'Piezo', difficulty: 'medium', question: "PZT (Lead Zirconate Titanate) is a common ___ material.", options: ["Piezoelectric", "Magnetic", "Superconducting", "None"], correctAnswer: 0, explanation: "Widely used ceramic transducer." },
+    { id: "phy110-u6-46", unit: 6, topic: 'Loss', difficulty: 'medium', question: "Tan δ in dielectrics represents ___.", options: ["Dielectric Loss", "Efficiency", "Phase", "None"], correctAnswer: 0, explanation: "Energy dissipated as heat." },
+    { id: "phy110-u6-47", unit: 6, topic: 'Permeability', difficulty: 'medium', question: "Relative permeability μr = 1 + ___.", options: ["χm", "χe", "1", "None"], correctAnswer: 0, explanation: "Magnetic analog of dielectric constant." },
+    { id: "phy110-u6-48", unit: 6, topic: 'Susceptibility', difficulty: 'easy', question: "χm for aluminum (+0.00002) means it is ___.", options: ["Paramagnetic", "Diamagnetic", "Ferromagnetic", "None"], correctAnswer: 0, explanation: "Small positive value." },
+    { id: "phy110-u6-49", unit: 6, topic: 'Susceptibility', difficulty: 'easy', question: "χm for copper (-0.00001) means it is ___.", options: ["Diamagnetic", "Paramagnetic", "Ferromagnetic", "None"], correctAnswer: 0, explanation: "Small negative value." },
+    { id: "phy110-u6-50", unit: 6, topic: 'Curie point', difficulty: 'easy', question: "Curie point for Iron is about ___.", options: ["770 °C", "100 °C", "0 °C", "1000 °C"], correctAnswer: 0, explanation: "Above this, iron is no longer a permanent magnet." },
+    { id: "phy110-u6-51", unit: 6, topic: 'Application', difficulty: 'medium', question: "MRI scanners use ___ magnets.", options: ["Superconducting", "Natural", "Battery", "None"], correctAnswer: 0, explanation: "Requires extremely stable and strong fields." },
+    { id: "phy110-u6-52", unit: 6, topic: 'Cryogenics', difficulty: 'easy', question: "Superconductors often need cooling with ___.", options: ["Liquid Nitrogen or Helium", "Water", "Ice", "None"], correctAnswer: 0, explanation: "To reach very low Tc." },
+    { id: "phy110-u6-53", unit: 6, topic: 'Dielectric', difficulty: 'easy', question: "Unit of dielectric constant?", options: ["None (Dimensionless)", "Farad", "Meter", "Coulomb"], correctAnswer: 0, explanation: "It's a ratio." },
+    { id: "phy110-u6-54", unit: 6, topic: 'Field', difficulty: 'medium', question: "Magnetic Induction B = ___.", options: ["μ0 (H + M)", "H + B", "μ0 H", "None"], correctAnswer: 0, explanation: "Total internal field in material." },
+    { id: "phy110-u6-55", unit: 6, topic: 'Piezo', difficulty: 'hard', question: "Piezoelectricity only occurs in ___ crystals.", options: ["Non-centrosymmetric", "Cubic", "Liquid", "None"], correctAnswer: 0, explanation: "Symmetry must be broken to allow net dipole shift." },
+    { id: "phy110-u6-56", unit: 6, topic: 'Eddy Current', difficulty: 'medium', question: "Power loss in conductive magnets under AC field?", options: ["Eddy current loss", "Hysteresis loss", "Windage", "None"], correctAnswer: 0, explanation: "Laminations or ferrites are used to minimize this." },
+    { id: "phy110-u6-57", unit: 6, topic: 'Measurement', difficulty: 'medium', question: "Gouy balance is used to measure ___.", options: ["Magnetic susceptibility", "Weight", "Length", "None"], correctAnswer: 0, explanation: "Force exerted in a gradient field." },
+    { id: "phy110-u6-58", unit: 6, topic: 'Superconductivity', difficulty: 'hard', question: "Cooper pairs are formed by ___ attraction.", options: ["Electron-phonon-electron", "Proton-neutron", "Magnetic", "None"], correctAnswer: 0, explanation: "Lattice distortion allows two electrons to pair." },
+    { id: "phy110-u6-59", unit: 6, topic: 'Ferromagnetism', difficulty: 'hard', question: "The internal 'Exchange Field' is ___.", options: ["Extremely strong (~10^7 G)", "Weak", "Zero", "None"], correctAnswer: 0, explanation: "Quantum mechanical origin (Exchange interaction)." },
+    { id: "phy110-u6-60", unit: 6, topic: 'Antiferromagnetism', difficulty: 'hard', question: "Materials where adjacent dipoles align antiparallel?", options: ["Antiferromagnetic", "Ferrimagnetic", "Ferro", "None"], correctAnswer: 0, explanation: "Example: MnO." },
+    { id: "phy110-u6-61", unit: 6, topic: 'Ferrimagnetism', difficulty: 'hard', question: "Unequal antiparallel alignment of dipoles?", options: ["Ferrimagnetism", "Anti", "Para", "None"], correctAnswer: 0, explanation: "Observed in ferrites." },
+    { id: "phy110-u6-62", unit: 6, topic: 'Application', difficulty: 'easy', question: "Mica and Ceramics are used as ___.", options: ["Dielectrics in capacitors", "Wires", "Magnets", "None"], correctAnswer: 0, explanation: "High breakdown and low loss." },
+    { id: "phy110-u6-63", unit: 6, topic: 'Dielectric', difficulty: 'medium', question: "Electronic polarization happens in ___ atoms.", options: ["All", "Only polar", "Only metals", "None"], correctAnswer: 0, explanation: "Basic displacement of electron cloud." },
+    { id: "phy110-u6-64", unit: 6, topic: 'Dielectric', difficulty: 'medium', question: "Ionic polarization is common in ___.", options: ["Ionic crystals (NaCl)", "Plastic", "Metals", "None"], correctAnswer: 0, explanation: "Offsetting of ions." },
+    { id: "phy110-u6-65", unit: 6, topic: 'Dielectric', difficulty: 'hard', question: "Local field inside a dielectric (Lorentz Field)?", options: ["E + P/(3ε0)", "E", "P", "None"], correctAnswer: 0, explanation: "The actual field felt by an atom." },
+    { id: "phy110-u6-66", unit: 6, topic: 'Application', difficulty: 'medium', question: "Transformer cores use ___ materials.", options: ["Soft magnetic / High μ", "Hard", "Glass", "None"], correctAnswer: 0, explanation: "Needs to flip magnetization quickly with low loss." },
+    { id: "phy110-u6-67", unit: 6, topic: 'Application', difficulty: 'medium', question: "Permanent magnets use ___ materials.", options: ["Hard magnetic / High coercivity", "Soft", "Silicon", "None"], correctAnswer: 0, explanation: "Must resist demagnetization." },
+    { id: "phy110-u6-68", unit: 6, topic: 'Superconductivity', difficulty: 'easy', question: "Is gold a superconductor?", options: ["No (at normal pressures/temps)", "Yes", "Always", "None"], correctAnswer: 0, explanation: "Strangely, best conductors (Ag, Au, Cu) are not superconductors." },
+    { id: "phy110-u6-69", unit: 6, topic: 'Material', difficulty: 'easy', question: "Mercury's Tc is around ___.", options: ["4.2 K", "77 K", "300 K", "0 K"], correctAnswer: 0, explanation: "Onnes' original discovery." },
+    { id: "phy110-u6-70", unit: 6, topic: 'Josephson Effect', difficulty: 'hard', question: "Tunneling of Cooper pairs through a thin insulator?", options: ["Josephson Effect", "Seebeck", "Hall", "None"], correctAnswer: 0, explanation: "Basis of SQUID and quantum computing." },
+    { id: "phy110-u6-71", unit: 6, topic: 'Piezo', difficulty: 'easy', question: "Gramophone pickups used ___.", options: ["Piezoelectric crystals", "Magnets", "Lasers", "None"], correctAnswer: 0, explanation: "Converts groove vibrations to electricity." },
+    { id: "phy110-u6-72", unit: 6, topic: 'Storage', difficulty: 'medium', question: "Floppy disks and Tapes used ___.", options: ["Magnetic storage", "Optical", "Paper", "None"], correctAnswer: 0, explanation: "Older technology based on same principle." },
+    { id: "phy110-u6-73", unit: 6, topic: 'Superconductivity', difficulty: 'medium', question: "Lossless power transmission is a goal for ___.", options: ["Superconductors", "Copper wires", "Fiber", "None"], correctAnswer: 0, explanation: "No I²R heating." },
+    { id: "phy110-u6-74", unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "Paramagnetic susceptibility depends on T as ___.", options: ["1/T (Curie Law)", "T", "T²", "None"], correctAnswer: 0, explanation: "Alignment vs thermal agitation." },
+    { id: "phy110-u6-75", unit: 6, topic: 'Dielectric', difficulty: 'medium', question: "Dielectric strength unit?", options: ["V/m", "Farad", "Newton", "None"], correctAnswer: 0, explanation: "Electric field limit." },
+    { id: "phy110-u6-76", unit: 6, topic: 'Loss', difficulty: 'hard', question: "Dielectric heating is higher at ___ frequencies.", options: ["High", "Low", "Static", "None"], correctAnswer: 0, explanation: "Dipoles flipping fast create heat." },
+    { id: "phy110-u6-77", unit: 6, topic: 'Dipole', difficulty: 'easy', question: "Water molecule is ___.", options: ["Polar", "Non-polar", "Metallic", "None"], correctAnswer: 0, explanation: "Bent shape gives permanent dipole." },
+    { id: "phy110-u6-78", unit: 6, topic: 'Dipole', difficulty: 'easy', question: "CO2 molecule is ___.", options: ["Non-polar (Linear)", "Polar", "Conductive", "None"], correctAnswer: 0, explanation: "Symmetric cancellation of dipoles." },
+    { id: "phy110-u6-79", unit: 6, topic: 'Ferro', difficulty: 'easy', question: "Ferro means ___ in Latin.", options: ["Iron", "Magnetic", "Strong", "None"], correctAnswer: 0, explanation: "Historically linked to iron." },
+    { id: "phy110-u6-80", unit: 6, topic: 'Superconductivity', difficulty: 'easy', question: "Critical Temperature Tc is ___.", options: ["Material dependent", "Same for all", "Room temperature", "None"], correctAnswer: 0, explanation: "Specific to each element/compound." },
+    { id: "phy110-u6-81", unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "Is blood magnetic?", options: ["Weakly (Diamagnetic/Paramagnetic components)", "Strongly", "No", "None"], correctAnswer: 0, explanation: "Hemoglobin state (oxy/deoxy) affects properties slightly." },
+    { id: "phy110-u6-82", unit: 6, topic: 'Piezo', difficulty: 'medium', question: "Can a lighter spark be dangerous?", options: ["Yes (High voltage)", "No", "Depends", "None"], correctAnswer: 0, explanation: "Produces several kilovolts." },
+    { id: "phy110-u6-83", unit: 6, topic: 'Dielectric', difficulty: 'easy', question: "Air is a ___.", options: ["Dielectric", "Conductor", "Superconductor", "None"], correctAnswer: 0, explanation: "Effective insulator at low fields." },
+    { id: "phy110-u6-84", unit: 6, topic: 'Flux', difficulty: 'easy', question: "Unit of magnetic flux?", options: ["Weber (Wb)", "Tesla", "Oersted", "None"], correctAnswer: 0, explanation: "Tesla per m² effectively." },
+    { id: "phy110-u6-85", unit: 6, topic: 'Tesla', difficulty: 'easy', question: "Unit of magnetic induction (B)?", options: ["Tesla (T)", "Weber", "Volt", "None"], correctAnswer: 0, explanation: "Named after Nikola Tesla." },
+    { id: "phy110-u6-86", unit: 6, topic: 'Susceptibility', difficulty: 'hard', question: "Is χm for diamagnets temperature dependent?", options: ["Mostly No", "Yes (1/T)", "Yes (T)", "None"], correctAnswer: 0, explanation: "Inherent atomic response independent of thermal motion." },
+    { id: "phy110-u6-87", unit: 6, topic: 'Hysteresis', difficulty: 'medium', question: "Residual induction is also called ___.", options: ["Remanence", "Saturation", "Coercivity", "None"], correctAnswer: 0, explanation: "B value at H=0." },
+    { id: "phy110-u6-88", unit: 6, topic: 'Superconductivity', difficulty: 'hard', question: "London Penetration Depth is ___.", options: ["Distance magnetic field penetrates a superconductor", "Length", "Radius", "None"], correctAnswer: 0, explanation: "Decays exponentially from surface." },
+    { id: "phy110-u6-89", unit: 6, topic: 'Josephson', difficulty: 'hard', question: "A Josephson Junction consists of ___.", options: ["SC - Insulator - SC", "SC - Metal - SC", "Metals", "None"], correctAnswer: 0, explanation: "Standard configuration for tunneling." },
+    { id: "phy110-u6-90", unit: 6, topic: 'Magnet', difficulty: 'easy', question: "Lodestone is a natural ___.", options: ["Magnet", "Insulator", "Laser", "None"], correctAnswer: 0, explanation: "Magnetite (Fe3O4)." },
+    { id: "phy110-u6-91", unit: 6, topic: 'Physics', difficulty: 'easy', question: "Does magnetic field affect living tissue?", options: ["Very weakly (safe for MRI)", "Strongly", "Lethally", "None"], correctAnswer: 0, explanation: "Only at extreme cosmic levels." },
+    { id: "phy110-u6-92", unit: 6, topic: 'Physics', difficulty: 'medium', question: "Can light be affected by magnetic field?", options: ["Yes (Faraday Effect)", "No", "Only blue light", "None"], correctAnswer: 0, explanation: "Rotation of polarization." },
+    { id: "phy110-u6-93", unit: 6, topic: 'Polarization', difficulty: 'medium', question: "Frequency of external field affects ___.", options: ["Total Polarization", "Color", "Weight", "None"], correctAnswer: 0, explanation: "Heavier entities (ions, dipoles) stop responding at high frequencies." },
+    { id: "phy110-u6-94", unit: 6, topic: 'Dielectric', difficulty: 'easy', question: "Which has higher εr?", options: ["Water (~80)", "Air (~1)", "Polyethylene (~2)", "None"], correctAnswer: 0, explanation: "Water's high polarity." },
+    { id: "phy110-u6-95", unit: 6, topic: 'Piezo', difficulty: 'medium', question: "Ultrasonic cleaners use ___.", options: ["Piezoelectric transducers", "Soap only", "Fire", "None"], correctAnswer: 0, explanation: "Vibrates water at high freq." },
+    { id: "phy110-u6-96", unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "B-H curve for diamagnets is ___.", options: ["Linear with negative slope", "Linear with positive slope", "Loop", "None"], correctAnswer: 0, explanation: "Straight line through origin." },
+    { id: "phy110-u6-97", unit: 6, topic: 'Magnetic', difficulty: 'medium', question: "B-H curve for paramagnets is ___.", options: ["Linear with positive slope", "Negative", "Loop", "None"], correctAnswer: 0, explanation: "Saturation only at extreme T/B." },
+    { id: "phy110-u6-98", unit: 6, topic: 'Final', difficulty: 'easy', question: "Course code for this quiz is ___.", options: ["PHY110", "CHE110", "CSE320", "None"], correctAnswer: 0, explanation: "Engineering Physics." },
+    { id: "phy110-u6-99", unit: 6, topic: 'Final', difficulty: 'easy', question: "Unit 6 topic is ___.", options: ["Engineering Materials", "Quantum", "Lasers", "None"], correctAnswer: 0, explanation: "Final unit of the syllabus." },
+    { id: "phy110-u6-100", unit: 6, topic: 'Final', difficulty: 'easy', question: "You've finished the PHY110 set!", options: ["Yes", "Maybe", "No", "None"], correctAnswer: 0, explanation: "100 MCQs per unit done." }
 ];

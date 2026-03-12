@@ -2,7 +2,8 @@ import { QuizQuestion } from "../../../types.ts";
 
 export const ece249Unit2Subjective: QuizQuestion[] = [
     {
-        unit: 2,
+        id: "ece249-s-u2-1",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "Explain the architecture of the Arduino UNO board and the role of the ATmega328P microcontroller.",
         explanation: "The Arduino UNO is based on the ATmega328P microcontroller. Its architecture includes 14 digital I/O pins, 6 analog inputs, a $16\\,MHz$ quartz crystal, a USB connection, a power jack, and an ICSP header. The ATmega328P acts as the CPU, executing stored sketches, managing I/O operations, and performing ADC conversions.",
@@ -10,7 +11,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Arduino Board'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-2",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "Describe the working principle of an HC-SR04 ultrasonic sensor for distance measurement.",
         explanation: "The HC-SR04 emits an 8-cycle burst of ultrasound at $40\\,kHz$ from the 'Trig' pin. If these waves hit an object, they reflect back and are detected by the receiver. The 'Echo' pin then outputs a HIGH pulse whose width is proportional to the time taken for the round trip. Distance is calculated as: $Distance = (Time \\times Speed\\ of\\ Sound) / 2$.",
@@ -18,7 +20,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Ultrasonic Sensor'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-3",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "What is Pulse Width Modulation (PWM)? Explain how it simulates an analog output on digital pins.",
         explanation: "PWM is a technique for getting analog results with digital means. Digital control is used to create a square wave, a signal switched between on and off. This on-off pattern can simulate voltages in between full on ($5\\,V$) and off ($0\\,V$) by changing the duty cycle (the ratio of time the signal is HIGH vs LOW). The average voltage seen by the load is $V_{avg} = V_{peak} \\times Duty\\ Cycle$.",
@@ -26,7 +29,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Analog and Digital Signals'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-4",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "Explain the difference between Analog and Digital signals in the context of Arduino.",
         explanation: "An analog signal is continuous and can represent an infinite number of values within a range (e.g., $0-5\\,V$). Arduino reads these via ADC ($0-1023$). A digital signal has only two discrete states: HIGH ($5\\,V$) or LOW ($0\\,V$). Digital pins are used for binary logic, while analog pins are used for sensors that provide variable voltage.",
@@ -34,7 +38,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Analog and Digital Signals'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-5",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "How does an LDR (Light Dependent Resistor) work, and how do you interface it with an Arduino?",
         explanation: "An LDR's resistance decreases as the intensity of light falling on it increases. To interface it, we use a voltage divider circuit with a fixed resistor. The junction between the LDR and resistor is connected to an analog pin (A0-A5). The Arduino reads the changing voltage and converts it to a digital value using `analogRead()`, which represents the light level.",
@@ -42,7 +47,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'LDR (Light Dependent Resistor)'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-6",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "Discuss the communication between a DHT11/DHT22 sensor and an Arduino.",
         explanation: "DHT sensors use a custom single-wire serial protocol. The Arduino sends a start signal, and the sensor responds by sending 40 bits of data (8-bit integral RH, 8-bit decimal RH, 8-bit integral T, 8-bit decimal T, and 8-bit checksum). A specialized library is usually used to handle the timing and decoding of this bit stream.",
@@ -50,7 +56,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Temperature Sensor (DHT11/DHT22)'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-7",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "What is the purpose of the `Serial` library in Arduino? Give examples of its common functions.",
         explanation: "The `Serial` library is used for communication between the Arduino board and a computer or other devices. Common functions include: `Serial.begin(baud)` to initialize communication, `Serial.print()`/`Serial.println()` to send data, and `Serial.read()` to receive data. It is essential for debugging and data monitoring.",
@@ -58,7 +65,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Arduino Board'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-8",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "Explain the function of a standard IR obstacle sensor module.",
         explanation: "An IR obstacle sensor consists of an IR LED (transmitter) and a photodiode (receiver). The LED emits IR light; if an obstacle is present, the light reflects back. The photodiode detects this reflection, and an on-board comparator (like LM393) outputs a digital LOW signal to the Arduino. Sensitivity is adjusted via a potentiometer.",
@@ -66,7 +74,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'IR Sensor'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-9",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "Describe the role of the `setup()` and `loop()` functions in an Arduino sketch.",
         explanation: "The `setup()` function runs once when the program starts or the board is reset; it is used for initialization (e.g., setting `pinMode`). The `loop()` function runs repeatedly and contains the main logic of the program. It executes as fast as the processor allows unless a `delay()` is used.",
@@ -74,7 +83,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Arduino Board'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-10",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "Explain the concept of ADC resolution. What is the resolution of the Arduino UNO?",
         explanation: "ADC resolution refers to the number of discrete steps into which an analog range is divided. The Arduino UNO has a 10-bit ADC, meaning it has $2^{10} = 1024$ steps. For a $5\\,V$ reference, the step size is $5\\,V / 1024 \\approx 4.88\\,mV$. Higher resolution allows for more precise measurements.",
@@ -82,7 +92,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Analog and Digital Signals'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-11",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "What are 'Shields' in the Arduino ecosystem? Provide two examples.",
         explanation: "Shields are modular circuit boards that plug directly onto an Arduino to extend its capabilities without complex wiring. Examples include the Ethernet Shield (for internet connectivity) and the Motor Shield (for controlling DC and stepper motors).",
@@ -90,7 +101,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Arduino Board'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-12",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "How do you measure a negative voltage using an Arduino analog pin?",
         explanation: "Arduino analog pins cannot directly measure negative voltages (they only accept $0-VCC$). To measure negative voltage, you must use a voltage level shifter or a precision op-amp circuit to offset and scale the signal into the $0-5\\,V$ range acceptable by the Arduino's ADC.",
@@ -98,7 +110,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Analog and Digital Signals'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-13",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "Explain the difference between the DHT11 and DHT22 sensors.",
         explanation: "DHT11 is smaller, cheaper, and has a lower range/accuracy (Humidity $20-80\\%$, Temp $0-50^\\circ C$). DHT22 is larger, more expensive, and more accurate (Humidity $0-100\\%$, Temp $-40$ to $125^\\circ C$). DHT22 also provides decimal resolution, whereas DHT11 usually only provides integer values.",
@@ -106,7 +119,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Temperature Sensor (DHT11/DHT22)'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-14",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "What is an Interrupt? Why is it useful in embedded systems like Arduino?",
         explanation: "An interrupt is a signal that tells the processor to stop its current task and handle a specific event immediately. It is useful for time-critical tasks, such as responding to a button press or a sensor trigger without constantly 'polling' the state in the `loop()`. Arduino UNO has two hardware interrupt pins (2 and 3).",
@@ -114,7 +128,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Arduino Board'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-15",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "Discuss the importance of the baud rate in serial communication.",
         explanation: "The baud rate is the speed at which data is transmitted over serial (in bits per second). Both the transmitter (Arduino) and receiver (Serial Monitor) must be set to the same baud rate; otherwise, the data will be interpreted incorrectly, resulting in garbled characters.",
@@ -122,7 +137,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Arduino Board'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-16",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "How does a passive IR (PIR) sensor differ from an active IR sensor?",
         explanation: "An active IR sensor emits its own IR light and looks for reflection. A passive IR (PIR) sensor does not emit any light; instead, it detects IR radiation (heat) emitted or reflected by objects (like humans) moving across its field of view.",
@@ -130,7 +146,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'IR Sensor'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-17",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "Explain the purpose of the 'AREF' pin on an Arduino.",
         explanation: "The AREF (Analog Reference) pin allows you to provide an external voltage reference for the ADC. By default, Arduino uses $5\\,V$. If you connect a $3.3\\,V$ supply to AREF and call `analogReference(EXTERNAL)`, the 1024 steps will be mapped to $0-3.3\\,V$, increasing measurement precision for low-voltage sensors.",
@@ -138,7 +155,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Arduino Board'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-18",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "Why is a resistor typically used in series with an LED when connecting to an Arduino pin?",
         explanation: "LEDs have very low internal resistance once they reach their forward voltage. Without a series resistor, the LED would draw excessive current from the Arduino pin, potentially burning out both the LED and the microcontroller's I/O pin. The resistor limits the current to a safe level (typically $20\\,mA$).",
@@ -146,7 +164,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Arduino Board'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-19",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "What is the 'I2C' communication protocol and which pins are used on the UNO?",
         explanation: "I2C (Inter-Integrated Circuit) is a multi-master, multi-slave serial protocol using two lines: SDA (Data) and SCL (Clock). On the Arduino UNO, these are located on pins A4 (SDA) and A5 (SCL). It allows connecting multiple sensors/displays to the same pins using unique addresses.",
@@ -154,7 +173,8 @@ export const ece249Unit2Subjective: QuizQuestion[] = [
         topic: 'Arduino Board'
     },
     {
-        unit: 2,
+        id: "ece249-s-u2-20",
+        unit:unit:unit: 2,
         type: 'subjective',
         question: "Discuss the limitations of the HC-SR04 ultrasonic sensor.",
         explanation: "1. It cannot detect objects with very soft surfaces (like cloth) that absorb sound. 2. It struggles with objects at sharp angles that reflect sound away. 3. It has a minimum range of about $2\\,cm$ and a maximum of $4\\,m$. 4. Measurements can be affected by ambient sound or echoes in confined spaces.",

@@ -25,7 +25,7 @@ const parseText = (text: string | undefined) => {
       return <InlineMath key={i} math={math} />;
     }
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="font-bold">{part.slice(2, -2)}</strong>;
+      return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
     }
     return <React.Fragment key={i}>{part}</React.Fragment>;
   });
@@ -40,9 +40,8 @@ const PEL130_STATIC_BANK = [
 
 // Expanded static bank to avoid empty quizzes if API fails
 const FALLBACK_QUESTIONS: QuizQuestion[] = [
-  { unit: 1, question: "Communication is a non-stop process.", options: ["True", "False", "Maybe", "Depends on context"], correctAnswer: 0, explanation: "Communication is continuous." },
-  { unit: 1, question: "Which is not a barrier to communication?", options: ["Noise", "Choice of medium", "Feedback", "Language"], correctAnswer: 2, explanation: "Feedback is a part of the process, not a barrier." },
-  // ... add more if needed
+  { id: "fallback-1", unit: 1, question: "Communication is a non-stop process.", options: ["True", "False", "Maybe", "Depends on context"], correctAnswer: 0, explanation: "Communication is continuous." },
+  { id: "fallback-2", unit: 1, question: "Which is not a barrier to communication?", options: ["Noise", "Choice of medium", "Feedback", "Language"], correctAnswer: 2, explanation: "Feedback is a part of the process, not a barrier." },
 ];
 
 interface SubjectWithSyllabus {
@@ -80,7 +79,46 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([]);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
 
+  const [solvedQuestionIds, setSolvedQuestionIds] = useState<Set<string>>(new Set());
+  const [isSavingAttempt, setIsSavingAttempt] = useState(false);
+  const [hasSavedAttempt, setHasSavedAttempt] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [pastAttempts, setPastAttempts] = useState<any[]>([]);
   const resultRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const solved = localStorage.getItem('quiz_solved_questions');
+    if (solved) {
+      setSolvedQuestionIds(new Set(JSON.parse(solved)));
+    }
+  }, []);
+
+  const saveSolvedQuestions = (ids: string[]) => {
+    const newSolved = new Set([...Array.from(solvedQuestionIds), ...ids]);
+    setSolvedQuestionIds(newSolved);
+    localStorage.setItem('quiz_solved_questions', JSON.stringify(Array.from(newSolved)));
+  };
+
+  useEffect(() => {
+    if (quizCompleted && quizQuestions.length > 0) {
+      const solvedIds: string[] = [];
+      quizQuestions.forEach((q, idx) => {
+        if (q.type === 'subjective') {
+          // If in practice mode and explanation was shown, or if they finished the quiz
+          // We'll mark subjective as solved if they at least saw the question at the end
+          solvedIds.push(q.id);
+        } else {
+          // Only mark MCQs as solved if they answered correctly
+          if (userAnswers[idx] === q.correctAnswer) {
+            solvedIds.push(q.id);
+          }
+        }
+      });
+      if (solvedIds.length > 0) {
+        saveSolvedQuestions(solvedIds);
+      }
+    }
+  }, [quizCompleted]);
 
   const availableUnitsForSubject = useMemo(() => {
     if (!selectedSubject) return [];
@@ -217,31 +255,26 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
       let availableMcqs = filterByUnits(subjectData.mcqs || []);
       let availableSubj = filterByUnits(subjectData.subjective || []);
 
+      // Filter out solved questions
+      const unsolvedMcqs = availableMcqs.filter(q => !solvedQuestionIds.has(q.id));
+      const unsolvedSubj = availableSubj.filter(q => !solvedQuestionIds.has(q.id));
+
+      // Use unsolved if available, otherwise reset or fallback
+      let poolMcq = unsolvedMcqs.length > 0 ? unsolvedMcqs : availableMcqs;
+      let poolSubj = unsolvedSubj.length > 0 ? unsolvedSubj : availableSubj;
+
       if (selectedDifficulties.length > 0) {
-        availableMcqs = availableMcqs.filter(q => selectedDifficulties.includes(q.difficulty || 'medium'));
-        availableSubj = availableSubj.filter(q => selectedDifficulties.includes(q.difficulty || 'medium'));
+        poolMcq = poolMcq.filter(q => selectedDifficulties.includes(q.difficulty || 'medium'));
+        poolSubj = poolSubj.filter(q => selectedDifficulties.includes(q.difficulty || 'medium'));
       }
       if (selectedTopics.length > 0) {
-        const unitsWithSpecificTopicsSelected = new Set<number>();
-        [...(subjectData.mcqs || []), ...(subjectData.subjective || [])].forEach(q => {
-          if (q.topic && selectedTopics.includes(q.topic)) {
-            unitsWithSpecificTopicsSelected.add(q.unit);
-          }
-        });
-
-        availableMcqs = availableMcqs.filter(q => {
-          if (!unitsWithSpecificTopicsSelected.has(q.unit)) return true;
-          return selectedTopics.includes(q.topic || '');
-        });
-        availableSubj = availableSubj.filter(q => {
-          if (!unitsWithSpecificTopicsSelected.has(q.unit)) return true;
-          return selectedTopics.includes(q.topic || '');
-        });
+        poolMcq = poolMcq.filter(q => q.topic && selectedTopics.includes(q.topic));
+        poolSubj = poolSubj.filter(q => q.topic && selectedTopics.includes(q.topic));
       }
 
       // Independent selection based on individual counts
-      const pickedMcq = [...availableMcqs].sort(() => 0.5 - Math.random()).slice(0, numMCQ);
-      const pickedSubj = [...availableSubj].sort(() => 0.5 - Math.random()).slice(0, numSubjective);
+      const pickedMcq = [...poolMcq].sort(() => 0.5 - Math.random()).slice(0, numMCQ);
+      const pickedSubj = [...poolSubj].sort(() => 0.5 - Math.random()).slice(0, numSubjective);
 
       finalSelection = [...pickedMcq, ...pickedSubj].sort(() => 0.5 - Math.random());
 
@@ -268,7 +301,15 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   };
 
   const startQuiz = (questions: QuizQuestion[], cached: boolean) => {
-    setQuizQuestions(questions);
+    // Ensure all questions have IDs (especially AI-generated ones)
+    const enriched = questions.map((q, idx) => {
+      if (q.id) return q;
+      // Deterministic ID based on question content to track repeats
+      const contentHash = q.question.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0);
+      return { ...q, id: `ai-${Math.abs(contentHash)}` };
+    });
+
+    setQuizQuestions(enriched);
     setIsCached(cached);
     setLoading(false);
     setCurrentQuestionIdx(0);
@@ -335,6 +376,52 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
       return negativeMarking ? acc - 0.25 : acc;
     }, 0);
   }, [userAnswers, quizQuestions, negativeMarking]);
+
+  const percentage = useMemo(() => quizQuestions.length > 0 ? (score / quizQuestions.length) * 100 : 0, [score, quizQuestions]);
+
+  const handleSaveAttempt = async () => {
+    if (!userProfile) {
+      showToast('Log in to save your results to your account', 'error');
+      return;
+    }
+
+    setIsSavingAttempt(true);
+    try {
+      const attemptData = {
+        subject: selectedSubject?.name || 'Quiz',
+        score,
+        total_questions: quizQuestions.length,
+        date: new Date().toISOString(),
+        is_cached: isCached,
+        selected_units: selectedUnits,
+        selected_difficulties: selectedDifficulties,
+        answers: userAnswers,
+        questions: quizQuestions,
+        percentage: Math.round(percentage),
+        duration: timerMinutes
+      };
+
+      await NexusServer.saveQuizAttempt(userProfile.id, attemptData);
+      setHasSavedAttempt(true);
+      showToast('Attempt saved successfully!', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to save attempt', 'error');
+    } finally {
+      setIsSavingAttempt(false);
+    }
+  };
+
+  const loadHistory = async () => {
+    if (!userProfile) return;
+    try {
+      const attempts = await NexusServer.fetchQuizAttempts(userProfile.id);
+      setPastAttempts(attempts);
+      setShowHistory(true);
+    } catch (err) {
+      showToast('Failed to load history', 'error');
+    }
+  };
 
   const unitAnalysis = useMemo(() => {
     if (!quizCompleted) return [];
@@ -421,10 +508,10 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
             <div className="glass-panel p-10 md:p-12 rounded-[48px] shadow-2xl bg-white/80 dark:bg-slate-900/50 border-slate-200 dark:border-white/5 relative">
               <div className="space-y-10">
                 <div className="flex items-center flex-wrap gap-3">
-                  <span className="bg-orange-600/10 dark:bg-orange-600/20 text-orange-600 dark:text-orange-500 px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest">Question {sectionInfo.mapping[currentQuestionIdx]}</span>
-                  <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest">Unit {q.unit}</span>
+                  <span className="bg-orange-600/10 dark:bg-orange-600/20 text-orange-600 dark:text-orange-500 px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest">Question {sectionInfo.mapping[currentQuestionIdx]}</span>
+                  <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest">Unit {q.unit}</span>
                   {q.difficulty && (
-                    <span className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest ${
+                    <span className={`px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest ${
                       q.difficulty === 'easy' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
                       q.difficulty === 'medium' ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' :
                       'bg-red-500/10 text-red-600 dark:text-red-400'
@@ -433,15 +520,15 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                     </span>
                   )}
                   {q.topic && (
-                    <span className="bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 px-4 py-1.5 rounded-xl text-[10px] font-bold tracking-widest">
+                    <span className="bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 px-4 py-1.5 rounded-xl text-[10px] font-semibold tracking-widest">
                       {q.topic}
                     </span>
                   )}
                 </div>
 
-                <h3 className="text-lg md:text-xl font-semibold leading-relaxed text-slate-900 dark:text-white">
-                  {parseText(q.question)}
-                </h3>
+                <p className="text-lg md:text-xl font-light leading-relaxed text-slate-800 dark:text-slate-100">
+                  Q) {parseText(q.question)}
+                </p>
 
                 {q.type === 'subjective' ? (
                   <div className="space-y-6">
@@ -458,7 +545,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                         <div className="p-10 rounded-[32px] border border-orange-500/10 bg-orange-600/[0.02] flex flex-col items-center gap-4 text-center">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-orange-500/30"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                           <div>
-                            <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Test Mode Active</p>
+                            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Test Mode Active</p>
                             <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Model solutions will be available in the final report.</p>
                           </div>
                         </div>
@@ -467,7 +554,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                       <div className="p-8 bg-emerald-500/5 border border-emerald-500/20 dark:border-emerald-500/10 rounded-[32px] animate-in fade-in slide-in-from-top-4 duration-500 space-y-4">
                         <div className="flex items-center gap-3">
                           <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                          <h4 className="text-xs font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-widest">Model Solution</h4>
+                          <h4 className="text-xs font-semibold text-emerald-600 dark:text-emerald-500 uppercase tracking-widest">Model Solution</h4>
                         </div>
                         <div className="text-base font-medium text-slate-700 dark:text-slate-300 leading-relaxed border-l-4 border-emerald-500/30 dark:border-emerald-500/30 pl-6">{parseText(q.explanation)}</div>
                       </div>
@@ -495,7 +582,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                             {isSelected && <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_#ea580c]" />}
                           </div>
                           <span className="font-medium text-[13px] md:text-sm tracking-tight flex items-center gap-2">
-                            <span className="text-slate-400 dark:text-slate-500 font-bold">{String.fromCharCode(65 + i)}.</span>
+                            <span className="text-slate-400 dark:text-slate-500 font-medium">{String.fromCharCode(65 + i)}.</span>
                             <span className="flex-1">{parseText(opt)}</span>
                           </span>
                         </button>
@@ -504,7 +591,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
 
                     {isShowingExplanation && (
                       <div className="p-8 mt-6 bg-orange-600/[0.03] dark:bg-orange-600/5 border border-orange-500/20 dark:border-orange-600/10 rounded-[32px] animate-in fade-in slide-in-from-top-4 duration-500">
-                        <p className="text-[10px] font-bold text-orange-600 uppercase tracking-widest mb-3">Expert Insights</p>
+                        <p className="text-[10px] font-semibold text-orange-600 uppercase tracking-widest mb-3">Expert Insights</p>
                         <div className="text-base font-medium text-slate-600 dark:text-slate-400 leading-relaxed italic border-l-2 border-orange-500/30 dark:border-orange-600/30 pl-6">{parseText(q.explanation)}</div>
                       </div>
                     )}
@@ -546,7 +633,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <div className={`w-1 h-4 rounded-full ${!isSubjectiveSection ? 'bg-orange-600 shadow-[0_0_8px_#ea580c]' : 'bg-slate-300 dark:bg-slate-700'}`} />
-                  <span className={`text-[13px] font-bold uppercase tracking-widest ${!isSubjectiveSection ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-600'}`}>Section 1: Objective</span>
+                  <span className={`text-[13px] font-semibold uppercase tracking-widest ${!isSubjectiveSection ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-600'}`}>Section 1: Objective</span>
                 </div>
                 <div className="grid grid-cols-5 gap-2.5">
                   {quizQuestions.map((q, idx) => {
@@ -568,7 +655,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                           setIsShowingExplanation(false);
                           setVisitedQuestions(prev => new Set(prev).add(idx));
                         }}
-                        className={`h-11 w-full rounded-xl flex items-center justify-center text-xs font-bold transition-all border-2 ${isCurrent ? 'border-orange-400' : 'border-transparent'} ${bgColor}`}
+                        className={`h-11 w-full rounded-xl flex items-center justify-center text-xs font-semibold transition-all border-2 ${isCurrent ? 'border-orange-400' : 'border-transparent'} ${bgColor}`}
                       >
                         {sectionInfo.mapping[idx]}
                       </button>
@@ -582,7 +669,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <div className={`w-1 h-4 rounded-full ${isSubjectiveSection ? 'bg-orange-600 shadow-[0_0_8px_#ea580c]' : 'bg-slate-300 dark:bg-slate-700'}`} />
-                    <span className={`text-[13px] font-bold uppercase tracking-widest ${isSubjectiveSection ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-600'}`}>Section 2: Subjective</span>
+                    <span className={`text-[13px] font-semibold uppercase tracking-widest ${isSubjectiveSection ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-600'}`}>Section 2: Subjective</span>
                   </div>
                   <div className="grid grid-cols-5 gap-2.5">
                     {quizQuestions.map((q, idx) => {
@@ -717,6 +804,24 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
 
             <div className="pt-6 border-t border-slate-200 dark:border-white/10 flex flex-wrap gap-4">
               <button
+                onClick={handleSaveAttempt}
+                disabled={isSavingAttempt || hasSavedAttempt}
+                className={`flex-1 min-w-[140px] px-6 py-4 rounded-2xl text-sm font-semibold shadow-xl transition-all flex items-center justify-center gap-2 border-none ${
+                   hasSavedAttempt 
+                   ? 'bg-emerald-500 text-white opacity-80 cursor-default' 
+                   : 'bg-emerald-600 hover:bg-emerald-500 text-white active:scale-[0.98]'
+                }`}
+              >
+                {isSavingAttempt ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : hasSavedAttempt ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M20 6L9 17l-5-5"/></svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
+                )}
+                {hasSavedAttempt ? 'Saved to Account' : 'Save to Account'}
+              </button>
+              <button
                 onClick={handleGenerate}
                 className="flex-1 min-w-[140px] px-6 py-4 bg-orange-600 text-white rounded-2xl text-sm font-semibold shadow-[0_8px_20px_-8px_#ea580c] hover:shadow-[0_8px_25px_-5px_#ea580c] hover:-translate-y-0.5 active:translate-y-0 transition-all border-none flex items-center justify-center gap-2"
               >
@@ -724,7 +829,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                 Re-take Quiz
               </button>
               <button
-                onClick={() => { setQuizQuestions([]); setQuizCompleted(false); setSelectedSubject(null); }}
+                onClick={() => { setQuizQuestions([]); setQuizCompleted(false); setSelectedSubject(null); setHasSavedAttempt(false); }}
                 className="flex-1 min-w-[140px] px-6 py-4 glass-panel bg-white/50 dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-2xl text-sm font-semibold border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-white/10 transition-all flex items-center justify-center gap-2"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
@@ -919,6 +1024,19 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                         Coming soon
                       </span>
                     )}
+                    {selectedSubject && isAvailable && (
+                      <div className="absolute top-3 right-3 flex items-center gap-1">
+                         <div className="flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                         <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 tabular-nums">
+                           {(() => {
+                             const data = QUIZTAKER_DATA[selectedSubject.name];
+                             const allInUnit = [...(data?.mcqs || []), ...(data?.subjective || [])].filter(q => q.unit === u);
+                             const solvedCount = allInUnit.filter(q => solvedQuestionIds.has(q.id)).length;
+                             return `${solvedCount}/${allInUnit.length}`;
+                           })()}
+                         </span>
+                      </div>
+                    )}
                     <span className={`text-2xl font-bold tracking-tight ${isSelected ? 'text-orange-600' : isAvailable ? 'text-slate-400 dark:text-slate-600' : 'text-slate-400 dark:text-slate-600'}`}>0{u}</span>
                     <span className={`text-[10px] font-medium mt-1 ${isSelected ? 'text-orange-500' : 'text-slate-500 opacity-60'}`}>Unit {u}</span>
                   </button>
@@ -1013,7 +1131,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                     return (
                       <div key={unit} className="space-y-3">
                         <div className="flex items-center gap-2">
-                          <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Unit {unit}</h4>
+                          <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Unit {unit}</h4>
                           <div className="h-px bg-slate-200 dark:bg-white/5 flex-grow"></div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -1073,8 +1191,8 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M12 2v20M2 12h20" className="rotate-45" /></svg>
                         </div>
                         <div>
-                          <p className="text-[13px] font-bold text-slate-900 dark:text-slate-100">Negative Marking</p>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest opacity-60">Deducts 1/4 mark / error</p>
+                          <p className="text-[13px] font-semibold text-slate-900 dark:text-slate-100">Negative Marking</p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-widest opacity-60">Deducts 1/4 mark / error</p>
                         </div>
                       </div>
                       <div className={`w-11 h-6 rounded-full relative transition-colors ${negativeMarking ? 'bg-orange-600' : 'bg-slate-200 dark:bg-slate-800'}`}>
@@ -1091,8 +1209,8 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
                         </div>
                         <div>
-                          <p className="text-[13px] font-bold text-slate-900 dark:text-slate-100">Practice Mode</p>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest opacity-60">Instant Answer Validation</p>
+                          <p className="text-[13px] font-semibold text-slate-900 dark:text-slate-100">Practice Mode</p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-widest opacity-60">Instant Answer Validation</p>
                         </div>
                       </div>
                       <div className={`w-11 h-6 rounded-full relative transition-colors ${isPracticeMode ? 'bg-orange-600' : 'bg-slate-200 dark:bg-slate-800'}`}>
@@ -1104,7 +1222,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
               <button
                 onClick={handleGenerate}
                 disabled={loading}
-                className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl font-bold text-sm tracking-tight shadow-xl shadow-orange-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 border-none"
+                className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl font-semibold text-sm tracking-tight shadow-xl shadow-orange-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 border-none"
               >
                 {loading ? 'Processing...' : 'Generate My Quiz'}
               </button>

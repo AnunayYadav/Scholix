@@ -2,6 +2,7 @@ import { QuizQuestion } from '../../../types.ts';
 
 export const phy110Unit1MCQs: QuizQuestion[] = [
     {
+        id: "phy110-u1-1",
         unit: 1,
         topic: 'Scalar and Vector Fields',
         difficulty: 'easy',
@@ -11,6 +12,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "A scalar field, like temperature or pressure, associates a scalar value with every point in space."
     },
     {
+        id: "phy110-u1-2",
         unit: 1,
         topic: 'Scalar and Vector Fields',
         difficulty: 'easy',
@@ -20,6 +22,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "A vector field associates a vector (magnitude and direction) with every point in space, like the magnetic or electric field."
     },
     {
+        id: "phy110-u1-3",
         unit: 1,
         topic: 'Gradient',
         difficulty: 'medium',
@@ -29,6 +32,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "The gradient (∇V) of a scalar field V is a vector that points in the direction of the maximum rate of increase of V."
     },
     {
+        id: "phy110-u1-4",
         unit: 1,
         topic: 'Divergence',
         difficulty: 'medium',
@@ -38,6 +42,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "Divergence measures the net outward flow of a vector field from a point; positive means a source, negative means a sink."
     },
     {
+        id: "phy110-u1-5",
         unit: 1,
         topic: 'Curl',
         difficulty: 'medium',
@@ -47,6 +52,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "Curl is a vector that describes the infinitesimal rotation of a vector field at a given point."
     },
     {
+        id: "phy110-u1-6",
         unit: 1,
         topic: 'Gauss Theorem',
         difficulty: 'hard',
@@ -56,6 +62,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "Gauss's theorem states that the surface integral of a vector field over a closed surface is equal to the volume integral of its divergence over the enclosed volume."
     },
     {
+        id: "phy110-u1-7",
         unit: 1,
         topic: 'Stokes Theorem',
         difficulty: 'hard',
@@ -65,6 +72,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "Stokes's theorem states that the line integral of a vector field around a closed loop is equal to the surface integral of its curl over a surface bounded by the loop."
     },
     {
+        id: "phy110-u1-8",
         unit: 1,
         topic: 'Maxwell Equations',
         difficulty: 'easy',
@@ -74,6 +82,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "Maxwell's theory is encapsulated in four equations: Gauss's Law for Electricity, Gauss's Law for Magnetism, Faraday's Law, and Ampere-Maxwell Law."
     },
     {
+        id: "phy110-u1-9",
         unit: 1,
         topic: 'Gauss Law for Electricity',
         difficulty: 'medium',
@@ -83,6 +92,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "Gauss's law in differential form states that the divergence of electric displacement (D) is equal to the volume charge density (ρ)."
     },
     {
+        id: "phy110-u1-10",
         unit: 1,
         topic: 'Gauss Law for Magnetism',
         difficulty: 'medium',
@@ -92,6 +102,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "The divergence of the magnetic field is always zero, which physically means there are no isolated magnetic poles (monopoles)."
     },
     {
+        id: "phy110-u1-11",
         unit: 1,
         topic: 'Displacement Current',
         difficulty: 'hard',
@@ -101,6 +112,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "Maxwell added the displacement current term (∂D/∂t) to Ampere's law to make it consistent with the continuity equation for time-varying fields."
     },
     {
+        id: "phy110-u1-12",
         unit: 1,
         topic: 'Physical Significance',
         difficulty: 'medium',
@@ -110,6 +122,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "Faraday's law describes how a changing magnetic field produces a circulating electric field."
     },
     {
+        id: "phy110-u1-13",
         unit: 1,
         topic: 'Ampere Circuital Law',
         difficulty: 'medium',
@@ -119,6 +132,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "The original form of Ampere's Law does not account for time-varying electric fields and is only valid for magnetostatics (steady currents)."
     },
     {
+        id: "phy110-u1-14",
         unit: 1,
         topic: 'Continuity Equation',
         difficulty: 'hard',
@@ -128,6 +142,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "The continuity equation expresses the fundamental physical law that electric charge can be neither created nor destroyed."
     },
     {
+        id: "phy110-u1-15",
         unit: 1,
         topic: 'Poisson Equation',
         difficulty: 'hard',
@@ -137,6 +152,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "The Poisson equation relates the second spatial derivative of the potential (Laplacian) to the charge density."
     },
     {
+        id: "phy110-u1-16",
         unit: 1,
         topic: 'Laplace Equation',
         difficulty: 'medium',
@@ -146,6 +162,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "When there is no charge in a region, the electric potential satisfies the Laplace equation."
     },
     {
+        id: "phy110-u1-17",
         unit: 1,
         topic: 'Maxwell Equations',
         difficulty: 'easy',
@@ -155,6 +172,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "∇·B = 0 states that magnetic lines of force are continuous loops, hence no isolated poles."
     },
     {
+        id: "phy110-u1-18",
         unit: 1,
         topic: 'Concept of Curl',
         difficulty: 'easy',
@@ -164,6 +182,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "An irrotational field has zero curl, meaning there is no local rotation in the field."
     },
     {
+        id: "phy110-u1-19",
         unit: 1,
         topic: 'Concept of Divergence',
         difficulty: 'easy',
@@ -173,6 +192,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         explanation: "A solenoidal field has no sources or sinks, meaning the net flux through any closed surface is zero."
     },
     {
+        id: "phy110-u1-20",
         unit: 1,
         topic: 'Maxwell displacement current',
         difficulty: 'medium',
@@ -181,84 +201,84 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Maxwell defined displacement current as the rate of change of the electric displacement field."
     },
-    { unit: 1, topic: 'Scalar and Vector Fields', difficulty: 'easy', question: "Temperature distribution in a room is an example of a ___ field.", options: ["Scalar", "Vector", "Tensor", "Stationary"], correctAnswer: 0, explanation: "Temperature only has magnitude at each point." },
-    { unit: 1, topic: 'Scalar and Vector Fields', difficulty: 'easy', question: "Wind velocity in the atmosphere is an example of a ___ field.", options: ["Vector", "Scalar", "Uniform", "Constant"], correctAnswer: 0, explanation: "Velocity has both magnitude and direction." },
-    { unit: 1, topic: 'Gradient', difficulty: 'medium', question: "The direction of the gradient of a scalar field is ___ to the level surfaces.", options: ["Normal (Perpendicular)", "Parallel", "Tangential", "Random"], correctAnswer: 0, explanation: "∇V is always perpendicular to surfaces of constant V." },
-    { unit: 1, topic: 'Gradient', difficulty: 'hard', question: "The magnitude of the gradient represents the ___ of the scalar field.", options: ["Maximum rate of change", "Minimum rate of change", "Average value", "Total flux"], correctAnswer: 0, explanation: "It shows how steep the change is." },
-    { unit: 1, topic: 'Divergence', difficulty: 'medium', question: "A field with positive divergence at a point indicates a ___.", options: ["Source", "Sink", "Rotational center", "Vacuum"], correctAnswer: 0, explanation: "Field lines are 'originating' from that point." },
-    { unit: 1, topic: 'Divergence', difficulty: 'medium', question: "A field with negative divergence at a point indicates a ___.", options: ["Sink", "Source", "Vortex", "Boundary"], correctAnswer: 0, explanation: "Field lines are 'converging' into that point." },
-    { unit: 1, topic: 'Curl', difficulty: 'hard', question: "The curl of the gradient of any scalar field (∇×∇V) is always ___.", options: ["Zero", "Vector V", "Gradient V", "One"], correctAnswer: 0, explanation: "Mathematical identity: curl of a gradient is always zero." },
-    { unit: 1, topic: 'Divergence', difficulty: 'hard', question: "The divergence of the curl of any vector field (∇·(∇×A)) is always ___.", options: ["Zero", "Vector A", "One", "A constant"], correctAnswer: 0, explanation: "Mathematical identity: divergence of a curl is always zero." },
-    { unit: 1, topic: 'Gauss Theorem', difficulty: 'medium', question: "Gauss's theorem is used to convert ___ integrals to volume integrals.", options: ["Surface", "Line", "Double", "Scalar"], correctAnswer: 0, explanation: "It links flux through a boundary to properties inside the volume." },
-    { unit: 1, topic: 'Stokes Theorem', difficulty: 'medium', question: "Stokes's theorem is used to convert ___ integrals to surface integrals.", options: ["Line", "Volume", "Triple", "Tensor"], correctAnswer: 0, explanation: "It links circulation around a loop to flux of curl through a surface." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "Faraday's Law in integral form relates EMF to the rate of change of ___.", options: ["Magnetic Flux", "Electric Flux", "Charge", "Resistance"], correctAnswer: 0, explanation: "EMF = -dΦm/dt." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'hard', question: "Which equation represents the Ampere-Maxwell Law in differential form?", options: ["∇×H = J + ∂D/∂t", "∇×E = -∂B/∂t", "∇·D = ρ", "∇·B = 0"], correctAnswer: 0, explanation: "It includes the conduction current J and displacement current." },
-    { unit: 1, topic: 'Displacement Current', difficulty: 'medium', question: "Displacement current exists primarily in ___.", options: ["Dielectrics (Insulators)", "Conductors", "Both", "Metals only"], correctAnswer: 0, explanation: "It accounts for changing electric fields in non-conducting regions." },
-    { unit: 1, topic: 'Ampere Law', difficulty: 'hard', question: "Maxwell's correction to Ampere's Law was necessary to satisfy ___.", options: ["Continuity Equation", "Ohm's Law", "Newton's Laws", "Kepler's Laws"], correctAnswer: 0, explanation: "Without it, the law would violate charge conservation in time-varying cases." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "In vacuum, the charge density ρ and current density J are both ___.", options: ["Zero", "Infinite", "Constant", "Dependent on time"], correctAnswer: 0, explanation: "Free space contains no charges or currents." },
-    { unit: 1, topic: 'Electromagnetic Waves', difficulty: 'hard', question: "Maxwell's equations predict that EM waves propagate at the speed ___.", options: ["1/√(με)", "√(με)", "μ/ε", "ε/μ"], correctAnswer: 0, explanation: "Speed depends on the permeability and permittivity of the medium." },
-    { unit: 1, topic: 'Coulomb Law', difficulty: 'easy', question: "Gauss's Law for electricity is essentially a general form of ___.", options: ["Coulomb's Law", "Biot-Savart Law", "Ohm's Law", "Lenz Law"], correctAnswer: 0, explanation: "It describes the relationship between charge and electric field." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "Which equation shows that time-varying electric fields produce magnetic fields?", options: ["Ampere-Maxwell Law", "Faraday's Law", "Gauss's Law", "Poisson's Equation"], correctAnswer: 0, explanation: "The ∂D/∂t term creates a circulating magnetic field H." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "Faraday's Law shows that magnetic fields can be produced by ___.", options: ["Time-varying magnetic fields", "Static charges", "Moving rocks", "Nothing"], correctAnswer: 0, explanation: "Specifically, the change in B field induces an E field." },
-    { unit: 1, topic: 'Continuity Equation', difficulty: 'hard', question: "If a current entering a region is not equal to current leaving, the ___ must be changing.", options: ["Charge density", "Temperature", "Wavelength", "Frequency"], correctAnswer: 0, explanation: "Charge must accumulate or deplete according to ∇·J = -∂ρ/∂t." },
-    { unit: 1, topic: 'Poisson Equation', difficulty: 'medium', question: "Poisson's equation is a ___ order partial differential equation.", options: ["Second", "First", "Third", "Fourth"], correctAnswer: 0, explanation: "It involves the Laplacian operator ∇²." },
-    { unit: 1, topic: 'Lapace Equation', difficulty: 'medium', question: "The Laplace equation is a special case of Poisson's equation where ___.", options: ["ρ = 0", "V = 0", "E = 0", "B = 0"], correctAnswer: 0, explanation: "It describes potentials in empty space." },
-    { unit: 1, topic: 'Scalar Potential', difficulty: 'hard', question: "The existence of a scalar potential V (E = -∇V) is guaranteed for ___ fields.", options: ["Conservative (Irrotational)", "Divergent", "Unsteady", "Complex"], correctAnswer: 0, explanation: "If ∇×E = 0, E can be written as the gradient of a scalar." },
-    { unit: 1, topic: 'Vector Potential', difficulty: 'hard', question: "Since ∇·B = 0, the magnetic field can be expressed as ___.", options: ["B = ∇×A", "B = ∇V", "B = ∇·A", "B = -∇V"], correctAnswer: 0, explanation: "A is the magnetic vector potential." },
-    { unit: 1, topic: 'Constitutive Relations', difficulty: 'medium', question: "For a linear isotropic medium, D is related to E by?", options: ["D = εE", "D = ε/E", "D = E + P", "D = ε/P"], correctAnswer: 0, explanation: "ε is the permittivity of the medium." },
-    { unit: 1, topic: 'Constitutive Relations', difficulty: 'medium', question: "For a linear isotropic medium, B is related to H by?", options: ["B = μH", "B = μ/H", "B = H + M", "B = μM"], correctAnswer: 0, explanation: "μ is the permeability of the medium." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'easy', question: "Which scientist's name is NOT associated with a Maxwell equation?", options: ["Newton", "Gauss", "Ampere", "Faraday"], correctAnswer: 0, explanation: "Newton's laws are for mechanics, not electromagnetism." },
-    { unit: 1, topic: 'Physical Significance', difficulty: 'medium', question: "The physical significance of ∇·B = 0 is that magnetic lines of force are ___.", options: ["Continuous closed loops", "Straight lines", "Random", "Parallel"], correctAnswer: 0, explanation: "They have no beginning or end." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'hard', question: "In integral form, Gauss's law for magnetism states that total magnetic flux through a closed surface is ___.", options: ["Zero", "μ0 * I", "Q / ε0", "Constant"], correctAnswer: 0, explanation: "Φm = ∮ B·dS = 0." },
-    { unit: 1, topic: 'Ampere Law', difficulty: 'easy', question: "The unit of current density J is ___.", options: ["Ampere / Meter²", "Ampere / Meter", "Ampere", "Volt / Meter"], correctAnswer: 0, explanation: "Charge flow per unit area per unit time." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "A static charge produces only an ___ field.", options: ["Electric", "Magnetic", "Gravitational", "Scalar"], correctAnswer: 0, explanation: "Steady magnetic fields require moving charges (currents)." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "A steady current produces only a ___ field.", options: ["Magnetic", "Electric", "Nuclear", "Both"], correctAnswer: 0, explanation: "In the absence of net charge, only magnetism is produced by steady flow." },
-    { unit: 1, topic: 'Divergence', difficulty: 'medium', question: "∇·v = 0 for an incompressible fluid means the ___ is zero.", options: ["Net flow rate", "Speed", "Pressure", "Temperature"], correctAnswer: 0, explanation: "The amount flowing in equals amount flowing out." },
-    { unit: 1, topic: 'Curl', difficulty: 'hard', question: "If the curl of velocity is non-zero, the fluid is ___.", options: ["Rotational (Eddies exist)", "Stationary", "Laminar", "Dry"], correctAnswer: 0, explanation: "Vorticity exists in the fluid." },
-    { unit: 1, topic: 'Vector Fields', difficulty: 'easy', question: "The Earth's gravitational field is a ___ field.", options: ["Vector", "Scalar", "Periodic", "Constant"], correctAnswer: 0, explanation: "Gravity has a specific pull direction at every point." },
-    { unit: 1, topic: 'Gradient', difficulty: 'easy', question: "Symbol for the gradient operator is ___.", options: ["∇ (Del / Nabla)", "Δ (Delta)", "Σ (Sigma)", "Π (Pi)"], correctAnswer: 0, explanation: "∇ represents vector differentiation." },
-    { unit: 1, topic: 'Poisson Equation', difficulty: 'hard', question: "Poisson's equation is derived by combining Gauss's law with ___.", options: ["E = -∇V", "∇×E = 0", "F = qE", "V = IR"], correctAnswer: 0, explanation: "∇·E = ρ/ε -> ∇·(-∇V) = ρ/ε -> ∇²V = -ρ/ε." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "The term ∂B/∂t in Maxwell's equations represents ___.", options: ["Faraday's induction", "Displacement current", "Charge density", "Ohm's induction"], correctAnswer: 0, explanation: "It describes the coupling between changing B and induced E." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'hard', question: "Continuity equation in magnetostatics implies that ∇·J = ___.", options: ["0", "ρ", "∂ρ/∂t", "1"], correctAnswer: 0, explanation: "For steady currents, there is no accumulation of charge over time." },
-    { unit: 1, topic: 'Displacement Current', difficulty: 'medium', question: "Across the plates of a capacitor being charged, the current is ___ current.", options: ["Displacement", "Conduction", "Eddy", "Direct"], correctAnswer: 0, explanation: "No physical charges cross the gap, but the field changing acts like a current." },
-    { unit: 1, topic: 'Vector Algebra', difficulty: 'easy', question: "The dot product of two vectors results in a ___.", options: ["Scalar", "Vector", "Matrix", "Angle"], correctAnswer: 0, explanation: "A·B = |A||B|cosθ." },
-    { unit: 1, topic: 'Vector Algebra', difficulty: 'easy', question: "The cross product of two vectors results in a ___.", options: ["Vector", "Scalar", "Unit", "Point"], correctAnswer: 0, explanation: "A×B = |A||B|sinθ n." },
-    { unit: 1, topic: 'Gradient', difficulty: 'medium', question: "The gradient of r (where r = √[x²+y²+z²]) is ___.", options: ["r̂ (Unit vector r)", "r", "1/r", "0"], correctAnswer: 0, explanation: "It points radially outward from the origin." },
-    { unit: 1, topic: 'Divergence', difficulty: 'hard', question: "Divergence of the position vector r (x i + y j + z k) is ___.", options: ["3", "1", "0", "r"], correctAnswer: 0, explanation: "∂x/∂x + ∂y/∂y + ∂z/∂z = 1 + 1 + 1 = 3." },
-    { unit: 1, topic: 'Curl', difficulty: 'hard', question: "Curl of the position vector r is ___.", options: ["0", "3", "r̂", "1"], correctAnswer: 0, explanation: "Angular-like components are zero for purely radial vectors." },
-    { unit: 1, topic: 'Vector Operations', difficulty: 'hard', question: "∇²f is called the ___ operator.", options: ["Laplacian", "Hamiltonian", "Gaussian", "Stokesian"], correctAnswer: 0, explanation: "Second order differential operator." },
-    { unit: 1, topic: 'Gauss Law', difficulty: 'medium', question: "Total electric flux through a closed surface depends only on ___.", options: ["Enclosed charge", "Surface area", "External charge", "Shape"], correctAnswer: 0, explanation: "Φe = Q_encl / ε0 regardless of geometry." },
-    { unit: 1, topic: 'Lorentz Force', difficulty: 'easy', question: "The total force F = q(E + v×B) is known as the ___ force.", options: ["Lorentz", "Coulomb", "Ampere", "Newton"], correctAnswer: 0, explanation: "Describes force on a moving charge in EM fields." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "In the absence of time variation, Maxwell's equations decouple into ___.", options: ["Electrostatics and Magnetostatics", "Gravity and Nuclear", "Waves and Particles", "None"], correctAnswer: 0, explanation: "Electricity and magnetism become independent." },
-    { unit: 1, topic: 'Boundary Conditions', difficulty: 'hard', question: "Maxwell equations lead to ___ at the interface of two media.", options: ["Boundary conditions", "Wave packets", "Quarks", "Chaos"], correctAnswer: 0, explanation: "Required for solving field problems across different materials." },
-    { unit: 1, topic: 'Vector field', difficulty: 'easy', question: "Field lines are ___ to a vector field at every point.", options: ["Tangent", "Normal", "Opposite", "Circular"], correctAnswer: 0, explanation: "They represent the direction of the vector." },
-    { unit: 1, topic: 'Gauss Law', difficulty: 'medium', question: "Integral form of ∇·B = 0 is?", options: ["∮ B·dS = 0", "∮ B·dl = 0", "∫ B dV = 0", "None"], correctAnswer: 0, explanation: "Surface integral over closed surface." },
-    { unit: 1, topic: 'Faraday Law', difficulty: 'medium', question: "Integral form of ∇×E = -∂B/∂t is?", options: ["∮ E·dl = -dΦm/dt", "∮ E·dl = 0", "∮ E·dS = Q", "None"], correctAnswer: 0, explanation: "Line integral of E is EMF." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'hard', question: "Physical significance of ∇·D = ρ is that electric charge is the ___ of the D field.", options: ["Source", "Sink", "Rotator", "Wave"], correctAnswer: 0, explanation: "Specifically, ρ is the source density." },
-    { unit: 1, topic: 'Ampere Law', difficulty: 'medium', question: "The integral form of ∇×H = J + ∂D/∂t involves a ___ integral and a ___ integral.", options: ["Line, Surface", "Volume, Surface", "Line, Volume", "None"], correctAnswer: 0, explanation: "∮ H·dl = I_cond + I_disp." },
-    { unit: 1, topic: 'Electromagnetics', difficulty: 'hard', question: "Wave equation for E in vacuum is?", options: ["∇²E - (1/c²)∂²E/∂t² = 0", "∇²E = 0", "∇·E = 0", "None"], correctAnswer: 0, explanation: "Derived from Maxwell's Equations." },
-    { unit: 1, topic: 'Vector Calculus', difficulty: 'medium', question: "Del operator ∇ is a ___ operator.", options: ["Vector", "Scalar", "Constant", "Complex"], correctAnswer: 0, explanation: "It has component directions (i, j, k)." },
-    { unit: 1, topic: 'Divergence', difficulty: 'easy', question: "Divergence of a vector field is a ___ result.", options: ["Scalar", "Vector", "Zero", "Tensor"], correctAnswer: 0, explanation: "Like the dot product." },
-    { unit: 1, topic: 'Curl', difficulty: 'easy', question: "Curl of a vector field is a ___ result.", options: ["Vector", "Scalar", "Unit", "Number"], correctAnswer: 0, explanation: "Like the cross product." },
-    { unit: 1, topic: 'Potential', difficulty: 'medium', question: "Potential V is a ___ field.", options: ["Scalar", "Vector", "Rotating", "Flux"], correctAnswer: 0, explanation: "Assigns voltage values." },
-    { unit: 1, topic: 'History', difficulty: 'easy', question: "Maxwell unified electricity, magnetism, and ___.", options: ["Light", "Gravity", "Sound", "Wind"], correctAnswer: 0, explanation: "He showed light is an EM wave." },
-    { unit: 1, topic: 'Continuity', difficulty: 'hard', question: "Net outflow of current from a volume equals ___.", options: ["Rate of decrease of charge inside", "Rate of increase", "Constant current", "Zero"], correctAnswer: 0, explanation: "Conservation of charge." },
-    { unit: 1, topic: 'Vector Identity', difficulty: 'hard', question: "∇×(∇×A) = ?", options: ["∇(∇·A) - ∇²A", "0", "∇²A", "None"], correctAnswer: 0, explanation: "Important for deriving wave equations." },
-    { unit: 1, topic: 'Electric field', difficulty: 'easy', question: "Direction of E for positive point charge is ___.", options: ["Radially outward", "Radially inward", "Tangent", "Circular"], correctAnswer: 0, explanation: "Repels other positive charges." },
-    { unit: 1, topic: 'Magnetic field', difficulty: 'easy', question: "Magnetic field lines of a wire are ___.", options: ["Concentric circles", "Straight lines", "Random", "Ellipses"], correctAnswer: 0, explanation: "According to right-hand rule." },
-    { unit: 1, topic: 'Laplacian', difficulty: 'medium', question: "Laplacian of a scalar field is a ___.", options: ["Scalar", "Vector", "Zero", "Constant"], correctAnswer: 0, explanation: "∇·(∇f)." },
-    { unit: 1, topic: 'Laplacian', difficulty: 'medium', question: "Laplacian of a vector field is a ___.", options: ["Vector", "Scalar", "One", "Zero"], correctAnswer: 0, explanation: "Defined component-wise." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'easy', question: "Which equation represents Gauss's law for electricity?", options: ["∇·D = ρ", "∇·B = 0", "∇×E = 0", "None"], correctAnswer: 0, explanation: "Connects field to charge source." },
-    { unit: 1, topic: 'Physical significance', difficulty: 'medium', question: "What does ∇×E = -∂B/dt imply about E fields in presence of time-varying B?", options: ["Non-conservative", "Conservative", "Scalar", "Vanishing"], correctAnswer: 0, explanation: "Circulation is non-zero, so work done along closed path is non-zero." },
-    { unit: 1, topic: 'Displacement Current', difficulty: 'hard', question: "Dimension of displacement current is same as ___ current.", options: ["Conduction", "Voltage", "Charge", "Inertia"], correctAnswer: 0, explanation: "Both measured in Amperes." },
-    { unit: 1, topic: 'Poisson Equation', difficulty: 'medium', question: "Sign of ρ/ε in ∇²V equation?", options: ["Negative (-ρ/ε)", "Positive", "Depends", "None"], correctAnswer: 0, explanation: "Convention for potential relation." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'hard', question: "Static Maxwell equation ∇×H = J comes from ___ Law.", options: ["Ampere's Circuital", "Gauss's", "Coulomb's", "Lenz's"], correctAnswer: 0, explanation: "Relates magnetism to current flow." },
-    { unit: 1, topic: 'Flux', difficulty: 'easy', question: "Magnetic flux (Φ) unit?", options: ["Weber", "Tesla", "Henry", "Farad"], correctAnswer: 0, explanation: "Total magnetic B through a surface." },
-    { unit: 1, topic: 'Gauss Theorem', difficulty: 'medium', question: "If divergence is zero everywhere, total flux through any closed surface is ___.", options: ["Zero", "Maximum", "Infinite", "1"], correctAnswer: 0, explanation: "Flux in = Flux out." },
-    { unit: 1, topic: 'Vector potential', difficulty: 'hard', question: "Magnetic vector potential A unit?", options: ["Weber / Meter", "Tesla", "Ampere", "Volt"], correctAnswer: 0, explanation: "Derived unit for B = ∇×A." },
-    { unit: 1, topic: 'Laplace Equation', difficulty: 'medium', question: "Solutions to Laplace equation are called ___ functions.", options: ["Harmonic", "Linear", "Analytic", "Periodic"], correctAnswer: 0, explanation: "Special properties like no local maxima." },
-    { unit: 1, topic: 'Constitutive Relations', difficulty: 'easy', question: "In vacuum, ε0 is called ___.", options: ["Permittivity of free space", "Permeability", "Charge", "Flux"], correctAnswer: 0, explanation: "Scales electrical response." },
-    { unit: 1, topic: 'Constitutive Relations', difficulty: 'easy', question: "In vacuum, μ0 is called ___.", options: ["Permeability of free space", "Permittivity", "Magnetization", "Dipole"], correctAnswer: 0, explanation: "Scales magnetic response." },
-    { unit: 1, topic: 'Maxwell Equations', difficulty: 'hard', question: "Concept of displacement current leads to the prediction of ___ waves.", options: ["Light", "Matter", "Sound", "Pressure"], correctAnswer: 0, explanation: "Allows self-sustaining EM propagation." },
-    { unit: 1, topic: 'Continuity Equation', difficulty: 'medium', question: "∇·J = 0 means the current is ___.", options: ["Steady", "Alternating", "Unstable", "Circular"], correctAnswer: 0, explanation: "Magnitude doesn't change with time." }
+    { id: "phy110-u1-21", unit: 1, topic: 'Scalar and Vector Fields', difficulty: 'easy', question: "Temperature distribution in a room is an example of a ___ field.", options: ["Scalar", "Vector", "Tensor", "Stationary"], correctAnswer: 0, explanation: "Temperature only has magnitude at each point." },
+    { id: "phy110-u1-22", unit: 1, topic: 'Scalar and Vector Fields', difficulty: 'easy', question: "Wind velocity in the atmosphere is an example of a ___ field.", options: ["Vector", "Scalar", "Uniform", "Constant"], correctAnswer: 0, explanation: "Velocity has both magnitude and direction." },
+    { id: "phy110-u1-23", unit: 1, topic: 'Gradient', difficulty: 'medium', question: "The direction of the gradient of a scalar field is ___ to the level surfaces.", options: ["Normal (Perpendicular)", "Parallel", "Tangential", "Random"], correctAnswer: 0, explanation: "∇V is always perpendicular to surfaces of constant V." },
+    { id: "phy110-u1-24", unit: 1, topic: 'Gradient', difficulty: 'hard', question: "The magnitude of the gradient represents the ___ of the scalar field.", options: ["Maximum rate of change", "Minimum rate of change", "Average value", "Total flux"], correctAnswer: 0, explanation: "It shows how steep the change is." },
+    { id: "phy110-u1-25", unit: 1, topic: 'Divergence', difficulty: 'medium', question: "A field with positive divergence at a point indicates a ___.", options: ["Source", "Sink", "Rotational center", "Vacuum"], correctAnswer: 0, explanation: "Field lines are 'originating' from that point." },
+    { id: "phy110-u1-26", unit: 1, topic: 'Divergence', difficulty: 'medium', question: "A field with negative divergence at a point indicates a ___.", options: ["Sink", "Source", "Vortex", "Boundary"], correctAnswer: 0, explanation: "Field lines are 'converging' into that point." },
+    { id: "phy110-u1-27", unit: 1, topic: 'Curl', difficulty: 'hard', question: "The curl of the gradient of any scalar field (∇×∇V) is always ___.", options: ["Zero", "Vector V", "Gradient V", "One"], correctAnswer: 0, explanation: "Mathematical identity: curl of a gradient is always zero." },
+    { id: "phy110-u1-28", unit: 1, topic: 'Divergence', difficulty: 'hard', question: "The divergence of the curl of any vector field (∇·(∇×A)) is always ___.", options: ["Zero", "Vector A", "One", "A constant"], correctAnswer: 0, explanation: "Mathematical identity: divergence of a curl is always zero." },
+    { id: "phy110-u1-29", unit: 1, topic: 'Gauss Theorem', difficulty: 'medium', question: "Gauss's theorem is used to convert ___ integrals to volume integrals.", options: ["Surface", "Line", "Double", "Scalar"], correctAnswer: 0, explanation: "It links flux through a boundary to properties inside the volume." },
+    { id: "phy110-u1-30", unit: 1, topic: 'Stokes Theorem', difficulty: 'medium', question: "Stokes's theorem is used to convert ___ integrals to surface integrals.", options: ["Line", "Volume", "Triple", "Tensor"], correctAnswer: 0, explanation: "It links circulation around a loop to flux of curl through a surface." },
+    { id: "phy110-u1-31", unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "Faraday's Law in integral form relates EMF to the rate of change of ___.", options: ["Magnetic Flux", "Electric Flux", "Charge", "Resistance"], correctAnswer: 0, explanation: "EMF = -dΦm/dt." },
+    { id: "phy110-u1-32", unit: 1, topic: 'Maxwell Equations', difficulty: 'hard', question: "Which equation represents the Ampere-Maxwell Law in differential form?", options: ["∇×H = J + ∂D/∂t", "∇×E = -∂B/∂t", "∇·D = ρ", "∇·B = 0"], correctAnswer: 0, explanation: "It includes the conduction current J and displacement current." },
+    { id: "phy110-u1-33", unit: 1, topic: 'Displacement Current', difficulty: 'medium', question: "Displacement current exists primarily in ___.", options: ["Dielectrics (Insulators)", "Conductors", "Both", "Metals only"], correctAnswer: 0, explanation: "It accounts for changing electric fields in non-conducting regions." },
+    { id: "phy110-u1-34", unit: 1, topic: 'Ampere Law', difficulty: 'hard', question: "Maxwell's correction to Ampere's Law was necessary to satisfy ___.", options: ["Continuity Equation", "Ohm's Law", "Newton's Laws", "Kepler's Laws"], correctAnswer: 0, explanation: "Without it, the law would violate charge conservation in time-varying cases." },
+    { id: "phy110-u1-35", unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "In vacuum, the charge density ρ and current density J are both ___.", options: ["Zero", "Infinite", "Constant", "Dependent on time"], correctAnswer: 0, explanation: "Free space contains no charges or currents." },
+    { id: "phy110-u1-36", unit: 1, topic: 'Electromagnetic Waves', difficulty: 'hard', question: "Maxwell's equations predict that EM waves propagate at the speed ___.", options: ["1/√(με)", "√(με)", "μ/ε", "ε/μ"], correctAnswer: 0, explanation: "Speed depends on the permeability and permittivity of the medium." },
+    { id: "phy110-u1-37", unit: 1, topic: 'Coulomb Law', difficulty: 'easy', question: "Gauss's Law for electricity is essentially a general form of ___.", options: ["Coulomb's Law", "Biot-Savart Law", "Ohm's Law", "Lenz Law"], correctAnswer: 0, explanation: "It describes the relationship between charge and electric field." },
+    { id: "phy110-u1-38", unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "Which equation shows that time-varying electric fields produce magnetic fields?", options: ["Ampere-Maxwell Law", "Faraday's Law", "Gauss's Law", "Poisson's Equation"], correctAnswer: 0, explanation: "The ∂D/∂t term creates a circulating magnetic field H." },
+    { id: "phy110-u1-39", unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "Faraday's Law shows that magnetic fields can be produced by ___.", options: ["Time-varying magnetic fields", "Static charges", "Moving rocks", "Nothing"], correctAnswer: 0, explanation: "Specifically, the change in B field induces an E field." },
+    { id: "phy110-u1-40", unit: 1, topic: 'Continuity Equation', difficulty: 'hard', question: "If a current entering a region is not equal to current leaving, the ___ must be changing.", options: ["Charge density", "Temperature", "Wavelength", "Frequency"], correctAnswer: 0, explanation: "Charge must accumulate or deplete according to ∇·J = -∂ρ/∂t." },
+    { id: "phy110-u1-41", unit: 1, topic: 'Poisson Equation', difficulty: 'medium', question: "Poisson's equation is a ___ order partial differential equation.", options: ["Second", "First", "Third", "Fourth"], correctAnswer: 0, explanation: "It involves the Laplacian operator ∇²." },
+    { id: "phy110-u1-42", unit: 1, topic: 'Lapace Equation', difficulty: 'medium', question: "The Laplace equation is a special case of Poisson's equation where ___.", options: ["ρ = 0", "V = 0", "E = 0", "B = 0"], correctAnswer: 0, explanation: "It describes potentials in empty space." },
+    { id: "phy110-u1-43", unit: 1, topic: 'Scalar Potential', difficulty: 'hard', question: "The existence of a scalar potential V (E = -∇V) is guaranteed for ___ fields.", options: ["Conservative (Irrotational)", "Divergent", "Unsteady", "Complex"], correctAnswer: 0, explanation: "If ∇×E = 0, E can be written as the gradient of a scalar." },
+    { id: "phy110-u1-44", unit: 1, topic: 'Vector Potential', difficulty: 'hard', question: "Since ∇·B = 0, the magnetic field can be expressed as ___.", options: ["B = ∇×A", "B = ∇V", "B = ∇·A", "B = -∇V"], correctAnswer: 0, explanation: "A is the magnetic vector potential." },
+    { id: "phy110-u1-45", unit: 1, topic: 'Constitutive Relations', difficulty: 'medium', question: "For a linear isotropic medium, D is related to E by?", options: ["D = εE", "D = ε/E", "D = E + P", "D = ε/P"], correctAnswer: 0, explanation: "ε is the permittivity of the medium." },
+    { id: "phy110-u1-46", unit: 1, topic: 'Constitutive Relations', difficulty: 'medium', question: "For a linear isotropic medium, B is related to H by?", options: ["B = μH", "B = μ/H", "B = H + M", "B = μM"], correctAnswer: 0, explanation: "μ is the permeability of the medium." },
+    { id: "phy110-u1-47", unit: 1, topic: 'Maxwell Equations', difficulty: 'easy', question: "Which scientist's name is NOT associated with a Maxwell equation?", options: ["Newton", "Gauss", "Ampere", "Faraday"], correctAnswer: 0, explanation: "Newton's laws are for mechanics, not electromagnetism." },
+    { id: "phy110-u1-48", unit: 1, topic: 'Physical Significance', difficulty: 'medium', question: "The physical significance of ∇·B = 0 is that magnetic lines of force are ___.", options: ["Continuous closed loops", "Straight lines", "Random", "Parallel"], correctAnswer: 0, explanation: "They have no beginning or end." },
+    { id: "phy110-u1-49", unit: 1, topic: 'Maxwell Equations', difficulty: 'hard', question: "In integral form, Gauss's law for magnetism states that total magnetic flux through a closed surface is ___.", options: ["Zero", "μ0 * I", "Q / ε0", "Constant"], correctAnswer: 0, explanation: "Φm = ∮ B·dS = 0." },
+    { id: "phy110-u1-50", unit: 1, topic: 'Ampere Law', difficulty: 'easy', question: "The unit of current density J is ___.", options: ["Ampere / Meter²", "Ampere / Meter", "Ampere", "Volt / Meter"], correctAnswer: 0, explanation: "Charge flow per unit area per unit time." },
+    { id: "phy110-u1-51", unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "A static charge produces only an ___ field.", options: ["Electric", "Magnetic", "Gravitational", "Scalar"], correctAnswer: 0, explanation: "Steady magnetic fields require moving charges (currents)." },
+    { id: "phy110-u1-52", unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "A steady current produces only a ___ field.", options: ["Magnetic", "Electric", "Nuclear", "Both"], correctAnswer: 0, explanation: "In the absence of net charge, only magnetism is produced by steady flow." },
+    { id: "phy110-u1-53", unit: 1, topic: 'Divergence', difficulty: 'medium', question: "∇·v = 0 for an incompressible fluid means the ___ is zero.", options: ["Net flow rate", "Speed", "Pressure", "Temperature"], correctAnswer: 0, explanation: "The amount flowing in equals amount flowing out." },
+    { id: "phy110-u1-54", unit: 1, topic: 'Curl', difficulty: 'hard', question: "If the curl of velocity is non-zero, the fluid is ___.", options: ["Rotational (Eddies exist)", "Stationary", "Laminar", "Dry"], correctAnswer: 0, explanation: "Vorticity exists in the fluid." },
+    { id: "phy110-u1-55", unit: 1, topic: 'Vector Fields', difficulty: 'easy', question: "The Earth's gravitational field is a ___ field.", options: ["Vector", "Scalar", "Periodic", "Constant"], correctAnswer: 0, explanation: "Gravity has a specific pull direction at every point." },
+    { id: "phy110-u1-56", unit: 1, topic: 'Gradient', difficulty: 'easy', question: "Symbol for the gradient operator is ___.", options: ["∇ (Del / Nabla)", "Δ (Delta)", "Σ (Sigma)", "Π (Pi)"], correctAnswer: 0, explanation: "∇ represents vector differentiation." },
+    { id: "phy110-u1-57", unit: 1, topic: 'Poisson Equation', difficulty: 'hard', question: "Poisson's equation is derived by combining Gauss's law with ___.", options: ["E = -∇V", "∇×E = 0", "F = qE", "V = IR"], correctAnswer: 0, explanation: "∇·E = ρ/ε -> ∇·(-∇V) = ρ/ε -> ∇²V = -ρ/ε." },
+    { id: "phy110-u1-58", unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "The term ∂B/∂t in Maxwell's equations represents ___.", options: ["Faraday's induction", "Displacement current", "Charge density", "Ohm's induction"], correctAnswer: 0, explanation: "It describes the coupling between changing B and induced E." },
+    { id: "phy110-u1-59", unit: 1, topic: 'Maxwell Equations', difficulty: 'hard', question: "Continuity equation in magnetostatics implies that ∇·J = ___.", options: ["0", "ρ", "∂ρ/∂t", "1"], correctAnswer: 0, explanation: "For steady currents, there is no accumulation of charge over time." },
+    { id: "phy110-u1-60", unit: 1, topic: 'Displacement Current', difficulty: 'medium', question: "Across the plates of a capacitor being charged, the current is ___ current.", options: ["Displacement", "Conduction", "Eddy", "Direct"], correctAnswer: 0, explanation: "No physical charges cross the gap, but the field changing acts like a current." },
+    { id: "phy110-u1-61", unit: 1, topic: 'Vector Algebra', difficulty: 'easy', question: "The dot product of two vectors results in a ___.", options: ["Scalar", "Vector", "Matrix", "Angle"], correctAnswer: 0, explanation: "A·B = |A||B|cosθ." },
+    { id: "phy110-u1-62", unit: 1, topic: 'Vector Algebra', difficulty: 'easy', question: "The cross product of two vectors results in a ___.", options: ["Vector", "Scalar", "Unit", "Point"], correctAnswer: 0, explanation: "A×B = |A||B|sinθ n." },
+    { id: "phy110-u1-63", unit: 1, topic: 'Gradient', difficulty: 'medium', question: "The gradient of r (where r = √[x²+y²+z²]) is ___.", options: ["r̂ (Unit vector r)", "r", "1/r", "0"], correctAnswer: 0, explanation: "It points radially outward from the origin." },
+    { id: "phy110-u1-64", unit: 1, topic: 'Divergence', difficulty: 'hard', question: "Divergence of the position vector r (x i + y j + z k) is ___.", options: ["3", "1", "0", "r"], correctAnswer: 0, explanation: "∂x/∂x + ∂y/∂y + ∂z/∂z = 1 + 1 + 1 = 3." },
+    { id: "phy110-u1-65", unit: 1, topic: 'Curl', difficulty: 'hard', question: "Curl of the position vector r is ___.", options: ["0", "3", "r̂", "1"], correctAnswer: 0, explanation: "Angular-like components are zero for purely radial vectors." },
+    { id: "phy110-u1-66", unit: 1, topic: 'Vector Operations', difficulty: 'hard', question: "∇²f is called the ___ operator.", options: ["Laplacian", "Hamiltonian", "Gaussian", "Stokesian"], correctAnswer: 0, explanation: "Second order differential operator." },
+    { id: "phy110-u1-67", unit: 1, topic: 'Gauss Law', difficulty: 'medium', question: "Total electric flux through a closed surface depends only on ___.", options: ["Enclosed charge", "Surface area", "External charge", "Shape"], correctAnswer: 0, explanation: "Φe = Q_encl / ε0 regardless of geometry." },
+    { id: "phy110-u1-68", unit: 1, topic: 'Lorentz Force', difficulty: 'easy', question: "The total force F = q(E + v×B) is known as the ___ force.", options: ["Lorentz", "Coulomb", "Ampere", "Newton"], correctAnswer: 0, explanation: "Describes force on a moving charge in EM fields." },
+    { id: "phy110-u1-69", unit: 1, topic: 'Maxwell Equations', difficulty: 'medium', question: "In the absence of time variation, Maxwell's equations decouple into ___.", options: ["Electrostatics and Magnetostatics", "Gravity and Nuclear", "Waves and Particles", "None"], correctAnswer: 0, explanation: "Electricity and magnetism become independent." },
+    { id: "phy110-u1-70", unit: 1, topic: 'Boundary Conditions', difficulty: 'hard', question: "Maxwell equations lead to ___ at the interface of two media.", options: ["Boundary conditions", "Wave packets", "Quarks", "Chaos"], correctAnswer: 0, explanation: "Required for solving field problems across different materials." },
+    { id: "phy110-u1-71", unit: 1, topic: 'Vector field', difficulty: 'easy', question: "Field lines are ___ to a vector field at every point.", options: ["Tangent", "Normal", "Opposite", "Circular"], correctAnswer: 0, explanation: "They represent the direction of the vector." },
+    { id: "phy110-u1-72", unit: 1, topic: 'Gauss Law', difficulty: 'medium', question: "Integral form of ∇·B = 0 is?", options: ["∮ B·dS = 0", "∮ B·dl = 0", "∫ B dV = 0", "None"], correctAnswer: 0, explanation: "Surface integral over closed surface." },
+    { id: "phy110-u1-73", unit: 1, topic: 'Faraday Law', difficulty: 'medium', question: "Integral form of ∇×E = -∂B/∂t is?", options: ["∮ E·dl = -dΦm/dt", "∮ E·dl = 0", "∮ E·dS = Q", "None"], correctAnswer: 0, explanation: "Line integral of E is EMF." },
+    { id: "phy110-u1-74", unit: 1, topic: 'Maxwell Equations', difficulty: 'hard', question: "Physical significance of ∇·D = ρ is that electric charge is the ___ of the D field.", options: ["Source", "Sink", "Rotator", "Wave"], correctAnswer: 0, explanation: "Specifically, ρ is the source density." },
+    { id: "phy110-u1-75", unit: 1, topic: 'Ampere Law', difficulty: 'medium', question: "The integral form of ∇×H = J + ∂D/∂t involves a ___ integral and a ___ integral.", options: ["Line, Surface", "Volume, Surface", "Line, Volume", "None"], correctAnswer: 0, explanation: "∮ H·dl = I_cond + I_disp." },
+    { id: "phy110-u1-76", unit: 1, topic: 'Electromagnetics', difficulty: 'hard', question: "Wave equation for E in vacuum is?", options: ["∇²E - (1/c²)∂²E/∂t² = 0", "∇²E = 0", "∇·E = 0", "None"], correctAnswer: 0, explanation: "Derived from Maxwell's Equations." },
+    { id: "phy110-u1-77", unit: 1, topic: 'Vector Calculus', difficulty: 'medium', question: "Del operator ∇ is a ___ operator.", options: ["Vector", "Scalar", "Constant", "Complex"], correctAnswer: 0, explanation: "It has component directions (i, j, k)." },
+    { id: "phy110-u1-78", unit: 1, topic: 'Divergence', difficulty: 'easy', question: "Divergence of a vector field is a ___ result.", options: ["Scalar", "Vector", "Zero", "Tensor"], correctAnswer: 0, explanation: "Like the dot product." },
+    { id: "phy110-u1-79", unit: 1, topic: 'Curl', difficulty: 'easy', question: "Curl of a vector field is a ___ result.", options: ["Vector", "Scalar", "Unit", "Number"], correctAnswer: 0, explanation: "Like the cross product." },
+    { id: "phy110-u1-80", unit: 1, topic: 'Potential', difficulty: 'medium', question: "Potential V is a ___ field.", options: ["Scalar", "Vector", "Rotating", "Flux"], correctAnswer: 0, explanation: "Assigns voltage values." },
+    { id: "phy110-u1-81", unit: 1, topic: 'History', difficulty: 'easy', question: "Maxwell unified electricity, magnetism, and ___.", options: ["Light", "Gravity", "Sound", "Wind"], correctAnswer: 0, explanation: "He showed light is an EM wave." },
+    { id: "phy110-u1-82", unit: 1, topic: 'Continuity', difficulty: 'hard', question: "Net outflow of current from a volume equals ___.", options: ["Rate of decrease of charge inside", "Rate of increase", "Constant current", "Zero"], correctAnswer: 0, explanation: "Conservation of charge." },
+    { id: "phy110-u1-83", unit: 1, topic: 'Vector Identity', difficulty: 'hard', question: "∇×(∇×A) = ?", options: ["∇(∇·A) - ∇²A", "0", "∇²A", "None"], correctAnswer: 0, explanation: "Important for deriving wave equations." },
+    { id: "phy110-u1-84", unit: 1, topic: 'Electric field', difficulty: 'easy', question: "Direction of E for positive point charge is ___.", options: ["Radially outward", "Radially inward", "Tangent", "Circular"], correctAnswer: 0, explanation: "Repels other positive charges." },
+    { id: "phy110-u1-85", unit: 1, topic: 'Magnetic field', difficulty: 'easy', question: "Magnetic field lines of a wire are ___.", options: ["Concentric circles", "Straight lines", "Random", "Ellipses"], correctAnswer: 0, explanation: "According to right-hand rule." },
+    { id: "phy110-u1-86", unit: 1, topic: 'Laplacian', difficulty: 'medium', question: "Laplacian of a scalar field is a ___.", options: ["Scalar", "Vector", "Zero", "Constant"], correctAnswer: 0, explanation: "∇·(∇f)." },
+    { id: "phy110-u1-87", unit: 1, topic: 'Laplacian', difficulty: 'medium', question: "Laplacian of a vector field is a ___.", options: ["Vector", "Scalar", "One", "Zero"], correctAnswer: 0, explanation: "Defined component-wise." },
+    { id: "phy110-u1-88", unit: 1, topic: 'Maxwell Equations', difficulty: 'easy', question: "Which equation represents Gauss's law for electricity?", options: ["∇·D = ρ", "∇·B = 0", "∇×E = 0", "None"], correctAnswer: 0, explanation: "Connects field to charge source." },
+    { id: "phy110-u1-89", unit: 1, topic: 'Physical significance', difficulty: 'medium', question: "What does ∇×E = -∂B/dt imply about E fields in presence of time-varying B?", options: ["Non-conservative", "Conservative", "Scalar", "Vanishing"], correctAnswer: 0, explanation: "Circulation is non-zero, so work done along closed path is non-zero." },
+    { id: "phy110-u1-90", unit: 1, topic: 'Displacement Current', difficulty: 'hard', question: "Dimension of displacement current is same as ___ current.", options: ["Conduction", "Voltage", "Charge", "Inertia"], correctAnswer: 0, explanation: "Both measured in Amperes." },
+    { id: "phy110-u1-91", unit: 1, topic: 'Poisson Equation', difficulty: 'medium', question: "Sign of ρ/ε in ∇²V equation?", options: ["Negative (-ρ/ε)", "Positive", "Depends", "None"], correctAnswer: 0, explanation: "Convention for potential relation." },
+    { id: "phy110-u1-92", unit: 1, topic: 'Maxwell Equations', difficulty: 'hard', question: "Static Maxwell equation ∇×H = J comes from ___ Law.", options: ["Ampere's Circuital", "Gauss's", "Coulomb's", "Lenz's"], correctAnswer: 0, explanation: "Relates magnetism to current flow." },
+    { id: "phy110-u1-93", unit: 1, topic: 'Flux', difficulty: 'easy', question: "Magnetic flux (Φ) unit?", options: ["Weber", "Tesla", "Henry", "Farad"], correctAnswer: 0, explanation: "Total magnetic B through a surface." },
+    { id: "phy110-u1-94", unit: 1, topic: 'Gauss Theorem', difficulty: 'medium', question: "If divergence is zero everywhere, total flux through any closed surface is ___.", options: ["Zero", "Maximum", "Infinite", "1"], correctAnswer: 0, explanation: "Flux in = Flux out." },
+    { id: "phy110-u1-95", unit: 1, topic: 'Vector potential', difficulty: 'hard', question: "Magnetic vector potential A unit?", options: ["Weber / Meter", "Tesla", "Ampere", "Volt"], correctAnswer: 0, explanation: "Derived unit for B = ∇×A." },
+    { id: "phy110-u1-96", unit: 1, topic: 'Laplace Equation', difficulty: 'medium', question: "Solutions to Laplace equation are called ___ functions.", options: ["Harmonic", "Linear", "Analytic", "Periodic"], correctAnswer: 0, explanation: "Special properties like no local maxima." },
+    { id: "phy110-u1-97", unit: 1, topic: 'Constitutive Relations', difficulty: 'easy', question: "In vacuum, ε0 is called ___.", options: ["Permittivity of free space", "Permeability", "Charge", "Flux"], correctAnswer: 0, explanation: "Scales electrical response." },
+    { id: "phy110-u1-98", unit: 1, topic: 'Constitutive Relations', difficulty: 'easy', question: "In vacuum, μ0 is called ___.", options: ["Permeability of free space", "Permittivity", "Magnetization", "Dipole"], correctAnswer: 0, explanation: "Scales magnetic response." },
+    { id: "phy110-u1-99", unit: 1, topic: 'Maxwell Equations', difficulty: 'hard', question: "Concept of displacement current leads to the prediction of ___ waves.", options: ["Light", "Matter", "Sound", "Pressure"], correctAnswer: 0, explanation: "Allows self-sustaining EM propagation." },
+    { id: "phy110-u1-100", unit: 1, topic: 'Continuity Equation', difficulty: 'medium', question: "∇·J = 0 means the current is ___.", options: ["Steady", "Alternating", "Unstable", "Circular"], correctAnswer: 0, explanation: "Magnitude doesn't change with time." }
 ];

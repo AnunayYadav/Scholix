@@ -2,6 +2,7 @@ import { QuizQuestion } from '../../../types.ts';
 
 export const phy110Unit5MCQs: QuizQuestion[] = [
     {
+        id: "phy110-u5-1",
         unit: 5,
         topic: 'Free Electron Theory',
         difficulty: 'easy',
@@ -11,6 +12,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Drude and Lorentz proposed the 'electron gas' model."
     },
     {
+        id: "phy110-u5-2",
         unit: 5,
         topic: 'Drift Velocity',
         difficulty: 'medium',
@@ -20,6 +22,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "vd = μE, where μ is mobility."
     },
     {
+        id: "phy110-u5-3",
         unit: 5,
         topic: 'Mobility',
         difficulty: 'medium',
@@ -29,6 +32,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "μ = vd / E; Unit: m²/(V·s)."
     },
     {
+        id: "phy110-u5-4",
         unit: 5,
         topic: 'Mean Free Path',
         difficulty: 'medium',
@@ -38,6 +42,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Collisions occur with lattice ions or defects."
     },
     {
+        id: "phy110-u5-5",
         unit: 5,
         topic: 'Relaxation Time',
         difficulty: 'medium',
@@ -47,6 +52,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Thermal velocity v ≈ λ / τ."
     },
     {
+        id: "phy110-u5-6",
         unit: 5,
         topic: 'Fermi Energy',
         difficulty: 'hard',
@@ -56,6 +62,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "States are filled up to this level according to Pauli Exclusion Principle."
     },
     {
+        id: "phy110-u5-7",
         unit: 5,
         topic: 'Fermi-Dirac Distribution',
         difficulty: 'hard',
@@ -65,6 +72,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Describes particles with half-integer spin (fermions)."
     },
     {
+        id: "phy110-u5-8",
         unit: 5,
         topic: 'Fermi-Dirac',
         difficulty: 'hard',
@@ -74,6 +82,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "The Fermi level is the energy with 50% chance of being occupied."
     },
     {
+        id: "phy110-u5-9",
         unit: 5,
         topic: 'Band Theory',
         difficulty: 'medium',
@@ -83,6 +92,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Interaction of valence electrons in a crystal lattice."
     },
     {
+        id: "phy110-u5-10",
         unit: 5,
         topic: 'Forbidden Gap',
         difficulty: 'medium',
@@ -92,6 +102,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Crucial for distinguishing metals, semiconductors, and insulators."
     },
     {
+        id: "phy110-u5-11",
         unit: 5,
         topic: 'Metals',
         difficulty: 'easy',
@@ -101,6 +112,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Ensures high conductivity as electrons move easily."
     },
     {
+        id: "phy110-u5-12",
         unit: 5,
         topic: 'Insulators',
         difficulty: 'easy',
@@ -110,6 +122,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Example: Diamond (Eg ~5.5 eV)."
     },
     {
+        id: "phy110-u5-13",
         unit: 5,
         topic: 'Semiconductors',
         difficulty: 'easy',
@@ -119,6 +132,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Example: Silicon (1.1 eV), Germanium (0.67 eV)."
     },
     {
+        id: "phy110-u5-14",
         unit: 5,
         topic: 'Effective Mass',
         difficulty: 'hard',
@@ -128,6 +142,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "m* = ħ² / (d²E/dk²). Can be different from free electron mass."
     },
     {
+        id: "phy110-u5-15",
         unit: 5,
         topic: 'Electrons and Holes',
         difficulty: 'medium',
@@ -137,6 +152,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Concept used to explain p-type conductivity."
     },
     {
+        id: "phy110-u5-16",
         unit: 5,
         topic: 'Intrinsic Semiconductor',
         difficulty: 'medium',
@@ -146,6 +162,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Electron concentration (n) = Hole concentration (p)."
     },
     {
+        id: "phy110-u5-17",
         unit: 5,
         topic: 'Extrinsic Semiconductor',
         difficulty: 'medium',
@@ -155,6 +172,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Allows controlling electronic properties."
     },
     {
+        id: "phy110-u5-18",
         unit: 5,
         topic: 'Doping',
         difficulty: 'medium',
@@ -164,6 +182,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "These atoms accept electrons, creating holes."
     },
     {
+        id: "phy110-u5-19",
         unit: 5,
         topic: 'Doping',
         difficulty: 'medium',
@@ -173,6 +192,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "These atoms donate extra electrons."
     },
     {
+        id: "phy110-u5-20",
         unit: 5,
         topic: 'Fermi Level',
         difficulty: 'hard',
@@ -182,6 +202,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Equidistant from electrons and holes states."
     },
     {
+        id: "phy110-u5-21",
         unit: 5,
         topic: 'Fermi Level',
         difficulty: 'hard',
@@ -191,6 +212,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Due to high concentration of donor electrons."
     },
     {
+        id: "phy110-u5-22",
         unit: 5,
         topic: 'Hall Effect',
         difficulty: 'hard',
@@ -200,6 +222,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Used to find carrier type, concentration, and mobility."
     },
     {
+        id: "phy110-u5-23",
         unit: 5,
         topic: 'Hall Coefficient',
         difficulty: 'hard',
@@ -209,6 +232,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Rh is negative for electrons and positive for holes."
     },
     {
+        id: "phy110-u5-24",
         unit: 5,
         topic: 'Band Gap',
         difficulty: 'hard',
@@ -218,6 +242,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Example: GaAs. Efficient for photon emission (LEDs/Lasers)."
     },
     {
+        id: "phy110-u5-25",
         unit: 5,
         topic: 'Band Gap',
         difficulty: 'hard',
@@ -227,6 +252,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         explanation: "Momentum mismatch requires a phonon assist."
     },
     {
+        id: "phy110-u5-26",
         unit: 5,
         topic: 'Solar Cell',
         difficulty: 'medium',
@@ -235,77 +261,77 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Converts light energy directly into electrical energy via p-n junction."
     },
-    { unit: 5, topic: 'Ohm Law', difficulty: 'easy', question: "Microscopic form of Ohm's Law?", options: ["J = σE", "V = IR", "P = VI", "None"], correctAnswer: 0, explanation: "Relates current density and electric field." },
-    { unit: 5, topic: 'Conductivity', difficulty: 'medium', question: "Conductivity σ = ___.", options: ["neμ", "n/e", "μ/n", "None"], correctAnswer: 0, explanation: "Depends on carrier density and mobility." },
-    { unit: 5, topic: 'Resistance', difficulty: 'easy', question: "Resistance of a conductor ___ with increasing temperature.", options: ["Increases", "Decreases", "Stays constant", "Zeroes"], correctAnswer: 0, explanation: "Increased lattice vibrations (phonons) increase scattering." },
-    { unit: 5, topic: 'Resistance', difficulty: 'easy', question: "Resistance of a semiconductor ___ with increasing temperature.", options: ["Decreases", "Increases", "Stays constant", "None"], correctAnswer: 0, explanation: "Thermal energy creates more electron-hole pairs." },
-    { unit: 5, topic: 'Fermi Velocity', difficulty: 'hard', question: "The velocity of electrons at the Fermi level?", options: ["Fermi Velocity (vf)", "Drift Velocity", "Light speed", "Zero"], correctAnswer: 0, explanation: "Typically ~10^6 m/s, much faster than drift." },
-    { unit: 5, topic: 'Fermi energy', difficulty: 'hard', question: "Formula for Ef at 0K involves ___.", options: ["(n)^(2/3)", "log(n)", "n", "1/n"], correctAnswer: 0, explanation: "Depends on electron density." },
-    { unit: 5, topic: 'Effective mass', difficulty: 'hard', question: "Can effective mass be negative?", options: ["Yes (at top of bands)", "No", "Only for protons", "None"], correctAnswer: 0, explanation: "Indicates an electron accelerating opposite to applied force (hole-like behavior)." },
-    { unit: 5, topic: 'Fermi Dirac', difficulty: 'medium', question: "Fermions obey ___ principle.", options: ["Pauli Exclusion Principle", "Hund Rule", "Newton First Law", "None"], correctAnswer: 0, explanation: "No two electrons can have same quantum state." },
-    { unit: 5, topic: 'Energy Bands', difficulty: 'hard', question: "The width of energy bands ___ as interatomic distance decreases.", options: ["Increases", "Decreases", "Stays same", "None"], correctAnswer: 0, explanation: "More interaction/overlapping leads to wider bands." },
-    { unit: 5, topic: 'Kronig-Penney', difficulty: 'hard', question: "The Kronig-Penney model explains ___.", options: ["Origin of energy bands in a periodic potential", "TIR", "Magnetism", "None"], correctAnswer: 0, explanation: "Uses a periodic square well potential." },
-    { unit: 5, topic: 'Hall effect', difficulty: 'medium', question: "Hall voltage VH = ___.", options: ["BI / (net)", "BIt / n", "BI / ne", "None"], correctAnswer: 0, explanation: "t is the thickness of the sample." },
-    { unit: 5, topic: 'Carrier density', difficulty: 'hard', question: "Mass Action Law for semiconductors?", options: ["n * p = ni²", "n + p = ni", "n = p", "None"], correctAnswer: 0, explanation: "Product of electrons and holes is constant at a given temperature." },
-    { unit: 5, topic: 'Dopant', difficulty: 'easy', question: "Common trivalent dopant for Silicon?", options: ["Boron (B)", "Phosphorus (P)", "Arsenic (As)", "Gold (Au)"], correctAnswer: 0, explanation: "Used for P-type silicon." },
-    { unit: 5, topic: 'Dopant', difficulty: 'easy', question: "Common pentavalent dopant?", options: ["Phosphorus (P)", "Boron", "Aluminum", "Lithium"], correctAnswer: 0, explanation: "Used for N-type silicon." },
-    { unit: 5, topic: 'Diffusion', difficulty: 'hard', question: "Current due to concentration gradient?", options: ["Diffusion current", "Drift current", "Static current", "Eddy current"], correctAnswer: 0, explanation: "Flow from high to low density." },
-    { unit: 5, topic: 'Einstein Relation', difficulty: 'hard', question: "Relation between Diffusion constant D and Mobility μ?", options: ["D / μ = kT / e", "D * μ = 1", "D = μ", "None"], correctAnswer: 0, explanation: "Links thermodynamic and transport properties." },
-    { unit: 5, topic: 'Solar Cell', difficulty: 'medium', question: "Silicon solar cells have efficiency around ___.", options: ["15-25%", "90%", "5%", "100%"], correctAnswer: 0, explanation: "Limited by band gap and losses." },
-    { unit: 5, topic: 'Photoconductivity', difficulty: 'medium', question: "Increase in conductivity due to light absorption?", options: ["Photoconductivity", "Piezoelectricity", "Hall effect", "None"], correctAnswer: 0, explanation: "Photon energy boosts electrons across Eg." },
-    { unit: 5, topic: 'Band Gap', difficulty: 'easy', question: "Eg of Silicon at 300K is ___.", options: ["1.1 eV", "0.67 eV", "5 eV", "0 eV"], correctAnswer: 0, explanation: "Standard semiconductor value." },
-    { unit: 5, topic: 'Band Gap', difficulty: 'easy', question: "Eg of Germanium at 300K is ___.", options: ["0.67 eV", "1.1 eV", "2 eV", "None"], correctAnswer: 0, explanation: "Lower than Silicon." },
-    { unit: 5, topic: 'Exciton', difficulty: 'hard', question: "A bound state of an electron and a hole?", options: ["Exciton", "Proton", "Atom", "Neutron"], correctAnswer: 0, explanation: "Quasi-particle in solids." },
-    { unit: 5, topic: 'Phonon', difficulty: 'medium', question: "Quantum of lattice vibration?", options: ["Phonon", "Photon", "Gluon", "Graviton"], correctAnswer: 0, explanation: "Carries heat/sound in crystals." },
-    { unit: 5, topic: 'Intrinsic', difficulty: 'easy', question: "At 0 K, a pure semiconductor behaves as an ___.", options: ["Insulator", "Conductor", "Metal", "Superconductor"], correctAnswer: 0, explanation: "No thermal energy to excite electrons." },
-    { unit: 5, topic: 'Direct Band Gap', difficulty: 'hard', question: "Why is Silicon not used for making LEDs?", options: ["It has an indirect band gap", "It is too expensive", "It is an insulator", "None"], correctAnswer: 0, explanation: "Recombination mostly turns into heat, not light." },
-    { unit: 5, topic: 'Mobility', difficulty: 'medium', question: "Do holes have higher mobility than electrons?", options: ["No (Electrons are usually faster)", "Yes", "Always equal", "Depends on color"], correctAnswer: 0, explanation: "Valence band mechanism for holes is slower." },
-    { unit: 5, topic: 'Doping', difficulty: 'medium', question: "Doping concentration is usually in the range of ___.", options: ["ppm (parts per million)", "50%", "100%", "None"], correctAnswer: 0, explanation: "Even tiny amounts change properties drastically." },
-    { unit: 5, topic: 'Drift', difficulty: 'easy', question: "Drift current is proportional to ___.", options: ["Applied Electric Field", "Gravity", "Light", "None"], correctAnswer: 0, explanation: "J_drift = σE." },
-    { unit: 5, topic: 'Semiconductors', difficulty: 'easy', question: "Major charge carriers in P-type?", options: ["Holes", "Electrons", "Ions", "Photons"], correctAnswer: 0, explanation: "Positive (P) type." },
-    { unit: 5, topic: 'Semiconductors', difficulty: 'easy', question: "Major charge carriers in N-type?", options: ["Electrons", "Holes", "Neutrons", "None"], correctAnswer: 0, explanation: "Negative (N) type." },
-    { unit: 5, topic: 'Semiconductors', difficulty: 'medium', question: "Holes are majorly found in ___ band.", options: ["Valence Band", "Conduction Band", "Forbidden Gap", "None"], correctAnswer: 0, explanation: "Missing electrons in filled states." },
-    { unit: 5, topic: 'Band Theory', difficulty: 'easy', question: "Who originated Band Theory of solids?", options: ["Felix Bloch", "Newton", "Einstein", "Bohr"], correctAnswer: 0, explanation: "Bloch's Theorem for electrons in periodic potential." },
-    { unit: 5, topic: 'Superconductivity', difficulty: 'medium', question: "Resistance of a superconductor at critical temperature becomes ___.", options: ["Exactly Zero", "Small", "Infinite", "Negative"], correctAnswer: 0, explanation: "Discovery by Kamerlingh Onnes." },
-    { unit: 5, topic: 'Meissner Effect', difficulty: 'hard', question: "Expulsion of magnetic field from a superconductor?", options: ["Meissner Effect", "Hall Effect", "Stark Effect", "None"], correctAnswer: 0, explanation: "Perfect diamagnetism." },
-    { unit: 5, topic: 'Lattice', difficulty: 'easy', question: "Crystal lattice is a ___ concept.", options: ["Geometric", "Chemical", "Biological", "None"], correctAnswer: 0, explanation: "Abstraction for repeating patterns." },
-    { unit: 5, topic: 'Hall effect', difficulty: 'hard', question: "Hall angle is the angle between ___.", options: ["Net field and Current", "Current and Voltage", "Magnetic field and gravity", "None"], correctAnswer: 0, explanation: "Defines the deflection of flow." },
-    { unit: 5, topic: 'Semiconductors', difficulty: 'medium', question: "Unit of Rh (Hall constant)?", options: ["m³ / Coulomb", "Coulomb / m³", "Ohm", "Farad"], correctAnswer: 0, explanation: "Inverse of charge density." },
-    { unit: 5, topic: 'Fermi Level', difficulty: 'hard', question: "As T increases, Ef in N-type shifts ___.", options: ["Downwards (towards intrinsic level)", "Upwards", "To zero", "None"], correctAnswer: 0, explanation: "Intrinsic carrier generation starts dominating at high T." },
-    { unit: 5, topic: 'Solar cell', difficulty: 'hard', question: "VOC stands for ___ in solar cells.", options: ["Open Circuit Voltage", "Output Capacity", "Variable Current", "None"], correctAnswer: 0, explanation: "Voltage when current is zero." },
-    { unit: 5, topic: 'Carrier density', difficulty: 'hard', question: "Intrinsic carrier concentration ni depends on ___.", options: ["Temperature and Eg", "Time", "Size", "None"], correctAnswer: 0, explanation: "ni ∝ exp(-Eg / 2kT)." },
-    { unit: 5, topic: 'Effective mass', difficulty: 'hard', question: "Flat bands have ___ effective mass.", options: ["Higher", "Lower", "Zero", "Infinite"], correctAnswer: 0, explanation: "Curvature is low, so m* is large." },
-    { unit: 5, topic: 'Theory', difficulty: 'hard', question: "Classical free electron theory fails to explain ___.", options: ["Specific heat of metals", "Ohm's law", "Drift", "None"], correctAnswer: 0, explanation: "Predicts much higher specific heat than observed." },
-    { unit: 5, topic: 'Quantum Theory', difficulty: 'hard', question: "Sommerfeld model improved free electron theory by ___.", options: ["Using Fermi-Dirac statistics", "Adding light", "Ignoring electrons", "None"], correctAnswer: 0, explanation: "Combined Quantum mechanics with electron gas model." },
-    { unit: 5, topic: 'Brillouin Zone', difficulty: 'hard', question: "Wigner-Seitz cell in reciprocal lattice?", options: ["Brillouin Zone", "Unit cell", "Basis", "None"], correctAnswer: 0, explanation: "Used to analyze wave propagation in crystals." },
-    { unit: 5, topic: 'Effective Mass', difficulty: 'easy', question: "Symbol for effective mass?", options: ["m*", "m", "me", "M"], correctAnswer: 0, explanation: "Star denotes 'renormalized' value." },
-    { unit: 5, topic: 'Material', difficulty: 'easy', question: "Which is a common III-V semiconductor?", options: ["GaAs (Gallium Arsenide)", "Silicon", "Carbon", "NaCl"], correctAnswer: 0, explanation: "Used in high speed and optoelectronic devices." },
-    { unit: 5, topic: 'Doping', difficulty: 'medium', question: "Donor levels are located ___.", options: ["Just below Conduction Band", "Above CV", "In Valence Band", "None"], correctAnswer: 0, explanation: "Easy to ionize thermally." },
-    { unit: 5, topic: 'Doping', difficulty: 'medium', question: "Acceptor levels are located ___.", options: ["Just above Valence Band", "Below VB", "In CB", "None"], correctAnswer: 0, explanation: "Easily capture valence electrons." },
-    { unit: 5, topic: 'Mean free time', difficulty: 'medium', question: "τ = l / v. If l is 100 nm and v is 10^6 m/s, τ is?", options: ["10^-13 s", "1 s", "1 ms", "10^-6 s"], correctAnswer: 0, explanation: "Typical scattering timescale in metals." },
-    { unit: 5, topic: 'Superconductivity', difficulty: 'medium', question: "Critical Field (Hc) is the ___.", options: ["Magnetic field above which superconductivity is lost", "Field required to start it", "Zero", "None"], correctAnswer: 0, explanation: "Depends on temperature." },
-    { unit: 5, topic: 'BCS Theory', difficulty: 'hard', question: "BCS theory explains superconductivity using ___ pairs.", options: ["Cooper pairs", "Electron pairs", "Hole pairs", "Atomic pairs"], correctAnswer: 0, explanation: "Bardeen, Cooper, Schrieffer (1957)." },
-    { unit: 5, topic: 'Fermi energy', difficulty: 'easy', question: "Ef for Copper is about ___.", options: ["7.0 eV", "0.1 eV", "100 eV", "Zero"], correctAnswer: 0, explanation: "Typical value for good metals." },
-    { unit: 5, topic: 'Work Function', difficulty: 'medium', question: "Energy to move electron from Fermi level to vacuum?", options: ["Work Function", "Band Gap", "Potential", "None"], correctAnswer: 0, explanation: "Physical surface property." },
-    { unit: 5, topic: 'Physics', difficulty: 'easy', question: "Fermi level is a ___.", options: ["Hypothetical energy level", "Physical object", "Point in space", "None"], correctAnswer: 0, explanation: "Mathematical concept for statistics." },
-    { unit: 5, topic: 'Semiconductors', difficulty: 'medium', question: "Extrinsic conductivity dominates at ___ temperatures.", options: ["Low / Room temperature", "Very high", "Infinite", "None"], correctAnswer: 0, explanation: "At very high T, intrinsic carriers outnumber dopants." },
-    { unit: 5, topic: 'Drift velocity', difficulty: 'medium', question: "Order of drift velocity in normal wires?", options: ["mm/s (very slow)", "Speed of light", "m/s", "None"], correctAnswer: 0, explanation: "Signal travels fast (EM field), but electrons crawl." },
-    { unit: 5, topic: 'Current', difficulty: 'easy', question: "Units of Current Density J?", options: ["Ampere / m²", "Ampere", "Volt / m", "None"], correctAnswer: 0, explanation: "Rate of flow per unit area." },
-    { unit: 5, topic: 'Theory', difficulty: 'medium', question: "Drude model assumes electrons move ___.", options: ["Freely between collisions", "In circles", "Along lines", "None"], correctAnswer: 0, explanation: "Ballistic motion between scattering events." },
-    { unit: 5, topic: 'Doping', difficulty: 'easy', question: "Adding impurities to a crystal is ___.", options: ["Doping", "Cleaning", "Melting", "None"], correctAnswer: 0, explanation: "Key process in semi-industry." },
-    { unit: 5, topic: 'Silicon', difficulty: 'easy', question: "Atomic number of Silicon?", options: ["14", "6", "32", "1"], correctAnswer: 0, explanation: "Group 14 element." },
-    { unit: 5, topic: 'Solar cells', difficulty: 'medium', question: "Used to cover satellites for power?", options: ["Solar panels", "Coal", "Windmills", "None"], correctAnswer: 0, explanation: "Reliable power in space." },
-    { unit: 5, topic: 'Temperature', difficulty: 'easy', question: "Absolute zero is ___ Celsius.", options: ["-273.15", "0", "100", "None"], correctAnswer: 0, explanation: "Lowest theoretical temperature." },
-    { unit: 5, topic: 'Conduction', difficulty: 'easy', question: "Good conductors have many ___.", options: ["Free electrons", "Holes", "Protons", "Neutrons"], correctAnswer: 0, explanation: "Allows current flow." },
-    { unit: 5, topic: 'Valence', difficulty: 'easy', question: "Electrons in outer shell are ___.", options: ["Valence electrons", "Core electrons", "Space electrons", "None"], correctAnswer: 0, explanation: "Participate in bonding/conduction." },
-    { unit: 5, topic: 'Energy', difficulty: 'medium', question: "1 eV = ___ Joules.", options: ["1.6e-19", "1", "9.1e-31", "None"], correctAnswer: 0, explanation: "Energy of one electron through 1 volt." },
-    { unit: 5, topic: 'Fermi Level', difficulty: 'hard', question: "Fermi level in insulators?", options: ["Middle of forbidden gap", "Top of VB", "Bottom of CB", "None"], correctAnswer: 0, explanation: "Similar to intrinsic semiconductors." },
-    { unit: 5, topic: 'Measurement', difficulty: 'easy', question: "Multimeter can measure ___.", options: ["All of these", "Voltage", "Current", "Resistance"], correctAnswer: 0, explanation: "Basic electronic tool." },
-    { unit: 5, topic: 'Diffusion', difficulty: 'hard', question: "Does diffusion require an electric field?", options: ["No (Requires concentration gradient)", "Yes", "Only in water", "None"], correctAnswer: 0, explanation: "Driven by thermal motion." },
-    { unit: 5, topic: 'Reciprocal Lattice', difficulty: 'hard', question: "Direct lattice distance 'd' and reciprocal 'G' related by ___.", options: ["G = 2π / d", "G = d", "G = d²", "None"], correctAnswer: 0, explanation: "Inverse relationship." },
-    { unit: 5, topic: 'Scattering', difficulty: 'medium', question: "Matthiessen's Rule: Total resistivity = ___.", options: ["Lattice scattering + Impurity scattering", "Product", "Difference", "None"], correctAnswer: 0, explanation: "Sum of independent contributions." },
-    { unit: 5, topic: 'Holes', difficulty: 'medium', question: "Charge of a hole is ___.", options: ["+1.6e-19 C", "-1.6e-19 C", "0", "Infinite"], correctAnswer: 0, explanation: "Opposite of electron." },
-    { unit: 5, topic: 'Band Gap', difficulty: 'easy', question: "Eg = 0 for ___.", options: ["Metals", "Silicon", "Rubber", "None"], correctAnswer: 0, explanation: "Overlap means no gap." },
-    { unit: 5, topic: 'Semi', difficulty: 'easy', question: "Most common semiconductor material?", options: ["Silicon", "Gold", "Lead", "Carbon"], correctAnswer: 0, explanation: "Silicon valley namesake." },
-    { unit: 5, topic: 'Final', difficulty: 'easy', question: "PHY110 Unit 5 covers ___.", options: ["Solid State Physics", "Lasers", "Mechanics", "None"], correctAnswer: 0, explanation: "Based on syllabus." }
+    { id: "phy110-u5-27", unit: 5, topic: 'Ohm Law', difficulty: 'easy', question: "Microscopic form of Ohm's Law?", options: ["J = σE", "V = IR", "P = VI", "None"], correctAnswer: 0, explanation: "Relates current density and electric field." },
+    { id: "phy110-u5-28", unit: 5, topic: 'Conductivity', difficulty: 'medium', question: "Conductivity σ = ___.", options: ["neμ", "n/e", "μ/n", "None"], correctAnswer: 0, explanation: "Depends on carrier density and mobility." },
+    { id: "phy110-u5-29", unit: 5, topic: 'Resistance', difficulty: 'easy', question: "Resistance of a conductor ___ with increasing temperature.", options: ["Increases", "Decreases", "Stays constant", "Zeroes"], correctAnswer: 0, explanation: "Increased lattice vibrations (phonons) increase scattering." },
+    { id: "phy110-u5-30", unit: 5, topic: 'Resistance', difficulty: 'easy', question: "Resistance of a semiconductor ___ with increasing temperature.", options: ["Decreases", "Increases", "Stays constant", "None"], correctAnswer: 0, explanation: "Thermal energy creates more electron-hole pairs." },
+    { id: "phy110-u5-31", unit: 5, topic: 'Fermi Velocity', difficulty: 'hard', question: "The velocity of electrons at the Fermi level?", options: ["Fermi Velocity (vf)", "Drift Velocity", "Light speed", "Zero"], correctAnswer: 0, explanation: "Typically ~10^6 m/s, much faster than drift." },
+    { id: "phy110-u5-32", unit: 5, topic: 'Fermi energy', difficulty: 'hard', question: "Formula for Ef at 0K involves ___.", options: ["(n)^(2/3)", "log(n)", "n", "1/n"], correctAnswer: 0, explanation: "Depends on electron density." },
+    { id: "phy110-u5-33", unit: 5, topic: 'Effective mass', difficulty: 'hard', question: "Can effective mass be negative?", options: ["Yes (at top of bands)", "No", "Only for protons", "None"], correctAnswer: 0, explanation: "Indicates an electron accelerating opposite to applied force (hole-like behavior)." },
+    { id: "phy110-u5-34", unit: 5, topic: 'Fermi Dirac', difficulty: 'medium', question: "Fermions obey ___ principle.", options: ["Pauli Exclusion Principle", "Hund Rule", "Newton First Law", "None"], correctAnswer: 0, explanation: "No two electrons can have same quantum state." },
+    { id: "phy110-u5-35", unit: 5, topic: 'Energy Bands', difficulty: 'hard', question: "The width of energy bands ___ as interatomic distance decreases.", options: ["Increases", "Decreases", "Stays same", "None"], correctAnswer: 0, explanation: "More interaction/overlapping leads to wider bands." },
+    { id: "phy110-u5-36", unit: 5, topic: 'Kronig-Penney', difficulty: 'hard', question: "The Kronig-Penney model explains ___.", options: ["Origin of energy bands in a periodic potential", "TIR", "Magnetism", "None"], correctAnswer: 0, explanation: "Uses a periodic square well potential." },
+    { id: "phy110-u5-37", unit: 5, topic: 'Hall effect', difficulty: 'medium', question: "Hall voltage VH = ___.", options: ["BI / (net)", "BIt / n", "BI / ne", "None"], correctAnswer: 0, explanation: "t is the thickness of the sample." },
+    { id: "phy110-u5-38", unit: 5, topic: 'Carrier density', difficulty: 'hard', question: "Mass Action Law for semiconductors?", options: ["n * p = ni²", "n + p = ni", "n = p", "None"], correctAnswer: 0, explanation: "Product of electrons and holes is constant at a given temperature." },
+    { id: "phy110-u5-39", unit: 5, topic: 'Dopant', difficulty: 'easy', question: "Common trivalent dopant for Silicon?", options: ["Boron (B)", "Phosphorus (P)", "Arsenic (As)", "Gold (Au)"], correctAnswer: 0, explanation: "Used for P-type silicon." },
+    { id: "phy110-u5-40", unit: 5, topic: 'Dopant', difficulty: 'easy', question: "Common pentavalent dopant?", options: ["Phosphorus (P)", "Boron", "Aluminum", "Lithium"], correctAnswer: 0, explanation: "Used for N-type silicon." },
+    { id: "phy110-u5-41", unit: 5, topic: 'Diffusion', difficulty: 'hard', question: "Current due to concentration gradient?", options: ["Diffusion current", "Drift current", "Static current", "Eddy current"], correctAnswer: 0, explanation: "Flow from high to low density." },
+    { id: "phy110-u5-42", unit: 5, topic: 'Einstein Relation', difficulty: 'hard', question: "Relation between Diffusion constant D and Mobility μ?", options: ["D / μ = kT / e", "D * μ = 1", "D = μ", "None"], correctAnswer: 0, explanation: "Links thermodynamic and transport properties." },
+    { id: "phy110-u5-43", unit: 5, topic: 'Solar Cell', difficulty: 'medium', question: "Silicon solar cells have efficiency around ___.", options: ["15-25%", "90%", "5%", "100%"], correctAnswer: 0, explanation: "Limited by band gap and losses." },
+    { id: "phy110-u5-44", unit: 5, topic: 'Photoconductivity', difficulty: 'medium', question: "Increase in conductivity due to light absorption?", options: ["Photoconductivity", "Piezoelectricity", "Hall effect", "None"], correctAnswer: 0, explanation: "Photon energy boosts electrons across Eg." },
+    { id: "phy110-u5-45", unit: 5, topic: 'Band Gap', difficulty: 'easy', question: "Eg of Silicon at 300K is ___.", options: ["1.1 eV", "0.67 eV", "5 eV", "0 eV"], correctAnswer: 0, explanation: "Standard semiconductor value." },
+    { id: "phy110-u5-46", unit: 5, topic: 'Band Gap', difficulty: 'easy', question: "Eg of Germanium at 300K is ___.", options: ["0.67 eV", "1.1 eV", "2 eV", "None"], correctAnswer: 0, explanation: "Lower than Silicon." },
+    { id: "phy110-u5-47", unit: 5, topic: 'Exciton', difficulty: 'hard', question: "A bound state of an electron and a hole?", options: ["Exciton", "Proton", "Atom", "Neutron"], correctAnswer: 0, explanation: "Quasi-particle in solids." },
+    { id: "phy110-u5-48", unit: 5, topic: 'Phonon', difficulty: 'medium', question: "Quantum of lattice vibration?", options: ["Phonon", "Photon", "Gluon", "Graviton"], correctAnswer: 0, explanation: "Carries heat/sound in crystals." },
+    { id: "phy110-u5-49", unit: 5, topic: 'Intrinsic', difficulty: 'easy', question: "At 0 K, a pure semiconductor behaves as an ___.", options: ["Insulator", "Conductor", "Metal", "Superconductor"], correctAnswer: 0, explanation: "No thermal energy to excite electrons." },
+    { id: "phy110-u5-50", unit: 5, topic: 'Direct Band Gap', difficulty: 'hard', question: "Why is Silicon not used for making LEDs?", options: ["It has an indirect band gap", "It is too expensive", "It is an insulator", "None"], correctAnswer: 0, explanation: "Recombination mostly turns into heat, not light." },
+    { id: "phy110-u5-51", unit: 5, topic: 'Mobility', difficulty: 'medium', question: "Do holes have higher mobility than electrons?", options: ["No (Electrons are usually faster)", "Yes", "Always equal", "Depends on color"], correctAnswer: 0, explanation: "Valence band mechanism for holes is slower." },
+    { id: "phy110-u5-52", unit: 5, topic: 'Doping', difficulty: 'medium', question: "Doping concentration is usually in the range of ___.", options: ["ppm (parts per million)", "50%", "100%", "None"], correctAnswer: 0, explanation: "Even tiny amounts change properties drastically." },
+    { id: "phy110-u5-53", unit: 5, topic: 'Drift', difficulty: 'easy', question: "Drift current is proportional to ___.", options: ["Applied Electric Field", "Gravity", "Light", "None"], correctAnswer: 0, explanation: "J_drift = σE." },
+    { id: "phy110-u5-54", unit: 5, topic: 'Semiconductors', difficulty: 'easy', question: "Major charge carriers in P-type?", options: ["Holes", "Electrons", "Ions", "Photons"], correctAnswer: 0, explanation: "Positive (P) type." },
+    { id: "phy110-u5-55", unit: 5, topic: 'Semiconductors', difficulty: 'easy', question: "Major charge carriers in N-type?", options: ["Electrons", "Holes", "Neutrons", "None"], correctAnswer: 0, explanation: "Negative (N) type." },
+    { id: "phy110-u5-56", unit: 5, topic: 'Semiconductors', difficulty: 'medium', question: "Holes are majorly found in ___ band.", options: ["Valence Band", "Conduction Band", "Forbidden Gap", "None"], correctAnswer: 0, explanation: "Missing electrons in filled states." },
+    { id: "phy110-u5-57", unit: 5, topic: 'Band Theory', difficulty: 'easy', question: "Who originated Band Theory of solids?", options: ["Felix Bloch", "Newton", "Einstein", "Bohr"], correctAnswer: 0, explanation: "Bloch's Theorem for electrons in periodic potential." },
+    { id: "phy110-u5-58", unit: 5, topic: 'Superconductivity', difficulty: 'medium', question: "Resistance of a superconductor at critical temperature becomes ___.", options: ["Exactly Zero", "Small", "Infinite", "Negative"], correctAnswer: 0, explanation: "Discovery by Kamerlingh Onnes." },
+    { id: "phy110-u5-59", unit: 5, topic: 'Meissner Effect', difficulty: 'hard', question: "Expulsion of magnetic field from a superconductor?", options: ["Meissner Effect", "Hall Effect", "Stark Effect", "None"], correctAnswer: 0, explanation: "Perfect diamagnetism." },
+    { id: "phy110-u5-60", unit: 5, topic: 'Lattice', difficulty: 'easy', question: "Crystal lattice is a ___ concept.", options: ["Geometric", "Chemical", "Biological", "None"], correctAnswer: 0, explanation: "Abstraction for repeating patterns." },
+    { id: "phy110-u5-61", unit: 5, topic: 'Hall effect', difficulty: 'hard', question: "Hall angle is the angle between ___.", options: ["Net field and Current", "Current and Voltage", "Magnetic field and gravity", "None"], correctAnswer: 0, explanation: "Defines the deflection of flow." },
+    { id: "phy110-u5-62", unit: 5, topic: 'Semiconductors', difficulty: 'medium', question: "Unit of Rh (Hall constant)?", options: ["m³ / Coulomb", "Coulomb / m³", "Ohm", "Farad"], correctAnswer: 0, explanation: "Inverse of charge density." },
+    { id: "phy110-u5-63", unit: 5, topic: 'Fermi Level', difficulty: 'hard', question: "As T increases, Ef in N-type shifts ___.", options: ["Downwards (towards intrinsic level)", "Upwards", "To zero", "None"], correctAnswer: 0, explanation: "Intrinsic carrier generation starts dominating at high T." },
+    { id: "phy110-u5-64", unit: 5, topic: 'Solar cell', difficulty: 'hard', question: "VOC stands for ___ in solar cells.", options: ["Open Circuit Voltage", "Output Capacity", "Variable Current", "None"], correctAnswer: 0, explanation: "Voltage when current is zero." },
+    { id: "phy110-u5-65", unit: 5, topic: 'Carrier density', difficulty: 'hard', question: "Intrinsic carrier concentration ni depends on ___.", options: ["Temperature and Eg", "Time", "Size", "None"], correctAnswer: 0, explanation: "ni ∝ exp(-Eg / 2kT)." },
+    { id: "phy110-u5-66", unit: 5, topic: 'Effective mass', difficulty: 'hard', question: "Flat bands have ___ effective mass.", options: ["Higher", "Lower", "Zero", "Infinite"], correctAnswer: 0, explanation: "Curvature is low, so m* is large." },
+    { id: "phy110-u5-67", unit: 5, topic: 'Theory', difficulty: 'hard', question: "Classical free electron theory fails to explain ___.", options: ["Specific heat of metals", "Ohm's law", "Drift", "None"], correctAnswer: 0, explanation: "Predicts much higher specific heat than observed." },
+    { id: "phy110-u5-68", unit: 5, topic: 'Quantum Theory', difficulty: 'hard', question: "Sommerfeld model improved free electron theory by ___.", options: ["Using Fermi-Dirac statistics", "Adding light", "Ignoring electrons", "None"], correctAnswer: 0, explanation: "Combined Quantum mechanics with electron gas model." },
+    { id: "phy110-u5-69", unit: 5, topic: 'Brillouin Zone', difficulty: 'hard', question: "Wigner-Seitz cell in reciprocal lattice?", options: ["Brillouin Zone", "Unit cell", "Basis", "None"], correctAnswer: 0, explanation: "Used to analyze wave propagation in crystals." },
+    { id: "phy110-u5-70", unit: 5, topic: 'Effective Mass', difficulty: 'easy', question: "Symbol for effective mass?", options: ["m*", "m", "me", "M"], correctAnswer: 0, explanation: "Star denotes 'renormalized' value." },
+    { id: "phy110-u5-71", unit: 5, topic: 'Material', difficulty: 'easy', question: "Which is a common III-V semiconductor?", options: ["GaAs (Gallium Arsenide)", "Silicon", "Carbon", "NaCl"], correctAnswer: 0, explanation: "Used in high speed and optoelectronic devices." },
+    { id: "phy110-u5-72", unit: 5, topic: 'Doping', difficulty: 'medium', question: "Donor levels are located ___.", options: ["Just below Conduction Band", "Above CV", "In Valence Band", "None"], correctAnswer: 0, explanation: "Easy to ionize thermally." },
+    { id: "phy110-u5-73", unit: 5, topic: 'Doping', difficulty: 'medium', question: "Acceptor levels are located ___.", options: ["Just above Valence Band", "Below VB", "In CB", "None"], correctAnswer: 0, explanation: "Easily capture valence electrons." },
+    { id: "phy110-u5-74", unit: 5, topic: 'Mean free time', difficulty: 'medium', question: "τ = l / v. If l is 100 nm and v is 10^6 m/s, τ is?", options: ["10^-13 s", "1 s", "1 ms", "10^-6 s"], correctAnswer: 0, explanation: "Typical scattering timescale in metals." },
+    { id: "phy110-u5-75", unit: 5, topic: 'Superconductivity', difficulty: 'medium', question: "Critical Field (Hc) is the ___.", options: ["Magnetic field above which superconductivity is lost", "Field required to start it", "Zero", "None"], correctAnswer: 0, explanation: "Depends on temperature." },
+    { id: "phy110-u5-76", unit: 5, topic: 'BCS Theory', difficulty: 'hard', question: "BCS theory explains superconductivity using ___ pairs.", options: ["Cooper pairs", "Electron pairs", "Hole pairs", "Atomic pairs"], correctAnswer: 0, explanation: "Bardeen, Cooper, Schrieffer (1957)." },
+    { id: "phy110-u5-77", unit: 5, topic: 'Fermi energy', difficulty: 'easy', question: "Ef for Copper is about ___.", options: ["7.0 eV", "0.1 eV", "100 eV", "Zero"], correctAnswer: 0, explanation: "Typical value for good metals." },
+    { id: "phy110-u5-78", unit: 5, topic: 'Work Function', difficulty: 'medium', question: "Energy to move electron from Fermi level to vacuum?", options: ["Work Function", "Band Gap", "Potential", "None"], correctAnswer: 0, explanation: "Physical surface property." },
+    { id: "phy110-u5-79", unit: 5, topic: 'Physics', difficulty: 'easy', question: "Fermi level is a ___.", options: ["Hypothetical energy level", "Physical object", "Point in space", "None"], correctAnswer: 0, explanation: "Mathematical concept for statistics." },
+    { id: "phy110-u5-80", unit: 5, topic: 'Semiconductors', difficulty: 'medium', question: "Extrinsic conductivity dominates at ___ temperatures.", options: ["Low / Room temperature", "Very high", "Infinite", "None"], correctAnswer: 0, explanation: "At very high T, intrinsic carriers outnumber dopants." },
+    { id: "phy110-u5-81", unit: 5, topic: 'Drift velocity', difficulty: 'medium', question: "Order of drift velocity in normal wires?", options: ["mm/s (very slow)", "Speed of light", "m/s", "None"], correctAnswer: 0, explanation: "Signal travels fast (EM field), but electrons crawl." },
+    { id: "phy110-u5-82", unit: 5, topic: 'Current', difficulty: 'easy', question: "Units of Current Density J?", options: ["Ampere / m²", "Ampere", "Volt / m", "None"], correctAnswer: 0, explanation: "Rate of flow per unit area." },
+    { id: "phy110-u5-83", unit: 5, topic: 'Theory', difficulty: 'medium', question: "Drude model assumes electrons move ___.", options: ["Freely between collisions", "In circles", "Along lines", "None"], correctAnswer: 0, explanation: "Ballistic motion between scattering events." },
+    { id: "phy110-u5-84", unit: 5, topic: 'Doping', difficulty: 'easy', question: "Adding impurities to a crystal is ___.", options: ["Doping", "Cleaning", "Melting", "None"], correctAnswer: 0, explanation: "Key process in semi-industry." },
+    { id: "phy110-u5-85", unit: 5, topic: 'Silicon', difficulty: 'easy', question: "Atomic number of Silicon?", options: ["14", "6", "32", "1"], correctAnswer: 0, explanation: "Group 14 element." },
+    { id: "phy110-u5-86", unit: 5, topic: 'Solar cells', difficulty: 'medium', question: "Used to cover satellites for power?", options: ["Solar panels", "Coal", "Windmills", "None"], correctAnswer: 0, explanation: "Reliable power in space." },
+    { id: "phy110-u5-87", unit: 5, topic: 'Temperature', difficulty: 'easy', question: "Absolute zero is ___ Celsius.", options: ["-273.15", "0", "100", "None"], correctAnswer: 0, explanation: "Lowest theoretical temperature." },
+    { id: "phy110-u5-88", unit: 5, topic: 'Conduction', difficulty: 'easy', question: "Good conductors have many ___.", options: ["Free electrons", "Holes", "Protons", "Neutrons"], correctAnswer: 0, explanation: "Allows current flow." },
+    { id: "phy110-u5-89", unit: 5, topic: 'Valence', difficulty: 'easy', question: "Electrons in outer shell are ___.", options: ["Valence electrons", "Core electrons", "Space electrons", "None"], correctAnswer: 0, explanation: "Participate in bonding/conduction." },
+    { id: "phy110-u5-90", unit: 5, topic: 'Energy', difficulty: 'medium', question: "1 eV = ___ Joules.", options: ["1.6e-19", "1", "9.1e-31", "None"], correctAnswer: 0, explanation: "Energy of one electron through 1 volt." },
+    { id: "phy110-u5-91", unit: 5, topic: 'Fermi Level', difficulty: 'hard', question: "Fermi level in insulators?", options: ["Middle of forbidden gap", "Top of VB", "Bottom of CB", "None"], correctAnswer: 0, explanation: "Similar to intrinsic semiconductors." },
+    { id: "phy110-u5-92", unit: 5, topic: 'Measurement', difficulty: 'easy', question: "Multimeter can measure ___.", options: ["All of these", "Voltage", "Current", "Resistance"], correctAnswer: 0, explanation: "Basic electronic tool." },
+    { id: "phy110-u5-93", unit: 5, topic: 'Diffusion', difficulty: 'hard', question: "Does diffusion require an electric field?", options: ["No (Requires concentration gradient)", "Yes", "Only in water", "None"], correctAnswer: 0, explanation: "Driven by thermal motion." },
+    { id: "phy110-u5-94", unit: 5, topic: 'Reciprocal Lattice', difficulty: 'hard', question: "Direct lattice distance 'd' and reciprocal 'G' related by ___.", options: ["G = 2π / d", "G = d", "G = d²", "None"], correctAnswer: 0, explanation: "Inverse relationship." },
+    { id: "phy110-u5-95", unit: 5, topic: 'Scattering', difficulty: 'medium', question: "Matthiessen's Rule: Total resistivity = ___.", options: ["Lattice scattering + Impurity scattering", "Product", "Difference", "None"], correctAnswer: 0, explanation: "Sum of independent contributions." },
+    { id: "phy110-u5-96", unit: 5, topic: 'Holes', difficulty: 'medium', question: "Charge of a hole is ___.", options: ["+1.6e-19 C", "-1.6e-19 C", "0", "Infinite"], correctAnswer: 0, explanation: "Opposite of electron." },
+    { id: "phy110-u5-97", unit: 5, topic: 'Band Gap', difficulty: 'easy', question: "Eg = 0 for ___.", options: ["Metals", "Silicon", "Rubber", "None"], correctAnswer: 0, explanation: "Overlap means no gap." },
+    { id: "phy110-u5-98", unit: 5, topic: 'Semi', difficulty: 'easy', question: "Most common semiconductor material?", options: ["Silicon", "Gold", "Lead", "Carbon"], correctAnswer: 0, explanation: "Silicon valley namesake." },
+    { id: "phy110-u5-99", unit: 5, topic: 'Final', difficulty: 'easy', question: "PHY110 Unit 5 covers ___.", options: ["Solid State Physics", "Lasers", "Mechanics", "None"], correctAnswer: 0, explanation: "Based on syllabus." }
 ];
