@@ -788,12 +788,10 @@ sys.stdin = io.StringIO("${tc.input}")
                                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-red-500"><path d="M18 6L6 18M6 6l12 12" /></svg>
                                     }
                                   </div>
-                                  {!tr.passed && (
-                                    <div className="space-y-1 font-mono text-[10px]">
-                                      <div className="flex gap-2 text-slate-500"><span>Exp:</span> <span className="text-slate-400">{tr.output || tr.out}</span></div>
-                                      <div className="flex gap-2 text-red-500"><span>Got:</span> <span>{tr.actual || 'No output'}</span></div>
-                                    </div>
-                                  )}
+                                  <div className="space-y-1 font-mono text-[10px]">
+                                    <div className="flex gap-2 text-slate-500"><span>Exp:</span> <span className="text-slate-400 truncate">{(tr.output || tr.out || "").trim()}</span></div>
+                                    <div className={`flex gap-2 ${tr.passed ? 'text-emerald-500/70' : 'text-red-500'}`}><span>Got:</span> <span className="truncate">{tr.actual || 'No output'}</span></div>
+                                  </div>
                                 </div>
                               ))}
                             </div>
@@ -988,13 +986,14 @@ sys.stdin = io.StringIO("${tc.input}")
                   <div className="grid grid-cols-5 gap-2.5">
                     {quizQuestions.map((q, idx) => {
                       if (q.type !== 'coding') return null;
-                      const isAnswered = userAnswers[idx] !== undefined;
+                      const ans = userAnswers[idx];
+                      const isPassed = ans && typeof ans === 'object' && ans.passed === true;
                       const isVisited = visitedQuestions.has(idx);
                       const isCurrent = currentQuestionIdx === idx;
 
                       let bgColor = "bg-slate-100 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500";
                       if (isCurrent) bgColor = "bg-orange-500 text-white shadow-[0_0_15px_rgba(234,88,12,0.3)]";
-                      else if (isAnswered) bgColor = "bg-emerald-500 text-white";
+                      else if (isPassed) bgColor = "bg-emerald-500 text-white";
                       else if (isVisited) bgColor = "bg-red-500 text-white";
 
                       return (
@@ -1219,11 +1218,10 @@ sys.stdin = io.StringIO("${tc.input}")
                                     </span>
                                     <span className="font-mono">Case {idx + 1}</span>
                                   </div>
-                                  {!res.passed && (
-                                    <div className="text-[10px] opacity-70 italic truncate max-w-[200px]">
-                                      Exp: {(res.output || res.out || "").trim()} | Got: {res.actual || 'None'}
-                                    </div>
-                                  )}
+                                  <div className="text-[10px] opacity-70 italic truncate flex gap-4 ml-4">
+                                    <span className="text-slate-500">Exp: {(res.output || res.out || "").trim()}</span>
+                                    <span className={res.passed ? "text-emerald-500" : "text-red-500"}>Got: {res.actual || 'None'}</span>
+                                  </div>
                                 </div>
                               ))}
                             </div>
