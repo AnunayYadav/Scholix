@@ -80,10 +80,6 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
 
   const [solvedQuestionIds, setSolvedQuestionIds] = useState<Set<string>>(new Set());
-  const [isSavingAttempt, setIsSavingAttempt] = useState(false);
-  const [hasSavedAttempt, setHasSavedAttempt] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-  const [pastAttempts, setPastAttempts] = useState<any[]>([]);
   const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -377,52 +373,6 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     }, 0);
   }, [userAnswers, quizQuestions, negativeMarking]);
 
-  const percentage = useMemo(() => quizQuestions.length > 0 ? (score / quizQuestions.length) * 100 : 0, [score, quizQuestions]);
-
-  const handleSaveAttempt = async () => {
-    if (!userProfile) {
-      showToast('Log in to save your results to your account', 'error');
-      return;
-    }
-
-    setIsSavingAttempt(true);
-    try {
-      const attemptData = {
-        subject: selectedSubject?.name || 'Quiz',
-        score,
-        total_questions: quizQuestions.length,
-        date: new Date().toISOString(),
-        is_cached: isCached,
-        selected_units: selectedUnits,
-        selected_difficulties: selectedDifficulties,
-        answers: userAnswers,
-        questions: quizQuestions,
-        percentage: Math.round(percentage),
-        duration: timerMinutes
-      };
-
-      await NexusServer.saveQuizAttempt(userProfile.id, attemptData);
-      setHasSavedAttempt(true);
-      showToast('Attempt saved successfully!', 'success');
-    } catch (err) {
-      console.error(err);
-      showToast('Failed to save attempt', 'error');
-    } finally {
-      setIsSavingAttempt(false);
-    }
-  };
-
-  const loadHistory = async () => {
-    if (!userProfile) return;
-    try {
-      const attempts = await NexusServer.fetchQuizAttempts(userProfile.id);
-      setPastAttempts(attempts);
-      setShowHistory(true);
-    } catch (err) {
-      showToast('Failed to load history', 'error');
-    }
-  };
-
   const unitAnalysis = useMemo(() => {
     if (!quizCompleted) return [];
     const stats: Record<number, { correct: number, total: number, subjective: number }> = {};
@@ -437,7 +387,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     });
     return Object.entries(stats).map(([unit, s]) => ({
       unit: parseInt(unit),
-      accuracy: s.total > 0 ? (s.correct / s.total) * 100 : 100,
+      accuracy: s.total > 0 ? Math.round((s.correct / s.total) * 100) : 100,
       correct: s.correct,
       total: s.total,
       subjective: s.subjective
@@ -726,7 +676,8 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   }
 
   if (quizCompleted || reviewMode) {
-    const percentage = quizQuestions.length > 0 ? (score / quizQuestions.length) * 100 : 0;
+    const rawPercentage = quizQuestions.length > 0 ? (score / quizQuestions.length) * 100 : 0;
+    const percentage = Math.round(rawPercentage);
     return (
       <div className="max-w-5xl mx-auto py-12 space-y-12 animate-fade-in pb-32 px-4 md:px-0" ref={resultRef} id="quiz-result">
         {/* Professional Result Header */}
@@ -804,24 +755,6 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
 
             <div className="pt-6 border-t border-slate-200 dark:border-white/10 flex flex-wrap gap-4">
               <button
-                onClick={handleSaveAttempt}
-                disabled={isSavingAttempt || hasSavedAttempt}
-                className={`flex-1 min-w-[140px] px-6 py-4 rounded-2xl text-sm font-semibold shadow-xl transition-all flex items-center justify-center gap-2 border-none ${
-                   hasSavedAttempt 
-                   ? 'bg-emerald-500 text-white opacity-80 cursor-default' 
-                   : 'bg-emerald-600 hover:bg-emerald-500 text-white active:scale-[0.98]'
-                }`}
-              >
-                {isSavingAttempt ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : hasSavedAttempt ? (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M20 6L9 17l-5-5"/></svg>
-                ) : (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
-                )}
-                {hasSavedAttempt ? 'Saved to Account' : 'Save to Account'}
-              </button>
-              <button
                 onClick={handleGenerate}
                 className="flex-1 min-w-[140px] px-6 py-4 bg-orange-600 text-white rounded-2xl text-sm font-semibold shadow-[0_8px_20px_-8px_#ea580c] hover:shadow-[0_8px_25px_-5px_#ea580c] hover:-translate-y-0.5 active:translate-y-0 transition-all border-none flex items-center justify-center gap-2"
               >
@@ -829,7 +762,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                 Re-take Quiz
               </button>
               <button
-                onClick={() => { setQuizQuestions([]); setQuizCompleted(false); setSelectedSubject(null); setHasSavedAttempt(false); }}
+                onClick={() => { setQuizQuestions([]); setQuizCompleted(false); setSelectedSubject(null); }}
                 className="flex-1 min-w-[140px] px-6 py-4 glass-panel bg-white/50 dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-2xl text-sm font-semibold border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-white/10 transition-all flex items-center justify-center gap-2"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
@@ -1027,17 +960,9 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                     {selectedSubject && isAvailable && (
                       <div className="absolute top-3 right-3 flex items-center gap-1">
                          <div className="flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                         <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 tabular-nums">
-                           {(() => {
-                             const data = QUIZTAKER_DATA[selectedSubject.name];
-                             const allInUnit = [...(data?.mcqs || []), ...(data?.subjective || [])].filter(q => q.unit === u);
-                             const solvedCount = allInUnit.filter(q => solvedQuestionIds.has(q.id)).length;
-                             return `${solvedCount}/${allInUnit.length}`;
-                           })()}
-                         </span>
                       </div>
                     )}
-                    <span className={`text-2xl font-bold tracking-tight ${isSelected ? 'text-orange-600' : isAvailable ? 'text-slate-400 dark:text-slate-600' : 'text-slate-400 dark:text-slate-600'}`}>0{u}</span>
+
                     <span className={`text-[10px] font-medium mt-1 ${isSelected ? 'text-orange-500' : 'text-slate-500 opacity-60'}`}>Unit {u}</span>
                   </button>
                 );

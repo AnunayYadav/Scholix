@@ -94,9 +94,7 @@ difficulty: 'easy',
 topic: 'Empty Subject \'It\' and \'There\'' },
 
     // Professional Communication & Soft Skills
-    {
-        id: "pel130-u1-31",
-        unit: 1,
+    { id: "pel130-u1-31", unit: 1,
         question: "What is the primary focus of 'Communication Skills II' (PEL130)?",
         options: ["Learning basic grammar", "Professional and advanced communication in workplace and social contexts", "Learning to write code", "Basic math calculations"],
         correctAnswer: 1,
@@ -104,9 +102,7 @@ topic: 'Empty Subject \'It\' and \'There\'' },
 difficulty: 'easy',
 topic: 'Substitution: So and Do so'
     },
-    {
-        id: "pel130-u1-32",
-        unit: 1,
+    { id: "pel130-u1-32", unit: 1,
         question: "What is 'Emotional Intelligence' (EI)?",
         options: ["Being very smart in math", "The ability to recognize, understand, and manage our own emotions and those of others", "Suppressing all emotions", "Reading many books about psychology"],
         correctAnswer: 1,
@@ -114,9 +110,7 @@ topic: 'Substitution: So and Do so'
 difficulty: 'easy',
 topic: 'Empty Subject \'It\' and \'There\''
     },
-    {
-        id: "pel130-u1-33",
-        unit: 1,
+    { id: "pel130-u1-33", unit: 1,
         question: "In a 'Group Discussion' (GD), what is being assessed?",
         options: ["Your ability to shout the loudest", "Coordination, leadership, communication, and knowledge", "Your physical strength", "The speed of your speech"],
         correctAnswer: 1,
@@ -124,9 +118,7 @@ topic: 'Empty Subject \'It\' and \'There\''
 difficulty: 'easy',
 topic: 'Leaving Words Out (Ellipsis)'
     },
-    {
-        id: "pel130-u1-34",
-        unit: 1,
+    { id: "pel130-u1-34", unit: 1,
         question: "What is a 'Resume' primarily used for?",
         options: ["As a legal birth certificate", "To showcase skills, education, and experience to potential employers", "To write a personal diary", "To list every single person you know"],
         correctAnswer: 1,
@@ -134,9 +126,7 @@ topic: 'Leaving Words Out (Ellipsis)'
 difficulty: 'easy',
 topic: 'Self Assessment'
     },
-    {
-        id: "pel130-u1-35",
-        unit: 1,
+    { id: "pel130-u1-35", unit: 1,
         question: "What is the 'STAR' method used for in interviews?",
         options: ["Looking at the stars", "Situation, Task, Action, Result", "Singing, Talking, Acting, Running", "Strategy, Tactics, Aim, Role"],
         correctAnswer: 1,
@@ -144,9 +134,7 @@ topic: 'Self Assessment'
 difficulty: 'easy',
 topic: 'Leaving out Subjects and Objects'
     },
-    {
-        id: "pel130-u1-36",
-        unit: 1,
+    { id: "pel130-u1-36", unit: 1,
         question: "What is 'Professional Etiquette'?",
         options: ["The code of ethical and polite behavior in the workplace", "The speed of the internet in the office", "The technical skills required for the job", "The way the office is decorated"],
         correctAnswer: 0,
@@ -154,9 +142,7 @@ topic: 'Leaving out Subjects and Objects'
 difficulty: 'easy',
 topic: 'Substitution: One and Ones'
     },
-    {
-        id: "pel130-u1-37",
-        unit: 1,
+    { id: "pel130-u1-37", unit: 1,
         question: "A 'Cover Letter' is usually sent with:",
         options: ["A birthday card", "A resume", "A shopping list", "A technical manual"],
         correctAnswer: 1,
@@ -164,9 +150,7 @@ topic: 'Substitution: One and Ones'
 difficulty: 'easy',
 topic: 'Leaving Words Out (Ellipsis)'
     },
-    {
-        id: "pel130-u1-38",
-        unit: 1,
+    { id: "pel130-u1-38", unit: 1,
         question: "What is 'Critical Thinking'?",
         options: ["Thinking only about criticisms", "Objective analysis and evaluation of an issue to form a judgment", "Thinking as fast as possible", "Memorizing facts and figures"],
         correctAnswer: 1,
@@ -174,9 +158,7 @@ topic: 'Leaving Words Out (Ellipsis)'
 difficulty: 'easy',
 topic: 'Substitution: So and Do so'
     },
-    {
-        id: "pel130-u1-39",
-        unit: 1,
+    { id: "pel130-u1-39", unit: 1,
         question: "In a presentation, what is the 'Hook'?",
         options: ["A literal metal hook", "An opening statement or element designed to grab the audience's attention", "The last slide of the presentation", "The laser pointer used by the speaker"],
         correctAnswer: 1,
@@ -184,9 +166,7 @@ topic: 'Substitution: So and Do so'
 difficulty: 'easy',
 topic: 'Self Assessment'
     },
-    {
-        id: "pel130-u1-40",
-        unit: 1,
+    { id: "pel130-u1-40", unit: 1,
         question: "What does 'Body Language' in an interview reveal?",
         options: ["Confidence, honesty, and openness", "Only your height", "Exactly what you are thinking in words", "Your favorite color"],
         correctAnswer: 0,
@@ -194,9 +174,7 @@ topic: 'Self Assessment'
 difficulty: 'easy',
 topic: 'Leaving Words Out (Ellipsis)'
     },
-    {
-        id: "pel130-u1-41",
-        unit: 1,
+    { id: "pel130-u1-41", unit: 1,
         question: "What is 'Conflict Resolution'?",
         options: ["Winning every fight", "Finding a peaceful and workable solution to a disagreement", "Ignoring problems until they go away", "Firing anyone who disagrees"],
         correctAnswer: 1,
@@ -204,9 +182,7 @@ topic: 'Leaving Words Out (Ellipsis)'
 difficulty: 'easy',
 topic: 'Substitution: One and Ones'
     },
-    {
-        id: "pel130-u1-42",
-        unit: 1,
+    { id: "pel130-u1-42", unit: 1,
         question: "Which of the following is a key element of a 'Winning Pitch'?",
         options: ["Making it as long as possible", "Focusing on the value/problem solved for the listener", "Using only technical jargon", "Never making eye contact"],
         correctAnswer: 1,
@@ -214,9 +190,7 @@ topic: 'Substitution: One and Ones'
 difficulty: 'easy',
 topic: 'Empty Subject \'It\' and \'There\''
     },
-    {
-        id: "pel130-u1-43",
-        unit: 1,
+    { id: "pel130-u1-43", unit: 1,
         question: "What is 'Public Speaking' anxiety often called?",
         options: ["Glossophobia", "Arachnophobia", "Claustrophobia", "Hydrophobia"],
         correctAnswer: 0,
@@ -224,9 +198,7 @@ topic: 'Empty Subject \'It\' and \'There\''
 difficulty: 'easy',
 topic: 'Leaving Words Out (Ellipsis)'
     },
-    {
-        id: "pel130-u1-44",
-        unit: 1,
+    { id: "pel130-u1-44", unit: 1,
         question: "In professional writing, what does 'Brevity' mean?",
         options: ["Being very rude", "Using short and concise language", "Writing as many pages as possible", "Using very small fonts"],
         correctAnswer: 1,
@@ -234,9 +206,7 @@ topic: 'Leaving Words Out (Ellipsis)'
 difficulty: 'easy',
 topic: 'Substitution: One and Ones'
     },
-    {
-        id: "pel130-u1-45",
-        unit: 1,
+    { id: "pel130-u1-45", unit: 1,
         question: "What is the 'Elevator Pitch'?",
         options: ["A pitch given in a sports stadium", "A very short summary (30-60s) of who you are or what you do", "A long 2-hour lecture", "A pitch given while running"],
         correctAnswer: 1,
@@ -244,9 +214,7 @@ topic: 'Substitution: One and Ones'
 difficulty: 'easy',
 topic: 'Empty Subject \'It\' and \'There\''
     },
-    {
-        id: "pel130-u1-46",
-        unit: 1,
+    { id: "pel130-u1-46", unit: 1,
         question: "Which of the following is 'Email Etiquette'?",
         options: ["Using all capital letters (ALL CAPS)", "Using a clear and concise subject line", "Sending emails at 2 AM to everyone", "Using many emojis in a formal mail"],
         correctAnswer: 1,
@@ -254,9 +222,7 @@ topic: 'Empty Subject \'It\' and \'There\''
 difficulty: 'easy',
 topic: 'Empty Subject \'It\' and \'There\''
     },
-    {
-        id: "pel130-u1-47",
-        unit: 1,
+    { id: "pel130-u1-47", unit: 1,
         question: "What is 'Active Feedback'?",
         options: ["Waiting for someone to finish and saying nothing", "Providing specific, constructive, and timely responses", "Shouting at someone when they make a mistake", "Deleting feedback emails"],
         correctAnswer: 1,
@@ -264,9 +230,7 @@ topic: 'Empty Subject \'It\' and \'There\''
 difficulty: 'easy',
 topic: 'Self Assessment'
     },
-    {
-        id: "pel130-u1-48",
-        unit: 1,
+    { id: "pel130-u1-48", unit: 1,
         question: "What are 'Transferable Skills'?",
         options: ["Skills that only work in one specific job", "Skills like communication or leadership that are useful across different roles/industries", "Skills involving the transfer of money", "Skills for moving furniture"],
         correctAnswer: 1,
@@ -274,9 +238,7 @@ topic: 'Self Assessment'
 difficulty: 'easy',
 topic: 'Leaving out Subjects and Objects'
     },
-    {
-        id: "pel130-u1-49",
-        unit: 1,
+    { id: "pel130-u1-49", unit: 1,
         question: "What is the purpose of a 'Mock Interview'?",
         options: ["To make fun of someone", "To practice and prepare for a real job interview", "To hire someone immediately", "To test the internet connection"],
         correctAnswer: 1,
@@ -284,9 +246,7 @@ topic: 'Leaving out Subjects and Objects'
 difficulty: 'easy',
 topic: 'Substitution: One and Ones'
     },
-    {
-        id: "pel130-u1-50",
-        unit: 1,
+    { id: "pel130-u1-50", unit: 1,
         question: "Which of the following is a part of 'Professional Appearance'?",
         options: ["Dressing appropriately for the industry/company culture", "Always wearing a tuxedo", "Wearing gym clothes to the office", "Wearing a costume"],
         correctAnswer: 0,

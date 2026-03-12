@@ -1,9 +1,7 @@
 import { QuizQuestion } from '../../../types.ts';
 
 export const phy110Unit2MCQs: QuizQuestion[] = [
-    {
-        id: "phy110-u2-1",
-        unit: 2,
+    { id: "phy110-u2-1", unit: 2,
         topic: 'Introduction to Lasers',
         difficulty: 'easy',
         question: "What does the acronym LASER stand for?",
@@ -11,9 +9,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "LASER is an acronym describing the process of generating coherent light through stimulated emission."
     },
-    {
-        id: "phy110-u2-2",
-        unit: 2,
+    { id: "phy110-u2-2", unit: 2,
         topic: 'Emission Process',
         difficulty: 'medium',
         question: "Which process is fundamental to the operation of a laser?",
@@ -21,9 +17,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Stimulated emission produces photons with the same frequency, phase, and direction as the incident photon, leading to amplification."
     },
-    {
-        id: "phy110-u2-3",
-        unit: 2,
+    { id: "phy110-u2-3", unit: 2,
         topic: 'Spontaneous Emission',
         difficulty: 'easy',
         question: "In spontaneous emission, an atom transitions to a lower state and emits a photon ___.",
@@ -31,9 +25,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Spontaneous emission occurs randomly after a certain lifetime in an excited state."
     },
-    {
-        id: "phy110-u2-4",
-        unit: 2,
+    { id: "phy110-u2-4", unit: 2,
         topic: 'Stimulated Emission',
         difficulty: 'hard',
         question: "The concept of stimulated emission was first proposed by ___ in 1917.",
@@ -41,9 +33,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Einstein predicted stimulated emission while deriving Planck's radiation law."
     },
-    {
-        id: "phy110-u2-5",
-        unit: 2,
+    { id: "phy110-u2-5", unit: 2,
         topic: 'Population Inversion',
         difficulty: 'medium',
         question: "What is the condition called when there are more atoms in the excited state than in the ground state?",
@@ -51,9 +41,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Population inversion is a non-equilibrium state required for laser action."
     },
-    {
-        id: "phy110-u2-6",
-        unit: 2,
+    { id: "phy110-u2-6", unit: 2,
         topic: 'Pumping',
         difficulty: 'medium',
         question: "The process of achieving population inversion by supplying energy is called ___.",
@@ -61,9 +49,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Pumping moves atoms from lower energy levels to higher ones using light, electricity, or other energy sources."
     },
-    {
-        id: "phy110-u2-7",
-        unit: 2,
+    { id: "phy110-u2-7", unit: 2,
         topic: 'Metastable State',
         difficulty: 'hard',
         question: "A metastable state is characterized by having ___.",
@@ -71,9 +57,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Metastable states allow atoms to accumulate in the excited level, facilitating population inversion."
     },
-    {
-        id: "phy110-u2-8",
-        unit: 2,
+    { id: "phy110-u2-8", unit: 2,
         topic: 'Monochromaticity',
         difficulty: 'easy',
         question: "A laser beam having a single color or wavelength is described as ___.",
@@ -81,9 +65,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Lasers emit light within a very narrow range of wavelengths."
     },
-    {
-        id: "phy110-u2-9",
-        unit: 2,
+    { id: "phy110-u2-9", unit: 2,
         topic: 'Coherence',
         difficulty: 'medium',
         question: "The property where all photons in a laser beam have the same phase is called ___.",
@@ -91,9 +73,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Coherence allows for the stable interference patterns used in holography."
     },
-    {
-        id: "phy110-u2-10",
-        unit: 2,
+    { id: "phy110-u2-10", unit: 2,
         topic: 'Directionality',
         difficulty: 'easy',
         question: "The property of a laser beam to travel long distances without spreading much is ___.",
@@ -101,9 +81,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Laser beams have very low divergence compared to conventional light sources."
     },
-    {
-        id: "phy110-u2-11",
-        unit: 2,
+    { id: "phy110-u2-11", unit: 2,
         topic: 'Ruby Laser',
         difficulty: 'medium',
         question: "The first successful laser (Ruby Laser) was built by ___ in 1960.",
@@ -111,9 +89,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Maiman operated the first ruby laser at Hughes Research Laboratories."
     },
-    {
-        id: "phy110-u2-12",
-        unit: 2,
+    { id: "phy110-u2-12", unit: 2,
         topic: 'Ruby Laser',
         difficulty: 'hard',
         question: "In a Ruby laser, the active medium consists of Al2O3 doped with ___ atoms.",
@@ -121,9 +97,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "The Cr3+ ions replace some Al atoms and provide the necessary energy levels for lasing."
     },
-    {
-        id: "phy110-u2-13",
-        unit: 2,
+    { id: "phy110-u2-13", unit: 2,
         topic: 'Ruby Laser',
         difficulty: 'medium',
         question: "Which type of pumping is used in a Ruby laser?",
@@ -131,9 +105,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "A helical flash lamp provides intense light to pump the ruby rod."
     },
-    {
-        id: "phy110-u2-14",
-        unit: 2,
+    { id: "phy110-u2-14", unit: 2,
         topic: 'He-Ne Laser',
         difficulty: 'medium',
         question: "The He-Ne laser is an example of a ___ laser.",
@@ -141,9 +113,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "It uses a mixture of Helium and Neon gas as the active medium."
     },
-    {
-        id: "phy110-u2-15",
-        unit: 2,
+    { id: "phy110-u2-15", unit: 2,
         topic: 'He-Ne Laser',
         difficulty: 'hard',
         question: "In a He-Ne laser, the actual lasing action takes place in ___ atoms.",
@@ -151,9 +121,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Helium atoms transfer energy to Neon atoms via collisions; Neon atoms then emit the laser light."
     },
-    {
-        id: "phy110-u2-16",
-        unit: 2,
+    { id: "phy110-u2-16", unit: 2,
         topic: 'Nd-YAG Laser',
         difficulty: 'hard',
         question: "Nd-YAG stands for Neodymium-doped ___.",
@@ -161,9 +129,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "It is a highly efficient four-level solid-state laser."
     },
-    {
-        id: "phy110-u2-17",
-        unit: 2,
+    { id: "phy110-u2-17", unit: 2,
         topic: 'Laser Components',
         difficulty: 'medium',
         question: "The pair of parallel mirrors at the ends of a laser rod forms an ___.",
@@ -171,9 +137,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "The resonator provides the feedback needed to sustain the chain reaction of stimulated emission."
     },
-    {
-        id: "phy110-u2-18",
-        unit: 2,
+    { id: "phy110-u2-18", unit: 2,
         topic: 'Population Inversion',
         difficulty: 'hard',
         question: "According to Boltzmann distribution, in thermal equilibrium, N2/N1 is proportional to ___.",
@@ -181,9 +145,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "In equilibrium, higher energy states are always less populated than lower ones."
     },
-    {
-        id: "phy110-u2-19",
-        unit: 2,
+    { id: "phy110-u2-19", unit: 2,
         topic: 'Einstein Coefficients',
         difficulty: 'hard',
         question: "The ratio of spontaneous to stimulated emission rate is proportional to ___.",
@@ -191,9 +153,7 @@ export const phy110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "This means spontaneous emission dominates at higher frequencies (like X-rays)."
     },
-    {
-        id: "phy110-u2-20",
-        unit: 2,
+    { id: "phy110-u2-20", unit: 2,
         topic: 'Laser Characteristics',
         difficulty: 'medium',
         question: "The high intensity of laser light is primarily due to its ___ property.",

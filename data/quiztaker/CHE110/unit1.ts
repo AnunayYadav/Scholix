@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const che110Unit1MCQs: QuizQuestion[] = [
-    {
-        id: "che110-u1-1",
-        unit: 1,
+    { id: "che110-u1-1", unit: 1,
         topic: 'Introduction to Environment',
         difficulty: 'easy',
         question: "The term 'Environment' is derived from which language?",
@@ -11,9 +9,7 @@ export const che110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "The word 'Environment' comes from the French word 'Environner' meaning to encircle or surround."
     },
-    {
-        id: "che110-u1-2",
-        unit: 1,
+    { id: "che110-u1-2", unit: 1,
         topic: 'Spheres of Earth',
         difficulty: 'easy',
         question: "Which sphere of the earth contains all the water bodies?",
@@ -21,9 +17,7 @@ export const che110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "The hydrosphere includes all liquid water on Earth, such as oceans, rivers, and lakes."
     },
-    {
-        id: "che110-u1-3",
-        unit: 1,
+    { id: "che110-u1-3", unit: 1,
         topic: 'Sustainable Development',
         difficulty: 'medium',
         question: "Sustainable development was first defined in which report?",
@@ -31,9 +25,7 @@ export const che110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Sustainable development was defined in the 1987 Brundtland Report ('Our Common Future')."
     },
-    {
-        id: "che110-u1-4",
-        unit: 1,
+    { id: "che110-u1-4", unit: 1,
         topic: 'Sustainable Development Goals',
         difficulty: 'medium',
         question: "How many Sustainable Development Goals (SDGs) were set by the UN?",
@@ -41,9 +33,7 @@ export const che110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "There are 17 SDGs adopted by the United Nations in 2015."
     },
-    {
-        id: "che110-u1-5",
-        unit: 1,
+    { id: "che110-u1-5", unit: 1,
         topic: 'Sustainable Development',
         difficulty: 'hard',
         question: "What is the primary goal of sustainable development?",
@@ -51,9 +41,7 @@ export const che110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Sustainable development balances economic, social, and environmental needs for now and later."
     },
-    {
-        id: "che110-u1-6",
-        unit: 1,
+    { id: "che110-u1-6", unit: 1,
         topic: 'Pillars of Sustainability',
         difficulty: 'medium',
         question: "Which of the following is NOT a pillar of sustainability?",
@@ -61,9 +49,7 @@ export const che110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 3,
         explanation: "The three core pillars are Social, Economic, and Environmental."
     },
-    {
-        id: "che110-u1-7",
-        unit: 1,
+    { id: "che110-u1-7", unit: 1,
         topic: 'Carrying Capacity',
         difficulty: 'hard',
         question: "Carrying capacity refers to?",
@@ -71,9 +57,7 @@ export const che110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Carrying capacity is the maximum population size of a biological species that can be sustained in that specific environment."
     },
-    {
-        id: "che110-u1-8",
-        unit: 1,
+    { id: "che110-u1-8", unit: 1,
         topic: 'Spheres of Earth',
         difficulty: 'easy',
         question: "The thin layer of air surrounding the earth is called?",
@@ -81,9 +65,7 @@ export const che110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "The atmosphere is the envelope of gases surrounding the planet."
     },
-    {
-        id: "che110-u1-9",
-        unit: 1,
+    { id: "che110-u1-9", unit: 1,
         topic: 'Introduction to Environment',
         difficulty: 'easy',
         question: "Biotic components of environment include?",
@@ -91,9 +73,7 @@ export const che110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Biotic factors are the living components of an ecosystem."
     },
-    {
-        id: "che110-u1-10",
-        unit: 1,
+    { id: "che110-u1-10", unit: 1,
         topic: 'Sustainable Development Goals',
         difficulty: 'hard',
         question: "What is SDG 13 related to?",

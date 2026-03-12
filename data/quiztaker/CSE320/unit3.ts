@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const cse320Unit3MCQs: QuizQuestion[] = [
-    {
-        id: "cse320-u3-1",
-        unit: 3,
+    { id: "cse320-u3-1", unit: 3,
         topic: 'Unified Process',
         difficulty: 'easy',
         question: "Which of the following is the first phase of the Unified Process?",
@@ -11,9 +9,7 @@ export const cse320Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "The Unified Process (UP) consists of four phases: Inception, Elaboration, Construction, and Transition."
     },
-    {
-        id: "cse320-u3-2",
-        unit: 3,
+    { id: "cse320-u3-2", unit: 3,
         topic: 'UML Modelling',
         difficulty: 'easy',
         question: "UML stands for?",
@@ -21,9 +17,7 @@ export const cse320Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "UML is a standardized general-purpose modeling language in the field of software engineering."
     },
-    {
-        id: "cse320-u3-3",
-        unit: 3,
+    { id: "cse320-u3-3", unit: 3,
         topic: 'Use Case Diagrams',
         difficulty: 'medium',
         question: "Which diagram shows the interactions between actors and the system?",
@@ -31,9 +25,7 @@ export const cse320Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Use Case diagrams describe the functional requirements of the system through actors and use cases."
     },
-    {
-        id: "cse320-u3-4",
-        unit: 3,
+    { id: "cse320-u3-4", unit: 3,
         topic: 'Class Diagrams',
         difficulty: 'medium',
         question: "A Class Diagram represents which view of a system?",
@@ -41,9 +33,7 @@ export const cse320Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Class diagrams describe the static structure of the system by showing its classes, attributes, operations, and relationships."
     },
-    {
-        id: "cse320-u3-5",
-        unit: 3,
+    { id: "cse320-u3-5", unit: 3,
         topic: 'Sequence Diagrams',
         difficulty: 'hard',
         question: "In a Sequence Diagram, vertical dashed lines represent?",
@@ -51,9 +41,7 @@ export const cse320Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Lifelines represent the existence of an object over a period of time."
     },
-    {
-        id: "cse320-u3-6",
-        unit: 3,
+    { id: "cse320-u3-6", unit: 3,
         topic: 'Unified Process',
         difficulty: 'hard',
         question: "In which phase of UP is the architecture mostly established?",
@@ -61,9 +49,7 @@ export const cse320Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "The Elaboration phase focuses on specifying requirements and designing the architecture."
     },
-    {
-        id: "cse320-u3-7",
-        unit: 3,
+    { id: "cse320-u3-7", unit: 3,
         topic: 'Class Diagrams',
         difficulty: 'hard',
         question: "Aggregation in a Class Diagram is represented by?",
@@ -71,9 +57,7 @@ export const cse320Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "A hollow diamond represents a 'whole-part' relationship where the 'part' can exist without the 'whole'."
     },
-    {
-        id: "cse320-u3-8",
-        unit: 3,
+    { id: "cse320-u3-8", unit: 3,
         topic: 'Activity Diagrams',
         difficulty: 'medium',
         question: "Which diagram is best for modeling the workflow or business processes?",
@@ -81,9 +65,7 @@ export const cse320Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Activity diagrams are graphical representations of workflows of stepwise activities and actions."
     },
-    {
-        id: "cse320-u3-9",
-        unit: 3,
+    { id: "cse320-u3-9", unit: 3,
         topic: 'Traceability',
         difficulty: 'medium',
         question: "Traceability from requirements ensures?",
@@ -91,9 +73,7 @@ export const cse320Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Traceability links requirements to later artifacts like design components and test cases."
     },
-    {
-        id: "cse320-u3-10",
-        unit: 3,
+    { id: "cse320-u3-10", unit: 3,
         topic: 'Code Review',
         difficulty: 'easy',
         question: "Which is a formal code review technique?",

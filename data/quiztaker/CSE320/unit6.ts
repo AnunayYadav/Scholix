@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const cse320Unit6MCQs: QuizQuestion[] = [
-    {
-        id: "cse320-u6-1",
-        unit: 6,
+    { id: "cse320-u6-1", unit: 6,
         topic: 'Reliability',
         difficulty: 'easy',
         question: "MTTF stands for?",
@@ -11,9 +9,7 @@ export const cse320Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Mean Time To Failure (MTTF) is a measure of reliability for non-repairable systems."
     },
-    {
-        id: "cse320-u6-2",
-        unit: 6,
+    { id: "cse320-u6-2", unit: 6,
         topic: 'Reliability',
         difficulty: 'medium',
         question: "MTBF (Mean Time Between Failures) formula is?",
@@ -21,9 +17,7 @@ export const cse320Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "MTBF = MTTF + MTTR (Mean Time To Repair)."
     },
-    {
-        id: "cse320-u6-3",
-        unit: 6,
+    { id: "cse320-u6-3", unit: 6,
         topic: 'Quality Standards',
         difficulty: 'hard',
         question: "How many levels are there in the SEI-CMM (Capability Maturity Model)?",
@@ -31,9 +25,7 @@ export const cse320Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "SEI-CMM has 5 levels: Initial, Repeatable, Defined, Managed, and Optimizing."
     },
-    {
-        id: "cse320-u6-4",
-        unit: 6,
+    { id: "cse320-u6-4", unit: 6,
         topic: 'Quality Attributes',
         difficulty: 'medium',
         question: "ISO 9126 standard is for?",
@@ -41,9 +33,7 @@ export const cse320Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "ISO/IEC 9126 is an international standard for the evaluation of software quality."
     },
-    {
-        id: "cse320-u6-5",
-        unit: 6,
+    { id: "cse320-u6-5", unit: 6,
         topic: 'Quality Management',
         difficulty: 'medium',
         question: "Quality Assurance (QA) focuses on ___.",
@@ -51,9 +41,7 @@ export const cse320Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "QA is proactive and preventitive, focusing on how a product is built."
     },
-    {
-        id: "cse320-u6-6",
-        unit: 6,
+    { id: "cse320-u6-6", unit: 6,
         topic: 'Quality Management',
         difficulty: 'medium',
         question: "Quality Control (QC) focuses on ___.",
@@ -61,9 +49,7 @@ export const cse320Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "QC is reactive and detective, focusing on identifying defects in the final product."
     },
-    {
-        id: "cse320-u6-7",
-        unit: 6,
+    { id: "cse320-u6-7", unit: 6,
         topic: 'Emerging Trends',
         difficulty: 'hard',
         question: "Serverless computing allows developers to ___.",
@@ -71,9 +57,7 @@ export const cse320Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Cloud provider automatically manages the infrastructure scaling and execution."
     },
-    {
-        id: "cse320-u6-8",
-        unit: 6,
+    { id: "cse320-u6-8", unit: 6,
         topic: 'Clean Code',
         difficulty: 'medium',
         question: "The 'Boy Scout Rule' in Clean Code stands for?",
@@ -81,9 +65,7 @@ export const cse320Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Continuous small improvements prevent technical debt."
     },
-    {
-        id: "cse320-u6-9",
-        unit: 6,
+    { id: "cse320-u6-9", unit: 6,
         topic: 'Reliability',
         difficulty: 'hard',
         question: "Software Availability formula?",
@@ -91,9 +73,7 @@ export const cse320Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Probability that a system is operational at a given time."
     },
-    {
-        id: "cse320-u6-10",
-        unit: 6,
+    { id: "cse320-u6-10", unit: 6,
         topic: 'Quality Attributes',
         difficulty: 'easy',
         question: "Conformance to requirements is a definition of ___.",

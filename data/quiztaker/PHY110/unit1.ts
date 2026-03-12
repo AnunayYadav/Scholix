@@ -1,9 +1,7 @@
 import { QuizQuestion } from '../../../types.ts';
 
 export const phy110Unit1MCQs: QuizQuestion[] = [
-    {
-        id: "phy110-u1-1",
-        unit: 1,
+    { id: "phy110-u1-1", unit: 1,
         topic: 'Scalar and Vector Fields',
         difficulty: 'easy',
         question: "A field that assigns a single numerical value to every point in space is called?",
@@ -11,9 +9,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "A scalar field, like temperature or pressure, associates a scalar value with every point in space."
     },
-    {
-        id: "phy110-u1-2",
-        unit: 1,
+    { id: "phy110-u1-2", unit: 1,
         topic: 'Scalar and Vector Fields',
         difficulty: 'easy',
         question: "Which of the following is an example of a vector field?",
@@ -21,9 +17,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "A vector field associates a vector (magnitude and direction) with every point in space, like the magnetic or electric field."
     },
-    {
-        id: "phy110-u1-3",
-        unit: 1,
+    { id: "phy110-u1-3", unit: 1,
         topic: 'Gradient',
         difficulty: 'medium',
         question: "The gradient of a scalar field results in a?",
@@ -31,9 +25,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "The gradient (∇V) of a scalar field V is a vector that points in the direction of the maximum rate of increase of V."
     },
-    {
-        id: "phy110-u1-4",
-        unit: 1,
+    { id: "phy110-u1-4", unit: 1,
         topic: 'Divergence',
         difficulty: 'medium',
         question: "The divergence of a vector field A (∇·A) represents?",
@@ -41,9 +33,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Divergence measures the net outward flow of a vector field from a point; positive means a source, negative means a sink."
     },
-    {
-        id: "phy110-u1-5",
-        unit: 1,
+    { id: "phy110-u1-5", unit: 1,
         topic: 'Curl',
         difficulty: 'medium',
         question: "The curl of a vector field A (∇×A) measures?",
@@ -51,9 +41,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Curl is a vector that describes the infinitesimal rotation of a vector field at a given point."
     },
-    {
-        id: "phy110-u1-6",
-        unit: 1,
+    { id: "phy110-u1-6", unit: 1,
         topic: 'Gauss Theorem',
         difficulty: 'hard',
         question: "Gauss's Divergence Theorem relates which two types of integrals?",
@@ -61,9 +49,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Gauss's theorem states that the surface integral of a vector field over a closed surface is equal to the volume integral of its divergence over the enclosed volume."
     },
-    {
-        id: "phy110-u1-7",
-        unit: 1,
+    { id: "phy110-u1-7", unit: 1,
         topic: 'Stokes Theorem',
         difficulty: 'hard',
         question: "Stokes's Theorem relates which two types of integrals?",
@@ -71,9 +57,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Stokes's theorem states that the line integral of a vector field around a closed loop is equal to the surface integral of its curl over a surface bounded by the loop."
     },
-    {
-        id: "phy110-u1-8",
-        unit: 1,
+    { id: "phy110-u1-8", unit: 1,
         topic: 'Maxwell Equations',
         difficulty: 'easy',
         question: "How many fundamental equations are there in Maxwell's electromagnetic theory?",
@@ -81,9 +65,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Maxwell's theory is encapsulated in four equations: Gauss's Law for Electricity, Gauss's Law for Magnetism, Faraday's Law, and Ampere-Maxwell Law."
     },
-    {
-        id: "phy110-u1-9",
-        unit: 1,
+    { id: "phy110-u1-9", unit: 1,
         topic: 'Gauss Law for Electricity',
         difficulty: 'medium',
         question: "The differential form of Gauss's Law for Electricity is ∇·D = ?",
@@ -91,9 +73,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Gauss's law in differential form states that the divergence of electric displacement (D) is equal to the volume charge density (ρ)."
     },
-    {
-        id: "phy110-u1-10",
-        unit: 1,
+    { id: "phy110-u1-10", unit: 1,
         topic: 'Gauss Law for Magnetism',
         difficulty: 'medium',
         question: "The equation ∇·B = 0 implies?",
@@ -101,9 +81,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "The divergence of the magnetic field is always zero, which physically means there are no isolated magnetic poles (monopoles)."
     },
-    {
-        id: "phy110-u1-11",
-        unit: 1,
+    { id: "phy110-u1-11", unit: 1,
         topic: 'Displacement Current',
         difficulty: 'hard',
         question: "Who introduced the concept of displacement current to correct Ampere's law?",
@@ -111,9 +89,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Maxwell added the displacement current term (∂D/∂t) to Ampere's law to make it consistent with the continuity equation for time-varying fields."
     },
-    {
-        id: "phy110-u1-12",
-        unit: 1,
+    { id: "phy110-u1-12", unit: 1,
         topic: 'Physical Significance',
         difficulty: 'medium',
         question: "Faraday's Law of Induction (∇×E = -∂B/∂t) states that?",
@@ -121,9 +97,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Faraday's law describes how a changing magnetic field produces a circulating electric field."
     },
-    {
-        id: "phy110-u1-13",
-        unit: 1,
+    { id: "phy110-u1-13", unit: 1,
         topic: 'Ampere Circuital Law',
         difficulty: 'medium',
         question: "The original Ampere's Law (∇×H = J) is valid only for?",
@@ -131,9 +105,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "The original form of Ampere's Law does not account for time-varying electric fields and is only valid for magnetostatics (steady currents)."
     },
-    {
-        id: "phy110-u1-14",
-        unit: 1,
+    { id: "phy110-u1-14", unit: 1,
         topic: 'Continuity Equation',
         difficulty: 'hard',
         question: "The continuity equation ∇·J + ∂ρ/∂t = 0 is a statement of?",
@@ -141,9 +113,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "The continuity equation expresses the fundamental physical law that electric charge can be neither created nor destroyed."
     },
-    {
-        id: "phy110-u1-15",
-        unit: 1,
+    { id: "phy110-u1-15", unit: 1,
         topic: 'Poisson Equation',
         difficulty: 'hard',
         question: "The Poisson equation for electric potential in a region with charge density ρ is?",
@@ -151,9 +121,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "The Poisson equation relates the second spatial derivative of the potential (Laplacian) to the charge density."
     },
-    {
-        id: "phy110-u1-16",
-        unit: 1,
+    { id: "phy110-u1-16", unit: 1,
         topic: 'Laplace Equation',
         difficulty: 'medium',
         question: "In a charge-free region (ρ = 0), the Poisson equation reduces to?",
@@ -161,9 +129,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "When there is no charge in a region, the electric potential satisfies the Laplace equation."
     },
-    {
-        id: "phy110-u1-17",
-        unit: 1,
+    { id: "phy110-u1-17", unit: 1,
         topic: 'Maxwell Equations',
         difficulty: 'easy',
         question: "Which Maxwell equation describes why you can't have a magnet with only a North pole?",
@@ -171,9 +137,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "∇·B = 0 states that magnetic lines of force are continuous loops, hence no isolated poles."
     },
-    {
-        id: "phy110-u1-18",
-        unit: 1,
+    { id: "phy110-u1-18", unit: 1,
         topic: 'Concept of Curl',
         difficulty: 'easy',
         question: "If the curl of a vector field is zero at all points, the field is said to be?",
@@ -181,9 +145,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "An irrotational field has zero curl, meaning there is no local rotation in the field."
     },
-    {
-        id: "phy110-u1-19",
-        unit: 1,
+    { id: "phy110-u1-19", unit: 1,
         topic: 'Concept of Divergence',
         difficulty: 'easy',
         question: "If the divergence of a vector field is zero, the field is called?",
@@ -191,9 +153,7 @@ export const phy110Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "A solenoidal field has no sources or sinks, meaning the net flux through any closed surface is zero."
     },
-    {
-        id: "phy110-u1-20",
-        unit: 1,
+    { id: "phy110-u1-20", unit: 1,
         topic: 'Maxwell displacement current',
         difficulty: 'medium',
         question: "The displacement current density is defined as Jd = ?",

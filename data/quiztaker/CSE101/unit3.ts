@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const cse101Unit3MCQs: QuizQuestion[] = [
-    {
-        id: "cse101-u3-1",
-        unit: 3,
+    { id: "cse101-u3-1", unit: 3,
         topic: 'Functions',
         difficulty: 'easy',
         question: "What is a function prototype in C?",
@@ -11,9 +9,7 @@ export const cse101Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "A prototype declares the function's name, return type, and parameters before it is used."
     },
-    {
-        id: "cse101-u3-2",
-        unit: 3,
+    { id: "cse101-u3-2", unit: 3,
         topic: 'Storage Classes',
         difficulty: 'easy',
         question: "Which storage class has the fastest access speed?",
@@ -21,9 +17,7 @@ export const cse101Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Register variables are stored in CPU registers instead of RAM."
     },
-    {
-        id: "cse101-u3-3",
-        unit: 3,
+    { id: "cse101-u3-3", unit: 3,
         topic: 'Functions',
         difficulty: 'medium',
         question: "In pass by value, what is passed to the function?",
@@ -31,9 +25,7 @@ export const cse101Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "A copy of the actual parameter is made; changes inside the function do not affect the original."
     },
-    {
-        id: "cse101-u3-4",
-        unit: 3,
+    { id: "cse101-u3-4", unit: 3,
         topic: 'Recursion',
         difficulty: 'medium',
         question: "What is the base case in recursion?",
@@ -41,9 +33,7 @@ export const cse101Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "A base case is required to prevent infinite recursion and stack overflow."
     },
-    {
-        id: "cse101-u3-5",
-        unit: 3,
+    { id: "cse101-u3-5", unit: 3,
         topic: 'Storage Classes',
         difficulty: 'hard',
         question: "What is the default initial value of a static variable?",
@@ -51,9 +41,7 @@ export const cse101Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Static variables are initialized to zero by default if not specified."
     },
-    {
-        id: "cse101-u3-6",
-        unit: 3,
+    { id: "cse101-u3-6", unit: 3,
         topic: 'Storage Classes',
         difficulty: 'medium',
         question: "Which keyword is used to access a global variable from another file?",
@@ -61,9 +49,7 @@ export const cse101Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "The 'extern' keyword extends the visibility of a variable to other files."
     },
-    {
-        id: "cse101-u3-7",
-        unit: 3,
+    { id: "cse101-u3-7", unit: 3,
         topic: 'Functions',
         difficulty: 'medium',
         question: "A function that calls itself is known as ___.",
@@ -71,9 +57,7 @@ export const cse101Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Recursion is the process where a function calls its own definition."
     },
-    {
-        id: "cse101-u3-8",
-        unit: 3,
+    { id: "cse101-u3-8", unit: 3,
         topic: 'Math Library',
         difficulty: 'easy',
         question: "Which function is used to calculate the square root in C?",
@@ -81,9 +65,7 @@ export const cse101Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "sqrt() is provided in math.h for square root calculations."
     },
-    {
-        id: "cse101-u3-9",
-        unit: 3,
+    { id: "cse101-u3-9", unit: 3,
         topic: 'Scope',
         difficulty: 'easy',
         question: "Where are local variables defined?",
@@ -91,9 +73,7 @@ export const cse101Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Local variables are only accessible within the block they are declared in."
     },
-    {
-        id: "cse101-u3-10",
-        unit: 3,
+    { id: "cse101-u3-10", unit: 3,
         topic: 'Functions',
         difficulty: 'hard',
         question: "What happens if a function's return type is mismatching with the return statement?",

@@ -1,9 +1,7 @@
 import { QuizQuestion } from '../../../types.ts';
 
 export const phy110Unit5MCQs: QuizQuestion[] = [
-    {
-        id: "phy110-u5-1",
-        unit: 5,
+    { id: "phy110-u5-1", unit: 5,
         topic: 'Free Electron Theory',
         difficulty: 'easy',
         question: "According to the classical free electron theory, electrons in a metal behave like?",
@@ -11,9 +9,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Drude and Lorentz proposed the 'electron gas' model."
     },
-    {
-        id: "phy110-u5-2",
-        unit: 5,
+    { id: "phy110-u5-2", unit: 5,
         topic: 'Drift Velocity',
         difficulty: 'medium',
         question: "The average velocity acquired by free electrons in the presence of an electric field is?",
@@ -21,9 +17,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "vd = μE, where μ is mobility."
     },
-    {
-        id: "phy110-u5-3",
-        unit: 5,
+    { id: "phy110-u5-3", unit: 5,
         topic: 'Mobility',
         difficulty: 'medium',
         question: "Mobility (μ) of an electron is defined as?",
@@ -31,9 +25,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "μ = vd / E; Unit: m²/(V·s)."
     },
-    {
-        id: "phy110-u5-4",
-        unit: 5,
+    { id: "phy110-u5-4", unit: 5,
         topic: 'Mean Free Path',
         difficulty: 'medium',
         question: "The average distance an electron travels between two successive collisions is?",
@@ -41,9 +33,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Collisions occur with lattice ions or defects."
     },
-    {
-        id: "phy110-u5-5",
-        unit: 5,
+    { id: "phy110-u5-5", unit: 5,
         topic: 'Relaxation Time',
         difficulty: 'medium',
         question: "The time interval between two successive collisions of an electron is?",
@@ -51,9 +41,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Thermal velocity v ≈ λ / τ."
     },
-    {
-        id: "phy110-u5-6",
-        unit: 5,
+    { id: "phy110-u5-6", unit: 5,
         topic: 'Fermi Energy',
         difficulty: 'hard',
         question: "The maximum energy an electron can have at absolute zero (0 K) is called?",
@@ -61,9 +49,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "States are filled up to this level according to Pauli Exclusion Principle."
     },
-    {
-        id: "phy110-u5-7",
-        unit: 5,
+    { id: "phy110-u5-7", unit: 5,
         topic: 'Fermi-Dirac Distribution',
         difficulty: 'hard',
         question: "The probability f(E) that a state of energy E is occupied is given by?",
@@ -71,9 +57,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Describes particles with half-integer spin (fermions)."
     },
-    {
-        id: "phy110-u5-8",
-        unit: 5,
+    { id: "phy110-u5-8", unit: 5,
         topic: 'Fermi-Dirac',
         difficulty: 'hard',
         question: "At E = Ef, the probability of occupancy f(E) is always ___ (for T > 0).",
@@ -81,9 +65,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "The Fermi level is the energy with 50% chance of being occupied."
     },
-    {
-        id: "phy110-u5-9",
-        unit: 5,
+    { id: "phy110-u5-9", unit: 5,
         topic: 'Band Theory',
         difficulty: 'medium',
         question: "Energy bands are formed in solids due to?",
@@ -91,9 +73,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Interaction of valence electrons in a crystal lattice."
     },
-    {
-        id: "phy110-u5-10",
-        unit: 5,
+    { id: "phy110-u5-10", unit: 5,
         topic: 'Forbidden Gap',
         difficulty: 'medium',
         question: "The energy range where no electron states can exist is called the?",
@@ -101,9 +81,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Crucial for distinguishing metals, semiconductors, and insulators."
     },
-    {
-        id: "phy110-u5-11",
-        unit: 5,
+    { id: "phy110-u5-11", unit: 5,
         topic: 'Metals',
         difficulty: 'easy',
         question: "In metals, the valence and conduction bands ___.",
@@ -111,9 +89,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Ensures high conductivity as electrons move easily."
     },
-    {
-        id: "phy110-u5-12",
-        unit: 5,
+    { id: "phy110-u5-12", unit: 5,
         topic: 'Insulators',
         difficulty: 'easy',
         question: "Materials with an energy gap greater than ~3 eV are usually?",
@@ -121,9 +97,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Example: Diamond (Eg ~5.5 eV)."
     },
-    {
-        id: "phy110-u5-13",
-        unit: 5,
+    { id: "phy110-u5-13", unit: 5,
         topic: 'Semiconductors',
         difficulty: 'easy',
         question: "Materials with a narrow energy gap (~1 eV) are?",
@@ -131,9 +105,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Example: Silicon (1.1 eV), Germanium (0.67 eV)."
     },
-    {
-        id: "phy110-u5-14",
-        unit: 5,
+    { id: "phy110-u5-14", unit: 5,
         topic: 'Effective Mass',
         difficulty: 'hard',
         question: "The mass of an electron when moving inside a crystal potential is called?",
@@ -141,9 +113,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "m* = ħ² / (d²E/dk²). Can be different from free electron mass."
     },
-    {
-        id: "phy110-u5-15",
-        unit: 5,
+    { id: "phy110-u5-15", unit: 5,
         topic: 'Electrons and Holes',
         difficulty: 'medium',
         question: "A vacant electron state in the valence band that behaves like a positive charge is a?",
@@ -151,9 +121,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Concept used to explain p-type conductivity."
     },
-    {
-        id: "phy110-u5-16",
-        unit: 5,
+    { id: "phy110-u5-16", unit: 5,
         topic: 'Intrinsic Semiconductor',
         difficulty: 'medium',
         question: "A pure semiconductor with no impurities is called?",
@@ -161,9 +129,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Electron concentration (n) = Hole concentration (p)."
     },
-    {
-        id: "phy110-u5-17",
-        unit: 5,
+    { id: "phy110-u5-17", unit: 5,
         topic: 'Extrinsic Semiconductor',
         difficulty: 'medium',
         question: "Semiconductors with added impurities (doping) are?",
@@ -171,9 +137,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Allows controlling electronic properties."
     },
-    {
-        id: "phy110-u5-18",
-        unit: 5,
+    { id: "phy110-u5-18", unit: 5,
         topic: 'Doping',
         difficulty: 'medium',
         question: "P-type semiconductors are created by doping with ___ impurities.",
@@ -181,9 +145,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "These atoms accept electrons, creating holes."
     },
-    {
-        id: "phy110-u5-19",
-        unit: 5,
+    { id: "phy110-u5-19", unit: 5,
         topic: 'Doping',
         difficulty: 'medium',
         question: "N-type semiconductors are created by doping with ___ impurities.",
@@ -191,9 +153,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "These atoms donate extra electrons."
     },
-    {
-        id: "phy110-u5-20",
-        unit: 5,
+    { id: "phy110-u5-20", unit: 5,
         topic: 'Fermi Level',
         difficulty: 'hard',
         question: "In intrinsic semiconductors, the Fermi level is located ___.",
@@ -201,9 +161,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Equidistant from electrons and holes states."
     },
-    {
-        id: "phy110-u5-21",
-        unit: 5,
+    { id: "phy110-u5-21", unit: 5,
         topic: 'Fermi Level',
         difficulty: 'hard',
         question: "In N-type semiconductors, the Fermi level shifts ___.",
@@ -211,9 +169,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Due to high concentration of donor electrons."
     },
-    {
-        id: "phy110-u5-22",
-        unit: 5,
+    { id: "phy110-u5-22", unit: 5,
         topic: 'Hall Effect',
         difficulty: 'hard',
         question: "Production of a transverse potential difference in a conductor carrying current in a magnetic field is?",
@@ -221,9 +177,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Used to find carrier type, concentration, and mobility."
     },
-    {
-        id: "phy110-u5-23",
-        unit: 5,
+    { id: "phy110-u5-23", unit: 5,
         topic: 'Hall Coefficient',
         difficulty: 'hard',
         question: "Hall Coefficient (Rh) is given by?",
@@ -231,9 +185,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Rh is negative for electrons and positive for holes."
     },
-    {
-        id: "phy110-u5-24",
-        unit: 5,
+    { id: "phy110-u5-24", unit: 5,
         topic: 'Band Gap',
         difficulty: 'hard',
         question: "A semiconductor where the conduction band minimum and valence band maximum align in k-space is?",
@@ -241,9 +193,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Example: GaAs. Efficient for photon emission (LEDs/Lasers)."
     },
-    {
-        id: "phy110-u5-25",
-        unit: 5,
+    { id: "phy110-u5-25", unit: 5,
         topic: 'Band Gap',
         difficulty: 'hard',
         question: "In an Indirect Band Gap semiconductor (like Silicon), recombination primarily produces ___.",
@@ -251,9 +201,7 @@ export const phy110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Momentum mismatch requires a phonon assist."
     },
-    {
-        id: "phy110-u5-26",
-        unit: 5,
+    { id: "phy110-u5-26", unit: 5,
         topic: 'Solar Cell',
         difficulty: 'medium',
         question: "A solar cell works on the principle of?",

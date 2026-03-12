@@ -94,9 +94,7 @@ difficulty: 'easy',
 topic: 'Simple Present vs Present Continuous' },
 
     // Communication Basics
-    {
-        id: "pel125-u1-31",
-        unit: 1,
+    { id: "pel125-u1-31", unit: 1,
         question: "What is the primary purpose of 'Communication'?",
         options: ["To speak loudly", "To exchange information, ideas, and feelings", "To use complex vocabulary", "To win every argument"],
         correctAnswer: 1,
@@ -104,9 +102,7 @@ topic: 'Simple Present vs Present Continuous' },
 difficulty: 'easy',
 topic: 'Self Assessment'
     },
-    {
-        id: "pel125-u1-32",
-        unit: 1,
+    { id: "pel125-u1-32", unit: 1,
         question: "Which of the following is a 'Barrier' to effective communication?",
         options: ["Active listening", "Clear feedback", "Noise", "Empathy"],
         correctAnswer: 2,
@@ -114,9 +110,7 @@ topic: 'Self Assessment'
 difficulty: 'easy',
 topic: 'Final Summary Table'
     },
-    {
-        id: "pel125-u1-33",
-        unit: 1,
+    { id: "pel125-u1-33", unit: 1,
         question: "What does 'Verbal Communication' involve?",
         options: ["Body language", "Facial expressions", "Spoken or written words", "Silence"],
         correctAnswer: 2,
@@ -124,9 +118,7 @@ topic: 'Final Summary Table'
 difficulty: 'easy',
 topic: 'Quick Revision'
     },
-    {
-        id: "pel125-u1-34",
-        unit: 1,
+    { id: "pel125-u1-34", unit: 1,
         question: "Which component of the communication process starts the conversation?",
         options: ["Receiver", "Channel", "Sender", "Feedback"],
         correctAnswer: 2,
@@ -134,9 +126,7 @@ topic: 'Quick Revision'
 difficulty: 'easy',
 topic: 'Past Perfect vs Past Simple'
     },
-    {
-        id: "pel125-u1-35",
-        unit: 1,
+    { id: "pel125-u1-35", unit: 1,
         question: "In the context of communication, what is 'Feedback'?",
         options: ["The response of the receiver to the sender's message", "A type of background noise", "The script of the presentation", "The physical location of the meeting"],
         correctAnswer: 0,
@@ -144,9 +134,7 @@ topic: 'Past Perfect vs Past Simple'
 difficulty: 'easy',
 topic: 'Future Perfect and Future Perfect Continuous'
     },
-    {
-        id: "pel125-u1-36",
-        unit: 1,
+    { id: "pel125-u1-36", unit: 1,
         question: "What is 'Non-Verbal Communication'?",
         options: ["Writing a letter", "Sending an email", "Body language, gestures, and facial expressions", "Using a megaphone"],
         correctAnswer: 2,
@@ -154,9 +142,7 @@ topic: 'Future Perfect and Future Perfect Continuous'
 difficulty: 'easy',
 topic: 'Present Perfect vs Past Simple'
     },
-    {
-        id: "pel125-u1-37",
-        unit: 1,
+    { id: "pel125-u1-37", unit: 1,
         question: "Which of the following describes 'Active Listening'?",
         options: ["Waiting for your turn to speak", "Listening with full attention and providing feedback to ensure understanding", "Interrupting the speaker frequently", "Listening while multi-tasking"],
         correctAnswer: 1,
@@ -164,9 +150,7 @@ topic: 'Present Perfect vs Past Simple'
 difficulty: 'easy',
 topic: 'Past Perfect vs Past Perfect Continuous'
     },
-    {
-        id: "pel125-u1-38",
-        unit: 1,
+    { id: "pel125-u1-38", unit: 1,
         question: "What is 'Intrapersonal Communication'?",
         options: ["Communication between two or more groups", "Communication with oneself (internal dialogue)", "Communication with a large audience", "Communication via mass media"],
         correctAnswer: 1,
@@ -174,9 +158,7 @@ topic: 'Past Perfect vs Past Perfect Continuous'
 difficulty: 'easy',
 topic: 'Self Assessment'
     },
-    {
-        id: "pel125-u1-39",
-        unit: 1,
+    { id: "pel125-u1-39", unit: 1,
         question: "What is 'Interpersonal Communication'?",
         options: ["Communication with oneself", "Communication between two or more people", "Communication with a computer", "Communication through a satellite"],
         correctAnswer: 1,
@@ -184,9 +166,7 @@ topic: 'Self Assessment'
 difficulty: 'easy',
 topic: 'Final Summary Table'
     },
-    {
-        id: "pel125-u1-40",
-        unit: 1,
+    { id: "pel125-u1-40", unit: 1,
         question: "The 'Seven Cs' of effective communication include:",
         options: ["Clarity, Conciseness, Concrete, Correct, Coherent, Complete, Courteous", "Complexity, Chaos, Color, Cost, Craft, Care, Cool", "Crying, Calling, Cutting, Caring, Coming, Creating, Curing", "None of the above"],
         correctAnswer: 0,
@@ -194,9 +174,7 @@ topic: 'Final Summary Table'
 difficulty: 'easy',
 topic: 'Self Assessment'
     },
-    {
-        id: "pel125-u1-41",
-        unit: 1,
+    { id: "pel125-u1-41", unit: 1,
         question: "Which medium is best for delivering a complex and formal business proposal?",
         options: ["A quick text message", "A formal written report or document", "A casual hallway conversation", "A social media post"],
         correctAnswer: 1,
@@ -204,9 +182,7 @@ topic: 'Self Assessment'
 difficulty: 'medium',
 topic: 'Present Continuous for the Future and Going to'
     },
-    {
-        id: "pel125-u1-42",
-        unit: 1,
+    { id: "pel125-u1-42", unit: 1,
         question: "What is 'Upward Communication'?",
         options: ["Communication from subordinates to superiors", "Communication between colleagues at the same level", "Communication from managers to employees", "Communication with external clients"],
         correctAnswer: 0,
@@ -214,9 +190,7 @@ topic: 'Present Continuous for the Future and Going to'
 difficulty: 'easy',
 topic: 'Past Perfect vs Past Simple'
     },
-    {
-        id: "pel125-u1-43",
-        unit: 1,
+    { id: "pel125-u1-43", unit: 1,
         question: "What is 'Downward Communication'?",
         options: ["Communication from peers", "Communication from employees to CEO", "Communication from superiors to subordinates", "Communication through the 'grapevine'"],
         correctAnswer: 2,
@@ -224,9 +198,7 @@ topic: 'Past Perfect vs Past Simple'
 difficulty: 'easy',
 topic: 'Past Perfect vs Past Perfect Continuous'
     },
-    {
-        id: "pel125-u1-44",
-        unit: 1,
+    { id: "pel125-u1-44", unit: 1,
         question: "The 'Grapevine' in an organization refers to:",
         options: ["The official company newsletter", "The formal hierarchy", "Informal communication channels/rumors", "The IT infrastructure"],
         correctAnswer: 2,
@@ -234,9 +206,7 @@ topic: 'Past Perfect vs Past Perfect Continuous'
 difficulty: 'easy',
 topic: 'Past Perfect vs Past Perfect Continuous'
     },
-    {
-        id: "pel125-u1-45",
-        unit: 1,
+    { id: "pel125-u1-45", unit: 1,
         question: "What is 'Cross-Cultural Communication'?",
         options: ["Talking to someone in the same room", "Communication between people from different cultural backgrounds", "Using emojis only", "Shouting across a border"],
         correctAnswer: 1,
@@ -244,9 +214,7 @@ topic: 'Past Perfect vs Past Perfect Continuous'
 difficulty: 'easy',
 topic: 'Simple Present vs Present Continuous'
     },
-    {
-        id: "pel125-u1-46",
-        unit: 1,
+    { id: "pel125-u1-46", unit: 1,
         question: "Which of the following is a 'Soft Skill'?",
         options: ["Programming in Python", "Statistical Analysis", "Effective Communication", "Network Security"],
         correctAnswer: 2,
@@ -254,9 +222,7 @@ topic: 'Simple Present vs Present Continuous'
 difficulty: 'easy',
 topic: 'Self Assessment'
     },
-    {
-        id: "pel125-u1-47",
-        unit: 1,
+    { id: "pel125-u1-47", unit: 1,
         question: "What is 'Paralanguage'?",
         options: ["A new programming language", "Non-verbal vocal cues like tone, pitch, and volume", "The language used by pilots", "Translating words into code"],
         correctAnswer: 1,
@@ -264,9 +230,7 @@ topic: 'Self Assessment'
 difficulty: 'easy',
 topic: 'Past Perfect vs Past Perfect Continuous'
     },
-    {
-        id: "pel125-u1-48",
-        unit: 1,
+    { id: "pel125-u1-48", unit: 1,
         question: "Which of the following demonstrates 'Empathy' in communication?",
         options: ["Ignoring the other person's emotions", "Telling the other person they are wrong", "Trying to understand and share the feelings of another", "Talking only about yourself"],
         correctAnswer: 2,
@@ -274,9 +238,7 @@ topic: 'Past Perfect vs Past Perfect Continuous'
 difficulty: 'easy',
 topic: 'Use of Future Tense'
     },
-    {
-        id: "pel125-u1-49",
-        unit: 1,
+    { id: "pel125-u1-49", unit: 1,
         question: "What is 'Body Language'?",
         options: ["The way we dress", "The use of physical behavior and expressions to communicate", "The speed of our typing", "The font we use in reports"],
         correctAnswer: 1,
@@ -284,9 +246,7 @@ topic: 'Use of Future Tense'
 difficulty: 'easy',
 topic: 'Final Summary Table'
     },
-    {
-        id: "pel125-u1-50",
-        unit: 1,
+    { id: "pel125-u1-50", unit: 1,
         question: "Why is 'Eye Contact' important in many cultures?",
         options: ["To show dominance", "To show interest, confidence, and respect", "To intimidate the receiver", "To see the other person's eye color"],
         correctAnswer: 1,

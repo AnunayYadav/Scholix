@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const unit5Quizzes: QuizQuestion[] = [
-    {
-        id: "ece249-u5-1",
-        unit: 5,
+    { id: "ece249-u5-1", unit: 5,
         question: "What is the primary feature that distinguishes sequential logic circuits from combinational logic circuits?",
         options: [
             "Sequential circuits use only NAND gates",
@@ -16,9 +14,7 @@ export const unit5Quizzes: QuizQuestion[] = [
 difficulty: 'medium',
 topic: 'Sequential Circuits Overview'
     },
-    {
-        id: "ece249-u5-2",
-        unit: 5,
+    { id: "ece249-u5-2", unit: 5,
         question: "What is the fundamental difference between a latch and a flip-flop?",
         options: [
             "A latch is edge-triggered; a flip-flop is level-triggered",
@@ -31,9 +27,7 @@ topic: 'Sequential Circuits Overview'
 difficulty: 'easy',
 topic: 'Flip-Flops'
     },
-    {
-        id: "ece249-u5-3",
-        unit: 5,
+    { id: "ece249-u5-3", unit: 5,
         question: "In an SR latch constructed using NOR gates, which input combination results in a forbidden or invalid state?",
         options: [
             "$S = 0, R = 0$",
@@ -46,9 +40,7 @@ topic: 'Flip-Flops'
 difficulty: 'medium',
 topic: 'Table of Contents'
     },
-    {
-        id: "ece249-u5-4",
-        unit: 5,
+    { id: "ece249-u5-4", unit: 5,
         question: "What is the characteristic equation of an SR flip-flop?",
         options: [
             "$Q_{n+1} = S + \\overline{R} \\cdot Q_n$",
@@ -61,9 +53,7 @@ topic: 'Table of Contents'
 difficulty: 'easy',
 topic: 'Master-Slave Flip-Flop'
     },
-    {
-        id: "ece249-u5-5",
-        unit: 5,
+    { id: "ece249-u5-5", unit: 5,
         question: "How does a D latch solve the forbidden state problem of the SR latch?",
         options: [
             "By adding a clock signal",
@@ -76,9 +66,7 @@ topic: 'Master-Slave Flip-Flop'
 difficulty: 'easy',
 topic: 'Latches'
     },
-    {
-        id: "ece249-u5-6",
-        unit: 5,
+    { id: "ece249-u5-6", unit: 5,
         question: "Which input condition causes a JK flip-flop to toggle its output state ($Q_{n+1} = \\overline{Q_n}$)?",
         options: [
             "$J = 0, K = 0$",
@@ -91,9 +79,7 @@ topic: 'Latches'
 difficulty: 'medium',
 topic: 'Master-Slave Flip-Flop'
     },
-    {
-        id: "ece249-u5-7",
-        unit: 5,
+    { id: "ece249-u5-7", unit: 5,
         question: "What is the characteristic equation of a JK flip-flop?",
         options: [
             "$Q_{n+1} = JQ_n + K\\overline{Q_n}$",
@@ -106,9 +92,7 @@ topic: 'Master-Slave Flip-Flop'
 difficulty: 'easy',
 topic: 'Master-Slave Flip-Flop'
     },
-    {
-        id: "ece249-u5-8",
-        unit: 5,
+    { id: "ece249-u5-8", unit: 5,
         question: "What is the 'race-around condition' in sequential circuits?",
         options: [
             "When signals propagate too slowly through logic gates",
@@ -121,9 +105,7 @@ topic: 'Master-Slave Flip-Flop'
 difficulty: 'easy',
 topic: 'Sequential Circuits Overview'
     },
-    {
-        id: "ece249-u5-9",
-        unit: 5,
+    { id: "ece249-u5-9", unit: 5,
         question: "Which of the following architectures is explicitly designed to eliminate the race-around condition?",
         options: [
             "D Latch",
@@ -136,9 +118,7 @@ topic: 'Sequential Circuits Overview'
 difficulty: 'medium',
 topic: 'Master-Slave Flip-Flop'
     },
-    {
-        id: "ece249-u5-10",
-        unit: 5,
+    { id: "ece249-u5-10", unit: 5,
         question: "What is the characteristic equation for a D flip-flop?",
         options: [
             "$Q_{n+1} = \\overline{D}$",
@@ -151,9 +131,7 @@ topic: 'Master-Slave Flip-Flop'
 difficulty: 'easy',
 topic: 'Master-Slave Flip-Flop'
     },
-    {
-        id: "ece249-u5-11",
-        unit: 5,
+    { id: "ece249-u5-11", unit: 5,
         question: "What is the characteristic equation for a T (Toggle) flip-flop?",
         options: [
             "$Q_{n+1} = T + Q_n$",
@@ -166,9 +144,7 @@ topic: 'Master-Slave Flip-Flop'
 difficulty: 'easy',
 topic: 'Master-Slave Flip-Flop'
     },
-    {
-        id: "ece249-u5-12",
-        unit: 5,
+    { id: "ece249-u5-12", unit: 5,
         question: "How is a T flip-flop typically constructed from a JK flip-flop?",
         options: [
             "By setting $J=1$ and $K=0$",
@@ -181,9 +157,7 @@ topic: 'Master-Slave Flip-Flop'
 difficulty: 'easy',
 topic: 'Master-Slave Flip-Flop'
     },
-    {
-        id: "ece249-u5-13",
-        unit: 5,
+    { id: "ece249-u5-13", unit: 5,
         question: "What type of shift register takes $n$ clock pulses to load data and requires outputs to be read one bit at a time?",
         options: [
             "SIPO (Serial In Parallel Out)",
@@ -196,9 +170,7 @@ topic: 'Master-Slave Flip-Flop'
 difficulty: 'medium',
 topic: 'Conversion of Flip-Flops'
     },
-    {
-        id: "ece249-u5-14",
-        unit: 5,
+    { id: "ece249-u5-14", unit: 5,
         question: "Which shift register configuration is best suited for serial-to-parallel data conversion?",
         options: [
             "SISO",
@@ -211,9 +183,7 @@ topic: 'Conversion of Flip-Flops'
 difficulty: 'medium',
 topic: 'Conversion of Flip-Flops'
     },
-    {
-        id: "ece249-u5-15",
-        unit: 5,
+    { id: "ece249-u5-15", unit: 5,
         question: "What defines an Asynchronous (Ripple) counter?",
         options: [
             "All flip-flops receive the clock signal simultaneously",
@@ -226,9 +196,7 @@ topic: 'Conversion of Flip-Flops'
 difficulty: 'easy',
 topic: 'Flip-Flops'
     },
-    {
-        id: "ece249-u5-16",
-        unit: 5,
+    { id: "ece249-u5-16", unit: 5,
         question: "What is a major disadvantage of asynchronous counters compared to synchronous counters?",
         options: [
             "They are more complex to design",
@@ -241,9 +209,7 @@ topic: 'Flip-Flops'
 difficulty: 'medium',
 topic: 'Sequential Circuits Overview'
     },
-    {
-        id: "ece249-u5-17",
-        unit: 5,
+    { id: "ece249-u5-17", unit: 5,
         question: "How many state combinations (modulus) does an $n$-bit Ring Counter have?",
         options: [
             "$2^n$",
@@ -256,9 +222,7 @@ topic: 'Sequential Circuits Overview'
 difficulty: 'medium',
 topic: 'Flip-Flops'
     },
-    {
-        id: "ece249-u5-18",
-        unit: 5,
+    { id: "ece249-u5-18", unit: 5,
         question: "What is the modulus of a 4-bit Johnson (Twisted Ring) counter?",
         options: [
             "4",
@@ -271,9 +235,7 @@ topic: 'Flip-Flops'
 difficulty: 'easy',
 topic: 'Table of Contents'
     },
-    {
-        id: "ece249-u5-19",
-        unit: 5,
+    { id: "ece249-u5-19", unit: 5,
         question: "To convert a JK flip-flop into a D flip-flop, what excitation logic is required for inputs $J$ and $K$?",
         options: [
             "$J = D$, $K = D$",
@@ -286,9 +248,7 @@ topic: 'Table of Contents'
 difficulty: 'medium',
 topic: 'Master-Slave Flip-Flop'
     },
-    {
-        id: "ece249-u5-20",
-        unit: 5,
+    { id: "ece249-u5-20", unit: 5,
         question: "To design a synchronous Mod-10 counter, what is the minimum number of flip-flops required?",
         options: [
             "3",

@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const che110Unit5MCQs: QuizQuestion[] = [
-    {
-        id: "che110-u5-1",
-        unit: 5,
+    { id: "che110-u5-1", unit: 5,
         topic: 'Disaster Management',
         difficulty: 'easy',
         question: "A disaster is characterized by?",
@@ -11,9 +9,7 @@ export const che110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 3,
         explanation: "Disasters cause widespread human, material, or environmental losses exceeding the community's ability to cope."
     },
-    {
-        id: "che110-u5-2",
-        unit: 5,
+    { id: "che110-u5-2", unit: 5,
         topic: 'Natural Disasters',
         difficulty: 'medium',
         question: "On which scale is the magnitude of an earthquake measured?",
@@ -21,9 +17,7 @@ export const che110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "The Richter scale quantifies the energy released by an earthquake."
     },
-    {
-        id: "che110-u5-3",
-        unit: 5,
+    { id: "che110-u5-3", unit: 5,
         topic: 'Water Related Disasters',
         difficulty: 'medium',
         question: "Floods can be caused by?",
@@ -31,9 +25,7 @@ export const che110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 3,
         explanation: "Multiple natural and man-made factors can trigger flooding."
     },
-    {
-        id: "che110-u5-4",
-        unit: 5,
+    { id: "che110-u5-4", unit: 5,
         topic: 'Man-made Disasters',
         difficulty: 'hard',
         question: "Which of the following is a chemical disaster?",
@@ -41,9 +33,7 @@ export const che110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "The accidental release of toxic methyl isocyanate gas caused catastrophic harm."
     },
-    {
-        id: "che110-u5-5",
-        unit: 5,
+    { id: "che110-u5-5", unit: 5,
         topic: 'Disaster Preparedness',
         difficulty: 'medium',
         question: "What does NDM stand for in India?",
@@ -51,9 +41,7 @@ export const che110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Refers to the overall framework for handling disasters in the country."
     },
-    {
-        id: "che110-u5-6",
-        unit: 5,
+    { id: "che110-u5-6", unit: 5,
         topic: 'Air Related Disasters',
         difficulty: 'easy',
         question: "High wind speed storm with an 'eye' is called?",
@@ -61,9 +49,7 @@ export const che110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Cyclones are characterized by low-pressure centers and strong winds rotating inward."
     },
-    {
-        id: "che110-u5-7",
-        unit: 5,
+    { id: "che110-u5-7", unit: 5,
         topic: 'Disaster Response',
         difficulty: 'hard',
         question: "The role of NGOs in disaster management is primarily in?",
@@ -71,9 +57,7 @@ export const che110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 3,
         explanation: "NGOs provide critical boots-on-the-ground support before, during, and after disasters."
     },
-    {
-        id: "che110-u5-8",
-        unit: 5,
+    { id: "che110-u5-8", unit: 5,
         topic: 'Biological Disasters',
         difficulty: 'medium',
         question: "COVID-19 is an example of a?",
@@ -81,9 +65,7 @@ export const che110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Pandemics are large-scale biological disasters caused by pathogens."
     },
-    {
-        id: "che110-u5-9",
-        unit: 5,
+    { id: "che110-u5-9", unit: 5,
         topic: 'Earth Related Disasters',
         difficulty: 'medium',
         question: "Sudden downward movement of rock and soil is?",
@@ -91,9 +73,7 @@ export const che110Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Landslides are often triggered by rain, earthquakes, or human activities."
     },
-    {
-        id: "che110-u5-10",
-        unit: 5,
+    { id: "che110-u5-10", unit: 5,
         topic: 'Nuclear Disasters',
         difficulty: 'hard',
         question: "Radiation leaks from a power plant are categorized as?",

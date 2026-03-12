@@ -1,9 +1,7 @@
 import { QuizQuestion } from '../../../types.ts';
 
 export const phy110Unit4MCQs: QuizQuestion[] = [
-    {
-        id: "phy110-u4-1",
-        unit: 4,
+    { id: "phy110-u4-1", unit: 4,
         topic: 'Blackbody Radiation',
         difficulty: 'easy',
         question: "A perfect absorber and emitter of all radiation is called?",
@@ -11,9 +9,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "At thermal equilibrium, it emits radiation at the same rate it absorbs."
     },
-    {
-        id: "phy110-u4-2",
-        unit: 4,
+    { id: "phy110-u4-2", unit: 4,
         topic: 'Planck Law',
         difficulty: 'hard',
         question: "Max Planck explained blackbody radiation by assuming that energy is ___.",
@@ -21,9 +17,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "This marked the birth of Quantum Theory (1900)."
     },
-    {
-        id: "phy110-u4-3",
-        unit: 4,
+    { id: "phy110-u4-3", unit: 4,
         topic: 'De-Broglie Hypothesis',
         difficulty: 'medium',
         question: "The wavelength associated with a particle of mass 'm' and velocity 'v' is?",
@@ -31,9 +25,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Matter waves hypothesis: Particles behave as waves."
     },
-    {
-        id: "phy110-u4-4",
-        unit: 4,
+    { id: "phy110-u4-4", unit: 4,
         topic: 'Wave-Particle Duality',
         difficulty: 'easy',
         question: "Matter waves exist only when the particle is?",
@@ -41,9 +33,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "λ = h/(mv). If v=0, λ is undefined/infinite."
     },
-    {
-        id: "phy110-u4-5",
-        unit: 4,
+    { id: "phy110-u4-5", unit: 4,
         topic: 'Phase and Group Velocity',
         difficulty: 'hard',
         question: "The velocity of the individual wave in a wave packet is called?",
@@ -51,9 +41,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "vp = ω / k."
     },
-    {
-        id: "phy110-u4-6",
-        unit: 4,
+    { id: "phy110-u4-6", unit: 4,
         topic: 'Group Velocity',
         difficulty: 'hard',
         question: "The velocity with which a wave packet (representing a particle) moves is?",
@@ -61,9 +49,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "vg = dω / dk. It represents the particle's physical velocity."
     },
-    {
-        id: "phy110-u4-7",
-        unit: 4,
+    { id: "phy110-u4-7", unit: 4,
         topic: 'Uncertainty Principle',
         difficulty: 'medium',
         question: "Heisenberg's Uncertainty Principle states that Δx * Δpx ≥ ___.",
@@ -71,9 +57,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "It's impossible to measure position and momentum simultaneously with perfect accuracy."
     },
-    {
-        id: "phy110-u4-8",
-        unit: 4,
+    { id: "phy110-u4-8", unit: 4,
         topic: 'Uncertainty Principle',
         difficulty: 'medium',
         question: "The uncertainty relation for Energy and Time is?",
@@ -81,9 +65,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Short-lived states have large energy uncertainties (broadening of spectral lines)."
     },
-    {
-        id: "phy110-u4-9",
-        unit: 4,
+    { id: "phy110-u4-9", unit: 4,
         topic: 'Wave Function',
         difficulty: 'medium',
         question: "The mathematical function (ψ) describing the state of a quantum system is?",
@@ -91,9 +73,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Contains all information about the system."
     },
-    {
-        id: "phy110-u4-10",
-        unit: 4,
+    { id: "phy110-u4-10", unit: 4,
         topic: 'Born Interpretation',
         difficulty: 'hard',
         question: "According to Max Born, |ψ|² represents the ___.",
@@ -101,9 +81,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "The likelihood of finding a particle in a given region."
     },
-    {
-        id: "phy110-u4-11",
-        unit: 4,
+    { id: "phy110-u4-11", unit: 4,
         topic: 'Normalization',
         difficulty: 'hard',
         question: "The integral of |ψ|² over all space must be equal to ___.",
@@ -111,9 +89,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Normalization condition for a physical wave function."
     },
-    {
-        id: "phy110-u4-12",
-        unit: 4,
+    { id: "phy110-u4-12", unit: 4,
         topic: 'Schrodinger Equation',
         difficulty: 'hard',
         question: "The time-independent Schrodinger equation for a free particle is?",
@@ -121,9 +97,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Derived by considering total energy = Kinetic energy (Potential V=0)."
     },
-    {
-        id: "phy110-u4-13",
-        unit: 4,
+    { id: "phy110-u4-13", unit: 4,
         topic: 'Operators',
         difficulty: 'hard',
         question: "The Quantum mechanical operator for momentum is?",
@@ -131,9 +105,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "p-operator acts on ψ to give momentum information."
     },
-    {
-        id: "phy110-u4-14",
-        unit: 4,
+    { id: "phy110-u4-14", unit: 4,
         topic: 'Operators',
         difficulty: 'hard',
         question: "The Hamiltonian operator (H) represents the total ___.",
@@ -141,9 +113,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "H = T + V (Kinetic + Potential energy)."
     },
-    {
-        id: "phy110-u4-15",
-        unit: 4,
+    { id: "phy110-u4-15", unit: 4,
         topic: 'Particle in a Box',
         difficulty: 'hard',
         question: "For a particle in a 1D box of length L, energy levels are ___.",
@@ -151,9 +121,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "En = (n²h²) / (8mL²)."
     },
-    {
-        id: "phy110-u4-16",
-        unit: 4,
+    { id: "phy110-u4-16", unit: 4,
         topic: 'Zero Point Energy',
         difficulty: 'hard',
         question: "In a 1D box, the lowest energy state (n=1) has energy?",
@@ -161,9 +129,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "A quantum particle can never be 'completely' at rest in a box."
     },
-    {
-        id: "phy110-u4-17",
-        unit: 4,
+    { id: "phy110-u4-17", unit: 4,
         topic: 'Wave-Function Properties',
         difficulty: 'medium',
         question: "A valid wave function must be ___.",
@@ -171,9 +137,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Physical constraints for mathematical solutions of Schrodinger's equation."
     },
-    {
-        id: "phy110-u4-18",
-        unit: 4,
+    { id: "phy110-u4-18", unit: 4,
         topic: 'De-Broglie',
         difficulty: 'medium',
         question: "Non-relativistic kinetic energy K and de-Broglie wavelength are related by λ = ?",
@@ -181,9 +145,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "As energy increases, wavelength decreases."
     },
-    {
-        id: "phy110-u4-19",
-        unit: 4,
+    { id: "phy110-u4-19", unit: 4,
         topic: 'Schrodinger Time Dependent',
         difficulty: 'hard',
         question: "The factor representing 'Time Evolution' in Schrodinger's equation is ___.",
@@ -191,9 +153,7 @@ export const phy110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Relates change in wave function to energy."
     },
-    {
-        id: "phy110-u4-20",
-        unit: 4,
+    { id: "phy110-u4-20", unit: 4,
         topic: 'Eigenvalues',
         difficulty: 'hard',
         question: "In Hψ = Eψ, E is called the ___.",

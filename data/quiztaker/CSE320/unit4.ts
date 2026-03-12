@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const cse320Unit4MCQs: QuizQuestion[] = [
-    {
-        id: "cse320-u4-1",
-        unit: 4,
+    { id: "cse320-u4-1", unit: 4,
         topic: 'Verification and Validation',
         difficulty: 'easy',
         question: "Are we building the product right? is a question of:",
@@ -11,9 +9,7 @@ export const cse320Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Verification ensures the software conforms to its specifications (Building the product right)."
     },
-    {
-        id: "cse320-u4-2",
-        unit: 1,
+    { id: "cse320-u4-2", unit: 1,
         topic: 'Verification and Validation',
         difficulty: 'easy',
         question: "Are we building the right product? is a question of:",
@@ -21,9 +17,7 @@ export const cse320Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Validation ensures the software meets the user's needs (Building the right product)."
     },
-    {
-        id: "cse320-u4-3",
-        unit: 4,
+    { id: "cse320-u4-3", unit: 4,
         topic: 'Levels of Testing',
         difficulty: 'medium',
         question: "Which testing type is performed by the end-users at their site?",
@@ -31,9 +25,7 @@ export const cse320Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Beta testing is conducted by real users in their own environment."
     },
-    {
-        id: "cse320-u4-4",
-        unit: 4,
+    { id: "cse320-u4-4", unit: 4,
         topic: 'White Box Testing',
         difficulty: 'hard',
         question: "Cyclomatic complexity is a measure of?",
@@ -41,9 +33,7 @@ export const cse320Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Cyclomatic complexity (V(G) = E - N + 2P) measures the number of linearly independent paths."
     },
-    {
-        id: "cse320-u4-5",
-        unit: 4,
+    { id: "cse320-u4-5", unit: 4,
         topic: 'Black Box Testing',
         difficulty: 'medium',
         question: "Boundary Value Analysis (BVA) belongs to?",
@@ -51,9 +41,7 @@ export const cse320Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "BVA is a black box technique focusing on values at the boundaries of input domains."
     },
-    {
-        id: "cse320-u4-6",
-        unit: 4,
+    { id: "cse320-u4-6", unit: 4,
         topic: 'Types of Testing',
         difficulty: 'medium',
         question: "Regression testing is primarily for?",
@@ -61,9 +49,7 @@ export const cse320Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Regression testing re-runs previous tests to ensure new changes didn't introduce regressions."
     },
-    {
-        id: "cse320-u4-7",
-        unit: 4,
+    { id: "cse320-u4-7", unit: 4,
         topic: 'White Box Testing',
         difficulty: 'hard',
         question: "Basis path testing falls under?",
@@ -71,9 +57,7 @@ export const cse320Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Basis path testing identifies paths from the control flow graph, requiring knowledge of internal logic."
     },
-    {
-        id: "cse320-u4-8",
-        unit: 4,
+    { id: "cse320-u4-8", unit: 4,
         topic: 'Levels of Testing',
         difficulty: 'medium',
         question: "In Top-Down integration testing, what are used as substitutes for lower-level modules?",
@@ -81,9 +65,7 @@ export const cse320Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Stubs are 'dummy' modules that simulate the behavior of lower-level modules not yet developed."
     },
-    {
-        id: "cse320-u4-9",
-        unit: 4,
+    { id: "cse320-u4-9", unit: 4,
         topic: 'Levels of Testing',
         difficulty: 'medium',
         question: "In Bottom-Up integration testing, what are used as substitutes for higher-level modules?",
@@ -91,9 +73,7 @@ export const cse320Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Drivers are used to invoke and pass data to lower-level modules during development."
     },
-    {
-        id: "cse320-u4-10",
-        unit: 4,
+    { id: "cse320-u4-10", unit: 4,
         topic: 'Fundamentals',
         difficulty: 'easy',
         question: "Testing is the process of?",

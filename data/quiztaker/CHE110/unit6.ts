@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const che110Unit6MCQs: QuizQuestion[] = [
-    {
-        id: "che110-u6-1",
-        unit: 6,
+    { id: "che110-u6-1", unit: 6,
         topic: 'Sustainability',
         difficulty: 'easy',
         question: "Sustainable development means meeting needs of?",
@@ -11,9 +9,7 @@ export const che110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "As defined by the Brundtland Commission, it balances current needs with future capability."
     },
-    {
-        id: "che110-u6-2",
-        unit: 6,
+    { id: "che110-u6-2", unit: 6,
         topic: 'Environmental Management',
         difficulty: 'medium',
         question: "What is the main goal of Environmental Management Systems (EMS)?",
@@ -21,9 +17,7 @@ export const che110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "EMS like ISO 14001 help organizations manage and reduce their environmental impact."
     },
-    {
-        id: "che110-u6-3",
-        unit: 6,
+    { id: "che110-u6-3", unit: 6,
         topic: 'Human Rights',
         difficulty: 'medium',
         question: "The right to a clean environment is considered a?",
@@ -31,9 +25,7 @@ export const che110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Many constitutions and international frameworks recognize a healthy environment as a fundamental right."
     },
-    {
-        id: "che110-u6-4",
-        unit: 6,
+    { id: "che110-u6-4", unit: 6,
         topic: 'Human Health',
         difficulty: 'medium',
         question: "Which of the following is a major environmental factor affecting human health?",
@@ -41,9 +33,7 @@ export const che110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 3,
         explanation: "Environmental conditions directly impact public health outcomes and disease prevalence."
     },
-    {
-        id: "che110-u6-5",
-        unit: 6,
+    { id: "che110-u6-5", unit: 6,
         topic: 'Global Issues',
         difficulty: 'hard',
         question: "The 'United Nations Conference on Environment and Development' (1992) is also known as?",
@@ -51,9 +41,7 @@ export const che110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Held in Rio de Janeiro, it was a milestone for global environmental policy (Agenda 21)."
     },
-    {
-        id: "che110-u6-6",
-        unit: 6,
+    { id: "che110-u6-6", unit: 6,
         topic: 'Value Education',
         difficulty: 'easy',
         question: "Environmental value education aims to develop?",
@@ -61,9 +49,7 @@ export const che110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "It instills ethical attitudes and awareness about our role in the ecosystem."
     },
-    {
-        id: "che110-u6-7",
-        unit: 6,
+    { id: "che110-u6-7", unit: 6,
         topic: 'Treaties and Accords',
         difficulty: 'hard',
         question: "The Paris Agreement primarily focuses on?",
@@ -71,9 +57,7 @@ export const che110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "It aims to limit global warming to well below 2, preferably 1.5 degrees Celsius."
     },
-    {
-        id: "che110-u6-8",
-        unit: 6,
+    { id: "che110-u6-8", unit: 6,
         topic: 'Biodiversity',
         difficulty: 'medium',
         question: "CITES is an international treaty regarding?",
@@ -81,9 +65,7 @@ export const che110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Convention on International Trade in Endangered Species of Wild Fauna and Flora."
     },
-    {
-        id: "che110-u6-9",
-        unit: 6,
+    { id: "che110-u6-9", unit: 6,
         topic: 'Infrastructure',
         difficulty: 'medium',
         question: "Green infrastructure includes?",
@@ -91,9 +73,7 @@ export const che110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Natural or semi-natural systems that provide environmental services like flood control."
     },
-    {
-        id: "che110-u6-10",
-        unit: 6,
+    { id: "che110-u6-10", unit: 6,
         topic: 'Conservation',
         difficulty: 'hard',
         question: "The 'Polluter Pays Principle' is part of?",

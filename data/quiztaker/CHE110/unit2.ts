@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const che110Unit2MCQs: QuizQuestion[] = [
-    {
-        id: "che110-u2-1",
-        unit: 2,
+    { id: "che110-u2-1", unit: 2,
         topic: 'Natural Resources',
         difficulty: 'easy',
         question: "Which of the following is a renewable resource?",
@@ -11,9 +9,7 @@ export const che110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Renewable resources can be replenished naturally over short periods, like solar, wind, and water."
     },
-    {
-        id: "che110-u2-2",
-        unit: 2,
+    { id: "che110-u2-2", unit: 2,
         topic: 'Ecosystem',
         difficulty: 'easy',
         question: "The basic functional unit of biosphere is?",
@@ -21,9 +17,7 @@ export const che110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "An ecosystem is a community of living organisms in conjunction with the nonliving components of their environment."
     },
-    {
-        id: "che110-u2-3",
-        unit: 2,
+    { id: "che110-u2-3", unit: 2,
         topic: 'Food Chain',
         difficulty: 'medium',
         question: "Which of the following is a primary producer in an aquatic ecosystem?",
@@ -31,9 +25,7 @@ export const che110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Phytoplankton are microscopic marine plants that form the base of several aquatic food webs."
     },
-    {
-        id: "che110-u2-4",
-        unit: 2,
+    { id: "che110-u2-4", unit: 2,
         topic: 'Ecological Pyramids',
         difficulty: 'medium',
         question: "Which pyramid is always upright in a stable ecosystem?",
@@ -41,9 +33,7 @@ export const che110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "The pyramid of energy is always upright because energy is lost as heat at each trophic level."
     },
-    {
-        id: "che110-u2-5",
-        unit: 2,
+    { id: "che110-u2-5", unit: 2,
         topic: 'Ecosystem',
         difficulty: 'hard',
         question: "10% law of energy transfer was proposed by?",
@@ -51,9 +41,7 @@ export const che110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Raymond Lindeman proposed the 10% law, stating that only about 10% of energy is transferred to the next trophic level."
     },
-    {
-        id: "che110-u2-6",
-        unit: 2,
+    { id: "che110-u2-6", unit: 2,
         topic: 'Natural Resources',
         difficulty: 'medium',
         question: "Deforestation generally decreases?",
@@ -61,9 +49,7 @@ export const che110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Loss of vegetation reduces transpiration, which can lead to decreased local rainfall."
     },
-    {
-        id: "che110-u2-7",
-        unit: 2,
+    { id: "che110-u2-7", unit: 2,
         topic: 'Ecological Succession',
         difficulty: 'hard',
         question: "Succession that starts on bare rock is known as?",
@@ -71,9 +57,7 @@ export const che110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Lithosere is ecological succession that begins on a newly exposed rock surface."
     },
-    {
-        id: "che110-u2-8",
-        unit: 2,
+    { id: "che110-u2-8", unit: 2,
         topic: 'Energy Flow',
         difficulty: 'easy',
         question: "The sequence of eating and being eaten is called?",
@@ -81,9 +65,7 @@ export const che110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "A food chain shows how each living thing gets food, and how nutrients and energy are passed."
     },
-    {
-        id: "che110-u2-9",
-        unit: 2,
+    { id: "che110-u2-9", unit: 2,
         topic: 'Natural Resources',
         difficulty: 'easy',
         question: "Major cause of land degradation is?",
@@ -91,9 +73,7 @@ export const che110Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Soil erosion by water and wind is a primary driver of land degradation globally."
     },
-    {
-        id: "che110-u2-10",
-        unit: 2,
+    { id: "che110-u2-10", unit: 2,
         topic: 'Ecosystem',
         difficulty: 'hard',
         question: "Detrivores are organisms that feed on?",

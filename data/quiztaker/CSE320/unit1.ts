@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const cse320Unit1MCQs: QuizQuestion[] = [
-    {
-        id: "cse320-u1-1",
-        unit: 1,
+    { id: "cse320-u1-1", unit: 1,
         topic: 'Software Engineering Foundations',
         difficulty: 'easy',
         question: "What is the primary goal of Software Engineering?",
@@ -11,9 +9,7 @@ export const cse320Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Software Engineering is about applying engineering principles to ensure software quality, reliability, and maintainability."
     },
-    {
-        id: "cse320-u1-2",
-        unit: 1,
+    { id: "cse320-u1-2", unit: 1,
         topic: 'SDLC',
         difficulty: 'easy',
         question: "Which of the following is NOT a phase of the Software Development Life Cycle (SDLC)?",
@@ -21,9 +17,7 @@ export const cse320Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Hardware manufacturing is part of hardware engineering, not the standard software development life cycle."
     },
-    {
-        id: "cse320-u1-3",
-        unit: 1,
+    { id: "cse320-u1-3", unit: 1,
         topic: 'Life cycle models',
         difficulty: 'medium',
         question: "The 'Waterfall Model' is best described as:",
@@ -31,9 +25,7 @@ export const cse320Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Waterfall follows a strictly linear progression where each phase must be completed before the next begins."
     },
-    {
-        id: "cse320-u1-4",
-        unit: 1,
+    { id: "cse320-u1-4", unit: 1,
         topic: 'Life cycle models',
         difficulty: 'medium',
         question: "What is the main advantage of the 'Prototyping Model'?",
@@ -41,9 +33,7 @@ export const cse320Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Creating a prototype helps stakeholders visualize the product and clarify requirements early on."
     },
-    {
-        id: "cse320-u1-5",
-        unit: 1,
+    { id: "cse320-u1-5", unit: 1,
         topic: 'Life cycle models',
         difficulty: 'hard',
         question: "The 'Spiral Model' is uniquely known for its focus on:",
@@ -51,9 +41,7 @@ export const cse320Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "The Spiral model is an evolutionary model that incorporates risk assessment at every iteration."
     },
-    {
-        id: "cse320-u1-6",
-        unit: 1,
+    { id: "cse320-u1-6", unit: 1,
         topic: 'Agile & Scrum',
         difficulty: 'medium',
         question: "In Agile methodology, a 'Sprint' usually lasts for:",
@@ -61,9 +49,7 @@ export const cse320Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Sprints are short-duration iterations (typically 2-4 weeks) used to deliver incremental features."
     },
-    {
-        id: "cse320-u1-7",
-        unit: 1,
+    { id: "cse320-u1-7", unit: 1,
         topic: 'V-Model',
         difficulty: 'hard',
         question: "Which model maps each development phase directly to a corresponding testing phase?",
@@ -71,9 +57,7 @@ export const cse320Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "The V-Model (Verification and Validation) emphasizes testing at every stage of development."
     },
-    {
-        id: "cse320-u1-8",
-        unit: 1,
+    { id: "cse320-u1-8", unit: 1,
         topic: 'SRS',
         difficulty: 'medium',
         question: "What does SRS stand for in Software Engineering?",
@@ -81,9 +65,7 @@ export const cse320Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "SRS is the foundational document that describes exactly what the software should do."
     },
-    {
-        id: "cse320-u1-9",
-        unit: 1,
+    { id: "cse320-u1-9", unit: 1,
         topic: 'Functional & Non-functional requirements',
         difficulty: 'medium',
         question: "Which of the following is a 'Non-functional Requirement'?",
@@ -91,9 +73,7 @@ export const cse320Unit1MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Performance, security, and usability are non-functional (how it performs), while features are functional (what it does)."
     },
-    {
-        id: "cse320-u1-10",
-        unit: 1,
+    { id: "cse320-u1-10", unit: 1,
         topic: 'Agile & Scrum',
         difficulty: 'hard',
         question: "The 'Agile Manifesto' prioritizes which of the following?",

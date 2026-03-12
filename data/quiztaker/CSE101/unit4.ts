@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const cse101Unit4MCQs: QuizQuestion[] = [
-    {
-        id: "cse101-u4-1",
-        unit: 4,
+    { id: "cse101-u4-1", unit: 4,
         topic: 'Arrays',
         difficulty: 'easy',
         question: "What is an array in C?",
@@ -11,9 +9,7 @@ export const cse101Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "An array is a linear data structure that stores elements of the same type in adjacent memory locations."
     },
-    {
-        id: "cse101-u4-2",
-        unit: 4,
+    { id: "cse101-u4-2", unit: 4,
         topic: 'Arrays',
         difficulty: 'easy',
         question: "What is the index of the first element in an array of size N?",
@@ -21,9 +17,7 @@ export const cse101Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Arrays in C are zero-indexed."
     },
-    {
-        id: "cse101-u4-3",
-        unit: 4,
+    { id: "cse101-u4-3", unit: 4,
         topic: 'Arrays',
         difficulty: 'medium',
         question: "How do you access the element at the 3rd row and 4th column of a 2D array 'a'?",
@@ -31,9 +25,7 @@ export const cse101Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Row index 2 is 3rd row, column index 3 is 4th column (zero-based indexing)."
     },
-    {
-        id: "cse101-u4-4",
-        unit: 4,
+    { id: "cse101-u4-4", unit: 4,
         topic: 'Arrays',
         difficulty: 'medium',
         question: "When an array is passed to a function, what is actually passed?",
@@ -41,9 +33,7 @@ export const cse101Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "The base address (pointer to the first element) is passed by default."
     },
-    {
-        id: "cse101-u4-5",
-        unit: 4,
+    { id: "cse101-u4-5", unit: 4,
         topic: 'Searching',
         difficulty: 'medium',
         question: "What is the time complexity of a linear search?",
@@ -51,9 +41,7 @@ export const cse101Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Linear search checks each element one by one, taking linear time."
     },
-    {
-        id: "cse101-u4-6",
-        unit: 4,
+    { id: "cse101-u4-6", unit: 4,
         topic: 'Searching',
         difficulty: 'hard',
         question: "Binary search requires the array to be ___.",
@@ -61,9 +49,7 @@ export const cse101Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Binary search works by dividing the range in half, which requires sorted data."
     },
-    {
-        id: "cse101-u4-7",
-        unit: 4,
+    { id: "cse101-u4-7", unit: 4,
         topic: 'Sorting',
         difficulty: 'hard',
         question: "In bubble sort, how many passes are needed for N elements in worst case?",
@@ -71,9 +57,7 @@ export const cse101Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Bubble sort performs N-1 passes to ensure all elements are in place."
     },
-    {
-        id: "cse101-u4-8",
-        unit: 4,
+    { id: "cse101-u4-8", unit: 4,
         topic: 'Arrays',
         difficulty: 'easy',
         question: "How is an array initialized at declaration?",
@@ -81,9 +65,7 @@ export const cse101Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "The curly braces syntax is used for static initialization of arrays."
     },
-    {
-        id: "cse101-u4-9",
-        unit: 4,
+    { id: "cse101-u4-9", unit: 4,
         topic: 'Arrays',
         difficulty: 'medium',
         question: "What is the result of sizeof(int a[10])? (Assume int is 4 bytes)",
@@ -91,9 +73,7 @@ export const cse101Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "sizeof returns total memory occupied: 10 * 4 = 40 bytes."
     },
-    {
-        id: "cse101-u4-10",
-        unit: 4,
+    { id: "cse101-u4-10", unit: 4,
         topic: 'Arrays',
         difficulty: 'hard',
         question: "Is int a[] = {1, 2, 3}; a valid declaration?",

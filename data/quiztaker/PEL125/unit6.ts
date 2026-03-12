@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const unit6Quizzes: QuizQuestion[] = [
-    {
-        id: "pel125-u6-1",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-1", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'easy',
         question: "What is a phrasal verb?",
@@ -11,9 +9,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "e.g., 'give up' (quit) has a different meaning than 'give' (hand over)."
     },
-    {
-        id: "pel125-u6-2",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-2", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'easy',
         question: "Which is an INSEPARABLE phrasal verb?",
@@ -21,9 +17,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "You 'look after the baby'. You CANNOT say 'look the baby after' because the object must follow the particle."
     },
-    {
-        id: "pel125-u6-3",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-3", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'easy',
         question: "Identify the SEPARABLE phrasal verb:",
@@ -31,9 +25,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "You can say 'Turn the TV off' or 'Turn off the TV'."
     },
-    {
-        id: "pel125-u6-4",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-4", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'easy',
         question: "What is the crucial Pronoun Rule for separable phrasal verbs?",
@@ -41,9 +33,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "e.g., 'Turn IT off'. Never 'Turn off IT'."
     },
-    {
-        id: "pel125-u6-5",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-5", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'easy',
         question: "Choose the correct sentence:",
@@ -51,9 +41,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Pronoun goes in the middle for separable phrasal verbs."
     },
-    {
-        id: "pel125-u6-6",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-6", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'easy',
         question: "Which represents a 3-word phrasal verb?",
@@ -61,9 +49,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "e.g., 'Look (verb) forward (adverb) to (preposition)'."
     },
-    {
-        id: "pel125-u6-7",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-7", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'easy',
         question: "Identify the 3-word verb meaning 'tolerate':",
@@ -71,9 +57,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "'I cannot put up with this noise' means 'I cannot tolerate it'."
     },
-    {
-        id: "pel125-u6-8",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-8", unit:6,
         topic: 'Common Noun Suffixes',
         difficulty: 'easy',
         question: "What suffix turns a verb or adjective into a NOUN?",
@@ -81,9 +65,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "e.g., develop(verb) -> development(noun)."
     },
-    {
-        id: "pel125-u6-9",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-9", unit:6,
         topic: 'Common Noun Suffixes',
         difficulty: 'easy',
         question: "Which suffix means 'the person who does'?",
@@ -91,9 +73,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Teach -> Teacher. Act -> Actor."
     },
-    {
-        id: "pel125-u6-10",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-10", unit:6,
         topic: 'Common Noun Suffixes',
         difficulty: 'easy',
         question: "Turn 'happy' into a noun using the correct suffix:",
@@ -101,9 +81,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "'y' changes to 'i' + 'ness' to form the noun 'Happiness'."
     },
-    {
-        id: "pel125-u6-11",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-11", unit:6,
         topic: 'Common Verb Suffixes',
         difficulty: 'easy',
         question: "Which suffix turns an adjective or noun into a VERB?",
@@ -111,9 +89,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Modern (adj) -> Modernize (verb)."
     },
-    {
-        id: "pel125-u6-12",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-12", unit:6,
         topic: 'Common Verb Suffixes',
         difficulty: 'easy',
         question: "Add a suffix to make 'short' an action verb:",
@@ -121,9 +97,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "'-en' makes verbs describing a change in state, like 'shorten'."
     },
-    {
-        id: "pel125-u6-13",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-13", unit:6,
         topic: 'Common Verb Suffixes',
         difficulty: 'easy',
         question: "Identify the VERB format of 'simple':",
@@ -131,9 +105,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "'-ify' makes words verbs meaning to cause or make, like 'Simplify'."
     },
-    {
-        id: "pel125-u6-14",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-14", unit:6,
         topic: 'Common Adjective Suffixes',
         difficulty: 'easy',
         question: "What suffix turns nouns/verbs into ADJECTIVES?",
@@ -141,9 +113,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Read -> Readable. Flex -> Flexible."
     },
-    {
-        id: "pel125-u6-15",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-15", unit:6,
         topic: 'Common Adjective Suffixes',
         difficulty: 'easy',
         question: "Which adjective suffix means 'without'?",
@@ -151,9 +121,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Careless, Homeless, Harmless. '-less' means 'without'."
     },
-    {
-        id: "pel125-u6-16",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-16", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'easy',
         question: "What is a PRE-fix?",
@@ -161,9 +129,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "A prefix is added to the start of a word to change its meaning."
     },
-    {
-        id: "pel125-u6-17",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-17", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'medium',
         question: "Which negative prefix is typically used before words starting with 'L'?",
@@ -171,9 +137,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Legal -> Illegal. Logical -> Illogical."
     },
-    {
-        id: "pel125-u6-18",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-18", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'easy',
         question: "What is the negative form of 'Possible'?",
@@ -181,9 +145,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Words starting with 'P' or 'M' usually take 'im-', like 'Impossible'."
     },
-    {
-        id: "pel125-u6-19",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-19", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'easy',
         question: "Which negative prefix gives the exact opposite action?",
@@ -191,9 +153,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Agree -> Disagree. Connect -> Disconnect."
     },
-    {
-        id: "pel125-u6-20",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-20", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'easy',
         question: "Prefix meaning 'again':",
@@ -201,9 +161,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Do -> Redo. Write -> Rewrite."
     },
-    {
-        id: "pel125-u6-21",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-21", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'easy',
         question: "Prefix meaning 'wrongly' or 'badly':",
@@ -211,9 +169,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Understand -> Misunderstand. Spell -> Misspell."
     },
-    {
-        id: "pel125-u6-22",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-22", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'easy',
         question: "Identify the idiom meaning 'to be exactly right':",
@@ -221,9 +177,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "It means finding the exact truth or describing a situation perfectly."
     },
-    {
-        id: "pel125-u6-23",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-23", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'easy',
         question: "What is a Proverb?",
@@ -231,9 +185,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "e.g., 'A stitch in time saves nine'."
     },
-    {
-        id: "pel125-u6-24",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-24", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'easy',
         question: "Fill the blank (Proverb): 'Don't judge a book by its ______.'",
@@ -241,9 +193,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Meaning: Don't judge based on outward appearances."
     },
-    {
-        id: "pel125-u6-25",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-25", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'easy',
         question: "Meaning of the idiom: 'Break the ice.'",
@@ -251,9 +201,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Used to lighten the mood with strangers."
     },
-    {
-        id: "pel125-u6-26",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-26", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'easy',
         question: "What does 'Under the weather' mean?",
@@ -261,9 +209,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "A very common English idiom for feeling unwell."
     },
-    {
-        id: "pel125-u6-27",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-27", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'easy',
         question: "Bite the bullet means:",
@@ -271,9 +217,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "It means to accept something difficult or unpleasant."
     },
-    {
-        id: "pel125-u6-28",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-28", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'medium',
         question: "Find the error: 'He look aftered his grandmother.'",
@@ -281,9 +225,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "The tense changes on the verb, not the particle: 'looked after'."
     },
-    {
-        id: "pel125-u6-29",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-29", unit:6,
         topic: 'Common Adjective Suffixes',
         difficulty: 'easy',
         question: "What is the base noun for the adjective 'famous'?",
@@ -291,9 +233,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Fame (noun) + -ous (suffix) = Famous (adj)."
     },
-    {
-        id: "pel125-u6-30",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-30", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'easy',
         question: "Which proverb means 'success comes to those who act early'?",
@@ -301,9 +241,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "The early bird catches the worm!"
     },
-    {
-        id: "pel125-u6-31",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-31", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'easy',
         question: "'Give up' means ___.",
@@ -311,9 +249,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "To give up is to quit or surrender."
     },
-    {
-        id: "pel125-u6-32",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-32", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'medium',
         question: "'Call off' means ___.",
@@ -321,9 +257,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "To call off an event is to cancel it."
     },
-    {
-        id: "pel125-u6-33",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-33", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'medium',
         question: "'Look forward to' is followed by:",
@@ -331,9 +265,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "e.g., I look forward to meeting (verb+ing) you."
     },
-    {
-        id: "pel125-u6-34",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-34", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'hard',
         question: "'Put off' means ___.",
@@ -341,9 +273,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "To put off a task is to postpone it."
     },
-    {
-        id: "pel125-u6-35",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-35", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'hard',
         question: "'Run out of' means ___.",
@@ -351,9 +281,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "To run out of something is to exhaust its supply."
     },
-    {
-        id: "pel125-u6-36",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-36", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'medium',
         question: "I'll ___ the matter (investigate).",
@@ -361,9 +289,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "To look into means to investigate."
     },
-    {
-        id: "pel125-u6-37",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-37", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'medium',
         question: "Please ___ the lights.",
@@ -371,9 +297,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Turn off is an action to stop electrical flow."
     },
-    {
-        id: "pel125-u6-38",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-38", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'easy',
         question: "___ your shoes before entering.",
@@ -381,9 +305,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Take off means to remove clothing/shoes."
     },
-    {
-        id: "pel125-u6-39",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-39", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'easy',
         question: "Opposite of 'Happy'?",
@@ -391,9 +313,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Prefix 'un-' makes it 'Unhappy'."
     },
-    {
-        id: "pel125-u6-40",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-40", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'medium',
         question: "Opposite of 'Accurate'?",
@@ -401,9 +321,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Prefix 'in-' makes it 'Inaccurate'."
     },
-    {
-        id: "pel125-u6-41",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-41", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'medium',
         question: "Opposite of 'Respect'?",
@@ -411,9 +329,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Prefix 'dis-' indicates opposite or lack of, as in 'Disrespect'."
     },
-    {
-        id: "pel125-u6-42",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-42", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'hard',
         question: "Prefix for 'Mature'?",
@@ -421,9 +337,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Use 'im-' before 'm', so 'Immature'."
     },
-    {
-        id: "pel125-u6-43",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-43", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'hard',
         question: "Prefix for 'Regular'?",
@@ -431,9 +345,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Use 'ir-' before 'r', so 'Irregular'."
     },
-    {
-        id: "pel125-u6-44",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-44", unit:6,
         topic: 'Common Noun Suffixes',
         difficulty: 'easy',
         question: "Noun form of 'Beautiful'?",
@@ -441,9 +353,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Beauty is the fundamental noun form."
     },
-    {
-        id: "pel125-u6-45",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-45", unit:6,
         topic: 'Common Noun Suffixes',
         difficulty: 'medium',
         question: "Noun form of 'Strong'?",
@@ -451,9 +361,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Strength is the noun form derived from the adjective strong."
     },
-    {
-        id: "pel125-u6-46",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-46", unit:6,
         topic: 'Common Verb Suffixes',
         difficulty: 'medium',
         question: "Verb form of 'Modern'?",
@@ -461,9 +369,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Modernize means to make modern."
     },
-    {
-        id: "pel125-u6-47",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-47", unit:6,
         topic: 'Common Adjective Suffixes',
         difficulty: 'hard',
         question: "Adjective form of 'Child'?",
@@ -471,9 +377,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Childish is the adjective form (often with a negative connotation)."
     },
-    {
-        id: "pel125-u6-48",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-48", unit:6,
         topic: 'Common Adjective Suffixes',
         difficulty: 'hard',
         question: "Adjective form of 'Hero'?",
@@ -481,9 +385,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Heroic means relating to a hero."
     },
-    {
-        id: "pel125-u6-49",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-49", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'easy',
         question: "'A piece of cake' means ___.",
@@ -491,9 +393,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Something very easy is called a piece of cake."
     },
-    {
-        id: "pel125-u6-50",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-50", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'medium',
         question: "'Once in a blue moon' means ___.",
@@ -501,9 +401,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Blue moons are rare, so the phrase means rarely."
     },
-    {
-        id: "pel125-u6-51",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-51", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'medium',
         question: "'Costs an arm and a leg' means ___.",
@@ -511,9 +409,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "It means something is extremely pricey."
     },
-    {
-        id: "pel125-u6-52",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-52", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'hard',
         question: "'Cry over spilt milk' means ___.",
@@ -521,9 +417,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "It means to be upset about something that has already happened and cannot be fixed."
     },
-    {
-        id: "pel125-u6-53",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-53", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'medium',
         question: "She ___ (met unexpectedly) an old friend.",
@@ -531,9 +425,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "To run into someone is to meet them by surprise."
     },
-    {
-        id: "pel125-u6-54",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-54", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'medium',
         question: "The plane ___ (departed) on time.",
@@ -541,9 +433,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Take off means to leave the ground."
     },
-    {
-        id: "pel125-u6-55",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-55", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'hard',
         question: "I can't ___ (tolerate) his behavior.",
@@ -551,9 +441,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Put up with means to tolerate something unpleasant."
     },
-    {
-        id: "pel125-u6-56",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-56", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'hard',
         question: "He ___ (raised) his kids well.",
@@ -561,9 +449,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Brought up means raised (parents to children)."
     },
-    {
-        id: "pel125-u6-57",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-57", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'medium',
         question: "Opposite of 'Direct'?",
@@ -571,9 +457,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Prefix 'in-' is used, forming 'Indirect'."
     },
-    {
-        id: "pel125-u6-58",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-58", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'medium',
         question: "Opposite of 'Polite'?",
@@ -581,9 +465,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Use 'im-' before 'p', so 'Impolite'."
     },
-    {
-        id: "pel125-u6-59",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-59", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'hard',
         question: "Prefix meaning 'before'?",
@@ -591,9 +473,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Pre- means before, as in 'Pre-war'."
     },
-    {
-        id: "pel125-u6-60",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-60", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'hard',
         question: "Prefix meaning 'against'?",
@@ -601,9 +481,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Anti- means against (e.g., Antibiotic)."
     },
-    {
-        id: "pel125-u6-61",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-61", unit:6,
         topic: 'Common Noun Suffixes',
         difficulty: 'easy',
         question: "Suffix for 'Friend' to make noun mapping a relationship?",
@@ -611,9 +489,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Friendship is the relationship between friends."
     },
-    {
-        id: "pel125-u6-62",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-62", unit:6,
         topic: 'Common Noun Suffixes',
         difficulty: 'medium',
         question: "Suffix for 'Kind' to make noun?",
@@ -621,9 +497,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Kindness is the state of being kind."
     },
-    {
-        id: "pel125-u6-63",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-63", unit:6,
         topic: 'Common Noun Suffixes',
         difficulty: 'medium',
         question: "Suffix for 'Act' to make noun of action?",
@@ -631,9 +505,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Action is a noun formed with the suffix -ion."
     },
-    {
-        id: "pel125-u6-64",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-64", unit:6,
         topic: 'Common Adjective Suffixes',
         difficulty: 'hard',
         question: "Suffix for 'Danger' to make adjective?",
@@ -641,9 +513,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Dangerous means full of danger."
     },
-    {
-        id: "pel125-u6-65",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-65", unit:6,
         topic: 'Common Adjective Suffixes',
         difficulty: 'hard',
         question: "Suffix for 'Music' to make adjective?",
@@ -651,9 +521,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Musical (al) or Music (ic) - generally Musical is the standard."
     },
-    {
-        id: "pel125-u6-66",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-66", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'medium',
         question: "'Better late than never' means ___.",
@@ -661,9 +529,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "It's better to finish something late than not at all."
     },
-    {
-        id: "pel125-u6-67",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-67", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'medium',
         question: "'To kill two birds with one stone' means ___.",
@@ -671,9 +537,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Refers to achieving two goals at once."
     },
-    {
-        id: "pel125-u6-68",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-68", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'hard',
         question: "'The ball is in your court' means ___.",
@@ -681,9 +545,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Meaning it's up to you to take the next step."
     },
-    {
-        id: "pel125-u6-69",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-69", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'hard',
         question: "'Barking up the wrong tree' means ___.",
@@ -691,9 +553,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Meaning to have a wrong idea or blame the wrong person."
     },
-    {
-        id: "pel125-u6-70",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-70", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'easy',
         question: "An apple a day ___.",
@@ -701,9 +561,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "A famous proverb about healthy eating."
     },
-    {
-        id: "pel125-u6-71",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-71", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'medium',
         question: "Honesty is the ___.",
@@ -711,9 +569,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "A proverb teaching integrity."
     },
-    {
-        id: "pel125-u6-72",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-72", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'medium',
         question: "Actions speak ___.",
@@ -721,9 +577,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Meaning what people do matters more than what they say."
     },
-    {
-        id: "pel125-u6-73",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-73", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'hard',
         question: "A friend in need is ___.",
@@ -731,9 +585,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Meaning a true friend helps when you're in trouble."
     },
-    {
-        id: "pel125-u6-74",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-74", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'hard',
         question: "Every cloud has a ___.",
@@ -741,9 +593,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Meaning there is something good in every bad situation."
     },
-    {
-        id: "pel125-u6-75",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-75", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'medium',
         question: "We ___ (spent time) at the mall.",
@@ -751,9 +601,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "To hang out means to spend leisure time."
     },
-    {
-        id: "pel125-u6-76",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-76", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'medium',
         question: "Please ___ (wait) for a moment.",
@@ -761,9 +609,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Hold on is a common phrasal verb meaning to wait."
     },
-    {
-        id: "pel125-u6-77",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-77", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'hard',
         question: "The car ___ (stopped working).",
@@ -771,9 +617,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Broke down is used for mechanical failure."
     },
-    {
-        id: "pel125-u6-78",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-78", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'hard',
         question: "I ___ (found by chance) a rare coin.",
@@ -781,9 +625,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "To come across means to find unexpectedly."
     },
-    {
-        id: "pel125-u6-79",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-79", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'medium',
         question: "What is the opposite of 'Legal'?",
@@ -791,9 +633,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Prefix 'il-' is used before 'l', forming 'Illegal'."
     },
-    {
-        id: "pel125-u6-80",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-80", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'hard',
         question: "Prefix for 'Standard' to mean below?",
@@ -801,9 +641,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Substandard means below the required standard."
     },
-    {
-        id: "pel125-u6-81",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-81", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'hard',
         question: "Prefix meaning 'half'?",
@@ -811,9 +649,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Semi means half, like in 'Semicircle'."
     },
-    {
-        id: "pel125-u6-82",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-82", unit:6,
         topic: 'Common Noun Suffixes',
         difficulty: 'easy',
         question: "Suffix for 'Play' to make person?",
@@ -821,9 +657,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Player is someone who plays."
     },
-    {
-        id: "pel125-u6-83",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-83", unit:6,
         topic: 'Common Noun Suffixes',
         difficulty: 'medium',
         question: "Suffix for 'Magic' to make person?",
@@ -831,9 +665,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Magician is a person who performs magic."
     },
-    {
-        id: "pel125-u6-84",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-84", unit:6,
         topic: 'Common Noun Suffixes',
         difficulty: 'medium',
         question: "Suffix for 'Art' to make person?",
@@ -841,9 +673,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Artist is a person who creates art."
     },
-    {
-        id: "pel125-u6-85",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-85", unit:6,
         topic: 'Common Adjective Suffixes',
         difficulty: 'hard',
         question: "Suffix for 'Care' to make adjective (with)?",
@@ -851,9 +681,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Careful means full of care."
     },
-    {
-        id: "pel125-u6-86",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-86", unit:6,
         topic: 'Common Adjective Suffixes',
         difficulty: 'hard',
         question: "Suffix for 'Care' to make adjective (without)?",
@@ -861,9 +689,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Careless means without care."
     },
-    {
-        id: "pel125-u6-87",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-87", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'medium',
         question: "'Spill the beans' means ___.",
@@ -871,9 +697,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "To spill the beans is to reveal hidden info."
     },
-    {
-        id: "pel125-u6-88",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-88", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'hard',
         question: "'Through thick and thin' means ___.",
@@ -881,9 +705,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Loyalty in good and bad times."
     },
-    {
-        id: "pel125-u6-89",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-89", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'hard',
         question: "'Beat around the bush' means ___.",
@@ -891,9 +713,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Delaying getting to the point."
     },
-    {
-        id: "pel125-u6-90",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-90", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'medium',
         question: "Practice makes ___.",
@@ -901,9 +721,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Repetition leads to mastery."
     },
-    {
-        id: "pel125-u6-91",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-91", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'medium',
         question: "Laughter is the ___.",
@@ -911,9 +729,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Laughter improves health/mood."
     },
-    {
-        id: "pel125-u6-92",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-92", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'hard',
         question: "'Burning the midnight oil' means ___.",
@@ -921,9 +737,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Staying up late to work or study."
     },
-    {
-        id: "pel125-u6-93",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-93", unit:6,
         topic: 'Two- and Three-Word Verbs (Phrasal Verbs)',
         difficulty: 'hard',
         question: "He finally ___ (arrived) at the party.",
@@ -931,9 +745,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Show up means to arrive."
     },
-    {
-        id: "pel125-u6-94",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-94", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'easy',
         question: "Prefix for 'Regular' to mean not?",
@@ -941,9 +753,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Use 'ir-' before 'r', forming 'Irregular'."
     },
-    {
-        id: "pel125-u6-95",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-95", unit:6,
         topic: 'Common Verb Suffixes',
         difficulty: 'medium',
         question: "Verb form of 'Memory'?",
@@ -951,9 +761,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Memorize is the verb form meaning to learn by heart."
     },
-    {
-        id: "pel125-u6-96",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-96", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'medium',
         question: "'To let the cat out of the bag' means ___.",
@@ -961,9 +769,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "It means to accidentally reveal something secret."
     },
-    {
-        id: "pel125-u6-97",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-97", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'easy',
         question: "Prefix meaning 'too much'?",
@@ -971,9 +777,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Overcook, Overwork - means too much."
     },
-    {
-        id: "pel125-u6-98",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-98", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'easy',
         question: "Prefix meaning 'not enough'?",
@@ -981,9 +785,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Undercook, Underpaid - means not enough."
     },
-    {
-        id: "pel125-u6-99",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-99", unit:6,
         topic: 'Common and Negative Prefixes',
         difficulty: 'medium',
         question: "Prefix for 'Zip' to open?",
@@ -991,9 +793,7 @@ export const unit6Quizzes: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Un- is used for reversing actions like Unzip."
     },
-    {
-        id: "pel125-u6-100",
-        unit:unit:unit: 6,
+    { id: "pel125-u6-100", unit:6,
         topic: 'Idioms and Proverbs',
         difficulty: 'medium',
         question: "'Hit the hay' means ___.",

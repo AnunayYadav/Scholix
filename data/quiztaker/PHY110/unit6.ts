@@ -1,9 +1,7 @@
 import { QuizQuestion } from '../../../types.ts';
 
 export const phy110Unit6MCQs: QuizQuestion[] = [
-    {
-        id: "phy110-u6-1",
-        unit: 6,
+    { id: "phy110-u6-1", unit: 6,
         topic: 'Dielectrics',
         difficulty: 'easy',
         question: "Materials that do not conduct electricity but can be polarized by an electric field are?",
@@ -11,9 +9,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Dielectrics store electrical energy through polarization."
     },
-    {
-        id: "phy110-u6-2",
-        unit: 6,
+    { id: "phy110-u6-2", unit: 6,
         topic: 'Dielectric Constant',
         difficulty: 'medium',
         question: "The ratio of permittivity of a medium to that of free space is?",
@@ -21,9 +17,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Also known as relative permittivity."
     },
-    {
-        id: "phy110-u6-3",
-        unit: 6,
+    { id: "phy110-u6-3", unit: 6,
         topic: 'Polarization',
         difficulty: 'medium',
         question: "Induced dipole moment per unit volume is?",
@@ -31,9 +25,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "P = total dipole moment / Volume."
     },
-    {
-        id: "phy110-u6-4",
-        unit: 6,
+    { id: "phy110-u6-4", unit: 6,
         topic: 'Magnetic Materials',
         difficulty: 'easy',
         question: "Materials that are weakly repelled by a magnetic field are?",
@@ -41,9 +33,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Examples include Water, Bismuth, Copper."
     },
-    {
-        id: "phy110-u6-5",
-        unit: 6,
+    { id: "phy110-u6-5", unit: 6,
         topic: 'Magnetic Materials',
         difficulty: 'easy',
         question: "Materials that are weakly attracted to a magnetic field are?",
@@ -51,9 +41,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Examples: Aluminum, Platinum."
     },
-    {
-        id: "phy110-u6-6",
-        unit: 6,
+    { id: "phy110-u6-6", unit: 6,
         topic: 'Magnetic Materials',
         difficulty: 'easy',
         question: "Materials that show strong spontaneous magnetization are?",
@@ -61,9 +49,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Iron, Nickel, and Cobalt are classic examples."
     },
-    {
-        id: "phy110-u6-7",
-        unit: 6,
+    { id: "phy110-u6-7", unit: 6,
         topic: 'Domains',
         difficulty: 'medium',
         question: "Small regions in a ferromagnetic material where all dipoles are aligned are?",
@@ -71,9 +57,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "The domain theory explains hysteresis and saturation."
     },
-    {
-        id: "phy110-u6-8",
-        unit: 6,
+    { id: "phy110-u6-8", unit: 6,
         topic: 'Curie Point',
         difficulty: 'hard',
         question: "The temperature at which a ferromagnetic material becomes paramagnetic is?",
@@ -81,9 +65,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Thermal energy overcomes the exchange interaction."
     },
-    {
-        id: "phy110-u6-9",
-        unit: 6,
+    { id: "phy110-u6-9", unit: 6,
         topic: 'Hysteresis',
         difficulty: 'hard',
         question: "The lagging of magnetic induction (B) behind the magnetizing field (H) is?",
@@ -91,9 +73,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Represented by the B-H loop."
     },
-    {
-        id: "phy110-u6-10",
-        unit: 6,
+    { id: "phy110-u6-10", unit: 6,
         topic: 'Retentivity',
         difficulty: 'medium',
         question: "The residual magnetism left in a material when the external field is removed is?",
@@ -101,9 +81,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "High retentivity is needed for permanent magnets."
     },
-    {
-        id: "phy110-u6-11",
-        unit: 6,
+    { id: "phy110-u6-11", unit: 6,
         topic: 'Coercivity',
         difficulty: 'medium',
         question: "The reverse magnetic field required to reduce residual magnetism to zero is?",
@@ -111,9 +89,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Measures the resistance to demagnetization."
     },
-    {
-        id: "phy110-u6-12",
-        unit: 6,
+    { id: "phy110-u6-12", unit: 6,
         topic: 'Superconductivity',
         difficulty: 'medium',
         question: "The complete loss of electrical resistance below a critical temperature (Tc) is?",
@@ -121,9 +97,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Discovered by H. Kamerlingh Onnes in 1911."
     },
-    {
-        id: "phy110-u6-13",
-        unit: 6,
+    { id: "phy110-u6-13", unit: 6,
         topic: 'Meissner Effect',
         difficulty: 'hard',
         question: "The expulsion of magnetic flux from the interior of a superconductor is?",
@@ -131,9 +105,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Proves that a superconductor is a perfect diamagnet."
     },
-    {
-        id: "phy110-u6-14",
-        unit: 6,
+    { id: "phy110-u6-14", unit: 6,
         topic: 'Superconductors',
         difficulty: 'hard',
         question: "Type-I superconductors are also known as ___.",
@@ -141,9 +113,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "They exhibit sudden loss of superconductivity at Hc."
     },
-    {
-        id: "phy110-u6-15",
-        unit: 6,
+    { id: "phy110-u6-15", unit: 6,
         topic: 'Superconductors',
         difficulty: 'hard',
         question: "Type-II superconductors have ___ critical magnetic fields.",
@@ -151,9 +121,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "They have a 'vortex state' between the two fields."
     },
-    {
-        id: "phy110-u6-16",
-        unit: 6,
+    { id: "phy110-u6-16", unit: 6,
         topic: 'Piezoelectricity',
         difficulty: 'medium',
         question: "Production of electric charge by applying mechanical stress is?",
@@ -161,9 +129,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Common in non-centrosymmetric crystals like Quartz."
     },
-    {
-        id: "phy110-u6-17",
-        unit: 6,
+    { id: "phy110-u6-17", unit: 6,
         topic: 'Piezoelectricity',
         difficulty: 'medium',
         question: "Mechanical deformation caused by applying an electric field is?",
@@ -171,9 +137,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Used in actuators and ultrasonic generators."
     },
-    {
-        id: "phy110-u6-18",
-        unit: 6,
+    { id: "phy110-u6-18", unit: 6,
         topic: 'Magnetic Data Storage',
         difficulty: 'easy',
         question: "Hard drives store data using the property of ___.",
@@ -181,9 +145,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Tiny domains are oriented to represent bits 0 and 1."
     },
-    {
-        id: "phy110-u6-19",
-        unit: 6,
+    { id: "phy110-u6-19", unit: 6,
         topic: 'Superconductors',
         difficulty: 'hard',
         question: "High temperature superconductors (HTS) usually belong to the family of?",
@@ -191,9 +153,7 @@ export const phy110Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Example: YBCO (Yttrium Barium Copper Oxide)."
     },
-    {
-        id: "phy110-u6-20",
-        unit: 6,
+    { id: "phy110-u6-20", unit: 6,
         topic: 'Applications',
         difficulty: 'easy',
         question: "Maglev trains use ___ to float above tracks.",

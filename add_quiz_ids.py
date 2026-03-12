@@ -9,27 +9,33 @@ def process_file(file_path, subject, unit):
         print(f"Error reading {file_path}: {e}")
         return
 
-    # Remove existing IDs to start fresh
-    content = re.sub(r'id:\s*".*?",\s*\n?', '', content)
-    content = re.sub(r'id:\s*\'.*?\',\s*\n?', '', content)
+    # First, clean up the 'unit:unit:unit:' mess if it exists
+    content = re.sub(r'unit\s*:\s*(unit\s*:\s*)+', 'unit:', content)
+    
+    # Remove existing IDs to start fresh and avoid duplicates/misplacements
+    content = re.sub(r'(\s*)id:\s*".*?",\s*\n?', '', content)
+    content = re.sub(r'(\s*)id:\s*\'.*?\',\s*\n?', '', content)
 
     count = 0
     def replacer(match):
         nonlocal count
         count += 1
-        spacing = match.group(1)
+        prefix = match.group(1) # The {
+        spacing = match.group(2) # The whitespace after {
+        
         q_id = f"{subject.lower()}-u{unit}-{count}"
         
+        # We want to return: { [spacing] id: "...", [spacing_normalized] unit:
+        # If spacing has a newline, we should probably maintain the indentation
         if '\n' in spacing:
-            # Multi-line
             indent = spacing.split('\n')[-1]
-            return f'{{' + spacing + f'id: "{q_id}",\n' + indent + 'unit:'
+            return f'{prefix}{spacing}id: "{q_id}",\n{indent}unit:'
         else:
-            # Single line
-            return f'{{ id: "{q_id}", unit:'
+            return f'{prefix} id: "{q_id}", unit:'
 
     # Match { followed by whitespace then unit:
-    pattern = re.compile(r'\{(\s*)unit:', re.MULTILINE)
+    # Using a lookahead or capturing the { to ensure we only hit the start of the object
+    pattern = re.compile(r'(\{)(\s*)unit:', re.MULTILINE)
     
     processed_content = pattern.sub(replacer, content)
     

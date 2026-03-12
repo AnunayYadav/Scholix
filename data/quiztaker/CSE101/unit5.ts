@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const cse101Unit5MCQs: QuizQuestion[] = [
-    {
-        id: "cse101-u5-1",
-        unit: 5,
+    { id: "cse101-u5-1", unit: 5,
         topic: 'Pointers',
         difficulty: 'easy',
         question: "What is a pointer in C?",
@@ -11,9 +9,7 @@ export const cse101Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Pointers are specialized variables designed to hold memory addresses."
     },
-    {
-        id: "cse101-u5-2",
-        unit: 5,
+    { id: "cse101-u5-2", unit: 5,
         topic: 'Pointers',
         difficulty: 'easy',
         question: "Which operator is used to get the address of a variable?",
@@ -21,9 +17,7 @@ export const cse101Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "The '&' operator (address-of) returns the memory location of its operand."
     },
-    {
-        id: "cse101-u5-3",
-        unit: 5,
+    { id: "cse101-u5-3", unit: 5,
         topic: 'Pointers',
         difficulty: 'medium',
         question: "What is a 'null pointer'?",
@@ -31,9 +25,7 @@ export const cse101Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 3,
         explanation: "A NULL pointer is explicitly assigned to point to a safe 'nowhere' value (usually 0)."
     },
-    {
-        id: "cse101-u5-4",
-        unit: 5,
+    { id: "cse101-u5-4", unit: 5,
         topic: 'Pointer Arithmetic',
         difficulty: 'medium',
         question: "If 'p' is a pointer to an integer, what does 'p++' do?",
@@ -41,9 +33,7 @@ export const cse101Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Pointer arithmetic is scaled by the size of the data type it points to."
     },
-    {
-        id: "cse101-u5-5",
-        unit: 5,
+    { id: "cse101-u5-5", unit: 5,
         topic: 'Dynamic Memory',
         difficulty: 'medium',
         question: "Which function is used to allocate memory at runtime and initialize it to zero?",
@@ -51,9 +41,7 @@ export const cse101Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "calloc() allocates memory and clears it, while malloc() leaves it uninitialized (garbage)."
     },
-    {
-        id: "cse101-u5-6",
-        unit: 5,
+    { id: "cse101-u5-6", unit: 5,
         topic: 'Dynamic Memory',
         difficulty: 'hard',
         question: "What happens if you don't 'free()' dynamically allocated memory?",
@@ -61,9 +49,7 @@ export const cse101Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Failure to release memory back to the heap leads to memory leaks, which can eventually consume all RAM."
     },
-    {
-        id: "cse101-u5-7",
-        unit: 5,
+    { id: "cse101-u5-7", unit: 5,
         topic: 'Strings',
         difficulty: 'easy',
         question: "How are strings represented in C?",
@@ -71,9 +57,7 @@ export const cse101Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "C strings are null-terminated character arrays."
     },
-    {
-        id: "cse101-u5-8",
-        unit: 5,
+    { id: "cse101-u5-8", unit: 5,
         topic: 'Strings',
         difficulty: 'medium',
         question: "Which library function is used to concatenate two strings?",
@@ -81,9 +65,7 @@ export const cse101Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "strcat(dest, src) appends the source string to the destination string."
     },
-    {
-        id: "cse101-u5-9",
-        unit: 5,
+    { id: "cse101-u5-9", unit: 5,
         topic: 'Pointers',
         difficulty: 'hard',
         question: "What is a 'dangling pointer'?",
@@ -91,9 +73,7 @@ export const cse101Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "A dangling pointer arises when the memory it pointed to is freed, but the pointer still holds the old address."
     },
-    {
-        id: "cse101-u5-10",
-        unit: 5,
+    { id: "cse101-u5-10", unit: 5,
         topic: 'Pointers',
         difficulty: 'hard',
         question: "What is a 'void pointer'?",

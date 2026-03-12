@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const cse320Unit5MCQs: QuizQuestion[] = [
-    {
-        id: "cse320-u5-1",
-        unit: 5,
+    { id: "cse320-u5-1", unit: 5,
         topic: 'Software Maintenance',
         difficulty: 'easy',
         question: "Which type of maintenance is used to fix defects found in the system?",
@@ -11,9 +9,7 @@ export const cse320Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Corrective maintenance involves rectifying software faults discovered after delivery."
     },
-    {
-        id: "cse320-u5-2",
-        unit: 5,
+    { id: "cse320-u5-2", unit: 5,
         topic: 'Software Maintenance',
         difficulty: 'medium',
         question: "Adding new features to a system to improve its performance or functional scope is called?",
@@ -21,9 +17,7 @@ export const cse320Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Perfective maintenance improves the software by enhancing existing features or adding new ones."
     },
-    {
-        id: "cse320-u5-3",
-        unit: 5,
+    { id: "cse320-u5-3", unit: 5,
         topic: 'Cost Estimation',
         difficulty: 'hard',
         question: "COCOMO stands for?",
@@ -31,9 +25,7 @@ export const cse320Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "COCOMO is an algorithmic software cost estimation model developed by Barry Boehm."
     },
-    {
-        id: "cse320-u5-4",
-        unit: 5,
+    { id: "cse320-u5-4", unit: 5,
         topic: 'Cost Estimation',
         difficulty: 'medium',
         question: "In COCOMO, the 'Organic' project refers to?",
@@ -41,9 +33,7 @@ export const cse320Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Organic projects have relatively small teams and well-understood requirements."
     },
-    {
-        id: "cse320-u5-5",
-        unit: 5,
+    { id: "cse320-u5-5", unit: 5,
         topic: 'SCM',
         difficulty: 'medium',
         question: "SCM stands for?",
@@ -51,9 +41,7 @@ export const cse320Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "SCM controls changes to Software artifacts over time."
     },
-    {
-        id: "cse320-u5-6",
-        unit: 5,
+    { id: "cse320-u5-6", unit: 5,
         topic: 'DevOps',
         difficulty: 'medium',
         question: "CI/CD stands for?",
@@ -61,9 +49,7 @@ export const cse320Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Automated practice of merging code and deploying to production."
     },
-    {
-        id: "cse320-u5-7",
-        unit: 5,
+    { id: "cse320-u5-7", unit: 5,
         topic: 'Software Maintenance',
         difficulty: 'hard',
         question: "Updating software to work on a new OS version is ___ maintenance.",
@@ -71,9 +57,7 @@ export const cse320Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Adaptive maintenance modifies the software to keep it usable in a changing environment."
     },
-    {
-        id: "cse320-u5-8",
-        unit: 5,
+    { id: "cse320-u5-8", unit: 5,
         topic: 'Scheduling',
         difficulty: 'medium',
         question: "Gantt charts are used for?",
@@ -81,9 +65,7 @@ export const cse320Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Bar charts that represent the project timeline."
     },
-    {
-        id: "cse320-u5-9",
-        unit: 5,
+    { id: "cse320-u5-9", unit: 5,
         topic: 'Project Management',
         difficulty: 'hard',
         question: "The first step in Risk Management is?",
@@ -91,9 +73,7 @@ export const cse320Unit5MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "You must first find the risks before you can analyze or mitigate them."
     },
-    {
-        id: "cse320-u5-10",
-        unit: 5,
+    { id: "cse320-u5-10", unit: 5,
         topic: 'DevOps',
         difficulty: 'easy',
         question: "GitHub Actions is an example of ___.",

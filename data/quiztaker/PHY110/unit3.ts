@@ -1,9 +1,7 @@
 import { QuizQuestion } from '../../../types.ts';
 
 export const phy110Unit3MCQs: QuizQuestion[] = [
-    {
-        id: "phy110-u3-1",
-        unit: 3,
+    { id: "phy110-u3-1", unit: 3,
         topic: 'Fiber Optics',
         difficulty: 'easy',
         question: "The principle of an optical fiber is?",
@@ -11,9 +9,7 @@ export const phy110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Light is guided along the core by repeated internal reflections."
     },
-    {
-        id: "phy110-u3-2",
-        unit: 3,
+    { id: "phy110-u3-2", unit: 3,
         topic: 'Fiber Structure',
         difficulty: 'medium',
         question: "In an optical fiber, the refractive index of the core (n1) must be ___ than the cladding (n2).",
@@ -21,9 +17,7 @@ export const phy110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Requirement for TIR: light must travel from denser to rarer medium."
     },
-    {
-        id: "phy110-u3-3",
-        unit: 3,
+    { id: "phy110-u3-3", unit: 3,
         topic: 'Numerical Aperture',
         difficulty: 'hard',
         question: "Numerical Aperture (NA) is a measure of?",
@@ -31,9 +25,7 @@ export const phy110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "NA = √(n1² - n2²), representing the range of angles at which light can enter."
     },
-    {
-        id: "phy110-u3-4",
-        unit: 3,
+    { id: "phy110-u3-4", unit: 3,
         topic: 'Acceptance Angle',
         difficulty: 'hard',
         question: "Acceptance Angle (θa) is related to NA by?",
@@ -41,9 +33,7 @@ export const phy110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "It's the maximum angle at the fiber face for which TIR occurs inside."
     },
-    {
-        id: "phy110-u3-5",
-        unit: 3,
+    { id: "phy110-u3-5", unit: 3,
         topic: 'Step Index Fiber',
         difficulty: 'medium',
         question: "A fiber where the refractive index changes abruptly at the core-cladding boundary is?",
@@ -51,9 +41,7 @@ export const phy110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Most basic type of fiber optics."
     },
-    {
-        id: "phy110-u3-6",
-        unit: 3,
+    { id: "phy110-u3-6", unit: 3,
         topic: 'Graded Index Fiber',
         difficulty: 'hard',
         question: "In a Graded Index (GRIN) fiber, the refractive index varies ___.",
@@ -61,9 +49,7 @@ export const phy110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Reduces modal dispersion by making all rays arrive at similar times."
     },
-    {
-        id: "phy110-u3-7",
-        unit: 3,
+    { id: "phy110-u3-7", unit: 3,
         topic: 'Single Mode Fiber',
         difficulty: 'hard',
         question: "Single Mode Fibers (SMF) have a very ___ core diameter.",
@@ -71,9 +57,7 @@ export const phy110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Allows only one path (mode) for light, minimizing pulse spreading."
     },
-    {
-        id: "phy110-u3-8",
-        unit: 3,
+    { id: "phy110-u3-8", unit: 3,
         topic: 'V-Number',
         difficulty: 'hard',
         question: "The V-number (Normalized frequency) determines ___.",
@@ -81,9 +65,7 @@ export const phy110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "If V < 2.405, the fiber is single-mode."
     },
-    {
-        id: "phy110-u3-9",
-        unit: 3,
+    { id: "phy110-u3-9", unit: 3,
         topic: 'Attenuation',
         difficulty: 'medium',
         question: "Loss of optical power as light travels through a fiber is called?",
@@ -91,9 +73,7 @@ export const phy110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Measured in dB/km, caused by scattering and absorption."
     },
-    {
-        id: "phy110-u3-10",
-        unit: 3,
+    { id: "phy110-u3-10", unit: 3,
         topic: 'Dispersion',
         difficulty: 'hard',
         question: "Broadening of pulses as they travel through a fiber is called?",

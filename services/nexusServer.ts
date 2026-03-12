@@ -151,23 +151,6 @@ class NexusServer {
     }, { onConflict: 'subject_name,unit_number' });
   }
 
-  /**
-   * Quiz Taker: Attempt History
-   */
-  static async saveQuizAttempt(userId: string | null, attempt: any) {
-    const label = `${attempt.subject} - ${attempt.score}/${attempt.total_questions}`;
-    await this.saveRecord(userId, 'QUIZ_ATTEMPT', label, attempt);
-  }
-
-  static async fetchQuizAttempts(userId: string | null): Promise<any[]> {
-    const records = await this.fetchRecords(userId, 'QUIZ_ATTEMPT');
-    return records.map(r => ({
-      id: r.id,
-      created_at: r.created_at,
-      ...r.content
-    }));
-  }
-
   static async recordVisit(): Promise<void> {
     const client = getSupabase();
     if (!client) return;

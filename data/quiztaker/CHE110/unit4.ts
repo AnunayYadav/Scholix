@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const che110Unit4MCQs: QuizQuestion[] = [
-    {
-        id: "che110-u4-1",
-        unit: 4,
+    { id: "che110-u4-1", unit: 4,
         topic: 'Air Pollution',
         difficulty: 'easy',
         question: "Which gas is the primary contributor to the greenhouse effect?",
@@ -11,9 +9,7 @@ export const che110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "CO2 traps heat in the atmosphere, leading to global warming."
     },
-    {
-        id: "che110-u4-2",
-        unit: 4,
+    { id: "che110-u4-2", unit: 4,
         topic: 'Water Pollution',
         difficulty: 'medium',
         question: "Minamata disease was caused by which pollutant?",
@@ -21,9 +17,7 @@ export const che110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Methylmercury poisoning occurred in Minamata, Japan, through contaminated fish."
     },
-    {
-        id: "che110-u4-3",
-        unit: 4,
+    { id: "che110-u4-3", unit: 4,
         topic: 'Soil Pollution',
         difficulty: 'medium',
         question: "Which of the following causes soil salinity?",
@@ -31,9 +25,7 @@ export const che110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Excessive irrigation without proper drainage leads to salt accumulation on the soil surface."
     },
-    {
-        id: "che110-u4-4",
-        unit: 4,
+    { id: "che110-u4-4", unit: 4,
         topic: 'Noise Pollution',
         difficulty: 'easy',
         question: "What is the unit for measuring noise levels?",
@@ -41,9 +33,7 @@ export const che110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Noise is measured in decibels (dB)."
     },
-    {
-        id: "che110-u4-5",
-        unit: 4,
+    { id: "che110-u4-5", unit: 4,
         topic: 'Ozone Depletion',
         difficulty: 'hard',
         question: "Which chemical is mainly responsible for ozone layer depletion?",
@@ -51,9 +41,7 @@ export const che110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "CFCs release chlorine atoms that break down ozone molecules in the stratosphere."
     },
-    {
-        id: "che110-u4-6",
-        unit: 4,
+    { id: "che110-u4-6", unit: 4,
         topic: 'Acid Rain',
         difficulty: 'medium',
         question: "The two main acids present in acid rain are?",
@@ -61,9 +49,7 @@ export const che110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "SO2 and NOx react with water vapor to form sulfuric and nitric acids."
     },
-    {
-        id: "che110-u4-7",
-        unit: 4,
+    { id: "che110-u4-7", unit: 4,
         topic: 'Solid Waste Management',
         difficulty: 'medium',
         question: "The '3Rs' of waste management are?",
@@ -71,9 +57,7 @@ export const che110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "The hierarchy of waste management starts with reducing waste generation."
     },
-    {
-        id: "che110-u4-8",
-        unit: 4,
+    { id: "che110-u4-8", unit: 4,
         topic: 'Water Pollution',
         difficulty: 'hard',
         question: "Eutrophication leads to the depletion of?",
@@ -81,9 +65,7 @@ export const che110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Excessive nutrients cause algal blooms, which consume oxygen during decomposition, killing aquatic life."
     },
-    {
-        id: "che110-u4-9",
-        unit: 4,
+    { id: "che110-u4-9", unit: 4,
         topic: 'Air Pollution',
         difficulty: 'medium',
         question: "Particulate matter (PM 2.5) refers to particles with diameter less than?",
@@ -91,9 +73,7 @@ export const che110Unit4MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Fine particles that can penetrate deep into human lungs and bloodstreams."
     },
-    {
-        id: "che110-u4-10",
-        unit: 4,
+    { id: "che110-u4-10", unit: 4,
         topic: 'Waste Management',
         difficulty: 'hard',
         question: "Which method is used to dispose of hazardous hospital waste?",

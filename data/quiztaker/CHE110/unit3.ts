@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const che110Unit3MCQs: QuizQuestion[] = [
-    {
-        id: "che110-u3-1",
-        unit: 3,
+    { id: "che110-u3-1", unit: 3,
         topic: 'Biodiversity',
         difficulty: 'easy',
         question: "How many levels of biodiversity are generally recognized?",
@@ -11,9 +9,7 @@ export const che110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "The three levels are Genetic, Species, and Ecosystem diversity."
     },
-    {
-        id: "che110-u3-2",
-        unit: 3,
+    { id: "che110-u3-2", unit: 3,
         topic: 'Genetic Diversity',
         difficulty: 'medium',
         question: "Variation of genes within a species is called?",
@@ -21,9 +17,7 @@ export const che110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Genetic diversity allows species to adapt to changing environments."
     },
-    {
-        id: "che110-u3-3",
-        unit: 3,
+    { id: "che110-u3-3", unit: 3,
         topic: 'Biodiversity Hotspots',
         difficulty: 'hard',
         question: "Who coined the term 'Biodiversity Hotspot'?",
@@ -31,9 +25,7 @@ export const che110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Norman Myers introduced the concept in 1988 to identify areas with high endemism and high threat."
     },
-    {
-        id: "che110-u3-4",
-        unit: 3,
+    { id: "che110-u3-4", unit: 3,
         topic: 'Conservation',
         difficulty: 'medium',
         question: "In-situ conservation refers to?",
@@ -41,9 +33,7 @@ export const che110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "In-situ means 'on-site', like National Parks and Wildlife Sanctuaries."
     },
-    {
-        id: "che110-u3-5",
-        unit: 3,
+    { id: "che110-u3-5", unit: 3,
         topic: 'Conservation',
         difficulty: 'medium',
         question: "Which of the following is an example of ex-situ conservation?",
@@ -51,9 +41,7 @@ export const che110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Ex-situ means 'off-site', protecting species outside their natural habitats (Zoos, Seed Banks)."
     },
-    {
-        id: "che110-u3-6",
-        unit: 3,
+    { id: "che110-u3-6", unit: 3,
         topic: 'Red Data Book',
         difficulty: 'easy',
         question: "The 'Red Data Book' is published by?",
@@ -61,9 +49,7 @@ export const che110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "The IUCN (International Union for Conservation of Nature) maintains the Red List of threatened species."
     },
-    {
-        id: "che110-u3-7",
-        unit: 3,
+    { id: "che110-u3-7", unit: 3,
         topic: 'Endemic Species',
         difficulty: 'medium',
         question: "Species found only in a particular geographical area are called?",
@@ -71,9 +57,7 @@ export const che110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Endemic species (like the Lion-tailed Macaque in Western Ghats) are restricted to specific regions."
     },
-    {
-        id: "che110-u3-8",
-        unit: 3,
+    { id: "che110-u3-8", unit: 3,
         topic: 'Threats to Biodiversity',
         difficulty: 'hard',
         question: "Which is the most significant threat to biodiversity globally?",
@@ -81,9 +65,7 @@ export const che110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Destruction of natural habitats due to human activity is the leading cause of extinction."
     },
-    {
-        id: "che110-u3-9",
-        unit: 3,
+    { id: "che110-u3-9", unit: 3,
         topic: 'Mega-diversity',
         difficulty: 'medium',
         question: "How many mega-diverse countries are recognized worldwide?",
@@ -91,9 +73,7 @@ export const che110Unit3MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "There are 17 countries, including India, that harbor the majority of Earth's species."
     },
-    {
-        id: "che110-u3-10",
-        unit: 3,
+    { id: "che110-u3-10", unit: 3,
         topic: 'Biodiversity Hotspots',
         difficulty: 'medium',
         question: "Which region in India is a recognized biodiversity hotspot?",

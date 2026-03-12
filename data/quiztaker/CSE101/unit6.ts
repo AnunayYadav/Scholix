@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const cse101Unit6MCQs: QuizQuestion[] = [
-    {
-        id: "cse101-u6-1",
-        unit: 6,
+    { id: "cse101-u6-1", unit: 6,
         topic: 'Structures',
         difficulty: 'easy',
         question: "What is a structure in C?",
@@ -11,9 +9,7 @@ export const cse101Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Structures (structs) allow grouping variables of different types together."
     },
-    {
-        id: "cse101-u6-2",
-        unit: 6,
+    { id: "cse101-u6-2", unit: 6,
         topic: 'Structures',
         difficulty: 'easy',
         question: "Which keyword is used to define a structure?",
@@ -21,9 +17,7 @@ export const cse101Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "The 'struct' keyword is used for defining user-defined record types."
     },
-    {
-        id: "cse101-u6-3",
-        unit: 6,
+    { id: "cse101-u6-3", unit: 6,
         topic: 'Structures',
         difficulty: 'medium',
         question: "How do you access structure members using a pointer 'ptr'?",
@@ -31,9 +25,7 @@ export const cse101Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "The arrow operator (->) is used for accessing members through pointers."
     },
-    {
-        id: "cse101-u6-4",
-        unit: 6,
+    { id: "cse101-u6-4", unit: 6,
         topic: 'Unions',
         difficulty: 'medium',
         question: "What is the key difference between Structure and Union?",
@@ -41,9 +33,7 @@ export const cse101Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "In a union, all members start at the same memory address, and it occupies only as much space as its largest member."
     },
-    {
-        id: "cse101-u6-5",
-        unit: 6,
+    { id: "cse101-u6-5", unit: 6,
         topic: 'File Handling',
         difficulty: 'medium',
         question: "Which function is used to open a file in C?",
@@ -51,9 +41,7 @@ export const cse101Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "fopen() is used to open a file and returns a FILE pointer."
     },
-    {
-        id: "cse101-u6-6",
-        unit: 6,
+    { id: "cse101-u6-6", unit: 6,
         topic: 'File Handling',
         difficulty: 'hard',
         question: "What does the 'a' mode in fopen() stand for?",
@@ -61,9 +49,7 @@ export const cse101Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Append mode opens a file for writing at the end without erasing existing content."
     },
-    {
-        id: "cse101-u6-7",
-        unit: 6,
+    { id: "cse101-u6-7", unit: 6,
         topic: 'File Handling',
         difficulty: 'hard',
         question: "Which function is used to check for the end of a file?",
@@ -71,9 +57,7 @@ export const cse101Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "feof() returns a non-zero value if the end-of-file indicator for the stream is set."
     },
-    {
-        id: "cse101-u6-8",
-        unit: 6,
+    { id: "cse101-u6-8", unit: 6,
         topic: 'Command Line',
         difficulty: 'medium',
         question: "In 'int main(int argc, char *argv[])', what is 'argc'?",
@@ -81,9 +65,7 @@ export const cse101Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "argc stores the number of arguments passed via the command line, including the program name."
     },
-    {
-        id: "cse101-u6-9",
-        unit: 6,
+    { id: "cse101-u6-9", unit: 6,
         topic: 'File Handling',
         difficulty: 'medium',
         question: "Which function is used to close an open file?",
@@ -91,9 +73,7 @@ export const cse101Unit6MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "fclose() is required to properly save buffers and close the file stream."
     },
-    {
-        id: "cse101-u6-10",
-        unit: 6,
+    { id: "cse101-u6-10", unit: 6,
         topic: 'Structures',
         difficulty: 'hard',
         question: "What is structure padding in C?",

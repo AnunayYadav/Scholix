@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const unit6Quizzes: QuizQuestion[] = [
-    {
-        id: "ece249-u6-1",
-        unit: 6,
+    { id: "ece249-u6-1", unit: 6,
         question: "What is the physical structure of an n-bit register?",
         options: [
             "A sequential logic gate composed of n independent NAND gates",
@@ -16,9 +14,7 @@ export const unit6Quizzes: QuizQuestion[] = [
 difficulty: 'easy',
 topic: 'Shift Register Operations'
     },
-    {
-        id: "ece249-u6-2",
-        unit: 6,
+    { id: "ece249-u6-2", unit: 6,
         question: "What primary operation specifically defines a Shift Register?",
         options: [
             "Storing data permanently",
@@ -31,9 +27,7 @@ topic: 'Shift Register Operations'
 difficulty: 'easy',
 topic: 'Shift Register Operations'
     },
-    {
-        id: "ece249-u6-3",
-        unit: 6,
+    { id: "ece249-u6-3", unit: 6,
         question: "In a definitive Right Shift operation, what is the precise direction of data movement?",
         options: [
             "From LSB (right) to MSB (left)",
@@ -46,9 +40,7 @@ topic: 'Shift Register Operations'
 difficulty: 'medium',
 topic: 'Shift Register Operations'
     },
-    {
-        id: "ece249-u6-4",
-        unit: 6,
+    { id: "ece249-u6-4", unit: 6,
         question: "What does the abbreviation SISO precisely stand for regarding shift registers?",
         options: [
             "Simultaneous In Sequential Out",
@@ -61,9 +53,7 @@ topic: 'Shift Register Operations'
 difficulty: 'medium',
 topic: 'Shift Register Operations'
     },
-    {
-        id: "ece249-u6-5",
-        unit: 6,
+    { id: "ece249-u6-5", unit: 6,
         question: "Why is the SISO shift register considered structurally the slowest classification?",
         options: [
             "It solely operates using significantly slower latch components",
@@ -76,9 +66,7 @@ topic: 'Shift Register Operations'
 difficulty: 'medium',
 topic: 'Shift Register Operations'
     },
-    {
-        id: "ece249-u6-6",
-        unit: 6,
+    { id: "ece249-u6-6", unit: 6,
         question: "Which specific type of shift register configuration serves uniquely as a 'Serial-to-Parallel' electronic converter?",
         options: [
             "SISO",
@@ -91,9 +79,7 @@ topic: 'Shift Register Operations'
 difficulty: 'medium',
 topic: 'Shift Register Operations'
     },
-    {
-        id: "ece249-u6-7",
-        unit: 6,
+    { id: "ece249-u6-7", unit: 6,
         question: "How many actual clock pulses are technically required logically to completely load an n-bit PISO or PIPO parallel shift register?",
         options: [
             "1",
@@ -106,9 +92,7 @@ topic: 'Shift Register Operations'
 difficulty: 'medium',
 topic: 'Shift Register Operations'
     },
-    {
-        id: "ece249-u6-8",
-        unit: 6,
+    { id: "ece249-u6-8", unit: 6,
         question: "What defines an Asynchronous (Ripple) counter?",
         options: [
             "All flip-flops receive the clock signal simultaneously",
@@ -121,9 +105,7 @@ topic: 'Shift Register Operations'
 difficulty: 'easy',
 topic: 'Ring Counter and Johnson Ring Counter'
     },
-    {
-        id: "ece249-u6-9",
-        unit: 6,
+    { id: "ece249-u6-9", unit: 6,
         question: "What is a major disadvantage of asynchronous counters compared to synchronous counters?",
         options: [
             "They are more complex to design",
@@ -136,9 +118,7 @@ topic: 'Ring Counter and Johnson Ring Counter'
 difficulty: 'medium',
 topic: 'Asynchronous Counters'
     },
-    {
-        id: "ece249-u6-10",
-        unit: 6,
+    { id: "ece249-u6-10", unit: 6,
         question: "How many state combinations (modulus) does an n-bit Ring Counter have?",
         options: [
             "2^n",

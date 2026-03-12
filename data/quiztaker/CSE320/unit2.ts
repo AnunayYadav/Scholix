@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const cse320Unit2MCQs: QuizQuestion[] = [
-    {
-        id: "cse320-u2-1",
-        unit: 2,
+    { id: "cse320-u2-1", unit: 2,
         topic: 'Software Design Principles',
         difficulty: 'easy',
         question: "What is the primary goal of software design?",
@@ -11,9 +9,7 @@ export const cse320Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Software design focuses on breaking down complex problems into manageable modules."
     },
-    {
-        id: "cse320-u2-2",
-        unit: 2,
+    { id: "cse320-u2-2", unit: 2,
         topic: 'Coupling',
         difficulty: 'medium',
         question: "Which type of coupling is considered the best for software design?",
@@ -21,9 +17,7 @@ export const cse320Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Data coupling (low coupling) is the best as modules only share necessary data."
     },
-    {
-        id: "cse320-u2-3",
-        unit: 2,
+    { id: "cse320-u2-3", unit: 2,
         topic: 'Cohesion',
         difficulty: 'medium',
         question: "In which type of cohesion do all elements of a module contribute to a single task?",
@@ -31,9 +25,7 @@ export const cse320Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Functional cohesion is the strongest and most desirable type of cohesion."
     },
-    {
-        id: "cse320-u2-4",
-        unit: 2,
+    { id: "cse320-u2-4", unit: 2,
         topic: 'Data Flow Diagrams',
         difficulty: 'easy',
         question: "A bubble in a DFD represents?",
@@ -41,9 +33,7 @@ export const cse320Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Circles or bubbles in a Data Flow Diagram represent processes or transformations."
     },
-    {
-        id: "cse320-u2-5",
-        unit: 2,
+    { id: "cse320-u2-5", unit: 2,
         topic: 'Data Flow Diagrams',
         difficulty: 'hard',
         question: "Level 0 DFD is also known as?",
@@ -51,9 +41,7 @@ export const cse320Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "A Context Diagram (Level 0) shows the entire system as a single process with its external entities."
     },
-    {
-        id: "cse320-u2-6",
-        unit: 2,
+    { id: "cse320-u2-6", unit: 2,
         topic: 'Coupling',
         difficulty: 'hard',
         question: "When one module modifies the internal data of another module, it is called?",
@@ -61,9 +49,7 @@ export const cse320Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Content coupling is the worst type where one module interferes with another's internals."
     },
-    {
-        id: "cse320-u2-7",
-        unit: 2,
+    { id: "cse320-u2-7", unit: 2,
         topic: 'Cohesion',
         difficulty: 'medium',
         question: "The degree to which the elements of a module belong together is called?",
@@ -71,9 +57,7 @@ export const cse320Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Cohesion measures the internal strength of a module."
     },
-    {
-        id: "cse320-u2-8",
-        unit: 2,
+    { id: "cse320-u2-8", unit: 2,
         topic: 'Data Flow Diagrams',
         difficulty: 'easy',
         question: "Parallel lines in a DFD represent?",
@@ -81,9 +65,7 @@ export const cse320Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "Data stores (files or databases) are represented by parallel lines or an open rectangle."
     },
-    {
-        id: "cse320-u2-9",
-        unit: 2,
+    { id: "cse320-u2-9", unit: 2,
         topic: 'Structure Charts',
         difficulty: 'medium',
         question: "A structure chart shows?",
@@ -91,9 +73,7 @@ export const cse320Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "Structure charts represent the hierarchical structure of modules and their interactions."
     },
-    {
-        id: "cse320-u2-10",
-        unit: 2,
+    { id: "cse320-u2-10", unit: 2,
         topic: 'Design Principles',
         difficulty: 'hard',
         question: "Modularity helps in?",

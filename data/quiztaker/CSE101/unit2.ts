@@ -1,9 +1,7 @@
 import { QuizQuestion } from "../../../types.ts";
 
 export const cse101Unit2MCQs: QuizQuestion[] = [
-    {
-        id: "cse101-u2-1",
-        unit: 2,
+    { id: "cse101-u2-1", unit: 2,
         topic: 'Control Structures',
         difficulty: 'easy',
         question: "Which keyword is used for a multi-way decision in C?",
@@ -11,9 +9,7 @@ export const cse101Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "The 'switch' statement allows a variable to be tested for equality against a list of values."
     },
-    {
-        id: "cse101-u2-2",
-        unit: 2,
+    { id: "cse101-u2-2", unit: 2,
         topic: 'Loops',
         difficulty: 'easy',
         question: "Which loop is guaranteed to execute at least once?",
@@ -21,9 +17,7 @@ export const cse101Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "A 'do-while' loop checks the condition at the end of the loop body."
     },
-    {
-        id: "cse101-u2-3",
-        unit: 2,
+    { id: "cse101-u2-3", unit: 2,
         topic: 'Input/Output',
         difficulty: 'easy',
         question: "What is the format specifier for an integer in printf()?",
@@ -31,9 +25,7 @@ export const cse101Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "%d is used for signed decimal integers."
     },
-    {
-        id: "cse101-u2-4",
-        unit: 2,
+    { id: "cse101-u2-4", unit: 2,
         topic: 'Control Structures',
         difficulty: 'medium',
         question: "What happens if a 'break' statement is omitted in a switch case?",
@@ -41,9 +33,7 @@ export const cse101Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Without a 'break', the execution continues to the subsequent cases (fall-through)."
     },
-    {
-        id: "cse101-u2-5",
-        unit: 2,
+    { id: "cse101-u2-5", unit: 2,
         topic: 'Loops',
         difficulty: 'medium',
         question: "How do you represent an infinite loop using 'for'?",
@@ -51,9 +41,7 @@ export const cse101Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 0,
         explanation: "for(;;) has no initialization, condition, or increment, resulting in an infinite loop."
     },
-    {
-        id: "cse101-u2-6",
-        unit: 2,
+    { id: "cse101-u2-6", unit: 2,
         topic: 'Input/Output',
         difficulty: 'medium',
         question: "Which function is used to read a single character from the console?",
@@ -61,9 +49,7 @@ export const cse101Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "getchar() reads a single character from standard input."
     },
-    {
-        id: "cse101-u2-7",
-        unit: 2,
+    { id: "cse101-u2-7", unit: 2,
         topic: 'Control Structures',
         difficulty: 'hard',
         question: "Which statement is used to jump out of a loop immediately but continue the iteration in certain contexts?",
@@ -71,9 +57,7 @@ export const cse101Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "'continue' skips the rest of the current loop body and moves to the next iteration."
     },
-    {
-        id: "cse101-u2-8",
-        unit: 2,
+    { id: "cse101-u2-8", unit: 2,
         topic: 'Type Conversion',
         difficulty: 'hard',
         question: "What is implicit type conversion also known as?",
@@ -81,9 +65,7 @@ export const cse101Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 1,
         explanation: "Automatic type conversion by the compiler is called coercion."
     },
-    {
-        id: "cse101-u2-9",
-        unit: 2,
+    { id: "cse101-u2-9", unit: 2,
         topic: 'Input/Output',
         difficulty: 'hard',
         question: "What does the scanf() function return?",
@@ -91,9 +73,7 @@ export const cse101Unit2MCQs: QuizQuestion[] = [
         correctAnswer: 2,
         explanation: "scanf() returns the number of items successfully matched and assigned."
     },
-    {
-        id: "cse101-u2-10",
-        unit: 2,
+    { id: "cse101-u2-10", unit: 2,
         topic: 'Control Structures',
         difficulty: 'easy',
         question: "The 'default' case in a switch statement is ___.",
