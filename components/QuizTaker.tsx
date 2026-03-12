@@ -160,17 +160,18 @@ sys.stdin = io.StringIO("${tc.input}")
           }
           try {
             await pyodide.runPythonAsync(currentCode);
-            const actual = pyodide.runPython("sys.stdout.getvalue()").trim();
+            const actual = pyodide.runPython("sys.stdout.getvalue()")?.trim() || "";
+            const expected = (tc.output || tc.out || "").trim();
             results.push({
-              input: tc.input,
-              output: tc.output,
+              input: tc.input || tc.in || "",
+              output: expected,
               actual: actual,
-              passed: actual === tc.output.trim()
+              passed: actual === expected
             });
           } catch (e: any) {
             results.push({
-              input: tc.input,
-              output: tc.output,
+              input: tc.input || tc.in || "",
+              output: tc.output || tc.out || "",
               actual: "Error: " + e.message,
               passed: false
             });
@@ -664,14 +665,14 @@ sys.stdin = io.StringIO("${tc.input}")
                         </pre>
                       </div>
                       
-                      <div className="md:w-48 flex flex-col gap-3">
+                      <div className="md:w-36 flex flex-col justify-center">
                         <button
                           onClick={runCode}
                           disabled={isExecuting || !pyodide}
-                          className="w-full h-full min-h-[60px] bg-orange-600 text-white rounded-3xl font-bold shadow-lg shadow-orange-600/20 hover:bg-orange-500 transition-all active:scale-95 disabled:opacity-50 flex flex-col items-center justify-center gap-2"
+                          className="w-full py-6 bg-orange-600 text-white rounded-[24px] font-bold shadow-lg shadow-orange-600/20 hover:bg-orange-500 transition-all active:scale-95 disabled:opacity-50 flex flex-col items-center justify-center gap-2"
                         >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M5 3l14 9-14 9V3z" /></svg>
-                          <span className="text-xs uppercase tracking-wider">{isExecuting ? 'Executing' : 'Run Program'}</span>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M5 3l14 9-14 9V3z" /></svg>
+                          <span className="text-[10px] font-bold uppercase tracking-widest">{isExecuting ? 'Executing' : 'Run Program'}</span>
                         </button>
                       </div>
                     </div>
@@ -695,8 +696,8 @@ sys.stdin = io.StringIO("${tc.input}")
                                 }
                               </div>
                               <div className="space-y-2 font-mono text-[11px] leading-snug">
-                                {tr.input && <div className="flex gap-2"><span className="text-slate-500 w-12 shrink-0">In:</span> <span className="text-slate-700 dark:text-slate-300 break-all">{tr.input}</span></div>}
-                                <div className="flex gap-2"><span className="text-slate-500 w-12 shrink-0">Exp:</span> <span className="text-slate-700 dark:text-slate-300 break-all">{tr.output}</span></div>
+                                { (tr.input || tr.in) && <div className="flex gap-2"><span className="text-slate-500 w-12 shrink-0">In:</span> <span className="text-slate-700 dark:text-slate-300 break-all">{tr.input || tr.in}</span></div>}
+                                <div className="flex gap-2"><span className="text-slate-500 w-12 shrink-0">Exp:</span> <span className="text-slate-700 dark:text-slate-300 break-all">{tr.output || tr.out}</span></div>
                                 <div className="flex gap-2"><span className="text-slate-500 w-12 shrink-0 text-orange-400">Got:</span> <span className={tr.passed ? "text-emerald-500 font-bold" : "text-red-500 font-bold"}>{tr.actual || 'No output'}</span></div>
                               </div>
                             </div>
@@ -1126,7 +1127,7 @@ sys.stdin = io.StringIO("${tc.input}")
                                   </div>
                                   {!res.passed && (
                                     <div className="text-[10px] opacity-70 italic truncate max-w-[200px]">
-                                      Exp: {res.out.trim()} | Got: {res.actual || 'None'}
+                                      Exp: {(res.output || res.out || "").trim()} | Got: {res.actual || 'None'}
                                     </div>
                                   )}
                                 </div>
