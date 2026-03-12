@@ -130,7 +130,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     }
   }, [currentQuestionIdx, quizQuestions]);
 
-  const runCode = async () => {
+  const runCode = async (isSubmit: boolean = false) => {
     if (!pyodide) return;
     setIsExecuting(true);
     setExecutionOutput("Running...");
@@ -162,50 +162,56 @@ sys.stdin = io.StringIO("")
       const stderr = pyodide.runPython("sys.stderr.getvalue()");
       setExecutionOutput(output + (stderr ? "\nError:\n" + stderr : ""));
 
-      if (currentCode.includes('input(') && !stdinValue && !showStdin) {
+      if (currentCode.includes('input(') && !stdinValue && !showStdin && !isSubmit) {
         setShowStdin(true);
       }
 
-      // Run test cases if any
-      const q = quizQuestions[currentQuestionIdx];
-      if (q.testCases) {
-        const results = [];
-        for (const tc of q.testCases) {
-          pyodide.runPython(`sys.stdout = io.StringIO()`);
-          if (tc.input) {
-            pyodide.runPython(`
+      // Run test cases only if Submit is clicked
+      if (isSubmit) {
+        const q = quizQuestions[currentQuestionIdx];
+        if (q.testCases) {
+          const results = [];
+          for (const tc of q.testCases) {
+            pyodide.runPython(`sys.stdout = io.StringIO()`);
+            if (tc.input) {
+              pyodide.runPython(`
 import io
 import sys
 sys.stdin = io.StringIO(${JSON.stringify(tc.input)})
-            `);
+              `);
+            }
+            try {
+              await pyodide.runPythonAsync(currentCode);
+              const actual = pyodide.runPython("sys.stdout.getvalue()")?.trim() || "";
+              const expected = (tc.output || tc.out || "").trim();
+              results.push({
+                input: tc.input || tc.in || "",
+                output: expected,
+                actual: actual,
+                passed: actual === expected,
+                isHidden: tc.isHidden
+              });
+            } catch (e: any) {
+              results.push({
+                input: tc.input || tc.in || "",
+                output: tc.output || tc.out || "",
+                actual: "Error: " + e.message,
+                passed: false,
+                isHidden: tc.isHidden
+              });
+            }
           }
-          try {
-            await pyodide.runPythonAsync(currentCode);
-            const actual = pyodide.runPython("sys.stdout.getvalue()")?.trim() || "";
-            const expected = (tc.output || tc.out || "").trim();
-            results.push({
-              input: tc.input || tc.in || "",
-              output: expected,
-              actual: actual,
-              passed: actual === expected
-            });
-          } catch (e: any) {
-            results.push({
-              input: tc.input || tc.in || "",
-              output: tc.output || tc.out || "",
-              actual: "Error: " + e.message,
-              passed: false
-            });
-          }
+          const allPassed = results.every(r => r.passed);
+          setTestResults(results);
+          
+          // Auto-save answer with pass/fail status and detailed results
+          handleAnswer({ code: currentCode, passed: allPassed, results });
+          showToast(allPassed ? "All test cases passed!" : "Some test cases failed.", allPassed ? "success" : "error");
+        } else {
+          // No test cases, just save code
+          handleAnswer({ code: currentCode, passed: true });
+          showToast("Code submitted successfully", "success");
         }
-        const allPassed = results.every(r => r.passed);
-        setTestResults(results);
-        
-        // Auto-save answer with pass/fail status and detailed results
-        handleAnswer({ code: currentCode, passed: allPassed, results });
-      } else {
-        // No test cases, just save code
-        handleAnswer({ code: currentCode, passed: true });
       }
     } catch (err: any) {
       let msg = err.message;
@@ -727,20 +733,9 @@ sys.stdin = io.StringIO(${JSON.stringify(tc.input)})
                       />
                     </div>
                     
-                    {/* Action Bar */}
+                     {/* Action Bar */}
                     <div className="flex flex-wrap items-center justify-between gap-4 py-2">
                        <div className="flex items-center gap-2">
-                         {!pyodide ? (
-                           <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/5 border border-blue-500/10 rounded-full">
-                             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                             <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Initializing Engine</span>
-                           </div>
-                         ) : (
-                           <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
-                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                             <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Engine Ready</span>
-                           </div>
-                         )}
                          {isExecuting && (
                            <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-500/10 rounded-full">
                              <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-spin border border-t-transparent" />
@@ -751,7 +746,7 @@ sys.stdin = io.StringIO(${JSON.stringify(tc.input)})
 
                        <div className="flex items-center gap-3">
                          <button
-                           onClick={runCode}
+                           onClick={() => runCode(false)}
                            disabled={isExecuting || !pyodide}
                            className="px-6 py-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-sm"
                          >
@@ -759,7 +754,7 @@ sys.stdin = io.StringIO(${JSON.stringify(tc.input)})
                            Run Code
                          </button>
                          <button
-                           onClick={runCode}
+                           onClick={() => runCode(true)}
                            disabled={isExecuting || !pyodide}
                            className="px-8 py-2.5 bg-orange-600 text-white rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-orange-500 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-orange-600/20"
                          >
