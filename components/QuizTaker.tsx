@@ -819,26 +819,33 @@ sys.stdin = io.StringIO(${JSON.stringify(tc.input)})
                           </div>
                         </div>
                         <div className="flex-1 overflow-auto custom-scrollbar p-1">
-                          {testResults.length > 0 ? (
+                          {(testResults.length > 0 ? testResults : (q.testCases || []).filter(tc => !tc.isHidden)).length > 0 ? (
                             <div className="divide-y divide-white/5">
-                              {testResults.map((tr, idx) => (
+                              {(testResults.length > 0 ? testResults : (q.testCases || []).filter(tc => !tc.isHidden)).map((tr: any, idx) => (
                                 <div key={idx} className="p-3">
                                   <div className="flex items-center justify-between mb-2">
-                                    <span className={`text-[9px] font-bold uppercase tracking-wider ${tr.passed ? 'text-emerald-500' : 'text-red-500'}`}>
-                                      Test Case {idx + 1}
+                                    <span className={`text-[9px] font-bold uppercase tracking-wider ${
+                                      tr.passed === undefined ? 'text-slate-500' :
+                                      tr.passed ? 'text-emerald-500' : 'text-red-500'
+                                    }`}>
+                                      Test Case {idx + 1} {tr.passed === undefined && '(Pending)'}
                                     </span>
-                                    {tr.passed ? 
-                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-emerald-500"><path d="M20 6L9 17l-5-5" /></svg> :
-                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-red-500"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                                    }
+                                    {tr.passed !== undefined && (
+                                      tr.passed ? 
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-emerald-500"><path d="M20 6L9 17l-5-5" /></svg> :
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-red-500"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                                    )}
                                   </div>
                                   <div className="space-y-1 font-mono text-[10px]">
                                     {tr.isHidden ? (
                                       <div className="text-slate-500 italic">[Hidden Test Case]</div>
                                     ) : (
                                       <>
-                                        <div className="flex gap-2 text-slate-500"><span>Exp:</span> <span className="text-slate-400 truncate">{(tr.output || tr.out || "").trim()}</span></div>
-                                        <div className={`flex gap-2 ${tr.passed ? 'text-emerald-500/70' : 'text-red-500'}`}><span>Got:</span> <span className="truncate">{tr.actual || 'No output'}</span></div>
+                                        <div className="flex gap-2 text-slate-500 font-medium"><span>Input:</span> <span className="text-slate-400 truncate">{tr.input || tr.in || 'None'}</span></div>
+                                        <div className="flex gap-2 text-slate-500 font-medium"><span>Exp:</span> <span className="text-slate-400 truncate">{(tr.output || tr.out || "").trim()}</span></div>
+                                        {tr.passed !== undefined && (
+                                          <div className={`flex gap-2 ${tr.passed ? 'text-emerald-500/70' : 'text-red-500'}`}><span>Got:</span> <span className="truncate">{tr.actual || 'No output'}</span></div>
+                                        )}
                                       </>
                                     )}
                                   </div>
@@ -848,7 +855,7 @@ sys.stdin = io.StringIO(${JSON.stringify(tc.input)})
                           ) : (
                             <div className="h-full flex flex-col items-center justify-center opacity-20 filter grayscale">
                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-white mb-2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                               <span className="text-[10px] font-bold text-white uppercase tracking-widest">No Tests Run</span>
+                               <span className="text-[10px] font-bold text-white uppercase tracking-widest">No Tests Available</span>
                             </div>
                           )}
                         </div>
