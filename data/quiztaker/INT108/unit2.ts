@@ -107,332 +107,93 @@ export const int108Unit2Coding: QuizQuestion[] = [
     {
         id: `int108-u2-coding-1`,
         unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
+        topic: `Prime Number Checker`,
+        difficulty: `hard`,
         type: `coding`,
-        question: `Check if a number x is positive, negative or zero.`,
-        starterCode: `x = -5
-# Your code here`,
+        question: `Write a program that takes an integer N and prints "Prime" if it is a prime number, otherwise prints "Not Prime". (A prime number is only divisible by 1 and itself).`,
+        starterCode: `n = int(input())
+# Your logic here`,
         testCases: [
-        {
-                "input": "",
-                "output": "negative"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "7", "output": "Prime" },
+            { "input": "10", "output": "Not Prime" },
+            { "input": "2", "output": "Prime", "isHidden": true },
+            { "input": "1", "output": "Not Prime", "isHidden": true }
+        ],
+        explanation: `Iterate from 2 up to sqrt(n) and check for divisibility.`
     },
     {
         id: `int108-u2-coding-2`,
         unit: 2,
-        topic: `Programming`,
+        topic: `FizzBuzz Logic`,
         difficulty: `medium`,
         type: `coding`,
-        question: `Print first 5 natural numbers using while loop.`,
-        starterCode: `# Your code here`,
+        question: `Take an integer N. For all numbers from 1 to N (inclusive), print:
+- "Fizz" if divisible by 3
+- "Buzz" if divisible by 5
+- "FizzBuzz" if divisible by both 3 and 5
+- The number itself if none of the above.`,
+        starterCode: `n = int(input())
+# Your loop here`,
         testCases: [
-        {
-                "input": "",
-                "output": "1\n2\n3\n4\n5"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "5", "output": "1\n2\nFizz\n4\nBuzz" },
+            { "input": "3", "output": "1\n2\nFizz" },
+            { "input": "15", "output": "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz", "isHidden": true }
+        ],
+        explanation: `Use modulo operator (%) and careful if-elif-else ordering.`
     },
     {
         id: `int108-u2-coding-3`,
         unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
+        topic: `Number Reversal (Math)`,
+        difficulty: `hard`,
         type: `coding`,
-        question: `Print all even numbers between 1 and 10 using for loop.`,
-        starterCode: `# Your code here`,
+        question: `Reverse an integer N mathematically (using // and %) and print the result. Do NOT use string slicing [::-1].`,
+        starterCode: `n = int(input())
+rev = 0
+# Your logic here
+print(rev)`,
         testCases: [
-        {
-                "input": "",
-                "output": "2\n4\n6\n8\n10"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "123", "output": "321" },
+            { "input": "400", "output": "4" },
+            { "input": "9876", "output": "6789", "isHidden": true }
+        ],
+        explanation: `Use 'rev = rev * 10 + (n % 10)' in a while loop.`
     },
     {
         id: `int108-u2-coding-4`,
         unit: 2,
-        topic: `Programming`,
+        topic: `Nested Conditionals (Leap Year)`,
         difficulty: `medium`,
         type: `coding`,
-        question: `Find if x is divisible by both 3 and 5.`,
-        starterCode: `x = 15
-# Your code here`,
+        question: `Determine if a year is a Leap Year. A year is leap if:
+1. It is divisible by 4.
+2. But if it is divisible by 100, it must also be divisible by 400.
+Print "Leap" or "Not Leap".`,
+        starterCode: `year = int(input())
+# Your logic here`,
         testCases: [
-        {
-                "input": "",
-                "output": "True"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "2024", "output": "Leap" },
+            { "input": "1900", "output": "Not Leap" },
+            { "input": "2000", "output": "Leap", "isHidden": true }
+        ],
+        explanation: `Combine logic with AND/OR or nested if statements.`
     },
     {
         id: `int108-u2-coding-5`,
         unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
+        topic: `Loop Control (Break/Continue)`,
+        difficulty: `hard`,
         type: `coding`,
-        question: `Find the largest of three numbers a, b, c.`,
-        starterCode: `a, b, c = 10, 20, 15
-# Your code here`,
+        question: `Sum of first N odd numbers. Take N as input. Calculate the sum of the first N positive odd integers (1, 3, 5, ...) using a loop.`,
+        starterCode: `n = int(input())
+total = 0
+# Your code here
+print(total)`,
         testCases: [
-        {
-                "input": "",
-                "output": "20"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-6`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Print the multiplication table of 2 up to 5.`,
-        starterCode: `# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "2\n4\n6\n8\n10"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-7`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Find the factorial of 5.`,
-        starterCode: `n = 5
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "120"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-8`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Check if a year is leap year (Year = 2024).`,
-        starterCode: `year = 2024
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "Leap Year"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-9`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Print numbers from 10 down to 1.`,
-        starterCode: `# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "10\n9\n8\n7\n6\n5\n4\n3\n2\n1"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-10`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Find the sum of all numbers from 1 to 10.`,
-        starterCode: `# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "55"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-11`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Check if a character is a vowel.`,
-        starterCode: `char = 'e'
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "vowel"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-12`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Print 'Pass' if marks >= 40 else 'Fail'.`,
-        starterCode: `marks = 45
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "Pass"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-13`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Use 'break' to stop a loop at 5 (range 1 to 10).`,
-        starterCode: `# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "1\n2\n3\n4"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-14`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Use 'continue' to skip 3 in range 1 to 5.`,
-        starterCode: `# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "1\n2\n4\n5"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-15`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Count number of digits in 12345.`,
-        starterCode: `n = 12345
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "5"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-16`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Reverse a number 123.`,
-        starterCode: `n = 123
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "321"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-17`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Check if a number 7 is prime.`,
-        starterCode: `n = 7
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "Prime"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-18`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Print Fibonacci series up to 5 terms.`,
-        starterCode: `# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "0\n1\n1\n2\n3"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-19`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Find sum of digits of 123.`,
-        starterCode: `n = 123
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "6"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u2-coding-20`,
-        unit: 2,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Draw a 3x3 square of stars (*).`,
-        starterCode: `# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "***\n***\n***"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "3", "output": "9" },
+            { "input": "5", "output": "25" },
+            { "input": "1", "output": "1", "isHidden": true }
+        ],
+        explanation: `The sum of the first N odd numbers is always N^2, but solve it with a loop.`
     }
 ];

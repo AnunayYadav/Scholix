@@ -107,371 +107,117 @@ export const int108Unit6Coding: QuizQuestion[] = [
     {
         id: `int108-u6-coding-1`,
         unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
+        topic: `Banking System (Logic Building)`,
+        difficulty: `hard`,
         type: `coding`,
-        question: `Create a class 'Student' with no methods.`,
-        starterCode: `# Your code here
-s = Student()
-print(type(s))`,
+        question: `Create a class 'BankAccount' with an __init__ method that sets the 'balance' (default 0). Implement methods 'deposit(amount)' and 'withdraw(amount)'. If withdrawal amount is greater than balance, print 'Insufficient Funds'. Finally, print the current balance.`,
+        starterCode: `class BankAccount:
+    def __init__(self, balance=0):
+        self.balance = balance
+    
+    # Write deposit and withdraw methods here
+
+# Test Logic
+acc = BankAccount(100)
+acc.deposit(int(input()))
+acc.withdraw(int(input()))
+print(acc.balance)`,
         testCases: [
-        {
-                "input": "",
-                "output": "<class '__main__.Student'>"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "50\n30", "output": "120" },
+            { "input": "0\n200", "output": "Insufficient Funds\n100" },
+            { "input": "1000\n500", "output": "600", "isHidden": true }
+        ],
+        explanation: `Encapsulate logic within the class and handle edge cases for withdrawals.`
     },
     {
         id: `int108-u6-coding-2`,
         unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
+        topic: `Geometry (Inheritance)`,
+        difficulty: `hard`,
         type: `coding`,
-        question: `Add an __init__ method to set 'name'.`,
-        starterCode: `# Your code here
-s = Student('Bob')
-print(s.name)`,
+        question: `Create a base class 'Shape' with a method 'area' that returns 0. Create a child class 'Square' that inherits from 'Shape', takes 'side' as input in __init__, and overrides the 'area' method to return side*side.`,
+        starterCode: `class Shape:
+    def area(self): return 0
+
+# Your Square class here
+
+s = Square(int(input()))
+print(s.area())`,
         testCases: [
-        {
-                "input": "",
-                "output": "Bob"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "5", "output": "25" },
+            { "input": "10", "output": "100" },
+            { "input": "1", "output": "1", "isHidden": true }
+        ],
+        explanation: `Demonstrate method overriding and inheritance principles.`
     },
     {
         id: `int108-u6-coding-3`,
         unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
+        topic: `Operator Overloading`,
+        difficulty: `hard`,
         type: `coding`,
-        question: `Create a method 'say_hi' that returns 'Hi'.`,
-        starterCode: `# Your code here
-s = Student()
-print(s.say_hi())`,
+        question: `Create a class 'Vector' that takes 'x' and 'y' coordinates. Overload the addition '+' operator (using __add__) so that two vectors can be added. The result of adding Vector(x1, y1) and Vector(x2, y2) should be a new Vector(x1+x2, y1+y2). Print the resulting coordinates.`,
+        starterCode: `class Vector:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+    
+    # Overload + operator here
+
+v1 = Vector(int(input()), int(input()))
+v2 = Vector(int(input()), int(input()))
+v3 = v1 + v2
+print(f"{v3.x}, {v3.y}")`,
         testCases: [
-        {
-                "input": "",
-                "output": "Hi"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "1\n2\n3\n4", "output": "4, 6" },
+            { "input": "0\n0\n0\n0", "output": "0, 0" },
+            { "input": "-5\n10\n5\n-10", "output": "0, 0", "isHidden": true }
+        ],
+        explanation: `Standard use of the __add__ magic method for operator overloading.`
     },
     {
         id: `int108-u6-coding-4`,
         unit: 6,
-        topic: `Programming`,
+        topic: `Class Variables`,
         difficulty: `medium`,
         type: `coding`,
-        question: `Demonstrate inheritance: Class B(A).`,
-        starterCode: `class A: pass
-# Your code here
-b = B()
-print(isinstance(b, A))`,
+        question: `Create a class 'Employee' where each instance has a 'name'. Maintain a class variable 'count' that increments every time a new Employee instance is created. Print the final count after creating two employees.`,
+        starterCode: `class Employee:
+    count = 0
+    def __init__(self, name):
+        self.name = name
+        # Increment class variable here
+
+e1 = Employee("Alice")
+e2 = Employee("Bob")
+print(Employee.count)`,
         testCases: [
-        {
-                "input": "",
-                "output": "True"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "", "output": "2" }
+        ],
+        explanation: `Class variables are shared across all instances of a class.`
     },
     {
         id: `int108-u6-coding-5`,
         unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
+        topic: `Encapsulation (Getters/Setters)`,
+        difficulty: `hard`,
         type: `coding`,
-        question: `Use 'super()' to call parent constructor.`,
-        starterCode: `class A:
-    def __init__(self): print('A')
-class B(A):
+        question: `Create a class 'Student' with a private attribute '__grade'. Implement a property 'grade' (using @property) to get the grade and a setter to set the grade, but only if it's between 0 and 100. If invalid, keep the previous grade.`,
+        starterCode: `class Student:
     def __init__(self):
-        # Your code
-B()`,
+        self.__grade = 0
+    
+    # Implementation here
+
+s = Student()
+s.grade = int(input())
+s.grade = 500 # Should be ignored
+print(s.grade)`,
         testCases: [
-        {
-                "input": "",
-                "output": "A"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-6`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Override a method in child class.`,
-        starterCode: `class A: 
-    def f(self): return 'A'
-class B(A):
-    # Your code
-print(B().f())`,
-        testCases: [
-        {
-                "input": "",
-                "output": "B"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-7`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Create a private variable __score.`,
-        starterCode: `class A:
-    def __init__(self): # Your code
-a = A()
-try: print(a.__score)
-except AttributeError: print('Private')`,
-        testCases: [
-        {
-                "input": "",
-                "output": "Private"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-8`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Demonstrate polymorphism with two classes.`,
-        starterCode: `# Your code here
-for obj in [Dog(), Cat()]:
-    print(obj.sound())`,
-        testCases: [
-        {
-                "input": "",
-                "output": "Woof\nMeow"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-9`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Count number of objects using a class variable.`,
-        starterCode: `class A:
-    count = 0
-    # Your code
-A(); A(); print(A.count)`,
-        testCases: [
-        {
-                "input": "",
-                "output": "2"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-10`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Create a static method using @staticmethod.`,
-        starterCode: `class A:
-    # Your code
-    def info(): return 'Static'
-print(A.info())`,
-        testCases: [
-        {
-                "input": "",
-                "output": "Static"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-11`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Use __str__ method to return object description.`,
-        starterCode: `class A:
-    # Your code
-print(str(A()))`,
-        testCases: [
-        {
-                "input": "",
-                "output": "Object A"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-12`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Implement multiple inheritance.`,
-        starterCode: `class A: pass
-class B: pass
-# Your code
-print(isinstance(C(), A) and isinstance(C(), B))`,
-        testCases: [
-        {
-                "input": "",
-                "output": "True"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-13`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Check if an object has an attribute using hasattr().`,
-        starterCode: `class A: x=1
-# Your code`,
-        testCases: [
-        {
-                "input": "",
-                "output": "True"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-14`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Delete an object attribute using delattr().`,
-        starterCode: `class A: x=1
-a = A()
-# Your code
-print(hasattr(a, 'x'))`,
-        testCases: [
-        {
-                "input": "",
-                "output": "False"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-15`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Get an attribute value using getattr().`,
-        starterCode: `class A: x=99
-a = A()
-# Your code`,
-        testCases: [
-        {
-                "input": "",
-                "output": "99"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-16`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Create a property using @property decorator.`,
-        starterCode: `class A:
-    # Your code
-    def x(self): return 10
-print(A().x)`,
-        testCases: [
-        {
-                "input": "",
-                "output": "10"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-17`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Demonstrate method overloading using default args.`,
-        starterCode: `class A:
-    # Your code
-print(A().sum(1), A().sum(1, 2))`,
-        testCases: [
-        {
-                "input": "",
-                "output": "1 3"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-18`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Identify internal attributes of a class using __dict__.`,
-        starterCode: `class A: x=1
-# Your code`,
-        testCases: [
-        {
-                "input": "",
-                "output": "{'x': 1}"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-19`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Show use of __del__ (destructor).`,
-        starterCode: `class A:
-    # Your code
-del A()`,
-        testCases: [
-        {
-                "input": "",
-                "output": "Deleted"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u6-coding-20`,
-        unit: 6,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Abstract Base Class: Create a class that must implement 'run'.`,
-        starterCode: `from abc import ABC, abstractmethod
-# Your code`,
-        testCases: [
-        {
-                "input": "",
-                "output": "Implemented"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "85", "output": "85" },
+            { "input": "-10", "output": "0" },
+            { "input": "100", "output": "100", "isHidden": true }
+        ],
+        explanation: `Use @property and @grade.setter for controlled attribute access.`
     }
 ];

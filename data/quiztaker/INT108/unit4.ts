@@ -107,351 +107,93 @@ export const int108Unit4Coding: QuizQuestion[] = [
     {
         id: `int108-u4-coding-1`,
         unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
+        topic: `List Logic`,
+        difficulty: `hard`,
         type: `coding`,
-        question: `Create a list [1, 2, 3] and append 4.`,
-        starterCode: `L = [1, 2, 3]
-# Your code here
-print(L)`,
+        question: `Given a list of scores, find the 'runner-up' score (the second largest unique score).`,
+        starterCode: `def get_runner_up(scores):
+    # Your logic here
+
+n = int(input())
+scores = [int(x) for x in input().split()]
+print(get_runner_up(scores))`,
         testCases: [
-        {
-                "input": "",
-                "output": "[1, 2, 3, 4]"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "5\n2 3 6 6 5", "output": "5" },
+            { "input": "4\n10 10 10 10", "output": "None" },
+            { "input": "2\n1 2", "output": "1", "isHidden": true }
+        ],
+        explanation: `Convert the list to a set to get unique scores, sort it, and pick the second last. Handle cases with fewer than 2 unique scores.`
     },
     {
         id: `int108-u4-coding-2`,
         unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
+        topic: `List Comprehension`,
+        difficulty: `hard`,
         type: `coding`,
-        question: `Access the second element of a list.`,
-        starterCode: `L = [10, 20, 30]
-# Your code here`,
+        question: `Use a single list comprehension to extract all vowels (a, e, i, o, u) from a given string, preserving their order and case.`,
+        starterCode: `s = input()
+vowels = # Your list comprehension here
+print(vowels)`,
         testCases: [
-        {
-                "input": "",
-                "output": "20"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "Hello World", "output": "['e', 'o', 'o']" },
+            { "input": "Python", "output": "['o']" },
+            { "input": "AEIOU", "output": "['A', 'E', 'I', 'O', 'U']", "isHidden": true }
+        ],
+        explanation: `Syntax: [char for char in s if char.lower() in 'aeiou']`
     },
     {
         id: `int108-u4-coding-3`,
         unit: 4,
-        topic: `Programming`,
+        topic: `String Formatting`,
         difficulty: `medium`,
         type: `coding`,
-        question: `Slicing: Get [2, 3] from [1, 2, 3, 4].`,
-        starterCode: `L = [1, 2, 3, 4]
-# Your code here`,
+        question: `Write a function 'mask_card(card_number)' that masks all digits of a credit card except the last 4 with '*'. Assume a 16-digit card number.`,
+        starterCode: `def mask_card(card):
+    # Your code here
+
+card = input()
+print(mask_card(card))`,
         testCases: [
-        {
-                "input": "",
-                "output": "[2, 3]"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "1234567812345678", "output": "************5678" }
+        ],
+        explanation: `Use string slicing and concatenation: '*' * 12 + card[12:]`
     },
     {
         id: `int108-u4-coding-4`,
         unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
+        topic: `Nested Lists`,
+        difficulty: `hard`,
         type: `coding`,
-        question: `Sort a list [3, 1, 2] in ascending order.`,
-        starterCode: `L = [3, 1, 2]
-# Your code here
-print(L)`,
+        question: `Given two 2x2 matrices as nested lists, return their sum as a new nested list.`,
+        starterCode: `def add_matrices(m1, m2):
+    # Your logic here
+
+# Example input reading
+m1 = [[1, 2], [3, 4]]
+m2 = [[5, 6], [7, 8]]
+print(add_matrices(m1, m2))`,
         testCases: [
-        {
-                "input": "",
-                "output": "[1, 2, 3]"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "", "output": "[[6, 8], [10, 12]]" }
+        ],
+        explanation: `Iterate through rows and columns to sum corresponding elements.`
     },
     {
         id: `int108-u4-coding-5`,
         unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
+        topic: `Set & List Order`,
+        difficulty: `hard`,
         type: `coding`,
-        question: `Create a tuple (1, 2, 3) and print its type.`,
-        starterCode: `# Your code here`,
+        question: `Given a list of numbers, return a new list containing only unique elements while MAINTAINING their original order.`,
+        starterCode: `def unique_ordered(items):
+    # Your code here
+
+nums = [int(x) for x in input().split()]
+print(unique_ordered(nums))`,
         testCases: [
-        {
-                "input": "",
-                "output": "<class 'tuple'>"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-6`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Unpack a tuple (10, 20) into a and b.`,
-        starterCode: `T = (10, 20)
-# Your code here
-print(a, b)`,
-        testCases: [
-        {
-                "input": "",
-                "output": "10 20"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-7`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Create a dictionary with name='Alice' and age=25.`,
-        starterCode: `# Your code here
-print(D['name'])`,
-        testCases: [
-        {
-                "input": "",
-                "output": "Alice"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-8`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Add a new key-value 'city':'Noida' to dictionary.`,
-        starterCode: `D = {'id': 1}
-# Your code here
-print(D)`,
-        testCases: [
-        {
-                "input": "",
-                "output": "{'id': 1, 'city': 'Noida'}"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-9`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Iterate through dictionary and print keys.`,
-        starterCode: `D = {'a': 1, 'b': 2}
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "a\nb"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-10`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Create a set {1, 2, 2, 3} and print it.`,
-        starterCode: `# Your code here
-print(S)`,
-        testCases: [
-        {
-                "input": "",
-                "output": "{1, 2, 3}"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-11`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Find union of two sets {1, 2} and {2, 3}.`,
-        starterCode: `s1, s2 = {1, 2}, {2, 3}
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "{1, 2, 3}"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-12`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Use list comprehension to create squares of [1, 2, 3].`,
-        starterCode: `L = [1, 2, 3]
-S = # Your code here
-print(S)`,
-        testCases: [
-        {
-                "input": "",
-                "output": "[1, 4, 9]"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-13`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Remove element 20 from list [10, 20, 30].`,
-        starterCode: `L = [10, 20, 30]
-# Your code here
-print(L)`,
-        testCases: [
-        {
-                "input": "",
-                "output": "[10, 30]"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-14`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Find the length of a dictionary.`,
-        starterCode: `D = {'a':1, 'b':2}
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "2"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-15`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Merge two dictionaries D1 and D2.`,
-        starterCode: `D1 = {'a':1} 
-D2 = {'b':2}
-# Your code here
-print(sorted(D1.items()))`,
-        testCases: [
-        {
-                "input": "",
-                "output": "[('a', 1), ('b', 2)]"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-16`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Check if 'a' exists in dictionary keys.`,
-        starterCode: `D = {'a':1}
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "True"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-17`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Find the intersection of two sets.`,
-        starterCode: `s1 = {1, 2, 3}
-s2 = {2, 3, 4}
-# Your code
-print(sorted(list(res)))`,
-        testCases: [
-        {
-                "input": "",
-                "output": "[2, 3]"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-18`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Create a list of 5 zeros using *.`,
-        starterCode: `# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "[0, 0, 0, 0, 0]"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-19`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Pop the last element from a list.`,
-        starterCode: `L = [1, 2, 3]
-# Your code here
-print(L)`,
-        testCases: [
-        {
-                "input": "",
-                "output": "[1, 2]"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u4-coding-20`,
-        unit: 4,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Clear all elements from a dictionary.`,
-        starterCode: `D = {'a':1}
-# Your code here
-print(D)`,
-        testCases: [
-        {
-                "input": "",
-                "output": "{}"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "1 2 3 2 1 4", "output": "[1, 2, 3, 4]" },
+            { "input": "5 5 5", "output": "[5]" },
+            { "input": "10 20 30 10", "output": "[10, 20, 30]", "isHidden": true }
+        ],
+        explanation: `Use a helper set to track seen items while iterating through the list.`
     }
 ];

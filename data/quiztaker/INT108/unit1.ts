@@ -107,346 +107,89 @@ export const int108Unit1Coding: QuizQuestion[] = [
     {
         id: `int108-u1-coding-1`,
         unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
+        topic: `Input and Operations`,
+        difficulty: `easy`,
         type: `coding`,
-        question: `Write a program to print 'Hello, Python!'`,
-        starterCode: `print()`,
+        question: `Write a program that takes temperature in Celsius as input and converts it to Fahrenheit. Formula: (Celsius * 9/5) + 32.`,
+        starterCode: `celsius = float(input())
+# Your code here`,
         testCases: [
-        {
-                "input": "",
-                "output": "Hello, Python!"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "0", "output": "32.0" },
+            { "input": "100", "output": "212.0" },
+            { "input": "-40", "output": "-40.0", "isHidden": true }
+        ],
+        explanation: `Simply apply the algebraic formula using the input variable.`
     },
     {
         id: `int108-u1-coding-2`,
         unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
+        topic: `Bitwise Operators`,
+        difficulty: `hard`,
         type: `coding`,
-        question: `Create two variables a=5 and b=10, and print their sum.`,
-        starterCode: `a = 5
-b = 10
-# Your code here`,
+        question: `Swap two integer variables 'a' and 'b' using the bitwise XOR operator (^) WITHOUT using a temporary variable or multiple assignment. Finally, print 'a' and 'b' separated by a space.`,
+        starterCode: `a = int(input())
+b = int(input())
+# Your XOR logic here
+print(a, b)`,
         testCases: [
-        {
-                "input": "",
-                "output": "15"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "5\n10", "output": "10 5" },
+            { "input": "23\n45", "output": "45 23" },
+            { "input": "0\n0", "output": "0 0", "isHidden": true }
+        ],
+        explanation: `x = x ^ y; y = x ^ y; x = x ^ y is the standard XOR swap algorithm.`
     },
     {
         id: `int108-u1-coding-3`,
         unit: 1,
-        topic: `Programming`,
+        topic: `String Formatting`,
         difficulty: `medium`,
         type: `coding`,
-        question: `Write a program that takes a name as input and prints 'Hello, [name]'.`,
+        question: `Take three inputs: name, age, and city. Print a single sentence: "[Name] is [Age] years old and lives in [City]." using an f-string.`,
         starterCode: `name = input()
+age = input()
+city = input()
 # Your code here`,
         testCases: [
-        {
-                "input": "Alice",
-                "output": "Hello, Alice"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "Alice\n25\nLondon", "output": "Alice is 25 years old and lives in London." },
+            { "input": "Bob\n30\nNew York", "output": "Bob is 30 years old and lives in New York." },
+            { "input": "X\n0\nY", "output": "X is 0 years old and lives in Y.", "isHidden": true }
+        ],
+        explanation: `Use f"{name} is {age} years old and lives in {city}."`
     },
     {
         id: `int108-u1-coding-4`,
         unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
+        topic: `String Manipulation`,
+        difficulty: `hard`,
         type: `coding`,
-        question: `Calculate the area of a rectangle with length 5 and width 3.`,
-        starterCode: `l = 5
-w = 3
-# Your code here`,
+        question: `Create a "Name Formatter". Take a full name (e.g., "guido van rossum") and print it in Title Case, but only if its length is greater than 5. Otherwise, print it in UPPERCASE.`,
+        starterCode: `name = input()
+# Your logic here`,
         testCases: [
-        {
-                "input": "",
-                "output": "15"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "guido van rossum", "output": "Guido Van Rossum" },
+            { "input": "adam", "output": "ADAM" },
+            { "input": "python", "output": "Python", "isHidden": true }
+        ],
+        explanation: `Use len(), .title(), and .upper() with basic if-else (or one-liner).`
     },
     {
         id: `int108-u1-coding-5`,
         unit: 1,
-        topic: `Programming`,
+        topic: `Math and Operators`,
         difficulty: `medium`,
         type: `coding`,
-        question: `Write a program to swap two variables x and y.`,
-        starterCode: `x = 1
-y = 2
-# Your code here
-print(x, y)`,
-        testCases: [
-        {
-                "input": "",
-                "output": "2 1"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-6`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Check if a variable x is greater than 10. Print True or False.`,
-        starterCode: `x = 15
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "True"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-7`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Find the remainder when 25 is divided by 4.`,
-        starterCode: `a = 25
-b = 4
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "1"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-8`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Convert 10.5 to an integer.`,
-        starterCode: `x = 10.5
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "10"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-9`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Concatenate two strings 'Python' and 'Programming'.`,
-        starterCode: `s1 = 'Python'
-s2 = 'Programming'
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "PythonProgramming"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-10`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Print the type of variable x = 5.`,
-        starterCode: `x = 5
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "<class 'int'>"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-11`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Find 2 raised to the power 5.`,
-        starterCode: `# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "32"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-12`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Write a program to calculate simple interest (P=1000, R=5, T=2).`,
-        starterCode: `p, r, t = 1000, 5, 2
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "100.0"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-13`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Check if a number is even by printing x % 2 == 0.`,
-        starterCode: `x = 8
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "True"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-14`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Multiply a string 'Ha' 3 times.`,
-        starterCode: `s = 'Ha'
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "HaHaHa"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-15`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Get the length of the string 'INT108'.`,
-        starterCode: `s = 'INT108'
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "6"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-16`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Convert a string '100' to an integer.`,
-        starterCode: `s = '100'
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "100"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-17`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Print the last character of string 'Nexus'.`,
-        starterCode: `s = 'Nexus'
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "s"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-18`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Perform floor division of 17 by 3.`,
-        starterCode: `a, b = 17, 3
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "5"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-19`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Find the square root of 64.`,
+        question: `Find the distance between two points on a 2D plane. Take four inputs: x1, y1, x2, y2. Formula: sqrt((x2-x1)^2 + (y2-y1)^2). Print the result.`,
         starterCode: `import math
-x = 64
+x1 = float(input())
+y1 = float(input())
+x2 = float(input())
+y2 = float(input())
 # Your code here`,
         testCases: [
-        {
-                "input": "",
-                "output": "8.0"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
-    },
-    {
-        id: `int108-u1-coding-20`,
-        unit: 1,
-        topic: `Programming`,
-        difficulty: `medium`,
-        type: `coding`,
-        question: `Print the absolute value of -10.`,
-        starterCode: `x = -10
-# Your code here`,
-        testCases: [
-        {
-                "input": "",
-                "output": "10"
-        }
-],
-        explanation: `Follow basic Python syntax and common practices for this unit.`
+            { "input": "0\n0\n3\n4", "output": "5.0" },
+            { "input": "1\n1\n1\n1", "output": "0.0" },
+            { "input": "-1\n-1\n2\n3", "output": "5.0", "isHidden": true }
+        ],
+        explanation: `Use math.sqrt() and the power operator (**) for the distance formula.`
     }
 ];

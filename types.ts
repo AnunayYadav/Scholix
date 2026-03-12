@@ -168,7 +168,7 @@ export interface QuizQuestion {
   difficulty?: 'easy' | 'medium' | 'hard';
   topic?: string;
   starterCode?: string;
-  testCases?: { input: string; output: string }[];
+  testCases?: { input: string; output: string; isHidden?: boolean }[];
 }
 
 

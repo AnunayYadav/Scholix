@@ -789,8 +789,14 @@ sys.stdin = io.StringIO("${tc.input}")
                                     }
                                   </div>
                                   <div className="space-y-1 font-mono text-[10px]">
-                                    <div className="flex gap-2 text-slate-500"><span>Exp:</span> <span className="text-slate-400 truncate">{(tr.output || tr.out || "").trim()}</span></div>
-                                    <div className={`flex gap-2 ${tr.passed ? 'text-emerald-500/70' : 'text-red-500'}`}><span>Got:</span> <span className="truncate">{tr.actual || 'No output'}</span></div>
+                                    {tr.isHidden ? (
+                                      <div className="text-slate-500 italic">[Hidden Test Case]</div>
+                                    ) : (
+                                      <>
+                                        <div className="flex gap-2 text-slate-500"><span>Exp:</span> <span className="text-slate-400 truncate">{(tr.output || tr.out || "").trim()}</span></div>
+                                        <div className={`flex gap-2 ${tr.passed ? 'text-emerald-500/70' : 'text-red-500'}`}><span>Got:</span> <span className="truncate">{tr.actual || 'No output'}</span></div>
+                                      </>
+                                    )}
                                   </div>
                                 </div>
                               ))}
@@ -1219,8 +1225,14 @@ sys.stdin = io.StringIO("${tc.input}")
                                     <span className="font-mono">Case {idx + 1}</span>
                                   </div>
                                   <div className="text-[10px] opacity-70 italic truncate flex gap-4 ml-4">
-                                    <span className="text-slate-500">Exp: {(res.output || res.out || "").trim()}</span>
-                                    <span className={res.passed ? "text-emerald-500" : "text-red-500"}>Got: {res.actual || 'None'}</span>
+                                    {res.isHidden ? (
+                                      <span className="text-slate-500">[Hidden Test Case]</span>
+                                    ) : (
+                                      <>
+                                        <span className="text-slate-500">Exp: {(res.output || res.out || "").trim()}</span>
+                                        <span className={res.passed ? "text-emerald-500" : "text-red-500"}>Got: {res.actual || 'None'}</span>
+                                      </>
+                                    )}
                                   </div>
                                 </div>
                               ))}
