@@ -790,24 +790,9 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     
                      {/* Action Bar */}
                     <div className="flex flex-wrap items-center justify-between gap-4 py-2">
-                       <div className="flex items-center gap-2">
-                          {isExecuting && (
-                            <div className="flex items-center gap-3">
-                              <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-500/10 rounded-full">
-                                <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-spin border border-t-transparent" />
-                                <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest">Executing...</span>
-                              </div>
-                              <button
-                                onClick={terminateExecution}
-                                className="group flex items-center gap-2 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 rounded-full transition-all"
-                                title="Terminate execution"
-                              >
-                                <div className="w-2 h-2 rounded-sm bg-red-500 group-hover:scale-110 transition-transform" />
-                                <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">Terminate</span>
-                              </button>
-                            </div>
-                          )}
-                       </div>
+                        <div className="flex items-center gap-2">
+                           {/* Empty or can put other status here if needed */}
+                        </div>
 
                        <div className="flex items-center gap-3">
                          <button
@@ -838,21 +823,34 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                             <div className="w-1 h-1 rounded-full bg-slate-500" />
                             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Console</span>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <button 
-                              onClick={() => setShowStdin(!showStdin)}
-                              className={`text-[9px] font-bold uppercase tracking-widest transition-colors ${showStdin ? 'text-orange-500' : 'text-slate-600 hover:text-slate-400'}`}
-                            >
-                              {showStdin ? 'Hide Input' : 'Add Input'}
-                            </button>
-                            <button 
-                              onClick={() => setExecutionOutput('')}
-                              className="text-[9px] font-bold text-slate-600 hover:text-slate-400 uppercase tracking-widest transition-colors"
-                            >
-                              Clear
-                            </button>
+                           <div className="flex items-center gap-3">
+                             {isExecuting ? (
+                               <div className="flex items-center gap-2">
+                                 <div className="w-3 h-3 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                                 <button 
+                                   onClick={terminateExecution}
+                                   className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-md transition-all group"
+                                   title="Terminate Execution"
+                                 >
+                                   <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 group-active:scale-90 transition-transform"><rect x="6" y="6" width="12" height="12" rx="1" /></svg>
+                                 </button>
+                               </div>
+                             ) : (
+                               <button 
+                                 onClick={() => setShowStdin(!showStdin)}
+                                 className={`text-[9px] font-bold uppercase tracking-widest transition-colors ${showStdin ? 'text-orange-500' : 'text-slate-600 hover:text-slate-400'}`}
+                               >
+                                 {showStdin ? 'Hide Input' : 'Add Input'}
+                               </button>
+                             )}
+                             <button 
+                               onClick={() => setExecutionOutput('')}
+                               className="text-[9px] font-bold text-slate-600 hover:text-slate-400 uppercase tracking-widest transition-colors"
+                             >
+                               Clear
+                             </button>
+                           </div>                            
                           </div>
-                        </div>
                         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                           {showStdin && (
                             <div className="h-1/2 border-b border-white/5 flex flex-col">
