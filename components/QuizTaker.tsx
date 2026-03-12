@@ -193,6 +193,17 @@ sys.stdin = io.StringIO("${tc.input}")
     }
   };
 
+  const resetCode = () => {
+    if (window.confirm("Are you sure you want to reset your code? This will erase your current work for this question.")) {
+      const q = quizQuestions[currentQuestionIdx];
+      const starter = q.starterCode || '';
+      setCurrentCode(starter);
+      setExecutionOutput('');
+      setTestResults([]);
+      handleAnswer({ code: starter, passed: false });
+    }
+  };
+
   useEffect(() => {
     if (quizCompleted && quizQuestions.length > 0) {
       const solvedIds: string[] = [];
@@ -628,10 +639,37 @@ sys.stdin = io.StringIO("${tc.input}")
                 </p>
 
                 {isCodingSection ? (
-                  <div className="space-y-6">
-                    <div className="rounded-3xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-lg bg-[#1e1e1e]">
+                  <div className="space-y-4">
+                    {/* Editor Header Bar */}
+                    <div className="flex items-center justify-between px-6 py-3 bg-slate-100 dark:bg-[#252526] rounded-t-[20px] border-x border-t border-slate-200 dark:border-white/10">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                          <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                          <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
+                        </div>
+                        <div className="h-4 w-px bg-slate-300 dark:bg-white/10 mx-1" />
+                        <div className="flex items-center gap-2">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-blue-500"><path d="M12 2C6.48 2 2 6.48 2 12s4.1 10 9.1 10c4.1 0 7.7-2.7 8.7-6.5h-2.1c-.9 2.7-3.4 4.5-6.6 4.5-3.6 0-6.6-2.9-6.6-6.5S7.4 7 11 7c3.1 0 5.8 2.1 6.7 5h2.1C18.8 8 15.3 5.5 11 5.5s-8 2.5-8 6.5" /></svg>
+                          <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Python 3</span>
+                        </div>
+                        <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">|</span>
+                        <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300 tabular-nums">main.py</span>
+                      </div>
+                      
+                      <button 
+                        onClick={resetCode}
+                        className="flex items-center gap-1.5 px-3 py-1 hover:bg-slate-200 dark:hover:bg-white/5 rounded-lg transition-colors group"
+                        title="Reset code to starter"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-slate-400 group-hover:text-orange-500"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+                        <span className="text-[10px] font-bold text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 uppercase tracking-widest">Reset</span>
+                      </button>
+                    </div>
+
+                    <div className="rounded-b-[20px] overflow-hidden border-x border-b border-slate-200 dark:border-white/10 shadow-xl bg-[#1e1e1e]">
                       <Editor
-                        height="350px"
+                        height="400px"
                         language="python"
                         theme="vs-dark"
                         value={currentCode}
@@ -642,76 +680,132 @@ sys.stdin = io.StringIO("${tc.input}")
                         options={{
                           fontSize: 14,
                           minimap: { enabled: false },
-                          padding: { top: 20 },
+                          padding: { top: 16, bottom: 16 },
                           fontFamily: 'JetBrains Mono, Menlo, monospace',
                           smoothScrolling: true,
                           cursorBlinking: 'smooth',
-                          scrollBeyondLastLine: false
+                          scrollBeyondLastLine: false,
+                          lineNumbers: 'on',
+                          glyphMargin: false,
+                          folding: true,
+                          lineDecorationsWidth: 10,
+                          lineNumbersMinChars: 3,
+                          scrollbar: {
+                            vertical: 'auto',
+                            horizontal: 'auto',
+                            useShadows: false,
+                            verticalScrollbarSize: 10,
+                            horizontalScrollbarSize: 10
+                          }
                         }}
                       />
                     </div>
                     
-                    <div className="flex flex-col md:flex-row gap-4">
-                      <div className="flex-1 p-6 bg-slate-950 rounded-3xl border border-white/5 font-mono text-sm overflow-hidden flex flex-col min-h-[160px]">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold flex items-center gap-2">
+                    {/* Action Bar */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 py-2">
+                       <div className="flex items-center gap-2">
+                         {!pyodide ? (
+                           <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/5 border border-blue-500/10 rounded-full">
+                             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                             <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Initializing Engine</span>
+                           </div>
+                         ) : (
+                           <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                             Console Output
-                          </span>
-                          {isExecuting && <div className="w-3 h-3 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />}
-                        </div>
-                        <pre className="flex-1 overflow-auto text-slate-300 whitespace-pre-wrap custom-scrollbar text-xs">
-                          {executionOutput || "# Output will appear here after execution..."}
-                        </pre>
-                      </div>
-                      
-                      <div className="md:w-36 flex flex-col justify-center">
-                        <button
-                          onClick={runCode}
-                          disabled={isExecuting || !pyodide}
-                          className="w-full py-6 bg-orange-600 text-white rounded-[24px] font-bold shadow-lg shadow-orange-600/20 hover:bg-orange-500 transition-all active:scale-95 disabled:opacity-50 flex flex-col items-center justify-center gap-2"
-                        >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M5 3l14 9-14 9V3z" /></svg>
-                          <span className="text-[10px] font-bold uppercase tracking-widest">{isExecuting ? 'Executing' : 'Run Program'}</span>
-                        </button>
-                      </div>
+                             <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Engine Ready</span>
+                           </div>
+                         )}
+                         {isExecuting && (
+                           <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-500/10 rounded-full">
+                             <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-spin border border-t-transparent" />
+                             <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest">Executing...</span>
+                           </div>
+                         )}
+                       </div>
+
+                       <div className="flex items-center gap-3">
+                         <button
+                           onClick={runCode}
+                           disabled={isExecuting || !pyodide}
+                           className="px-6 py-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-sm"
+                         >
+                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M5 3l14 9-14 9V3z" /></svg>
+                           Run Code
+                         </button>
+                         <button
+                           onClick={runCode}
+                           disabled={isExecuting || !pyodide}
+                           className="px-8 py-2.5 bg-orange-600 text-white rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-orange-500 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-orange-600/20"
+                         >
+                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></svg>
+                           Submit Code
+                         </button>
+                       </div>
                     </div>
 
-                    {testResults.length > 0 && (
-                      <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Validation Results</h4>
-                          <div className="h-px flex-1 bg-slate-200 dark:bg-white/5" />
+                    {/* Console & Results Panel */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                      {/* Output Console */}
+                      <div className="bg-[#0f0f0f] rounded-2xl border border-white/5 overflow-hidden flex flex-col h-[200px] shadow-2xl">
+                        <div className="px-4 py-2 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1 h-1 rounded-full bg-slate-500" />
+                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Console</span>
+                          </div>
+                          <button 
+                            onClick={() => setExecutionOutput('')}
+                            className="text-[9px] font-bold text-slate-600 hover:text-slate-400 uppercase tracking-widest transition-colors"
+                          >
+                            Clear
+                          </button>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {testResults.map((tr, idx) => (
-                            <div key={idx} className={`p-5 rounded-3xl border transition-all ${tr.passed ? 'bg-emerald-500/[0.03] border-emerald-500/20 shadow-sm' : 'bg-red-500/[0.03] border-red-500/20'}`}>
-                              <div className="flex items-center justify-between mb-3">
-                                <span className={`text-[10px] font-bold uppercase tracking-wider ${tr.passed ? 'text-emerald-500' : 'text-red-500'}`}>
-                                  Case #{idx + 1} {tr.passed ? 'Success' : 'Failed'}
-                                </span>
-                                {tr.passed ? 
-                                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-emerald-500"><path d="M20 6L9 17l-5-5" /></svg></div> :
-                                  <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-red-500"><path d="M18 6L6 18M6 6l12 12" /></svg></div>
-                                }
-                              </div>
-                              <div className="space-y-2 font-mono text-[11px] leading-snug">
-                                { (tr.input || tr.in) && <div className="flex gap-2"><span className="text-slate-500 w-12 shrink-0">In:</span> <span className="text-slate-700 dark:text-slate-300 break-all">{tr.input || tr.in}</span></div>}
-                                <div className="flex gap-2"><span className="text-slate-500 w-12 shrink-0">Exp:</span> <span className="text-slate-700 dark:text-slate-300 break-all">{tr.output || tr.out}</span></div>
-                                <div className="flex gap-2"><span className="text-slate-500 w-12 shrink-0 text-orange-400">Got:</span> <span className={tr.passed ? "text-emerald-500 font-bold" : "text-red-500 font-bold"}>{tr.actual || 'No output'}</span></div>
-                              </div>
-                            </div>
-                          ))}
+                        <div className="flex-1 p-4 font-mono text-xs overflow-auto custom-scrollbar">
+                           <pre className="text-slate-300 whitespace-pre-wrap leading-relaxed">
+                            {executionOutput || <span className="text-slate-600 italic"># Output will appear here...</span>}
+                          </pre>
                         </div>
                       </div>
-                    )}
 
-                    {!pyodide && (
-                      <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center gap-3 animate-pulse">
-                        <div className="w-2 h-2 rounded-full bg-blue-500" />
-                        <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">Initializing Python Runtime (Pyodide)...</p>
+                      {/* Test Results */}
+                      <div className="bg-[#0f0f0f] rounded-2xl border border-white/5 overflow-hidden flex flex-col h-[200px] shadow-2xl">
+                        <div className="px-4 py-2 border-b border-white/5 bg-white/5 flex items-center">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1 h-1 rounded-full bg-orange-500" />
+                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Test Results</span>
+                          </div>
+                        </div>
+                        <div className="flex-1 overflow-auto custom-scrollbar p-1">
+                          {testResults.length > 0 ? (
+                            <div className="divide-y divide-white/5">
+                              {testResults.map((tr, idx) => (
+                                <div key={idx} className="p-3">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className={`text-[9px] font-bold uppercase tracking-wider ${tr.passed ? 'text-emerald-500' : 'text-red-500'}`}>
+                                      Test Case {idx + 1}
+                                    </span>
+                                    {tr.passed ? 
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-emerald-500"><path d="M20 6L9 17l-5-5" /></svg> :
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-red-500"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                                    }
+                                  </div>
+                                  {!tr.passed && (
+                                    <div className="space-y-1 font-mono text-[10px]">
+                                      <div className="flex gap-2 text-slate-500"><span>Exp:</span> <span className="text-slate-400">{tr.output || tr.out}</span></div>
+                                      <div className="flex gap-2 text-red-500"><span>Got:</span> <span>{tr.actual || 'No output'}</span></div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="h-full flex flex-col items-center justify-center opacity-20 filter grayscale">
+                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-white mb-2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                               <span className="text-[10px] font-bold text-white uppercase tracking-widest">No Tests Run</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    )}
+                    </div>
                   </div>
                 ) : q.type === 'subjective' ? (
                   <div className="space-y-6">
