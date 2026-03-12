@@ -102,3 +102,376 @@ export const int108Unit6MCQs: QuizQuestion[] = [
     { id: "int108-u6-99", unit: 6, topic: 'Identity', difficulty: 'easy', question: "Is 'obj' a pointer?", options: ["Technically yes (Memory address)", "No", "None", "Both"], correctAnswer: 0, explanation: "References are pointers under the hood." },
     { id: "int108-u6-100", unit: 6, topic: 'Coding Style', difficulty: 'medium', question: "What is PascalCase?", options: ["StartingWordsWithCaps (For classes)", "underscores", "camelCase", "None"], correctAnswer: 0, explanation: "Standard for classes." }
 ];
+
+export const int108Unit6Coding: QuizQuestion[] = [
+    {
+        id: `int108-u6-coding-1`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Create a class 'Student' with no methods.`,
+        starterCode: `# Your code here
+s = Student()
+print(type(s))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "<class '__main__.Student'>"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-2`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Add an __init__ method to set 'name'.`,
+        starterCode: `# Your code here
+s = Student('Bob')
+print(s.name)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Bob"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-3`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Create a method 'say_hi' that returns 'Hi'.`,
+        starterCode: `# Your code here
+s = Student()
+print(s.say_hi())`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Hi"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-4`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Demonstrate inheritance: Class B(A).`,
+        starterCode: `class A: pass
+# Your code here
+b = B()
+print(isinstance(b, A))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "True"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-5`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Use 'super()' to call parent constructor.`,
+        starterCode: `class A:
+    def __init__(self): print('A')
+class B(A):
+    def __init__(self):
+        # Your code
+B()`,
+        testCases: [
+        {
+                "input": "",
+                "output": "A"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-6`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Override a method in child class.`,
+        starterCode: `class A: 
+    def f(self): return 'A'
+class B(A):
+    # Your code
+print(B().f())`,
+        testCases: [
+        {
+                "input": "",
+                "output": "B"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-7`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Create a private variable __score.`,
+        starterCode: `class A:
+    def __init__(self): # Your code
+a = A()
+try: print(a.__score)
+except AttributeError: print('Private')`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Private"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-8`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Demonstrate polymorphism with two classes.`,
+        starterCode: `# Your code here
+for obj in [Dog(), Cat()]:
+    print(obj.sound())`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Woof\nMeow"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-9`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Count number of objects using a class variable.`,
+        starterCode: `class A:
+    count = 0
+    # Your code
+A(); A(); print(A.count)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "2"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-10`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Create a static method using @staticmethod.`,
+        starterCode: `class A:
+    # Your code
+    def info(): return 'Static'
+print(A.info())`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Static"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-11`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Use __str__ method to return object description.`,
+        starterCode: `class A:
+    # Your code
+print(str(A()))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Object A"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-12`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Implement multiple inheritance.`,
+        starterCode: `class A: pass
+class B: pass
+# Your code
+print(isinstance(C(), A) and isinstance(C(), B))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "True"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-13`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Check if an object has an attribute using hasattr().`,
+        starterCode: `class A: x=1
+# Your code`,
+        testCases: [
+        {
+                "input": "",
+                "output": "True"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-14`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Delete an object attribute using delattr().`,
+        starterCode: `class A: x=1
+a = A()
+# Your code
+print(hasattr(a, 'x'))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "False"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-15`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Get an attribute value using getattr().`,
+        starterCode: `class A: x=99
+a = A()
+# Your code`,
+        testCases: [
+        {
+                "input": "",
+                "output": "99"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-16`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Create a property using @property decorator.`,
+        starterCode: `class A:
+    # Your code
+    def x(self): return 10
+print(A().x)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "10"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-17`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Demonstrate method overloading using default args.`,
+        starterCode: `class A:
+    # Your code
+print(A().sum(1), A().sum(1, 2))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "1 3"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-18`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Identify internal attributes of a class using __dict__.`,
+        starterCode: `class A: x=1
+# Your code`,
+        testCases: [
+        {
+                "input": "",
+                "output": "{'x': 1}"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-19`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Show use of __del__ (destructor).`,
+        starterCode: `class A:
+    # Your code
+del A()`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Deleted"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u6-coding-20`,
+        unit: 6,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Abstract Base Class: Create a class that must implement 'run'.`,
+        starterCode: `from abc import ABC, abstractmethod
+# Your code`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Implemented"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    }
+];

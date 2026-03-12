@@ -102,3 +102,351 @@ export const int108Unit1MCQs: QuizQuestion[] = [
     { id: "int108-u1-99", unit: 1, topic: 'Memory', difficulty: 'hard', question: "Is 'id()' used for?", options: ["Object identity/memory address", "Object name", "Checking type", "None"], correctAnswer: 0, explanation: "id() returns the unique identifier for an object in memory." },
     { id: "int108-u1-100", unit: 1, topic: 'Strings', difficulty: 'medium', question: "Is '\"123\".isnumeric()' True?", options: ["Yes", "No", "None", "Error"], correctAnswer: 0, explanation: "It checks if all characters in the string are numeric." }
 ];
+
+export const int108Unit1Coding: QuizQuestion[] = [
+    {
+        id: `int108-u1-coding-1`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a program to print 'Hello, Python!'`,
+        starterCode: `print()`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Hello, Python!"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-2`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Create two variables a=5 and b=10, and print their sum.`,
+        starterCode: `a = 5
+b = 10
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "15"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-3`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a program that takes a name as input and prints 'Hello, [name]'.`,
+        starterCode: `name = input()
+# Your code here`,
+        testCases: [
+        {
+                "input": "Alice",
+                "output": "Hello, Alice"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-4`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Calculate the area of a rectangle with length 5 and width 3.`,
+        starterCode: `l = 5
+w = 3
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "15"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-5`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a program to swap two variables x and y.`,
+        starterCode: `x = 1
+y = 2
+# Your code here
+print(x, y)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "2 1"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-6`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Check if a variable x is greater than 10. Print True or False.`,
+        starterCode: `x = 15
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "True"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-7`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Find the remainder when 25 is divided by 4.`,
+        starterCode: `a = 25
+b = 4
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "1"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-8`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Convert 10.5 to an integer.`,
+        starterCode: `x = 10.5
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "10"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-9`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Concatenate two strings 'Python' and 'Programming'.`,
+        starterCode: `s1 = 'Python'
+s2 = 'Programming'
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "PythonProgramming"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-10`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Print the type of variable x = 5.`,
+        starterCode: `x = 5
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "<class 'int'>"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-11`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Find 2 raised to the power 5.`,
+        starterCode: `# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "32"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-12`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a program to calculate simple interest (P=1000, R=5, T=2).`,
+        starterCode: `p, r, t = 1000, 5, 2
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "100.0"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-13`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Check if a number is even by printing x % 2 == 0.`,
+        starterCode: `x = 8
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "True"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-14`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Multiply a string 'Ha' 3 times.`,
+        starterCode: `s = 'Ha'
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "HaHaHa"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-15`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Get the length of the string 'INT108'.`,
+        starterCode: `s = 'INT108'
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "6"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-16`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Convert a string '100' to an integer.`,
+        starterCode: `s = '100'
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "100"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-17`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Print the last character of string 'Nexus'.`,
+        starterCode: `s = 'Nexus'
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "s"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-18`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Perform floor division of 17 by 3.`,
+        starterCode: `a, b = 17, 3
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "5"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-19`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Find the square root of 64.`,
+        starterCode: `import math
+x = 64
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "8.0"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u1-coding-20`,
+        unit: 1,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Print the absolute value of -10.`,
+        starterCode: `x = -10
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "10"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    }
+];

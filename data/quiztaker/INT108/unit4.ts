@@ -102,3 +102,356 @@ export const int108Unit4MCQs: QuizQuestion[] = [
     { id: "int108-u4-99", unit: 4, topic: 'Strings', difficulty: 'medium', question: "chr(65) returns?", options: ["'A'", "65", "Error", "None"], correctAnswer: 0, explanation: "Converts point back to char." },
     { id: "int108-u4-100", unit: 4, topic: 'Sets', difficulty: 'medium', question: "Is { 1, 2} sub of { 1, 2, 3}?", options: ["Yes", "No", "Error", "None"], correctAnswer: 0, explanation: "Subset logic." }
 ];
+
+export const int108Unit4Coding: QuizQuestion[] = [
+    {
+        id: `int108-u4-coding-1`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Create a list [1, 2, 3] and append 4.`,
+        starterCode: `L = [1, 2, 3]
+# Your code here
+print(L)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "[1, 2, 3, 4]"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-2`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Access the second element of a list.`,
+        starterCode: `L = [10, 20, 30]
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "20"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-3`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Slicing: Get [2, 3] from [1, 2, 3, 4].`,
+        starterCode: `L = [1, 2, 3, 4]
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "[2, 3]"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-4`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Sort a list [3, 1, 2] in ascending order.`,
+        starterCode: `L = [3, 1, 2]
+# Your code here
+print(L)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "[1, 2, 3]"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-5`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Create a tuple (1, 2, 3) and print its type.`,
+        starterCode: `# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "<class 'tuple'>"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-6`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Unpack a tuple (10, 20) into a and b.`,
+        starterCode: `T = (10, 20)
+# Your code here
+print(a, b)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "10 20"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-7`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Create a dictionary with name='Alice' and age=25.`,
+        starterCode: `# Your code here
+print(D['name'])`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Alice"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-8`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Add a new key-value 'city':'Noida' to dictionary.`,
+        starterCode: `D = {'id': 1}
+# Your code here
+print(D)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "{'id': 1, 'city': 'Noida'}"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-9`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Iterate through dictionary and print keys.`,
+        starterCode: `D = {'a': 1, 'b': 2}
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "a\nb"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-10`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Create a set {1, 2, 2, 3} and print it.`,
+        starterCode: `# Your code here
+print(S)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "{1, 2, 3}"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-11`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Find union of two sets {1, 2} and {2, 3}.`,
+        starterCode: `s1, s2 = {1, 2}, {2, 3}
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "{1, 2, 3}"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-12`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Use list comprehension to create squares of [1, 2, 3].`,
+        starterCode: `L = [1, 2, 3]
+S = # Your code here
+print(S)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "[1, 4, 9]"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-13`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Remove element 20 from list [10, 20, 30].`,
+        starterCode: `L = [10, 20, 30]
+# Your code here
+print(L)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "[10, 30]"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-14`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Find the length of a dictionary.`,
+        starterCode: `D = {'a':1, 'b':2}
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "2"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-15`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Merge two dictionaries D1 and D2.`,
+        starterCode: `D1 = {'a':1} 
+D2 = {'b':2}
+# Your code here
+print(sorted(D1.items()))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "[('a', 1), ('b', 2)]"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-16`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Check if 'a' exists in dictionary keys.`,
+        starterCode: `D = {'a':1}
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "True"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-17`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Find the intersection of two sets.`,
+        starterCode: `s1 = {1, 2, 3}
+s2 = {2, 3, 4}
+# Your code
+print(sorted(list(res)))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "[2, 3]"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-18`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Create a list of 5 zeros using *.`,
+        starterCode: `# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "[0, 0, 0, 0, 0]"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-19`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Pop the last element from a list.`,
+        starterCode: `L = [1, 2, 3]
+# Your code here
+print(L)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "[1, 2]"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u4-coding-20`,
+        unit: 4,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Clear all elements from a dictionary.`,
+        starterCode: `D = {'a':1}
+# Your code here
+print(D)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "{}"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    }
+];

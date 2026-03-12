@@ -32,12 +32,12 @@ import { cse326Unit4MCQs } from "./CSE326/unit4.ts";
 import { cse326Unit5MCQs } from "./CSE326/unit5.ts";
 import { cse326Unit6MCQs } from "./CSE326/unit6.ts";
 
-import { int108Unit1MCQs } from "./INT108/unit1.ts";
-import { int108Unit2MCQs } from "./INT108/unit2.ts";
-import { int108Unit3MCQs } from "./INT108/unit3.ts";
-import { int108Unit4MCQs } from "./INT108/unit4.ts";
-import { int108Unit5MCQs } from "./INT108/unit5.ts";
-import { int108Unit6MCQs } from "./INT108/unit6.ts";
+import { int108Unit1MCQs, int108Unit1Coding } from "./INT108/unit1.ts";
+import { int108Unit2MCQs, int108Unit2Coding } from "./INT108/unit2.ts";
+import { int108Unit3MCQs, int108Unit3Coding } from "./INT108/unit3.ts";
+import { int108Unit4MCQs, int108Unit4Coding } from "./INT108/unit4.ts";
+import { int108Unit5MCQs, int108Unit5Coding } from "./INT108/unit5.ts";
+import { int108Unit6MCQs, int108Unit6Coding } from "./INT108/unit6.ts";
 
 import { int306Unit1MCQs } from "./INT306/unit1.ts";
 import { int306Unit2MCQs } from "./INT306/unit2.ts";
@@ -143,7 +143,14 @@ export const QUIZTAKER_DATA: Record<string, { mcqs: QuizQuestion[], subjective: 
         subjective: []
     },
     "INT108": {
-        mcqs: [...int108Unit1MCQs, ...int108Unit2MCQs, ...int108Unit3MCQs, ...int108Unit4MCQs, ...int108Unit5MCQs, ...int108Unit6MCQs],
+        mcqs: [
+            ...int108Unit1MCQs, ...int108Unit1Coding,
+            ...int108Unit2MCQs, ...int108Unit2Coding,
+            ...int108Unit3MCQs, ...int108Unit3Coding,
+            ...int108Unit4MCQs, ...int108Unit4Coding,
+            ...int108Unit5MCQs, ...int108Unit5Coding,
+            ...int108Unit6MCQs, ...int108Unit6Coding
+        ],
         subjective: []
     },
     "INT306": {

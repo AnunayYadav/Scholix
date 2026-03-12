@@ -102,3 +102,353 @@ export const int108Unit3MCQs: QuizQuestion[] = [
     { id: "int108-u3-99", unit: 3, topic: 'Importing', difficulty: 'easy', question: "Import statement location?", options: ["Top of file (Recommended)", "Bottom", "Inside function", "Both A and C"], correctAnswer: 3, explanation: "Usually top, but can be local." },
     { id: "int108-u3-100", unit: 3, topic: 'Math', difficulty: 'easy', question: "How to use sin(x)?", options: ["math.sin(x)", "sin(x)", "math(sin, x)", "None"], correctAnswer: 0, explanation: "Requires module prefix." }
 ];
+
+export const int108Unit3Coding: QuizQuestion[] = [
+    {
+        id: `int108-u3-coding-1`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Define a function 'greet' that returns 'Hello'.`,
+        starterCode: `# Your code here
+print(greet())`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Hello"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-2`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Create a function 'add(a, b)' and print add(3, 4).`,
+        starterCode: `# Your code here
+print(add(3, 4))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "7"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-3`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a function to find the square of a number.`,
+        starterCode: `# Your code here
+print(square(5))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "25"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-4`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Create a function with a default argument.`,
+        starterCode: `def greet(name='User'):
+    return 'Hi ' + name
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Hi User"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-5`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a recursive function for factorial.`,
+        starterCode: `# Your code here
+print(fact(4))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "24"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-6`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Use a lambda function to add 10 to a number.`,
+        starterCode: `add_ten = # Your code
+print(add_ten(5))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "15"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-7`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a function that returns multiple values.`,
+        starterCode: `# Your code here
+a, b = get_min_max([1, 2, 3])
+print(a, b)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "1 3"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-8`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Calculate area of circle using math.pi in a function.`,
+        starterCode: `import math
+# Your code here
+print(round(area(5), 2))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "78.54"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-9`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a function to check if a string is palindrome.`,
+        starterCode: `# Your code here
+print(is_palindrome('radar'))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "True"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-10`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Use *args to print all arguments passed to a function.`,
+        starterCode: `# Your code here
+print_all(1, 2, 3)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "1\n2\n3"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-11`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Use **kwargs to print key-value pairs.`,
+        starterCode: `# Your code here
+print_kv(name='Alice', age=20)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "name: Alice\nage: 20"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-12`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a function to find the maximum in a list.`,
+        starterCode: `# Your code here
+print(my_max([10, 50, 30]))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "50"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-13`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a function to count vowels in a string.`,
+        starterCode: `# Your code here
+print(count_vowels('hello'))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "2"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-14`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Apply a function to all elements in a list using map().`,
+        starterCode: `nums = [1, 2, 3]
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "[1, 4, 9]"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-15`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Filter even numbers from a list using filter().`,
+        starterCode: `nums = [1, 2, 3, 4]
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "[2, 4]"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-16`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a function to reverse a string.`,
+        starterCode: `# Your code here
+print(reverse_str('abc'))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "cba"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-17`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Demonstrate the use of global keyword.`,
+        starterCode: `x = 10
+def change():
+    # Your code
+change()
+print(x)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "20"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-18`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Create a generator function that yields 1, 2, 3.`,
+        starterCode: `# Your code here
+for i in my_gen():
+    print(i)`,
+        testCases: [
+        {
+                "input": "",
+                "output": "1\n2\n3"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-19`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a function to calculate power without ** operator.`,
+        starterCode: `# Your code here
+print(power(2, 3))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "8"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u3-coding-20`,
+        unit: 3,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Use an inner function to calculate square of sum.`,
+        starterCode: `# Your code here
+print(calc(2, 3))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "25"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    }
+];

@@ -102,3 +102,363 @@ export const int108Unit5MCQs: QuizQuestion[] = [
     { id: "int108-u5-99", unit: 5, topic: 'Exceptions', difficulty: 'medium', question: "What is KeyboardInterrupt?", options: ["Ctrl+C pressed", "Unplugged keyboard", "None", "Both"], correctAnswer: 0, explanation: "User signal to stop." },
     { id: "int108-u5-100", unit: 5, topic: 'Logic', difficulty: 'easy', question: "Is an empty string True or False?", options: ["False", "True", "None", "Error"], correctAnswer: 0, explanation: "Falsy." }
 ];
+
+export const int108Unit5Coding: QuizQuestion[] = [
+    {
+        id: `int108-u5-coding-1`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write 'Hello' to a file 'test.txt'.`,
+        starterCode: `# Your code here
+with open('test.txt', 'r') as f: print(f.read())`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Hello"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-2`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Read all content from 'test.txt'.`,
+        starterCode: `with open('test.txt', 'w') as f: f.write('Data')
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Data"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-3`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Append '!!!' to 'test.txt'.`,
+        starterCode: `with open('test.txt', 'w') as f: f.write('Hi')
+# Your code here
+with open('test.txt', 'r') as f: print(f.read())`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Hi!!!"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-4`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Perform division by zero and handle with try-except.`,
+        starterCode: `try:
+    # Your code
+except ZeroDivisionError:
+    print('Zero')`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Zero"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-5`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Catch multiple exceptions (Index and Value errors).`,
+        starterCode: `try:
+    # Your code
+except (IndexError, ValueError):
+    print('Error')`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Error"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-6`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Use 'finally' block with try-except.`,
+        starterCode: `try:
+    1/1
+finally:
+    # Your code`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Cleaned up"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-7`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Raise a ValueError with message 'Wrong Value'.`,
+        starterCode: `# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Wrong Value"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-8`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Read file line by line using for loop.`,
+        starterCode: `with open('t.txt', 'w') as f: f.write('a\\nb')
+# Your code`,
+        testCases: [
+        {
+                "input": "",
+                "output": "a\\nb"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-9`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a list of strings to a file using writelines().`,
+        starterCode: `L = ['a\\n', 'b\\n']
+# Your code
+with open('t.txt', 'r') as f: print(f.read().strip())`,
+        testCases: [
+        {
+                "input": "",
+                "output": "a\\nb"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-10`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Use 'with' block for file handling to ensure closure.`,
+        starterCode: `# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "True"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-11`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Catch any exception using a generic 'except' block.`,
+        starterCode: `try:
+    raise NameError
+except:
+    # Your code`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Caught"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-12`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Read only first 5 characters of a file.`,
+        starterCode: `with open('t.txt', 'w') as f: f.write('Hello World')
+# Your code`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Hello"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-13`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Check if a file exists before opening.`,
+        starterCode: `import os
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "False"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-14`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Rename 'old.txt' to 'new.txt' using os module.`,
+        starterCode: `with open('old.txt', 'w') as f: f.write('1')
+import os
+# Your code
+print(os.path.exists('new.txt'))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "True"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-15`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Delete 'temp.txt' file.`,
+        starterCode: `with open('temp.txt', 'w') as f: f.write('1')
+import os
+# Your code
+print(os.path.exists('temp.txt'))`,
+        testCases: [
+        {
+                "input": "",
+                "output": "False"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-16`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Raise and catch a custom exception.`,
+        starterCode: `class MyError(Exception): pass
+# Your code`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Handled"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-17`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Count number of words in a file.`,
+        starterCode: `with open('f.txt', 'w') as f: f.write('One Two Three')
+# Your code`,
+        testCases: [
+        {
+                "input": "",
+                "output": "3"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-18`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Use 'seek()' to move file pointer to start.`,
+        starterCode: `with open('f.txt', 'w+') as f:
+    f.write('ABC')
+    # Your code
+    print(f.read())`,
+        testCases: [
+        {
+                "input": "",
+                "output": "ABC"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-19`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Tell the current position of the file pointer.`,
+        starterCode: `with open('f.txt', 'w') as f:
+    f.write('123')
+    # Your code`,
+        testCases: [
+        {
+                "input": "",
+                "output": "3"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u5-coding-20`,
+        unit: 5,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Handle file not found exception.`,
+        starterCode: `try:
+    open('none.txt', 'r')
+except FileNotFoundError:
+    # Your code`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Missing"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    }
+];

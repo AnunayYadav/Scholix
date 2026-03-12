@@ -102,3 +102,337 @@ export const int108Unit2MCQs: QuizQuestion[] = [
     { id: "int108-u2-99", unit: 2, topic: 'Iterators', difficulty: 'hard', question: "What does iter(list) do?", options: ["Returns iterator object", "Reverses list", "Deletes list", "None"], correctAnswer: 0, explanation: "converts sequence into an iterator." },
     { id: "int108-u2-100", unit: 2, topic: 'Bitwise', difficulty: 'hard', question: ">> bits shift?", options: ["Right", "Left", "None", "Random"], correctAnswer: 0, explanation: "Binary Right Shift." }
 ];
+
+export const int108Unit2Coding: QuizQuestion[] = [
+    {
+        id: `int108-u2-coding-1`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Check if a number x is positive, negative or zero.`,
+        starterCode: `x = -5
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "negative"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-2`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Print first 5 natural numbers using while loop.`,
+        starterCode: `# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "1\n2\n3\n4\n5"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-3`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Print all even numbers between 1 and 10 using for loop.`,
+        starterCode: `# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "2\n4\n6\n8\n10"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-4`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Find if x is divisible by both 3 and 5.`,
+        starterCode: `x = 15
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "True"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-5`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Find the largest of three numbers a, b, c.`,
+        starterCode: `a, b, c = 10, 20, 15
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "20"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-6`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Print the multiplication table of 2 up to 5.`,
+        starterCode: `# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "2\n4\n6\n8\n10"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-7`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Find the factorial of 5.`,
+        starterCode: `n = 5
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "120"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-8`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Check if a year is leap year (Year = 2024).`,
+        starterCode: `year = 2024
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Leap Year"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-9`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Print numbers from 10 down to 1.`,
+        starterCode: `# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "10\n9\n8\n7\n6\n5\n4\n3\n2\n1"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-10`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Find the sum of all numbers from 1 to 10.`,
+        starterCode: `# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "55"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-11`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Check if a character is a vowel.`,
+        starterCode: `char = 'e'
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "vowel"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-12`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Print 'Pass' if marks >= 40 else 'Fail'.`,
+        starterCode: `marks = 45
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Pass"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-13`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Use 'break' to stop a loop at 5 (range 1 to 10).`,
+        starterCode: `# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "1\n2\n3\n4"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-14`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Use 'continue' to skip 3 in range 1 to 5.`,
+        starterCode: `# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "1\n2\n4\n5"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-15`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Count number of digits in 12345.`,
+        starterCode: `n = 12345
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "5"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-16`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Reverse a number 123.`,
+        starterCode: `n = 123
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "321"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-17`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Check if a number 7 is prime.`,
+        starterCode: `n = 7
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "Prime"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-18`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Print Fibonacci series up to 5 terms.`,
+        starterCode: `# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "0\n1\n1\n2\n3"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-19`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Find sum of digits of 123.`,
+        starterCode: `n = 123
+# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "6"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    },
+    {
+        id: `int108-u2-coding-20`,
+        unit: 2,
+        topic: `Programming`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Draw a 3x3 square of stars (*).`,
+        starterCode: `# Your code here`,
+        testCases: [
+        {
+                "input": "",
+                "output": "***\n***\n***"
+        }
+],
+        explanation: `Follow basic Python syntax and common practices for this unit.`
+    }
+];

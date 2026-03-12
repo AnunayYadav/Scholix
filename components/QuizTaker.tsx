@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import Editor from '@monaco-editor/react';
 import { UserProfile, QuizQuestion, LibraryFile } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import { generateQuizFromSyllabus } from '../services/geminiService.ts';
@@ -62,7 +63,12 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
 
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
+  const [userAnswers, setUserAnswers] = useState<Record<number, any>>({});
+  const [currentCode, setCurrentCode] = useState('');
+  const [executionOutput, setExecutionOutput] = useState('');
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [pyodide, setPyodide] = useState<any>(null);
+  const [testResults, setTestResults] = useState<{in: string, out: string, actual: string, passed: boolean}[]>([]);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [isShowingExplanation, setIsShowingExplanation] = useState(false);
   const [reviewMode, setReviewMode] = useState(false);
@@ -71,6 +77,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   // New Quiz Config States
   const [numMCQ, setNumMCQ] = useState(10);
   const [numSubjective, setNumSubjective] = useState(0);
+  const [numCoding, setNumCoding] = useState(0);
   const [negativeMarking, setNegativeMarking] = useState(false);
   const [timerMinutes, setTimerMinutes] = useState(60);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -96,6 +103,96 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   };
 
   useEffect(() => {
+    const initPyodide = async () => {
+      if (window.loadPyodide && !pyodide) {
+        try {
+          const loadedPyodide = await window.loadPyodide({
+            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
+          });
+          setPyodide(loadedPyodide);
+        } catch (err) {
+          console.error("Pyodide failed to load", err);
+        }
+      }
+    };
+    initPyodide();
+  }, [pyodide]);
+
+  useEffect(() => {
+    if (quizQuestions.length > 0 && quizQuestions[currentQuestionIdx].type === 'coding') {
+      const ans = userAnswers[currentQuestionIdx];
+      const code = (ans && typeof ans === 'object') ? ans.code : (ans || quizQuestions[currentQuestionIdx].starterCode || '');
+      setCurrentCode(code);
+      setExecutionOutput('');
+      setTestResults([]);
+    }
+  }, [currentQuestionIdx, quizQuestions]);
+
+  const runCode = async () => {
+    if (!pyodide) return;
+    setIsExecuting(true);
+    setExecutionOutput("Running...");
+    try {
+      // Setup stdout redirection
+      pyodide.runPython(`
+import sys
+import io
+sys.stdout = io.StringIO()
+      `);
+      
+      await pyodide.runPythonAsync(currentCode);
+      const output = pyodide.runPython("sys.stdout.getvalue()");
+      setExecutionOutput(output);
+
+      // Run test cases if any
+      const q = quizQuestions[currentQuestionIdx];
+      if (q.testCases) {
+        const results = [];
+        for (const tc of q.testCases) {
+          pyodide.runPython(`sys.stdout = io.StringIO()`);
+          // Note: This is a simple evaluation. For complex ones we'd need to mock input()
+          // If the problem requires input(), we can use pyodide.runPython(`sys.stdin = io.StringIO("${tc.input}")`)
+          if (tc.input) {
+            pyodide.runPython(`
+import io
+sys.stdin = io.StringIO("${tc.input}")
+            `);
+          }
+          try {
+            await pyodide.runPythonAsync(currentCode);
+            const actual = pyodide.runPython("sys.stdout.getvalue()").trim();
+            results.push({
+              input: tc.input,
+              output: tc.output,
+              actual: actual,
+              passed: actual === tc.output.trim()
+            });
+          } catch (e: any) {
+            results.push({
+              input: tc.input,
+              output: tc.output,
+              actual: "Error: " + e.message,
+              passed: false
+            });
+          }
+        }
+        const allPassed = results.every(r => r.passed);
+        setTestResults(results);
+        
+        // Auto-save answer with pass/fail status and detailed results
+        handleAnswer({ code: currentCode, passed: allPassed, results });
+      } else {
+        // No test cases, just save code
+        handleAnswer({ code: currentCode, passed: true });
+      }
+    } catch (err: any) {
+      setExecutionOutput("Error: " + err.message);
+    } finally {
+      setIsExecuting(false);
+    }
+  };
+
+  useEffect(() => {
     if (quizCompleted && quizQuestions.length > 0) {
       const solvedIds: string[] = [];
       quizQuestions.forEach((q, idx) => {
@@ -103,6 +200,11 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
           // If in practice mode and explanation was shown, or if they finished the quiz
           // We'll mark subjective as solved if they at least saw the question at the end
           solvedIds.push(q.id);
+        } else if (q.type === 'coding') {
+          // Mark coding as solved if all tests passed
+          if ((userAnswers[idx] as any)?.passed) {
+            solvedIds.push(q.id);
+          }
         } else {
           // Only mark MCQs as solved if they answered correctly
           if (userAnswers[idx] === q.correctAnswer) {
@@ -156,10 +258,14 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const sectionInfo = useMemo(() => {
     let mcqCount = 0;
     let subjCount = 0;
+    let codingCount = 0;
     const mapping = quizQuestions.map(q => {
       if (q.type === 'subjective') {
         subjCount++;
         return subjCount;
+      } else if (q.type === 'coding') {
+        codingCount++;
+        return codingCount;
       } else {
         mcqCount++;
         return mcqCount;
@@ -169,7 +275,8 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     return {
       mapping,
       totalMCQs: mcqCount,
-      totalSubjs: subjCount
+      totalSubjs: subjCount,
+      totalCoding: codingCount
     };
   }, [quizQuestions]);
 
@@ -183,9 +290,27 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     return (QUIZTAKER_DATA[selectedSubject.name]?.subjective?.length || 0) > 0;
   }, [selectedSubject]);
 
+  const hasCoding = useMemo(() => {
+    if (!selectedSubject) return false;
+    const mcqs = QUIZTAKER_DATA[selectedSubject.name]?.mcqs || [];
+    return mcqs.some(q => q.type === 'coding');
+  }, [selectedSubject]);
+
   useEffect(() => {
     loadValidSubjects();
   }, []);
+
+  // Update default counts when subject changes
+  useEffect(() => {
+    if (selectedSubject) {
+      setNumMCQ(10);
+      setNumSubjective(hasSubjective ? 2 : 0);
+      setNumCoding(hasCoding ? 2 : 0);
+      setSelectedUnits([]);
+      setSelectedTopics([]);
+      setSelectedDifficulties([]);
+    }
+  }, [selectedSubject, hasSubjective, hasCoding]);
 
   useEffect(() => {
     let timer: any;
@@ -268,11 +393,20 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
         poolSubj = poolSubj.filter(q => q.topic && selectedTopics.includes(q.topic));
       }
 
-      // Independent selection based on individual counts
-      const pickedMcq = [...poolMcq].sort(() => 0.5 - Math.random()).slice(0, numMCQ);
-      const pickedSubj = [...poolSubj].sort(() => 0.5 - Math.random()).slice(0, numSubjective);
+      // Separate coding from MCQ
+      const codingQuestions = poolMcq.filter(q => q.type === 'coding');
+      const pureMcqs = poolMcq.filter(q => q.type !== 'coding');
 
-      finalSelection = [...pickedMcq, ...pickedSubj].sort(() => 0.5 - Math.random());
+      // Independent selection based on individual counts
+      const pickedMcq = [...pureMcqs].sort(() => 0.5 - Math.random()).slice(0, numMCQ);
+      const pickedSubj = [...poolSubj].sort(() => 0.5 - Math.random()).slice(0, numSubjective);
+      
+      // If coding questions exist (like for INT108), pick from them
+      const pickedCoding = codingQuestions.length > 0 
+        ? [...codingQuestions].sort(() => 0.5 - Math.random()).slice(0, numCoding) 
+        : [];
+
+      finalSelection = [...pickedMcq, ...pickedCoding, ...pickedSubj].sort(() => 0.5 - Math.random());
 
       if (finalSelection.length > 0) {
         startQuiz(finalSelection, true);
@@ -320,10 +454,10 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     setVisitedQuestions(new Set([0]));
   };
 
-  const handleAnswer = (optionIdx: number) => {
+  const handleAnswer = (answer: any) => {
     if (isShowingExplanation || reviewMode) return;
-    setUserAnswers(prev => ({ ...prev, [currentQuestionIdx]: optionIdx }));
-    if (isPracticeMode) {
+    setUserAnswers(prev => ({ ...prev, [currentQuestionIdx]: answer }));
+    if (isPracticeMode && typeof answer === 'number') {
       setIsShowingExplanation(true);
     }
   };
@@ -365,8 +499,15 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const score = useMemo(() => {
     return Object.entries(userAnswers).reduce((acc, [idx, ans]) => {
       const question = quizQuestions[parseInt(idx)];
-      if (question.type === 'subjective') return acc; // Don't auto-score subjective
+      if (question.type === 'subjective') return acc;
+      
+      if (question.type === 'coding') {
+        const ansObj = ans as any;
+        return (ansObj && typeof ansObj === 'object' && ansObj.passed) ? acc + 1 : acc;
+      }
 
+      if (ans === undefined) return acc;
+      
       const isCorrect = ans === question.correctAnswer;
       if (isCorrect) return acc + 1;
       return negativeMarking ? acc - 0.25 : acc;
@@ -380,6 +521,10 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
       if (!stats[q.unit]) stats[q.unit] = { correct: 0, total: 0, subjective: 0 };
       if (q.type === 'subjective') {
         stats[q.unit].subjective++;
+      } else if (q.type === 'coding') {
+        stats[q.unit].total++;
+        const ans = userAnswers[idx] as any;
+        if (ans && typeof ans === 'object' && ans.passed) stats[q.unit].correct++;
       } else {
         stats[q.unit].total++;
         if (userAnswers[idx] === q.correctAnswer) stats[q.unit].correct++;
@@ -418,6 +563,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     const q = quizQuestions[currentQuestionIdx];
     const currentAnswer = userAnswers[currentQuestionIdx];
     const isSubjectiveSection = q.type === 'subjective';
+    const isCodingSection = q.type === 'coding';
 
     return (
       <div className="max-w-[1400px] mx-auto space-y-6 animate-fade-in pb-20 px-4 md:px-10 dark:text-white">
@@ -425,10 +571,10 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
         <header className="flex flex-wrap items-center justify-between gap-6 py-4">
           <div className="space-y-1">
             <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-              {isSubjectiveSection ? 'Subjective Section' : 'MCQ Section'}
+              {isSubjectiveSection ? 'Subjective Section' : isCodingSection ? 'Coding Section' : 'MCQ Section'}
             </h2>
             <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-              Question <span className="text-slate-900 dark:text-white">{sectionInfo.mapping[currentQuestionIdx]}</span> / {isSubjectiveSection ? sectionInfo.totalSubjs : sectionInfo.totalMCQs}
+              Question <span className="text-slate-900 dark:text-white">{sectionInfo.mapping[currentQuestionIdx]}</span> / {isSubjectiveSection ? sectionInfo.totalSubjs : isCodingSection ? sectionInfo.totalCoding : sectionInfo.totalMCQs}
             </p>
           </div>
 
@@ -477,10 +623,96 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                 </div>
 
                 <p className="text-lg md:text-xl font-light leading-relaxed text-slate-800 dark:text-slate-100">
-                  Q) {parseText(q.question)}
+                  {isCodingSection ? 'Implement the following:' : 'Q)'} {parseText(q.question)}
                 </p>
 
-                {q.type === 'subjective' ? (
+                {isCodingSection ? (
+                  <div className="space-y-6">
+                    <div className="rounded-3xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-lg bg-[#1e1e1e]">
+                      <Editor
+                        height="350px"
+                        language="python"
+                        theme="vs-dark"
+                        value={currentCode}
+                        onChange={(value) => {
+                          setCurrentCode(value || '');
+                          handleAnswer({ code: value || '', passed: false });
+                        }}
+                        options={{
+                          fontSize: 14,
+                          minimap: { enabled: false },
+                          padding: { top: 20 },
+                          fontFamily: 'JetBrains Mono, Menlo, monospace',
+                          smoothScrolling: true,
+                          cursorBlinking: 'smooth',
+                          scrollBeyondLastLine: false
+                        }}
+                      />
+                    </div>
+                    
+                    <div className="flex flex-col md:flex-row gap-4">
+                      <div className="flex-1 p-6 bg-slate-950 rounded-3xl border border-white/5 font-mono text-sm overflow-hidden flex flex-col min-h-[160px]">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold flex items-center gap-2">
+                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                             Console Output
+                          </span>
+                          {isExecuting && <div className="w-3 h-3 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />}
+                        </div>
+                        <pre className="flex-1 overflow-auto text-slate-300 whitespace-pre-wrap custom-scrollbar text-xs">
+                          {executionOutput || "# Output will appear here after execution..."}
+                        </pre>
+                      </div>
+                      
+                      <div className="md:w-48 flex flex-col gap-3">
+                        <button
+                          onClick={runCode}
+                          disabled={isExecuting || !pyodide}
+                          className="w-full h-full min-h-[60px] bg-orange-600 text-white rounded-3xl font-bold shadow-lg shadow-orange-600/20 hover:bg-orange-500 transition-all active:scale-95 disabled:opacity-50 flex flex-col items-center justify-center gap-2"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M5 3l14 9-14 9V3z" /></svg>
+                          <span className="text-xs uppercase tracking-wider">{isExecuting ? 'Executing' : 'Run Program'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {testResults.length > 0 && (
+                      <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Validation Results</h4>
+                          <div className="h-px flex-1 bg-slate-200 dark:bg-white/5" />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {testResults.map((tr, idx) => (
+                            <div key={idx} className={`p-5 rounded-3xl border transition-all ${tr.passed ? 'bg-emerald-500/[0.03] border-emerald-500/20 shadow-sm' : 'bg-red-500/[0.03] border-red-500/20'}`}>
+                              <div className="flex items-center justify-between mb-3">
+                                <span className={`text-[10px] font-bold uppercase tracking-wider ${tr.passed ? 'text-emerald-500' : 'text-red-500'}`}>
+                                  Case #{idx + 1} {tr.passed ? 'Success' : 'Failed'}
+                                </span>
+                                {tr.passed ? 
+                                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-emerald-500"><path d="M20 6L9 17l-5-5" /></svg></div> :
+                                  <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-red-500"><path d="M18 6L6 18M6 6l12 12" /></svg></div>
+                                }
+                              </div>
+                              <div className="space-y-2 font-mono text-[11px] leading-snug">
+                                {tr.input && <div className="flex gap-2"><span className="text-slate-500 w-12 shrink-0">In:</span> <span className="text-slate-700 dark:text-slate-300 break-all">{tr.input}</span></div>}
+                                <div className="flex gap-2"><span className="text-slate-500 w-12 shrink-0">Exp:</span> <span className="text-slate-700 dark:text-slate-300 break-all">{tr.output}</span></div>
+                                <div className="flex gap-2"><span className="text-slate-500 w-12 shrink-0 text-orange-400">Got:</span> <span className={tr.passed ? "text-emerald-500 font-bold" : "text-red-500 font-bold"}>{tr.actual || 'No output'}</span></div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {!pyodide && (
+                      <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center gap-3 animate-pulse">
+                        <div className="w-2 h-2 rounded-full bg-blue-500" />
+                        <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">Initializing Python Runtime (Pyodide)...</p>
+                      </div>
+                    )}
+                  </div>
+                ) : q.type === 'subjective' ? (
                   <div className="space-y-6">
                     {!isShowingExplanation ? (
                       isPracticeMode ? (
@@ -587,7 +819,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                 </div>
                 <div className="grid grid-cols-5 gap-2.5">
                   {quizQuestions.map((q, idx) => {
-                    if (q.type === 'subjective') return null;
+                    if (q.type === 'subjective' || q.type === 'coding') return null;
                     const isAnswered = userAnswers[idx] !== undefined;
                     const isVisited = visitedQuestions.has(idx);
                     const isCurrent = currentQuestionIdx === idx;
@@ -650,6 +882,43 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                   </div>
                 </div>
               )}
+
+              {/* Section 3: Coding */}
+              {hasCoding && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-1 h-4 rounded-full ${isCodingSection ? 'bg-orange-600 shadow-[0_0_8px_#ea580c]' : 'bg-slate-300 dark:bg-slate-700'}`} />
+                    <span className={`text-[13px] font-semibold uppercase tracking-widest ${isCodingSection ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-600'}`}>Section 3: Coding</span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-2.5">
+                    {quizQuestions.map((q, idx) => {
+                      if (q.type !== 'coding') return null;
+                      const isAnswered = userAnswers[idx] !== undefined;
+                      const isVisited = visitedQuestions.has(idx);
+                      const isCurrent = currentQuestionIdx === idx;
+
+                      let bgColor = "bg-slate-100 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500";
+                      if (isCurrent) bgColor = "bg-orange-500 text-white shadow-[0_0_15px_rgba(234,88,12,0.3)]";
+                      else if (isAnswered) bgColor = "bg-emerald-500 text-white";
+                      else if (isVisited) bgColor = "bg-red-500 text-white";
+
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setCurrentQuestionIdx(idx);
+                            setIsShowingExplanation(false);
+                            setVisitedQuestions(prev => new Set(prev).add(idx));
+                          }}
+                          className={`h-11 w-full rounded-xl flex items-center justify-center text-xs font-bold transition-all border-2 ${isCurrent ? 'border-orange-400' : 'border-transparent'} ${bgColor}`}
+                        >
+                          {sectionInfo.mapping[idx]}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="pt-6 border-t border-white/5">
@@ -676,8 +945,10 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   }
 
   if (quizCompleted || reviewMode) {
-    const rawPercentage = quizQuestions.length > 0 ? (score / quizQuestions.length) * 100 : 0;
-    const percentage = Math.round(rawPercentage);
+    const autoGradableQuestions = quizQuestions.filter(q => q.type !== 'subjective');
+    const autoGradableCount = autoGradableQuestions.length;
+    const rawPercentage = autoGradableCount > 0 ? (score / autoGradableCount) * 100 : 0;
+    const percentage = Math.max(0, Math.round(rawPercentage));
     return (
       <div className="max-w-5xl mx-auto py-12 space-y-12 animate-fade-in pb-32 px-4 md:px-0" ref={resultRef} id="quiz-result">
         {/* Professional Result Header */}
@@ -692,7 +963,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
               
               <div className="flex items-baseline justify-center">
                 <span className="text-7xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-slate-400">{score}</span>
-                <span className="text-3xl font-bold text-slate-500 ml-2">/ {quizQuestions.length}</span>
+                <span className="text-3xl font-bold text-slate-500 ml-2">/ {quizQuestions.filter(q => q.type !== 'subjective').length}</span>
               </div>
               
               <div className="inline-block px-8 py-3 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-md shadow-inner">
@@ -787,7 +1058,11 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
           <div className="grid grid-cols-1 gap-6">
             {quizQuestions.map((q, i) => {
               const isSubjective = q.type === 'subjective';
-              const isCorrect = !isSubjective && userAnswers[i] === q.correctAnswer;
+              const isCoding = q.type === 'coding';
+              const ansObj = userAnswers[i] as any;
+              const isCorrect = isCoding 
+                ? (ansObj && typeof ansObj === 'object' && ansObj.passed)
+                : (!isSubjective && userAnswers[i] === q.correctAnswer);
               
               const statusColorOptions = isSubjective 
                 ? 'bg-orange-50 border-orange-200 dark:bg-orange-500/5 dark:border-orange-500/20 text-orange-600 dark:text-orange-400' 
@@ -800,6 +1075,8 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                 : isCorrect 
                   ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30' 
                   : 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 border-red-200 dark:border-red-500/30';
+              
+              const label = isCoding ? (isCorrect ? 'Tests Passed' : 'Tests Failed') : (isSubjective ? 'Subjective' : (isCorrect ? 'Correct' : 'Incorrect'));
 
               return (
                 <div key={i} className={`p-6 md:p-8 rounded-[32px] border shadow-sm transition-all ${statusColorOptions}`}>
@@ -808,7 +1085,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                     {/* Header Row */}
                     <div className="flex flex-wrap items-center gap-3">
                       <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border ${badgeColors}`}>
-                        {isSubjective ? 'Subjective' : isCorrect ? 'Correct' : 'Incorrect'}
+                        {label}
                       </span>
                       <span className="px-3 py-1 bg-white dark:bg-slate-800 rounded-lg text-[10px] font-bold text-slate-500 border border-slate-200 dark:border-slate-700 uppercase tracking-wider shadow-sm">
                         Unit 0{q.unit}
@@ -826,11 +1103,51 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                     </h4>
 
                     {/* Options/Answers Row */}
-                    {!isSubjective ? (
+                    {isCoding ? (
+                      <div className="space-y-4">
+                        <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5">
+                          <span className="text-slate-500 dark:text-slate-400 font-bold block mb-1.5 uppercase text-[10px] tracking-widest">Submitted Code</span>
+                          <pre className="font-mono text-xs bg-slate-900/50 p-4 rounded-xl overflow-auto dark:text-slate-300">
+                            {ansObj?.code || '# No code submitted'}
+                          </pre>
+                        </div>
+                        
+                        {ansObj?.results && ansObj.results.length > 0 && (
+                          <div className="space-y-2">
+                            <span className="text-slate-500 dark:text-slate-400 font-bold block mb-1 uppercase text-[10px] tracking-widest">Test Results</span>
+                            <div className="grid grid-cols-1 gap-2">
+                              {ansObj.results.map((res: any, idx: number) => (
+                                <div key={idx} className={`p-3 rounded-xl border text-[11px] flex items-center justify-between ${res.passed ? 'bg-emerald-500/5 border-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/5 border-red-500/10 text-red-600 dark:text-red-400'}`}>
+                                  <div className="flex items-center gap-3">
+                                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${res.passed ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
+                                      {res.passed ? '✓' : '✗'}
+                                    </span>
+                                    <span className="font-mono">Case {idx + 1}</span>
+                                  </div>
+                                  {!res.passed && (
+                                    <div className="text-[10px] opacity-70 italic truncate max-w-[200px]">
+                                      Exp: {res.out.trim()} | Got: {res.actual || 'None'}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className={`p-4 rounded-2xl border text-xs font-bold uppercase tracking-widest flex items-center gap-2 ${isCorrect ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
+                          {isCorrect ? (
+                            <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M20 6L9 17l-5-5"/></svg> All validation tests passed</>
+                          ) : (
+                            <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12"/></svg> Some tests failed</>
+                          )}
+                        </div>
+                      </div>
+                    ) : !isSubjective ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                         <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5 text-slate-800 dark:text-slate-200">
                           <span className="text-slate-500 dark:text-slate-400 font-bold block mb-1.5 uppercase text-[10px] tracking-widest flex items-center gap-1">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M20 6L9 17l-5-5" /></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M20 6L9 17l-5-5" /></svg>
                             Your Answer
                           </span>
                           <span className={`font-semibold text-sm ${isCorrect ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
@@ -840,7 +1157,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                         {!isCorrect && (
                           <div className="p-4 bg-emerald-50/50 dark:bg-emerald-500/10 rounded-2xl border border-emerald-100 dark:border-emerald-500/20 text-slate-800 dark:text-slate-200">
                             <span className="text-emerald-600/70 dark:text-emerald-400/70 font-bold block mb-1.5 uppercase text-[10px] tracking-widest flex items-center gap-1">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                               Correct Solution
                             </span>
                             <span className="font-semibold text-sm text-emerald-700 dark:text-emerald-400">
@@ -852,7 +1169,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                     ) : (
                       <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5 mt-2">
                         <span className="text-orange-500/70 dark:text-orange-400/70 font-bold block mb-1.5 uppercase text-[10px] tracking-widest flex items-center gap-1">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                           Feedback
                         </span>
                         <span className="font-semibold text-sm text-orange-700 dark:text-orange-400">
@@ -1026,6 +1343,17 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
                     <input
                       type="number" min="0" max="500" value={numSubjective}
                       onChange={(e) => setNumSubjective(parseInt(e.target.value) || 0)}
+                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-white/5 rounded-xl text-sm font-bold text-orange-600 focus:outline-none focus:border-orange-500 transition-all shadow-inner"
+                    />
+                  </div>
+                )}
+
+                {hasCoding && (
+                  <div className="flex-1 space-y-2 animate-in fade-in slide-in-from-left-2 duration-500">
+                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Coding Count</p>
+                    <input
+                      type="number" min="0" max="50" value={numCoding}
+                      onChange={(e) => setNumCoding(parseInt(e.target.value) || 0)}
                       className="w-full px-4 py-2.5 bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-white/5 rounded-xl text-sm font-bold text-orange-600 focus:outline-none focus:border-orange-500 transition-all shadow-inner"
                     />
                   </div>

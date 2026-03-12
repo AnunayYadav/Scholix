@@ -72,6 +72,12 @@ export interface AITool {
   isHero?: boolean;
 }
 
+declare global {
+  interface Window {
+    loadPyodide: any;
+  }
+}
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -155,12 +161,14 @@ export interface QuizQuestion {
   id: string;
   unit: number;
   question: string;
-  type?: 'mcq' | 'subjective';
+  type?: 'mcq' | 'subjective' | 'coding';
   options?: string[];
   correctAnswer?: number;
   explanation: string;
   difficulty?: 'easy' | 'medium' | 'hard';
   topic?: string;
+  starterCode?: string;
+  testCases?: { input: string; output: string }[];
 }
 
 
