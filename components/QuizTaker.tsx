@@ -245,10 +245,19 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       if (!isSubmit) {
         let msg = err.message;
         setExecutionOutput(prev => prev + "\nError: " + msg);
+        setIsAwaitingInput(false); // Reset input state on crash
       }
     } finally {
       if (!isAwaitingInput) setIsExecuting(false);
     }
+  };
+
+  const terminateExecution = () => {
+    setIsExecuting(false);
+    setIsAwaitingInput(false);
+    setLiveInput('');
+    setExecutionOutput(prev => prev + "\n\n[Execution Terminated by User]");
+    showToast("Execution terminated", "info");
   };
 
   const handleLiveInput = (e: React.KeyboardEvent) => {
@@ -262,6 +271,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       runCode(false, true);
     }
   };
+
+  // Add a ref for console to auto-scroll
+  const consoleRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (consoleRef.current) {
+      consoleRef.current.scrollTop = consoleRef.current.scrollHeight;
+    }
+  }, [executionOutput, isAwaitingInput]);
 
   const resetCode = () => {
     if (window.confirm("Are you sure you want to reset your code? This will erase your current work for this question.")) {
@@ -774,12 +791,22 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                      {/* Action Bar */}
                     <div className="flex flex-wrap items-center justify-between gap-4 py-2">
                        <div className="flex items-center gap-2">
-                         {isExecuting && (
-                           <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-500/10 rounded-full">
-                             <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-spin border border-t-transparent" />
-                             <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest">Executing...</span>
-                           </div>
-                         )}
+                          {isExecuting && (
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-500/10 rounded-full">
+                                <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-spin border border-t-transparent" />
+                                <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest">Executing...</span>
+                              </div>
+                              <button
+                                onClick={terminateExecution}
+                                className="group flex items-center gap-2 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 rounded-full transition-all"
+                                title="Terminate execution"
+                              >
+                                <div className="w-2 h-2 rounded-sm bg-red-500 group-hover:scale-110 transition-transform" />
+                                <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">Terminate</span>
+                              </button>
+                            </div>
+                          )}
                        </div>
 
                        <div className="flex items-center gap-3">
@@ -840,24 +867,27 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                               />
                             </div>
                           )}
-                           <div className={`flex-1 p-4 font-mono text-xs overflow-auto custom-scrollbar flex flex-col ${showStdin ? 'h-1/2' : 'h-full'}`}>
-                              <pre className="text-slate-300 whitespace-pre-wrap leading-relaxed inline">
-                                {executionOutput || <span className="text-slate-600 italic"># Output will appear here...</span>}
-                             </pre>
-                             {isAwaitingInput && (
-                               <div className="flex items-center gap-1 mt-1">
-                                 <span className="w-1.5 h-3.5 bg-orange-500 animate-pulse inline-block" />
-                                 <input
-                                   autoFocus
-                                   value={liveInput}
-                                   onChange={(e) => setLiveInput(e.target.value)}
-                                   onKeyDown={handleLiveInput}
-                                   className="flex-1 bg-transparent border-none outline-none text-orange-200 caret-orange-500 p-0 m-0"
-                                   placeholder=""
-                                 />
-                               </div>
-                             )}
-                           </div>
+                            <div 
+                              ref={consoleRef}
+                              className={`flex-1 p-4 font-mono text-xs overflow-auto custom-scrollbar flex flex-col ${showStdin ? 'h-1/2' : 'h-full'}`}
+                            >
+                               <pre className="text-slate-300 whitespace-pre-wrap leading-relaxed inline">
+                                 {executionOutput || <span className="text-slate-600 italic"># Output will appear here...</span>}
+                              </pre>
+                              {isAwaitingInput && (
+                                <div className="flex items-center gap-1 mt-1 pb-4">
+                                  <span className="w-1.5 h-3.5 bg-orange-500 animate-pulse inline-block" />
+                                  <input
+                                    autoFocus
+                                    value={liveInput}
+                                    onChange={(e) => setLiveInput(e.target.value)}
+                                    onKeyDown={handleLiveInput}
+                                    className="flex-1 bg-transparent border-none outline-none text-orange-200 caret-orange-500 p-0 m-0"
+                                    placeholder=""
+                                  />
+                                </div>
+                              )}
+                            </div>
                         </div>
                       </div>
 
