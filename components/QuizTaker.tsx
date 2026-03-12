@@ -1274,13 +1274,13 @@ sys.stdin = io.StringIO("${tc.input}")
                         Coming soon
                       </span>
                     )}
-                    {selectedSubject && isAvailable && (
-                      <div className="absolute top-3 right-3 flex items-center gap-1">
-                         <div className="flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      </div>
-                    )}
-
-                    <span className={`text-[10px] font-medium mt-1 ${isSelected ? 'text-orange-500' : 'text-slate-500 opacity-60'}`}>Unit {u}</span>
+                    
+                    <span className={`text-2xl font-bold tracking-tight mb-0.5 transition-colors ${isSelected ? 'text-orange-600' : 'text-slate-300 dark:text-slate-700'}`}>
+                      0{u}
+                    </span>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-orange-500' : 'text-slate-400 dark:text-slate-500'}`}>
+                      Unit {u}
+                    </span>
                   </button>
                 );
               })}
