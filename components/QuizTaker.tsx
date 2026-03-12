@@ -133,53 +133,71 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const runCode = async (isSubmit: boolean = false) => {
     if (!pyodide) return;
     setIsExecuting(true);
-    setExecutionOutput("Running...");
+    
+    if (isSubmit) {
+      setTestResults([]); // Clear previous results
+    } else {
+      setExecutionOutput("Running...");
+    }
+
     try {
-      pyodide.runPython(`
+      // Setup base execution environment
+      const setupEnv = () => pyodide.runPython(`
 import sys
 import io
 sys.stdout = io.StringIO()
 sys.stderr = io.StringIO()
       `);
-      
-      // Handle stdin if provided
-      if (stdinValue) {
-        pyodide.runPython(`
-import io
+
+      // MODE 1: Manual Run (In Console)
+      if (!isSubmit) {
+        setupEnv();
+        // Handle stdin for manual run
+        if (stdinValue) {
+          pyodide.runPython(`
 import sys
+import io
 sys.stdin = io.StringIO(${JSON.stringify(stdinValue)})
-        `);
-      } else {
-        pyodide.runPython(`
-import io
+          `);
+        } else {
+          pyodide.runPython(`
 import sys
+import io
 sys.stdin = io.StringIO("")
-        `);
-      }
-      
-      await pyodide.runPythonAsync(currentCode);
-      const output = pyodide.runPython("sys.stdout.getvalue()");
-      const stderr = pyodide.runPython("sys.stderr.getvalue()");
-      setExecutionOutput(output + (stderr ? "\nError:\n" + stderr : ""));
+          `);
+        }
+        
+        await pyodide.runPythonAsync(currentCode);
+        const output = pyodide.runPython("sys.stdout.getvalue()");
+        const stderr = pyodide.runPython("sys.stderr.getvalue()");
+        setExecutionOutput(output + (stderr ? "\nError:\n" + stderr : ""));
 
-      if (currentCode.includes('input(') && !stdinValue && !showStdin && !isSubmit) {
-        setShowStdin(true);
+        if (currentCode.includes('input(') && !stdinValue && !showStdin) {
+          setShowStdin(true);
+        }
       }
 
-      // Run test cases only if Submit is clicked
+      // MODE 2: Submission (Test Cases)
       if (isSubmit) {
         const q = quizQuestions[currentQuestionIdx];
-        if (q.testCases) {
+        if (q.testCases && q.testCases.length > 0) {
           const results = [];
           for (const tc of q.testCases) {
-            pyodide.runPython(`sys.stdout = io.StringIO()`);
+            setupEnv();
             if (tc.input) {
               pyodide.runPython(`
-import io
 import sys
+import io
 sys.stdin = io.StringIO(${JSON.stringify(tc.input)})
               `);
+            } else {
+              pyodide.runPython(`
+import sys
+import io
+sys.stdin = io.StringIO("")
+              `);
             }
+
             try {
               await pyodide.runPythonAsync(currentCode);
               const actual = pyodide.runPython("sys.stdout.getvalue()")?.trim() || "";
@@ -203,23 +221,23 @@ sys.stdin = io.StringIO(${JSON.stringify(tc.input)})
           }
           const allPassed = results.every(r => r.passed);
           setTestResults(results);
-          
-          // Auto-save answer with pass/fail status and detailed results
           handleAnswer({ code: currentCode, passed: allPassed, results });
           showToast(allPassed ? "All test cases passed!" : "Some test cases failed.", allPassed ? "success" : "error");
         } else {
-          // No test cases, just save code
+          // No test cases defined for this coding question
           handleAnswer({ code: currentCode, passed: true });
           showToast("Code submitted successfully", "success");
         }
       }
     } catch (err: any) {
-      let msg = err.message;
-      if (msg.includes("EOFError")) {
-        msg = "Error: Input required! Use the 'Add Input' button in the console to provide values for input().";
-        setShowStdin(true);
+      if (!isSubmit) {
+        let msg = err.message;
+        if (msg.includes("EOFError")) {
+          msg = "Error: Input required! Use the 'Add Input' button in the console to provide values for input().";
+          setShowStdin(true);
+        }
+        setExecutionOutput("Error: " + msg);
       }
-      setExecutionOutput("Error: " + msg);
     } finally {
       setIsExecuting(false);
     }
