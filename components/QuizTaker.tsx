@@ -71,6 +71,9 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [testResults, setTestResults] = useState<{in: string, out: string, actual: string, passed: boolean}[]>([]);
   const [stdinValue, setStdinValue] = useState('');
   const [showStdin, setShowStdin] = useState(false);
+  const [userInputs, setUserInputs] = useState<string[]>([]);
+  const [isAwaitingInput, setIsAwaitingInput] = useState(false);
+  const [liveInput, setLiveInput] = useState('');
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [isShowingExplanation, setIsShowingExplanation] = useState(false);
   const [reviewMode, setReviewMode] = useState(false);
@@ -130,50 +133,64 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     }
   }, [currentQuestionIdx, quizQuestions]);
 
-  const runCode = async (isSubmit: boolean = false) => {
+  const runCode = async (isSubmit: boolean = false, isResume: boolean = false) => {
     if (!pyodide) return;
     setIsExecuting(true);
+    setIsAwaitingInput(false);
     
     if (isSubmit) {
-      setTestResults([]); // Clear previous results
-    } else {
+      setTestResults([]); 
+    } else if (!isResume) {
       setExecutionOutput("Running...");
+      setUserInputs([]); // Reset inputs for fresh manual run
     }
 
     try {
-      // Setup base execution environment
       const setupEnv = () => pyodide.runPython(`
 import sys
 import io
+import builtins
+
+# Create custom stdout/stderr that notifies JS immediately if possible
+# (Though for runPythonAsync, it usually flushes at once or on custom handlers)
 sys.stdout = io.StringIO()
 sys.stderr = io.StringIO()
+
+_inputs = ${JSON.stringify(isResume ? userInputs : (stdinValue ? stdinValue.split('\n') : []))}
+_input_idx = 0
+
+def _custom_input(prompt=""):
+    global _input_idx
+    if prompt:
+        sys.stdout.write(str(prompt))
+    if _input_idx < len(_inputs):
+        val = _inputs[_input_idx]
+        _input_idx += 1
+        return val
+    else:
+        # Signal JS that we need input
+        raise Exception("WAITING_FOR_INPUT")
+
+builtins.input = _custom_input
       `);
 
       // MODE 1: Manual Run (In Console)
       if (!isSubmit) {
         setupEnv();
-        // Handle stdin for manual run
-        if (stdinValue) {
-          pyodide.runPython(`
-import sys
-import io
-sys.stdin = io.StringIO(${JSON.stringify(stdinValue)})
-          `);
-        } else {
-          pyodide.runPython(`
-import sys
-import io
-sys.stdin = io.StringIO("")
-          `);
-        }
-        
-        await pyodide.runPythonAsync(currentCode);
-        const output = pyodide.runPython("sys.stdout.getvalue()");
-        const stderr = pyodide.runPython("sys.stderr.getvalue()");
-        setExecutionOutput(output + (stderr ? "\nError:\n" + stderr : ""));
-
-        if (currentCode.includes('input(') && !stdinValue && !showStdin) {
-          setShowStdin(true);
+        try {
+          await pyodide.runPythonAsync(currentCode);
+          const output = pyodide.runPython("sys.stdout.getvalue()");
+          const stderr = pyodide.runPython("sys.stderr.getvalue()");
+          setExecutionOutput(output + (stderr ? "\nError:\n" + stderr : ""));
+        } catch (err: any) {
+          if (err.message.includes("WAITING_FOR_INPUT")) {
+            // Partial output before input()
+            const partialOutput = pyodide.runPython("sys.stdout.getvalue()");
+            setExecutionOutput(partialOutput);
+            setIsAwaitingInput(true);
+          } else {
+            throw err;
+          }
         }
       }
 
@@ -183,20 +200,16 @@ sys.stdin = io.StringIO("")
         if (q.testCases && q.testCases.length > 0) {
           const results = [];
           for (const tc of q.testCases) {
-            setupEnv();
-            if (tc.input) {
-              pyodide.runPython(`
+            pyodide.runPython(`
 import sys
 import io
-sys.stdin = io.StringIO(${JSON.stringify(tc.input)})
-              `);
-            } else {
-              pyodide.runPython(`
-import sys
-import io
-sys.stdin = io.StringIO("")
-              `);
-            }
+import builtins
+sys.stdout = io.StringIO()
+sys.stderr = io.StringIO()
+_inputs = ${JSON.stringify((tc.input || "").split('\n').filter((l: string) => l !== ""))}
+_input_idx = 0
+builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
+            `);
 
             try {
               await pyodide.runPythonAsync(currentCode);
@@ -224,7 +237,6 @@ sys.stdin = io.StringIO("")
           handleAnswer({ code: currentCode, passed: allPassed, results });
           showToast(allPassed ? "All test cases passed!" : "Some test cases failed.", allPassed ? "success" : "error");
         } else {
-          // No test cases defined for this coding question
           handleAnswer({ code: currentCode, passed: true });
           showToast("Code submitted successfully", "success");
         }
@@ -232,14 +244,22 @@ sys.stdin = io.StringIO("")
     } catch (err: any) {
       if (!isSubmit) {
         let msg = err.message;
-        if (msg.includes("EOFError")) {
-          msg = "Error: Input required! Use the 'Add Input' button in the console to provide values for input().";
-          setShowStdin(true);
-        }
-        setExecutionOutput("Error: " + msg);
+        setExecutionOutput(prev => prev + "\nError: " + msg);
       }
     } finally {
-      setIsExecuting(false);
+      if (!isAwaitingInput) setIsExecuting(false);
+    }
+  };
+
+  const handleLiveInput = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      const val = liveInput;
+      const updatedInputs = [...userInputs, val];
+      setUserInputs(updatedInputs);
+      setLiveInput('');
+      setExecutionOutput(prev => prev + val + '\n');
+      // Re-run with the new input included
+      runCode(false, true);
     }
   };
 
@@ -820,11 +840,24 @@ sys.stdin = io.StringIO("")
                               />
                             </div>
                           )}
-                          <div className={`flex-1 p-4 font-mono text-xs overflow-auto custom-scrollbar ${showStdin ? 'h-1/2' : 'h-full'}`}>
-                             <pre className="text-slate-300 whitespace-pre-wrap leading-relaxed">
-                              {executionOutput || <span className="text-slate-600 italic"># Output will appear here...</span>}
-                            </pre>
-                          </div>
+                           <div className={`flex-1 p-4 font-mono text-xs overflow-auto custom-scrollbar flex flex-col ${showStdin ? 'h-1/2' : 'h-full'}`}>
+                              <pre className="text-slate-300 whitespace-pre-wrap leading-relaxed inline">
+                                {executionOutput || <span className="text-slate-600 italic"># Output will appear here...</span>}
+                             </pre>
+                             {isAwaitingInput && (
+                               <div className="flex items-center gap-1 mt-1">
+                                 <span className="w-1.5 h-3.5 bg-orange-500 animate-pulse inline-block" />
+                                 <input
+                                   autoFocus
+                                   value={liveInput}
+                                   onChange={(e) => setLiveInput(e.target.value)}
+                                   onKeyDown={handleLiveInput}
+                                   className="flex-1 bg-transparent border-none outline-none text-orange-200 caret-orange-500 p-0 m-0"
+                                   placeholder=""
+                                 />
+                               </div>
+                             )}
+                           </div>
                         </div>
                       </div>
 
@@ -859,10 +892,10 @@ sys.stdin = io.StringIO("")
                                       <div className="text-slate-500 italic">[Hidden Test Case]</div>
                                     ) : (
                                       <>
-                                        <div className="flex gap-2 text-slate-500 font-medium"><span>Input:</span> <span className="text-slate-400 truncate">{tr.input || tr.in || 'None'}</span></div>
-                                        <div className="flex gap-2 text-slate-500 font-medium"><span>Exp:</span> <span className="text-slate-400 truncate">{(tr.output || tr.out || "").trim()}</span></div>
+                                        <div className="flex gap-2 text-slate-500 font-medium"><span>Input:</span> <span className="text-slate-400 whitespace-pre-wrap break-words">{tr.input || tr.in || 'None'}</span></div>
+                                        <div className="flex gap-2 text-slate-500 font-medium"><span>Exp:</span> <span className="text-slate-400 whitespace-pre-wrap break-words">{(tr.output || tr.out || "").trim()}</span></div>
                                         {tr.passed !== undefined && (
-                                          <div className={`flex gap-2 ${tr.passed ? 'text-emerald-500/70' : 'text-red-500'}`}><span>Got:</span> <span className="truncate">{tr.actual || 'No output'}</span></div>
+                                          <div className={`flex gap-2 ${tr.passed ? 'text-emerald-500/70' : 'text-red-500'}`}><span>Got:</span> <span className="whitespace-pre-wrap break-words">{tr.actual || 'No output'}</span></div>
                                         )}
                                       </>
                                     )}
