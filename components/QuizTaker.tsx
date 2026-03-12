@@ -69,6 +69,8 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [isExecuting, setIsExecuting] = useState(false);
   const [pyodide, setPyodide] = useState<any>(null);
   const [testResults, setTestResults] = useState<{in: string, out: string, actual: string, passed: boolean}[]>([]);
+  const [stdinValue, setStdinValue] = useState('');
+  const [showStdin, setShowStdin] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [isShowingExplanation, setIsShowingExplanation] = useState(false);
   const [reviewMode, setReviewMode] = useState(false);
@@ -133,16 +135,36 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     setIsExecuting(true);
     setExecutionOutput("Running...");
     try {
-      // Setup stdout redirection
       pyodide.runPython(`
 import sys
 import io
 sys.stdout = io.StringIO()
+sys.stderr = io.StringIO()
       `);
+      
+      // Handle stdin if provided
+      if (stdinValue) {
+        pyodide.runPython(`
+import io
+import sys
+sys.stdin = io.StringIO(${JSON.stringify(stdinValue)})
+        `);
+      } else {
+        pyodide.runPython(`
+import io
+import sys
+sys.stdin = io.StringIO("")
+        `);
+      }
       
       await pyodide.runPythonAsync(currentCode);
       const output = pyodide.runPython("sys.stdout.getvalue()");
-      setExecutionOutput(output);
+      const stderr = pyodide.runPython("sys.stderr.getvalue()");
+      setExecutionOutput(output + (stderr ? "\nError:\n" + stderr : ""));
+
+      if (currentCode.includes('input(') && !stdinValue && !showStdin) {
+        setShowStdin(true);
+      }
 
       // Run test cases if any
       const q = quizQuestions[currentQuestionIdx];
@@ -150,12 +172,11 @@ sys.stdout = io.StringIO()
         const results = [];
         for (const tc of q.testCases) {
           pyodide.runPython(`sys.stdout = io.StringIO()`);
-          // Note: This is a simple evaluation. For complex ones we'd need to mock input()
-          // If the problem requires input(), we can use pyodide.runPython(`sys.stdin = io.StringIO("${tc.input}")`)
           if (tc.input) {
             pyodide.runPython(`
 import io
-sys.stdin = io.StringIO("${tc.input}")
+import sys
+sys.stdin = io.StringIO(${JSON.stringify(tc.input)})
             `);
           }
           try {
@@ -187,7 +208,12 @@ sys.stdin = io.StringIO("${tc.input}")
         handleAnswer({ code: currentCode, passed: true });
       }
     } catch (err: any) {
-      setExecutionOutput("Error: " + err.message);
+      let msg = err.message;
+      if (msg.includes("EOFError")) {
+        msg = "Error: Input required! Use the 'Add Input' button in the console to provide values for input().";
+        setShowStdin(true);
+      }
+      setExecutionOutput("Error: " + msg);
     } finally {
       setIsExecuting(false);
     }
@@ -752,17 +778,40 @@ sys.stdin = io.StringIO("${tc.input}")
                             <div className="w-1 h-1 rounded-full bg-slate-500" />
                             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Console</span>
                           </div>
-                          <button 
-                            onClick={() => setExecutionOutput('')}
-                            className="text-[9px] font-bold text-slate-600 hover:text-slate-400 uppercase tracking-widest transition-colors"
-                          >
-                            Clear
-                          </button>
+                          <div className="flex items-center gap-3">
+                            <button 
+                              onClick={() => setShowStdin(!showStdin)}
+                              className={`text-[9px] font-bold uppercase tracking-widest transition-colors ${showStdin ? 'text-orange-500' : 'text-slate-600 hover:text-slate-400'}`}
+                            >
+                              {showStdin ? 'Hide Input' : 'Add Input'}
+                            </button>
+                            <button 
+                              onClick={() => setExecutionOutput('')}
+                              className="text-[9px] font-bold text-slate-600 hover:text-slate-400 uppercase tracking-widest transition-colors"
+                            >
+                              Clear
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex-1 p-4 font-mono text-xs overflow-auto custom-scrollbar">
-                           <pre className="text-slate-300 whitespace-pre-wrap leading-relaxed">
-                            {executionOutput || <span className="text-slate-600 italic"># Output will appear here...</span>}
-                          </pre>
+                        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                          {showStdin && (
+                            <div className="h-1/2 border-b border-white/5 flex flex-col">
+                              <div className="px-4 py-1.5 bg-white/[0.02] border-b border-white/5">
+                                <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest">Standard Input (stdin)</span>
+                              </div>
+                              <textarea
+                                value={stdinValue}
+                                onChange={(e) => setStdinValue(e.target.value)}
+                                placeholder="Type input here..."
+                                className="flex-1 w-full bg-transparent p-3 font-mono text-xs text-orange-200/80 outline-none resize-none placeholder:text-slate-700"
+                              />
+                            </div>
+                          )}
+                          <div className={`flex-1 p-4 font-mono text-xs overflow-auto custom-scrollbar ${showStdin ? 'h-1/2' : 'h-full'}`}>
+                             <pre className="text-slate-300 whitespace-pre-wrap leading-relaxed">
+                              {executionOutput || <span className="text-slate-600 italic"># Output will appear here...</span>}
+                            </pre>
+                          </div>
                         </div>
                       </div>
 
