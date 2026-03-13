@@ -141,58 +141,6 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     return 'python';
   }, [selectedSubject]);
 
-  const runCodeWithPiston = async (code: string, stdin: string, language: string) => {
-    const langMap: Record<string, string> = {
-      'c': 'c',
-      'cpp': 'cpp',
-      'python': 'python3',
-      'java': 'java',
-      'javascript': 'node'
-    };
-    
-    const mirrors = [
-      "https://pydis-piston.vercel.app/api/v2/execute", // Mirror specialized for frontend
-      "https://piston.pydis.com/api/v2/execute",
-      "https://api.clot.io/api/v2/execute",
-      "https://emkc.org/api/v2/piston/execute" // Leaving as final fallback
-    ];
-
-    let lastError = null;
-
-    for (const url of mirrors) {
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            language: langMap[language] || language,
-            version: "*",
-            files: [{ content: code }],
-            stdin: stdin
-          })
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (!data.run) {
-          throw new Error(data.message || "Execution failed - No output received.");
-        }
-        return data.run;
-      } catch (err: any) {
-        console.warn(`Piston mirror ${url} failed:`, err.message);
-        lastError = err;
-        if (err.message?.toLowerCase().includes("whitelist")) continue; 
-        if (err.message?.includes("HTTP 503") || err.message?.includes("Failed to fetch")) continue;
-        // If it's a legitimate code error or something else, we might want to stop, but for now let's try all mirrors
-      }
-    }
-    
-    throw lastError || new Error("All Piston mirrors failed. Please try again later.");
-  };
 
   const runCode = async (isSubmit: boolean = false, isResume: boolean = false) => {
     const isPython = currentLanguage === 'python';
@@ -301,47 +249,9 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           }
         }
       } else {
-        // PISTON LOGIC (C/C++/etc)
-        if (!isSubmit) {
-          const runResult = await runCodeWithPiston(currentCode, stdinValue, currentLanguage);
-          setExecutionOutput(runResult?.output || (runResult?.stderr ? "Error:\n" + runResult.stderr : ""));
-        } else {
-          const q = quizQuestions[currentQuestionIdx];
-          if (q.testCases && q.testCases.length > 0) {
-            const results = [];
-            for (const tc of q.testCases) {
-              try {
-                const runResult = await runCodeWithPiston(currentCode, tc.input || tc.in || "", currentLanguage);
-                const actual = (runResult?.stdout || runResult?.output || "").trim();
-                const expected = (tc.output || tc.out || "").trim();
-                results.push({
-                  input: tc.input || "",
-                  output: expected,
-                  actual: actual,
-                  passed: actual === expected,
-                  isHidden: tc.isHidden
-                });
-              } catch (e: any) {
-                results.push({
-                  input: tc.input || "",
-                  output: tc.output || "",
-                  actual: "Execution Error",
-                  passed: false,
-                  isHidden: tc.isHidden
-                });
-              }
-            }
-            const allPassed = results.every(r => r.passed);
-            setTestResults(results);
-            handleAnswer({ code: currentCode, passed: allPassed, results });
-            showToast(allPassed ? "All test cases passed!" : "Some test cases failed.", allPassed ? "success" : "error");
-          } else {
-             const runResult = await runCodeWithPiston(currentCode, "", currentLanguage);
-             setExecutionOutput(runResult?.output || "");
-             handleAnswer({ code: currentCode, passed: true });
-             showToast("Code submitted successfully", "success");
-          }
-        }
+        // PISTON LOGIC REMOVED
+        showToast("Code execution is currently unavailable for this language.", "error");
+        setExecutionOutput("Error: External compiler services are currently down. Only Python is supported at this time.");
       }
     } catch (err: any) {
       if (!isSubmit) {
@@ -491,6 +401,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
   const hasCoding = useMemo(() => {
     if (!selectedSubject) return false;
+    // Lock coding questions for CSE101 as requested
+    if (selectedSubject.name.includes('CSE101')) return false;
     const mcqs = QUIZTAKER_DATA[selectedSubject.name]?.mcqs || [];
     return mcqs.some(q => q.type === 'coding');
   }, [selectedSubject]);
@@ -1689,7 +1601,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     <input
                       type="number" min="0" max="50" value={numCoding}
                       onChange={(e) => setNumCoding(parseInt(e.target.value) || 0)}
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-white/5 rounded-xl text-sm font-bold text-orange-600 focus:outline-none focus:border-orange-500 transition-all shadow-inner"
+                      disabled={selectedSubject?.name.includes('CSE101')}
+                      className={`w-full px-4 py-2.5 bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-white/5 rounded-xl text-sm font-bold text-orange-600 focus:outline-none focus:border-orange-500 transition-all shadow-inner ${selectedSubject?.name.includes('CSE101') ? 'opacity-50 cursor-not-allowed' : ''}`}
                     />
                   </div>
                 )}
