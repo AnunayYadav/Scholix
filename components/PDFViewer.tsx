@@ -232,9 +232,6 @@ const PageRenderer = React.memo<{
                     ref={textLayerRef}
                     className="textLayer absolute inset-0 pointer-events-none select-text z-20 opacity-20 transition-opacity duration-200"
                 />
-
-                {/* Optimized Watermark */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.03] select-none z-30 watermark-overlay" />
             </div>
         </div>
     );
@@ -966,12 +963,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 @keyframes shimmer {
                     from { transform: translateX(-100%); }
                     to { transform: translateX(100%); }
-                }
-
-                .watermark-overlay {
-                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' transform='rotate(-35 150 150)' fill='currentColor' fill-opacity='1' font-family='Inter, sans-serif' font-weight='700' font-size='32'%3ELPU NEXUS%3C/text%3E%3C/svg%3E");
-                    background-repeat: repeat;
-                    background-size: 300px 300px;
                 }
 
                 .is-zooming .textLayer {
