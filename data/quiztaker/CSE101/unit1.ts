@@ -802,3 +802,116 @@ topic: 'The C character set'
         topic: 'Basics'
     }
 ];
+
+export const cse101Unit1Coding: QuizQuestion[] = [
+    {
+        id: `cse101-u1-coding-1`,
+        unit: 1,
+        topic: `Basic I/O`,
+        difficulty: `easy`,
+        type: `coding`,
+        question: `Write a C program that takes an integer as input and prints its square.`,
+        starterCode: `#include <stdio.h>
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    // Your code here
+    return 0;
+}`,
+        testCases: [
+            { "input": "5", "output": "25" },
+            { "input": "12", "output": "144" },
+            { "input": "-4", "output": "16", "isHidden": true }
+        ],
+        explanation: `Use scanf to read the input and printf to display n*n.`
+    },
+    {
+        id: `cse101-u1-coding-2`,
+        unit: 1,
+        topic: `Arithmetic Operators`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a C program to calculate the area of a circle. Take the radius (float) as input and print the area formatted to 2 decimal places. Use 3.14 as the value of PI.`,
+        starterCode: `#include <stdio.h>
+
+int main() {
+    float radius;
+    scanf("%f", &radius);
+    // Your code here
+    return 0;
+}`,
+        testCases: [
+            { "input": "5", "output": "78.50" },
+            { "input": "2.5", "output": "19.62" },
+            { "input": "10", "output": "314.00", "isHidden": true }
+        ],
+        explanation: `Area = 3.14 * radius * radius. Use %.2f in printf.`
+    },
+    {
+        id: `cse101-u1-coding-3`,
+        unit: 1,
+        topic: `Bitwise Operators`,
+        difficulty: `hard`,
+        type: `coding`,
+        question: `Write a C program that takes an integer and checks if its least significant bit (LSB) is set (1) or not (0). Print "SET" if it's 1, and "NOT SET" if it's 0.`,
+        starterCode: `#include <stdio.h>
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    // Your code here
+    return 0;
+}`,
+        testCases: [
+            { "input": "5", "output": "SET" },
+            { "input": "10", "output": "NOT SET" },
+            { "input": "1", "output": "SET", "isHidden": true }
+        ],
+        explanation: `Check (n & 1). If true, it's set.`
+    },
+    {
+        id: `cse101-u1-coding-4`,
+        unit: 1,
+        topic: `Data Types`,
+        difficulty: `easy`,
+        type: `coding`,
+        question: `Write a C program that takes a character as input and prints its ASCII value.`,
+        starterCode: `#include <stdio.h>
+
+int main() {
+    char ch;
+    scanf("%c", &ch);
+    // Your code here
+    return 0;
+}`,
+        testCases: [
+            { "input": "A", "output": "65" },
+            { "input": "a", "output": "97" },
+            { "input": "0", "output": "48", "isHidden": true }
+        ],
+        explanation: `Use %d format specifier in printf to print the character as an integer.`
+    },
+    {
+        id: `cse101-u1-coding-5`,
+        unit: 1,
+        topic: `Variables`,
+        difficulty: `medium`,
+        type: `coding`,
+        question: `Write a C program to swap two integers without using a third variable. Print the swapped numbers separated by a space.`,
+        starterCode: `#include <stdio.h>
+
+int main() {
+    int a, b;
+    scanf("%d %d", &a, &b);
+    // Your code here
+    return 0;
+}`,
+        testCases: [
+            { "input": "10 20", "output": "20 10" },
+            { "input": "100 -50", "output": "-50 100" },
+            { "input": "0 1", "output": "1 0", "isHidden": true }
+        ],
+        explanation: `You can use addition and subtraction or XOR to swap without a temporary variable.`
+    }
+];

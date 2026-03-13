@@ -6,7 +6,7 @@ import { che110Unit3MCQs } from "./CHE110/unit3.ts";
 import { che110Unit4MCQs } from "./CHE110/unit4.ts";
 import { che110Unit5MCQs } from "./CHE110/unit5.ts";
 import { che110Unit6MCQs } from "./CHE110/unit6.ts";
-import { cse101Unit1MCQs } from "./CSE101/unit1.ts";
+import { cse101Unit1MCQs, cse101Unit1Coding } from "./CSE101/unit1.ts";
 import { cse101Unit2MCQs } from "./CSE101/unit2.ts";
 import { cse101Unit3MCQs } from "./CSE101/unit3.ts";
 import { cse101Unit4MCQs } from "./CSE101/unit4.ts";
@@ -101,7 +101,7 @@ export const QUIZTAKER_DATA: Record<string, { mcqs: QuizQuestion[], subjective: 
         subjective: []
     },
     "CSE101": {
-        mcqs: [...cse101Unit1MCQs, ...cse101Unit2MCQs, ...cse101Unit3MCQs, ...cse101Unit4MCQs, ...cse101Unit5MCQs, ...cse101Unit6MCQs],
+        mcqs: [...cse101Unit1MCQs, ...cse101Unit1Coding, ...cse101Unit2MCQs, ...cse101Unit3MCQs, ...cse101Unit4MCQs, ...cse101Unit5MCQs, ...cse101Unit6MCQs],
         subjective: []
     },
     "CSE121": {

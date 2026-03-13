@@ -133,8 +133,75 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     }
   }, [currentQuestionIdx, quizQuestions]);
 
+  const currentLanguage = useMemo(() => {
+    if (!selectedSubject) return 'python';
+    const name = selectedSubject.name.toUpperCase();
+    if (name.includes('CSE101')) return 'c';
+    if (name.includes('CSE121')) return 'cpp';
+    return 'python';
+  }, [selectedSubject]);
+
+  const runCodeWithPiston = async (code: string, stdin: string, language: string) => {
+    const langMap: Record<string, string> = {
+      'c': 'c',
+      'cpp': 'cpp',
+      'python': 'python3',
+      'java': 'java',
+      'javascript': 'node'
+    };
+    
+    const mirrors = [
+      "https://pydis-piston.vercel.app/api/v2/execute", // Mirror specialized for frontend
+      "https://piston.pydis.com/api/v2/execute",
+      "https://api.clot.io/api/v2/execute",
+      "https://emkc.org/api/v2/piston/execute" // Leaving as final fallback
+    ];
+
+    let lastError = null;
+
+    for (const url of mirrors) {
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            language: langMap[language] || language,
+            version: "*",
+            files: [{ content: code }],
+            stdin: stdin
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!data.run) {
+          throw new Error(data.message || "Execution failed - No output received.");
+        }
+        return data.run;
+      } catch (err: any) {
+        console.warn(`Piston mirror ${url} failed:`, err.message);
+        lastError = err;
+        if (err.message?.toLowerCase().includes("whitelist")) continue; 
+        if (err.message?.includes("HTTP 503") || err.message?.includes("Failed to fetch")) continue;
+        // If it's a legitimate code error or something else, we might want to stop, but for now let's try all mirrors
+      }
+    }
+    
+    throw lastError || new Error("All Piston mirrors failed. Please try again later.");
+  };
+
   const runCode = async (isSubmit: boolean = false, isResume: boolean = false) => {
-    if (!pyodide) return;
+    const isPython = currentLanguage === 'python';
+    
+    if (isPython && !pyodide) {
+      showToast("Python engine is still loading...", "info");
+      return;
+    }
+
     setIsExecuting(true);
     setIsAwaitingInput(false);
     
@@ -142,23 +209,20 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
       setTestResults([]); 
     } else if (!isResume) {
       setExecutionOutput("Running...");
-      setUserInputs([]); // Reset inputs for fresh manual run
+      setUserInputs([]);
     }
 
     try {
-      const setupEnv = () => pyodide.runPython(`
+      if (isPython) {
+        // ... (Existing Python/Pyodide logic)
+        const setupEnv = () => pyodide.runPython(`
 import sys
 import io
 import builtins
-
-# Create custom stdout/stderr that notifies JS immediately if possible
-# (Though for runPythonAsync, it usually flushes at once or on custom handlers)
 sys.stdout = io.StringIO()
 sys.stderr = io.StringIO()
-
 _inputs = ${JSON.stringify(isResume ? userInputs : (stdinValue ? stdinValue.split('\n') : []))}
 _input_idx = 0
-
 def _custom_input(prompt=""):
     global _input_idx
     if prompt:
@@ -168,39 +232,34 @@ def _custom_input(prompt=""):
         _input_idx += 1
         return val
     else:
-        # Signal JS that we need input
         raise Exception("WAITING_FOR_INPUT")
-
 builtins.input = _custom_input
-      `);
+        `);
 
-      // MODE 1: Manual Run (In Console)
-      if (!isSubmit) {
-        setupEnv();
-        try {
-          await pyodide.runPythonAsync(currentCode);
-          const output = pyodide.runPython("sys.stdout.getvalue()");
-          const stderr = pyodide.runPython("sys.stderr.getvalue()");
-          setExecutionOutput(output + (stderr ? "\nError:\n" + stderr : ""));
-        } catch (err: any) {
-          if (err.message.includes("WAITING_FOR_INPUT")) {
-            // Partial output before input()
-            const partialOutput = pyodide.runPython("sys.stdout.getvalue()");
-            setExecutionOutput(partialOutput);
-            setIsAwaitingInput(true);
-          } else {
-            throw err;
+        if (!isSubmit) {
+          setupEnv();
+          try {
+            await pyodide.runPythonAsync(currentCode);
+            const output = pyodide.runPython("sys.stdout.getvalue()");
+            const stderr = pyodide.runPython("sys.stderr.getvalue()");
+            setExecutionOutput(output + (stderr ? "\nError:\n" + stderr : ""));
+          } catch (err: any) {
+            if (err.message.includes("WAITING_FOR_INPUT")) {
+              const partialOutput = pyodide.runPython("sys.stdout.getvalue()");
+              setExecutionOutput(partialOutput);
+              setIsAwaitingInput(true);
+            } else {
+              throw err;
+            }
           }
         }
-      }
 
-      // MODE 2: Submission (Test Cases)
-      if (isSubmit) {
-        const q = quizQuestions[currentQuestionIdx];
-        if (q.testCases && q.testCases.length > 0) {
-          const results = [];
-          for (const tc of q.testCases) {
-            pyodide.runPython(`
+        if (isSubmit) {
+          const q = quizQuestions[currentQuestionIdx];
+          if (q.testCases && q.testCases.length > 0) {
+            const results = [];
+            for (const tc of q.testCases) {
+              pyodide.runPython(`
 import sys
 import io
 import builtins
@@ -209,46 +268,87 @@ sys.stderr = io.StringIO()
 _inputs = ${JSON.stringify((tc.input || "").split('\n').filter((l: string) => l !== ""))}
 _input_idx = 0
 builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
-            `);
+              `);
 
-            try {
-              await pyodide.runPythonAsync(currentCode);
-              const actual = pyodide.runPython("sys.stdout.getvalue()")?.trim() || "";
-              const expected = (tc.output || tc.out || "").trim();
-              results.push({
-                input: tc.input || tc.in || "",
-                output: expected,
-                actual: actual,
-                passed: actual === expected,
-                isHidden: tc.isHidden
-              });
-            } catch (e: any) {
-              results.push({
-                input: tc.input || tc.in || "",
-                output: tc.output || tc.out || "",
-                actual: "Error: " + e.message,
-                passed: false,
-                isHidden: tc.isHidden
-              });
+              try {
+                await pyodide.runPythonAsync(currentCode);
+                const actual = pyodide.runPython("sys.stdout.getvalue()")?.trim() || "";
+                const expected = (tc.output || tc.out || "").trim();
+                results.push({
+                  input: tc.input || tc.in || "",
+                  output: expected,
+                  actual: actual,
+                  passed: actual === expected,
+                  isHidden: tc.isHidden
+                });
+              } catch (e: any) {
+                results.push({
+                  input: tc.input || tc.in || "",
+                  output: tc.output || tc.out || "",
+                  actual: "Error: " + e.message,
+                  passed: false,
+                  isHidden: tc.isHidden
+                });
+              }
             }
+            const allPassed = results.every(r => r.passed);
+            setTestResults(results);
+            handleAnswer({ code: currentCode, passed: allPassed, results });
+            showToast(allPassed ? "All test cases passed!" : "Some test cases failed.", allPassed ? "success" : "error");
+          } else {
+            handleAnswer({ code: currentCode, passed: true });
+            showToast("Code submitted successfully", "success");
           }
-          const allPassed = results.every(r => r.passed);
-          setTestResults(results);
-          handleAnswer({ code: currentCode, passed: allPassed, results });
-          showToast(allPassed ? "All test cases passed!" : "Some test cases failed.", allPassed ? "success" : "error");
+        }
+      } else {
+        // PISTON LOGIC (C/C++/etc)
+        if (!isSubmit) {
+          const runResult = await runCodeWithPiston(currentCode, stdinValue, currentLanguage);
+          setExecutionOutput(runResult?.output || (runResult?.stderr ? "Error:\n" + runResult.stderr : ""));
         } else {
-          handleAnswer({ code: currentCode, passed: true });
-          showToast("Code submitted successfully", "success");
+          const q = quizQuestions[currentQuestionIdx];
+          if (q.testCases && q.testCases.length > 0) {
+            const results = [];
+            for (const tc of q.testCases) {
+              try {
+                const runResult = await runCodeWithPiston(currentCode, tc.input || tc.in || "", currentLanguage);
+                const actual = (runResult?.stdout || runResult?.output || "").trim();
+                const expected = (tc.output || tc.out || "").trim();
+                results.push({
+                  input: tc.input || "",
+                  output: expected,
+                  actual: actual,
+                  passed: actual === expected,
+                  isHidden: tc.isHidden
+                });
+              } catch (e: any) {
+                results.push({
+                  input: tc.input || "",
+                  output: tc.output || "",
+                  actual: "Execution Error",
+                  passed: false,
+                  isHidden: tc.isHidden
+                });
+              }
+            }
+            const allPassed = results.every(r => r.passed);
+            setTestResults(results);
+            handleAnswer({ code: currentCode, passed: allPassed, results });
+            showToast(allPassed ? "All test cases passed!" : "Some test cases failed.", allPassed ? "success" : "error");
+          } else {
+             const runResult = await runCodeWithPiston(currentCode, "", currentLanguage);
+             setExecutionOutput(runResult?.output || "");
+             handleAnswer({ code: currentCode, passed: true });
+             showToast("Code submitted successfully", "success");
+          }
         }
       }
     } catch (err: any) {
       if (!isSubmit) {
-        let msg = err.message;
-        setExecutionOutput(prev => prev + "\nError: " + msg);
-        setIsAwaitingInput(false); // Reset input state on crash
+        setExecutionOutput(prev => prev + "\nError: " + err.message);
       }
     } finally {
-      if (!isAwaitingInput) setIsExecuting(false);
+      setIsExecuting(false);
     }
   };
 
@@ -738,10 +838,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         <div className="h-4 w-px bg-slate-300 dark:bg-white/10 mx-1" />
                         <div className="flex items-center gap-2">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-blue-500"><path d="M12 2C6.48 2 2 6.48 2 12s4.1 10 9.1 10c4.1 0 7.7-2.7 8.7-6.5h-2.1c-.9 2.7-3.4 4.5-6.6 4.5-3.6 0-6.6-2.9-6.6-6.5S7.4 7 11 7c3.1 0 5.8 2.1 6.7 5h2.1C18.8 8 15.3 5.5 11 5.5s-8 2.5-8 6.5" /></svg>
-                          <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Python 3</span>
+                          <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">{currentLanguage === 'cpp' ? 'C++' : currentLanguage === 'c' ? 'C' : 'Python 3'}</span>
                         </div>
                         <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">|</span>
-                        <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300 tabular-nums">main.py</span>
+                        <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300 tabular-nums">main.{currentLanguage === 'cpp' ? 'cpp' : currentLanguage === 'c' ? 'c' : 'py'}</span>
                       </div>
                       
                       <button 
@@ -757,7 +857,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     <div className="rounded-b-[20px] overflow-hidden border-x border-b border-slate-200 dark:border-white/10 shadow-xl bg-[#1e1e1e]">
                       <Editor
                         height="400px"
-                        language="python"
+                        language={currentLanguage === 'cpp' ? 'cpp' : currentLanguage === 'c' ? 'c' : 'python'}
                         theme="vs-dark"
                         value={currentCode}
                         onChange={(value) => {
@@ -797,7 +897,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                        <div className="flex items-center gap-3">
                          <button
                            onClick={() => runCode(false)}
-                           disabled={isExecuting || !pyodide}
+                           disabled={isExecuting || (currentLanguage === 'python' && !pyodide)}
                            className="px-6 py-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-sm"
                          >
                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M5 3l14 9-14 9V3z" /></svg>
@@ -805,7 +905,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                          </button>
                          <button
                            onClick={() => runCode(true)}
-                           disabled={isExecuting || !pyodide}
+                           disabled={isExecuting || (currentLanguage === 'python' && !pyodide)}
                            className="px-8 py-2.5 bg-orange-600 text-white rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-orange-500 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-orange-600/20"
                          >
                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></svg>
