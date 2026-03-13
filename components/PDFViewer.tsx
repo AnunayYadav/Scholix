@@ -26,8 +26,8 @@ const PageRenderer = React.memo<{
     searchResults: SearchResult[];
     pdfjsLib: any;
     registerRef: (pageNum: number, el: HTMLDivElement | null) => void;
-    isInteracting: boolean;
-}>(({ pageNum, pdfDoc, renderScale, userProfile, searchQuery, currentSearchIndex, searchResults, pdfjsLib, registerRef, isInteracting }) => {
+    isInteractingRef: React.MutableRefObject<boolean>;
+}>(({ pageNum, pdfDoc, renderScale, userProfile, searchQuery, currentSearchIndex, searchResults, pdfjsLib, registerRef, isInteractingRef }) => {
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [renderTarget, setRenderTarget] = useState<{
@@ -43,9 +43,8 @@ const PageRenderer = React.memo<{
     const [pageInfo, setPageInfo] = useState<{ width: number; height: number } | null>(null);
 
     useEffect(() => {
-        if (isInteracting) return; // Completely freeze effect while zooming
-
         const render = async () => {
+            if (isInteractingRef.current) return;
             const targetId = renderTarget.activeCanvas === 'A' ? 'B' : 'A';
             const targetCanvas = targetId === 'A' ? canvasARef.current : canvasBRef.current;
             if (!pdfDoc || !targetCanvas || !textLayerRef.current || !pdfjsLib) return;
@@ -112,7 +111,7 @@ const PageRenderer = React.memo<{
 
         const observer = new IntersectionObserver(
             (entries) => {
-                if (entries[0].isIntersecting) {
+                if (entries[0].isIntersecting && !isInteractingRef.current) {
                     render();
                 }
             },
@@ -198,8 +197,9 @@ const PageRenderer = React.memo<{
             data-page={pageNum}
             className="relative mb-6 bg-white dark:bg-[#0a0a0a] shadow-2xl rounded-md origin-top-left select-none border border-slate-200 dark:border-white/5 overflow-visible page-container"
             style={{
-                width: pageInfo ? `calc(${pageInfo.width}px * var(--pdf-scale))` : 'fit-content',
-                height: pageInfo ? `calc(${pageInfo.height}px * var(--pdf-scale))` : '400px',
+                width: pageInfo ? `calc(${pageInfo.width}px * var(--pdf-scale))` : '100%',
+                height: pageInfo ? `calc(${pageInfo.height}px * var(--pdf-scale))` : '100vh',
+                contain: 'layout size',
                 willChange: 'transform'
             } as any}
         >
@@ -303,28 +303,32 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         pageRefs.current[pageNum] = el;
     }, []);
 
-    const [isInteracting, setIsInteracting] = useState(false);
+    const isInteractingRef = useRef(false);
     const zoomingTimeoutRef = useRef<any>(null);
 
-    // Optimized DOM-only scale update with rAF
+    // Optimized DOM-only scale update - Synchronous to prevent clamping glitches
     const updateDOMScale = useCallback((currentScale: number, scrollLeft?: number, scrollTop?: number) => {
         if (!containerRef.current) return;
         
         const container = containerRef.current;
-        requestAnimationFrame(() => {
-            container.style.setProperty('--pdf-scale', currentScale.toString());
-            if (scrollLeft !== undefined) container.scrollLeft = scrollLeft;
-            if (scrollTop !== undefined) container.scrollTop = scrollTop;
-        });
+        container.style.setProperty('--pdf-scale', currentScale.toString());
+        if (scrollLeft !== undefined) container.scrollLeft = scrollLeft;
+        if (scrollTop !== undefined) container.scrollTop = scrollTop;
 
         // Sync to React only after interaction settles to prevent re-render churn
         if (zoomingTimeoutRef.current) clearTimeout(zoomingTimeoutRef.current);
         zoomingTimeoutRef.current = setTimeout(() => {
-            setIsInteracting(false);
+            isInteractingRef.current = false;
             if (containerRef.current) {
                 containerRef.current.classList.remove('is-zooming');
             }
             setScale(currentScale);
+            
+            // Sync current page after interaction ends
+            if (visiblePages.current.size > 0) {
+                const sorted = Array.from(visiblePages.current).sort((a: number, b: number) => a - b);
+                setCurrentPage(sorted[0]);
+            }
         }, 300); 
     }, []);
 
@@ -449,7 +453,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     };
 
     useEffect(() => {
-        if (isInteracting) return;
+        if (isInteractingRef.current) return;
 
         // Keep scaleRef in sync with state for non-gesture updates (buttons, init)
         scaleRef.current = scale;
@@ -473,7 +477,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         const handleWheel = (e: WheelEvent) => {
             if (e.ctrlKey) {
                 e.preventDefault();
-                if (!isInteracting) setIsInteracting(true);
+                isInteractingRef.current = true;
                 container.classList.add('is-zooming');
 
                 const delta = -e.deltaY * 0.005;
@@ -502,7 +506,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     touch1.pageX - touch2.pageX,
                     touch1.pageY - touch2.pageY
                 );
-                if (!isInteracting) setIsInteracting(true);
+                isInteractingRef.current = true;
                 container.classList.add('is-zooming');
             } else if (e.touches.length === 1) {
                 const touch = e.touches[0];
@@ -601,7 +605,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
                 if (visiblePages.current.size > 0) {
                     const sorted = Array.from(visiblePages.current).sort((a: number, b: number) => a - b);
-                    setCurrentPage(sorted[0]);
+                    if (!isInteractingRef.current) {
+                        setCurrentPage(sorted[0]);
+                    }
                 }
             },
             { threshold: 0.1 } // More lenient threshold for better tracking
@@ -857,8 +863,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
                 <main
                     ref={containerRef}
-                    className="flex-1 overflow-auto bg-slate-100 dark:bg-[#0a0a0a] relative select-none touch-none"
-                    style={{ WebkitOverflowScrolling: 'touch' }}
+                    className="flex-1 overflow-auto bg-slate-100 dark:bg-[#0a0a0a] relative select-none touch-none overscroll-none"
+                    style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'none' }}
                 >
                     {isLoading ? (
                         <div className="flex flex-col items-center w-full max-w-4xl px-4 mx-auto space-y-8">
@@ -882,7 +888,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                                     searchResults={searchResults}
                                     pdfjsLib={pdfjsLibState}
                                     registerRef={registerPageRef}
-                                    isInteracting={isInteracting}
+                                    isInteractingRef={isInteractingRef}
                                 />
 
                             ))}
