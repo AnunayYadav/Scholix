@@ -128,7 +128,7 @@ const PageRenderer = React.memo<{
 
     // Independent search highlighting effect
     useEffect(() => {
-        if (!textLayerRef.current) return;
+        if (isInteractingRef.current || !textLayerRef.current) return;
 
         const marks = textLayerRef.current.querySelectorAll('mark.pdf-search-match');
         marks.forEach(mark => {
@@ -173,14 +173,22 @@ const PageRenderer = React.memo<{
                 span.appendChild(fragment);
             }
         });
+    }, [searchQuery, currentSearchIndex, searchResults, pageNum, renderScale]);
 
-        if (isActivePage) {
-            const activeEl = textLayerRef.current.querySelector('.active-match');
-            if (activeEl) {
-                activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Dedicated effect for scrolling to match - Only trigger on index change, not scale
+    const lastScrollMatchRef = useRef<number>(-1);
+    useEffect(() => {
+        if (currentSearchIndex !== lastScrollMatchRef.current && textLayerRef.current) {
+            const activeResult = searchResults[currentSearchIndex];
+            if (activeResult?.pageIndex === pageNum) {
+                const activeEl = textLayerRef.current.querySelector('.active-match');
+                if (activeEl) {
+                    activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    lastScrollMatchRef.current = currentSearchIndex;
+                }
             }
         }
-    }, [searchQuery, currentSearchIndex, searchResults, pageNum, renderTarget.activeCanvas === 'A' ? renderTarget.scaleA : renderTarget.scaleB]);
+    }, [currentSearchIndex, searchResults, pageNum]);
 
     const activeScale = renderTarget.activeCanvas === 'A' ? renderTarget.scaleA : renderTarget.scaleB;
     const scaleA = renderTarget.scaleA || activeScale || 1;
@@ -299,12 +307,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         currentPageRef.current = currentPage;
     }, [currentPage]);
 
-    const registerPageRef = useCallback((pageNum: number, el: HTMLDivElement | null) => {
-        pageRefs.current[pageNum] = el;
-    }, []);
-
     const isInteractingRef = useRef(false);
     const zoomingTimeoutRef = useRef<any>(null);
+    const observerRef = useRef<IntersectionObserver | null>(null);
+
+    const [isInteracting, setIsInteracting] = useState(false); 
 
     // Optimized DOM-only scale update - Synchronous to prevent clamping glitches
     const updateDOMScale = useCallback((currentScale: number, scrollLeft?: number, scrollTop?: number) => {
@@ -323,6 +330,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 containerRef.current.classList.remove('is-zooming');
             }
             setScale(currentScale);
+            setIsInteracting(false);
             
             // Sync current page after interaction ends
             if (visiblePages.current.size > 0) {
@@ -332,7 +340,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         }, 300); 
     }, []);
 
-    // Load PDF.js from CDN
+    const registerPageRef = useCallback((pageNum: number, el: HTMLDivElement | null) => {
+        pageRefs.current[pageNum] = el;
+        if (el && observerRef.current) {
+            observerRef.current.observe(el);
+        }
+    }, []);
+// Load PDF.js from CDN
     useEffect(() => {
         document.body.style.overflow = 'hidden';
 
@@ -610,17 +624,22 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     }
                 }
             },
-            { threshold: 0.1 } // More lenient threshold for better tracking
+            { threshold: 0, rootMargin: '20%' } // Zero threshold handles extreme zoom cases
         );
 
-        // Clear existing observations
+        observerRef.current = observer;
+
+        // Observe all currently registered pages
         const currentRefs = pageRefs.current;
         Object.values(currentRefs).forEach(ref => {
             if (ref) observer.observe(ref as Element);
         });
 
-        return () => observer.disconnect();
-    }, [numPages, isLoading, pdfDoc]); // Removed scale to prevent observer rebuild on zoom
+        return () => {
+            observer.disconnect();
+            observerRef.current = null;
+        };
+    }, [numPages, isLoading, pdfDoc]);
 
     const jumpToPage = (pageNum: number) => {
         const target = pageRefs.current[pageNum];
