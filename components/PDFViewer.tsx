@@ -203,7 +203,7 @@ const PageRenderer = React.memo<{
                 }
             }}
             data-page={pageNum}
-            className="relative mb-6 bg-white dark:bg-[#0a0a0a] shadow-2xl rounded-md origin-top-left select-none border border-slate-200 dark:border-white/5 overflow-visible page-container"
+            className="relative mb-6 bg-white dark:bg-[#0a0a0a] rounded-md origin-top-left select-none border border-slate-200 dark:border-white/5 overflow-visible page-container"
             style={{
                 width: pageInfo ? `calc(${pageInfo.width}px * var(--pdf-scale))` : '100%',
                 height: pageInfo ? `calc(${pageInfo.height}px * var(--pdf-scale))` : '100vh',
@@ -214,7 +214,7 @@ const PageRenderer = React.memo<{
             <div className="absolute inset-0 overflow-hidden rounded-md">
                 <canvas
                     ref={canvasARef}
-                    className={`absolute inset-0 block rounded-md shadow-inner transition-opacity duration-200 ${renderTarget.activeCanvas === 'A' ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                    className={`absolute inset-0 block rounded-md transition-opacity duration-200 ${renderTarget.activeCanvas === 'A' ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
                     style={{
                         backfaceVisibility: 'hidden',
                         pointerEvents: 'none',
@@ -226,7 +226,7 @@ const PageRenderer = React.memo<{
                 />
                 <canvas
                     ref={canvasBRef}
-                    className={`absolute inset-0 block rounded-md shadow-inner transition-opacity duration-200 ${renderTarget.activeCanvas === 'B' ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                    className={`absolute inset-0 block rounded-md transition-opacity duration-200 ${renderTarget.activeCanvas === 'B' ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
                     style={{
                         backfaceVisibility: 'hidden',
                         pointerEvents: 'none',
@@ -1007,7 +1007,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 }
 
                 .is-zooming .page-container {
-                    box-shadow: none !important;
                     transition: none !important;
                 }
             `}</style>
