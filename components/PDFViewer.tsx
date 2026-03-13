@@ -21,22 +21,21 @@ const PageRenderer = React.memo<{
     pageNum: number;
     pdfDoc: any;
     renderScale: number;
-    scale: number;
+    // Removed scale and isZooming props to prevent re-renders on every zoom step
     userProfile: UserProfile | null | undefined;
     searchQuery: string;
     currentSearchIndex: number;
     searchResults: SearchResult[];
     pdfjsLib: any;
     registerRef: (pageNum: number, el: HTMLDivElement | null) => void;
-    isZooming: boolean;
-}>(({ pageNum, pdfDoc, renderScale, scale, userProfile, searchQuery, currentSearchIndex, searchResults, pdfjsLib, registerRef, isZooming }) => {
+}>(({ pageNum, pdfDoc, renderScale, userProfile, searchQuery, currentSearchIndex, searchResults, pdfjsLib, registerRef }) => {
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [renderTarget, setRenderTarget] = useState<{
         activeCanvas: 'A' | 'B';
         scaleA: number;
         scaleB: number;
-    }>({ activeCanvas: 'A', scaleA: renderScale || scale || 1, scaleB: 0 });
+    }>({ activeCanvas: 'A', scaleA: renderScale || 1, scaleB: 0 });
 
     const canvasARef = useRef<HTMLCanvasElement>(null);
     const canvasBRef = useRef<HTMLCanvasElement>(null);
@@ -127,11 +126,10 @@ const PageRenderer = React.memo<{
         };
     }, [renderScale, pageNum, pdfDoc, pdfjsLib]);
 
-    // Independent search highlighting effect to prevent full re-renders
+    // Independent search highlighting effect
     useEffect(() => {
         if (!textLayerRef.current) return;
 
-        // Optimized reset: only remove our marks to preserve PDF.js structure
         const marks = textLayerRef.current.querySelectorAll('mark.pdf-search-match');
         marks.forEach(mark => {
             const textNode = document.createTextNode(mark.textContent || '');
@@ -153,17 +151,14 @@ const PageRenderer = React.memo<{
         spans.forEach(span => {
             const originalText = span.textContent || '';
             if (originalText.toLowerCase().includes(query)) {
-                // Safe DOM manipulation instead of innerHTML to prevent XSS
                 const fragment = document.createDocumentFragment();
                 let lastIndex = 0;
                 let match: RegExpExecArray | null;
                 const safeRegex = new RegExp(regex.source, regex.flags);
                 while ((match = safeRegex.exec(originalText)) !== null) {
-                    // Add text before match
                     if (match.index > lastIndex) {
                         fragment.appendChild(document.createTextNode(originalText.slice(lastIndex, match.index)));
                     }
-                    // Create safe mark element
                     const mark = document.createElement('mark');
                     mark.className = `pdf-search-match ${isActivePage && globalMatchCount === activeResult?.matchIndex ? 'active-match' : ''}`;
                     mark.textContent = match[0];
@@ -171,7 +166,6 @@ const PageRenderer = React.memo<{
                     globalMatchCount++;
                     lastIndex = match.index + match[0].length;
                 }
-                // Add remaining text
                 if (lastIndex < originalText.length) {
                     fragment.appendChild(document.createTextNode(originalText.slice(lastIndex)));
                 }
@@ -180,7 +174,6 @@ const PageRenderer = React.memo<{
             }
         });
 
-        // Scroll active match into view if it's on this page
         if (isActivePage) {
             const activeEl = textLayerRef.current.querySelector('.active-match');
             if (activeEl) {
@@ -202,12 +195,12 @@ const PageRenderer = React.memo<{
                 }
             }}
             data-page={pageNum}
-            className="relative mb-6 bg-white dark:bg-[#0a0a0a] shadow-[0_32px_128px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_128px_rgba(0,0,0,0.5)] rounded-md origin-top-left select-none border border-slate-200 dark:border-white/5 overflow-visible"
+            className="relative mb-6 bg-white dark:bg-[#0a0a0a] shadow-2xl rounded-md origin-top-left select-none border border-slate-200 dark:border-white/5 overflow-visible page-container"
             style={{
-                width: pageInfo ? `${pageInfo.width * scale}px` : 'fit-content',
-                height: pageInfo ? `${pageInfo.height * scale}px` : '400px',
+                width: pageInfo ? `calc(${pageInfo.width}px * var(--pdf-scale))` : 'fit-content',
+                height: pageInfo ? `calc(${pageInfo.height}px * var(--pdf-scale))` : '400px',
                 willChange: 'transform'
-            }}
+            } as any}
         >
             <div className="absolute inset-0 overflow-hidden rounded-md">
                 <canvas
@@ -216,7 +209,7 @@ const PageRenderer = React.memo<{
                     style={{
                         backfaceVisibility: 'hidden',
                         pointerEvents: 'none',
-                        transform: `scale(${scale / scaleA}) translateZ(0)`,
+                        transform: `scale(calc(var(--pdf-scale) / ${scaleA})) translateZ(0)`,
                         transformOrigin: 'top left',
                         width: pageInfo ? `${pageInfo.width * scaleA}px` : 'auto',
                         height: pageInfo ? `${pageInfo.height * scaleA}px` : 'auto',
@@ -228,7 +221,7 @@ const PageRenderer = React.memo<{
                     style={{
                         backfaceVisibility: 'hidden',
                         pointerEvents: 'none',
-                        transform: `scale(${scale / scaleB}) translateZ(0)`,
+                        transform: `scale(calc(var(--pdf-scale) / ${scaleB})) translateZ(0)`,
                         transformOrigin: 'top left',
                         width: pageInfo ? `${pageInfo.width * scaleB}px` : 'auto',
                         height: pageInfo ? `${pageInfo.height * scaleB}px` : 'auto',
@@ -237,17 +230,11 @@ const PageRenderer = React.memo<{
 
                 <div
                     ref={textLayerRef}
-                    className={`textLayer absolute inset-0 pointer-events-none select-text z-20 transition-all duration-200 ${isZooming ? 'opacity-0' : 'opacity-20'}`}
+                    className="textLayer absolute inset-0 pointer-events-none select-text z-20 opacity-20 transition-opacity duration-200"
                 />
 
-                {/* Dynamic Watermark */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.04] flex items-center justify-center overflow-hidden flex-wrap select-none p-10 z-30">
-                    {Array.from({ length: 9 }).map((_, i) => (
-                        <span key={i} className="text-[35px] font-medium rotate-[-35deg] whitespace-nowrap m-16 text-slate-900 dark:text-white tracking-widest">
-                            LPU NEXUS
-                        </span>
-                    ))}
-                </div>
+                {/* Optimized Watermark */}
+                <div className="absolute inset-0 pointer-events-none opacity-[0.03] select-none z-30 watermark-overlay" />
             </div>
         </div>
     );
@@ -302,8 +289,16 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const pdfDocRef = useRef<any>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-    const lastScaleRef = useRef(scale);
+    const scaleRef = useRef(scale);
     const focalPointRef = useRef<{ x: number; y: number } | null>(null);
+
+    // Initial scale sync
+    useEffect(() => {
+        if (containerRef.current) {
+            containerRef.current.style.setProperty('--pdf-scale', scale.toString());
+        }
+        scaleRef.current = scale;
+    }, []);
 
     const registerPageRef = useCallback((pageNum: number, el: HTMLDivElement | null) => {
         pageRefs.current[pageNum] = el;
@@ -319,11 +314,21 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         currentPageRef.current = currentPage;
     }, [currentPage]);
 
-    // Handle isZooming state for UI optimizations
-    const setZooming = useCallback(() => {
-        setIsZooming(true);
-        if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
-        zoomTimeoutRef.current = setTimeout(() => setIsZooming(false), 300);
+    // Handle zooming class and state via direct DOM
+    const zoomingTimeoutRef = useRef<any>(null);
+    const setZooming = useCallback((currentScale: number) => {
+        if (containerRef.current) {
+            containerRef.current.classList.add('is-zooming');
+            containerRef.current.style.setProperty('--pdf-scale', currentScale.toString());
+        }
+
+        if (zoomingTimeoutRef.current) clearTimeout(zoomingTimeoutRef.current);
+        zoomingTimeoutRef.current = setTimeout(() => {
+            if (containerRef.current) {
+                containerRef.current.classList.remove('is-zooming');
+            }
+            setScale(currentScale);
+        }, 150);
     }, []);
 
     // Load PDF.js from CDN
@@ -449,46 +454,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     useEffect(() => {
         const timer = setTimeout(() => {
             setRenderScale(scale);
-        }, 100); // Super fast high-qual transition
+            if (containerRef.current) {
+                containerRef.current.style.setProperty('--pdf-scale', scale.toString());
+            }
+        }, 50);
         return () => clearTimeout(timer);
     }, [scale]);
 
-    // Maintain focal point during zoom - UseLayoutEffect for zero-latency
-    // @ts-ignore
-    const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
-
-    useIsomorphicLayoutEffect(() => {
-        const container = containerRef.current;
-        if (!container || scale === lastScaleRef.current) return;
-
-        const wrapper = container.querySelector('div.flex.flex-col.items-center') as HTMLElement;
-        if (!wrapper) return;
-
-        const ratio = scale / lastScaleRef.current;
-        const focalX = focalPointRef.current?.x ?? (container.clientWidth / 2);
-        const focalY = focalPointRef.current?.y ?? (container.clientHeight / 2);
-
-        const containerWidth = container.clientWidth;
-        const newWidth = wrapper.offsetWidth;
-        const oldWidth = newWidth / ratio;
-        const oldOffsetX = Math.max(0, (containerWidth - oldWidth) / 2);
-        const newOffsetX = Math.max(0, (containerWidth - newWidth) / 2);
-
-        const docX = (container.scrollLeft + focalX - oldOffsetX);
-        const docY = (container.scrollTop + focalY);
-
-        const nextScrollLeft = (docX * ratio) - focalX + newOffsetX;
-        const nextScrollTop = (docY * ratio) - focalY;
-
-        container.scrollTo({
-            left: nextScrollLeft,
-            top: nextScrollTop,
-            behavior: 'auto'
-        });
-
-        lastScaleRef.current = scale;
-        focalPointRef.current = null;
-    }, [scale]);
+    // Simplified focal point logic removed in favor of direct gesture scroll handling
 
     // Trackpad / Wheel Support
     useEffect(() => {
@@ -498,19 +471,19 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         const handleWheel = (e: WheelEvent) => {
             if (e.ctrlKey) {
                 e.preventDefault();
-                setZooming();
+                const delta = -e.deltaY * 0.005;
+                const nextScale = Math.min(Math.max(0.3, scaleRef.current + delta), 4);
 
                 const rect = container.getBoundingClientRect();
-                focalPointRef.current = {
-                    x: e.clientX - rect.left,
-                    y: e.clientY - rect.top
-                };
+                const focalX = e.clientX - rect.left;
+                const focalY = e.clientY - rect.top;
 
-                setScale(prev => {
-                    const delta = -e.deltaY * 0.005;
-                    const next = prev + delta;
-                    return Math.min(Math.max(0.3, next), 4);
-                });
+                const ratio = nextScale / scaleRef.current;
+                container.scrollLeft = (container.scrollLeft + focalX) * ratio - focalX;
+                container.scrollTop = (container.scrollTop + focalY) * ratio - focalY;
+
+                scaleRef.current = nextScale;
+                setZooming(nextScale);
             }
         };
 
@@ -539,16 +512,21 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             const dist = Math.hypot(touch.clientX - lastTapX, touch.clientY - lastTapY);
 
             if (now - lastTap < 300 && dist < 30) {
-                // Double tap detected
                 const rect = containerRef.current?.getBoundingClientRect();
                 if (rect) {
-                    focalPointRef.current = {
-                        x: touch.clientX - rect.left,
-                        y: touch.clientY - rect.top
-                    };
+                    const focalX = touch.clientX - rect.left;
+                    const focalY = touch.clientY - rect.top;
+                    const nextScale = scaleRef.current > 1.2 ? 1.0 : 2.0;
+                    const ratio = nextScale / scaleRef.current;
+
+                    if (containerRef.current) {
+                        containerRef.current.scrollLeft = (containerRef.current.scrollLeft + focalX) * ratio - focalX;
+                        containerRef.current.scrollTop = (containerRef.current.scrollTop + focalY) * ratio - focalY;
+                    }
+
+                    scaleRef.current = nextScale;
+                    setZooming(nextScale);
                 }
-                setScale(prev => prev > 1.2 ? 1.0 : 2.0);
-                // Reset to prevent any accidental triple-tap behavior
                 touchState.current.lastTap = 0;
             } else {
                 touchState.current.lastTap = now;
@@ -572,20 +550,20 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
             if (touchState.current.lastDist > 0) {
                 const ratio = dist / touchState.current.lastDist;
-                setZooming();
+                const nextScale = Math.min(Math.max(0.3, scaleRef.current * ratio), 4);
 
                 const rect = containerRef.current?.getBoundingClientRect();
-                if (rect) {
-                    focalPointRef.current = {
-                        x: (Number(touch1.clientX) + Number(touch2.clientX)) / 2 - rect.left,
-                        y: (Number(touch1.clientY) + Number(touch2.clientY)) / 2 - rect.top
-                    };
+                if (rect && containerRef.current) {
+                    const focalX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
+                    const focalY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
+                    const realRatio = nextScale / scaleRef.current;
+
+                    containerRef.current.scrollLeft = (containerRef.current.scrollLeft + focalX) * realRatio - focalX;
+                    containerRef.current.scrollTop = (containerRef.current.scrollTop + focalY) * realRatio - focalY;
                 }
 
-                setScale(prev => {
-                    const next = prev * ratio;
-                    return Math.min(Math.max(0.3, next), 4);
-                });
+                scaleRef.current = nextScale;
+                setZooming(nextScale);
             }
             touchState.current.lastDist = dist;
         } else if (e.touches.length === 1) {
@@ -632,7 +610,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         });
 
         return () => observer.disconnect();
-    }, [numPages, isLoading, pdfDoc, scale]); // Added scale to re-calculate when zoomed
+    }, [numPages, isLoading, pdfDoc]); // Removed scale to prevent observer rebuild on zoom
 
     const jumpToPage = (pageNum: number) => {
         const target = pageRefs.current[pageNum];
@@ -897,14 +875,12 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                                     pageNum={i + 1}
                                     pdfDoc={pdfDoc}
                                     renderScale={renderScale}
-                                    scale={scale}
                                     userProfile={userProfile}
                                     searchQuery={searchQuery}
                                     currentSearchIndex={currentSearchIndex}
                                     searchResults={searchResults}
                                     pdfjsLib={pdfjsLibState}
                                     registerRef={registerPageRef}
-                                    isZooming={isZooming}
                                 />
 
                             ))}
@@ -976,7 +952,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     box-shadow: 0 0 15px rgba(234, 88, 12, 0.4);
                     z-index: 10;
                 }
-                
+
                 @keyframes fade-in {
                     from { opacity: 0; }
                     to { opacity: 1; }
@@ -990,6 +966,22 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 @keyframes shimmer {
                     from { transform: translateX(-100%); }
                     to { transform: translateX(100%); }
+                }
+
+                .watermark-overlay {
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' transform='rotate(-35 150 150)' fill='currentColor' fill-opacity='1' font-family='Inter, sans-serif' font-weight='700' font-size='32'%3ELPU NEXUS%3C/text%3E%3C/svg%3E");
+                    background-repeat: repeat;
+                    background-size: 300px 300px;
+                }
+
+                .is-zooming .textLayer {
+                    opacity: 0 !important;
+                    transition: none !important;
+                }
+
+                .is-zooming .page-container {
+                    box-shadow: none !important;
+                    transition: none !important;
                 }
             `}</style>
         </div >,
