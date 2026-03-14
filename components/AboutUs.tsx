@@ -47,11 +47,15 @@ const StatCounter: React.FC<{ target: number; label: string; subLabel: string; a
   );
 };
 
+import BuyMeACoffee from './BuyMeACoffee';
+
 interface AboutUsProps {
+
   userProfile: UserProfile | null;
 }
 
 const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
+
   const [stats, setStats] = useState<{ registered: number; visitors: number; totalViews: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSectionVisible, setIsSectionVisible] = useState(false);
@@ -226,7 +230,10 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
         </div>
       </section>
 
+      <BuyMeACoffee userProfile={userProfile} className="mt-8" />
+
       <footer className="text-center pt-8">
+
         <p className="text-[11px] sm:text-xs font-medium text-slate-400 opacity-50">
           LPU-Nexus v1.3.0 • Independent Student Project
         </p>

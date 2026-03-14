@@ -20,7 +20,9 @@ import RoommateFinder from './components/RoommateFinder.tsx';
 import EmergencyContacts from './components/EmergencyContacts.tsx';
 import AIToolsDirectory from './components/AIToolsDirectory.tsx';
 import AdminStats from './components/AdminStats.tsx';
+import BuyMeACoffee from './components/BuyMeACoffee.tsx';
 import { ModuleType, UserProfile, TimetableData } from './types.ts';
+
 import NexusServer from './services/nexusServer.ts';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -350,7 +352,7 @@ const FeatureCard = React.memo(({ f, navigate }: { f: any, navigate: any }) => {
   );
 });
 
-const Dashboard: React.FC = React.memo(() => {
+const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ userProfile }) => {
   const navigate = useNavigate();
 
   const features = [
@@ -373,15 +375,18 @@ const Dashboard: React.FC = React.memo(() => {
       <TodaysSchedule />
       <div className="max-w-6xl mx-auto px-6 mb-10">
         <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1 mb-8">Categories</h3>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-16">
           {features.map((f) => (
             <FeatureCard key={f.id} f={f} navigate={navigate} />
           ))}
         </div>
+
+        <BuyMeACoffee userProfile={userProfile} />
       </div>
     </div>
   );
 });
+
 
 
 
@@ -570,7 +575,8 @@ const AppContent: React.FC = () => {
         <div id="main-content-area" className={`flex-1 overflow-y-auto relative scroll-smooth ${location.pathname === '/' ? 'p-0' : 'p-4 md:p-8'} bg-transparent`}>
           <div className={`relative ${location.pathname === '/' ? 'w-full' : 'max-w-7xl mx-auto'}`}>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/" element={<Dashboard userProfile={userProfile} />} />
+
               <Route path="/placement" element={<PlacementPrefect userProfile={userProfile} />} />
               <Route path="/timetable" element={<TimetableHub userProfile={userProfile} />} />
               <Route path="/quiz" element={<QuizTaker userProfile={userProfile} />} />
