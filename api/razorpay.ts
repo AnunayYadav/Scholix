@@ -1,38 +1,26 @@
 
-export const config = {
-  runtime: 'edge',
-};
-
-export default async function handler(req: Request) {
+export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), { 
-      status: 405,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { amount } = await req.json();
+    const { amount } = req.body || {};
 
     if (!amount || isNaN(amount)) {
-      return new Response(JSON.stringify({ error: 'Invalid amount' }), { 
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return res.status(400).json({ error: 'Invalid amount' });
     }
 
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!keyId || !keySecret) {
-      return new Response(JSON.stringify({ error: 'Razorpay configuration missing on server' }), { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      console.error('Razorpay keys missing in environment variables');
+      return res.status(500).json({ error: 'Razorpay configuration missing on server' });
     }
 
     // Razorpay uses Basic Auth: base64(key_id:key_secret)
-    const auth = btoa(`${keyId}:${keySecret}`);
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
 
     const response = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
@@ -51,22 +39,12 @@ export default async function handler(req: Request) {
 
     if (!response.ok) {
       console.error('Razorpay Order Error:', data);
-      return new Response(JSON.stringify({ error: data.error?.description || 'Failed to create order' }), { 
-        status: response.status,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return res.status(response.status).json({ error: data.error?.description || 'Failed to create order' });
     }
 
-    return new Response(JSON.stringify({ ...data, keyId }), { 
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
-
+    return res.status(200).json({ ...data, keyId });
   } catch (error: any) {
     console.error('API Error:', error);
-    return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), { 
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return res.status(500).json({ error: error.message || 'Internal server error' });
   }
 }
