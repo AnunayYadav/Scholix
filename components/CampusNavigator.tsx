@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { showToast } from './Toast.tsx';
 
@@ -53,7 +54,9 @@ import { MESS_DATA, DAYS, type MealCategories } from '../data/messData';
 
 
 const CampusNavigator: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'mess' | 'map'>('mess');
+  const navigate = useNavigate();
+  const { tab: urlTab } = useParams();
+  const [activeTab, setActiveTab] = useState<'mess' | 'map'>((urlTab as 'mess' | 'map') || 'mess');
   const [isInitializing, setIsInitializing] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const reportModalRef = useRef<HTMLDivElement>(null);
@@ -85,6 +88,18 @@ const CampusNavigator: React.FC = () => {
     const timer = setTimeout(() => setIsInitializing(false), 800);
     return () => clearTimeout(timer);
   }, []);
+
+  // Sync tab with URL
+  useEffect(() => {
+    if (urlTab && (urlTab === 'mess' || urlTab === 'map')) {
+      setActiveTab(urlTab);
+    }
+  }, [urlTab]);
+
+  const handleTabChange = (tab: 'mess' | 'map') => {
+    setActiveTab(tab);
+    navigate(`/campus/${tab}`);
+  };
 
   // Auto-scroll logic for mess report modal
   useEffect(() => {
@@ -201,13 +216,13 @@ const CampusNavigator: React.FC = () => {
 
       <div className="flex flex-wrap gap-2 bg-slate-200 dark:bg-white/5 p-1 rounded-2xl w-fit mb-8">
         <button
-          onClick={() => setActiveTab('mess')}
+          onClick={() => handleTabChange('mess')}
           className={`px-6 py-2.5 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center ${activeTab === 'mess' ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'}`}
         >
           <IconMess /> Mess Menu
         </button>
         <button
-          onClick={() => setActiveTab('map')}
+          onClick={() => handleTabChange('map')}
           className={`px-6 py-2.5 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center ${activeTab === 'map' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'}`}
         >
           <IconMap /> 3D Map

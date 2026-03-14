@@ -33,23 +33,24 @@ import NotificationBell from './components/NotificationBell.tsx';
 
 const getModuleFromPath = (path: string): ModuleType => {
   const p = path.toLowerCase();
+  if (p === '/') return ModuleType.DASHBOARD;
   if (p.includes('/share-cgpa')) return ModuleType.SHARE_CGPA;
-  if (p.endsWith('/attendance')) return ModuleType.ATTENDANCE;
-  if (p.endsWith('/timetable')) return ModuleType.TIMETABLE;
-  if (p.endsWith('/quiz')) return ModuleType.QUIZ;
-  if (p.endsWith('/cgpa')) return ModuleType.CGPA;
-  if (p.endsWith('/placement')) return ModuleType.PLACEMENT;
-  if (p.endsWith('/library')) return ModuleType.LIBRARY;
-  if (p.endsWith('/campus')) return ModuleType.CAMPUS;
-  if (p.endsWith('/freshers')) return ModuleType.FRESHERS;
-  if (p.endsWith('/help')) return ModuleType.HELP;
-  if (p.endsWith('/about')) return ModuleType.ABOUT;
-  if (p.endsWith('/profile')) return ModuleType.PROFILE;
-  if (p.endsWith('/marketplace')) return ModuleType.MARKETPLACE;
-  if (p.endsWith('/roommate')) return ModuleType.ROOMMATE;
-  if (p.endsWith('/emergency')) return ModuleType.EMERGENCY;
-  if (p.endsWith('/ai-tools')) return ModuleType.AI_TOOLS;
-  if (p.endsWith('/admin-stats')) return ModuleType.ADMIN_STATS;
+  if (p.includes('/attendance')) return ModuleType.ATTENDANCE;
+  if (p.includes('/timetable')) return ModuleType.TIMETABLE;
+  if (p.includes('/quiz')) return ModuleType.QUIZ;
+  if (p.includes('/cgpa')) return ModuleType.CGPA;
+  if (p.includes('/placement')) return ModuleType.PLACEMENT;
+  if (p.includes('/library')) return ModuleType.LIBRARY;
+  if (p.includes('/campus')) return ModuleType.CAMPUS;
+  if (p.includes('/freshers')) return ModuleType.FRESHERS;
+  if (p.includes('/help')) return ModuleType.HELP;
+  if (p.includes('/about')) return ModuleType.ABOUT;
+  if (p.includes('/profile')) return ModuleType.PROFILE;
+  if (p.includes('/marketplace')) return ModuleType.MARKETPLACE;
+  if (p.includes('/roommate')) return ModuleType.ROOMMATE;
+  if (p.includes('/emergency')) return ModuleType.EMERGENCY;
+  if (p.includes('/ai-tools')) return ModuleType.AI_TOOLS;
+  if (p.includes('/admin-stats')) return ModuleType.ADMIN_STATS;
   return ModuleType.DASHBOARD;
 };
 
@@ -580,10 +581,18 @@ const AppContent: React.FC = () => {
               <Route path="/" element={<Dashboard userProfile={userProfile} />} />
 
               <Route path="/placement" element={<PlacementPrefect userProfile={userProfile} />} />
+              <Route path="/placement/:reportId" element={<PlacementPrefect userProfile={userProfile} />} />
               <Route path="/timetable" element={<TimetableHub userProfile={userProfile} />} />
               <Route path="/quiz" element={<QuizTaker userProfile={userProfile} />} />
+              <Route path="/quiz/:subjectName" element={<QuizTaker userProfile={userProfile} />} />
+              <Route path="/quiz/:subjectName/:quizId" element={<QuizTaker userProfile={userProfile} />} />
               <Route path="/library" element={<ContentLibrary userProfile={userProfile} />} />
+              <Route path="/library/:program" element={<ContentLibrary userProfile={userProfile} />} />
+              <Route path="/library/:program/:semester" element={<ContentLibrary userProfile={userProfile} />} />
+              <Route path="/library/:program/:semester/:subject" element={<ContentLibrary userProfile={userProfile} />} />
+              <Route path="/library/:program/:semester/:subject/:category" element={<ContentLibrary userProfile={userProfile} />} />
               <Route path="/campus" element={<CampusNavigator />} />
+              <Route path="/campus/:tab" element={<CampusNavigator />} />
               <Route path="/help" element={<HelpSection />} />
               <Route path="/freshers" element={<FreshersKit />} />
               <Route path="/cgpa" element={<CGPACalculator userProfile={userProfile} />} />
@@ -591,8 +600,11 @@ const AppContent: React.FC = () => {
               <Route path="/share-cgpa" element={<ShareReport />} />
               <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
               <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
+              <Route path="/payment-success/:paymentId" element={<PaymentSuccess userProfile={userProfile} />} />
               <Route path="/profile" element={<ProfileSection userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={(m) => navigate(getPathFromModule(m))} />} />
               <Route path="/marketplace" element={<MarketplaceHub userProfile={userProfile} />} />
+              <Route path="/marketplace/:category" element={<MarketplaceHub userProfile={userProfile} />} />
+              <Route path="/marketplace/item/:itemId" element={<MarketplaceHub userProfile={userProfile} />} />
               <Route path="/roommate" element={<RoommateFinder userProfile={userProfile} />} />
               <Route path="/emergency" element={<EmergencyContacts />} />
               <Route path="/ai-tools" element={<AIToolsDirectory />} />

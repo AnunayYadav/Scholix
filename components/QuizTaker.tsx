@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { UserProfile, QuizQuestion, LibraryFile } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
@@ -52,6 +53,9 @@ interface SubjectWithSyllabus {
 }
 
 const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile }) => {
+  const { subjectName, quizId } = useParams();
+  const navigate = useNavigate();
+
   const [subjectsWithSyllabi, setSubjectsWithSyllabi] = useState<SubjectWithSyllabus[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<SubjectWithSyllabus | null>(null);
   const [selectedUnits, setSelectedUnits] = useState<number[]>([]);
@@ -481,6 +485,99 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     }
   };
 
+  // Sync selectedSubject with URL param
+  useEffect(() => {
+    if (subjectsWithSyllabi.length > 0 && subjectName) {
+      const decoded = decodeURIComponent(subjectName);
+      const sub = subjectsWithSyllabi.find(s => s.name === decoded);
+      if (sub && (!selectedSubject || selectedSubject.name !== decoded)) {
+        setSelectedSubject(sub);
+      }
+    }
+  }, [subjectName, subjectsWithSyllabi]);
+
+  // Update URL when selectedSubject changes
+  const handleSubjectChange = (sub: SubjectWithSyllabus | null) => {
+    if (sub) {
+      // If we are already in a quiz for this subject, maybe we don't want to reset? 
+      // But if we're picking a new subject from the setup screen, we reset.
+      navigate(`/quiz/${encodeURIComponent(sub.name)}`);
+      setQuizQuestions([]);
+      setQuizIdInState(null);
+    } else {
+      navigate('/quiz');
+      setQuizQuestions([]);
+      setQuizIdInState(null);
+    }
+    setSelectedSubject(sub);
+  };
+
+  const [quizIdInState, setQuizIdInState] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (quizId && quizId !== quizIdInState) {
+      const saved = localStorage.getItem(`nexus_quiz_${quizId}`);
+      if (saved) {
+        const data = JSON.parse(saved);
+        setQuizQuestions(data.questions);
+        setUserAnswers(data.answers || {});
+        setCurrentQuestionIdx(data.currentIndex || 0);
+        setTimeLeft(data.timeLeft || 0);
+        setTimerActive(data.timerActive || false);
+        setIsCached(data.isCached || false);
+        setQuizCompleted(data.quizCompleted || false);
+        setQuizIdInState(quizId);
+        
+        // Ensure selected subject matches
+        if (data.subject && (!selectedSubject || selectedSubject.name !== data.subject)) {
+          const sub = subjectsWithSyllabi.find(s => s.name === data.subject);
+          if (sub) setSelectedSubject(sub);
+        }
+      }
+    }
+  }, [quizId, subjectsWithSyllabi]);
+
+  // Save progress periodically
+  useEffect(() => {
+    if (quizId && quizQuestions.length > 0) {
+      const data = {
+        subject: selectedSubject?.name,
+        questions: quizQuestions,
+        answers: userAnswers,
+        currentIndex: currentQuestionIdx,
+        timeLeft,
+        timerActive,
+        isCached,
+        quizCompleted,
+        lastUpdated: Date.now()
+      };
+      localStorage.setItem(`nexus_quiz_${quizId}`, JSON.stringify(data));
+      
+      // Also update a "recent quizzes" list
+      const recent = JSON.parse(localStorage.getItem('nexus_recent_quizzes') || '[]');
+      const filtered = recent.filter((q: any) => q.id !== quizId);
+      const updated = [{
+        id: quizId,
+        subject: selectedSubject?.name,
+        date: Date.now(),
+        score: quizCompleted ? calculateScore() : null
+      }, ...filtered].slice(0, 5);
+      localStorage.setItem('nexus_recent_quizzes', JSON.stringify(updated));
+    }
+  }, [quizQuestions, userAnswers, currentQuestionIdx, timeLeft, timerActive, quizCompleted]);
+
+  const calculateScore = () => {
+    let score = 0;
+    quizQuestions.forEach((q, idx) => {
+      if (q.type === 'mcq' || !q.type) {
+        if (userAnswers[idx] === q.correctAnswer) score++;
+      } else if (q.type === 'coding') {
+        if ((userAnswers[idx] as any)?.passed) score++;
+      }
+    });
+    return score;
+  };
+
   const toggleUnit = (unit: number) => {
     setSelectedUnits(prev => prev.includes(unit) ? prev.filter(u => u !== unit) : [...prev, unit].sort((a, b) => a - b));
   };
@@ -570,6 +667,12 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
     setQuizQuestions(enriched);
     setIsCached(cached);
+    
+    // Generate random ID for this instance
+    const newQuizId = `q${Math.random().toString(36).substring(2, 11)}`;
+    setQuizIdInState(newQuizId);
+    navigate(`/quiz/${encodeURIComponent(selectedSubject!.name)}/${newQuizId}`);
+
     setLoading(false);
     setCurrentQuestionIdx(0);
     setUserAnswers({});
@@ -1493,7 +1596,59 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       )}
 
       <div className="glass-panel p-8 md:p-12 rounded-[56px] shadow-2xl space-y-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        {!selectedSubject && (
+          <div className="animate-fade-in space-y-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Quick Start</h3>
+                <p className="text-xs font-medium text-slate-500 mt-1">Select a subject or continue a recent session</p>
+              </div>
+              <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-orange-600/10 rounded-2xl text-orange-600 font-bold text-[10px] uppercase tracking-widest border border-orange-600/10 animate-pulse">
+                <div className="w-1.5 h-1.5 rounded-full bg-orange-600" />
+                Live Engine Active
+              </div>
+            </div>
+
+            {/* Recent Quizzes Horizontal Scroll */}
+            {(() => {
+              const recent = JSON.parse(localStorage.getItem('nexus_recent_quizzes') || '[]');
+              if (recent.length === 0) return null;
+              return (
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Recent Sessions</h4>
+                  <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+                    {recent.map((q: any) => (
+                      <button
+                        key={q.id}
+                        onClick={() => navigate(`/quiz/${encodeURIComponent(q.subject)}/${q.id}`)}
+                        className="flex-shrink-0 w-64 p-5 rounded-3xl bg-white dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 hover:border-orange-500/30 transition-all hover:shadow-xl group text-left"
+                      >
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="p-2.5 rounded-2xl bg-orange-600/10 text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 2v20M2 12h20" className="rotate-45" /></svg>
+                          </div>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase">{new Date(q.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
+                        </div>
+                        <h5 className="text-sm font-bold text-slate-900 dark:text-white mb-1 line-clamp-1">{q.subject}</h5>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-medium text-slate-500">
+                            {q.score !== null ? `Score: ${q.score}` : 'In Progress'}
+                          </span>
+                          <div className="flex items-center gap-1 text-orange-600">
+                            <span className="text-[10px] font-black uppercase tracking-tighter">Resume</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-10 ${!selectedSubject ? 'pt-4' : ''}`}>
           {/* Step 1: Subject Selection */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
@@ -1506,7 +1661,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               {subjectsWithSyllabi.map(s => (
                 <button
                   key={s.id}
-                  onClick={() => { setSelectedSubject(s); setSelectedUnits([]); }}
+                  onClick={() => { handleSubjectChange(s); setSelectedUnits([]); }}
                   className={`p-4 rounded-2xl border text-left transition-all ${selectedSubject?.id === s.id ? 'bg-orange-600 border-orange-500 text-white shadow-lg' : 'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 text-slate-500 hover:border-orange-500/30'}`}
                 >
                   <p className="text-xs font-medium">{s.name}</p>

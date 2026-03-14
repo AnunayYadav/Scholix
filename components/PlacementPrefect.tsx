@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { extractTextFromPdf } from '../services/pdfUtils';
 import { analyzeResume } from '../services/geminiService';
 import { ResumeAnalysisResult, UserProfile, AnnotatedFragment } from '../types';
@@ -101,6 +102,8 @@ interface SavedReport extends ResumeAnalysisResult {
 }
 
 const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
+  const { reportId } = useParams();
+  const navigate = useNavigate();
   const [resumeText, setResumeText] = useState<string>('');
   const [jdText, setJdText] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -125,8 +128,20 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
 
   useEffect(() => {
     const saved = localStorage.getItem('nexus_resume_reports');
-    if (saved) setSavedReports(JSON.parse(saved));
-  }, []);
+    if (saved) {
+      const reports = JSON.parse(saved);
+      setSavedReports(reports);
+      
+      // If reportId in URL, load it
+      if (reportId !== undefined) {
+        const idx = parseInt(reportId);
+        if (!isNaN(idx) && reports[idx]) {
+          setResult(reports[idx]);
+          setFileName(reports[idx].label || '');
+        }
+      }
+    }
+  }, [reportId]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -161,6 +176,8 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
     try {
       const data = await analyzeResume(resumeText, jdText, deepAnalysis);
       setResult(data);
+      // Reset URL to base placement when new analysis is done
+      navigate('/placement');
     } catch (err: any) {
       setError(err.message || "Analysis failed. Please try again later.");
     } finally {
@@ -414,6 +431,37 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
           </button>
         </div>
       </div>
+
+      {savedReports.length > 0 && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between px-2">
+            <h3 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Past Reviews</h3>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{savedReports.length}/10 Stored</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {savedReports.map((report, idx) => (
+              <button
+                key={idx}
+                onClick={() => navigate(`/placement/${idx}`)}
+                className="group p-6 rounded-[32px] bg-white dark:bg-[#0a0a0a] border border-slate-100 dark:border-white/5 text-left hover:border-orange-500/30 transition-all flex items-center justify-between shadow-sm active:scale-[0.98]"
+              >
+                <div className="space-y-1">
+                  <p className="text-xs font-bold text-slate-900 dark:text-white tracking-tight truncate max-w-[150px]">{report.label}</p>
+                  <p className="text-[9px] font-medium text-slate-400 uppercase tracking-widest">Score: {report.totalScore}%</p>
+                </div>
+                <div className="flex items-center gap-2">
+                   <div onClick={(e) => handleDeleteReport(idx, e)} className="p-2.5 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-500 border-none bg-transparent transition-all">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" /></svg>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-orange-600/5 text-orange-600">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M9 18l6-6-6-6" /></svg>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

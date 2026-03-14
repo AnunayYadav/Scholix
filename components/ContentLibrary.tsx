@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { LibraryFile, UserProfile, Folder } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
@@ -67,6 +68,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
+  const { program, semester, subject, category } = useParams();
+  const navigate = useNavigate();
+
   const [activeSemester, setActiveSemester] = useState<Folder | null>(null);
   const [activeSubject, setActiveSubject] = useState<Folder | null>(null);
   const [activeCategory, setActiveCategory] = useState<Folder | null>(null);
@@ -74,6 +78,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const initialPrograms = ["BTech CSE", "BTech IT", "BCA", "MCA", "MBA", "BCom", "BA"];
   const [availablePrograms, setAvailablePrograms] = useState(initialPrograms);
   const [selectedProgram, setSelectedProgram] = useState(() => {
+    if (program && initialPrograms.includes(decodeURIComponent(program))) return decodeURIComponent(program);
     if (userProfile?.program && initialPrograms.includes(userProfile.program)) return userProfile.program;
     return initialPrograms[0];
   });
@@ -273,6 +278,44 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     fetchFromSource(true);
   }, [fetchFromSource]);
 
+  // Sync state with URL params
+  useEffect(() => {
+    if (folders.length > 0) {
+      const decodedProgram = program ? decodeURIComponent(program) : selectedProgram;
+      const decodedSemester = semester ? decodeURIComponent(semester) : null;
+      const decodedSubject = subject ? decodeURIComponent(subject) : null;
+      const decodedCategory = category ? decodeURIComponent(category) : null;
+
+      if (decodedProgram !== selectedProgram) {
+        setSelectedProgram(decodedProgram);
+      }
+
+      if (decodedSemester) {
+        const sem = folders.find(f => f.type === 'semester' && f.name === decodedSemester && f.program === decodedProgram);
+        setActiveSemester(sem || null);
+        
+        if (decodedSubject) {
+          const subj = folders.find(f => f.type === 'subject' && f.name === decodedSubject && f.parent_id === sem?.id);
+          setActiveSubject(subj || null);
+          
+          if (decodedCategory) {
+            const cat = folders.find(f => f.type === 'category' && f.name === decodedCategory && f.parent_id === subj?.id);
+            setActiveCategory(cat || null);
+          } else {
+            setActiveCategory(null);
+          }
+        } else {
+          setActiveSubject(null);
+          setActiveCategory(null);
+        }
+      } else {
+        setActiveSemester(null);
+        setActiveSubject(null);
+        setActiveCategory(null);
+      }
+    }
+  }, [program, semester, subject, category, folders]);
+
   const displayFiles = useMemo(() => {
     let data = [...allFiles];
 
@@ -403,9 +446,17 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [isCreatingNew, setIsCreatingNew] = useState({ program: false, semester: false, subject: false, type: false });
 
   const navigateTo = (sem: Folder | null, subj: Folder | null, cat: Folder | null) => {
-    setActiveSemester(sem);
-    setActiveSubject(subj);
-    setActiveCategory(cat);
+    let path = `/library/${encodeURIComponent(selectedProgram)}`;
+    if (sem) {
+      path += `/${encodeURIComponent(sem.name)}`;
+      if (subj) {
+        path += `/${encodeURIComponent(subj.name)}`;
+        if (cat) {
+          path += `/${encodeURIComponent(cat.name)}`;
+        }
+      }
+    }
+    navigate(path);
   };
 
   const handleCreateFolder = async () => {
@@ -502,7 +553,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     }
     setViewMode('browse');
     setSearchQuery('');
-    navigateTo(null, null, null);
+    navigate(`/library/${encodeURIComponent(userProfile?.program || availablePrograms[0])}`);
   };
 
   const handleFileAccess = async (file: LibraryFile) => {
@@ -569,8 +620,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 options={availablePrograms}
                 value={selectedProgram}
                 onChange={(val) => {
-                  setSelectedProgram(val);
-                  navigateTo(null, null, null);
+                  navigate(`/library/${encodeURIComponent(val)}`);
                 }}
                 className="flex-shrink-0"
                 buttonClassName="!h-12 !py-0 !rounded-2xl"

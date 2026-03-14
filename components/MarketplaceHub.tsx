@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { MarketplaceItem, UserProfile } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import { showToast } from './Toast.tsx';
@@ -9,9 +9,10 @@ import VerifiedBadge from './VerifiedBadge.tsx';
 
 const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile }) => {
     const navigate = useNavigate();
+    const { category: urlCategory, itemId: urlItemId } = useParams();
     const [items, setItems] = useState<MarketplaceItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('All');
+    const [filter, setFilter] = useState(urlCategory || 'All');
     const [showUserOnly, setShowUserOnly] = useState(false);
     const [showSellModal, setShowSellModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(null);
@@ -35,6 +36,11 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
         setTimeout(() => {
             setSelectedItem(null);
             setIsClosingDetail(false);
+            if (filter === 'All') {
+                navigate('/marketplace');
+            } else {
+                navigate(`/marketplace/${filter}`);
+            }
         }, 250);
     };
 
@@ -55,6 +61,31 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     useEffect(() => {
         fetchItems();
     }, []);
+
+    // Sync state with URL category
+    useEffect(() => {
+        if (urlCategory) {
+            setFilter(urlCategory);
+        } else if (!urlItemId) {
+            setFilter('All');
+        }
+    }, [urlCategory, urlItemId]);
+
+    useEffect(() => {
+        if (urlItemId && items.length > 0) {
+            const item = items.find(i => i.id === urlItemId);
+            if (item) setSelectedItem(item);
+        }
+    }, [urlItemId, items]);
+
+    const handleFilterChange = (newCategory: string) => {
+        setFilter(newCategory);
+        if (newCategory === 'All') {
+            navigate('/marketplace');
+        } else {
+            navigate(`/marketplace/${newCategory}`);
+        }
+    };
 
     const fetchItems = async () => {
         setLoading(true);
@@ -213,7 +244,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                     {categories.map(c => (
                         <button
                             key={c}
-                            onClick={() => setFilter(c)}
+                            onClick={() => handleFilterChange(c)}
                             className={`px-4 py-2 rounded-xl text-[11px] sm:text-xs font-medium tracking-wider transition-all border-none cursor-pointer whitespace-nowrap ${filter === c
                                 ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-600/20'
                                 : 'text-slate-400 hover:text-orange-500 dark:text-slate-500 dark:hover:text-white bg-transparent'
@@ -248,7 +279,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-8 mt-4 px-2 md:px-0">
                     {filteredItems.map(item => (
-                        <div key={item.id} onClick={() => setSelectedItem(item)} className="group p-3 md:p-4 bg-white dark:bg-[#0a0a0a] rounded-[32px] md:rounded-[42px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 shadow-sm hover:shadow-2xl hover:shadow-orange-600/5 transition-all duration-500 flex flex-col relative overflow-hidden cursor-pointer">
+                        <div key={item.id} onClick={() => { setSelectedItem(item); navigate(`/marketplace/item/${item.id}`); }} className="group p-3 md:p-4 bg-white dark:bg-[#0a0a0a] rounded-[32px] md:rounded-[42px] border border-slate-200 dark:border-white/5 hover:border-orange-500/30 shadow-sm hover:shadow-2xl hover:shadow-orange-600/5 transition-all duration-500 flex flex-col relative overflow-hidden cursor-pointer">
                             {/* Tags Overlay */}
                             <div className="absolute top-5 left-5 flex flex-col gap-2 z-30 transform -translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
                                 {item.seller_id === userProfile?.id && (
