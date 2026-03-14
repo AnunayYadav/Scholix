@@ -91,6 +91,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([]);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
 
+  const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>(['MCQ', 'PYQ']);
   const [solvedQuestionIds, setSolvedQuestionIds] = useState<Set<string>>(new Set());
   const resultRef = useRef<HTMLDivElement>(null);
 
@@ -407,6 +408,19 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     return mcqs.some(q => q.type === 'coding');
   }, [selectedSubject]);
 
+  const availableQuestionTypes = useMemo(() => {
+    if (!selectedSubject) return new Set<string>();
+    const data = QUIZTAKER_DATA[selectedSubject.name];
+    if (!data) return new Set<string>();
+
+    const types = new Set<string>();
+    const mcqs = (data.mcqs || []).filter(q => selectedUnits.length === 0 || selectedUnits.includes(q.unit));
+    mcqs.forEach(q => {
+      types.add(q.questionType || 'MCQ');
+    });
+    return types;
+  }, [selectedSubject, selectedUnits]);
+
   useEffect(() => {
     loadValidSubjects();
   }, []);
@@ -420,6 +434,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       setSelectedUnits([]);
       setSelectedTopics([]);
       setSelectedDifficulties([]);
+      setSelectedQuestionTypes(['MCQ', 'PYQ', 'Case Based']);
     }
   }, [selectedSubject, hasSubjective, hasCoding]);
 
@@ -503,6 +518,9 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         poolMcq = poolMcq.filter(q => q.topic && selectedTopics.includes(q.topic));
         poolSubj = poolSubj.filter(q => q.topic && selectedTopics.includes(q.topic));
       }
+      
+      // Filter by Question Type (MCQ, PYQ, Case Study)
+      poolMcq = poolMcq.filter(q => selectedQuestionTypes.includes(q.questionType || 'MCQ'));
 
       // Separate coding from MCQ
       const codingQuestions = poolMcq.filter(q => q.type === 'coding');
@@ -724,6 +742,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       'bg-red-500/10 text-red-600 dark:text-red-400'
                     }`}>
                       {q.difficulty}
+                    </span>
+                  )}
+                  {q.questionType && (
+                    <span className="bg-indigo-600/10 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest">
+                      {q.questionType}
                     </span>
                   )}
                   {q.topic && (
@@ -1337,6 +1360,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           {q.difficulty}
                         </span>
                       )}
+                      {q.questionType && (
+                        <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/10 rounded-lg text-[10px] font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 uppercase tracking-wider shadow-sm">
+                          {q.questionType}
+                        </span>
+                      )}
                     </div>
                     
                     {/* Question Text */}
@@ -1575,12 +1603,39 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               <div className="flex flex-col md:flex-row gap-4 w-full">
                 {hasMCQs && (
                   <div className="flex-1 space-y-2 animate-in fade-in slide-in-from-right-2 duration-500">
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">MCQ Count</p>
-                    <input
-                      type="number" min="0" max="500" value={numMCQ}
-                      onChange={(e) => setNumMCQ(parseInt(e.target.value) || 0)}
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-white/5 rounded-xl text-sm font-bold text-orange-600 focus:outline-none focus:border-orange-500 transition-all shadow-inner"
-                    />
+                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">MCQ Count & Type</p>
+                    <div className="space-y-3">
+                      <input
+                        type="number" min="0" max="500" value={numMCQ}
+                        onChange={(e) => setNumMCQ(parseInt(e.target.value) || 0)}
+                        className="w-full px-4 py-2.5 bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-white/5 rounded-xl text-sm font-bold text-orange-600 focus:outline-none focus:border-orange-500 transition-all shadow-inner"
+                      />
+                      <div className="flex flex-wrap gap-2">
+                        {['MCQ', 'PYQ', 'Case Based'].map(type => {
+                          const isAvailable = availableQuestionTypes.has(type);
+                          const isSelected = selectedQuestionTypes.includes(type);
+                          return (
+                            <button
+                              key={type}
+                              disabled={!isAvailable || type === 'Case Based'}
+                              onClick={() => setSelectedQuestionTypes(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type])}
+                              className={`px-3 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
+                                type === 'Case Based' || !isAvailable ? 'opacity-40 grayscale cursor-not-allowed bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-400' :
+                                isSelected ? 'bg-orange-600/10 border-orange-500 text-orange-600' : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-500 hover:border-orange-500/20'
+                              }`}
+                            >
+                              <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-colors ${
+                                isSelected && isAvailable ? 'bg-orange-600 border-orange-600 text-white' : 'border-slate-300 dark:border-slate-700'
+                              }`}>
+                                {isSelected && isAvailable && <svg viewBox="0 0 14 14" fill="none" className="w-2.5 h-2.5"><path d="M3 7.5L5.5 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                              </div>
+                              {type}s
+                              {!isAvailable && type !== 'Case Based' && <span className="text-[8px] opacity-70">(N/A)</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 )}
 

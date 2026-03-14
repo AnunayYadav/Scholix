@@ -162,6 +162,7 @@ export interface QuizQuestion {
   unit: number;
   question: string;
   type?: 'mcq' | 'subjective' | 'coding';
+  questionType?: 'MCQ' | 'PYQ' | 'Case Study' | 'Subjective';
   options?: string[];
   correctAnswer?: number;
   explanation: string;

@@ -6,7 +6,7 @@ export const cse101Unit1MCQs: QuizQuestion[] = [
         options: ["Dennis Ritchie", "Bjarne Stroustrup", "Guido van Rossum", "James Gosling"],
         correctAnswer: 0,
         explanation: "Dennis Ritchie developed C in the early 1970s at Bell Labs.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-2", unit:1,
@@ -14,7 +14,7 @@ topic: 'The C character set'
         options: ["my_variable", "_temp", "2ndVar", "totalSales"],
         correctAnswer: 2,
         explanation: "Identifiers cannot start with a digit. They must start with a letter or an underscore.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Identifiers and keywords'
     },
     { id: "cse101-u1-3", unit:1,
@@ -22,7 +22,7 @@ topic: 'Identifiers and keywords'
         options: ["24", "32", "48", "64"],
         correctAnswer: 1,
         explanation: "The original C standard defines 32 reserved keywords (like int, if, while).",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Identifiers and keywords'
     },
     { id: "cse101-u1-4", unit:1,
@@ -30,7 +30,7 @@ topic: 'Identifiers and keywords'
         options: ["1 byte", "2 bytes", "4 bytes", "8 bytes"],
         correctAnswer: 0,
         explanation: "A char typically occupies 1 byte (8 bits) in memory.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-5", unit:1,
@@ -38,7 +38,7 @@ topic: 'The C character set'
         options: ["/", "%", "&", "#"],
         correctAnswer: 1,
         explanation: "The modulo operator (%) returns the remainder of an integer division.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Arithmetic operators'
     },
     { id: "cse101-u1-6", unit:1,
@@ -46,7 +46,7 @@ topic: 'Arithmetic operators'
         options: ["30", "20", "25", "15"],
         correctAnswer: 1,
         explanation: "Due to operator precedence, multiplication is performed first: 10 + (5 * 2) = 20.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-7", unit:1,
@@ -54,7 +54,7 @@ topic: 'Expressions'
         options: ["&", "==", "&&", "|"],
         correctAnswer: 2,
         explanation: "&& is the logical AND operator, used for boolean logic.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Logical'
     },
     { id: "cse101-u1-8", unit:1,
@@ -62,7 +62,7 @@ topic: 'Logical'
         options: ["4", "5", "6", "0"],
         correctAnswer: 2,
         explanation: "The increment operator (++) increases the value by 1.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Arithmetic operators'
     },
     { id: "cse101-u1-9", unit:1,
@@ -70,7 +70,7 @@ topic: 'Arithmetic operators'
         options: ["&&", "&", "|", "^"],
         correctAnswer: 1,
         explanation: "A single ampersand (&) is used for bit-level AND operations.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Bitwise operators'
     },
     { id: "cse101-u1-10", unit:1,
@@ -78,7 +78,7 @@ topic: 'Bitwise operators'
         options: ["int", "char", "float", "long"],
         correctAnswer: 2,
         explanation: "Float (or double) is used for floating-point numbers.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Data types'
     },
     { id: "cse101-u1-11", unit:1,
@@ -86,7 +86,7 @@ topic: 'Data types'
         options: ["Storing integers", "Functions that do not return a value", "Storing text", "Defining constants"],
         correctAnswer: 1,
         explanation: "Void signifies an empty type, commonly used as a return type for functions that perform an action but return nothing.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Data types'
     },
     { id: "cse101-u1-12", unit:1,
@@ -94,7 +94,7 @@ topic: 'Data types'
         options: ["a =+ 5", "a += 5", "a + 5", "a == 5"],
         correctAnswer: 1,
         explanation: "+= is a shorthand assignment operator.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Assignment and conditional operators'
     },
     { id: "cse101-u1-13", unit:1,
@@ -102,7 +102,7 @@ topic: 'Assignment and conditional operators'
         options: ["A variable that changes value frequently", "An identifier whose value cannot be altered during program execution", "A type of loop", "A function name"],
         correctAnswer: 1,
         explanation: "Constants (often defined using 'const' or '#define') are fixed values.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Constants and variables'
     },
     { id: "cse101-u1-14", unit:1,
@@ -110,7 +110,7 @@ topic: 'Constants and variables'
         options: ["+", "=", ">=", "!"],
         correctAnswer: 2,
         explanation: ">= checks if the left operand is greater than or equal to the right.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Relational'
     },
     { id: "cse101-u1-15", unit:1,
@@ -118,7 +118,7 @@ topic: 'Relational'
         options: ["Only letters A-Z", "Digits 0-9", "Special characters like #, $, %", "All of the above"],
         correctAnswer: 3,
         explanation: "C uses a character set including alphanumeric characters and various symbols.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-16", unit:1,
@@ -126,7 +126,7 @@ topic: 'The C character set'
         options: ["+", "*", "()", "="],
         correctAnswer: 2,
         explanation: "Parentheses () have the highest priority in expression evaluation.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-17", unit:1,
@@ -134,7 +134,7 @@ topic: 'The C character set'
         options: ["Value of x", "Address of x", "Bitwise AND of x", "Negative of x"],
         correctAnswer: 1,
         explanation: "The unary & is the address-of operator.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Unary'
     },
     { id: "cse101-u1-18", unit:1,
@@ -142,7 +142,7 @@ topic: 'Unary'
         options: ["bit", "bool (via <stdbool.h>)", "truth", "logic"],
         correctAnswer: 1,
         explanation: "The <stdbool.h> header introduces the 'bool' type.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-19", unit:1,
@@ -150,7 +150,7 @@ topic: 'The C character set'
         options: ["A single variable", "A combination of operators and operands that evaluates to a single value", "A print statement", "A loop header"],
         correctAnswer: 1,
         explanation: "Expressions are the building blocks of computations.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-20", unit:1,
@@ -158,7 +158,7 @@ topic: 'Expressions'
         options: ["2.5", "2", "3", "0"],
         correctAnswer: 1,
         explanation: "Integer division truncates the decimal part, so 5 / 2 equals 2.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-21", unit:1,
@@ -166,7 +166,7 @@ topic: 'The C character set'
         options: ["2.5", "2", "1", "0"],
         correctAnswer: 2,
         explanation: "5 divided by 2 is 2 with a remainder of 1.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Data types'
     },
     { id: "cse101-u1-22", unit:1,
@@ -174,7 +174,7 @@ topic: 'Data types'
         options: [":", ";", ".", "!"],
         correctAnswer: 1,
         explanation: "Every statement in C must end with a semicolon (;).",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-23", unit:1,
@@ -182,7 +182,7 @@ topic: 'The C character set'
         options: ["\\n", "\\t", "\\r", "\\a"],
         correctAnswer: 0,
         explanation: "\\n is the standard newline character.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-24", unit:1,
@@ -190,7 +190,7 @@ topic: 'The C character set'
         options: ["integer", "main", "switch", "value"],
         correctAnswer: 2,
         explanation: "switch is a reserved keyword; main is a function, and integer/value are identifiers.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Identifiers and keywords'
     },
     { id: "cse101-u1-25", unit:1,
@@ -198,7 +198,7 @@ topic: 'Identifiers and keywords'
         options: ["Error", "Adds 1 to value", "Increments bits", "Nothing"],
         correctAnswer: 1,
         explanation: "The increment operator can be applied to float variables, increasing their value by 1.0.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Arithmetic operators'
     },
     { id: "cse101-u1-26", unit:1,
@@ -206,7 +206,7 @@ topic: 'Arithmetic operators'
         options: ["#include", "#def", "#define", "#const"],
         correctAnswer: 2,
         explanation: "#define is used for macro definitions and constants.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Constants and variables'
     },
     { id: "cse101-u1-27", unit:1,
@@ -214,7 +214,7 @@ topic: 'Constants and variables'
         options: ["Error", "Integer remainder", "Float remainder", "Zero"],
         correctAnswer: 0,
         explanation: "The modulo operator (%) is only applicable to integer operands in C.",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Arithmetic operators'
     },
     { id: "cse101-u1-28", unit:1,
@@ -222,7 +222,7 @@ topic: 'Arithmetic operators'
         options: ["&", "|", "^", "~"],
         correctAnswer: 2,
         explanation: "^ is the XOR operator in C.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Bitwise operators'
     },
     { id: "cse101-u1-29", unit:1,
@@ -230,7 +230,7 @@ topic: 'Bitwise operators'
         options: ["3", "6", "1", "0"],
         correctAnswer: 1,
         explanation: "Left shift by 1 is equivalent to multiplying by 2. $3 \times 2 = 6$.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Bitwise operators'
     },
     { id: "cse101-u1-30", unit:1,
@@ -238,7 +238,7 @@ topic: 'Bitwise operators'
         options: ["Only 1", "Only 100", "Any non-zero value", "Any positive value"],
         correctAnswer: 2,
         explanation: "In C, zero is false, and any non-zero value (positive or negative) is true.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Logical'
     },
     { id: "cse101-u1-31", unit:1,
@@ -246,7 +246,7 @@ topic: 'Logical'
         options: ["Implicit", "Explicit", "Automatic", "None"],
         correctAnswer: 1,
         explanation: "Typecasting using parentheses is explicit conversion.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-32", unit:1,
@@ -254,7 +254,7 @@ topic: 'Expressions'
         options: ["2", "4", "8", "16"],
         correctAnswer: 2,
         explanation: "Double usually occupies 8 bytes (64 bits).",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Data types'
     },
     { id: "cse101-u1-33", unit:1,
@@ -262,7 +262,7 @@ topic: 'Data types'
         options: ["1", "Usually 4 or 2 (int size)", "8", "Error"],
         correctAnswer: 1,
         explanation: "In C, character literals like 'A' are treated as integers, so sizeof('A') is the size of an int.",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Data types'
     },
     { id: "cse101-u1-34", unit:1,
@@ -270,7 +270,7 @@ topic: 'Data types'
         options: ["fixed", "const", "static", "volatile"],
         correctAnswer: 1,
         explanation: "const makes a variable read-only.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Constants and variables'
     },
     { id: "cse101-u1-35", unit:1,
@@ -278,7 +278,7 @@ topic: 'Constants and variables'
         options: ["1", "5", "3", "7"],
         correctAnswer: 0,
         explanation: "101 AND 011 = 001 (binary for 1).",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Bitwise operators'
     },
     { id: "cse101-u1-36", unit:1,
@@ -286,7 +286,7 @@ topic: 'Bitwise operators'
         options: ["1", "5", "3", "7"],
         correctAnswer: 3,
         explanation: "101 OR 011 = 111 (binary for 7).",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Bitwise operators'
     },
     { id: "cse101-u1-37", unit:1,
@@ -294,7 +294,7 @@ topic: 'Bitwise operators'
         options: ["\\b", "\\a", "\\r", "\\v"],
         correctAnswer: 0,
         explanation: "\\b is backspace.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-38", unit:1,
@@ -302,7 +302,7 @@ topic: 'The C character set'
         options: ["No difference", "Prefix increments then uses, postfix uses then increments", "Postfix is faster", "Prefix is only for float"],
         correctAnswer: 1,
         explanation: "++x increments before use; x++ increments after use.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Arithmetic operators'
     },
     { id: "cse101-u1-39", unit:1,
@@ -310,7 +310,7 @@ topic: 'Arithmetic operators'
         options: ["&", "*", "->", "."],
         correctAnswer: 1,
         explanation: "Dereference operator * fetches the value from address.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Unary'
     },
     { id: "cse101-u1-40", unit:1,
@@ -318,7 +318,7 @@ topic: 'Unary'
         options: ["Local", "Global", "Static", "External"],
         correctAnswer: 1,
         explanation: "Global variables are accessible by all functions in the file.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Constants and variables'
     },
     { id: "cse101-u1-41", unit:1,
@@ -326,7 +326,7 @@ topic: 'Constants and variables'
         options: ["short", "int (32-bit)", "char", "float"],
         correctAnswer: 1,
         explanation: "A 32-bit signed int ranges from approx -2.1B to +2.1B.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Data types'
     },
     { id: "cse101-u1-42", unit:1,
@@ -334,7 +334,7 @@ topic: 'Data types'
         options: ["1", "-1 (in 2's complement)", "0", "None"],
         correctAnswer: 1,
         explanation: "NOT of all 0s is all 1s, which represents -1 in two's complement.",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Bitwise operators'
     },
     { id: "cse101-u1-43", unit:1,
@@ -342,7 +342,7 @@ topic: 'Bitwise operators'
         options: ["printf", "scanf", "gets", "puts"],
         correctAnswer: 1,
         explanation: "scanf scans formatted data from stdin.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-44", unit:1,
@@ -350,7 +350,7 @@ topic: 'The C character set'
         options: ["void", "int", "float", "char"],
         correctAnswer: 1,
         explanation: "Implicit int was the default in early C standards.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Data types'
     },
     { id: "cse101-u1-45", unit:1,
@@ -358,7 +358,7 @@ topic: 'Data types'
         options: [".", "->", "*", "&"],
         correctAnswer: 1,
         explanation: "The arrow operator -> is used with pointers to structs.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-46", unit:1,
@@ -366,7 +366,7 @@ topic: 'The C character set'
         options: ["Variables", "Macros", "Functions", "Comments"],
         correctAnswer: 1,
         explanation: "#define creates macros.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Constants and variables'
     },
     { id: "cse101-u1-47", unit:1,
@@ -374,7 +374,7 @@ topic: 'Constants and variables'
         options: ["&", "&&", "|", "!"],
         correctAnswer: 1,
         explanation: "&& stops evaluating if the first operand is false.",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Logical'
     },
     { id: "cse101-u1-48", unit:1,
@@ -382,7 +382,7 @@ topic: 'Logical'
         options: ["101", "110", "111", "001"],
         correctAnswer: 0,
         explanation: "$4 \times 1 + 2 \times 0 + 1 \times 1 = 5$.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-49", unit:1,
@@ -390,7 +390,7 @@ topic: 'Expressions'
         options: ["back", "exit", "return", "send"],
         correctAnswer: 2,
         explanation: "return sends a value back to the caller.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-50", unit:1,
@@ -398,7 +398,7 @@ topic: 'Expressions'
         options: ["Compiler error", "Logical error", "Memory access violation at runtime", "Syntax error"],
         correctAnswer: 2,
         explanation: "Trying to access memory not owned by the program causes a segfault.",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Unary'
     },
     { id: "cse101-u1-51", unit:1,
@@ -406,7 +406,7 @@ topic: 'Unary'
         options: ["32", "44", "37", "50"],
         correctAnswer: 1,
         explanation: "Newer standards added more keywords (like _Atomic, _Generic).",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Identifiers and keywords'
     },
     { id: "cse101-u1-52", unit:1,
@@ -414,7 +414,7 @@ topic: 'Identifiers and keywords'
         options: ["<stdio.h>", "<math.h>", "<stdlib.h>", "<string.h>"],
         correctAnswer: 1,
         explanation: "math.h contains sqrt, sin, cos, etc.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-53", unit:1,
@@ -422,7 +422,7 @@ topic: 'Expressions'
         options: ["0", "0.5", "1", "Error"],
         correctAnswer: 1,
         explanation: "Since one operand is float, the result is float (0.5).",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Arithmetic operators'
     },
     { id: "cse101-u1-54", unit:1,
@@ -430,7 +430,7 @@ topic: 'Arithmetic operators'
         options: ["4", "3", "0", "Error"],
         correctAnswer: 1,
         explanation: "Casting to int truncates the decimal, so 3.9 becomes 3.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-55", unit:1,
@@ -438,7 +438,7 @@ topic: 'Expressions'
         options: ["\\n", "\\t", "\\z", "\\r"],
         correctAnswer: 2,
         explanation: "\\z is not a standard C escape sequence.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-56", unit:1,
@@ -446,7 +446,7 @@ topic: 'The C character set'
         options: ["American Standard Code for Information Interchange", "All Standard Code Interface", "Applied Standard Coding Info", "None"],
         correctAnswer: 0,
         explanation: "ASCII is the character encoding standard used by C.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-57", unit:1,
@@ -454,7 +454,7 @@ topic: 'The C character set'
         options: ["1 byte", "2 bytes", "4 bytes", "8 bytes"],
         correctAnswer: 1,
         explanation: "Old 16-bit systems had 2-byte integers.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Data types'
     },
     { id: "cse101-u1-58", unit:1,
@@ -462,7 +462,7 @@ topic: 'Data types'
         options: ["Makes it global", "Preserves value between function calls", "Makes it constant", "None"],
         correctAnswer: 1,
         explanation: "Static locals are initialized once and keep their value throughout the program.",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Constants and variables'
     },
     { id: "cse101-u1-59", unit:1,
@@ -470,7 +470,7 @@ topic: 'Constants and variables'
         options: ["rand()", "random()", "generate()", "seed()"],
         correctAnswer: 0,
         explanation: "rand() from <stdlib.h> returns a pseudo-random integer.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-60", unit:1,
@@ -478,7 +478,7 @@ topic: 'Expressions'
         options: ["Higher than +", "Lower than +", "Same as +", "Lowest"],
         correctAnswer: 0,
         explanation: "Unary operators like ~ have very high precedence.",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Bitwise operators'
     },
     { id: "cse101-u1-61", unit:1,
@@ -486,7 +486,7 @@ topic: 'Bitwise operators'
         options: ["int p*;", "int *p;", "pointer int p;", "ptr p;"],
         correctAnswer: 1,
         explanation: "int *p; declares p as a pointer to integer.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Unary'
     },
     { id: "cse101-u1-62", unit:1,
@@ -494,7 +494,7 @@ topic: 'Unary'
         options: ["Points to garbage", "Points to address 0 (nothing)", "Points to main", "Error"],
         correctAnswer: 1,
         explanation: "NULL is a macro representing an address that points nowhere.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Unary'
     },
     { id: "cse101-u1-63", unit:1,
@@ -502,7 +502,7 @@ topic: 'Unary'
         options: ["=", "==", "===", "!="],
         correctAnswer: 1,
         explanation: "= is assignment, == is equality.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Relational'
     },
     { id: "cse101-u1-64", unit:1,
@@ -510,7 +510,7 @@ topic: 'Relational'
         options: ["True", "False", "1", "Error"],
         correctAnswer: 1,
         explanation: "True && False results in False (0).",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Logical'
     },
     { id: "cse101-u1-65", unit:1,
@@ -518,7 +518,7 @@ topic: 'Logical'
         options: ["Result too small", "Result too large for type", "Divide by zero", "None"],
         correctAnswer: 1,
         explanation: "When a calculation exceeds the maximum float value.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Arithmetic operators'
     },
     { id: "cse101-u1-66", unit:1,
@@ -526,7 +526,7 @@ topic: 'Arithmetic operators'
         options: ["#include", "#ifndef / #define", "#once", "None"],
         correctAnswer: 1,
         explanation: "Header guards or #pragma once are used to prevent multiple inclusions.",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Constants and variables'
     },
     { id: "cse101-u1-67", unit:1,
@@ -534,7 +534,7 @@ topic: 'Constants and variables'
         options: ["ll", "long", "bigint", "int64"],
         correctAnswer: 1,
         explanation: "long is at least 32 bits.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Data types'
     },
     { id: "cse101-u1-68", unit:1,
@@ -542,7 +542,7 @@ topic: 'Data types'
         options: ["Symbols like +", "Variables/Values on which operators act", "The compiler", "The CPU"],
         correctAnswer: 1,
         explanation: "In 5 + 3, 5 and 3 are operands.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-69", unit:1,
@@ -550,7 +550,7 @@ topic: 'Expressions'
         options: ["+", "==", "=", "/"],
         correctAnswer: 2,
         explanation: "Assignment operators associate from right to left.",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Assignment and conditional operators'
     },
     { id: "cse101-u1-70", unit:1,
@@ -558,7 +558,7 @@ topic: 'Assignment and conditional operators'
         options: ["Yes", "No", "Depends on compiler", "Only with //"],
         correctAnswer: 1,
         explanation: "Standard C does not support nested /* ... /* ... */ ... */ comments.",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-71", unit:1,
@@ -566,7 +566,7 @@ topic: 'The C character set'
         options: ["Blank spaces, tabs, newlines", "Empty variables", "Comments", "Memory gaps"],
         correctAnswer: 0,
         explanation: "Whitespace is used to separate tokens.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-72", unit:1,
@@ -574,7 +574,7 @@ topic: 'The C character set'
         options: ["int", "long", "pointer", "void"],
         correctAnswer: 2,
         explanation: "Pointers are variables that store addresses.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Unary'
     },
     { id: "cse101-u1-73", unit:1,
@@ -582,7 +582,7 @@ topic: 'Unary'
         options: ["0", "1", "Usually -1", "Null"],
         correctAnswer: 2,
         explanation: "End of File (EOF) is an integer constant, typically -1.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-74", unit:1,
@@ -590,7 +590,7 @@ topic: 'The C character set'
         options: ["Comma (,)", "Assignment (=)", "Logical OR (||)", "Relational (>)"],
         correctAnswer: 0,
         explanation: "The comma operator has the lowest precedence.",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-75", unit:1,
@@ -598,7 +598,7 @@ topic: 'Expressions'
         options: ["Yes", "No", "Only at start", "Only at end"],
         correctAnswer: 1,
         explanation: "Only letters, digits, and underscores are allowed.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Identifiers and keywords'
     },
     { id: "cse101-u1-76", unit:1,
@@ -606,7 +606,7 @@ topic: 'Identifiers and keywords'
         options: ["Variable is constant", "Variable may change externally (don't optimize)", "Variable is fast", "Variable is local"],
         correctAnswer: 1,
         explanation: "Volatile is used for variables modified by hardware or other threads.",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Constants and variables'
     },
     { id: "cse101-u1-77", unit:1,
@@ -614,7 +614,7 @@ topic: 'Constants and variables'
         options: ["10", "11", "12", "15"],
         correctAnswer: 0,
         explanation: "A=10, B=11, ..., F=15.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-78", unit:1,
@@ -622,7 +622,7 @@ topic: 'The C character set'
         options: ["10", "8", "16", "1"],
         correctAnswer: 1,
         explanation: "Octal 10 is $1 \times 8 + 0 \times 1 = 8$.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-79", unit:1,
@@ -630,7 +630,7 @@ topic: 'The C character set'
         options: ["!", "++", "* (product)", "~"],
         correctAnswer: 2,
         explanation: "Product * takes two operands, others are unary.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Arithmetic operators'
     },
     { id: "cse101-u1-80", unit:1,
@@ -638,7 +638,7 @@ topic: 'Arithmetic operators'
         options: ["5", "0", "1", "True"],
         correctAnswer: 1,
         explanation: "AND with 0 is always 0 (False).",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Logical'
     },
     { id: "cse101-u1-81", unit:1,
@@ -646,7 +646,7 @@ topic: 'Logical'
         options: ["malloc()", "scanf()", "printf()", "alloc()"],
         correctAnswer: 0,
         explanation: "malloc stands for memory allocation.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-82", unit:1,
@@ -654,7 +654,7 @@ topic: 'Expressions'
         options: ["void", "int", "char", "None"],
         correctAnswer: 1,
         explanation: "printf returns the number of characters successfully printed.",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-83", unit:1,
@@ -662,7 +662,7 @@ topic: 'Expressions'
         options: ["\\s", "\\'", "\\q", "\\\""],
         correctAnswer: 1,
         explanation: "\\' is used for single quote literals.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-84", unit:1,
@@ -670,7 +670,7 @@ topic: 'The C character set'
         options: ["1,000", "0XFF", "1.0", "1 00"],
         correctAnswer: 1,
         explanation: "0XFF is a hexadecimal integer constant.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Constants and variables'
     },
     { id: "cse101-u1-85", unit:1,
@@ -678,7 +678,7 @@ topic: 'Constants and variables'
         options: ["2.5", "2.0", "3.0", "Error"],
         correctAnswer: 1,
         explanation: "5/2 is integer division (2), then assigned to float (2.0).",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-86", unit:1,
@@ -686,7 +686,7 @@ topic: 'Expressions'
         options: ["1", "10", "True", "Nothing"],
         correctAnswer: 0,
         explanation: "Equality check returns 1 (True) in C.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Relational'
     },
     { id: "cse101-u1-87", unit:1,
@@ -694,7 +694,7 @@ topic: 'Relational'
         options: ["<stdio.h>", "<stdlib.h>", "<math.h>", "<conio.h>"],
         correctAnswer: 1,
         explanation: "stdlib.h contains general utilities like exit, malloc, etc.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-88", unit:1,
@@ -702,7 +702,7 @@ topic: 'Expressions'
         options: ["Size of name string", "Size of data type in bytes", "Memory address", "Error"],
         correctAnswer: 1,
         explanation: "sizeof(variable) returns the bytes occupied by that variable.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Arithmetic operators'
     },
     { id: "cse101-u1-89", unit:1,
@@ -710,7 +710,7 @@ topic: 'Arithmetic operators'
         options: ["int", "long", "char", "short"],
         correctAnswer: 2,
         explanation: "Char is technically an integer type (usually 8-bit).",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Data types'
     },
     { id: "cse101-u1-90", unit:1,
@@ -718,7 +718,7 @@ topic: 'Data types'
         options: ["int", "x", "5", "main"],
         correctAnswer: 2,
         explanation: "Literals are fixed values like 5 or 'A'.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-91", unit:1,
@@ -726,7 +726,7 @@ topic: 'The C character set'
         options: ["#define PI 3.14", "float PI = 3.14;", "const PI 3.14", "#const PI 3.14"],
         correctAnswer: 0,
         explanation: "#define PI 3.14 is the correct macro syntax.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Constants and variables'
     },
     { id: "cse101-u1-92", unit:1,
@@ -734,7 +734,7 @@ topic: 'Constants and variables'
         options: ["sizeof", "typedef", "string", "struct"],
         correctAnswer: 2,
         explanation: "string is not a keyword in C (unlike C++ or Java).",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Identifiers and keywords'
     },
     { id: "cse101-u1-93", unit:1,
@@ -742,7 +742,7 @@ topic: 'Identifiers and keywords'
         options: ["int", "void", "Error", "None"],
         correctAnswer: 2,
         explanation: "Standard C requires main to return int. Some compilers allow void but it's not standard.",
-difficulty: 'hard',
+difficulty: 'hard', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-94", unit:1,
@@ -750,7 +750,7 @@ topic: 'Expressions'
         options: ["~", "!", "NOT", "None"],
         correctAnswer: 1,
         explanation: "! is logical NOT; ~ is bitwise NOT.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Logical'
     },
     { id: "cse101-u1-95", unit:1,
@@ -758,7 +758,7 @@ topic: 'Logical'
         options: ["Yes", "No", "Depends", "Only if it is global"],
         correctAnswer: 0,
         explanation: "It contains only letters and underscores.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Identifiers and keywords'
     },
     { id: "cse101-u1-96", unit:1,
@@ -766,7 +766,7 @@ topic: 'Identifiers and keywords'
         options: ["\\0", "\\n", "EOF", "NULL"],
         correctAnswer: 0,
         explanation: "The null character \\0 terminates strings.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-97", unit:1,
@@ -774,7 +774,7 @@ topic: 'The C character set'
         options: ["4.5", "4.0", "3.5", "5.0"],
         correctAnswer: 0,
         explanation: "3.5 + 1 = 4.5.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'Expressions'
     },
     { id: "cse101-u1-98", unit:1,
@@ -782,7 +782,7 @@ topic: 'Expressions'
         options: ["float", "double", "long double", "bigfloat"],
         correctAnswer: 2,
         explanation: "long double is highest precision.",
-difficulty: 'easy',
+difficulty: 'easy', questionType: 'MCQ',
 topic: 'Data types'
     },
     { id: "cse101-u1-99", unit:1,
@@ -790,7 +790,7 @@ topic: 'Data types'
         options: ["Checking syntax", "Merging object files and libraries", "Generating assembly", "Running the code"],
         correctAnswer: 1,
         explanation: "Linking creates the final executable.",
-difficulty: 'medium',
+difficulty: 'medium', questionType: 'MCQ',
 topic: 'The C character set'
     },
     { id: "cse101-u1-100", unit:1,
@@ -798,7 +798,7 @@ topic: 'The C character set'
         options: ["Microsoft", "AT&T Bell Labs", "Google", "IBM"],
         correctAnswer: 1,
         explanation: "Dennis Ritchie developed C at AT&T Bell Laboratories.",
-        difficulty: 'easy',
+        difficulty: 'easy', questionType: 'MCQ',
         topic: 'Basics'
     }
 ];
