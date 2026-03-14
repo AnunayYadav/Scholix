@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { UserProfile } from '../types.ts';
 
 interface BuyMeACoffeeProps {
@@ -11,6 +12,7 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className }) =
   const [loading, setLoading] = useState(false);
   const [customAmount, setCustomAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Load Razorpay script
@@ -59,9 +61,19 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className }) =
         order_id: orderData.id,
         handler: function (response: any) {
           // Success callback
-          alert(`Payment Successful! ID: ${response.razorpay_payment_id}`);
           setIsProcessing(false);
           setLoading(false);
+          
+          // Redirect to success page with data
+          navigate('/payment-success', { 
+            state: { 
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              signature: response.razorpay_signature,
+              amount: selectedAmount,
+              date: new Date().toISOString()
+            } 
+          });
         },
         prefill: {
           name: userProfile?.username || "Verto",

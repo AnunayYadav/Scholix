@@ -21,6 +21,8 @@ import EmergencyContacts from './components/EmergencyContacts.tsx';
 import AIToolsDirectory from './components/AIToolsDirectory.tsx';
 import AdminStats from './components/AdminStats.tsx';
 import BuyMeACoffee from './components/BuyMeACoffee.tsx';
+import PaymentSuccess from './components/PaymentSuccess.tsx';
+
 import { ModuleType, UserProfile, TimetableData } from './types.ts';
 
 import NexusServer from './services/nexusServer.ts';
@@ -588,6 +590,7 @@ const AppContent: React.FC = () => {
               <Route path="/attendance" element={<AttendanceTracker />} />
               <Route path="/share-cgpa" element={<ShareReport />} />
               <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
+              <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
               <Route path="/profile" element={<ProfileSection userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={(m) => navigate(getPathFromModule(m))} />} />
               <Route path="/marketplace" element={<MarketplaceHub userProfile={userProfile} />} />
               <Route path="/roommate" element={<RoommateFinder userProfile={userProfile} />} />
