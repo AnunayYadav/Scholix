@@ -22,6 +22,8 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
     }
   }, [location, navigate]);
 
+  // We've removed database sync as requested
+  /* 
   useEffect(() => {
     // Save to database once details are available
     if (details && !details.saved) {
@@ -55,6 +57,7 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
       saveToDb();
     }
   }, [details, userProfile]);
+  */
 
   if (!details) {
     return (
