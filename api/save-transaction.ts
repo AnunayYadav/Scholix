@@ -18,12 +18,15 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Missing transaction identifiers' });
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    console.error('Missing Supabase Environment Variables');
-    return res.status(500).json({ error: 'Database configuration missing. Check SUPABASE_URL and SUPABASE_ANON_KEY.' });
+    console.error('Missing Supabase Environment Variables. Found URL:', !!supabaseUrl, 'Key:', !!supabaseKey);
+    return res.status(500).json({ 
+      error: 'Database configuration missing on server.',
+      tip: 'Ensure SUPABASE_URL and SUPABASE_ANON_KEY are set in Vercel.' 
+    });
   }
 
   try {
