@@ -27,7 +27,8 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
     if (details && !details.saved) {
       const saveToDb = async () => {
         try {
-          await fetch('/api/save-transaction', {
+          console.log('Syncing transaction with database...', details);
+          const response = await fetch('/api/save-transaction', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -37,10 +38,18 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
               userUsername: userProfile?.username
             }),
           });
-          // Mark as saved to prevent duplicate calls in dev React StrictMode
-          setDetails((prev: any) => ({ ...prev, saved: true }));
+
+          const result = await response.json();
+          
+          if (response.ok) {
+            console.log('Transaction saved successfully:', result);
+            // Mark as saved to prevent duplicate calls
+            setDetails((prev: any) => ({ ...prev, saved: true }));
+          } else {
+            console.error('Failed to save transaction:', result.error || 'Unknown error');
+          }
         } catch (error) {
-          console.error('Failed to sync transaction with database:', error);
+          console.error('Network error during transaction sync:', error);
         }
       };
       saveToDb();
