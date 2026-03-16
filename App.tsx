@@ -285,11 +285,11 @@ const DashboardHero: React.FC<{ userProfile: UserProfile | null }> = React.memo(
 
   return (
     <div className="relative overflow-hidden bg-transparent pt-6 pb-6">
-      <div className="max-w-6xl mx-auto px-6 text-left space-y-2">
-        <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight ml-1">
+      <div className="max-w-6xl mx-auto px-6 text-left space-y-1">
+        <h1 className="text-2xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight ml-1">
           {greeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">{displayName}</span>
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm md:text-lg font-medium ml-1">
+        <p className="text-slate-500 dark:text-slate-400 text-xs md:text-base font-medium ml-1">
           Welcome to LPU Nexus
         </p>
       </div>
