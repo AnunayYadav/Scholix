@@ -271,18 +271,26 @@ const TodaysSchedule: React.FC = () => {
   );
 };
 
-const DashboardHero: React.FC = React.memo(() => {
-  return (
-    <div className="relative overflow-hidden bg-transparent pt-16 pb-10 px-6">
-      <div className="max-w-4xl mx-auto text-center space-y-6">
-        <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight leading-[0.9] drop-shadow-sm min-h-[2em]">
-          Your LPU Journey, <br />
-          <TypingText />
-        </h2>
+const DashboardHero: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ userProfile }) => {
+  const [greeting, setGreeting] = useState('');
 
-        <p className="text-slate-600 dark:text-slate-400 text-sm md:text-lg font-semibold leading-relaxed max-w-2xl mx-auto">
-          Master your academics with AI-powered quiz generation, precision CGPA tracking, and seamless
-          schedule synchronization.
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) setGreeting('Good Morning');
+    else if (hour >= 12 && hour < 17) setGreeting('Good Afternoon');
+    else setGreeting('Good Evening');
+  }, []);
+
+  const displayName = userProfile?.username || 'Verto';
+
+  return (
+    <div className="relative overflow-hidden bg-transparent pt-6 pb-6">
+      <div className="max-w-6xl mx-auto px-6 text-left space-y-2">
+        <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight ml-1">
+          {greeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">{displayName}</span>
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 text-sm md:text-lg font-medium ml-1">
+          Welcome to LPU Nexus
         </p>
       </div>
     </div>
@@ -374,7 +382,8 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
   ];
 
   return (
-    <div className="w-full h-full pb-20 pt-10 animate-fade-in">
+    <div className="w-full h-full pb-20 pt-0 animate-fade-in">
+      <DashboardHero userProfile={userProfile} />
       <TodaysSchedule />
       <div className="max-w-6xl mx-auto px-6 mb-10">
         <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1 mb-8">Categories</h3>
