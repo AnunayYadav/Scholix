@@ -172,7 +172,7 @@ const TodaysSchedule: React.FC = () => {
 
   if (!dayData || dayData.slots.length === 0) {
     return (
-      <div className="max-w-6xl mx-auto px-6 mb-12 animate-fade-in">
+      <div className="max-w-6xl mx-auto px-6 mb-4 animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => navigate('/timetable')}
@@ -199,8 +199,8 @@ const TodaysSchedule: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 mb-12 animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-6xl mx-auto px-6 mb-4 animate-fade-in">
+      <div className="flex items-center justify-between mb-1">
         <button
           onClick={() => navigate('/timetable')}
           className="flex items-center gap-2 group/header border-none bg-transparent p-0 transition-opacity hover:opacity-80"
@@ -218,7 +218,7 @@ const TodaysSchedule: React.FC = () => {
         </div>
       </div>
 
-      <div ref={scrollContainerRef} className="flex gap-6 overflow-x-auto py-10 px-4 -mx-4 no-scrollbar snap-x snap-mandatory">
+      <div ref={scrollContainerRef} className="flex gap-6 overflow-x-auto pt-1 pb-4 px-4 -mx-4 no-scrollbar snap-x snap-mandatory">
         {dayData.slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)).map((slot) => {
           const start = timeToMinutes(slot.startTime);
           const end = timeToMinutes(slot.endTime);
@@ -385,8 +385,8 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
     <div className="w-full h-full pb-20 pt-0 animate-fade-in">
       <DashboardHero userProfile={userProfile} />
       <TodaysSchedule />
-      <div className="max-w-6xl mx-auto px-6 mb-10">
-        <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1 mb-8">Categories</h3>
+      <div className="max-w-6xl mx-auto px-6 mb-6">
+        <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1 mb-4">Categories</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-16">
           {features.map((f) => (
             <FeatureCard key={f.id} f={f} navigate={navigate} />
