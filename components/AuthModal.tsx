@@ -163,13 +163,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
       <div ref={modalRef} className={`nexus-modal w-full max-w-md mx-4 overflow-hidden ${isClosing ? 'closing' : ''}`}>
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-600/10 blur-[80px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
 
-        <div className="bg-white dark:bg-[#0a0a0a] p-8 md:p-10 text-center relative border-b border-slate-100 dark:border-white/5">
+        <div className="bg-white dark:bg-[#0a0a0a] p-6 sm:p-8 md:p-10 text-center relative border-b border-slate-100 dark:border-white/5">
           <button onClick={handleClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-orange-500 transition-colors border-none bg-transparent active:scale-95">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
           </button>
 
-          <div className="w-12 h-12 bg-orange-600/10 rounded-[24px] flex items-center justify-center mx-auto mb-4 border border-orange-600/20 shadow-[0_0_40px_rgba(234,88,12,0.1)]">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6 text-orange-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-600/10 rounded-[20px] sm:rounded-[24px] flex items-center justify-center mx-auto mb-3 sm:mb-4 border border-orange-600/20 shadow-[0_0_40px_rgba(234,88,12,0.1)]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
           </div>
 
           <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white uppercase leading-none mb-2">
@@ -181,8 +181,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
-          <div className="p-6 md:p-8 space-y-6 overflow-y-auto custom-scrollbar max-h-[50vh] md:max-h-none">
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1 overflow-hidden">
+          <div className="p-5 sm:p-6 md:p-8 space-y-5 sm:space-y-6 overflow-y-auto custom-scrollbar flex-1">
             {error && (
               <div className="p-5 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl animate-fade-in">
                 <div className="flex items-center gap-2 mb-1">
@@ -306,10 +306,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             </div>
           </div>
 
-          <div className="p-6 md:p-8 pt-0 md:pt-0">
+          <div className="p-5 sm:p-6 md:p-8 pt-0 md:pt-0">
             <button
               type="submit" disabled={loading || (!isLogin && usernameStatus === 'taken')}
-              className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:shadow-[0_20px_40px_-10px_rgba(234,88,12,0.4)] hover:scale-[1.01] text-white py-5 rounded-3xl font-black text-xs uppercase tracking-[0.2em] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3 border-none"
+              className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:shadow-[0_20px_40px_-10px_rgba(234,88,12,0.4)] hover:scale-[1.01] text-white py-4 sm:py-5 rounded-[20px] sm:rounded-3xl font-black text-xs uppercase tracking-[0.2em] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3 border-none"
             >
               {loading ? (
                 <div className="w-5 h-5 border-3 border-white/50 border-t-white rounded-full animate-spin" />
@@ -319,7 +319,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             <button
               type="button"
               onClick={() => { setIsLogin(!isLogin); setError(null); setPassword(''); }}
-              className="w-full text-[11px] sm:text-xs font-medium text-slate-400 hover:text-orange-500 transition-colors py-6 bg-transparent border-none"
+              className="w-full text-[11px] sm:text-xs font-medium text-slate-400 hover:text-orange-500 transition-colors py-4 sm:py-6 bg-transparent border-none"
             >
               {isLogin ? "New here? Create an account" : "Have an account? Sign in"}
             </button>

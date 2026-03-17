@@ -258,6 +258,13 @@ h4,
   isolation: isolate;
 }
 
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 1rem !important;
+    align-items: flex-end !important; /* Bottom-heavy on mobile is better for keyboards */
+  }
+}
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -300,7 +307,27 @@ h4,
   animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   color: #0f172a;
   max-height: 90vh;
+  max-height: 90dvh;
   box-shadow: 0 32px 128px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 640px) {
+  .nexus-modal {
+    max-height: calc(100dvh - 2rem);
+    margin: 0 auto !important;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    animation: slideInUpMobile 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+@keyframes slideInUpMobile {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 .dark .nexus-modal {
