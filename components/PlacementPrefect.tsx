@@ -13,12 +13,36 @@ const IconFile = () => (
 );
 
 const INDUSTRY_ROLES = [
-  { id: 'swe', name: 'Software Engineer', keywords: 'Algorithms, System Design, Java/Python/C++, Git, Problem Solving, Unit Testing' },
-  { id: 'frontend', name: 'Frontend Developer', keywords: 'React.js, TypeScript, Tailwind CSS, Web Performance, State Management (Zustand/Redux), Next.js' },
-  { id: 'backend', name: 'Backend Developer', keywords: 'Node.js, Microservices, SQL/NoSQL, API Security, Cloud Deployment, Redis/Kafka' },
-  { id: 'ai', name: 'AI/ML Engineer', keywords: 'Python, PyTorch/TensorFlow, LLMs, RAG, Data Pipelines, Model Fine-tuning, Vector Databases' },
-  { id: 'data', name: 'Data Scientist', keywords: 'Statistical Analysis, SQL, Data Visualization, Scikit-learn, Machine Learning, Business Intelligence' },
-  { id: 'pm', name: 'Product Manager', keywords: 'Product Strategy, Agile/Scrum, User Stories, Roadmapping, Stakeholder Management, Market Analysis' }
+  { 
+    id: 'swe', 
+    name: 'Software Engineer', 
+    jd: 'We are looking for a Software Engineer to join our core engineering team. You will be responsible for designing, developing, and maintaining scalable software solutions. You should have strong fundamentals in data structures, algorithms, and system design. Experience with languages like Java, Python, or C++, and proficiency with version control systems (Git) is essential. You will participate in code reviews, write unit tests, and collaborate with cross-functional teams to deliver high-quality features.' 
+  },
+  { 
+    id: 'frontend', 
+    name: 'Frontend Developer', 
+    jd: 'Join us as a Frontend Developer to create stunning and performant user interfaces. You will work closely with designers and product managers to translate complex requirements into fluid web experiences. Expertise in React.js, TypeScript, and modern CSS frameworks like Tailwind CSS is required. You should have a deep understanding of web performance optimization, state management (Zustand/Redux), and server-side rendering with Next.js. Familiarity with accessibility standards and cross-browser compatibility testing is a plus.' 
+  },
+  { 
+    id: 'backend', 
+    name: 'Backend Developer', 
+    jd: "We're seeking a Backend Developer to build robust and scalable server-side systems. Your role involves designing microservices, managing SQL and NoSQL databases, and ensuring the security and performance of our APIs. Proficiency in Node.js and experience with cloud platforms (AWS/Azure/GCP) is crucial. You should be familiar with message brokers like Kafka/Redis and understand containerization using Docker/Kubernetes. A strong focus on API security and architectural best practices is expected." 
+  },
+  { 
+    id: 'ai', 
+    name: 'AI/ML Engineer', 
+    jd: 'As an AI/ML Engineer, you will develop and productionize machine learning models. You\'ll work with large datasets to build RAG-based systems, fine-tune LLMs, and optimize data pipelines. Mastery of Python and deep learning frameworks (PyTorch/TensorFlow) is mandatory. You should have experience with vector databases (Pinecone/Milvus) and stay updated with the latest advancements in Generative AI. Knowledge of model deployment and monitoring in production environments is highly valued.' 
+  },
+  { 
+    id: 'data', 
+    name: 'Data Scientist', 
+    jd: 'We are looking for a Data Scientist to extract actionable insights from complex data. You will build predictive models, perform statistical analysis, and create compelling data visualizations to drive business decisions. Proficiency in SQL and data science libraries like Scikit-learn, Pandas, and NumPy is required. You should have experience with business intelligence tools and be able to communicate technical findings to non-technical stakeholders effectively. A strong background in machine learning and experiment design is essential.' 
+  },
+  { 
+    id: 'pm', 
+    name: 'Product Manager', 
+    jd: 'Join our team as a Product Manager to lead the product lifecycle from conception to launch. You\'ll define product strategy, create detailed roadmaps, and manage stakeholders across the organization. Success in this role requires experience with Agile/Scrum methodologies, writing user stories, and performing market analysis. You\'ll work closely with engineering and design teams to prioritize features that deliver maximum user value. Strong analytical skills and a data-driven approach to product growth are key.' 
+  }
 ];
 
 const CATEGORIES = [
@@ -164,7 +188,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
     setSelectedRoleId(roleId);
     const role = INDUSTRY_ROLES.find(r => r.id === roleId);
     if (role) {
-      setJdText(`Role: ${role.name}. Skills: ${role.keywords}`);
+      setJdText(role.jd);
     }
   };
 
@@ -295,7 +319,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
 
           <div className="flex-1 space-y-6">
 
-            <p className="text-lg md:text-xl font-bold text-slate-800 dark:text-white leading-relaxed italic opacity-90">"{result.summary}"</p>
+            <p className="text-lg md:text-xl font-medium text-slate-800 dark:text-white leading-relaxed opacity-90">"{result.summary}"</p>
             <div className="h-px bg-slate-100 dark:bg-white/5 w-full" />
             <div className="space-y-3">
               {result.flags.map((flag, idx) => (
@@ -403,7 +427,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
               </div>
             ) : (
               <textarea
-                className="w-full h-[184px] bg-slate-50 dark:bg-[#0a0a0a]/60 border border-slate-100 dark:border-white/10 rounded-[32px] p-6 text-xs text-slate-800 dark:text-white focus:ring-4 focus:ring-orange-600/10 outline-none resize-none transition-all font-bold placeholder:opacity-30 shadow-inner"
+                className="w-full h-[220px] bg-slate-50 dark:bg-[#0a0a0a]/60 border border-slate-100 dark:border-white/10 rounded-[32px] p-8 text-sm text-slate-800 dark:text-white focus:ring-4 focus:ring-orange-600/10 outline-none resize-none transition-all font-normal leading-relaxed placeholder:opacity-30 shadow-inner"
                 placeholder="Paste job description here..."
                 value={jdText}
                 onChange={(e) => setJdText(e.target.value)}

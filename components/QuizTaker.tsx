@@ -97,6 +97,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
 
   const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>(['MCQ', 'PYQ']);
   const [solvedQuestionIds, setSolvedQuestionIds] = useState<Set<string>>(new Set());
+  const [showTopics, setShowTopics] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1833,62 +1834,77 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               </div>
 
               <div className="space-y-3 animate-in fade-in slide-in-from-left-2 duration-500">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Topics</p>
-                </div>
-                <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 no-scrollbar">
-                  {Object.entries(availableTopicsByUnit).sort((a,b) => Number(a[0]) - Number(b[0])).map(([unit, topics]) => {
-                    const isUnitAllSelected = !(topics as string[]).some(t => selectedTopics.includes(t));
-                    return (
-                      <div key={unit} className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Unit {unit}</h4>
-                          <div className="h-px bg-slate-200 dark:bg-white/5 flex-grow"></div>
+                <button 
+                  onClick={() => setShowTopics(!showTopics)}
+                  className="w-full flex items-center justify-between p-4 bg-slate-100/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl hover:border-orange-500/30 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-orange-600/10 text-orange-600 rounded-xl">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M4 6h16M4 12h16M4 18h7" /></svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[13px] font-semibold text-slate-900 dark:text-white">Topic Selection</p>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Filter by specific areas</p>
+                    </div>
+                  </div>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-4 h-4 text-slate-400 group-hover:text-orange-500 transition-transform duration-300 ${showTopics ? 'rotate-180' : ''}`}><path d="M6 9l6 6 6-6" /></svg>
+                </button>
+
+                {showTopics && (
+                  <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 no-scrollbar animate-in slide-in-from-top-2 duration-300">
+                    {Object.entries(availableTopicsByUnit).sort((a,b) => Number(a[0]) - Number(b[0])).map(([unit, topics]) => {
+                      const isUnitAllSelected = !(topics as string[]).some(t => selectedTopics.includes(t));
+                      return (
+                        <div key={unit} className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Unit {unit}</h4>
+                            <div className="h-px bg-slate-200 dark:bg-white/5 flex-grow"></div>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <button
+                              onClick={() => setSelectedTopics(prev => prev.filter(t => !(topics as string[]).includes(t)))}
+                              className={`col-span-1 md:col-span-2 flex items-center text-left gap-3 p-3 rounded-xl border transition-all ${
+                                isUnitAllSelected ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-500/50 shadow-sm' :
+                                'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 hover:border-orange-500/30'
+                              }`}
+                            >
+                              <div className={`min-w-4 w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                                isUnitAllSelected ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-dark-900'
+                              }`}>
+                                {isUnitAllSelected && <svg viewBox="0 0 14 14" fill="none" className="w-2.5 h-2.5"><path d="M3 7.5L5.5 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                              </div>
+                              <span className={`text-sm font-semibold leading-relaxed ${isUnitAllSelected ? 'text-orange-700 dark:text-orange-400' : 'text-slate-600 dark:text-slate-400'}`}>
+                                All Unit {unit} Topics
+                              </span>
+                            </button>
+                            {(topics as string[]).map(topic => {
+                              const isSelected = selectedTopics.includes(topic);
+                              return (
+                                <button
+                                  key={topic}
+                                  onClick={() => setSelectedTopics(prev => prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic])}
+                                  className={`flex items-start text-left gap-3 p-3 rounded-xl border transition-all ${
+                                    isSelected ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-500/50 shadow-sm' :
+                                    'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 hover:border-orange-500/30'
+                                  }`}
+                                >
+                                  <div className={`mt-0.5 min-w-4 w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                                    isSelected ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-dark-900'
+                                  }`}>
+                                    {isSelected && <svg viewBox="0 0 14 14" fill="none" className="w-2.5 h-2.5"><path d="M3 7.5L5.5 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                  </div>
+                                  <span className={`text-xs font-medium leading-relaxed ${isSelected ? 'text-orange-700 dark:text-orange-400' : 'text-slate-600 dark:text-slate-400'}`}>
+                                    {topic}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                          <button
-                            onClick={() => setSelectedTopics(prev => prev.filter(t => !(topics as string[]).includes(t)))}
-                            className={`col-span-1 md:col-span-2 flex items-center text-left gap-3 p-3 rounded-xl border transition-all ${
-                              isUnitAllSelected ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-500/50 shadow-sm' :
-                              'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 hover:border-orange-500/30'
-                            }`}
-                          >
-                            <div className={`min-w-4 w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                              isUnitAllSelected ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-dark-900'
-                            }`}>
-                              {isUnitAllSelected && <svg viewBox="0 0 14 14" fill="none" className="w-2.5 h-2.5"><path d="M3 7.5L5.5 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                            </div>
-                            <span className={`text-sm font-semibold leading-relaxed ${isUnitAllSelected ? 'text-orange-700 dark:text-orange-400' : 'text-slate-600 dark:text-slate-400'}`}>
-                              All Unit {unit} Topics
-                            </span>
-                          </button>
-                          {(topics as string[]).map(topic => {
-                            const isSelected = selectedTopics.includes(topic);
-                            return (
-                              <button
-                                key={topic}
-                                onClick={() => setSelectedTopics(prev => prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic])}
-                                className={`flex items-start text-left gap-3 p-3 rounded-xl border transition-all ${
-                                  isSelected ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-500/50 shadow-sm' :
-                                  'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 hover:border-orange-500/30'
-                                }`}
-                              >
-                                <div className={`mt-0.5 min-w-4 w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                                  isSelected ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-dark-900'
-                                }`}>
-                                  {isSelected && <svg viewBox="0 0 14 14" fill="none" className="w-2.5 h-2.5"><path d="M3 7.5L5.5 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                                </div>
-                                <span className={`text-xs font-medium leading-relaxed ${isSelected ? 'text-orange-700 dark:text-orange-400' : 'text-slate-600 dark:text-slate-400'}`}>
-                                  {topic}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
                 {hasMCQs && (

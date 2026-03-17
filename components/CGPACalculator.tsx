@@ -18,6 +18,10 @@ const GRADE_POINTS: Record<string, number> = {
   'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'P': 4, 'F': 0
 };
 
+const LPU_BTECH_CREDITS: Record<number, number> = {
+  1: 18, 2: 27, 3: 24, 4: 24, 5: 25, 6: 22, 7: 10, 8: 16
+};
+
 const LPU_STANDARDS = [
   { grade: 'O', points: 10, range: '90-100', label: 'Outstanding' },
   { grade: 'A+', points: 9, range: '80-89', label: 'Excellent' },
@@ -152,21 +156,27 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
     return result;
   }, [courses]);
 
+  const archivedCredits = useMemo(() => {
+    if (prevTotalCredits !== '' && !isNaN(Number(prevTotalCredits))) return Number(prevTotalCredits);
+    let sum = 0;
+    for (let i = 1; i < currentSemester; i++) {
+      sum += LPU_BTECH_CREDITS[i] || 20;
+    }
+    return sum;
+  }, [prevTotalCredits, currentSemester]);
+
   const overallCGPA = useMemo(() => {
     const pCGPA = Number(prevCGPA) || 0;
-    const pCredits = Number(prevTotalCredits) || 0;
-    const combinedPoints = (pCGPA * pCredits) + currentStats.totalPoints;
-    const combinedCredits = pCredits + currentStats.totalCredits;
+    const combinedPoints = (pCGPA * archivedCredits) + currentStats.totalPoints;
+    const combinedCredits = archivedCredits + currentStats.totalCredits;
     return combinedCredits === 0 ? 0 : (combinedPoints / combinedCredits);
-  }, [prevCGPA, prevTotalCredits, currentStats]).toFixed(2);
+  }, [prevCGPA, archivedCredits, currentStats]).toFixed(2);
 
   const roadmapData = useMemo(() => {
     const tCGPA = Number(targetCGPA);
     if (!tCGPA || tCGPA <= 0) return { roadmap: [], summary: null };
 
-    const CREDITS_PER_SEM = 20;
     const totalSems = 8;
-    const archivedCredits = Number(prevTotalCredits) || 0;
     const archivedPoints = (Number(prevCGPA) || 0) * archivedCredits;
 
     const planSemIndices = [];
@@ -174,21 +184,25 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
 
     if (planSemIndices.length === 0) return { roadmap: [], summary: null };
 
-    const totalCreditsForDegree = archivedCredits + (planSemIndices.length * CREDITS_PER_SEM);
+    const futureCredits = planSemIndices.reduce((sum, sem) => sum + (LPU_BTECH_CREDITS[sem] || 20), 0);
+    const totalCreditsForDegree = archivedCredits + futureCredits;
     const totalPointsNeeded = tCGPA * totalCreditsForDegree;
-    let pointsNeededFromFuture = totalPointsNeeded - archivedPoints;
+    const pointsNeededFromFuture = totalPointsNeeded - archivedPoints;
 
-    let manualCount = 0;
+    let manualPoints = 0;
+    let manualCredits = 0;
     Object.entries(manualAdjustments).forEach(([sem, val]) => {
       const sNum = parseInt(sem);
       if (planSemIndices.includes(sNum)) {
-        pointsNeededFromFuture -= (Number(val) * CREDITS_PER_SEM);
-        manualCount++;
+        const semCredits = LPU_BTECH_CREDITS[sNum] || 20;
+        manualPoints += (Number(val) * semCredits);
+        manualCredits += semCredits;
       }
     });
 
-    const unpinnedCount = planSemIndices.length - manualCount;
-    const autoSGPA = unpinnedCount > 0 ? Math.max(0, Math.min(10, pointsNeededFromFuture / (unpinnedCount * CREDITS_PER_SEM))) : 0;
+    const unpinnedCredits = futureCredits - manualCredits;
+    const pointsNeededFromUnpinned = pointsNeededFromFuture - manualPoints;
+    const autoSGPA = unpinnedCredits > 0 ? Math.max(0, Math.min(10, pointsNeededFromUnpinned / unpinnedCredits)) : 0;
 
     const roadmap = planSemIndices.map(semNum => {
       const isManual = manualAdjustments[semNum] !== undefined;
@@ -203,12 +217,12 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
       roadmap,
       summary: {
         totalPointsNeeded,
-        remainingPoints: pointsNeededFromFuture,
+        remainingPoints: pointsNeededFromUnpinned,
         avgNeeded: autoSGPA,
-        isImpossible: autoSGPA > 10 || autoSGPA < 0
+        isImpossible: autoSGPA > 10 || (pointsNeededFromUnpinned > 0 && autoSGPA <= 0)
       }
     };
-  }, [targetCGPA, prevCGPA, prevTotalCredits, currentSemester, manualAdjustments]);
+  }, [targetCGPA, prevCGPA, archivedCredits, currentSemester, manualAdjustments]);
 
   const adjustSemTarget = (sem: number, delta: number) => {
     setManualAdjustments(prev => {
@@ -269,7 +283,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
         <div ref={historyPanelRef} className="glass-panel p-6 rounded-[32px] border border-orange-500/20 bg-orange-500/[0.03] animate-fade-in mb-8">
           <h3 className="text-[11px] sm:text-xs font-medium text-orange-600 mb-6">Saved reports</h3>
           {history.length === 0 ? <p className="text-[11px] sm:text-xs text-slate-400 font-bold py-8 text-center uppercase tracking-widest opacity-40">Vault empty.</p> : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {history.map(h => (
                 <div key={h.id} onClick={() => loadSnapshot(h)} className="p-5 bg-white dark:bg-[#0a0a0a] border border-slate-100 dark:border-white/5 rounded-3xl cursor-pointer hover:border-orange-500/50 transition-all flex items-center justify-between shadow-sm">
                   <div>
@@ -323,7 +337,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
                 type="number"
                 value={prevTotalCredits}
                 onChange={(e) => setPrevTotalCredits(e.target.value)}
-                placeholder="e.g. 42"
+                placeholder={`Default: ${archivedCredits} (LPU B.Tech)`}
                 className="w-full bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-sm font-semibold dark:text-white outline-none focus:ring-2 focus:ring-orange-600"
               />
             </div>
@@ -383,18 +397,18 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
 
             {Number(targetCGPA) > 0 && roadmapData.summary ? (
               <div className="space-y-8 animate-fade-in">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {roadmapData.roadmap.map((item) => (
-                    <div key={item.sem} className={`p-5 rounded-[32px] border transition-all flex flex-col items-center justify-center text-center relative overflow-hidden ${item.isManual ? 'bg-orange-600/10 border-orange-600/30 shadow-lg' : 'bg-white dark:bg-[#0a0a0a] border-slate-100 dark:border-white/5'}`}>
-                      <p className="text-[11px] sm:text-xs text-slate-400 mb-3">Sem {item.sem}</p>
+                    <div key={item.sem} className={`p-4 sm:p-5 rounded-[32px] border transition-all flex flex-col items-center justify-center text-center relative overflow-hidden ${item.isManual ? 'bg-orange-600/10 border-orange-600/30 shadow-lg' : 'bg-white dark:bg-[#0a0a0a] border-slate-100 dark:border-white/5'}`}>
+                      <p className="text-[11px] sm:text-xs text-slate-400 mb-3">Sem {item.sem} • {LPU_BTECH_CREDITS[item.sem] || 20} Cr</p>
 
-                      <div className="flex items-center gap-3 relative z-10">
-                        <button onClick={() => adjustSemTarget(item.sem, -0.1)} className="w-7 h-7 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-600 dark:text-white hover:bg-orange-600 hover:text-white transition-all border-none">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M5 12h14" /></svg>
+                      <div className="flex items-center gap-1 sm:gap-3 relative z-10">
+                        <button onClick={() => adjustSemTarget(item.sem, -0.1)} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-600 dark:text-white hover:bg-orange-600 hover:text-white transition-all border-none">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 sm:w-3.5 sm:h-3.5"><path d="M5 12h14" /></svg>
                         </button>
-                        <span className={`text-2xl font-bold tracking-tight ${item.isManual ? 'text-orange-600' : 'text-blue-600'}`}>{item.sgpa.toFixed(1)}</span>
-                        <button onClick={() => adjustSemTarget(item.sem, 0.1)} className="w-7 h-7 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-600 dark:text-white hover:bg-orange-600 hover:text-white transition-all border-none">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M12 5v14M5 12h14" /></svg>
+                        <span className={`text-xl sm:text-2xl font-bold tracking-tight ${item.isManual ? 'text-orange-600' : 'text-blue-600'}`}>{item.sgpa.toFixed(1)}</span>
+                        <button onClick={() => adjustSemTarget(item.sem, 0.1)} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-600 dark:text-white hover:bg-orange-600 hover:text-white transition-all border-none">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 sm:w-3.5 sm:h-3.5"><path d="M12 5v14M5 12h14" /></svg>
                         </button>
                       </div>
 
