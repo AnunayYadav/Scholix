@@ -107,6 +107,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     program: string;
   }[]>([]);
   const [activeUploadIndex, setActiveUploadIndex] = useState(0);
+  const [examDisclaimerAgreed, setExamDisclaimerAgreed] = useState(false);
 
   const [isClosingDetails, setIsClosingDetails] = useState(false);
   const [isClosingFolder, setIsClosingFolder] = useState(false);
@@ -144,6 +145,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       setShowUploadModal(false);
       setPendingUploads([]);
       setIsCreatingNew({ program: false, semester: false, subject: false, type: false });
+      setExamDisclaimerAgreed(false);
       setIsClosingUpload(false);
     }, 250);
   };
@@ -499,6 +501,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
       handleCloseUpload();
       setPendingUploads([]);
+      setExamDisclaimerAgreed(false);
       fetchFromSource(false);
       showToast("Contribution successful!", "success");
     } catch (e: any) {
@@ -584,8 +587,21 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         <div className="space-y-6 animate-fade-in">
           <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight leading-none mb-1">
-                Content <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Library</span> Hub
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight leading-none mb-1 flex items-center">
+                Content <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 ml-1.5 mr-1.5">Library</span> Hub
+                <div className="relative group ml-2 mb-1">
+                  <button className="flex items-center justify-center text-slate-300 dark:text-white/20 hover:text-orange-500 dark:hover:text-orange-500 bg-transparent border-none transition-colors">
+                    <svg viewBox="0 0 512 512" fill="currentColor" className="w-5 h-5">
+                      <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/>
+                    </svg>
+                  </button>
+                  <div className="absolute left-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-64 p-3 bg-white dark:bg-[#1a1a1a] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100]">
+                    <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium whitespace-normal">
+                      <span className="text-orange-500 font-bold block mb-1 uppercase tracking-wider text-[9px]">Disclaimer</span>
+                      Resources not explicitly marked as <strong className="text-slate-800 dark:text-white font-bold">Nexus</strong> (e.g. Nexus Originals, Nexus Official) are completely crowdsourced (WhatsApp, Telegram, etc.) and not owned by us.
+                    </p>
+                  </div>
+                </div>
               </h2>
               {!isAdminView && !searchQuery && viewMode === 'browse' && (
                 <nav className="mt-2 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-slate-400">
@@ -614,6 +630,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               <button onClick={() => { if (!userProfile) { showToast("Sign in required.", "info"); return; } fileInputRef.current?.click(); }} className="px-5 py-2 bg-orange-600 text-white rounded-xl font-bold text-[11px] sm:text-xs shadow-lg shadow-orange-600/20 border-none hover:scale-105 active:scale-95 transition-all flex items-center gap-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>Contribute {pendingUploads.length > 0 && `(${pendingUploads.length})`}</button>
             </div>
           </header>
+
           <div className="flex gap-2 w-full flex-col md:flex-row">
             <div className="flex-1 flex gap-2">
               <NexusDropdown
@@ -1085,6 +1102,16 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       <label className="text-[11px] sm:text-xs text-slate-500 ml-1">Short Description</label>
                       <textarea rows={2} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-slate-100 dark:bg-[#0a0a0a]/40 p-4 rounded-3xl font-medium border border-transparent dark:border-white/5 text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic text-[11px] sm:text-xs transition-all" placeholder="Tell us more about this file..." />
                     </div>
+
+                    {showUploadModal && (
+                      <div className="md:col-span-2 mt-2 p-5 rounded-3xl bg-red-500/10 border border-red-500/30 flex gap-4 items-start shadow-sm">
+                        <input type="checkbox" id="exam-disclaimer" checked={examDisclaimerAgreed} onChange={e => setExamDisclaimerAgreed(e.target.checked)} className="mt-1 w-5 h-5 rounded border-red-500 text-red-600 focus:ring-red-500 bg-white/5 cursor-pointer flex-shrink-0" />
+                        <label htmlFor="exam-disclaimer" className="text-[11px] sm:text-xs text-red-700 dark:text-red-400 font-medium leading-relaxed cursor-pointer select-none">
+                          <strong className="block uppercase tracking-wider mb-1 font-black text-red-600 dark:text-red-500">⚠️ Mandatory Agreement</strong>
+                          I confirm that the file(s) being uploaded do not contain any ongoing semester examination papers or material that violates university examination rules. I understand that sharing such content is a serious violation of academic integrity.
+                        </label>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1100,7 +1127,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 )}
                 <button
                   onClick={showUploadModal ? handleUpload : handleEditSubmission}
-                  disabled={isProcessing || !metaForm.name || !metaForm.semester || !metaForm.subject || (showUploadModal && pendingUploads.some(u => !u.name || !u.semester || !u.subject))}
+                  disabled={isProcessing || !metaForm.name || !metaForm.semester || !metaForm.subject || (showUploadModal && (pendingUploads.some(u => !u.name || !u.semester || !u.subject) || !examDisclaimerAgreed))}
                   className="flex-1 bg-orange-600 text-white py-4 rounded-[24px] font-semibold text-[11px] sm:text-xs shadow-[0_20px_50px_rgba(234,88,12,0.3)] hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all border-none"
                 >
                   {isProcessing ? 'Processing Batch...' : showUploadModal ? `Upload ${pendingUploads.length} Item${pendingUploads.length > 1 ? 's' : ''}` : 'Update Record'}
