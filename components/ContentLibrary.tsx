@@ -107,7 +107,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     program: string;
   }[]>([]);
   const [activeUploadIndex, setActiveUploadIndex] = useState(0);
-  const [examDisclaimerAgreed, setExamDisclaimerAgreed] = useState(false);
 
   const [isClosingDetails, setIsClosingDetails] = useState(false);
   const [isClosingFolder, setIsClosingFolder] = useState(false);
@@ -145,7 +144,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       setShowUploadModal(false);
       setPendingUploads([]);
       setIsCreatingNew({ program: false, semester: false, subject: false, type: false });
-      setExamDisclaimerAgreed(false);
       setIsClosingUpload(false);
     }, 250);
   };
@@ -501,7 +499,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
       handleCloseUpload();
       setPendingUploads([]);
-      setExamDisclaimerAgreed(false);
       fetchFromSource(false);
       showToast("Contribution successful!", "success");
     } catch (e: any) {
@@ -1102,16 +1099,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       <label className="text-[11px] sm:text-xs text-slate-500 ml-1">Short Description</label>
                       <textarea rows={2} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-slate-100 dark:bg-[#0a0a0a]/40 p-4 rounded-3xl font-medium border border-transparent dark:border-white/5 text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic text-[11px] sm:text-xs transition-all" placeholder="Tell us more about this file..." />
                     </div>
-
-                    {showUploadModal && (
-                      <div className="md:col-span-2 mt-2 p-5 rounded-3xl bg-red-500/10 border border-red-500/30 flex gap-4 items-start shadow-sm">
-                        <input type="checkbox" id="exam-disclaimer" checked={examDisclaimerAgreed} onChange={e => setExamDisclaimerAgreed(e.target.checked)} className="mt-1 w-5 h-5 rounded border-red-500 text-red-600 focus:ring-red-500 bg-white/5 cursor-pointer flex-shrink-0" />
-                        <label htmlFor="exam-disclaimer" className="text-[11px] sm:text-xs text-red-700 dark:text-red-400 font-medium leading-relaxed cursor-pointer select-none">
-                          <strong className="block uppercase tracking-wider mb-1 font-black text-red-600 dark:text-red-500">⚠️ Mandatory Agreement</strong>
-                          I confirm that the file(s) being uploaded do not contain any ongoing semester examination papers or material that violates university examination rules. I understand that sharing such content is a serious violation of academic integrity.
-                        </label>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -1127,7 +1114,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 )}
                 <button
                   onClick={showUploadModal ? handleUpload : handleEditSubmission}
-                  disabled={isProcessing || !metaForm.name || !metaForm.semester || !metaForm.subject || (showUploadModal && (pendingUploads.some(u => !u.name || !u.semester || !u.subject) || !examDisclaimerAgreed))}
+                  disabled={isProcessing || !metaForm.name || !metaForm.semester || !metaForm.subject || (showUploadModal && pendingUploads.some(u => !u.name || !u.semester || !u.subject))}
                   className="flex-1 bg-orange-600 text-white py-4 rounded-[24px] font-semibold text-[11px] sm:text-xs shadow-[0_20px_50px_rgba(234,88,12,0.3)] hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all border-none"
                 >
                   {isProcessing ? 'Processing Batch...' : showUploadModal ? `Upload ${pendingUploads.length} Item${pendingUploads.length > 1 ? 's' : ''}` : 'Update Record'}

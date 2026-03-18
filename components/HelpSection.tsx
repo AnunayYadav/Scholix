@@ -33,6 +33,22 @@ const HelpSection: React.FC = () => {
         { q: "What is the 'Rescue Line'?", a: "The Rescue Line (Emergency Contacts) provides instant access to hostel wardens, campus security, and healthcare services. It's built for rapid response in critical situations." },
         { q: "How do I contribute notes to the library?", a: "Go to 'Study Material', click 'Contribute', and upload your PYQs or notes. Our Admin Vertos will review and approve them within 24 hours." }
       ]
+    },
+    {
+      category: 'Academic Integrity & Policies',
+      questions: [
+        { q: "Can I share ongoing examination papers on LPU-Nexus?", a: "Absolutely NOT. Sharing ongoing semester examination papers through WhatsApp, Telegram, or platforms like LPU-Nexus is a serious violation of academic integrity and university examination rules. We strictly prohibit such activities." },
+        { q: "What are the consequences of sharing live exam material?", a: "The University takes such misconduct very seriously. Strict disciplinary action is taken against any student found involved, including possible suspension or cancellation of exams. Any LPU-Nexus account found uploading such material will be permanently banned." },
+        { q: "What is LPU-Nexus's liability regarding user-uploaded content?", a: "LPU-Nexus is an intermediary platform for crowdsourced study material. We do not own, endorse, or verify user-uploaded content, nor are we liable for it. We enforce a zero-tolerance policy for academic malpractice. Users are solely responsible for upholding honesty and fairness in academics." }
+      ]
+    },
+    {
+      category: 'Data Privacy & Account',
+      questions: [
+        { q: "Is my personal data securely stored?", a: "Yes. LPU-Nexus employs enterprise-grade security protocols. We never share your registration details, metrics, or academic records with third parties without your direct authorization." },
+        { q: "What happens if I lose access to my account?", a: "You can securely reset your password from the login screen. Ensure you have access to your registered student email address, as secure recovery links are exclusively dispatched there." },
+        { q: "How can I report a bug or request a new feature?", a: "We love student feedback! You can reach out directly via our WhatsApp support lifeline linked at the bottom of this page. We review every request and ship weekly updates." }
+      ]
     }
   ];
 
