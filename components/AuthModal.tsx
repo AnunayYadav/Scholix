@@ -157,14 +157,48 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, compulsory = false }) =>
 
   return createPortal(
     <div
-      className={`modal-overlay ${isClosing ? 'closing' : ''}`}
+      className={`modal-overlay ${isClosing ? 'closing' : ''} md:p-0 md:items-stretch py-6`}
       style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
       onClick={(e) => { if (e.target === e.currentTarget && !loading && !compulsory) handleClose(); }}
     >
-      <div ref={modalRef} className={`nexus-modal w-full max-w-md mx-4 overflow-hidden ${isClosing ? 'closing' : ''}`}>
-        <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-600/10 blur-[80px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
+      <div ref={modalRef} className={`nexus-modal w-full max-w-md md:max-w-none md:w-full md:h-full md:rounded-none md:m-0 mx-4 overflow-hidden flex flex-col md:flex-row shadow-2xl ${isClosing ? 'closing' : ''} bg-white dark:bg-[#0a0a0a]`}>
+        {/* Left Side Branding - Desktop Only */}
+        <div className="hidden md:flex flex-col justify-between w-1/2 bg-[#2c1305] dark:bg-[#1a0a02] relative pl-16 pr-16 pt-12 pb-12 overflow-hidden border-r border-slate-200 dark:border-white/5">
+          <div className="flex items-center gap-3 relative z-10 transition-transform active:scale-95 cursor-default">
+             <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-lg">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-orange-600"><path d="M12 2L2 22h20L12 2z"/></svg>
+             </div>
+             <span className="text-white text-xl font-black tracking-widest uppercase drop-shadow-sm">LPU Nexus</span>
+          </div>
+          
+          <div className="flex-1 flex items-center justify-center relative z-10 w-full mb-8 mt-12 animate-fade-in" style={{ animationDuration: '1s' }}>
+            <svg viewBox="0 0 600 400" className="w-full h-auto max-w-lg opacity-90 drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M150 250h200v100H150z" fill="#ea580c"/>
+              <path d="M150 250l100 50 100-50" fill="#f97316"/>
+              <path d="M170 250v-80h160v80" fill="#fff"/>
+              <path d="M190 190h120M190 210h120M190 230h80" stroke="#cbd5e1" strokeWidth="6" strokeLinecap="round"/>
+              <circle cx="420" cy="180" r="30" fill="#ea580c"/>
+              <path d="M370 280c0-40 25-60 50-60s50 20 50 60H370z" fill="#f97316"/>
+              <rect x="360" y="220" width="100" height="70" rx="10" fill="#1e293b"/>
+              <circle cx="410" cy="255" r="8" fill="#fff"/>
+              <path d="M100 350h400" stroke="#fff" strokeWidth="4" strokeLinecap="round" opacity="0.2"/>
+            </svg>
+          </div>
+          
+          <div className="relative z-10 text-center w-full max-w-xl mx-auto">
+             <p className="text-white drop-shadow-md text-3xl font-serif italic mb-6 leading-relaxed">"Education is not preparation for life; education is life itself."</p>
+             <p className="text-white/70 font-black text-xs tracking-[0.2em] uppercase">— John Dewey</p>
+          </div>
+          <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+          <div className="absolute top-[-20%] right-[-10%] w-[120%] h-[120%] bg-[radial-gradient(circle_at_top_right,rgba(234,88,12,0.15),transparent_50%)] pointer-events-none mix-blend-screen" />
+        </div>
 
-        <div className="bg-white dark:bg-[#0a0a0a] p-6 sm:p-8 md:p-10 text-center relative border-b border-slate-100 dark:border-white/5">
+        {/* Right Side Form Container */}
+        <div className="flex-1 flex flex-col justify-center relative w-full md:w-1/2 overflow-hidden h-full bg-white dark:bg-[#0a0a0a]">
+          <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-600/10 blur-[80px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
+          <div className="w-full max-w-md mx-auto flex flex-col h-full md:h-auto md:max-h-[90vh] overflow-y-auto custom-scrollbar relative px-4 md:px-0">
+
+        <div className="p-6 sm:p-8 md:p-10 text-center relative border-b border-slate-100 dark:border-white/5 md:border-none md:pb-6">
           {!compulsory && (
             <button onClick={handleClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-orange-500 transition-colors border-none bg-transparent active:scale-95">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -329,6 +363,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, compulsory = false }) =>
           </div>
         </form>
       </div>
+    </div>
+  </div>
     </div>,
     document.getElementById('modal-root') || document.body
   );
