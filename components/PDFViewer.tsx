@@ -821,8 +821,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                     </button>
                     <div className="hidden sm:block truncate">
-                        <h3 className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-tighter truncate max-w-[200px]">{fileName}</h3>
-                        <p className="text-[8px] font-black text-orange-500 uppercase tracking-widest leading-none mt-1">LPU Nexus Secure Protocol</p>
+                        <h3 className="text-[13px] font-medium text-slate-900 dark:text-white tracking-tight truncate max-w-[200px]">{fileName}</h3>
+                        <p className="text-[10px] font-medium text-orange-500 tracking-wide leading-none mt-1">LPU Nexus Secure Protocol</p>
                     </div>
                 </div>
 
@@ -841,11 +841,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                             autoCorrect="off"
                             autoComplete="off"
                             spellCheck="false"
-                            className="bg-transparent border-none outline-none text-[11px] font-bold text-slate-900 dark:text-white px-2 w-24 md:w-32 placeholder:text-slate-400 dark:placeholder:text-white/20"
+                            className="bg-transparent border-none outline-none text-xs font-normal text-slate-900 dark:text-white px-2 w-24 md:w-32 placeholder:text-slate-400 dark:placeholder:text-white/20"
                         />
                         {searchResults.length > 0 && (
                             <div className="flex items-center gap-2 pr-2">
-                                <span className="text-[9px] font-black text-orange-500 whitespace-nowrap">{currentSearchIndex + 1} / {searchResults.length}</span>
+                                <span className="text-[10px] font-medium text-orange-500 whitespace-nowrap">{currentSearchIndex + 1} / {searchResults.length}</span>
                                 <div className="h-4 w-px bg-slate-300 dark:bg-white/10 mx-1" />
                                 <button onClick={prevSearch} className="text-slate-400 dark:text-white/40 hover:text-slate-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3"><path d="m15 18-6-6 6-6" /></svg></button>
                                 <button onClick={nextSearch} className="text-slate-400 dark:text-white/40 hover:text-slate-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3"><path d="m9 18 6-6-6-6" /></svg></button>
@@ -861,7 +861,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="5" y1="12" x2="19" y2="12" /></svg>
                         </button>
-                        <span className="text-[10px] font-black text-slate-900 dark:text-white px-2 min-w-[50px] text-center">{Math.round(scale * 100)}%</span>
+                        <span className="text-xs font-medium text-slate-900 dark:text-white px-2 min-w-[50px] text-center">{Math.round(scale * 100)}%</span>
                         <button
                             onClick={() => handleZoom(Math.min(3, scaleRef.current + 0.1))}
                             className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 dark:text-white/50 hover:text-slate-900 dark:hover:text-white hover:bg-slate-300 dark:hover:bg-white/10 transition-all border-none bg-transparent"
@@ -899,9 +899,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                             max={numPages}
                             value={currentPage}
                             onChange={e => jumpToPage(parseInt(e.target.value) || 1)}
-                            className="w-10 bg-transparent border-none outline-none text-center text-[10px] font-black text-slate-900 dark:text-white"
+                            className="w-10 bg-transparent border-none outline-none text-center text-xs font-medium text-slate-900 dark:text-white"
                         />
-                        <span className="text-[10px] font-black text-slate-400 dark:text-white/20 uppercase tracking-widest">/ {numPages}</span>
+                        <span className="text-xs font-medium text-slate-400 dark:text-white/20 tracking-wide">/ {numPages}</span>
                     </div>
 
                     <button
