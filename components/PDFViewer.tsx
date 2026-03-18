@@ -882,7 +882,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
                 <main
                     ref={containerRef}
-                    className="flex-1 overflow-auto bg-slate-100 dark:bg-[#0a0a0a] relative select-none touch-none overscroll-none"
+                    className="flex-1 overflow-auto bg-slate-100 dark:bg-[#0a0a0a] relative select-none touch-auto overscroll-none"
                     style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'none' }}
                 >
                     {isLoading ? (
