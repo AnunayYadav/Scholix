@@ -588,8 +588,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 Content <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 ml-1.5 mr-1.5">Library</span> Hub
                 <div className="relative group ml-2 mb-1">
                   <button className="flex items-center justify-center text-slate-300 dark:text-white/20 hover:text-orange-500 dark:hover:text-orange-500 bg-transparent border-none transition-colors">
-                    <svg viewBox="0 0 512 512" fill="currentColor" className="w-5 h-5">
-                      <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/>
+                    <svg viewBox="0 0 16 16" fill="currentColor" className="w-5 h-5">
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                      <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
                     </svg>
                   </button>
                   <div className="absolute left-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-64 p-3 bg-white dark:bg-[#1a1a1a] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100]">

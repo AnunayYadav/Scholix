@@ -5,6 +5,7 @@ import NexusServer from '../services/nexusServer.ts';
 
 interface AuthModalProps {
   onClose: () => void;
+  compulsory?: boolean;
 }
 
 const getPasswordStrength = (password: string): { score: number; label: string; color: string } => {
@@ -23,7 +24,7 @@ const getPasswordStrength = (password: string): { score: number; label: string; 
   return { score: 5, label: 'Excellent', color: 'bg-emerald-400' };
 };
 
-const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
+const AuthModal: React.FC<AuthModalProps> = ({ onClose, compulsory = false }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [identifier, setIdentifier] = useState('');
   const [email, setEmail] = useState('');
@@ -45,7 +46,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   // Escape key handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !loading) handleClose();
+      if (e.key === 'Escape' && !loading && !compulsory) handleClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -158,15 +159,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     <div
       className={`modal-overlay ${isClosing ? 'closing' : ''}`}
       style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
-      onClick={(e) => { if (e.target === e.currentTarget && !loading) handleClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget && !loading && !compulsory) handleClose(); }}
     >
       <div ref={modalRef} className={`nexus-modal w-full max-w-md mx-4 overflow-hidden ${isClosing ? 'closing' : ''}`}>
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-600/10 blur-[80px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
 
         <div className="bg-white dark:bg-[#0a0a0a] p-6 sm:p-8 md:p-10 text-center relative border-b border-slate-100 dark:border-white/5">
-          <button onClick={handleClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-orange-500 transition-colors border-none bg-transparent active:scale-95">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
-          </button>
+          {!compulsory && (
+            <button onClick={handleClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-orange-500 transition-colors border-none bg-transparent active:scale-95">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            </button>
+          )}
 
           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-600/10 rounded-[20px] sm:rounded-[24px] flex items-center justify-center mx-auto mb-3 sm:mb-4 border border-orange-600/20 shadow-[0_0_40px_rgba(234,88,12,0.1)]">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>

@@ -407,6 +407,7 @@ const AppContent: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isSessionLoaded, setIsSessionLoaded] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isClosingAuth, setIsClosingAuth] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -463,6 +464,7 @@ const AppContent: React.FC = () => {
       } else {
         setUserProfile(null);
       }
+      setIsSessionLoaded(true);
     });
     return () => unsubscribeAuth();
   }, []);
@@ -622,7 +624,15 @@ const AppContent: React.FC = () => {
             </Routes>
           </div>
         </div>
-        {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+        
+        {/* Compulsory Login Overlay */}
+        {isSessionLoaded && !userProfile && (
+          <AuthModal onClose={() => {}} compulsory={true} />
+        )}
+        {/* Optional Modal (e.g. forced via menu if needed, though mostly redundant now unless explicitly called) */}
+        {isSessionLoaded && userProfile && showAuthModal && (
+          <AuthModal onClose={handleAuthClose} />
+        )}
       </main>
       <Analytics />
       <SpeedInsights />
