@@ -203,10 +203,11 @@ const PageRenderer = React.memo<{
                 }
             }}
             data-page={pageNum}
-            className="relative mb-6 bg-white dark:bg-[#0a0a0a] rounded-md origin-top-left select-none border border-slate-200 dark:border-white/5 overflow-visible page-container"
+            className="relative bg-white dark:bg-[#0a0a0a] rounded-md origin-top-left select-none border border-slate-200 dark:border-white/5 overflow-visible page-container"
             style={{
                 width: pageInfo ? `calc(${pageInfo.width}px * var(--pdf-scale))` : '100%',
                 height: pageInfo ? `calc(${pageInfo.height}px * var(--pdf-scale))` : '100vh',
+                marginBottom: `calc(24px * var(--pdf-scale))`,
                 contain: 'layout size',
                 willChange: 'transform'
             } as any}
@@ -340,6 +341,26 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         }, 300); 
     }, []);
 
+    const handleZoom = useCallback((nextScale: number) => {
+        const container = containerRef.current;
+        if (!container) return;
+        if (nextScale === scaleRef.current) return;
+
+        isInteractingRef.current = true;
+        container.classList.add('is-zooming');
+
+        const rect = container.getBoundingClientRect();
+        const focalX = rect.width / 2;
+        const focalY = rect.height / 2;
+        const ratio = nextScale / scaleRef.current;
+
+        const nextLeft = (container.scrollLeft + focalX) * ratio - focalX;
+        const nextTop = (container.scrollTop + focalY) * ratio - focalY;
+
+        scaleRef.current = nextScale;
+        updateDOMScale(nextScale, nextLeft, nextTop);
+    }, [updateDOMScale]);
+
     const registerPageRef = useCallback((pageNum: number, el: HTMLDivElement | null) => {
         pageRefs.current[pageNum] = el;
         if (el && observerRef.current) {
@@ -442,7 +463,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         const containerWidth = containerRef.current?.clientWidth || window.innerWidth;
         const padding = window.innerWidth < 768 ? 20 : 120; // More padding for desktop centering
         const newScale = (containerWidth - padding) / originalViewport.width;
-        setScale(newScale);
+        handleZoom(newScale);
         setViewMode('page'); // Next click will fit to page
     };
 
@@ -454,7 +475,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         // Subtract toolbar (80px) and padding (80px)
         const availableHeight = containerHeight - 160;
         const newScale = availableHeight / originalViewport.height;
-        setScale(newScale);
+        handleZoom(newScale);
         setViewMode('width'); // Next click will fit to width
     };
 
@@ -809,14 +830,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     {/* Scale Controls */}
                     <div className="flex items-center gap-1 bg-slate-200 dark:bg-white/5 rounded-2xl p-1 border border-slate-300 dark:border-white/10">
                         <button
-                            onClick={() => setScale(prev => Math.max(0.2, prev - 0.1))}
+                            onClick={() => handleZoom(Math.max(0.2, scaleRef.current - 0.1))}
                             className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 dark:text-white/50 hover:text-slate-900 dark:hover:text-white hover:bg-slate-300 dark:hover:bg-white/10 transition-all border-none bg-transparent"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="5" y1="12" x2="19" y2="12" /></svg>
                         </button>
                         <span className="text-[10px] font-black text-slate-900 dark:text-white px-2 min-w-[50px] text-center">{Math.round(scale * 100)}%</span>
                         <button
-                            onClick={() => setScale(prev => Math.min(3, prev + 0.1))}
+                            onClick={() => handleZoom(Math.min(3, scaleRef.current + 0.1))}
                             className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 dark:text-white/50 hover:text-slate-900 dark:hover:text-white hover:bg-slate-300 dark:hover:bg-white/10 transition-all border-none bg-transparent"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
@@ -894,7 +915,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                             ))}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center min-w-max mx-auto py-12 px-4 md:px-8">
+                        <div 
+                            className="flex flex-col items-center min-w-max mx-auto px-4 md:px-8"
+                            style={{ paddingTop: 'calc(48px * var(--pdf-scale))', paddingBottom: 'calc(48px * var(--pdf-scale))' }}
+                        >
                             {Array.from({ length: numPages }).map((_, i) => (
                                 <PageRenderer
                                     key={i}
