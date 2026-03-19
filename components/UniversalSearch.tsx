@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import NexusServer from '../services/nexusServer.ts';
 import { aiTools } from '../data/aiToolsData.ts';
 import { allDirectory } from '../data/emergencyData.ts';
@@ -15,7 +15,21 @@ interface SearchResult {
   category: string;
 }
 
-const UniversalSearch: React.FC = () => {
+interface UniversalSearchProps {
+  className?: string;
+  placeholder?: string;
+  autoFocus?: boolean;
+  isInline?: boolean;
+  resultsPortalRef?: React.RefObject<HTMLDivElement>;
+}
+
+const UniversalSearch: React.FC<UniversalSearchProps> = ({ 
+  className = '', 
+  placeholder = 'Search Nexus...', 
+  autoFocus = false, 
+  isInline = false,
+  resultsPortalRef
+}) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,6 +38,13 @@ const UniversalSearch: React.FC = () => {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (autoFocus && inputRef.current) {
+      inputRef.current.focus();
+      setIsOpen(true);
+    }
+  }, [autoFocus]);
 
   const modules = [
     { id: 'library', name: 'Content Library', desc: 'Access 1000+ PYQs, notes and records.', path: '/library', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg> },
@@ -47,10 +68,12 @@ const UniversalSearch: React.FC = () => {
 
   const handleSelect = useCallback((result: SearchResult) => {
     navigate(result.path);
-    setIsOpen(false);
-    setQuery('');
-    inputRef.current?.blur();
-  }, [navigate]);
+    if (!isInline) {
+      setIsOpen(false);
+      setQuery('');
+      inputRef.current?.blur();
+    }
+  }, [navigate, isInline]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -61,7 +84,7 @@ const UniversalSearch: React.FC = () => {
 
       if (!isOpen) return;
 
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && !isInline) {
         setIsOpen(false);
         inputRef.current?.blur();
       }
@@ -81,17 +104,17 @@ const UniversalSearch: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, results, selectedIndex, handleSelect]);
+  }, [isOpen, results, selectedIndex, handleSelect, isInline]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (!isInline && containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [isInline]);
 
   const performSearch = async (q: string) => {
     if (!q.trim()) {
@@ -267,16 +290,93 @@ const UniversalSearch: React.FC = () => {
     return () => clearTimeout(timer);
   }, [query]);
 
+  const renderResults = () => {
+    if (!isOpen) return null;
+
+    const resultsDropdown = (
+      <div className={`${isInline || resultsPortalRef ? 'relative mt-6' : 'absolute top-full left-0 right-0 mt-3 shadow-2xl z-[100]'} bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[32px] overflow-hidden search-dropdown-anim`}>
+        <div className={`no-scrollbar p-3 ${(isInline || resultsPortalRef) ? 'max-h-none' : 'max-h-[70vh] overflow-y-auto'}`}>
+          {isLoading ? (
+            <div className="py-12 flex flex-col items-center justify-center opacity-40">
+              <div className="w-6 h-6 rounded-full border-2 border-orange-500 border-t-transparent animate-spin mb-4"></div>
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em]">Searching Nexus...</p>
+            </div>
+          ) : results.length > 0 ? (
+            <div className="grid grid-cols-1 gap-1">
+              {results.map((result, index) => (
+                <button
+                  key={result.id}
+                  onClick={() => handleSelect(result)}
+                  onMouseEnter={() => setSelectedIndex(index)}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                  className={`w-full text-left p-3.5 rounded-2xl flex items-center gap-4 transition-all border-none group search-result-anim ${selectedIndex === index ? 'bg-orange-600' : 'bg-transparent hover:bg-slate-50 dark:hover:bg-white/5'}`}
+                >
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${selectedIndex === index ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/40'}`}>
+                    {result.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className={`text-sm font-normal truncate ${selectedIndex === index ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{result.title}</h4>
+                      <span className={`text-[8px] font-medium uppercase tracking-widest shrink-0 ${selectedIndex === index ? 'text-white/60' : 'text-slate-400 dark:text-white/20'}`}>{result.category}</span>
+                    </div>
+                    {result.description && (
+                      <p className={`text-[11px] font-light truncate ${selectedIndex === index ? 'text-white/70' : 'text-slate-500 dark:text-slate-400'}`}>{result.description}</p>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : query ? (
+            <div className="py-12 text-center opacity-40">
+              <p className="text-xs font-bold">No results for "{query}"</p>
+            </div>
+          ) : (
+            <div className="p-4 space-y-4">
+              <div className="space-y-2">
+                <h3 className="text-[9px] font-medium uppercase tracking-[0.2em] text-slate-400 dark:text-white/20">Trending Now</h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {['Library', 'Quizzes', 'Timetable', 'Market', 'Attendance'].map(s => (
+                    <button 
+                      key={s} 
+                      onClick={() => setQuery(s)}
+                      className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[10px] font-normal text-slate-500 dark:text-white/60 hover:border-orange-500/50 hover:text-orange-600 transition-all"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {!(isInline || resultsPortalRef) && (
+          <div className="px-5 py-2.5 bg-slate-50/50 dark:bg-black/40 border-t border-slate-200 dark:border-white/5 flex items-center justify-between">
+            <div className="flex gap-3">
+              <span className="text-[9px] font-medium text-slate-400 dark:text-white/20 tracking-widest cursor-default">ESC TO CLOSE</span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+
+    if (resultsPortalRef?.current) {
+      return createPortal(resultsDropdown, resultsPortalRef.current);
+    }
+
+    return resultsDropdown;
+  };
+
   return (
-    <div ref={containerRef} className="relative w-full">
+    <div ref={containerRef} className={`relative w-full ${className}`}>
       {/* Search Bar Input */}
-      <div className={`relative group transition-all duration-300 ${isOpen ? 'z-[60]' : 'z-40'}`}>
-        <div className={`flex items-center gap-3 px-6 h-11 rounded-full bg-slate-100/80 dark:bg-white/5 transition-all ${isOpen ? 'shadow-2xl shadow-orange-500/10 bg-white dark:bg-[#0a0a0a]' : 'hover:bg-slate-200/80 dark:hover:bg-white/10'}`}>
+      <div className={`relative group transition-all duration-300 ${isOpen && !isInline && !resultsPortalRef ? 'z-[60]' : 'z-40'}`}>
+        <div className={`flex items-center gap-3 px-6 h-11 rounded-full bg-slate-100/80 dark:bg-white/5 transition-all ${isOpen && !isInline && !resultsPortalRef ? 'shadow-2xl shadow-orange-500/10 bg-white dark:bg-[#0a0a0a]' : 'hover:bg-slate-200/80 dark:hover:bg-white/10'}`}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-4 h-4 transition-colors ${isOpen ? 'text-orange-500' : 'text-slate-400 group-hover:text-slate-500'}`}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search files, tasks, market..."
+            placeholder={placeholder}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -301,74 +401,8 @@ const UniversalSearch: React.FC = () => {
           )}
         </div>
 
-        {/* Results Dropdown */}
-        {isOpen && (
-          <div className="absolute top-full left-0 right-0 mt-3 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[32px] shadow-2xl overflow-hidden search-dropdown-anim z-[100]">
-            <div className="max-h-[70vh] overflow-y-auto no-scrollbar p-3">
-              {isLoading ? (
-                <div className="py-12 flex flex-col items-center justify-center opacity-40">
-                  <div className="w-6 h-6 rounded-full border-2 border-orange-500 border-t-transparent animate-spin mb-4"></div>
-                  <p className="text-[10px] font-medium uppercase tracking-[0.2em]">Searching Nexus...</p>
-                </div>
-              ) : results.length > 0 ? (
-                <div className="grid grid-cols-1 gap-1">
-                  {results.map((result, index) => (
-                    <button
-                      key={result.id}
-                      onClick={() => handleSelect(result)}
-                      onMouseEnter={() => setSelectedIndex(index)}
-                      style={{ animationDelay: `${index * 50}ms` }}
-                      className={`w-full text-left p-3.5 rounded-2xl flex items-center gap-4 transition-all border-none group search-result-anim ${selectedIndex === index ? 'bg-orange-600' : 'bg-transparent hover:bg-slate-50 dark:hover:bg-white/5'}`}
-                    >
-                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${selectedIndex === index ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/40'}`}>
-                        {result.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <h4 className={`text-sm font-normal truncate ${selectedIndex === index ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{result.title}</h4>
-                          <span className={`text-[8px] font-medium uppercase tracking-widest shrink-0 ${selectedIndex === index ? 'text-white/60' : 'text-slate-400 dark:text-white/20'}`}>{result.category}</span>
-                        </div>
-                        <p className={`text-[11px] font-light truncate ${selectedIndex === index ? 'text-white/70' : 'text-slate-500 dark:text-slate-400'}`}>{result.description}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ) : query ? (
-                <div className="py-12 text-center opacity-40">
-                  <p className="text-xs font-bold">No results for "{query}"</p>
-                </div>
-              ) : (
-                <div className="p-4 space-y-4">
-                  <div className="space-y-2">
-                    <h3 className="text-[9px] font-medium uppercase tracking-[0.2em] text-slate-400 dark:text-white/20">Trending Now</h3>
-                    <div className="flex flex-wrap gap-1.5">
-                      {['Library', 'Quizzes', 'Timetable', 'Market', 'Attendance'].map(s => (
-                        <button 
-                          key={s} 
-                          onClick={() => setQuery(s)}
-                          className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[10px] font-normal text-slate-500 dark:text-white/60 hover:border-orange-500/50 hover:text-orange-600 transition-all"
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="px-5 py-2.5 bg-slate-50/50 dark:bg-black/40 border-t border-slate-200 dark:border-white/5 flex items-center justify-between">
-              <div className="flex gap-3">
-                <span className="text-[9px] font-medium text-slate-400 dark:text-white/20 tracking-widest cursor-default">ESC TO CLOSE</span>
-              </div>
-            </div>
-          </div>
-        )}
+        {renderResults()}
       </div>
-
-      {/* Mobile Special: When Query is Active and Input isn't focused, we might want a full screen overlay? 
-          Actually, let's keep it simple as requested - dropdown in the search bar. 
-      */}
     </div>
   );
 };

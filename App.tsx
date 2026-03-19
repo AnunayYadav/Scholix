@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar.tsx';
 import PlacementPrefect from './components/PlacementPrefect.tsx';
@@ -219,7 +219,7 @@ const TodaysSchedule: React.FC = () => {
         </div>
       </div>
 
-      <div ref={scrollContainerRef} className="flex gap-6 overflow-x-auto pt-1 pb-4 px-4 -mx-4 no-scrollbar snap-x snap-mandatory">
+      <div ref={scrollContainerRef} className="flex gap-3 md:gap-6 overflow-x-auto pt-4 pb-12 px-5 -mx-6 no-scrollbar snap-x snap-mandatory">
         {dayData.slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)).map((slot) => {
           const start = timeToMinutes(slot.startTime);
           const end = timeToMinutes(slot.endTime);
@@ -231,35 +231,35 @@ const TodaysSchedule: React.FC = () => {
             <button
               key={slot.id}
               onClick={() => navigate('/timetable')}
-              className={`flex-shrink-0 w-[220px] md:w-[260px] snap-center group relative overflow-hidden rounded-[32px] border bg-transparent p-0 text-left transition-all duration-500 active:scale-95 cursor-pointer ${isGoingOn ? 'border-white/60 scale-[1.08] shadow-2xl z-10' : 'border-white/10 shadow-lg hover:scale-[1.05] opacity-80 hover:opacity-100'}`}
+              className={`flex-shrink-0 w-[175px] md:w-[260px] snap-center group relative overflow-hidden rounded-[24px] md:rounded-[32px] border bg-transparent p-0 text-left transition-all duration-500 active:scale-95 cursor-pointer ${isGoingOn ? 'border-transparent scale-[1.03] shadow-2xl z-10' : 'border-white/10 shadow-lg hover:scale-[1.02] opacity-80 hover:opacity-100'}`}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br from-orange-500 to-red-600`} />
-              <div className="relative p-5 space-y-5">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <h4 className="text-2xl font-bold text-white tracking-tight leading-none drop-shadow-md">{slot.subject}</h4>
-                    <p className="text-[11px] sm:text-xs font-medium text-white/80">{slot.room} • {slot.type}</p>
+              <div className={`absolute inset-0 bg-gradient-to-br from-orange-500 to-red-600 transition-transform duration-700 ${isGoingOn ? 'scale-110' : 'group-hover:scale-110'}`} />
+              <div className="relative p-4 md:p-6 space-y-3 md:space-y-6">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-base md:text-2xl font-bold text-white tracking-tight leading-tight drop-shadow-md truncate">{slot.subject}</h4>
+                    <p className="text-[9px] md:text-xs font-semibold text-white/70 mt-0.5 truncate uppercase tracking-wider">{slot.room} • {slot.type}</p>
                   </div>
 
-                  <div className={`px-3 py-1.5 rounded-2xl text-[11px] sm:text-xs font-semibold backdrop-blur-md flex items-center gap-1.5 ${isGoingOn ? 'bg-white text-orange-600 shadow-lg' : 'bg-black/20 text-white'}`}>
+                  <div className={`shrink-0 px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[7px] md:text-[10px] font-black uppercase tracking-widest backdrop-blur-md flex items-center gap-1 shadow-sm ${isGoingOn ? 'bg-white text-orange-600' : 'bg-black/20 text-white'}`}>
                     {isGoingOn && (
-                      <span className="flex h-1.5 w-1.5 relative">
+                      <span className="flex h-1 w-1 md:h-1.5 md:w-1.5 relative">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-current"></span>
+                        <span className="relative inline-flex rounded-full h-1 w-1 md:h-1.5 md:w-1.5 bg-current"></span>
                       </span>
                     )}
-                    {isGoingOn ? 'Going On' : isUpcoming ? 'Upcoming' : 'Done'}
+                    <span>{isGoingOn ? 'Live' : isUpcoming ? 'Upcoming' : 'Done'}</span>
                   </div>
                 </div>
 
-                <div className="pt-6 border-t border-white/20 flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <p className="text-[11px] sm:text-xs text-white/60">Time</p>
-                    <p className="text-sm font-bold text-white">{slot.startTime} – {slot.endTime}</p>
+                <div className="pt-3 md:pt-6 border-t border-white/20 flex items-center justify-between">
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="text-[9px] md:text-[10px] text-white/50 font-medium uppercase tracking-tighter">Schedule</p>
+                    <p className="text-[10px] md:text-sm font-bold text-white whitespace-nowrap tabular-nums">{slot.startTime} – {slot.endTime}</p>
                   </div>
                   {isGoingOn && (
-                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-5 h-5"><path d="M12 2v20M2 12h20" /></svg>
+                    <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3.5 h-3.5 md:w-5 md:h-5"><path d="M12 2v20M2 12h20" /></svg>
                     </div>
                   )}
                 </div>
@@ -338,26 +338,26 @@ const FeatureCard = React.memo(({ f, navigate }: { f: any, navigate: any }) => {
         transition: isHovered ? 'transform 0.1s ease-out, box-shadow 0.3s ease, border 0.3s ease' : 'transform 0.5s ease-out, box-shadow 0.5s ease, border 0.5s ease',
         transformStyle: 'preserve-3d'
       }}
-      className={`group relative p-4 sm:p-6 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl rounded-[24px] sm:rounded-[32px] border border-slate-200 dark:border-white/10 text-left cursor-pointer overflow-hidden transition-all duration-500 ${isHovered ? 'shadow-[0_45px_120px_-20px_rgba(0,0,0,0.4)] dark:shadow-[0_45px_120px_-20px_rgba(0,0,0,0.8)] border-orange-500/40 z-10' : ''}`}
+      className={`group relative p-3 sm:p-6 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl rounded-[20px] sm:rounded-[32px] border border-slate-200 dark:border-white/10 text-left cursor-pointer overflow-hidden transition-all duration-500 ${isHovered ? 'shadow-[0_45px_120px_-20px_rgba(0,0,0,0.4)] dark:shadow-[0_45px_120px_-20px_rgba(0,0,0,0.8)] border-orange-500/40 z-10' : ''}`}
     >
       <div className={`absolute inset-0 bg-gradient-to-br from-orange-500 to-red-600 transition-opacity duration-500 ${isHovered ? 'opacity-[0.03] dark:opacity-[0.07]' : 'opacity-0'}`} />
 
       {/* Wrapping content with translateZ for parallax effect inside the card */}
       <div style={{ transform: isHovered ? 'translateZ(40px)' : 'translateZ(0)', transition: 'transform 0.4s ease-out', pointerEvents: 'none' }} className="w-full h-full relative flex flex-col items-start justify-center">
-        <div className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-[14px] sm:rounded-[16px] bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white mb-3 sm:mb-6 shadow-2xl transition-all duration-500 ${isHovered ? 'shadow-orange-500/50 scale-[1.15] rotate-3' : 'shadow-orange-500/20'}`}>
-          <div className={`absolute inset-0 rounded-[14px] sm:rounded-[16px] bg-inherit -z-10 transition-all duration-500 ${isHovered ? 'blur-2xl opacity-70' : 'blur-xl opacity-40'}`} />
-          <div className="scale-75 sm:scale-90">
+        <div className={`relative w-8 h-8 sm:w-12 sm:h-12 rounded-[10px] sm:rounded-[16px] bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white mb-2 sm:mb-6 shadow-2xl transition-all duration-500 ${isHovered ? 'shadow-orange-500/50 scale-[1.15] rotate-3' : 'shadow-orange-500/20'}`}>
+          <div className={`absolute inset-0 rounded-[10px] sm:rounded-[16px] bg-inherit -z-10 transition-all duration-500 ${isHovered ? 'blur-2xl opacity-70' : 'blur-xl opacity-40'}`} />
+          <div className="scale-65 sm:scale-90">
             {f.icon}
           </div>
         </div>
 
-        <div className="relative space-y-1 sm:space-y-2 text-left w-full">
-          <h4 className="text-[13px] sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-tight sm:leading-none">{f.name}</h4>
-          <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400/80 leading-relaxed max-w-[95%] sm:max-w-[90%] mt-1 line-clamp-2">{f.desc}</p>
+        <div className="relative space-y-0.5 sm:space-y-2 text-left w-full">
+          <h4 className="text-[12px] sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-tight sm:leading-none">{f.name}</h4>
+          <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400/80 leading-relaxed max-w-[95%] sm:max-w-[90%] line-clamp-2">{f.desc}</p>
         </div>
 
-        <div className={`absolute top-2 right-2 text-slate-300 dark:text-white/10 transition-all duration-500 ${isHovered ? 'text-orange-500 translate-x-1 -translate-y-1 scale-110' : ''}`}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
+        <div className={`absolute top-1 right-1 sm:top-2 sm:right-2 text-slate-300 dark:text-white/10 transition-all duration-500 ${isHovered ? 'text-orange-500 translate-x-1 -translate-y-1 scale-110' : ''}`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3 sm:w-4 sm:h-4"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
         </div>
       </div>
     </button>
@@ -412,6 +412,22 @@ const AppContent: React.FC = () => {
   const [isClosingAuth, setIsClosingAuth] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isClosingProfile, setIsClosingProfile] = useState(false);
+  const [isMobileSearchActive, setIsMobileSearchActive] = useState(false);
+  const [isClosingMobileSearch, setIsClosingMobileSearch] = useState(false);
+  const searchResultsRef = useRef<HTMLDivElement>(null);
+
+  const handleOpenMobileSearch = () => {
+    setIsClosingMobileSearch(false);
+    setIsMobileSearchActive(true);
+  };
+
+  const handleCloseMobileSearch = () => {
+    setIsClosingMobileSearch(true);
+    setTimeout(() => {
+      setIsMobileSearchActive(false);
+      setIsClosingMobileSearch(false);
+    }, 250);
+  };
 
   const handleProfileClose = () => {
     setIsClosingProfile(true);
@@ -507,7 +523,7 @@ const AppContent: React.FC = () => {
             </button>
             <span className="md:hidden text-xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tight cursor-pointer ml-1" onClick={() => navigate('/')}>LPU-Nexus</span>
           </div>
-          
+
           <div className="flex-1 hidden md:flex ml-4">
             <div className="w-full max-w-[480px]">
               <UniversalSearch />
@@ -516,11 +532,7 @@ const AppContent: React.FC = () => {
 
           <div className="flex items-center space-x-3 ml-auto">
             <button 
-              onClick={() => {
-                // Focus the hidden search if on mobile? 
-                // Or maybe UniversalSearch should handle mobile?
-                // For now, let's just make it simple.
-              }}
+              onClick={handleOpenMobileSearch}
               className="md:hidden p-2.5 rounded-full bg-slate-100 dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
@@ -570,17 +582,6 @@ const AppContent: React.FC = () => {
                           </div>
                           View Terminal
                         </button>
-                        {userProfile.is_admin && (
-                          <button
-                            onClick={() => { navigate('/admin-stats'); handleProfileClose(); }}
-                            className="w-full text-left px-5 py-3 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-slate-600 dark:text-white/70 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
-                          >
-                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-600/20 transition-colors">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
-                            </div>
-                            System Intelligence
-                          </button>
-                        )}
                         <button
                           onClick={async () => { await NexusServer.signOut(); navigate('/'); handleProfileClose(); }}
                           className="w-full text-left px-5 py-3 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-red-500 hover:bg-red-500/10 border-none bg-transparent flex items-center gap-3 transition-all"
@@ -595,13 +596,13 @@ const AppContent: React.FC = () => {
                   )}
                 </>
               ) : (
-                <button onClick={() => setShowAuthModal(true)} className="w-10 h-10 rounded-full border-none bg-slate-100 dark:bg-[#0a0a0a] flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-95">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                </button>
-              )}
+                    <button onClick={() => setShowAuthModal(true)} className="w-10 h-10 rounded-full border-none bg-slate-100 dark:bg-[#0a0a0a] flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-95">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
         <div id="main-content-area" className={`flex-1 overflow-y-auto relative scroll-smooth ${location.pathname === '/' ? 'p-0' : 'p-4 md:p-8'} bg-transparent`}>
           <div className={`relative ${location.pathname === '/' ? 'w-full' : 'max-w-7xl mx-auto'}`}>
             <Routes>
@@ -640,8 +641,46 @@ const AppContent: React.FC = () => {
             </Routes>
           </div>
         </div>
-        {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+        {/* Premium Mobile Search Bottom Sheet */}
+        {isMobileSearchActive && (
+          <div className="md:hidden fixed inset-0 z-[200] flex items-end justify-center pointer-events-auto">
+            {/* Backdrop */}
+            <div 
+              className={`absolute inset-0 bg-black/40 backdrop-blur-sm ${isClosingMobileSearch ? 'animate-overlay-out' : 'animate-overlay-in'}`}
+              onClick={handleCloseMobileSearch} 
+            />
+            
+            {/* Bottom Sheet Container */}
+            <div className={`relative w-full bg-white dark:bg-[#0a0a0a] rounded-t-[40px] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] dark:shadow-[0_-20px_50px_rgba(0,0,0,0.6)] p-6 overflow-hidden border-t border-slate-200 dark:border-white/10 flex flex-col h-[85vh] ${isClosingMobileSearch ? 'animate-sheet-out' : 'animate-sheet-in'}`}>
+              {/* Handle bar */}
+              <div className="w-12 h-1.5 bg-slate-200 dark:bg-white/10 rounded-full mx-auto mb-6 shrink-0" onClick={handleCloseMobileSearch} />
+              
+              <div className="flex items-start gap-3 mb-4 shrink-0">
+                <button 
+                  onClick={handleCloseMobileSearch}
+                  className="mt-1 p-3 rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-500 hover:text-orange-600 transition-all border-none active:scale-90"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="m15 18-6-6 6-6" /></svg>
+                </button>
+                <div className="flex-1 min-w-0">
+                  <UniversalSearch 
+                    autoFocus={true} 
+                    placeholder="Search Nexus..." 
+                    resultsPortalRef={searchResultsRef}
+                  />
+                </div>
+              </div>
+
+              {/* Scrollable Results Area */}
+              <div 
+                ref={searchResultsRef}
+                className="flex-1 overflow-y-auto no-scrollbar -mx-2 px-2 pb-10"
+              />
+            </div>
+          </div>
+        )}
       </main>
+      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       <Analytics />
       <SpeedInsights />
       <ToastContainer />

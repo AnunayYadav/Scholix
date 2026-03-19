@@ -60,6 +60,24 @@
     }
   }
 
+  @keyframes slideUpSheet {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideDownSheet {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100%);
+    }
+  }
+
   @keyframes float {
 
     0%,
@@ -144,6 +162,10 @@
   --animate-char-reveal: char-reveal 0.2s ease-out forwards;
   --animate-slide-up: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-scale-in: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-sheet-in: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-sheet-out: slideDownSheet 0.25s ease-in forwards;
+  --animate-overlay-in: overlayFadeIn 0.3s ease-out forwards;
+  --animate-overlay-out: overlayFadeOut 0.2s ease-in forwards;
 }
 
 :root {

@@ -717,35 +717,35 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     }
 
                     return (
-                      <div key={slot.id} className={`group relative p-4 md:p-5 rounded-[24px] md:rounded-[32px] transition-all flex flex-col justify-between border ${isActive ? 'bg-orange-600/10 border-orange-500/60 shadow-2xl scale-[1.02] z-10' : isFinished ? 'bg-slate-50 dark:bg-[#0a0a0a] border-slate-100 dark:border-white/5 opacity-40 grayscale' : isBreak ? 'bg-slate-50/50 dark:bg-white/[0.02] border-dashed border-slate-200 dark:border-white/10' : 'bg-white dark:bg-[#0a0a0a] border-slate-100 dark:border-white/5 hover:border-orange-500/30'}`}>
+                      <div key={slot.id} className={`group relative p-3.5 md:p-5 rounded-[24px] md:rounded-[32px] transition-all flex flex-col justify-between ${isActive ? 'bg-orange-600/10 border border-orange-500 shadow-2xl scale-[1.02] z-10' : isFinished ? 'bg-slate-50 dark:bg-white/[0.01] border border-transparent opacity-40 grayscale' : isBreak ? 'bg-slate-50/50 dark:bg-white/[0.02] border border-dashed border-slate-200 dark:border-white/10' : 'bg-white dark:bg-[#0a0a0a] border border-slate-100 dark:border-white/5 hover:border-orange-500/30'}`}>
 
-                        <div className="space-y-3 md:space-y-4">
-                          <div className="flex flex-col md:flex-row justify-between items-start gap-2">
-                            <div className={`px-2 py-1 md:px-3 md:py-1.5 rounded-lg md:rounded-xl text-[11px] sm:text-xs font-black whitespace-nowrap ${isActive ? 'bg-orange-600 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}>
+                        <div className="space-y-2 md:space-y-4">
+                          <div className="flex justify-between items-center gap-2">
+                            <div className={`px-2 py-0.5 md:px-3 md:py-1.5 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black whitespace-nowrap tabular-nums ${isActive ? 'bg-orange-600 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}>
                               {slot.startTime} — {slot.endTime}
                             </div>
-                            <div className={`px-2 py-0.5 md:py-1 text-[11px] sm:text-xs font-medium rounded-md ${isActive ? 'bg-orange-500 text-white animate-pulse' : isFinished ? 'bg-slate-200 dark:bg-white/10 text-slate-600' : 'text-slate-400'}`}>
+                            <div className={`px-2 py-0.5 text-[9px] md:text-xs font-black uppercase tracking-widest rounded-md ${isActive ? 'text-orange-500 animate-pulse' : isFinished ? 'text-slate-400' : 'text-slate-300'}`}>
                               {statusLabel}
                             </div>
                           </div>
 
-                          <div>
-                            <h4 className={`text-sm md:text-xl font-medium leading-tight mb-1 md:mb-2 ${isActive ? 'text-orange-500' : isBreak ? 'text-slate-400' : 'text-slate-800 dark:text-white'}`}>
+                          <div className="min-w-0">
+                            <h4 className={`text-sm md:text-xl font-bold leading-tight mb-0.5 md:mb-2 truncate ${isActive ? 'text-orange-600' : isBreak ? 'text-slate-400' : 'text-slate-800 dark:text-white'}`}>
                               {slot.subject}
                             </h4>
-                            <p className="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-tight">
+                            <p className="text-[9px] md:text-xs font-bold text-slate-500 dark:text-slate-400/60 uppercase tracking-widest leading-tight truncate">
                               {isBreak ? 'Free Window' : `Room ${slot.room} • ${slot.type}`}
                             </p>
                           </div>
                         </div>
 
                         {isActive && (
-                          <div className="mt-3 md:mt-4 flex items-center gap-1.5">
-                            <span className="flex h-1 w-1 md:h-1.5 md:w-1.5 relative">
+                          <div className="mt-2 md:mt-4 flex items-center gap-1.5 overflow-hidden">
+                            <span className="flex h-1 w-1 md:h-1.5 md:w-1.5 relative shrink-0">
                               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75"></span>
                               <span className="relative inline-flex rounded-full h-1 w-1 md:h-1.5 md:w-1.5 bg-orange-500"></span>
                             </span>
-                            <span className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest whitespace-nowrap">Now in progress</span>
+                            <span className="text-[9px] md:text-xs font-black text-orange-600 uppercase tracking-widest truncate">Session in progress</span>
                           </div>
                         )}
                       </div>
