@@ -106,6 +106,8 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [showTopics, setShowTopics] = useState(false);
   const [isRecentSessionsExpanded, setIsRecentSessionsExpanded] = useState(false);
   const [markedForReview, setMarkedForReview] = useState<Set<number>>(new Set());
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
+  const [timeSpentByQuestion, setTimeSpentByQuestion] = useState<Record<number, number>>({});
   const resultRef = useRef<HTMLDivElement>(null);
 
   const progressPercent = useMemo(() => {
@@ -118,12 +120,31 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     if (solved) {
       setSolvedQuestionIds(new Set(JSON.parse(solved)));
     }
+    const savedBookmarks = localStorage.getItem('nexus_quiz_bookmarks');
+    if (savedBookmarks) {
+      try {
+        setBookmarkedIds(new Set(JSON.parse(savedBookmarks)));
+      } catch (e) {
+        console.error("Failed to parse bookmarks", e);
+      }
+    }
   }, []);
 
   const saveSolvedQuestions = (ids: string[]) => {
     const newSolved = new Set([...Array.from(solvedQuestionIds), ...ids]);
     setSolvedQuestionIds(newSolved);
     localStorage.setItem('quiz_solved_questions', JSON.stringify(Array.from(newSolved)));
+  };
+
+  const toggleBookmark = (id: string) => {
+    if (!id) return;
+    setBookmarkedIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) newSet.delete(id);
+      else newSet.add(id);
+      localStorage.setItem('nexus_quiz_bookmarks', JSON.stringify(Array.from(newSet)));
+      return newSet;
+    });
   };
 
   useEffect(() => {
@@ -461,6 +482,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     if (timerActive && timeLeft > 0 && !quizCompleted) {
       timer = setInterval(() => {
         setTimeLeft(prev => prev - 1);
+        setTimeSpentByQuestion(prev => ({
+          ...prev,
+          [currentQuestionIdx]: (prev[currentQuestionIdx] || 0) + 1
+        }));
       }, 1000);
     } else if (timeLeft === 0 && timerActive && !quizCompleted) {
       setQuizCompleted(true);
@@ -468,7 +493,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       showToast("Time is up!", "info");
     }
     return () => clearInterval(timer);
-  }, [timerActive, timeLeft, quizCompleted]);
+  }, [timerActive, timeLeft, quizCompleted, currentQuestionIdx]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -596,6 +621,19 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     setSelectedUnits(prev => prev.includes(unit) ? prev.filter(u => u !== unit) : [...prev, unit].sort((a, b) => a - b));
   };
 
+  const handleBackToDashboard = () => {
+    setQuizQuestions([]);
+    setQuizCompleted(false);
+    setReviewMode(false);
+    setSelectedSubject(null);
+    setUserAnswers({});
+    setTimerActive(false);
+    setQuizIdInState(null);
+    setCurrentQuestionIdx(0);
+    setTimeSpentByQuestion({});
+    navigate('/quiz');
+  };
+
   const handleGenerate = async () => {
     if (!selectedSubject || selectedUnits.length === 0) return;
     setLoading(true);
@@ -699,6 +737,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     setTimerActive(true);
     setVisitedQuestions(new Set([0]));
     setMarkedForReview(new Set());
+    setTimeSpentByQuestion({});
   };
 
   const toggleMarkForReview = () => {
@@ -902,6 +941,20 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       {q.topic}
                     </span>
                   )}
+                  
+                  <button
+                    onClick={() => toggleBookmark(q.id || '')}
+                    className={`ml-auto p-1.5 transition-all active:scale-90 ${
+                      bookmarkedIds.has(q.id || '')
+                        ? 'text-blue-500'
+                        : 'text-slate-300 dark:text-slate-600 hover:text-blue-400'
+                    }`}
+                    title={bookmarkedIds.has(q.id || '') ? 'Remove Bookmark' : 'Bookmark Question'}
+                  >
+                    <svg viewBox="0 0 24 24" fill={bookmarkedIds.has(q.id || '') ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" className="w-5 h-5">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
+                    </svg>
+                  </button>
                 </div>
 
                 <p className="text-lg md:text-xl font-light leading-relaxed text-slate-800 dark:text-slate-100">
@@ -1402,13 +1455,274 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     const percentage = totalAuto > 0 ? Math.round((score / totalAuto) * 100) : 0;
     const timeAllocated = timerMinutes * 60;
     const totalTimeTaken = timeAllocated - timeLeft;
+    const avgTimePerQuestion = quizQuestions.length > 0 ? totalTimeTaken / quizQuestions.length : 0;
 
-    const milestones = [
-      { id: '80club', label: '80% Club', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>, condition: percentage >= 80, color: 'from-orange-500 to-red-500' },
-      { id: '90club', label: '90% Club', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>, condition: percentage >= 90, color: 'from-purple-500 to-indigo-600' },
-      { id: 'perfect', label: 'Perfect Score', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0M12 9v4M12 15h.01"/></svg>, condition: percentage === 100 && totalAuto > 0, color: 'from-emerald-400 to-teal-500' },
-      { id: 'speed', label: 'Speed Demon', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>, condition: totalTimeTaken < timeAllocated / 2 && quizQuestions.length >= 5, color: 'from-yellow-400 to-orange-500' }
-    ].filter(m => m.condition);
+    const allMilestones = [
+      // COMMON 🟤
+      { label: 'Beginner', rarity: 'common', icon: 'seedling', condition: percentage >= 5 },
+      { label: 'First Step', rarity: 'common', icon: 'footsteps', condition: percentage >= 20 },
+      { label: 'Participant', rarity: 'common', icon: 'badge', condition: percentage >= 35 },
+      { label: 'Getting Started', rarity: 'common', icon: 'flag', condition: percentage >= 45 },
+      { label: 'Rookie', rarity: 'common', icon: 'star', condition: percentage >= 55 },
+
+      // UNCOMMON 🔵
+      { label: 'Learner', rarity: 'uncommon', icon: 'book', condition: percentage >= 65 },
+      { label: 'Improving', rarity: 'uncommon', icon: 'chart', condition: percentage >= 72 },
+      { label: 'Halfway Hero', rarity: 'uncommon', icon: 'hero', condition: percentage >= 75 && quizQuestions.length > 10 },
+      { label: 'Quick Thinker', rarity: 'uncommon', icon: 'bolt', condition: totalTimeTaken < timeAllocated * 0.55 && percentage >= 60 },
+      { label: 'Rising Star', rarity: 'uncommon', icon: 'upward', condition: percentage >= 78 },
+
+      // RARE 🟢
+      { label: 'Sharp Mind', rarity: 'rare', icon: 'brain', condition: percentage >= 82 },
+      { label: 'Brainiac', rarity: 'rare', icon: 'flask', condition: percentage >= 86 },
+      { label: 'Speed Runner', rarity: 'rare', icon: 'run', condition: totalTimeTaken < timeAllocated * 0.35 && percentage >= 75 },
+      { label: 'Accuracy Pro', rarity: 'rare', icon: 'target', condition: percentage >= 90 },
+      { label: 'Consistent', rarity: 'rare', icon: 'check', condition: percentage >= 80 && percentage <= 94 },
+
+      // EPIC 🟣
+      { label: 'Quiz Master', rarity: 'epic', icon: 'trophy', condition: percentage >= 94 },
+      { label: 'Knowledge Ninja', rarity: 'epic', icon: 'ninja', condition: percentage >= 97 },
+      { label: 'Precision Pro', rarity: 'epic', icon: 'bullseye', condition: percentage === 100 && totalAuto >= 10 },
+      { label: 'Lightning Fast', rarity: 'epic', icon: 'zap', condition: totalTimeTaken < timeAllocated * 0.22 && percentage >= 85 },
+      { label: 'Dominator', rarity: 'epic', icon: 'sword', condition: percentage >= 98 && totalAuto >= 20 },
+
+      // LEGENDARY 🟠
+      { label: 'Perfect Score', rarity: 'legendary', icon: 'perfect', condition: percentage === 100 && totalAuto >= 20 },
+      { label: 'Speed Demon', rarity: 'legendary', icon: 'fire', condition: totalTimeTaken < timeAllocated * 0.12 && percentage >= 90 },
+      { label: 'Quiz God', rarity: 'legendary', icon: 'crown', condition: percentage === 100 && totalTimeTaken < timeAllocated * 0.25 },
+      { label: 'Unstoppable', rarity: 'legendary', icon: 'shield', condition: percentage >= 98 && totalAuto >= 30 },
+      { label: 'Mind King', rarity: 'legendary', icon: 'throne', condition: percentage === 100 && totalAuto >= 40 }
+    ];
+
+    const rarityStyles: Record<string, string> = {
+      common: 'bg-zinc-50 border-zinc-200 dark:bg-zinc-800/40 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 shadow-sm shadow-zinc-200/5',
+      uncommon: 'bg-blue-50 border-blue-200 dark:bg-blue-500/5 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 shadow-lg shadow-blue-500/5',
+      rare: 'bg-emerald-50 border-emerald-200 dark:bg-emerald-500/5 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 shadow-lg shadow-emerald-500/5',
+      epic: 'bg-indigo-50 border-indigo-200 dark:bg-indigo-500/5 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 shadow-xl shadow-indigo-500/10',
+      legendary: 'bg-orange-50 border-orange-200 dark:bg-orange-500/5 dark:border-orange-500/20 text-orange-600 dark:text-orange-400 shadow-2xl shadow-orange-500/15'
+    };
+
+    const activeMilestones = allMilestones
+      .filter(m => m.condition)
+      .sort((a, b) => {
+        const order = { legendary: 4, epic: 3, rare: 2, uncommon: 1, common: 0 };
+        return order[b.rarity as keyof typeof order] - order[a.rarity as keyof typeof order];
+      })
+      .slice(0, 4);
+
+    const getMilestoneIcon = (icon: string) => {
+      const getIconColor = (type: string) => {
+        switch(type) {
+          case 'seedling': return 'text-emerald-500';
+          case 'footsteps': return 'text-amber-600';
+          case 'badge': return 'text-zinc-500';
+          case 'flag': return 'text-rose-500';
+          case 'star': return 'text-yellow-500';
+          case 'book': return 'text-blue-500';
+          case 'chart': return 'text-indigo-500';
+          case 'hero': return 'text-emerald-500';
+          case 'bolt': return 'text-yellow-500';
+          case 'upward': return 'text-blue-500';
+          case 'brain': return 'text-purple-500';
+          case 'flask': return 'text-emerald-400';
+          case 'run': return 'text-rose-500';
+          case 'target': return 'text-blue-500';
+          case 'check': return 'text-emerald-500';
+          case 'trophy': return 'text-amber-500';
+          case 'ninja': return 'text-indigo-400';
+          case 'bullseye': return 'text-rose-600';
+          case 'zap': return 'text-yellow-400';
+          case 'sword': return 'text-slate-500';
+          case 'perfect': return 'text-emerald-500';
+          case 'fire': return 'text-orange-600';
+          case 'crown': return 'text-amber-500';
+          case 'shield': return 'text-blue-600';
+          case 'throne': return 'text-amber-600';
+          default: return 'text-current';
+        }
+      };
+
+      const props = {
+        viewBox: "0 0 24 24",
+        width: "24",
+        height: "24",
+        fill: "none", 
+        stroke: "currentColor",
+        strokeWidth: "2.5",
+        strokeLinecap: "round" as const,
+        strokeLinejoin: "round" as const,
+        className: `w-7 h-7 transition-all duration-300 group-hover:scale-110 ${getIconColor(icon)}`
+      };
+
+      switch(icon) {
+        case 'seedling': return (
+          <svg {...props}>
+            <path d="M7 20h10" />
+            <path d="M10 20c5.5-2.5.8-6.4 3-10" />
+            <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3 1.2-.6 2.3-1.4 2.5-3.4z" />
+            <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.2 3.4-.5 4.7-1.9-1.2-.1-2.4-.6-3.6-2.1z" />
+          </svg>
+        );
+        case 'footsteps': return (
+          <svg {...props}>
+            <path d="M4 16c0 1.1.9 2 2 2s2-.9 2-2-.9-2-2-2-2 .9-2 2z" />
+            <path d="M8 14c0 1.1.9 2 2 2s2-.9 2-2-.9-2-2-2-2 .9-2 2z" />
+            <path d="M16 5c0 1.1.9 2 2 2s2-.9 2-2-.9-2-2-2-2 .9-2 2z" />
+            <path d="M12 7c0 1.1.9 2 2 2s2-.9 2-2-.9-2-2-2-2 .9-2 2z" />
+          </svg>
+        );
+        case 'brain': return (
+          <svg {...props}>
+            <path d="M9.5 2a2.5 2.5 0 0 1 0 5 2.5 2.5 0 0 1 0-5Z" />
+            <path d="M14.5 2a2.5 2.5 0 0 1 0 5 2.5 2.5 0 0 1 0-5Z" />
+            <path d="M21 15a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2Z" />
+            <path d="M7 13v-3a5 5 0 0 1 10 0v3" />
+          </svg>
+        );
+        case 'trophy': return (
+          <svg {...props}>
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+            <path d="M4 22h16" />
+            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+            <path d="M12 15V3" />
+          </svg>
+        );
+        case 'fire': return (
+          <svg {...props}>
+            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3 1.05.76 3 2.5 3 5.5s-2 5.5-4.5 5.5a4 4 0 1 1 3.5-3.5" />
+          </svg>
+        );
+        case 'crown': return (
+          <svg {...props}>
+            <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7z" />
+          </svg>
+        );
+        case 'run': return (
+          <svg {...props}>
+            <path d="M13 4l-1 2-2 1-3 1-1 2v4" />
+            <path d="M12 10a1 1 0 1 0 2 0 1 1 0 1 0-2 0z" />
+            <path d="M17 10h-2l-2-2-4 1-2 4h-2" />
+            <path d="M13 14l-2 5h-2" />
+            <path d="M12 14h2l3 3h2" />
+          </svg>
+        );
+        case 'bullseye': return (
+          <svg {...props}>
+            <circle cx="12" cy="12" r="10" />
+            <circle cx="12" cy="12" r="6" />
+            <circle cx="12" cy="12" r="2" />
+            <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+          </svg>
+        );
+        case 'perfect': return (
+          <svg {...props}>
+            <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+        );
+        case 'throne': return (
+          <svg {...props}>
+            <path d="M19 21v-4a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v4" />
+            <path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+            <path d="M17 11V7l-5-4-5 4v4h10Z" />
+            <path d="M4 21h16" />
+          </svg>
+        );
+        case 'target': return (
+          <svg {...props}>
+            <circle cx="12" cy="12" r="10" />
+            <circle cx="12" cy="12" r="6" />
+            <circle cx="12" cy="12" r="2" />
+          </svg>
+        );
+        case 'zap': return (
+          <svg {...props}>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+        );
+        case 'star': return (
+          <svg {...props}>
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+        );
+        case 'book': return (
+          <svg {...props}>
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          </svg>
+        );
+        case 'bolt': return (
+          <svg {...props}>
+            <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        );
+        case 'flag': return (
+          <svg {...props}>
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1v19" />
+          </svg>
+        );
+        case 'chart': return (
+          <svg {...props}>
+            <path d="M3 3v18h18" />
+            <path d="m19 9-5 5-4-4-3 3" />
+          </svg>
+        );
+        case 'badge': return (
+          <svg {...props}>
+            <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+          </svg>
+        );
+        case 'hero': return (
+          <svg {...props}>
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            <path d="M12 11v4" />
+          </svg>
+        );
+        case 'ninja': return (
+          <svg {...props}>
+            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Z" />
+            <path d="M12 8v4l3 3" />
+            <path d="M12 7v1" />
+          </svg>
+        );
+        case 'sword': return (
+          <svg {...props}>
+            <path d="m14.5 4 5.5 5.5L7 22.5l-5.5-5.5L14.5 4Z" />
+            <path d="m5 16 3 3" />
+          </svg>
+        );
+        case 'shield': return (
+          <svg {...props}>
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+          </svg>
+        );
+        case 'upward': return (
+          <svg {...props}>
+            <path d="M12 19V5M5 12l7-7 7 7" />
+          </svg>
+        );
+        case 'check': return (
+          <svg {...props}>
+            <path d="M20 6L9 17l-5-5" />
+          </svg>
+        );
+        case 'flask': return (
+          <svg {...props}>
+            <path d="M9 3h6v4l-4 8v5H9v-5l-4-8V3h4z" />
+            <path d="M8 3h8" />
+          </svg>
+        );
+        default: return (
+          <svg {...props}>
+            <circle cx="12" cy="12" r="10" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+        );
+      }
+    };
+
 
     return (
       <div className="font-sans text-slate-900 dark:text-white selection:bg-orange-500/30 transition-all duration-300" ref={resultRef} id="quiz-result">
@@ -1443,7 +1757,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           </div>
 
           {/* Statistics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
               <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-3 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 6L9 17l-5-5"/></svg>
@@ -1461,8 +1775,16 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             </div>
 
             <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
-              <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-600 mb-3 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+              <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 mb-3 group-hover:bg-blue-500 group-hover:text-white transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Avg Speed</span>
+              <p className="text-3xl font-black text-slate-900 dark:text-white">{Math.round(avgTimePerQuestion)}s <span className="text-[10px] text-zinc-400">/ Q</span></p>
+            </div>
+
+            <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
+              <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-600 mb-3 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               </div>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Time Taken</span>
               <p className="text-3xl font-black text-slate-900 dark:text-white">{formatTime(totalTimeTaken)}</p>
@@ -1488,7 +1810,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 Retake Quiz
               </button>
               <button 
-                onClick={() => { setQuizQuestions([]); setQuizCompleted(false); setSelectedSubject(null); navigate('/quiz'); }}
+                onClick={handleBackToDashboard}
                 className="flex-1 py-4 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl font-bold text-xs text-slate-600 dark:text-zinc-400 transition-all flex items-center justify-center gap-2 group border-none"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-orange-600 transition-colors"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></svg>
@@ -1497,20 +1819,40 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             </div>
           </div>
 
-          {/* Milestones Achieved */}
-          {milestones.length > 0 && (
-            <div className="pt-10 border-t border-zinc-100 dark:border-white/5">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Milestones Achieved</span>
-                <div className="h-px bg-zinc-100 dark:bg-white/5 flex-grow" />
+          {/* Achievements / Milestones */}
+          {activeMilestones.length > 0 && (
+            <div className="pt-8">
+              <div className="flex items-center mb-6">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest transition-all duration-500 opacity-60">Achievements Unlocked</span>
               </div>
-              <div className="flex flex-wrap gap-4">
-                {milestones.map(m => (
-                  <div key={m.id} className="flex items-center gap-3 bg-transparent group">
-                    <div className={`p-1.5 rounded-lg bg-gradient-to-br ${m.color} text-white shadow-sm`}>
-                      {m.icon}
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4">
+                {activeMilestones.map((m, idx) => (
+                  <div 
+                    key={idx}
+                    className="flex flex-col items-center text-center gap-3 transition-all duration-300 hover:scale-105 group relative"
+                  >
+                    {/* Background Glow for High Rarity */}
+                    {(m.rarity === 'epic' || m.rarity === 'legendary') && (
+                      <div className={`absolute -inset-2 opacity-0 group-hover:opacity-10 blur-xl rounded-full transition-opacity duration-500 ${
+                        m.rarity === 'legendary' ? 'bg-orange-500' : 'bg-indigo-500'
+                      }`} />
+                    )}
+                    
+                    <div className="relative p-1 transition-transform duration-500 group-hover:-translate-y-1">
+                      {getMilestoneIcon(m.icon || '')}
                     </div>
-                    <span className="text-xs font-bold text-slate-600 dark:text-zinc-400 group-hover:text-orange-600 transition-colors">{m.label}</span>
+                    
+                    <div className="relative space-y-0.5">
+                      <p className="text-[12px] font-black uppercase tracking-tight leading-none text-slate-800 dark:text-zinc-300">{m.label}</p>
+                      <p className={`text-[8px] font-black uppercase tracking-widest ${
+                        m.rarity === 'legendary' ? 'text-orange-500' :
+                        m.rarity === 'epic' ? 'text-indigo-500' :
+                        m.rarity === 'rare' ? 'text-emerald-500' :
+                        m.rarity === 'uncommon' ? 'text-blue-500' :
+                        'text-zinc-500'
+                      }`}>{m.rarity}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1540,6 +1882,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 ? (ansObj && typeof ansObj === 'object' && ansObj.passed)
                 : (!isSubjective && userAnswers[i] === q.correctAnswer);
               
+              const timeSpent = timeSpentByQuestion[i] || 0;
+              const struggleMultiplier = q.difficulty === 'Easy' ? 1.25 : q.difficulty === 'Hard' ? 2.0 : 1.5;
+              const isStruggle = timeSpent > avgTimePerQuestion * struggleMultiplier;
+              
               const statusColorOptions = isSubjective 
                 ? 'bg-orange-50/50 border-orange-200 dark:bg-orange-500/5 dark:border-orange-500/20 text-orange-600 dark:text-orange-400' 
                 : isCorrect 
@@ -1563,6 +1909,15 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest border ${badgeColors}`}>
                         {label}
                       </span>
+                      {isStruggle && (
+                        <span className="px-2 py-0.5 bg-rose-500 text-white rounded-md text-[9px] font-black uppercase tracking-widest animate-pulse shadow-sm border-none shadow-rose-500/20">
+                          Struggle Area
+                        </span>
+                      )}
+                      <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-bold text-slate-500 border border-slate-200/50 dark:border-white/10 uppercase tracking-widest flex items-center gap-1.5">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5 opacity-60"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        {timeSpent}s
+                      </span>
                       <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-bold text-slate-500 border border-slate-200/50 dark:border-white/10 uppercase tracking-widest">
                         Unit 0{q.unit}
                       </span>
@@ -1576,6 +1931,20 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           {q.questionType}
                         </span>
                       )}
+                      
+                      <button
+                        onClick={() => toggleBookmark(q.id || '')}
+                        className={`ml-auto p-1 transition-all active:scale-90 ${
+                          bookmarkedIds.has(q.id || '')
+                            ? 'text-blue-500'
+                            : 'text-slate-300 dark:text-slate-600 hover:text-blue-400'
+                        }`}
+                        title={bookmarkedIds.has(q.id || '') ? 'Remove Bookmark' : 'Bookmark Question'}
+                      >
+                        <svg viewBox="0 0 24 24" fill={bookmarkedIds.has(q.id || '') ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
+                        </svg>
+                      </button>
                     </div>
                     
                     {/* Question Text */}
