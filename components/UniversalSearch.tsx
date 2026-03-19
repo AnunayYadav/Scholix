@@ -133,30 +133,27 @@ const UniversalSearch: React.FC = () => {
       }
     });
 
-    // 3. Search AI Directory Categories
-    const matchedAiCats = new Set<string>();
-    aiTools.forEach(tool => {
-      if (
-        tool.name.toLowerCase().includes(searchLower) || 
-        tool.description.toLowerCase().includes(searchLower) || 
-        tool.category.toLowerCase().includes(searchLower) ||
-        tool.tags.some(t => t.toLowerCase().includes(searchLower))
-      ) {
-        matchedAiCats.add(tool.category);
-      }
-    });
+    // 3. Smart AI Directory Search (One result for all tool/category matches)
+    const aiModule = modules.find(m => m.id === 'ai-tools');
+    const matchesAiHub = aiTools.some(tool => 
+      tool.name.toLowerCase().includes(searchLower) || 
+      tool.description.toLowerCase().includes(searchLower) || 
+      tool.category.toLowerCase().includes(searchLower) ||
+      tool.tags.some(t => t.toLowerCase().includes(searchLower))
+    );
 
-    matchedAiCats.forEach(cat => {
+    // Only add if not already added by the name search in step 1
+    if (matchesAiHub && !newResults.find(r => r.id === 'ai-tools')) {
       newResults.push({
-        id: `ai-cat-${cat}`,
-        type: 'ai-category',
-        title: cat,
-        description: `Explore AI tools for ${cat}`,
-        path: `/ai-tools?q=${encodeURIComponent(cat)}`,
-        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-indigo-500"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><circle cx="12" cy="12" r="3"/></svg>,
-        category: 'AI Directory'
+        id: 'ai-tools-smart',
+        type: 'module',
+        title: 'AI Directory',
+        description: `Search for tools related to "${q}" in our curated library.`,
+        path: `/ai-tools?q=${encodeURIComponent(q)}`,
+        icon: aiModule?.icon || <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-indigo-500"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><circle cx="12" cy="12" r="3"/></svg>,
+        category: 'AI Store'
       });
-    });
+    }
 
     // 5. Search Rescue Line Contacts
     allDirectory.forEach(contact => {
