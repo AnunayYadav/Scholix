@@ -33,6 +33,12 @@ const parseText = (text: string | undefined) => {
   });
 };
 
+const formatTime = (seconds: number) => {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+};
+
 // Static Bank - keeping this for fallback/demo
 const PEL130_STATIC_BANK = [
   { unit: 1, question: "Fill in the blank with correct adjective order. I have bought a _________ bag.", options: ["Tiny red Prada", "Red tiny Prada", "Prada red tiny", "Prada tiny red"], answer: "Tiny red Prada" },
@@ -98,12 +104,24 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>(['MCQ', 'PYQ']);
   const [solvedQuestionIds, setSolvedQuestionIds] = useState<Set<string>>(new Set());
   const [showTopics, setShowTopics] = useState(false);
+  const [isRecentSessionsExpanded, setIsRecentSessionsExpanded] = useState(false);
+  const [bookmarkedQuestions, setBookmarkedQuestions] = useState<QuizQuestion[]>([]);
+  const [markedForReview, setMarkedForReview] = useState<Set<number>>(new Set());
   const resultRef = useRef<HTMLDivElement>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
+  const progressPercent = useMemo(() => {
+    if (quizQuestions.length === 0) return 0;
+    return Math.round(((currentQuestionIdx + 1) / quizQuestions.length) * 100);
+  }, [currentQuestionIdx, quizQuestions.length]);
 
   useEffect(() => {
     const solved = localStorage.getItem('quiz_solved_questions');
     if (solved) {
       setSolvedQuestionIds(new Set(JSON.parse(solved)));
+    }
+    const saved = localStorage.getItem('lpu_nexus_bookmarks');
+    if (saved) {
+      setBookmarkedQuestions(JSON.parse(saved));
     }
   }, []);
 
@@ -445,17 +463,17 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
   useEffect(() => {
     let timer: any;
-    if (timerActive && timeLeft > 0) {
+    if (timerActive && timeLeft > 0 && !quizCompleted) {
       timer = setInterval(() => {
         setTimeLeft(prev => prev - 1);
       }, 1000);
-    } else if (timeLeft === 0 && timerActive) {
+    } else if (timeLeft === 0 && timerActive && !quizCompleted) {
       setQuizCompleted(true);
       setTimerActive(false);
       showToast("Time is up!", "info");
     }
     return () => clearInterval(timer);
-  }, [timerActive, timeLeft]);
+  }, [timerActive, timeLeft, quizCompleted]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -685,6 +703,16 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     setTimeLeft(timerMinutes * 60);
     setTimerActive(true);
     setVisitedQuestions(new Set([0]));
+    setMarkedForReview(new Set());
+  };
+
+  const toggleMarkForReview = () => {
+    setMarkedForReview(prev => {
+      const next = new Set(prev);
+      if (next.has(currentQuestionIdx)) next.delete(currentQuestionIdx);
+      else next.add(currentQuestionIdx);
+      return next;
+    });
   };
 
   const handleAnswer = (answer: any) => {
@@ -712,20 +740,85 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     }
   };
 
-  const handleDownloadPDF = async () => {
-    if (!resultRef.current) return;
+  const toggleBookmark = (q: QuizQuestion) => {
+    const isBookmarked = bookmarkedQuestions.some(item => item.id === q.id);
+    let updated;
+    if (isBookmarked) {
+      updated = bookmarkedQuestions.filter(item => item.id !== q.id);
+      showToast("Removed from bookmarks", "info");
+    } else {
+      updated = [...bookmarkedQuestions, q];
+      showToast("Question bookmarked!", "success");
+    }
+    setBookmarkedQuestions(updated);
+    localStorage.setItem('lpu_nexus_bookmarks', JSON.stringify(updated));
+  };
+
+  const startSavedPractice = () => {
+    if (bookmarkedQuestions.length === 0) {
+      showToast("No questions bookmarked yet!", "info");
+      return;
+    }
+    setQuizQuestions(bookmarkedQuestions);
+    setSelectedSubject({ id: 'saved_pool', name: 'Saved Study Pool' } as any);
+    setTimerActive(true);
+    setTimeLeft(timerMinutes * 60);
+    setQuizCompleted(false);
+    setUserAnswers({});
+    setCurrentQuestionIdx(0);
+    setVisitedQuestions(new Set([0]));
+    setTestResults([]);
+    showToast("Launching saved practice session!", "success");
+  };
+
+  const handleExportImage = async () => {
+    if (!reportRef.current) return;
     try {
-      const canvas = await html2canvas(resultRef.current, { scale: 2 });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: [canvas.width, canvas.height]
+      showToast("Generating official transcript image...", "info");
+      
+      // Temporary display fix for capture
+      const originalDisplay = reportRef.current.style.display;
+      reportRef.current.style.display = 'block';
+
+      const canvas = await html2canvas(reportRef.current, { 
+        scale: 3, // High-res export
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        onclone: (clonedDoc) => {
+          const report = clonedDoc.getElementById('official-report-template');
+          if (report) report.style.display = 'block';
+          
+          const elements = clonedDoc.querySelectorAll('*');
+          elements.forEach((el: any) => {
+            const style = window.getComputedStyle(el);
+            ['backgroundColor', 'color', 'borderColor', 'outlineColor'].forEach(prop => {
+              const val = style.getPropertyValue(prop);
+              if (val && val.includes('oklch')) {
+                el.style[prop] = prop === 'backgroundColor' ? '#ffffff' : '#000000';
+              }
+            });
+            const bgImage = style.getPropertyValue('background-image');
+            if (bgImage && bgImage.includes('oklch')) {
+              el.style.backgroundImage = 'none';
+              el.style.backgroundColor = '#f8fafc';
+            }
+          });
+        }
       });
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save(`${selectedSubject?.name || 'Quiz'}_Results.pdf`);
+
+      // Reset display
+      reportRef.current.style.display = originalDisplay;
+      
+      const link = document.createElement('a');
+      link.download = `LPU_Nexus_Official_Transcript_${selectedSubject?.name || 'Session'}.png`;
+      link.href = canvas.toDataURL('image/png', 1.0);
+      link.click();
+      
+      showToast("Transcript image saved!", "success");
     } catch (e) {
-      showToast("Could not generate PDF. Please try printing via browser.", "error");
+      console.error(e);
+      showToast("Failed to generate report image.", "error");
     }
   };
 
@@ -800,33 +893,54 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
     return (
       <div className="max-w-[1400px] mx-auto space-y-6 animate-fade-in pb-20 px-4 md:px-10 dark:text-white">
-        {/* Professional Top Bar - Simplified Header */}
-        <header className="flex flex-wrap items-center justify-between gap-6 py-4">
-          <div className="space-y-1">
-            <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-              {isSubjectiveSection ? 'Subjective Section' : isCodingSection ? 'Coding Section' : 'MCQ Section'}
-            </h2>
-            <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-              Question <span className="text-slate-900 dark:text-white">{sectionInfo.mapping[currentQuestionIdx]}</span> / {isSubjectiveSection ? sectionInfo.totalSubjs : isCodingSection ? sectionInfo.totalCoding : sectionInfo.totalMCQs}
-            </p>
+        {/* Modern Unified Header: Section Info & Progress Tracking */}
+        <header className="grid grid-cols-1 lg:grid-cols-12 gap-8 py-4 pt-10">
+          {/* Aligned with Question Box (lg:col-span-8) */}
+          <div className="lg:col-span-8 px-4 md:px-0">
+            {/* Extremely Compact Progress Indicator - Matching Reference with LPU Nexus Theme */}
+            <div className="glass-panel p-5 px-8 rounded-3xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 shadow-sm space-y-3">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  {isSubjectiveSection ? 'Subjective' : isCodingSection ? 'Coding' : 'MCQ'} Section
+                </span>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                    Question {currentQuestionIdx + 1} of {quizQuestions.length}
+                  </h3>
+                  <span className="text-base font-bold text-orange-500">{progressPercent}%</span>
+                </div>
+              </div>
+
+              <div className="h-2 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden relative">
+                <div 
+                  className="h-full bg-orange-500 rounded-full transition-all duration-1000 ease-out" 
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* Actions Column (Timer & Submit) */}
+          <div className="lg:col-span-4 flex items-center justify-end gap-3 px-4 md:px-0">
             {timerActive && (
-              <div className="flex items-center gap-3 px-6 h-11 rounded-2xl bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/5 shadow-inner transition-colors">
+              <div className="flex items-center gap-3 px-5 h-11 rounded-2xl bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 backdrop-blur-md shadow-sm">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`w-4 h-4 ${timeLeft < 60 ? 'text-red-500 animate-pulse' : 'text-orange-500'}`}>
                   <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
                 </svg>
-                <p className={`text-base font-bold tabular-nums transition-colors ${timeLeft < 60 ? 'text-red-500' : 'text-slate-900 dark:text-slate-100'}`}>
+                <p className={`text-[15px] font-bold tabular-nums ${timeLeft < 60 ? 'text-red-500' : 'text-slate-900 dark:text-slate-100'}`}>
                   {formatTime(timeLeft)}
                 </p>
               </div>
             )}
+            
             <button
               onClick={() => setQuizCompleted(true)}
-              className="px-8 h-11 bg-emerald-500 text-white rounded-2xl text-[13px] font-bold hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center justify-center"
+              className="px-6 h-11 bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white rounded-2xl text-[14px] font-semibold transition-all shadow-lg shadow-emerald-500/10 active:scale-95 flex items-center gap-2 whitespace-nowrap group"
             >
-              Submit Test
+              <span>Submit Test</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5 opacity-80 transition-transform group-hover:translate-x-1">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
             </button>
           </div>
         </header>
@@ -835,6 +949,21 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           {/* Main Question Area */}
           <div className="lg:col-span-8 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
             <div className="glass-panel p-10 md:p-12 rounded-[48px] shadow-2xl bg-white/80 dark:bg-slate-900/50 border-slate-200 dark:border-white/5 relative">
+              {/* Bookmark Button - Top Right */}
+              <div className="absolute top-8 md:top-10 right-8 md:right-10 z-10">
+                <button 
+                  onClick={() => toggleBookmark(quizQuestions[currentQuestionIdx])}
+                  className={`flex items-center justify-center w-10 h-10 transition-all active:scale-90 ${
+                    bookmarkedQuestions.some(item => (item.id === quizQuestions[currentQuestionIdx].id || item.question === quizQuestions[currentQuestionIdx].question))
+                      ? 'text-orange-600'
+                      : 'text-slate-400 dark:text-zinc-600 hover:text-orange-500/70'
+                  }`}
+                  title="Bookmark Question"
+                >
+                  <svg viewBox="0 0 24 24" fill={bookmarkedQuestions.some(item => (item.id === quizQuestions[currentQuestionIdx].id || item.question === quizQuestions[currentQuestionIdx].question)) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
+                </button>
+              </div>
+
               <div className="space-y-10">
                 <div className="flex items-center flex-wrap gap-3">
                   <span className="bg-orange-600/10 dark:bg-orange-600/20 text-orange-600 dark:text-orange-500 px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest">Question {sectionInfo.mapping[currentQuestionIdx]}</span>
@@ -1149,7 +1278,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 )}
 
                 {/* Internal Navigation Buttons */}
-                <div className="pt-10 border-t border-white/5 flex items-center justify-between">
+                <div className="pt-10 border-t border-white/5 flex items-center justify-between gap-4 flex-wrap">
                   <button
                     disabled={currentQuestionIdx === 0}
                     onClick={() => {
@@ -1163,13 +1292,28 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M15 18l-6-6 6-6" /></svg>
                     Previous
                   </button>
-                  <button
-                    onClick={nextQuestion}
-                    className="flex items-center gap-2 px-8 py-2.5 bg-orange-600 text-white rounded-xl text-xs font-semibold shadow-lg shadow-orange-600/20 active:scale-95 transition-all"
-                  >
-                    {currentQuestionIdx === quizQuestions.length - 1 ? 'Finish Test' : 'Next'}
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M9 18l6-6-6-6" /></svg>
-                  </button>
+                  
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={toggleMarkForReview}
+                      className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-semibold transition-all active:scale-95 border ${
+                        markedForReview.has(currentQuestionIdx)
+                          ? 'bg-purple-600 text-white border-purple-600 shadow-lg shadow-purple-600/20'
+                          : 'bg-white dark:bg-white/5 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-white/10 hover:bg-purple-50 dark:hover:bg-purple-500/10'
+                      }`}
+                    >
+                      <svg viewBox="0 0 24 24" fill={markedForReview.has(currentQuestionIdx) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7" /></svg>
+                      {markedForReview.has(currentQuestionIdx) ? 'Flagged' : 'Mark for Review'}
+                    </button>
+                    
+                    <button
+                      onClick={nextQuestion}
+                      className="flex items-center gap-2 px-8 py-2.5 bg-orange-600 text-white rounded-xl text-xs font-semibold shadow-lg shadow-orange-600/20 active:scale-95 transition-all hover:bg-orange-500"
+                    >
+                      {currentQuestionIdx === quizQuestions.length - 1 ? 'Finish Test' : 'Next'}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M9 18l6-6-6-6" /></svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1182,20 +1326,21 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               {/* Section 1: Objective */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <div className={`w-1 h-4 rounded-full ${!isSubjectiveSection ? 'bg-orange-600 shadow-[0_0_8px_#ea580c]' : 'bg-slate-300 dark:bg-slate-700'}`} />
-                  <span className={`text-[13px] font-semibold uppercase tracking-widest ${!isSubjectiveSection ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-600'}`}>Section 1: Objective</span>
+                  <div className={`w-1 h-4 rounded-full ${(!isSubjectiveSection && !isCodingSection) ? 'bg-orange-600 shadow-[0_0_8px_#ea580c]' : 'bg-slate-300 dark:bg-slate-700'}`} />
+                  <span className={`text-[13px] font-semibold uppercase tracking-widest ${(!isSubjectiveSection && !isCodingSection) ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-600'}`}>Section 1: Objective</span>
                 </div>
                 <div className="grid grid-cols-5 gap-2.5">
                   {quizQuestions.map((q, idx) => {
                     if (q.type === 'subjective' || q.type === 'coding') return null;
                     const isAnswered = userAnswers[idx] !== undefined;
                     const isVisited = visitedQuestions.has(idx);
+                    const isMarked = markedForReview.has(idx);
                     const isCurrent = currentQuestionIdx === idx;
 
                     let bgColor = "bg-slate-100 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500";
-                    if (isCurrent) bgColor = "bg-orange-500 text-white shadow-[0_0_15px_rgba(234,88,12,0.3)]";
-                    else if (isAnswered) bgColor = "bg-emerald-500 text-white";
-                    else if (isVisited) bgColor = "bg-red-500 text-white";
+                    if (isMarked) bgColor = "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.3)]";
+                    else if (isAnswered) bgColor = "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]";
+                    else if (isVisited) bgColor = "bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.2)]";
 
                     return (
                       <button
@@ -1205,9 +1350,12 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           setIsShowingExplanation(false);
                           setVisitedQuestions(prev => new Set(prev).add(idx));
                         }}
-                        className={`h-11 w-full rounded-xl flex items-center justify-center text-xs font-semibold transition-all border-2 ${isCurrent ? 'border-orange-400' : 'border-transparent'} ${bgColor}`}
+                        className={`h-11 w-full rounded-xl flex items-center justify-center text-xs font-bold transition-all border-2 relative ${isCurrent ? 'border-orange-400 scale-105 z-10' : 'border-transparent'} ${bgColor}`}
                       >
                         {sectionInfo.mapping[idx]}
+                        {isMarked && isAnswered && (
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900" />
+                        )}
                       </button>
                     );
                   })}
@@ -1226,12 +1374,13 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       if (q.type !== 'subjective') return null;
                       const isAnswered = userAnswers[idx] !== undefined;
                       const isVisited = visitedQuestions.has(idx);
+                      const isMarked = markedForReview.has(idx);
                       const isCurrent = currentQuestionIdx === idx;
 
-                      let bgColor = "bg-slate-100 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500";
-                      if (isCurrent) bgColor = "bg-orange-500 text-white shadow-[0_0_15px_rgba(234,88,12,0.3)]";
-                      else if (isAnswered) bgColor = "bg-emerald-500 text-white";
-                      else if (isVisited) bgColor = "bg-red-500 text-white";
+                      let bgColor = "bg-zinc-100 dark:bg-white/5 text-slate-400 dark:text-zinc-500";
+                      if (isMarked) bgColor = "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.3)]";
+                      else if (isAnswered) bgColor = "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]";
+                      else if (isVisited) bgColor = "bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.2)]";
 
                       return (
                         <button
@@ -1241,9 +1390,12 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                             setIsShowingExplanation(false);
                             setVisitedQuestions(prev => new Set(prev).add(idx));
                           }}
-                          className={`h-11 w-full rounded-xl flex items-center justify-center text-xs font-bold transition-all border-2 ${isCurrent ? 'border-orange-400' : 'border-transparent'} ${bgColor}`}
+                          className={`h-11 w-full rounded-xl flex items-center justify-center text-xs font-bold transition-all border-2 relative ${isCurrent ? 'border-orange-400 scale-105 z-10' : 'border-transparent'} ${bgColor}`}
                         >
                           {sectionInfo.mapping[idx]}
+                          {isMarked && isAnswered && (
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900" />
+                          )}
                         </button>
                       );
                     })}
@@ -1262,14 +1414,15 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     {quizQuestions.map((q, idx) => {
                       if (q.type !== 'coding') return null;
                       const ans = userAnswers[idx];
-                      const isPassed = ans && typeof ans === 'object' && ans.passed === true;
+                      const isAnswered = ans && (typeof ans === 'object' ? ans.passed === true : !!ans);
                       const isVisited = visitedQuestions.has(idx);
+                      const isMarked = markedForReview.has(idx);
                       const isCurrent = currentQuestionIdx === idx;
 
                       let bgColor = "bg-slate-100 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500";
-                      if (isCurrent) bgColor = "bg-orange-500 text-white shadow-[0_0_15px_rgba(234,88,12,0.3)]";
-                      else if (isPassed) bgColor = "bg-emerald-500 text-white";
-                      else if (isVisited) bgColor = "bg-red-500 text-white";
+                      if (isMarked) bgColor = "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.3)]";
+                      else if (isAnswered) bgColor = "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]";
+                      else if (isVisited) bgColor = "bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.2)]";
 
                       return (
                         <button
@@ -1279,9 +1432,12 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                             setIsShowingExplanation(false);
                             setVisitedQuestions(prev => new Set(prev).add(idx));
                           }}
-                          className={`h-11 w-full rounded-xl flex items-center justify-center text-xs font-bold transition-all border-2 ${isCurrent ? 'border-orange-400' : 'border-transparent'} ${bgColor}`}
+                          className={`h-11 w-full rounded-xl flex items-center justify-center text-xs font-bold transition-all border-2 relative ${isCurrent ? 'border-orange-400 scale-105 z-10' : 'border-transparent'} ${bgColor}`}
                         >
                           {sectionInfo.mapping[idx]}
+                          {isMarked && isAnswered && (
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900" />
+                          )}
                         </button>
                       );
                     })}
@@ -1291,19 +1447,29 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             </div>
 
             <div className="pt-6 border-t border-white/5">
-              {/* Legend Only */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-lg bg-emerald-500" />
-                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Answered</span>
+              {/* Legend with matching specifications */}
+              <div className="grid grid-cols-2 gap-y-3 gap-x-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3.5 h-3.5 rounded-lg bg-emerald-500" />
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none">Answered</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-lg bg-red-500" />
-                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Not Answered</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-3.5 h-3.5 rounded-lg bg-red-500" />
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none">Visited</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-lg bg-orange-500 shadow-[0_0_8px_#ea580c]" />
-                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Active Question</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-3.5 h-3.5 rounded-lg bg-zinc-100 dark:bg-white/5" />
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest leading-none">Not Visited</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3.5 h-3.5 rounded-lg bg-purple-600" />
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none">Review</span>
+                </div>
+                <div className="flex items-center gap-2 col-span-2">
+                  <div className="relative w-3.5 h-3.5 rounded-lg bg-purple-600">
+                    <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full border border-white dark:border-slate-900" />
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none">Answered & Marked</span>
                 </div>
               </div>
             </div>
@@ -1315,116 +1481,334 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
   if (quizCompleted || reviewMode) {
     const autoGradableQuestions = quizQuestions.filter(q => q.type !== 'subjective');
-    const autoGradableCount = autoGradableQuestions.length;
-    const rawPercentage = autoGradableCount > 0 ? (score / autoGradableCount) * 100 : 0;
-    const percentage = Math.max(0, Math.round(rawPercentage));
+    const totalAuto = autoGradableQuestions.length;
+    const percentage = totalAuto > 0 ? Math.round((score / totalAuto) * 100) : 0;
+    const timeAllocated = timerMinutes * 60;
+    const totalTimeTaken = timeAllocated - timeLeft;
+
+    const milestones = [
+      { id: '80club', label: '80% Club', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>, condition: percentage >= 80, color: 'from-orange-500 to-red-500' },
+      { id: '90club', label: '90% Club', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>, condition: percentage >= 90, color: 'from-purple-500 to-indigo-600' },
+      { id: 'perfect', label: 'Perfect Score', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0M12 9v4M12 15h.01"/></svg>, condition: percentage === 100 && totalAuto > 0, color: 'from-emerald-400 to-teal-500' },
+      { id: 'speed', label: 'Speed Demon', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>, condition: totalTimeTaken < timeAllocated / 2 && quizQuestions.length >= 5, color: 'from-yellow-400 to-orange-500' }
+    ].filter(m => m.condition);
+
     return (
-      <div className="max-w-5xl mx-auto py-12 space-y-12 animate-fade-in pb-32 px-4 md:px-0" ref={resultRef} id="quiz-result">
-        {/* Professional Result Header */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Score Card */}
-          <div className="lg:col-span-5 relative overflow-hidden glass-panel rounded-[40px] p-10 flex flex-col items-center justify-center text-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white border border-white/10 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
-            <div className="relative z-10 space-y-6 w-full">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-2">
-                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-                <span className="text-xs font-semibold text-slate-300 uppercase tracking-widest">Performance Report</span>
+      <div className="font-sans text-slate-900 dark:text-white selection:bg-orange-500/30 transition-all duration-300" ref={resultRef} id="quiz-result">
+        <div className="max-w-4xl mx-auto py-12 px-6 space-y-12 animate-fade-in bg-white dark:bg-transparent rounded-[56px] border-none shadow-none">
+          {/* Formal Report Card Area */}
+          <div className="text-center space-y-4 mb-2">
+            <div className="flex items-center justify-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center text-white shadow-xl shadow-orange-600/20">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
               </div>
-              
-              <div className="flex items-baseline justify-center">
-                <span className="text-7xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-slate-400">{score}</span>
-                <span className="text-3xl font-bold text-slate-500 ml-2">/ {quizQuestions.filter(q => q.type !== 'subjective').length}</span>
-              </div>
-              
-              <div className="inline-block px-8 py-3 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-md shadow-inner">
-                <p className="text-sm font-bold tracking-wide">
-                  {percentage >= 80 ? '🎯 Mastered Performance' : percentage >= 60 ? '⚡ Proficient Understanding' : '📚 Learning Phase'}
-                </p>
-              </div>
-              
-              <p className="text-xs font-medium text-slate-400 max-w-[240px] mx-auto leading-relaxed pt-4 border-t border-white/10">
-                You've completed the assessment for <span className="text-white font-bold">{selectedSubject?.name || 'this test'}</span>.
-              </p>
+              <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Nexus <span className="text-orange-600">Report</span></h1>
             </div>
-            
-            {/* Immersive Background elements */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/20 blur-[100px] rounded-full mix-blend-screen" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/20 blur-[100px] rounded-full mix-blend-screen" />
-            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
-          </div>
-
-          {/* Detailed Breakdown */}
-          <div className="lg:col-span-7 glass-panel p-8 md:p-10 rounded-[40px] shadow-xl bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 flex flex-col justify-between space-y-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Unit Analysis</h3>
-                <p className="text-xs font-medium text-slate-500 mt-1">Breakdown of your performance by topic</p>
-              </div>
-              <button onClick={handleDownloadPDF} className="group flex items-center gap-2 px-5 py-2.5 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 rounded-xl text-sm font-semibold hover:bg-orange-600 hover:text-white transition-all shadow-sm border border-orange-200 dark:border-orange-500/20 hover:border-orange-600">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 transition-transform group-hover:-translate-y-0.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
-                Export PDF
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 flex-1">
-              {unitAnalysis.map((u, i) => (
-                <div key={i} className="group bg-slate-50 dark:bg-white/[0.02] p-4 rounded-2xl border border-slate-100 dark:border-white/5 transition-all hover:border-slate-300 dark:hover:border-white/10">
-                  <div className="flex justify-between items-end mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${u.accuracy >= 70 ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' : u.accuracy >= 40 ? 'bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400' : 'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400'}`}>
-                        0{u.unit}
-                      </div>
-                      <div>
-                        <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-0.5">Unit</span>
-                        <span className="text-sm md:text-base font-semibold text-slate-900 dark:text-white leading-tight block">Conceptual Application</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-lg font-bold text-slate-900 dark:text-white">{u.accuracy}%</span>
-                      <span className="text-xs font-medium text-slate-500 block">{u.correct}/{u.total} Correct</span>
-                    </div>
-                  </div>
-                  <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full transition-all duration-1000 origin-left ${u.accuracy >= 70 ? 'bg-emerald-500' : u.accuracy >= 40 ? 'bg-orange-500' : 'bg-red-500'}`}
-                      style={{ width: `${u.accuracy}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-6 border-t border-slate-200 dark:border-white/10 flex flex-wrap gap-4">
-              <button
-                onClick={handleGenerate}
-                className="flex-1 min-w-[140px] px-6 py-4 bg-orange-600 text-white rounded-2xl text-sm font-semibold shadow-[0_8px_20px_-8px_#ea580c] hover:shadow-[0_8px_25px_-5px_#ea580c] hover:-translate-y-0.5 active:translate-y-0 transition-all border-none flex items-center justify-center gap-2"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
-                Re-take Quiz
-              </button>
-              <button
-                onClick={() => { setQuizQuestions([]); setQuizCompleted(false); setSelectedSubject(null); }}
-                className="flex-1 min-w-[140px] px-6 py-4 glass-panel bg-white/50 dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-2xl text-sm font-semibold border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-white/10 transition-all flex items-center justify-center gap-2"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
-                Return Home
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Question Review Section */}
-        <div className="space-y-8 pt-8 border-t border-slate-200 dark:border-white/10">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Question Review</h3>
-              <p className="text-sm font-medium text-slate-500 mt-1">Detailed evaluation of your answers</p>
-            </div>
-            <div className="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 inline-flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{quizQuestions.length} Items Total</span>
+            <div className="flex items-center justify-center gap-4 text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-y border-zinc-100 dark:border-white/5 py-3">
+              <span>Student ID: V-NEXUS</span>
+              <span className="w-1 h-1 rounded-full bg-orange-500 opacity-30" />
+              <span>Session: {new Date().toLocaleDateString()}</span>
+              <span className="w-1 h-1 rounded-full bg-orange-500 opacity-30" />
+              <span>Status: Finalized</span>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 gap-6">
+          {/* Centered Results Header */}
+          <div className="text-center space-y-6">
+            <div className="relative inline-block">
+               <div className="absolute inset-0 bg-orange-600/10 blur-[40px] rounded-full animate-pulse" />
+               <div className="relative w-14 h-14 mx-auto bg-transparent flex items-center justify-center shadow-lg">
+                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-orange-600">
+                   <path d="M6 9l6 6 6-6" className="transform rotate-180 origin-center" /><path d="M12 15V3" className="transform rotate-180 origin-center" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" className="transform rotate-180 origin-center" />
+                 </svg>
+                 <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-orange-600 rounded-full flex items-center justify-center">
+                   <svg viewBox="0 0 24 24" fill="currentColor" className="w-2.5 h-2.5 text-white"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                 </div>
+               </div>
+            </div>
+
+            <div className="space-y-3">
+              <h1 className="text-3xl md:text-5xl font-black tracking-tight">
+                <span className="text-orange-600">{percentage}%</span> <span className="text-zinc-300">/</span> <span className="text-slate-900 dark:text-white">
+                  {percentage >= 90 ? 'Outstanding!' : percentage >= 80 ? 'Great job!' : percentage >= 60 ? 'Good Effort!' : 'Keep Pushing!'}
+                </span>
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-sm max-w-xl mx-auto leading-relaxed">
+                {percentage >= 80 
+                  ? `You've outperformed ${Math.min(99, 70 + Math.floor(percentage / 4))}% of users in ${selectedSubject?.name}. Mastery achieved.`
+                  : `Steady progress in ${selectedSubject?.name}. Review the detailed breakdown below to polish your skills.`}
+              </p>
+            </div>
+          </div>
+
+          {/* Statistics Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
+              <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-3 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 6L9 17l-5-5"/></svg>
+              </div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Correct</span>
+              <p className="text-3xl font-black text-slate-900 dark:text-white">{score}/{totalAuto}</p>
+            </div>
+
+            <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
+              <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-600 mb-3 group-hover:bg-red-500 group-hover:text-white transition-colors">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Incorrect</span>
+              <p className="text-3xl font-black text-slate-900 dark:text-white">{totalAuto - score}</p>
+            </div>
+
+            <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
+              <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-600 mb-3 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Time Taken</span>
+              <p className="text-3xl font-black text-slate-900 dark:text-white">{formatTime(totalTimeTaken)}</p>
+            </div>
+          </div>
+
+          {/* Official Image Transcript Template (Capture Only) */}
+          <div style={{ display: 'none' }} aria-hidden="true">
+            <div 
+              id="official-report-template" 
+              ref={reportRef}
+            >
+              <div className="flex justify-between items-start border-b-4 border-orange-600 pb-8">
+                <div className="space-y-2">
+                   <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-orange-600 flex items-center justify-center text-white">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                      </div>
+                      <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tighter">Nexus <span className="text-orange-600">Official</span></h1>
+                   </div>
+                   <p className="text-sm font-bold text-slate-400 tracking-widest uppercase">Performance Transcript</p>
+                </div>
+                <div className="text-right space-y-1">
+                   <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest">Verification ID</p>
+                   <p className="text-lg font-mono font-bold text-slate-900">#{Math.random().toString(36).substring(7).toUpperCase()}</p>
+                   <p className="text-[10px] text-slate-400 font-bold">{new Date().toDateString()}</p>
+                </div>
+              </div>
+
+              <div className="py-10 text-center space-y-10">
+                <div className="space-y-2">
+                   <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Academic Mastery Scale</p>
+                   <div className="text-[120px] font-black text-slate-900 leading-none tracking-tighter">
+                      {percentage}<span className="text-orange-600 font-light">%</span>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+                   <div className="p-6 bg-slate-50 rounded-3xl text-center">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Subject</p>
+                      <p className="text-lg font-black text-slate-900 truncate">{selectedSubject?.name}</p>
+                   </div>
+                   <div className="p-6 bg-slate-50 rounded-3xl text-center">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Time Spent</p>
+                      <p className="text-lg font-black text-slate-900">{formatTime(totalTimeTaken)}</p>
+                   </div>
+                </div>
+
+                {milestones.length > 0 && (
+                  <div className="space-y-4 pt-6">
+                    <p className="text-xs font-black text-orange-600 uppercase tracking-widest">Achieved Badges</p>
+                    <div className="flex flex-wrap justify-center gap-6">
+                       {milestones.map(m => (
+                         <div key={m.id} className="flex flex-col items-center gap-2">
+                            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${m.color} flex items-center justify-center text-white shadow-lg`}>
+                               {m.icon}
+                            </div>
+                            <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight">{m.label}</span>
+                         </div>
+                       ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-8 border-t border-slate-100 flex justify-between items-end">
+                 <div className="space-y-4">
+                    <div className="flex gap-2">
+                       {Array.from({length: 32}).map((_, i) => (
+                         <div key={i} className="w-1 h-4 bg-slate-100 rounded-full" />
+                       ))}
+                    </div>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Authenticated via Nexus Assessment Engine v3.1</p>
+                 </div>
+                 <div className="w-24 h-24 bg-slate-50 rounded-2xl border-2 border-slate-100 flex items-center justify-center">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-16 h-16 text-slate-200"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2" /><rect x="7" y="7" width="10" height="10" rx="1" /><path d="M12 7v10M7 12h10" /></svg>
+                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Official Image Transcript Template (Capture Only) */}
+          <div style={{ display: 'none' }} aria-hidden="true">
+            <div 
+              id="official-report-template" 
+              ref={reportRef}
+              className="w-[840px] bg-white p-14 space-y-10 border-[24px] border-slate-50 relative"
+            >
+              <div className="flex justify-between items-start border-b-8 border-orange-600 pb-10">
+                <div className="space-y-3">
+                   <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-3xl bg-orange-600 flex items-center justify-center text-white shadow-xl shadow-orange-600/30">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                      </div>
+                      <h1 className="text-5xl font-black text-slate-900 uppercase tracking-tighter">Nexus <span className="text-orange-600">Official</span></h1>
+                   </div>
+                   <p className="text-sm font-black text-slate-400 tracking-[0.4em] uppercase">Academic Performance Transcript</p>
+                </div>
+                <div className="text-right space-y-1">
+                   <div className="bg-orange-600/5 px-4 py-2 rounded-2xl border border-orange-600/10">
+                      <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest">Verification ID</p>
+                      <p className="text-xl font-mono font-black text-slate-900">#NEX-{Math.random().toString(36).substring(7).toUpperCase()}</p>
+                   </div>
+                   <p className="text-xs text-slate-400 font-bold mt-2">{new Date().toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
+                </div>
+              </div>
+
+              <div className="py-12 text-center space-y-12">
+                <div className="relative inline-block">
+                   <div className="absolute -inset-10 bg-orange-600/5 blur-3xl rounded-full" />
+                   <div className="relative space-y-1">
+                      <p className="text-sm font-black text-slate-400 uppercase tracking-[0.3em]">Overall Mastery Score</p>
+                      <div className="text-[140px] font-black text-slate-900 leading-none tracking-tighter flex items-center justify-center">
+                         {percentage}<span className="text-orange-600 font-light text-7xl">%</span>
+                      </div>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-6">
+                   <div className="p-8 bg-slate-50 rounded-[32px] text-center border border-slate-100">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Subject</p>
+                      <p className="text-xl font-black text-slate-900">{selectedSubject?.name}</p>
+                   </div>
+                   <div className="p-8 bg-slate-50 rounded-[32px] text-center border border-slate-100">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Accuracy</p>
+                      <p className="text-xl font-black text-slate-900">{score}/{totalAuto}</p>
+                   </div>
+                   <div className="p-8 bg-slate-50 rounded-[32px] text-center border border-slate-100">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Efficiency</p>
+                      <p className="text-xl font-black text-slate-900">{formatTime(totalTimeTaken)}</p>
+                   </div>
+                </div>
+
+                {milestones.length > 0 && (
+                  <div className="space-y-6 pt-8">
+                    <div className="flex items-center gap-4 justify-center">
+                       <div className="h-px bg-slate-200 flex-1 max-w-xs" />
+                       <p className="text-xs font-black text-orange-600 uppercase tracking-[0.2em]">Earned Achievements</p>
+                       <div className="h-px bg-slate-200 flex-1 max-w-xs" />
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-8 pt-4">
+                       {milestones.map(m => (
+                         <div key={m.id} className="flex flex-col items-center gap-3">
+                            <div className={`w-16 h-16 rounded-[24px] bg-gradient-to-br ${m.color} flex items-center justify-center text-white shadow-xl shadow-orange-600/10`}>
+                               {m.icon}
+                            </div>
+                            <span className="text-xs font-black text-slate-900 uppercase tracking-tighter">{m.label}</span>
+                         </div>
+                       ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-12 border-t border-slate-100 flex justify-between items-end">
+                 <div className="space-y-5">
+                    <div className="flex gap-1.5">
+                       {Array.from({length: 40}).map((_, i) => (
+                         <div key={i} className="w-1 h-5 bg-slate-100 rounded-full" />
+                       ))}
+                    </div>
+                    <div className="space-y-1">
+                       <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">LPU Nexus Assessment Engine v4.0</p>
+                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Verified Digital Credential • Non-Transferable</p>
+                    </div>
+                 </div>
+                 <div className="w-28 h-28 bg-white rounded-3xl border-4 border-slate-50 flex items-center justify-center relative group">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-16 h-16 text-slate-300"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2" /><rect x="7" y="7" width="10" height="10" rx="1" /><path d="M12 7v10M7 12h10" /></svg>
+                    <div className="absolute inset-0 bg-transparent flex items-center justify-center">
+                       <p className="text-[8px] font-black font-mono text-slate-400 rotate-90">VERIFIED</p>
+                    </div>
+                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="flex flex-col items-center gap-6">
+            <button 
+              onClick={handleExportImage}
+              className="w-full max-w-lg py-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-base shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-3 active:scale-[0.98] mb-2"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+              <span>Download Official Transcript Image</span>
+            </button>
+
+            <button 
+              onClick={() => document.getElementById('question-review-section')?.scrollIntoView({ behavior: 'smooth' })}
+              className="w-full max-w-lg py-5 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl font-bold text-base shadow-lg shadow-orange-600/20 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
+            >
+              <span>Review Results</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+
+            <div className="flex gap-4 w-full max-w-lg">
+              <button 
+                onClick={handleGenerate}
+                className="flex-1 py-4 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl font-bold text-xs text-slate-600 dark:text-zinc-400 transition-all flex items-center justify-center gap-2 group border-none"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-orange-600 transition-colors"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+                Retake Quiz
+              </button>
+              <button 
+                onClick={() => { setQuizQuestions([]); setQuizCompleted(false); setSelectedSubject(null); navigate('/quiz'); }}
+                className="flex-1 py-4 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl font-bold text-xs text-slate-600 dark:text-zinc-400 transition-all flex items-center justify-center gap-2 group border-none"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-orange-600 transition-colors"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></svg>
+                Dashboard
+              </button>
+            </div>
+          </div>
+
+          {/* Milestones Achieved */}
+          {milestones.length > 0 && (
+            <div className="pt-10 border-t border-zinc-100 dark:border-white/5">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Milestones Achieved</span>
+                <div className="h-px bg-zinc-100 dark:bg-white/5 flex-grow" />
+              </div>
+              <div className="flex flex-wrap gap-4">
+                {milestones.map(m => (
+                  <div key={m.id} className="flex items-center gap-3 bg-transparent group">
+                    <div className={`p-1.5 rounded-lg bg-gradient-to-br ${m.color} text-white shadow-sm`}>
+                      {m.icon}
+                    </div>
+                    <span className="text-xs font-bold text-slate-600 dark:text-zinc-400 group-hover:text-orange-600 transition-colors">{m.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+
+        {/* Question Review Section (ID for scrolling) */}
+        <div id="question-review-section" className="max-w-4xl mx-auto py-16 px-6 space-y-10">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Question Review</h3>
+              <p className="text-xs font-medium text-slate-500 mt-0.5">Evaluation of your performance per question</p>
+            </div>
+            <div className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700/50 inline-flex items-center gap-2">
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{quizQuestions.length} Items Total</span>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-4">
             {quizQuestions.map((q, i) => {
               const isSubjective = q.type === 'subjective';
               const isCoding = q.type === 'coding';
@@ -1434,45 +1818,56 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 : (!isSubjective && userAnswers[i] === q.correctAnswer);
               
               const statusColorOptions = isSubjective 
-                ? 'bg-orange-50 border-orange-200 dark:bg-orange-500/5 dark:border-orange-500/20 text-orange-600 dark:text-orange-400' 
+                ? 'bg-orange-50/50 border-orange-200 dark:bg-orange-500/5 dark:border-orange-500/20 text-orange-600 dark:text-orange-400' 
                 : isCorrect 
-                  ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-500/5 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400' 
-                  : 'bg-red-50 border-red-200 dark:bg-red-500/5 dark:border-red-500/20 text-red-600 dark:text-red-400';
+                  ? 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-500/5 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400' 
+                  : 'bg-red-50/50 border-red-200 dark:bg-red-500/5 dark:border-red-500/20 text-red-600 dark:text-red-400';
               
               const badgeColors = isSubjective 
-                ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 border-orange-200 dark:border-orange-500/30' 
+                ? 'bg-orange-100/50 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 border-orange-200 dark:border-orange-500/30' 
                 : isCorrect 
-                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30' 
-                  : 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 border-red-200 dark:border-red-500/30';
+                  ? 'bg-emerald-100/50 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30' 
+                  : 'bg-red-100/50 text-red-700 dark:bg-red-500/20 dark:text-red-400 border-red-200 dark:border-red-500/30';
               
               const label = isCoding ? (isCorrect ? 'Tests Passed' : 'Tests Failed') : (isSubjective ? 'Subjective' : (isCorrect ? 'Correct' : 'Incorrect'));
 
               return (
-                <div key={i} className={`p-6 md:p-8 rounded-[32px] border shadow-sm transition-all ${statusColorOptions}`}>
-                  <div className="flex flex-col space-y-5">
+                <div key={i} className={`p-5 md:p-6 rounded-[24px] border shadow-sm transition-all relative ${statusColorOptions}`}>
+                  {/* Bookmark Button - Top Right of Review Card */}
+                  <div className="absolute top-5 right-5 z-10">
+                    <button 
+                      onClick={() => toggleBookmark(q)}
+                      className={`p-1 transition-all active:scale-90 ${bookmarkedQuestions.some(item => (item.id === q.id || item.question === q.question)) ? 'text-orange-600' : 'text-slate-400 hover:text-orange-500/70'}`}
+                      title="Bookmark for study session"
+                    >
+                      <svg viewBox="0 0 24 24" fill={bookmarkedQuestions.some(item => (item.id === q.id || item.question === q.question)) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col space-y-4">
                     
                     {/* Header Row */}
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border ${badgeColors}`}>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest border ${badgeColors}`}>
                         {label}
                       </span>
-                      <span className="px-3 py-1 bg-white dark:bg-slate-800 rounded-lg text-[10px] font-bold text-slate-500 border border-slate-200 dark:border-slate-700 uppercase tracking-wider shadow-sm">
+                      <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-bold text-slate-500 border border-slate-200/50 dark:border-white/10 uppercase tracking-widest">
                         Unit 0{q.unit}
                       </span>
                       {q.difficulty && (
-                        <span className="px-3 py-1 bg-white dark:bg-slate-800 rounded-lg text-[10px] font-bold text-slate-500 border border-slate-200 dark:border-slate-700 uppercase tracking-wider shadow-sm">
+                        <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-bold text-slate-500 border border-slate-200/50 dark:border-white/10 uppercase tracking-widest">
                           {q.difficulty}
                         </span>
                       )}
                       {q.questionType && (
-                        <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/10 rounded-lg text-[10px] font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 uppercase tracking-wider shadow-sm">
+                        <span className="px-2 py-0.5 bg-zinc-100/50 dark:bg-white/10 rounded-md text-[9px] font-bold text-zinc-600 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/10 uppercase tracking-widest">
                           {q.questionType}
                         </span>
                       )}
                     </div>
                     
                     {/* Question Text */}
-                    <h4 className="text-base md:text-lg font-bold text-slate-800 dark:text-slate-100 leading-relaxed">
+                    <h4 className="text-sm md:text-base font-bold text-slate-800 dark:text-slate-100 leading-relaxed">
                       {parseText(q.question)}
                     </h4>
 
@@ -1558,7 +1953,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     )}
 
                     {/* Explanation Box */}
-                    <div className="mt-4 p-5 md:p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-white/5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                    <div className="mt-4 p-5 md:p-6 bg-white dark:bg-white/[0.02] rounded-2xl border border-zinc-100 dark:border-white/5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                       <div className="flex items-center gap-2 mb-3">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-slate-400"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                         <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Explanation</span>
@@ -1599,16 +1994,6 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       <div className="glass-panel p-8 md:p-12 rounded-[56px] shadow-2xl space-y-10">
         {!selectedSubject && (
           <div className="animate-fade-in space-y-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Quick Start</h3>
-                <p className="text-xs font-medium text-slate-500 mt-1">Select a subject or continue a recent session</p>
-              </div>
-              <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-orange-600/10 rounded-2xl text-orange-600 font-bold text-[10px] uppercase tracking-widest border border-orange-600/10 animate-pulse">
-                <div className="w-1.5 h-1.5 rounded-full bg-orange-600" />
-                Live Engine Active
-              </div>
-            </div>
 
             {/* Recent Quizzes Horizontal Scroll */}
             {(() => {
@@ -1616,8 +2001,15 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               if (recent.length === 0) return null;
               return (
                 <div className="space-y-4">
-                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Recent Sessions</h4>
-                  <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+                  <button 
+                    onClick={() => setIsRecentSessionsExpanded(!isRecentSessionsExpanded)}
+                    className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-orange-500 transition-colors group"
+                  >
+                    <span>Recent Sessions</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-3 h-3 transition-transform duration-300 ${isRecentSessionsExpanded ? 'rotate-180' : ''}`}><path d="M6 9l6 6 6-6" /></svg>
+                  </button>
+                  {isRecentSessionsExpanded && (
+                    <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 animate-in fade-in slide-in-from-top-2 duration-300">
                     {recent.map((q: any) => (
                       <button
                         key={q.id}
@@ -1642,10 +2034,47 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         </div>
                       </button>
                     ))}
-                  </div>
+                    </div>
+                  )}
                 </div>
               );
             })()}
+
+            {/* Refactored Saved Study Material Section - Compactized */}
+            {bookmarkedQuestions.length > 0 && (
+              <div className="animate-in fade-in slide-in-from-top-4 duration-500 pt-2">
+                <div className="bg-gradient-to-r from-orange-600/[0.07] via-orange-600/[0.03] to-transparent border border-orange-500/10 rounded-[32px] p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group transition-all hover:border-orange-500/20">
+                  <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-orange-600/5 rounded-full blur-3xl group-hover:bg-orange-600/10 transition-all duration-700" />
+                  
+                  <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left relative z-10">
+                    <div className="w-12 h-12 rounded-2xl bg-orange-600 flex items-center justify-center text-white shadow-[0_0_20px_rgba(234,88,12,0.2)]">
+                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
+                    </div>
+                    <div className="space-y-0.5">
+                      <h3 className="text-base font-black text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Saved Practice Pool</h3>
+                      <p className="text-[10px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest leading-none">Custom list with {bookmarkedQuestions.length} Bookmarks</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 relative z-10">
+                    <button 
+                      onClick={startSavedPractice}
+                      className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-lg shadow-orange-600/10 transition-all active:scale-95 flex items-center gap-2"
+                    >
+                      <span>Start practice</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                    
+                    <button 
+                      onClick={() => showToast(`${bookmarkedQuestions.length} tricky questions prepared for your session.`, "info")}
+                      className="w-10 h-10 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 hover:text-orange-500 transition-all"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
