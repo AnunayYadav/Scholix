@@ -105,10 +105,9 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [solvedQuestionIds, setSolvedQuestionIds] = useState<Set<string>>(new Set());
   const [showTopics, setShowTopics] = useState(false);
   const [isRecentSessionsExpanded, setIsRecentSessionsExpanded] = useState(false);
-  const [bookmarkedQuestions, setBookmarkedQuestions] = useState<QuizQuestion[]>([]);
   const [markedForReview, setMarkedForReview] = useState<Set<number>>(new Set());
   const resultRef = useRef<HTMLDivElement>(null);
-  const reportRef = useRef<HTMLDivElement>(null);
+
   const progressPercent = useMemo(() => {
     if (quizQuestions.length === 0) return 0;
     return Math.round(((currentQuestionIdx + 1) / quizQuestions.length) * 100);
@@ -118,10 +117,6 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
     const solved = localStorage.getItem('quiz_solved_questions');
     if (solved) {
       setSolvedQuestionIds(new Set(JSON.parse(solved)));
-    }
-    const saved = localStorage.getItem('lpu_nexus_bookmarks');
-    if (saved) {
-      setBookmarkedQuestions(JSON.parse(saved));
     }
   }, []);
 
@@ -740,85 +735,20 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     }
   };
 
-  const toggleBookmark = (q: QuizQuestion) => {
-    const isBookmarked = bookmarkedQuestions.some(item => item.id === q.id);
-    let updated;
-    if (isBookmarked) {
-      updated = bookmarkedQuestions.filter(item => item.id !== q.id);
-      showToast("Removed from bookmarks", "info");
-    } else {
-      updated = [...bookmarkedQuestions, q];
-      showToast("Question bookmarked!", "success");
-    }
-    setBookmarkedQuestions(updated);
-    localStorage.setItem('lpu_nexus_bookmarks', JSON.stringify(updated));
-  };
-
-  const startSavedPractice = () => {
-    if (bookmarkedQuestions.length === 0) {
-      showToast("No questions bookmarked yet!", "info");
-      return;
-    }
-    setQuizQuestions(bookmarkedQuestions);
-    setSelectedSubject({ id: 'saved_pool', name: 'Saved Study Pool' } as any);
-    setTimerActive(true);
-    setTimeLeft(timerMinutes * 60);
-    setQuizCompleted(false);
-    setUserAnswers({});
-    setCurrentQuestionIdx(0);
-    setVisitedQuestions(new Set([0]));
-    setTestResults([]);
-    showToast("Launching saved practice session!", "success");
-  };
-
-  const handleExportImage = async () => {
-    if (!reportRef.current) return;
+  const handleDownloadPDF = async () => {
+    if (!resultRef.current) return;
     try {
-      showToast("Generating official transcript image...", "info");
-      
-      // Temporary display fix for capture
-      const originalDisplay = reportRef.current.style.display;
-      reportRef.current.style.display = 'block';
-
-      const canvas = await html2canvas(reportRef.current, { 
-        scale: 3, // High-res export
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        onclone: (clonedDoc) => {
-          const report = clonedDoc.getElementById('official-report-template');
-          if (report) report.style.display = 'block';
-          
-          const elements = clonedDoc.querySelectorAll('*');
-          elements.forEach((el: any) => {
-            const style = window.getComputedStyle(el);
-            ['backgroundColor', 'color', 'borderColor', 'outlineColor'].forEach(prop => {
-              const val = style.getPropertyValue(prop);
-              if (val && val.includes('oklch')) {
-                el.style[prop] = prop === 'backgroundColor' ? '#ffffff' : '#000000';
-              }
-            });
-            const bgImage = style.getPropertyValue('background-image');
-            if (bgImage && bgImage.includes('oklch')) {
-              el.style.backgroundImage = 'none';
-              el.style.backgroundColor = '#f8fafc';
-            }
-          });
-        }
+      const canvas = await html2canvas(resultRef.current, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
       });
-
-      // Reset display
-      reportRef.current.style.display = originalDisplay;
-      
-      const link = document.createElement('a');
-      link.download = `LPU_Nexus_Official_Transcript_${selectedSubject?.name || 'Session'}.png`;
-      link.href = canvas.toDataURL('image/png', 1.0);
-      link.click();
-      
-      showToast("Transcript image saved!", "success");
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`${selectedSubject?.name || 'Quiz'}_Results.pdf`);
     } catch (e) {
-      console.error(e);
-      showToast("Failed to generate report image.", "error");
+      showToast("Could not generate PDF. Please try printing via browser.", "error");
     }
   };
 
@@ -949,21 +879,6 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           {/* Main Question Area */}
           <div className="lg:col-span-8 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
             <div className="glass-panel p-10 md:p-12 rounded-[48px] shadow-2xl bg-white/80 dark:bg-slate-900/50 border-slate-200 dark:border-white/5 relative">
-              {/* Bookmark Button - Top Right */}
-              <div className="absolute top-8 md:top-10 right-8 md:right-10 z-10">
-                <button 
-                  onClick={() => toggleBookmark(quizQuestions[currentQuestionIdx])}
-                  className={`flex items-center justify-center w-10 h-10 transition-all active:scale-90 ${
-                    bookmarkedQuestions.some(item => (item.id === quizQuestions[currentQuestionIdx].id || item.question === quizQuestions[currentQuestionIdx].question))
-                      ? 'text-orange-600'
-                      : 'text-slate-400 dark:text-zinc-600 hover:text-orange-500/70'
-                  }`}
-                  title="Bookmark Question"
-                >
-                  <svg viewBox="0 0 24 24" fill={bookmarkedQuestions.some(item => (item.id === quizQuestions[currentQuestionIdx].id || item.question === quizQuestions[currentQuestionIdx].question)) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
-                </button>
-              </div>
-
               <div className="space-y-10">
                 <div className="flex items-center flex-wrap gap-3">
                   <span className="bg-orange-600/10 dark:bg-orange-600/20 text-orange-600 dark:text-orange-500 px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest">Question {sectionInfo.mapping[currentQuestionIdx]}</span>
@@ -1302,8 +1217,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           : 'bg-white dark:bg-white/5 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-white/10 hover:bg-purple-50 dark:hover:bg-purple-500/10'
                       }`}
                     >
-                      <svg viewBox="0 0 24 24" fill={markedForReview.has(currentQuestionIdx) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7" /></svg>
-                      {markedForReview.has(currentQuestionIdx) ? 'Flagged' : 'Mark for Review'}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                      </svg>
+                      {markedForReview.has(currentQuestionIdx) ? 'Marked' : 'Mark for Review'}
                     </button>
                     
                     <button
@@ -1495,23 +1412,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
     return (
       <div className="font-sans text-slate-900 dark:text-white selection:bg-orange-500/30 transition-all duration-300" ref={resultRef} id="quiz-result">
-        <div className="max-w-4xl mx-auto py-12 px-6 space-y-12 animate-fade-in bg-white dark:bg-transparent rounded-[56px] border-none shadow-none">
-          {/* Formal Report Card Area */}
-          <div className="text-center space-y-4 mb-2">
-            <div className="flex items-center justify-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center text-white shadow-xl shadow-orange-600/20">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-              </div>
-              <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Nexus <span className="text-orange-600">Report</span></h1>
-            </div>
-            <div className="flex items-center justify-center gap-4 text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-y border-zinc-100 dark:border-white/5 py-3">
-              <span>Student ID: V-NEXUS</span>
-              <span className="w-1 h-1 rounded-full bg-orange-500 opacity-30" />
-              <span>Session: {new Date().toLocaleDateString()}</span>
-              <span className="w-1 h-1 rounded-full bg-orange-500 opacity-30" />
-              <span>Status: Finalized</span>
-            </div>
-          </div>
+        <div className="max-w-4xl mx-auto py-12 px-6 space-y-12 animate-fade-in">
           
           {/* Centered Results Header */}
           <div className="text-center space-y-6">
@@ -1568,186 +1469,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             </div>
           </div>
 
-          {/* Official Image Transcript Template (Capture Only) */}
-          <div style={{ display: 'none' }} aria-hidden="true">
-            <div 
-              id="official-report-template" 
-              ref={reportRef}
-            >
-              <div className="flex justify-between items-start border-b-4 border-orange-600 pb-8">
-                <div className="space-y-2">
-                   <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-orange-600 flex items-center justify-center text-white">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                      </div>
-                      <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tighter">Nexus <span className="text-orange-600">Official</span></h1>
-                   </div>
-                   <p className="text-sm font-bold text-slate-400 tracking-widest uppercase">Performance Transcript</p>
-                </div>
-                <div className="text-right space-y-1">
-                   <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest">Verification ID</p>
-                   <p className="text-lg font-mono font-bold text-slate-900">#{Math.random().toString(36).substring(7).toUpperCase()}</p>
-                   <p className="text-[10px] text-slate-400 font-bold">{new Date().toDateString()}</p>
-                </div>
-              </div>
-
-              <div className="py-10 text-center space-y-10">
-                <div className="space-y-2">
-                   <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Academic Mastery Scale</p>
-                   <div className="text-[120px] font-black text-slate-900 leading-none tracking-tighter">
-                      {percentage}<span className="text-orange-600 font-light">%</span>
-                   </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-                   <div className="p-6 bg-slate-50 rounded-3xl text-center">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Subject</p>
-                      <p className="text-lg font-black text-slate-900 truncate">{selectedSubject?.name}</p>
-                   </div>
-                   <div className="p-6 bg-slate-50 rounded-3xl text-center">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Time Spent</p>
-                      <p className="text-lg font-black text-slate-900">{formatTime(totalTimeTaken)}</p>
-                   </div>
-                </div>
-
-                {milestones.length > 0 && (
-                  <div className="space-y-4 pt-6">
-                    <p className="text-xs font-black text-orange-600 uppercase tracking-widest">Achieved Badges</p>
-                    <div className="flex flex-wrap justify-center gap-6">
-                       {milestones.map(m => (
-                         <div key={m.id} className="flex flex-col items-center gap-2">
-                            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${m.color} flex items-center justify-center text-white shadow-lg`}>
-                               {m.icon}
-                            </div>
-                            <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight">{m.label}</span>
-                         </div>
-                       ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="pt-8 border-t border-slate-100 flex justify-between items-end">
-                 <div className="space-y-4">
-                    <div className="flex gap-2">
-                       {Array.from({length: 32}).map((_, i) => (
-                         <div key={i} className="w-1 h-4 bg-slate-100 rounded-full" />
-                       ))}
-                    </div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Authenticated via Nexus Assessment Engine v3.1</p>
-                 </div>
-                 <div className="w-24 h-24 bg-slate-50 rounded-2xl border-2 border-slate-100 flex items-center justify-center">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-16 h-16 text-slate-200"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2" /><rect x="7" y="7" width="10" height="10" rx="1" /><path d="M12 7v10M7 12h10" /></svg>
-                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Official Image Transcript Template (Capture Only) */}
-          <div style={{ display: 'none' }} aria-hidden="true">
-            <div 
-              id="official-report-template" 
-              ref={reportRef}
-              className="w-[840px] bg-white p-14 space-y-10 border-[24px] border-slate-50 relative"
-            >
-              <div className="flex justify-between items-start border-b-8 border-orange-600 pb-10">
-                <div className="space-y-3">
-                   <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-3xl bg-orange-600 flex items-center justify-center text-white shadow-xl shadow-orange-600/30">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                      </div>
-                      <h1 className="text-5xl font-black text-slate-900 uppercase tracking-tighter">Nexus <span className="text-orange-600">Official</span></h1>
-                   </div>
-                   <p className="text-sm font-black text-slate-400 tracking-[0.4em] uppercase">Academic Performance Transcript</p>
-                </div>
-                <div className="text-right space-y-1">
-                   <div className="bg-orange-600/5 px-4 py-2 rounded-2xl border border-orange-600/10">
-                      <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest">Verification ID</p>
-                      <p className="text-xl font-mono font-black text-slate-900">#NEX-{Math.random().toString(36).substring(7).toUpperCase()}</p>
-                   </div>
-                   <p className="text-xs text-slate-400 font-bold mt-2">{new Date().toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
-                </div>
-              </div>
-
-              <div className="py-12 text-center space-y-12">
-                <div className="relative inline-block">
-                   <div className="absolute -inset-10 bg-orange-600/5 blur-3xl rounded-full" />
-                   <div className="relative space-y-1">
-                      <p className="text-sm font-black text-slate-400 uppercase tracking-[0.3em]">Overall Mastery Score</p>
-                      <div className="text-[140px] font-black text-slate-900 leading-none tracking-tighter flex items-center justify-center">
-                         {percentage}<span className="text-orange-600 font-light text-7xl">%</span>
-                      </div>
-                   </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-6">
-                   <div className="p-8 bg-slate-50 rounded-[32px] text-center border border-slate-100">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Subject</p>
-                      <p className="text-xl font-black text-slate-900">{selectedSubject?.name}</p>
-                   </div>
-                   <div className="p-8 bg-slate-50 rounded-[32px] text-center border border-slate-100">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Accuracy</p>
-                      <p className="text-xl font-black text-slate-900">{score}/{totalAuto}</p>
-                   </div>
-                   <div className="p-8 bg-slate-50 rounded-[32px] text-center border border-slate-100">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Efficiency</p>
-                      <p className="text-xl font-black text-slate-900">{formatTime(totalTimeTaken)}</p>
-                   </div>
-                </div>
-
-                {milestones.length > 0 && (
-                  <div className="space-y-6 pt-8">
-                    <div className="flex items-center gap-4 justify-center">
-                       <div className="h-px bg-slate-200 flex-1 max-w-xs" />
-                       <p className="text-xs font-black text-orange-600 uppercase tracking-[0.2em]">Earned Achievements</p>
-                       <div className="h-px bg-slate-200 flex-1 max-w-xs" />
-                    </div>
-                    <div className="flex flex-wrap justify-center gap-8 pt-4">
-                       {milestones.map(m => (
-                         <div key={m.id} className="flex flex-col items-center gap-3">
-                            <div className={`w-16 h-16 rounded-[24px] bg-gradient-to-br ${m.color} flex items-center justify-center text-white shadow-xl shadow-orange-600/10`}>
-                               {m.icon}
-                            </div>
-                            <span className="text-xs font-black text-slate-900 uppercase tracking-tighter">{m.label}</span>
-                         </div>
-                       ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="pt-12 border-t border-slate-100 flex justify-between items-end">
-                 <div className="space-y-5">
-                    <div className="flex gap-1.5">
-                       {Array.from({length: 40}).map((_, i) => (
-                         <div key={i} className="w-1 h-5 bg-slate-100 rounded-full" />
-                       ))}
-                    </div>
-                    <div className="space-y-1">
-                       <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">LPU Nexus Assessment Engine v4.0</p>
-                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Verified Digital Credential • Non-Transferable</p>
-                    </div>
-                 </div>
-                 <div className="w-28 h-28 bg-white rounded-3xl border-4 border-slate-50 flex items-center justify-center relative group">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-16 h-16 text-slate-300"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2" /><rect x="7" y="7" width="10" height="10" rx="1" /><path d="M12 7v10M7 12h10" /></svg>
-                    <div className="absolute inset-0 bg-transparent flex items-center justify-center">
-                       <p className="text-[8px] font-black font-mono text-slate-400 rotate-90">VERIFIED</p>
-                    </div>
-                 </div>
-              </div>
-            </div>
-          </div>
-
           {/* Quick Actions */}
           <div className="flex flex-col items-center gap-6">
-            <button 
-              onClick={handleExportImage}
-              className="w-full max-w-lg py-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-base shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-3 active:scale-[0.98] mb-2"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
-              <span>Download Official Transcript Image</span>
-            </button>
-
             <button 
               onClick={() => document.getElementById('question-review-section')?.scrollIntoView({ behavior: 'smooth' })}
               className="w-full max-w-lg py-5 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl font-bold text-base shadow-lg shadow-orange-600/20 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
@@ -1832,18 +1555,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               const label = isCoding ? (isCorrect ? 'Tests Passed' : 'Tests Failed') : (isSubjective ? 'Subjective' : (isCorrect ? 'Correct' : 'Incorrect'));
 
               return (
-                <div key={i} className={`p-5 md:p-6 rounded-[24px] border shadow-sm transition-all relative ${statusColorOptions}`}>
-                  {/* Bookmark Button - Top Right of Review Card */}
-                  <div className="absolute top-5 right-5 z-10">
-                    <button 
-                      onClick={() => toggleBookmark(q)}
-                      className={`p-1 transition-all active:scale-90 ${bookmarkedQuestions.some(item => (item.id === q.id || item.question === q.question)) ? 'text-orange-600' : 'text-slate-400 hover:text-orange-500/70'}`}
-                      title="Bookmark for study session"
-                    >
-                      <svg viewBox="0 0 24 24" fill={bookmarkedQuestions.some(item => (item.id === q.id || item.question === q.question)) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
-                    </button>
-                  </div>
-
+                <div key={i} className={`p-5 md:p-6 rounded-[24px] border shadow-sm transition-all ${statusColorOptions}`}>
                   <div className="flex flex-col space-y-4">
                     
                     {/* Header Row */}
@@ -2039,42 +1751,6 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 </div>
               );
             })()}
-
-            {/* Refactored Saved Study Material Section - Compactized */}
-            {bookmarkedQuestions.length > 0 && (
-              <div className="animate-in fade-in slide-in-from-top-4 duration-500 pt-2">
-                <div className="bg-gradient-to-r from-orange-600/[0.07] via-orange-600/[0.03] to-transparent border border-orange-500/10 rounded-[32px] p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group transition-all hover:border-orange-500/20">
-                  <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-orange-600/5 rounded-full blur-3xl group-hover:bg-orange-600/10 transition-all duration-700" />
-                  
-                  <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left relative z-10">
-                    <div className="w-12 h-12 rounded-2xl bg-orange-600 flex items-center justify-center text-white shadow-[0_0_20px_rgba(234,88,12,0.2)]">
-                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
-                    </div>
-                    <div className="space-y-0.5">
-                      <h3 className="text-base font-black text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Saved Practice Pool</h3>
-                      <p className="text-[10px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest leading-none">Custom list with {bookmarkedQuestions.length} Bookmarks</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 relative z-10">
-                    <button 
-                      onClick={startSavedPractice}
-                      className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-lg shadow-orange-600/10 transition-all active:scale-95 flex items-center gap-2"
-                    >
-                      <span>Start practice</span>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                    
-                    <button 
-                      onClick={() => showToast(`${bookmarkedQuestions.length} tricky questions prepared for your session.`, "info")}
-                      className="w-10 h-10 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 hover:text-orange-500 transition-all"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
