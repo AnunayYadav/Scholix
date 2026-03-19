@@ -2,11 +2,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NexusServer from '../services/nexusServer.ts';
-import { ModuleType, LibraryFile, Folder } from '../types.ts';
+import { aiTools } from '../data/aiToolsData.ts';
+import { allDirectory } from '../data/emergencyData.ts';
 
 interface SearchResult {
   id: string;
-  type: 'module' | 'file' | 'folder' | 'marketplace' | 'navigation' | 'roommate';
+  type: 'module' | 'file' | 'folder' | 'marketplace' | 'navigation' | 'roommate' | 'ai-tool' | 'ai-category' | 'contact' | 'contact-category';
   title: string;
   description?: string;
   path: string;
@@ -14,14 +15,15 @@ interface SearchResult {
   category: string;
 }
 
-const UniversalSearch: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+const UniversalSearch: React.FC = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [isClosing, setIsClosing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const modules = [
     { id: 'library', name: 'Content Library', desc: 'Access 1000+ PYQs, notes and records.', path: '/library', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg> },
@@ -43,36 +45,26 @@ const UniversalSearch: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ i
     { title: 'Gate Pass', keywords: ['leave', 'out', 'pass', 'ums'], path: '/help', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="m21 21-4.3-4.3" /><circle cx="11" cy="11" r="8" /></svg> },
   ];
 
-  const handleClose = useCallback(() => {
-    setIsClosing(true);
-    setTimeout(() => {
-      onClose();
-      setIsClosing(false);
-      setQuery('');
-      setResults([]);
-    }, 300);
-  }, [onClose]);
-
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => { document.body.style.overflow = 'unset'; };
-  }, [isOpen]);
+  const handleSelect = useCallback((result: SearchResult) => {
+    navigate(result.path);
+    setIsOpen(false);
+    setQuery('');
+    inputRef.current?.blur();
+  }, [navigate]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        if (isOpen) handleClose();
-        else onClose(); // This will trigger the parent to open it
+        inputRef.current?.focus();
       }
+
       if (!isOpen) return;
 
-      if (e.key === 'Escape') handleClose();
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        inputRef.current?.blur();
+      }
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         setSelectedIndex(prev => (prev + 1) % (results.length || 1));
@@ -89,7 +81,17 @@ const UniversalSearch: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ i
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, results, selectedIndex, handleClose]);
+  }, [isOpen, results, selectedIndex, handleSelect]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const performSearch = async (q: string) => {
     if (!q.trim()) {
@@ -131,8 +133,75 @@ const UniversalSearch: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ i
       }
     });
 
+    // 3. Search AI Directory Tools
+    aiTools.forEach(tool => {
+      if (tool.name.toLowerCase().includes(searchLower) || 
+          tool.description.toLowerCase().includes(searchLower) || 
+          tool.tags.some(t => t.toLowerCase().includes(searchLower))) {
+        newResults.push({
+          id: `ai-${tool.id}`,
+          type: 'ai-tool',
+          title: tool.name,
+          description: tool.description,
+          path: `/ai-tools?q=${encodeURIComponent(tool.name)}`,
+          icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-indigo-500"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><circle cx="12" cy="12" r="3"/></svg>,
+          category: 'AI Directory'
+        });
+      }
+    });
+
+    // 4. Search AI Categories
+    const matchedAiCats = new Set<string>();
+    aiTools.forEach(t => {
+      if (t.category.toLowerCase().includes(searchLower)) matchedAiCats.add(t.category);
+    });
+    matchedAiCats.forEach(cat => {
+      newResults.push({
+        id: `ai-cat-${cat}`,
+        type: 'ai-category',
+        title: cat,
+        description: `Explore AI tools in ${cat}`,
+        path: `/ai-tools?q=${encodeURIComponent(cat)}`,
+        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-indigo-400"><path d="M4 6h16M4 12h16M4 18h16" /></svg>,
+        category: 'AI Categories'
+      });
+    });
+
+    // 5. Search Rescue Line Contacts
+    allDirectory.forEach(contact => {
+      if (contact.title.toLowerCase().includes(searchLower) || 
+          contact.subTitle?.toLowerCase().includes(searchLower) ||
+          contact.numbers.some(n => n.includes(searchLower))) {
+        newResults.push({
+          id: `contact-${contact.id}`,
+          type: 'contact',
+          title: contact.title,
+          description: `${contact.subTitle || ''} • ${contact.numbers[0] || 'Internal'}`,
+          path: `/emergency?q=${encodeURIComponent(contact.title)}`,
+          icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-red-500"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>,
+          category: 'Rescue Line'
+        });
+      }
+    });
+
+    // 6. Search Rescue Line Categories
+    const matchedRescueCats = new Set<string>();
+    allDirectory.forEach(c => {
+      if (c.category.toLowerCase().includes(searchLower)) matchedRescueCats.add(c.category);
+    });
+    matchedRescueCats.forEach(cat => {
+      newResults.push({
+        id: `rescue-cat-${cat}`,
+        type: 'contact-category',
+        title: cat,
+        description: `Rescue contacts for ${cat}`,
+        path: `/emergency?q=${encodeURIComponent(cat)}`,
+        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-red-400"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>,
+        category: 'Rescue Categories'
+      });
+    });
+
     try {
-      // 3. Search Library Files & Folders
       const [files, folders] = await Promise.all([
         NexusServer.fetchFiles('All', q),
         NexusServer.fetchFolders('All')
@@ -145,28 +214,27 @@ const UniversalSearch: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ i
             type: 'folder',
             title: f.name,
             description: `${f.type.charAt(0).toUpperCase() + f.type.slice(1)} folder in ${f.program}`,
-            path: `/library/${encodeURIComponent(f.program)}/${f.type === 'semester' ? encodeURIComponent(f.name) : ''}`,
+            path: `/library/${encodeURIComponent(f.program)}`,
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-orange-500"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>,
             category: 'Library Folders'
           });
         }
       });
 
-      files.forEach(f => {
+      files.slice(0, 5).forEach(f => {
         newResults.push({
           id: `file-${f.id}`,
           type: 'file',
           title: f.name,
-          description: `${f.subject} • ${f.semester} • ${f.size}`,
+          description: `${f.subject} • ${f.size}`,
           path: `/library/${encodeURIComponent(f.program)}/${encodeURIComponent(f.semester)}/${encodeURIComponent(f.subject)}`,
           icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-slate-400"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>,
           category: 'Library Files'
         });
       });
 
-      // 4. Search Marketplace
       const marketplaceItems = await NexusServer.fetchMarketplaceItems();
-      marketplaceItems.forEach(item => {
+      marketplaceItems.slice(0, 5).forEach(item => {
         if (item.title.toLowerCase().includes(searchLower) || item.description?.toLowerCase().includes(searchLower)) {
           newResults.push({
             id: `market-${item.id}`,
@@ -180,9 +248,8 @@ const UniversalSearch: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ i
         }
       });
 
-      // 5. Search Roommate Requests
       const roommateRequests = await NexusServer.fetchRoommateRequests();
-      roommateRequests.forEach(req => {
+      roommateRequests.slice(0, 5).forEach(req => {
         if (req.description?.toLowerCase().includes(searchLower) || req.preferences?.toLowerCase().includes(searchLower)) {
           newResults.push({
             id: `roommate-${req.id}`,
@@ -200,7 +267,7 @@ const UniversalSearch: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ i
       console.error("Global search error:", e);
     }
 
-    setResults(newResults.slice(0, 10)); // Limit to 10 results
+    setResults(newResults.slice(0, 10));
     setIsLoading(false);
     setSelectedIndex(0);
   };
@@ -208,121 +275,112 @@ const UniversalSearch: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ i
   useEffect(() => {
     const timer = setTimeout(() => {
       performSearch(query);
-    }, 300);
+    }, 200);
     return () => clearTimeout(timer);
   }, [query]);
 
-  const handleSelect = (result: SearchResult) => {
-    navigate(result.path);
-    handleClose();
-  };
-
-  if (!isOpen && !isClosing) return null;
-
   return (
-    <div 
-      className={`modal-overlay !p-0 sm:!p-4 ${isClosing ? 'closing' : ''}`}
-      onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
-    >
-      <div className={`nexus-modal w-full max-w-2xl !rounded-none sm:!rounded-[32px] !border-none sm:!border shadow-2xl overflow-hidden transition-all duration-300 transform ${isClosing ? 'opacity-0 scale-95 translate-y-4' : 'opacity-100 scale-100 translate-y-0'}`}>
-        <div className="flex items-center px-6 py-4 border-b border-slate-100 dark:border-white/10 bg-white/50 dark:bg-black/20 backdrop-blur-md">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 text-orange-600 mr-4 shrink-0"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+    <div ref={containerRef} className="relative w-full">
+      {/* Search Bar Input */}
+      <div className={`relative group transition-all duration-300 ${isOpen ? 'z-[60]' : 'z-40'}`}>
+        <div className={`flex items-center gap-3 px-6 h-11 rounded-full bg-slate-100/80 dark:bg-white/5 transition-all ${isOpen ? 'shadow-2xl shadow-orange-500/10 bg-white dark:bg-[#0a0a0a]' : 'hover:bg-slate-200/80 dark:hover:bg-white/10'}`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-4 h-4 transition-colors ${isOpen ? 'text-orange-500' : 'text-slate-400 group-hover:text-slate-500'}`}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search files, folders, market, navigation..."
+            placeholder="Search files, tasks, market..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 bg-transparent border-none outline-none text-lg font-bold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20"
+            onChange={(e) => {
+              setQuery(e.target.value);
+              if (!isOpen) setIsOpen(true);
+            }}
+            onFocus={() => setIsOpen(true)}
+            className="flex-1 bg-transparent border-none outline-none text-sm font-normal text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20"
           />
-          <div className="flex items-center gap-2 ml-4">
-            <span className="hidden sm:inline-block px-2 py-1 rounded-md bg-slate-100 dark:bg-white/5 text-[10px] font-bold text-slate-400 dark:text-white/40 border border-slate-200 dark:border-white/10">ESC</span>
-            <button onClick={handleClose} className="p-2 text-slate-400 hover:text-orange-600 transition-colors border-none bg-transparent">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          {!isOpen && (
+            <div className="flex items-center gap-1 opacity-20 group-hover:opacity-40 transition-all">
+              <span className="px-1 py-0.5 rounded bg-white dark:bg-white/10 border border-slate-200 dark:border-white/20 text-[9px] font-medium tracking-tighter">CTRL</span>
+              <span className="px-1 py-0.5 rounded bg-white dark:bg-white/10 border border-slate-200 dark:border-white/20 text-[9px] font-medium tracking-tighter">K</span>
+            </div>
+          )}
+          {query && (
+            <button 
+              onClick={() => { setQuery(''); setResults([]); }}
+              className="p-1 hover:text-orange-600 transition-colors border-none bg-transparent"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
-          </div>
-        </div>
-
-        <div className="max-h-[60vh] overflow-y-auto p-2 sm:p-4 no-scrollbar">
-          {isLoading ? (
-            <div className="py-20 flex flex-col items-center justify-center opacity-40 space-y-4">
-              <div className="w-8 h-8 rounded-full border-4 border-orange-500 border-t-transparent animate-spin"></div>
-              <p className="text-xs font-bold uppercase tracking-widest">Scanning Nexus...</p>
-            </div>
-          ) : results.length > 0 ? (
-            <div className="space-y-4">
-              {/* Grouped results view would be better, but for now flat is fine */}
-              <div className="grid grid-cols-1 gap-1">
-                {results.map((result, index) => (
-                  <button
-                    key={result.id}
-                    onClick={() => handleSelect(result)}
-                    onMouseEnter={() => setSelectedIndex(index)}
-                    className={`w-full text-left p-3 sm:p-4 rounded-2xl flex items-center gap-4 transition-all border-none group ${selectedIndex === index ? 'bg-orange-600 shadow-lg shadow-orange-600/20 scale-[1.01]' : 'bg-transparent hover:bg-slate-50 dark:hover:bg-white/5'}`}
-                  >
-                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${selectedIndex === index ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/40'}`}>
-                      {result.icon}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <h4 className={`text-sm sm:text-base font-bold truncate ${selectedIndex === index ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{result.title}</h4>
-                        <span className={`text-[9px] font-black uppercase tracking-widest shrink-0 ${selectedIndex === index ? 'text-white/60' : 'text-slate-400 dark:text-white/20'}`}>{result.category}</span>
-                      </div>
-                      <p className={`text-[10px] sm:text-xs truncate ${selectedIndex === index ? 'text-white/70' : 'text-slate-500 dark:text-slate-400'}`}>{result.description}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : query ? (
-            <div className="py-20 text-center opacity-40 space-y-2">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-12 h-12 mx-auto mb-4 opacity-20"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-              <p className="text-sm font-bold">No results found for "{query}"</p>
-              <p className="text-xs">Try searching for subjects, files, or marketplace items.</p>
-            </div>
-          ) : (
-            <div className="py-8 space-y-6">
-              <div className="px-4">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/20 mb-4">Quick Shortcuts</h3>
-                <div className="flex flex-wrap gap-2">
-                  {['Library', 'Quizzes', 'Timetable', 'Market', 'Attendance', 'Mess Menu'].map(s => (
-                    <button 
-                      key={s} 
-                      onClick={() => setQuery(s)}
-                      className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[11px] font-bold text-slate-600 dark:text-white/60 hover:border-orange-500/50 hover:text-orange-600 transition-all active:scale-95"
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="px-4 py-8 bg-orange-600/5 dark:bg-orange-600/10 rounded-3xl border border-orange-600/10">
-                <p className="text-xs font-bold text-orange-600 mb-1 tracking-tight">Pro Tip</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-medium">Use <span className="text-slate-900 dark:text-white font-bold">Ctrl + K</span> to open this search from anywhere in the platform.</p>
-              </div>
-            </div>
           )}
         </div>
 
-        <div className="hidden sm:flex items-center justify-between px-6 py-3 border-t border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-black/40">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <span className="px-1.5 py-0.5 rounded-md bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[10px] text-slate-400">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
-              </span>
-              <span className="px-1.5 py-0.5 rounded-md bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[10px] text-slate-400">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
-              </span>
-              <span className="text-[10px] font-bold text-slate-400 dark:text-white/20 uppercase tracking-widest">Navigate</span>
+        {/* Results Dropdown */}
+        {isOpen && (
+          <div className="absolute top-full left-0 right-0 mt-3 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[32px] shadow-2xl overflow-hidden search-dropdown-anim z-[100]">
+            <div className="max-h-[70vh] overflow-y-auto no-scrollbar p-3">
+              {isLoading ? (
+                <div className="py-12 flex flex-col items-center justify-center opacity-40">
+                  <div className="w-6 h-6 rounded-full border-2 border-orange-500 border-t-transparent animate-spin mb-4"></div>
+                  <p className="text-[10px] font-medium uppercase tracking-[0.2em]">Searching Nexus...</p>
+                </div>
+              ) : results.length > 0 ? (
+                <div className="grid grid-cols-1 gap-1">
+                  {results.map((result, index) => (
+                    <button
+                      key={result.id}
+                      onClick={() => handleSelect(result)}
+                      onMouseEnter={() => setSelectedIndex(index)}
+                      style={{ animationDelay: `${index * 50}ms` }}
+                      className={`w-full text-left p-3.5 rounded-2xl flex items-center gap-4 transition-all border-none group search-result-anim ${selectedIndex === index ? 'bg-orange-600' : 'bg-transparent hover:bg-slate-50 dark:hover:bg-white/5'}`}
+                    >
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${selectedIndex === index ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/40'}`}>
+                        {result.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <h4 className={`text-sm font-normal truncate ${selectedIndex === index ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{result.title}</h4>
+                          <span className={`text-[8px] font-medium uppercase tracking-widest shrink-0 ${selectedIndex === index ? 'text-white/60' : 'text-slate-400 dark:text-white/20'}`}>{result.category}</span>
+                        </div>
+                        <p className={`text-[11px] font-light truncate ${selectedIndex === index ? 'text-white/70' : 'text-slate-500 dark:text-slate-400'}`}>{result.description}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : query ? (
+                <div className="py-12 text-center opacity-40">
+                  <p className="text-xs font-bold">No results for "{query}"</p>
+                </div>
+              ) : (
+                <div className="p-4 space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="text-[9px] font-medium uppercase tracking-[0.2em] text-slate-400 dark:text-white/20">Trending Now</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {['Library', 'Quizzes', 'Timetable', 'Market', 'Attendance'].map(s => (
+                        <button 
+                          key={s} 
+                          onClick={() => setQuery(s)}
+                          className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[10px] font-normal text-slate-500 dark:text-white/60 hover:border-orange-500/50 hover:text-orange-600 transition-all"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              <span className="px-1.5 py-1 rounded-md bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[9px] font-black text-slate-400">ENTER</span>
-              <span className="text-[10px] font-bold text-slate-400 dark:text-white/20 uppercase tracking-widest">Select</span>
+            
+            <div className="px-5 py-2.5 bg-slate-50/50 dark:bg-black/40 border-t border-slate-200 dark:border-white/5 flex items-center justify-between">
+              <div className="flex gap-3">
+                <span className="text-[9px] font-medium text-slate-400 dark:text-white/20 tracking-widest cursor-default">ESC TO CLOSE</span>
+              </div>
             </div>
           </div>
-          <p className="text-[10px] font-bold text-slate-400 dark:text-white/20 uppercase tracking-widest">LPU Nexus Neural Search</p>
-        </div>
+        )}
       </div>
+
+      {/* Mobile Special: When Query is Active and Input isn't focused, we might want a full screen overlay? 
+          Actually, let's keep it simple as requested - dropdown in the search bar. 
+      */}
     </div>
   );
 };

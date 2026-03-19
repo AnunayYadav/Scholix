@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { AITool } from '../types';
 import NexusDropdown from './NexusDropdown';
 import { aiTools } from '../data/aiToolsData';
@@ -6,6 +7,13 @@ import { aiTools } from '../data/aiToolsData';
 const AIToolsDirectory: React.FC = () => {
     const [filter, setFilter] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
+    const location = useLocation();
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const q = params.get('q');
+        if (q) setSearchQuery(q);
+    }, [location.search]);
     const [visibleCount, setVisibleCount] = useState(24);
     const searchInputRef = React.useRef<HTMLInputElement>(null);
     const loaderRef = React.useRef<HTMLDivElement>(null);

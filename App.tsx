@@ -412,7 +412,6 @@ const AppContent: React.FC = () => {
   const [isClosingAuth, setIsClosingAuth] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isClosingProfile, setIsClosingProfile] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
 
   const handleProfileClose = () => {
     setIsClosingProfile(true);
@@ -509,23 +508,19 @@ const AppContent: React.FC = () => {
             <span className="md:hidden text-xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tight cursor-pointer ml-1" onClick={() => navigate('/')}>LPU-Nexus</span>
           </div>
           
-          <div className="flex-1 max-w-sm mx-4 hidden md:block">
-            <button 
-              onClick={() => setShowSearch(true)}
-              className="w-full h-11 flex items-center gap-3 px-4 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-400 hover:border-orange-500/50 hover:bg-slate-50 dark:hover:bg-white/10 transition-all group border-none"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-orange-600"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-              <span className="text-xs font-bold text-slate-500 dark:text-white/40 group-hover:text-slate-900 dark:group-hover:text-white">Search Nexus...</span>
-              <div className="ml-auto flex items-center gap-1.5 grayscale opacity-20 group-hover:grayscale-0 group-hover:opacity-100 transition-all">
-                <span className="px-1.5 py-0.5 rounded-md bg-white dark:bg-white/10 border border-slate-200 dark:border-white/20 text-[10px] font-black text-slate-500 dark:text-white/60">CTRL</span>
-                <span className="px-1.5 py-1 rounded-md bg-white dark:bg-white/10 border border-slate-200 dark:border-white/20 text-[10px] font-black text-slate-500 dark:text-white/60">K</span>
-              </div>
-            </button>
+          <div className="flex-1 hidden md:flex ml-4">
+            <div className="w-full max-w-[480px]">
+              <UniversalSearch />
+            </div>
           </div>
 
           <div className="flex items-center space-x-3 ml-auto">
             <button 
-              onClick={() => setShowSearch(true)}
+              onClick={() => {
+                // Focus the hidden search if on mobile? 
+                // Or maybe UniversalSearch should handle mobile?
+                // For now, let's just make it simple.
+              }}
               className="md:hidden p-2.5 rounded-full bg-slate-100 dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
@@ -646,7 +641,6 @@ const AppContent: React.FC = () => {
           </div>
         </div>
         {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
-        <UniversalSearch isOpen={showSearch} onClose={() => setShowSearch(false)} />
       </main>
       <Analytics />
       <SpeedInsights />
