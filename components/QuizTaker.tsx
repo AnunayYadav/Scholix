@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { UserProfile, QuizQuestion, LibraryFile } from '../types.ts';
@@ -10,9 +10,27 @@ import { showToast } from './Toast.tsx';
 import html2canvas from 'html2canvas';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
 import { QUIZTAKER_DATA } from '../data/quiztaker/quizData.ts';
+
+// Dashboard components
+import UserCard from './quiz/UserCard.tsx';
+import FeaturedQuizCard from './quiz/FeaturedQuizCard.tsx';
+import ChallengeCard from './quiz/ChallengeCard.tsx';
+import QuickStartBar from './quiz/QuickStartBar.tsx';
+import XPBreakdown from './quiz/XPBreakdown.tsx';
+import LevelUpOverlay from './quiz/LevelUpOverlay.tsx';
+import StreakToast from './quiz/StreakToast.tsx';
+import HistorySection from './quiz/HistorySection.tsx';
+
+
+// Dashboard hooks & store
+import { useXP } from '../hooks/useXP.ts';
+import { useStreak } from '../hooks/useStreak.ts';
+import { useDashboard } from '../hooks/useDashboard.ts';
+import { useQuizDashboardStore, getLevelInfo } from '../stores/quizStore.ts';
 
 const parseText = (text: string | undefined) => {
   if (!text) return null;
@@ -62,6 +80,24 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const { subjectName, quizId } = useParams();
   const navigate = useNavigate();
 
+  // ═══════════ Dashboard State ═══════════
+  const [showCustomQuizBuilder, setShowCustomQuizBuilder] = useState(false);
+  const userId = userProfile?.id || 'anonymous';
+  const { totalXP, level, awardXP } = useXP(userId);
+  const { currentStreak, streakCalendar, isStreakAtRisk, recordCompletion } = useStreak(userId);
+  const { saveCompletion, featuredQuiz, activeChallenges } = useDashboard(userId);
+  const {
+    featuredCompleted, featuredScore,
+    completedChallengeIds,
+    isDashboardLoading,
+    dashboardView, setDashboardView,
+    setFeaturedCompleted, setFeaturedScore,
+    markChallengeCompleted,
+  } = useQuizDashboardStore();
+  // Track what type of quiz is currently active
+  const [activeQuizType, setActiveQuizType] = useState<'custom' | 'featured' | 'challenge'>('custom');
+  const [activeChallengeId, setActiveChallengeId] = useState<string | null>(null);
+
   const [subjectsWithSyllabi, setSubjectsWithSyllabi] = useState<SubjectWithSyllabus[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<SubjectWithSyllabus | null>(null);
   const [selectedUnits, setSelectedUnits] = useState<number[]>([]);
@@ -102,6 +138,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
 
   const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>(['MCQ', 'PYQ']);
+  const [completedOnLoad, setCompletedOnLoad] = useState(false);
   const [solvedQuestionIds, setSolvedQuestionIds] = useState<Set<string>>(new Set());
   const [showTopics, setShowTopics] = useState(false);
   const [isRecentSessionsExpanded, setIsRecentSessionsExpanded] = useState(false);
@@ -565,6 +602,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         setTimerActive(data.timerActive || false);
         setIsCached(data.isCached || false);
         setQuizCompleted(data.quizCompleted || false);
+        setCompletedOnLoad(data.quizCompleted || false);
         setQuizIdInState(quizId);
         
         // Ensure selected subject matches
@@ -624,6 +662,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   const handleBackToDashboard = () => {
     setQuizQuestions([]);
     setQuizCompleted(false);
+    setCompletedOnLoad(false);
     setReviewMode(false);
     setSelectedSubject(null);
     setUserAnswers({});
@@ -631,8 +670,132 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     setQuizIdInState(null);
     setCurrentQuestionIdx(0);
     setTimeSpentByQuestion({});
+    setShowCustomQuizBuilder(false);
+    setActiveQuizType('custom');
+    setActiveChallengeId(null);
     navigate('/quiz');
   };
+
+  // ═══════════ Featured Quiz Start ═══════════
+  const handleStartFeaturedQuiz = useCallback(() => {
+    if (!featuredQuiz || featuredCompleted) return;
+    const questions = featuredQuiz.questions.map((q: any, idx: number) => ({
+      ...q,
+      id: q.id || `featured-${idx}`,
+      unit: q.unit || 1,
+      type: q.type || 'mcq',
+      questionType: q.questionType || 'MCQ',
+    }));
+    setActiveQuizType('featured');
+    setQuizQuestions(questions);
+    setCurrentQuestionIdx(0);
+    setUserAnswers({});
+    setQuizCompleted(false);
+    setCompletedOnLoad(false);
+    setTimerActive(true);
+    setTimeLeft(questions.length * 45); // 45 seconds per question
+    setVisitedQuestions(new Set([0]));
+    setMarkedForReview(new Set());
+    setTimeSpentByQuestion({});
+    const newQuizId = `featured_${Date.now()}`;
+    setQuizIdInState(newQuizId);
+    navigate(`/quiz/featured/${newQuizId}`);
+  }, [featuredQuiz, featuredCompleted]);
+
+  // ═══════════ Challenge Start ═══════════
+  const handleStartChallenge = useCallback((challenge: typeof activeChallenges[0]) => {
+    if (completedChallengeIds.has(challenge.id)) return;
+    const subjectData = QUIZTAKER_DATA[challenge.subject];
+    if (!subjectData?.mcqs || subjectData.mcqs.length === 0) {
+      showToast('No questions available for this challenge subject.', 'error');
+      return;
+    }
+    const shuffled = [...subjectData.mcqs].sort(() => 0.5 - Math.random()).slice(0, challenge.question_count);
+    const questions = shuffled.map((q: any, idx: number) => ({
+      ...q,
+      id: q.id || `challenge-${idx}`,
+      unit: q.unit || 1,
+      type: q.type || 'mcq',
+      questionType: q.questionType || 'MCQ',
+    }));
+    setActiveQuizType('challenge');
+    setActiveChallengeId(challenge.id);
+    setQuizQuestions(questions);
+    setCurrentQuestionIdx(0);
+    setUserAnswers({});
+    setQuizCompleted(false);
+    setCompletedOnLoad(false);
+    setTimerActive(true);
+    setTimeLeft(challenge.question_count * challenge.time_limit_per_question);
+    setVisitedQuestions(new Set([0]));
+    setMarkedForReview(new Set());
+    setTimeSpentByQuestion({});
+    const newQuizId = `challenge_${challenge.id}_${Date.now()}`;
+    setQuizIdInState(newQuizId);
+    navigate(`/quiz/challenge/${newQuizId}`);
+  }, [activeChallenges, completedChallengeIds]);
+
+  // ═══════════ XP & Streak on Completion ═══════════
+  useEffect(() => {
+    if (!quizCompleted || quizQuestions.length === 0 || completedOnLoad) return;
+
+    const scorableQuestions = quizQuestions.filter(q => q.type !== 'subjective');
+    if (scorableQuestions.length === 0) return;
+
+    const answeredCount = Object.keys(userAnswers).length;
+    if (answeredCount === 0) return;
+
+    const correctCount = Object.entries(userAnswers).reduce((acc, [idx, ans]) => {
+      const question = quizQuestions[parseInt(idx)];
+      if (question.type === 'subjective') return acc;
+      if (question.type === 'coding') {
+        return (ans && typeof ans === 'object' && (ans as any).passed) ? acc + 1 : acc;
+      }
+      return ans === question.correctAnswer ? acc + 1 : acc;
+    }, 0);
+
+    const scorePercentage = Math.round((correctCount / scorableQuestions.length) * 100);
+    const totalTimeTaken = Object.values(timeSpentByQuestion).reduce((a: number, b: number) => a + b, 0);
+    const totalTimeAllowed = timerMinutes * 60;
+
+    // Award XP
+    const xpResult = awardXP({
+      scorePercentage,
+      timeTakenSeconds: totalTimeTaken,
+      totalTimeAllowed,
+      hintsUsed: 0,
+      isFeaturedQuiz: activeQuizType === 'featured',
+      quizId: quizIdInState || 'unknown',
+      answeredCount,
+      totalQuestions: quizQuestions.length,
+    });
+
+
+    // Record streak
+    recordCompletion();
+
+    // Save completion
+    saveCompletion({
+      quiz_id: quizIdInState || 'unknown',
+      type: activeQuizType,
+      score_percentage: scorePercentage,
+      xp_earned: xpResult?.totalEarned || 0,
+    });
+
+    // Mark featured/challenge as completed
+    if (activeQuizType === 'featured') {
+      setFeaturedCompleted(true);
+      setFeaturedScore(scorePercentage);
+    } else if (activeQuizType === 'challenge' && activeChallengeId) {
+      markChallengeCompleted(activeChallengeId);
+    }
+
+    // Save solved question IDs
+    if (activeQuizType === 'custom' && !isPracticeMode) {
+      const solvedIds = quizQuestions.map(q => q.id).filter(Boolean) as string[];
+      saveSolvedQuestions(solvedIds);
+    }
+  }, [quizCompleted, completedOnLoad]);
 
   const handleGenerate = async () => {
     if (!selectedSubject || selectedUnits.length === 0) return;
@@ -729,6 +892,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     setCurrentQuestionIdx(0);
     setUserAnswers({});
     setQuizCompleted(false);
+    setCompletedOnLoad(false);
     setIsShowingExplanation(false);
     setReviewMode(false);
 
@@ -867,7 +1031,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           {/* Aligned with Question Box (lg:col-span-8) */}
           <div className="lg:col-span-8 px-4 md:px-0">
             {/* Extremely Compact Progress Indicator - Matching Reference with LPU Nexus Theme */}
-            <div className="glass-panel p-5 px-8 rounded-3xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 shadow-sm space-y-3">
+            <div className="glass-panel p-5 px-8 rounded-3xl bg-white dark:bg-dark-900/40 border border-slate-200 dark:border-white/5 shadow-sm space-y-3">
               <div className="space-y-1">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   {isSubjectiveSection ? 'Subjective' : isCodingSection ? 'Coding' : 'MCQ'} Section
@@ -892,7 +1056,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           {/* Actions Column (Timer & Submit) */}
           <div className="lg:col-span-4 flex items-center justify-end gap-3 px-4 md:px-0">
             {timerActive && (
-              <div className="flex items-center gap-3 px-5 h-11 rounded-2xl bg-white/60 dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 backdrop-blur-md shadow-sm">
+              <div className="flex items-center gap-3 px-5 h-11 rounded-2xl bg-white/60 dark:bg-dark-900/40 border border-slate-200 dark:border-white/5 backdrop-blur-md shadow-sm">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`w-4 h-4 ${timeLeft < 60 ? 'text-red-500 animate-pulse' : 'text-orange-500'}`}>
                   <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
                 </svg>
@@ -917,11 +1081,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Main Question Area */}
           <div className="lg:col-span-8 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
-            <div className="glass-panel p-10 md:p-12 rounded-[48px] shadow-2xl bg-white/80 dark:bg-slate-900/50 border-slate-200 dark:border-white/5 relative">
+            <div className="glass-panel p-10 md:p-12 rounded-[48px] shadow-2xl bg-white/80 dark:bg-dark-900/50 border-slate-200 dark:border-white/5 relative">
               <div className="space-y-10">
                 <div className="flex items-center flex-wrap gap-3">
                   <span className="bg-orange-600/10 dark:bg-orange-600/20 text-orange-600 dark:text-orange-500 px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest">Question {sectionInfo.mapping[currentQuestionIdx]}</span>
-                  <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest">Unit {q.unit}</span>
+                  <span className="bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-400 px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest">Unit {q.unit}</span>
                   {q.difficulty && (
                     <span className={`px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest ${
                       q.difficulty === 'easy' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
@@ -986,7 +1150,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         title="Reset code to starter"
                       >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-slate-400 group-hover:text-orange-500"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
-                        <span className="text-[10px] font-bold text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 uppercase tracking-widest">Reset</span>
+                        <span className="text-[10px] font-medium text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200">Reset</span>
                       </button>
                     </div>
 
@@ -1225,7 +1389,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           onClick={() => handleAnswer(i)}
                           className={`p-4 rounded-2xl border text-left transition-all duration-300 flex items-center gap-4 group relative ${style}`}
                         >
-                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-orange-500' : 'border-slate-300 dark:border-slate-700'}`}>
+                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-orange-500' : 'border-slate-300 dark:border-dark-800'}`}>
                             {isSelected && <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_#ea580c]" />}
                           </div>
                           <span className="font-medium text-[13px] md:text-sm tracking-tight flex items-center gap-2">
@@ -1255,7 +1419,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       setIsShowingExplanation(false);
                       setVisitedQuestions(prev => new Set(prev).add(prevIdx));
                     }}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all disabled:opacity-20 active:scale-95 border border-slate-200 dark:border-transparent"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-400 rounded-xl text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all disabled:opacity-20 active:scale-95 border border-slate-200 dark:border-transparent"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M15 18l-6-6 6-6" /></svg>
                     Previous
@@ -1307,7 +1471,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     const isMarked = markedForReview.has(idx);
                     const isCurrent = currentQuestionIdx === idx;
 
-                    let bgColor = "bg-slate-100 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500";
+                    let bgColor = "bg-slate-100 dark:bg-dark-800/40 text-slate-400 dark:text-slate-500";
                     if (isMarked) bgColor = "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.3)]";
                     else if (isAnswered) bgColor = "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]";
                     else if (isVisited) bgColor = "bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.2)]";
@@ -1389,7 +1553,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       const isMarked = markedForReview.has(idx);
                       const isCurrent = currentQuestionIdx === idx;
 
-                      let bgColor = "bg-slate-100 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500";
+                      let bgColor = "bg-slate-100 dark:bg-dark-800/40 text-slate-400 dark:text-slate-500";
                       if (isMarked) bgColor = "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.3)]";
                       else if (isAnswered) bgColor = "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]";
                       else if (isVisited) bgColor = "bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.2)]";
@@ -1743,7 +1907,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-3xl md:text-5xl font-black tracking-tight">
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
                 <span className="text-orange-600">{percentage}%</span> <span className="text-zinc-300">/</span> <span className="text-slate-900 dark:text-white">
                   {percentage >= 90 ? 'Outstanding!' : percentage >= 80 ? 'Great job!' : percentage >= 60 ? 'Good Effort!' : 'Keep Pushing!'}
                 </span>
@@ -1762,32 +1926,32 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-3 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 6L9 17l-5-5"/></svg>
               </div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Correct</span>
-              <p className="text-3xl font-black text-slate-900 dark:text-white">{score}/{totalAuto}</p>
+              <span className="text-[10px] font-semibold text-slate-400 tracking-wider mb-1">Correct</span>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white">{score}/{totalAuto}</p>
             </div>
 
             <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
               <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-600 mb-3 group-hover:bg-red-500 group-hover:text-white transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Incorrect</span>
-              <p className="text-3xl font-black text-slate-900 dark:text-white">{totalAuto - score}</p>
+              <span className="text-[10px] font-semibold text-slate-400 tracking-wider mb-1">Incorrect</span>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white">{totalAuto - score}</p>
             </div>
 
             <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
               <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 mb-3 group-hover:bg-blue-500 group-hover:text-white transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
               </div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Avg Speed</span>
-              <p className="text-3xl font-black text-slate-900 dark:text-white">{Math.round(avgTimePerQuestion)}s <span className="text-[10px] text-zinc-400">/ Q</span></p>
+              <span className="text-[10px] font-semibold text-slate-400 tracking-wider mb-1">Avg Speed</span>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white">{Math.round(avgTimePerQuestion)}s <span className="text-[10px] text-zinc-400">/ Q</span></p>
             </div>
 
             <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
               <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-600 mb-3 group-hover:bg-orange-600 group-hover:text-white transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               </div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Time Taken</span>
-              <p className="text-3xl font-black text-slate-900 dark:text-white">{formatTime(totalTimeTaken)}</p>
+              <span className="text-[10px] font-semibold text-slate-400 tracking-wider mb-1">Time Taken</span>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white">{formatTime(totalTimeTaken)}</p>
             </div>
           </div>
 
@@ -1823,7 +1987,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           {activeMilestones.length > 0 && (
             <div className="pt-8">
               <div className="flex items-center mb-6">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest transition-all duration-500 opacity-60">Achievements Unlocked</span>
+                <span className="text-[10px] font-semibold text-slate-400 tracking-wider transition-all duration-500 opacity-60">Achievements Unlocked</span>
               </div>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4">
@@ -1844,8 +2008,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     </div>
                     
                     <div className="relative space-y-0.5">
-                      <p className="text-[12px] font-black uppercase tracking-tight leading-none text-slate-800 dark:text-zinc-300">{m.label}</p>
-                      <p className={`text-[8px] font-black uppercase tracking-widest ${
+                      <p className="text-[12px] font-bold tracking-tight leading-none text-slate-800 dark:text-zinc-300">{m.label}</p>
+                      <p className={`text-[8px] font-bold tracking-wider ${
                         m.rarity === 'legendary' ? 'text-orange-500' :
                         m.rarity === 'epic' ? 'text-indigo-500' :
                         m.rarity === 'rare' ? 'text-emerald-500' :
@@ -1868,8 +2032,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Question Review</h3>
               <p className="text-xs font-medium text-slate-500 mt-0.5">Evaluation of your performance per question</p>
             </div>
-            <div className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700/50 inline-flex items-center gap-2">
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{quizQuestions.length} Items Total</span>
+            <div className="px-3 py-1.5 bg-slate-100 dark:bg-dark-800/50 rounded-lg border border-slate-200 dark:border-dark-800/50 inline-flex items-center gap-2">
+              <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 tracking-wider">{quizQuestions.length} Items Total</span>
             </div>
           </div>
           
@@ -1879,7 +2043,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               const isCoding = q.type === 'coding';
               const ansObj = userAnswers[i] as any;
               const isCorrect = isCoding 
-                ? (ansObj && typeof ansObj === 'object' && ansObj.passed)
+                ? (ansObj && typeof ansObj === 'object' ? ansObj.passed : false)
                 : (!isSubjective && userAnswers[i] === q.correctAnswer);
               
               const timeSpent = timeSpentByQuestion[i] || 0;
@@ -1906,28 +2070,28 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     
                     {/* Header Row */}
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest border ${badgeColors}`}>
+                      <span className={`px-2 py-0.5 rounded-md text-[9px] font-semibold tracking-wider border ${badgeColors}`}>
                         {label}
                       </span>
                       {isStruggle && (
-                        <span className="px-2 py-0.5 bg-rose-500 text-white rounded-md text-[9px] font-black uppercase tracking-widest animate-pulse shadow-sm border-none shadow-rose-500/20">
+                        <span className="px-2 py-0.5 bg-rose-500 text-white rounded-md text-[9px] font-bold tracking-wider animate-pulse shadow-sm border-none shadow-rose-500/20">
                           Struggle Area
                         </span>
                       )}
-                      <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-bold text-slate-500 border border-slate-200/50 dark:border-white/10 uppercase tracking-widest flex items-center gap-1.5">
+                      <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-semibold text-slate-500 border border-slate-200/50 dark:border-white/10 tracking-wider flex items-center gap-1.5">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5 opacity-60"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                         {timeSpent}s
                       </span>
-                      <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-bold text-slate-500 border border-slate-200/50 dark:border-white/10 uppercase tracking-widest">
+                      <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-semibold text-slate-500 border border-slate-200/50 dark:border-white/10 tracking-wider">
                         Unit 0{q.unit}
                       </span>
                       {q.difficulty && (
-                        <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-bold text-slate-500 border border-slate-200/50 dark:border-white/10 uppercase tracking-widest">
+                        <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-semibold text-slate-500 border border-slate-200/50 dark:border-white/10 tracking-wider">
                           {q.difficulty}
                         </span>
                       )}
                       {q.questionType && (
-                        <span className="px-2 py-0.5 bg-zinc-100/50 dark:bg-white/10 rounded-md text-[9px] font-bold text-zinc-600 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/10 uppercase tracking-widest">
+                        <span className="px-2 py-0.5 bg-zinc-100/50 dark:bg-white/10 rounded-md text-[9px] font-semibold text-zinc-600 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/10 tracking-wider">
                           {q.questionType}
                         </span>
                       )}
@@ -1956,7 +2120,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     {isCoding ? (
                       <div className="space-y-4">
                         <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5">
-                          <span className="text-slate-500 dark:text-slate-400 font-bold block mb-1.5 uppercase text-[10px] tracking-widest">Submitted Code</span>
+                          <span className="text-slate-500 dark:text-slate-400 font-semibold block mb-1.5 tracking-wider text-[10px]">Submitted Code</span>
                           <pre className="font-mono text-xs bg-slate-900/50 p-4 rounded-xl overflow-auto dark:text-slate-300">
                             {ansObj?.code || '# No code submitted'}
                           </pre>
@@ -1964,7 +2128,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         
                         {ansObj?.results && ansObj.results.length > 0 && (
                           <div className="space-y-2">
-                            <span className="text-slate-500 dark:text-slate-400 font-bold block mb-1 uppercase text-[10px] tracking-widest">Test Results</span>
+                            <span className="text-slate-500 dark:text-slate-400 font-semibold block mb-1 tracking-wider text-[10px]">Test Results</span>
                             <div className="grid grid-cols-1 gap-2">
                               {ansObj.results.map((res: any, idx: number) => (
                                 <div key={idx} className={`p-3 rounded-xl border text-[11px] flex items-center justify-between ${res.passed ? 'bg-emerald-500/5 border-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/5 border-red-500/10 text-red-600 dark:text-red-400'}`}>
@@ -1990,7 +2154,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           </div>
                         )}
 
-                        <div className={`p-4 rounded-2xl border text-xs font-bold uppercase tracking-widest flex items-center gap-2 ${isCorrect ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
+                        <div className={`p-4 rounded-2xl border text-xs font-semibold tracking-wider flex items-center gap-2 ${isCorrect ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
                           {isCorrect ? (
                             <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M20 6L9 17l-5-5"/></svg> All validation tests passed</>
                           ) : (
@@ -2001,7 +2165,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     ) : !isSubjective ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                         <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5 text-slate-800 dark:text-slate-200">
-                          <span className="text-slate-500 dark:text-slate-400 font-bold block mb-1.5 uppercase text-[10px] tracking-widest flex items-center gap-1">
+                          <span className="text-slate-500 dark:text-slate-400 font-semibold block mb-1.5 tracking-wider text-[10px] flex items-center gap-1">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M20 6L9 17l-5-5" /></svg>
                             Your Answer
                           </span>
@@ -2011,7 +2175,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         </div>
                         {!isCorrect && (
                           <div className="p-4 bg-emerald-50/50 dark:bg-emerald-500/10 rounded-2xl border border-emerald-100 dark:border-emerald-500/20 text-slate-800 dark:text-slate-200">
-                            <span className="text-emerald-600/70 dark:text-emerald-400/70 font-bold block mb-1.5 uppercase text-[10px] tracking-widest flex items-center gap-1">
+                            <span className="text-emerald-600/70 dark:text-emerald-400/70 font-semibold block mb-1.5 tracking-wider text-[10px] flex items-center gap-1">
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                               Correct Solution
                             </span>
@@ -2023,7 +2187,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       </div>
                     ) : (
                       <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5 mt-2">
-                        <span className="text-orange-500/70 dark:text-orange-400/70 font-bold block mb-1.5 uppercase text-[10px] tracking-widest flex items-center gap-1">
+                        <span className="text-orange-500/70 dark:text-orange-400/70 font-semibold block mb-1.5 tracking-wider text-[10px] flex items-center gap-1">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                           Feedback
                         </span>
@@ -2037,7 +2201,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     <div className="mt-4 p-5 md:p-6 bg-white dark:bg-white/[0.02] rounded-2xl border border-zinc-100 dark:border-white/5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                       <div className="flex items-center gap-2 mb-3">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-slate-400"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Explanation</span>
+                        <span className="text-[11px] font-semibold text-slate-500 tracking-wider">Explanation</span>
                       </div>
                       <div className="text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
                         {parseText(q.explanation)}
@@ -2054,385 +2218,508 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     );
   }
 
-  return (
-    <div className="max-w-4xl mx-auto space-y-12 animate-fade-in pb-20 px-4 md:px-0">
-      <header className="text-center space-y-3">
-        <h2 className="text-2xl md:text-4xl font-semibold text-slate-900 dark:text-white tracking-tighter leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Taker</span></h2>
-        <p className="text-slate-500 font-medium text-xs">Comprehensive Assessment Engine</p>
-      </header>
+  // ═══════════ Global Overlays ═══════════
+  const globalOverlays = (
+    <>
+      <XPBreakdown />
+      <LevelUpOverlay />
+      <StreakToast />
+    </>
+  );
 
-      {error && (
-        <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-[32px] text-center space-y-3 animate-fade-in">
-          <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center mx-auto text-red-500">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-          </div>
-          <h4 className="text-xs font-medium text-red-500 tracking-widest">Protocol Interrupted</h4>
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{error}</p>
-          <button onClick={() => setError(null)} className="text-[9px] font-medium text-slate-400 hover:text-orange-500 transition-colors">Dismiss</button>
-        </div>
-      )}
+  // ═══════════ Dashboard View ═══════════
+  if (!showCustomQuizBuilder && quizQuestions.length === 0 && !quizCompleted && !reviewMode && dashboardView === 'dashboard') {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-20 px-4 md:px-0">
+        {globalOverlays}
 
-      <div className="glass-panel p-8 md:p-12 rounded-[56px] shadow-2xl space-y-10">
-        {!selectedSubject && (
-          <div className="animate-fade-in space-y-8">
+        {/* Header */}
+        <header className="text-center space-y-3 pt-2">
+          <h2 className="text-2xl md:text-4xl font-semibold text-slate-900 dark:text-white tracking-tighter leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Taker</span></h2>
+          <p className="text-slate-500 font-medium text-xs">Your personal assessment dashboard</p>
+        </header>
 
-            {/* Recent Quizzes Horizontal Scroll */}
-            {(() => {
-              const recent = JSON.parse(localStorage.getItem('nexus_recent_quizzes') || '[]');
-              if (recent.length === 0) return null;
-              return (
-                <div className="space-y-4">
-                  <button 
-                    onClick={() => setIsRecentSessionsExpanded(!isRecentSessionsExpanded)}
-                    className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-orange-500 transition-colors group"
-                  >
-                    <span>Recent Sessions</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-3 h-3 transition-transform duration-300 ${isRecentSessionsExpanded ? 'rotate-180' : ''}`}><path d="M6 9l6 6 6-6" /></svg>
-                  </button>
-                  {isRecentSessionsExpanded && (
-                    <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                    {recent.map((q: any) => (
-                      <button
-                        key={q.id}
-                        onClick={() => navigate(`/quiz/${encodeURIComponent(q.subject)}/${q.id}`)}
-                        className="flex-shrink-0 w-64 p-5 rounded-3xl bg-white dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 hover:border-orange-500/30 transition-all hover:shadow-xl group text-left"
-                      >
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="p-2.5 rounded-2xl bg-orange-600/10 text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 2v20M2 12h20" className="rotate-45" /></svg>
-                          </div>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase">{new Date(q.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
-                        </div>
-                        <h5 className="text-sm font-bold text-slate-900 dark:text-white mb-1 line-clamp-1">{q.subject}</h5>
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-medium text-slate-500">
-                            {q.score !== null ? `Score: ${q.score}` : 'In Progress'}
-                          </span>
-                          <div className="flex items-center gap-1 text-orange-600">
-                            <span className="text-[10px] font-black uppercase tracking-tighter">Resume</span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
+        {error && (
+          <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-[32px] text-center space-y-3 animate-fade-in">
+            <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center mx-auto text-red-500">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+            </div>
+            <h4 className="text-xs font-medium text-red-500 tracking-widest">Protocol Interrupted</h4>
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{error}</p>
+            <button onClick={() => setError(null)} className="text-[9px] font-medium text-slate-400 hover:text-orange-500 transition-colors">Dismiss</button>
           </div>
         )}
 
-        <div className={`grid grid-cols-1 md:grid-cols-2 gap-10 ${!selectedSubject ? 'pt-4' : ''}`}>
+        {/* User Card */}
+        <UserCard
+          username={userProfile?.username || ''}
+          avatarUrl={userProfile?.avatar_url}
+          currentStreak={currentStreak}
+          isStreakAtRisk={isStreakAtRisk}
+          streakCalendar={streakCalendar}
+        />
+
+        {/* Quick Start Bar */}
+        <div className="space-y-3">
+          <h3 className="text-[10px] font-semibold text-slate-400 tracking-wider px-1">Quick Start</h3>
+          <QuickStartBar
+            onCustomQuiz={() => setShowCustomQuizBuilder(true)}
+            onMyHistory={() => setDashboardView('history')}
+          />
+        </div>
+
+        {/* Featured Quiz of the Day */}
+        {featuredQuiz && (
+          <div className="space-y-3">
+            <h3 className="text-[10px] font-semibold text-slate-400 tracking-wider px-1">Today's Featured</h3>
+            <FeaturedQuizCard
+              quiz={featuredQuiz}
+              isCompleted={featuredCompleted}
+              completedScore={featuredScore}
+              onStart={handleStartFeaturedQuiz}
+            />
+          </div>
+        )}
+
+        {/* Active Challenges */}
+        {activeChallenges.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-[10px] font-semibold text-slate-400 tracking-wider px-1">Active Challenges</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {activeChallenges.map((challenge, i) => (
+                <ChallengeCard
+                  key={challenge.id}
+                  challenge={challenge}
+                  isCompleted={completedChallengeIds.has(challenge.id)}
+                  userLevel={level.level}
+                  onStart={() => handleStartChallenge(challenge)}
+                  index={i}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ═══════════ History View ═══════════
+  if (dashboardView === 'history' && quizQuestions.length === 0 && !quizCompleted && !reviewMode) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20 px-4 md:px-0">
+        {globalOverlays}
+        
+        {/* Header with Back Button */}
+        <div className="flex items-center gap-4 pt-4">
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setDashboardView('dashboard')}
+            className="p-3 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-orange-500/10 text-slate-400 hover:text-orange-500 transition-colors border border-slate-200 dark:border-white/10"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+          </motion.button>
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Quiz <span className="text-orange-500">history</span></h2>
+            <p className="text-slate-500 font-medium text-[11px] uppercase tracking-widest">Review your past performance</p>
+          </div>
+        </div>
+
+        <div className="glass-panel p-6 md:p-10 rounded-[40px] shadow-xl">
+          <HistorySection />
+        </div>
+      </div>
+    );
+  }
+
+  // ═══════════ Original Quiz Builder / Selection View ═══════════
+  return (
+    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20 px-4 md:px-0">
+      {globalOverlays}
+
+      <header className="text-center space-y-2 py-4">
+        <div className="flex items-center justify-center gap-4">
+          {showCustomQuizBuilder && quizQuestions.length === 0 && (
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowCustomQuizBuilder(false)}
+              className="p-3 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-orange-500/10 text-slate-400 hover:text-orange-500 transition-colors border border-slate-200 dark:border-white/10"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+            </motion.button>
+          )}
+          <div>
+            <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">taker</span></h2>
+            <p className="text-slate-500 font-semibold text-[11px] tracking-wider mt-1 opacity-60">Comprehensive Assessment Engine</p>
+          </div>
+        </div>
+      </header>
+
+      {error && (
+        <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-[32px] text-center space-y-3 animate-fade-in shadow-xl shadow-red-500/5">
+          <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center mx-auto text-red-500">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+          </div>
+          <h4 className="text-xs font-semibold text-red-500 tracking-wide">Protocol interrupted</h4>
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{error}</p>
+          <button onClick={() => setError(null)} className="text-[10px] font-semibold text-slate-400 hover:text-orange-500 transition-colors tracking-wide">Dismiss</button>
+        </div>
+      )}
+
+      <div className="glass-panel p-8 md:p-12 rounded-[48px] shadow-2xl border border-white/5 space-y-12 relative overflow-hidden">
+        {/* Background Decorative Blurs */}
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-orange-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-red-500/5 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10 ${!selectedSubject ? 'pt-4' : ''}`}>
+
           {/* Step 1: Subject Selection */}
           <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs transition-colors ${selectedSubject ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-600/10 text-orange-600'}`}>
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-4"
+            >
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm shadow-lg transition-all duration-500 ${selectedSubject ? 'bg-emerald-500 text-white rotate-[360deg]' : 'bg-gradient-to-br from-orange-500 to-red-600 text-white'}`}>
                 {selectedSubject ? '✓' : '1'}
               </div>
-              <label className="text-sm font-semibold text-slate-500 dark:text-slate-400">Select Subject</label>
-            </div>
-            <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto no-scrollbar pr-2">
-              {subjectsWithSyllabi.map(s => (
-                <button
+              <div>
+                <label className="text-sm font-semibold text-slate-900 dark:text-white">Select subject</label>
+                <p className="text-[10px] text-slate-500 font-medium opacity-60">Engine Protocol Part A</p>
+              </div>
+            </motion.div>
+
+            <div className="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto no-scrollbar pr-2 py-2">
+              {subjectsWithSyllabi.map((s, i) => (
+                <motion.button
                   key={s.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + i * 0.05 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => { handleSubjectChange(s); setSelectedUnits([]); }}
-                  className={`p-4 rounded-2xl border text-left transition-all ${selectedSubject?.id === s.id ? 'bg-orange-600 border-orange-500 text-white shadow-lg' : 'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 text-slate-500 hover:border-orange-500/30'}`}
+                  className={`relative p-5 rounded-[24px] border text-left transition-all group overflow-hidden ${
+                    selectedSubject?.id === s.id 
+                      ? 'bg-gradient-to-r from-orange-500 to-red-600 border-transparent text-white shadow-xl shadow-orange-500/20' 
+                      : 'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:border-orange-500/30 hover:bg-white dark:hover:bg-white/[0.04]'
+                    }`}
                 >
-                  <p className="text-xs font-medium">{s.name}</p>
-                </button>
+                  <div className="flex items-center justify-between pointer-events-none">
+                    <p className={`text-sm font-normal ${selectedSubject?.id === s.id ? 'text-white' : 'text-slate-900 dark:text-white group-hover:text-orange-500'}`}>{s.name}</p>
+                    {selectedSubject?.id === s.id && (
+                      <motion.div layoutId="selection-active" className="w-2 h-2 rounded-full bg-white shadow-[0_0_10px_white]" />
+                    )}
+                  </div>
+                  {/* Subtle inner glow for selected */}
+                  {selectedSubject?.id === s.id && (
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
+                  )}
+                </motion.button>
               ))}
+              
               {subjectsWithSyllabi.length === 0 && !initializing && (
-                <div className="py-10 text-center space-y-4">
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest opacity-40">No subjects found in the library.</p>
-                  <p className="text-xs text-slate-500">Upload a syllabus in the Library to get started.</p>
+                <div className="py-16 text-center space-y-4">
+                  <div className="w-16 h-16 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto opacity-20">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3A2.5 2.5 0 0 1 6.5 0.5H20" /></svg>
+                  </div>
+                  <p className="text-[10px] font-semibold text-slate-500 tracking-widest opacity-40">Library is empty</p>
+                  <p className="text-xs text-slate-400 max-w-[200px] mx-auto leading-relaxed">Connect a subject syllabus to the repository to initialize testing modules.</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Step 2: Unit Selection */}
-          <div className={`space-y-6 transition-all duration-700 ${!selectedSubject ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}>
-            <div className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs transition-colors ${selectedUnits.length > 0 && selectedDifficulties.length > 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-600/10 text-orange-600'}`}>
+          <div className={`space-y-8 transition-all duration-700 ${!selectedSubject ? 'opacity-20 grayscale pointer-events-none scale-95 blur-[2px]' : 'opacity-100'}`}>
+            <motion.div 
+              animate={selectedSubject ? { opacity: 1, x: 0 } : { opacity: 0.5, x: -10 }}
+              className="flex items-center gap-4"
+            >
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-semibold text-sm shadow-lg transition-all duration-500 ${selectedUnits.length > 0 && selectedDifficulties.length > 0 ? 'bg-emerald-500 text-white rotate-[360deg]' : 'bg-gradient-to-br from-orange-500 to-red-600 text-white'}`}>
                 {selectedUnits.length > 0 && selectedDifficulties.length > 0 ? '✓' : '2'}
               </div>
-              <label className="text-sm font-semibold text-slate-500 dark:text-slate-400">Select Units & Difficulty</label>
-            </div>
+              <div>
+                <label className="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">Configure scope</label>
+                <p className="text-[10px] text-slate-500 font-semibold tracking-wide opacity-60">Engine Protocol Part B</p>
+              </div>
+            </motion.div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {[1, 2, 3, 4, 5, 6].map(u => {
+              {[1, 2, 3, 4, 5, 6].map((u, i) => {
                 const isAvailable = availableUnitsForSubject.includes(u);
                 const isSelected = selectedUnits.includes(u);
                 return (
-                  <button
+                  <motion.button
                     key={u}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 + i * 0.05 }}
                     disabled={!isAvailable}
                     onClick={() => toggleUnit(u)}
-                    className={`relative p-6 rounded-[32px] border transition-all flex flex-col items-center justify-center group ${!isAvailable ? 'bg-slate-100/80 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 opacity-80 grayscale cursor-not-allowed' :
-                      isSelected ? 'bg-orange-600/10 border-orange-600 shadow-xl scale-105' :
-                        'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 hover:border-orange-500/30'
+                    whileHover={isAvailable ? { scale: 1.05, y: -2 } : {}}
+                    whileTap={isAvailable ? { scale: 0.95 } : {}}
+                    className={`relative p-8 rounded-[28px] border transition-all flex flex-col items-center justify-center group ${!isAvailable ? 'bg-slate-100/50 dark:bg-dark-950/20 border-slate-200 dark:border-white/5 opacity-40 grayscale cursor-not-allowed' :
+                      isSelected ? 'bg-orange-500/10 border-orange-500 shadow-xl shadow-orange-500/5' :
+                        'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 hover:border-orange-500/30'
                       }`}
                   >
                     {selectedSubject && !isAvailable && (
-                      <span className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-200 dark:bg-white/10 text-slate-500 dark:text-slate-400 text-[10px] font-medium border border-slate-300/50 dark:border-white/10">
-                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-2.5 h-2.5"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm3 8H9V7a3 3 0 0 1 6 0v3z" /></svg>
-                        Coming soon
+                      <span className="absolute top-2 left-1/2 -translate-x-1/2 -translate-y-full group-hover:translate-y-4 opacity-0 group-hover:opacity-100 transition-all px-2 py-1 rounded-full bg-slate-800 text-white text-[8px] font-bold uppercase tracking-tighter whitespace-nowrap z-20">
+                        Locked unit
                       </span>
                     )}
                     
-                    <span className={`text-2xl font-bold tracking-tight mb-0.5 transition-colors ${isSelected ? 'text-orange-600' : 'text-slate-300 dark:text-slate-700'}`}>
+                    <span className={`text-3xl font-semibold tracking-tighter mb-1 transition-all duration-300 ${isSelected ? 'text-orange-500 scale-110 drop-shadow-[0_0_8px_rgba(249,115,22,0.3)]' : 'text-slate-200 dark:text-slate-800 group-hover:text-slate-300 dark:group-hover:text-slate-700'}`}>
                       0{u}
                     </span>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-orange-500' : 'text-slate-400 dark:text-slate-500'}`}>
+                    <span className={`text-[10px] font-semibold tracking-wider transition-colors ${isSelected ? 'text-orange-600' : 'text-slate-400 dark:text-slate-500'}`}>
                       Unit {u}
                     </span>
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
 
-            <div className="pt-1">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="pt-2">
+              <div className="grid grid-cols-3 gap-3">
                 {[
-                  { id: 'easy', num: 'L1', label: 'Easy', color: { bg: 'bg-emerald-500/10', border: 'border-emerald-500', text: 'text-emerald-600', subText: 'text-emerald-500', hover: 'hover:border-emerald-500/30' } },
-                  { id: 'medium', num: 'L2', label: 'Medium', color: { bg: 'bg-amber-500/10', border: 'border-amber-500', text: 'text-amber-600', subText: 'text-amber-500', hover: 'hover:border-amber-500/30' } },
-                  { id: 'hard', num: 'L3', label: 'Hard', color: { bg: 'bg-red-500/10', border: 'border-red-500', text: 'text-red-600', subText: 'text-red-500', hover: 'hover:border-red-500/30' } }
-                ].map(lvl => {
+                  { id: 'easy', num: 'L1', label: 'Easy', color: 'emerald' },
+                  { id: 'medium', num: 'L2', label: 'Medium', color: 'amber' },
+                  { id: 'hard', num: 'L3', label: 'Hard', color: 'red' }
+                ].map((lvl, i) => {
                   const isSelected = selectedDifficulties.includes(lvl.id);
-                  const toggleDifficulty = (id: string) => {
-                    setSelectedDifficulties(prev => prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]);
-                  };
+                  const colorMap = {
+                    emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/50', text: 'text-emerald-500', hover: 'hover:border-emerald-500/30' },
+                    amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/50', text: 'text-amber-500', hover: 'hover:border-amber-500/30' },
+                    red: { bg: 'bg-red-500/10', border: 'border-red-500/50', text: 'text-red-500', hover: 'hover:border-red-500/30' }
+                  }[lvl.color];
+
                   return (
-                    <button
+                    <motion.button
                       key={lvl.id}
-                      onClick={() => toggleDifficulty(lvl.id)}
-                      className={`relative p-5 rounded-[28px] border transition-all flex flex-col items-center justify-center group ${
-                        isSelected ? `${lvl.color.bg} ${lvl.color.border} shadow-xl scale-105` :
-                        `bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 ${lvl.color.hover}`
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 + i * 0.1 }}
+                      whileHover={{ y: -2, scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setSelectedDifficulties(prev => prev.includes(lvl.id) ? prev.filter(d => d !== lvl.id) : [...prev, lvl.id])}
+                      className={`relative p-5 rounded-[24px] border transition-all flex flex-col items-center justify-center group overflow-hidden ${
+                        isSelected ? `${colorMap.bg} ${colorMap.border} shadow-lg shadow-black/5` :
+                        `bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 ${colorMap.hover}`
                       }`}
                     >
-                      <span className={`text-xl font-bold tracking-tight ${isSelected ? lvl.color.text : 'text-slate-400 dark:text-slate-600'}`}>{lvl.num}</span>
-                      <span className={`text-[10px] font-medium mt-1 ${isSelected ? lvl.color.subText : 'text-slate-500 opacity-60'}`}>{lvl.label}</span>
-                    </button>
+                      <span className={`text-xl font-semibold tracking-tight transition-all duration-300 ${isSelected ? colorMap.text : 'text-slate-400 dark:text-slate-700'}`}>{lvl.num}</span>
+                      <span className={`text-[10px] font-semibold tracking-wide mt-1 transition-colors ${isSelected ? colorMap.text : 'text-slate-500/60'}`}>{lvl.label}</span>
+                    </motion.button>
                   );
                 })}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Step 3: Customization - Progressive Disclosure */}
-        {selectedUnits.length > 0 && selectedDifficulties.length > 0 && (
-          <div className="pt-10 border-t border-slate-100 dark:border-white/5 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600 font-bold text-xs">3</div>
-                <label className="text-sm font-semibold text-slate-500 dark:text-slate-400">Customization</label>
-              </div>
+          {/* Step 3: Customization - Progressive Disclosure */}
+          <div className="md:col-span-2">
+            {selectedUnits.length > 0 && selectedDifficulties.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="pt-10 border-t border-slate-100 dark:border-white/5 space-y-12"
+              >
+                <div className="space-y-10">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg">3</div>
+                    <div>
+                      <label className="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">Final configuration</label>
+                      <p className="text-[10px] text-slate-500 font-semibold tracking-wide opacity-60">Engine Protocol Part C</p>
+                    </div>
+                  </div>
 
-              <div className="flex flex-col md:flex-row gap-4 w-full">
-                {hasMCQs && (
-                  <div className="flex-1 space-y-2 animate-in fade-in slide-in-from-right-2 duration-500">
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">MCQ Count & Type</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+                    {hasMCQs && (
+                      <div className="space-y-3">
+                        <p className="text-[10px] font-semibold text-slate-500 tracking-wider ml-1">MCQ assessment</p>
+                        <div className="relative group">
+                          <input
+                            type="number" min="0" max="500" value={numMCQ}
+                            onChange={(e) => setNumMCQ(parseInt(e.target.value) || 0)}
+                            className="w-full px-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-slate-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
+                          />
+                          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">qty</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {hasSubjective && (
+                      <div className="space-y-3">
+                        <p className="text-[10px] font-semibold text-slate-500 tracking-wider ml-1">Subjective questions</p>
+                        <div className="relative group">
+                          <input
+                            type="number" min="0" max="500" value={numSubjective}
+                            onChange={(e) => setNumSubjective(parseInt(e.target.value) || 0)}
+                            className="w-full px-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-slate-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
+                          />
+                          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">qty</div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="space-y-3">
-                      <input
-                        type="number" min="0" max="500" value={numMCQ}
-                        onChange={(e) => setNumMCQ(parseInt(e.target.value) || 0)}
-                        className="w-full px-4 py-2.5 bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-white/5 rounded-xl text-sm font-bold text-orange-600 focus:outline-none focus:border-orange-500 transition-all shadow-inner"
-                      />
-                      <div className="flex flex-wrap gap-2">
-                        {['MCQ', 'PYQ', 'Case Based'].map(type => {
-                          const isAvailable = availableQuestionTypes.has(type);
-                          const isSelected = selectedQuestionTypes.includes(type);
-                          return (
-                            <button
-                              key={type}
-                              disabled={!isAvailable || type === 'Case Based'}
-                              onClick={() => setSelectedQuestionTypes(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type])}
-                              className={`px-3 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
-                                type === 'Case Based' || !isAvailable ? 'opacity-40 grayscale cursor-not-allowed bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-400' :
-                                isSelected ? 'bg-orange-600/10 border-orange-500 text-orange-600' : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-500 hover:border-orange-500/20'
-                              }`}
-                            >
-                              <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-colors ${
-                                isSelected && isAvailable ? 'bg-orange-600 border-orange-600 text-white' : 'border-slate-300 dark:border-slate-700'
-                              }`}>
-                                {isSelected && isAvailable && <svg viewBox="0 0 14 14" fill="none" className="w-2.5 h-2.5"><path d="M3 7.5L5.5 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                              </div>
-                              {type}s
-                              {!isAvailable && type !== 'Case Based' && <span className="text-[8px] opacity-70">(N/A)</span>}
-                            </button>
-                          );
-                        })}
+                      <p className="text-[10px] font-semibold text-slate-500 tracking-wider ml-1">Time limit</p>
+                      <div className="relative group">
+                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-orange-500 transition-colors">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
+                        </div>
+                        <input
+                          type="number" min="1" max="180" value={timerMinutes}
+                          onChange={(e) => setTimerMinutes(parseInt(e.target.value) || 0)}
+                          className="w-full pl-12 pr-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-slate-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
+                        />
+                        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">min</div>
                       </div>
                     </div>
-                  </div>
-                )}
 
-                {hasSubjective && (
-                  <div className="flex-1 space-y-2 animate-in fade-in slide-in-from-left-2 duration-500">
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Subjective Count</p>
-                    <input
-                      type="number" min="0" max="500" value={numSubjective}
-                      onChange={(e) => setNumSubjective(parseInt(e.target.value) || 0)}
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-white/5 rounded-xl text-sm font-bold text-orange-600 focus:outline-none focus:border-orange-500 transition-all shadow-inner"
-                    />
+                    {hasCoding && (
+                      <div className="space-y-3">
+                        <p className="text-[10px] font-semibold text-slate-500 tracking-wider ml-1">Coding logic</p>
+                        <div className="relative group">
+                          <input
+                            type="number" min="0" max="50" value={numCoding}
+                            onChange={(e) => setNumCoding(parseInt(e.target.value) || 0)}
+                            disabled={selectedSubject?.name.includes('CSE101')}
+                            className={`w-full px-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-slate-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm ${selectedSubject?.name.includes('CSE101') ? 'opacity-30 cursor-not-allowed' : ''}`}
+                          />
+                          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">qty</div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
 
-                {hasCoding && (
-                  <div className="flex-1 space-y-2 animate-in fade-in slide-in-from-left-2 duration-500">
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Coding Count</p>
-                    <input
-                      type="number" min="0" max="50" value={numCoding}
-                      onChange={(e) => setNumCoding(parseInt(e.target.value) || 0)}
-                      disabled={selectedSubject?.name.includes('CSE101')}
-                      className={`w-full px-4 py-2.5 bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-white/5 rounded-xl text-sm font-bold text-orange-600 focus:outline-none focus:border-orange-500 transition-all shadow-inner ${selectedSubject?.name.includes('CSE101') ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    />
-                  </div>
-                )}
-                
-                <div className="flex-1 space-y-2 animate-in fade-in slide-in-from-left-2 duration-500">
-                  <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Duration (Minutes)</p>
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
-                    </div>
-                    <input
-                      type="number" min="1" max="180" value={timerMinutes}
-                      onChange={(e) => setTimerMinutes(parseInt(e.target.value) || 0)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-white/5 rounded-xl text-sm font-bold text-orange-600 focus:outline-none focus:border-orange-500 transition-all shadow-inner"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3 animate-in fade-in slide-in-from-left-2 duration-500">
-                <button 
-                  onClick={() => setShowTopics(!showTopics)}
-                  className="w-full flex items-center justify-between p-4 bg-slate-100/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl hover:border-orange-500/30 transition-all group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-orange-600/10 text-orange-600 rounded-xl">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M4 6h16M4 12h16M4 18h7" /></svg>
-                    </div>
-                    <div className="text-left">
-                      <p className="text-[13px] font-semibold text-slate-900 dark:text-white">Topic Selection</p>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Filter by specific areas</p>
-                    </div>
-                  </div>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-4 h-4 text-slate-400 group-hover:text-orange-500 transition-transform duration-300 ${showTopics ? 'rotate-180' : ''}`}><path d="M6 9l6 6 6-6" /></svg>
-                </button>
-
-                {showTopics && (
-                  <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 no-scrollbar animate-in slide-in-from-top-2 duration-300">
-                    {Object.entries(availableTopicsByUnit).sort((a,b) => Number(a[0]) - Number(b[0])).map(([unit, topics]) => {
-                      const isUnitAllSelected = !(topics as string[]).some(t => selectedTopics.includes(t));
-                      return (
-                        <div key={unit} className="space-y-3">
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Unit {unit}</h4>
-                            <div className="h-px bg-slate-200 dark:bg-white/5 flex-grow"></div>
+                  {/* Move Topics to Step 3 below inputs */}
+                  {selectedUnits.length > 0 && Object.keys(availableTopicsByUnit).length > 0 && (
+                    <div className="space-y-4 pt-2">
+                      <button 
+                        onClick={() => setShowTopics(!showTopics)}
+                        className="flex items-center justify-between w-full px-5 py-4 rounded-[24px] bg-slate-50 dark:bg-white/5 hover:bg-orange-500/5 transition-all group border border-slate-100 dark:border-white/5"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`p-2.5 rounded-2xl transition-colors ${showTopics ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-orange-500/10 text-orange-500'}`}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M4 6h16M4 12h16m-7 6h7" /></svg>
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <button
-                              onClick={() => setSelectedTopics(prev => prev.filter(t => !(topics as string[]).includes(t)))}
-                              className={`col-span-1 md:col-span-2 flex items-center text-left gap-3 p-3 rounded-xl border transition-all ${
-                                isUnitAllSelected ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-500/50 shadow-sm' :
-                                'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 hover:border-orange-500/30'
-                              }`}
-                            >
-                              <div className={`min-w-4 w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                                isUnitAllSelected ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-dark-900'
-                              }`}>
-                                {isUnitAllSelected && <svg viewBox="0 0 14 14" fill="none" className="w-2.5 h-2.5"><path d="M3 7.5L5.5 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                              </div>
-                              <span className={`text-sm font-semibold leading-relaxed ${isUnitAllSelected ? 'text-orange-700 dark:text-orange-400' : 'text-slate-600 dark:text-slate-400'}`}>
-                                All Unit {unit} Topics
-                              </span>
-                            </button>
-                            {(topics as string[]).map(topic => {
-                              const isSelected = selectedTopics.includes(topic);
-                              return (
-                                <button
-                                  key={topic}
-                                  onClick={() => setSelectedTopics(prev => prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic])}
-                                  className={`flex items-start text-left gap-3 p-3 rounded-xl border transition-all ${
-                                    isSelected ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-500/50 shadow-sm' :
-                                    'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-white/5 hover:border-orange-500/30'
-                                  }`}
-                                >
-                                  <div className={`mt-0.5 min-w-4 w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                                    isSelected ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-dark-900'
-                                  }`}>
-                                    {isSelected && <svg viewBox="0 0 14 14" fill="none" className="w-2.5 h-2.5"><path d="M3 7.5L5.5 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                                  </div>
-                                  <span className={`text-xs font-medium leading-relaxed ${isSelected ? 'text-orange-700 dark:text-orange-400' : 'text-slate-600 dark:text-slate-400'}`}>
-                                    {topic}
-                                  </span>
-                                </button>
-                              );
-                            })}
+                          <div className="text-left">
+                            <span className="block text-sm font-semibold tracking-tight text-slate-900 dark:text-white">Refine by topics</span>
+                            <span className="block text-[11px] text-slate-500 font-semibold tracking-wide opacity-60">Fine-tune assessment focus</span>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+                        <motion.div animate={{ rotate: showTopics ? 180 : 0 }}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 text-slate-400"><path d="M19 9l-7 7-7-7" /></svg>
+                        </motion.div>
+                      </button>
 
-                {hasMCQs && (
-                  <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <button
+                      {showTopics && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="grid grid-cols-2 md:grid-cols-4 gap-2 px-1"
+                        >
+                          <button
+                            onClick={() => setSelectedTopics([])}
+                            className={`px-4 py-3 rounded-2xl text-[10px] font-semibold tracking-wider text-center transition-all border ${
+                              selectedTopics.length === 0 
+                                ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20' 
+                                : 'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 text-slate-500 hover:border-orange-500/30'
+                            }`}
+                          >
+                            All topics
+                          </button>
+
+                          {selectedUnits.flatMap(u => availableTopicsByUnit[u] || []).map((topic, idx) => {
+                            const isSelected = selectedTopics.includes(topic);
+                            return (
+                              <button
+                                key={`${topic}-${idx}`}
+                                onClick={() => setSelectedTopics(prev => isSelected ? prev.filter(t => t !== topic) : [...prev, topic])}
+                                className={`px-4 py-3 rounded-2xl text-[10px] font-semibold text-center transition-all border ${
+                                  isSelected 
+                                    ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20' 
+                                    : 'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 text-slate-500 hover:border-orange-500/30'
+                                }`}
+                              >
+                                {topic}
+                              </button>
+                            );
+                          })}
+                        </motion.div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <motion.button
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setNegativeMarking(!negativeMarking)}
-                      className={`w-full p-4 rounded-2xl border transition-all flex items-center justify-between group ${negativeMarking ? 'bg-orange-600/5 border-orange-500/30' : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 hover:border-orange-500/20'}`}
+                      className={`relative p-5 rounded-[28px] border transition-all flex items-center justify-between group overflow-hidden ${negativeMarking ? 'bg-red-500/5 border-red-500/30' : 'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 hover:border-red-500/20'}`}
                     >
-                      <div className="text-left flex items-center gap-4">
-                        <div className={`p-2 rounded-xl ${negativeMarking ? 'bg-orange-500 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}>
+                      <div className="flex items-center gap-4 z-10">
+                        <div className={`p-3 rounded-2xl transition-colors ${negativeMarking ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-slate-100 dark:bg-dark-800 text-slate-500'}`}>
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M12 2v20M2 12h20" className="rotate-45" /></svg>
                         </div>
-                        <div>
-                          <p className="text-[13px] font-semibold text-slate-900 dark:text-slate-100">Negative Marking</p>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-widest opacity-60">Deducts 1/4 mark / error</p>
+                        <div className="text-left">
+                          <p className={`text-sm font-semibold tracking-tight ${negativeMarking ? 'text-red-500' : 'text-slate-900 dark:text-white'}`}>Negative Marking</p>
+                          <p className="text-[10px] text-slate-500 font-semibold tracking-wider opacity-60">High stakes protocol</p>
                         </div>
                       </div>
-                      <div className={`w-11 h-6 rounded-full relative transition-colors ${negativeMarking ? 'bg-orange-600' : 'bg-slate-200 dark:bg-slate-800'}`}>
-                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${negativeMarking ? 'right-1 bg-white shadow-sm' : 'left-1 bg-slate-400 dark:bg-slate-600'}`} />
+                      <div className={`w-12 h-6 rounded-full relative transition-colors z-10 ${negativeMarking ? 'bg-red-500' : 'bg-slate-200 dark:bg-dark-800'}`}>
+                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${negativeMarking ? 'right-1 bg-white' : 'left-1 bg-slate-400 dark:bg-slate-600'}`} />
                       </div>
-                    </button>
+                    </motion.button>
 
-                    <button
+                    <motion.button
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setIsPracticeMode(!isPracticeMode)}
-                      className={`w-full p-4 rounded-2xl border transition-all flex items-center justify-between group ${isPracticeMode ? 'bg-orange-600/5 border-orange-500/30' : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 hover:border-orange-500/20'}`}
+                      className={`relative p-5 rounded-[28px] border transition-all flex items-center justify-between group overflow-hidden ${isPracticeMode ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 hover:border-emerald-500/20'}`}
                     >
-                      <div className="text-left flex items-center gap-4">
-                        <div className={`p-2 rounded-xl ${isPracticeMode ? 'bg-orange-500 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}>
+                      <div className="flex items-center gap-4 z-10">
+                        <div className={`p-3 rounded-2xl transition-colors ${isPracticeMode ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-slate-100 dark:bg-dark-800 text-slate-500'}`}>
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
                         </div>
-                        <div>
-                          <p className="text-[13px] font-semibold text-slate-900 dark:text-slate-100">Practice Mode</p>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-widest opacity-60">Instant Answer Validation</p>
+                        <div className="text-left">
+                          <p className={`text-sm font-semibold tracking-tight ${isPracticeMode ? 'text-emerald-500' : 'text-slate-900 dark:text-white'}`}>Practice Mode</p>
+                          <p className="text-[10px] text-slate-500 font-semibold tracking-wider opacity-60">Visual aid enabled</p>
                         </div>
                       </div>
-                      <div className={`w-11 h-6 rounded-full relative transition-colors ${isPracticeMode ? 'bg-orange-600' : 'bg-slate-200 dark:bg-slate-800'}`}>
-                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${isPracticeMode ? 'right-1 bg-white shadow-sm' : 'left-1 bg-slate-400 dark:bg-slate-600'}`} />
+                      <div className={`w-12 h-6 rounded-full relative transition-colors z-10 ${isPracticeMode ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-dark-800'}`}>
+                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${isPracticeMode ? 'right-1 bg-white' : 'left-1 bg-slate-400 dark:bg-slate-600'}`} />
                       </div>
-                    </button>
+                    </motion.button>
                   </div>
-                )}
-              <button
-                onClick={handleGenerate}
-                disabled={loading}
-                className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl font-semibold text-sm tracking-tight shadow-xl shadow-orange-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 border-none"
-              >
-                {loading ? 'Processing...' : 'Generate My Quiz'}
-              </button>
-            </div>
+
+                  <div className="pt-8 flex justify-center">
+                    <motion.button
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleGenerate}
+                      className="group relative px-6 py-2.5 rounded-[20px] overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-orange-600 via-red-600 to-orange-600 bg-[length:200%_auto] animate-gradient-x" />
+                      <div className="relative flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3 h-3 group-hover:translate-x-0.5 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                        </div>
+                        <span className="text-sm font-semibold text-white drop-shadow-lg">{loading ? 'Processing...' : 'Initialize session'}</span>
+                      </div>
+                      {/* Outer Glow */}
+                      <div className="absolute inset-0 bg-orange-600/30 blur-3xl group-hover:bg-orange-600/50 transition-all -z-10" />
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
-};
+}
 
 export default QuizTaker;
