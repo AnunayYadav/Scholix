@@ -213,107 +213,14 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
       {/* Leveling & Stats Section */}
       <section className="w-full space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* XP & Level Card */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/5 bg-white/50 dark:bg-white/[0.02] relative overflow-hidden group"
-          >
-            <div className="absolute -right-10 -top-10 w-40 h-40 bg-orange-500/10 blur-[80px] rounded-full" />
-            
-            <div className="flex items-start justify-between mb-8 relative z-10">
-              <div>
-                <h3 className="text-[10px] font-bold text-orange-600 uppercase tracking-[0.3em] mb-2">Current Standing</h3>
-                <div className="flex items-center gap-3">
-                  <span className="text-4xl">
-                    {levelInfo.icon}
-                  </span>
-                  <div>
-                    <h4 className="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tighter">
-                      {levelInfo.title}
-                    </h4>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Level {levelInfo.level}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-3xl font-black text-slate-800 dark:text-white tabular-nums drop-shadow-sm">
-                  {totalXP}
-                </span>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total XP Earned</p>
-              </div>
-            </div>
+        <div className="flex items-center justify-center p-8 bg-orange-600/5 rounded-[40px] border border-orange-600/10 backdrop-blur-sm group cursor-pointer" onClick={() => navigateToModule(ModuleType.DASHBOARD)}>
+          <div className="text-center space-y-2">
+            <p className="text-[10px] font-black text-orange-600 uppercase tracking-[0.3em]">Protocol Progress</p>
+            <h4 className="text-xl font-bold text-slate-800 dark:text-white uppercase tracking-tight">Visit Quiz Dashboard</h4>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">To view full XP breakdown & Streaks</p>
+          </div>
+        </div>
 
-            {/* XP Progress Bar */}
-            <div className="space-y-3 relative z-10">
-              <div className="flex justify-between items-end">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Progress to next tier</span>
-                <span className="text-[10px] font-bold text-orange-600 uppercase tracking-widest">
-                  {levelInfo.progress}%
-                </span>
-              </div>
-              <div className="h-4 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden p-1 border border-slate-200/50 dark:border-white/5">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  whileInView={{ width: `${levelInfo.progress}%` }}
-                  transition={{ duration: 1.5, ease: "circOut" }}
-                  viewport={{ once: true }}
-                  className="h-full bg-gradient-to-r from-orange-500 via-red-600 to-orange-500 bg-[length:200%_auto] animate-gradient-x rounded-full"
-                />
-              </div>
-              {levelInfo.nextLevel && (
-                <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] text-center">
-                  Earn {levelInfo.nextLevel!.minXP - totalXP} more XP to reach <span className="text-orange-600">{levelInfo.nextLevel!.title}</span>
-                </p>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Streak Card */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/5 bg-white/50 dark:bg-white/[0.02] relative overflow-hidden flex flex-col items-center justify-center text-center group"
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative z-10">
-              <div className="mb-4 relative">
-                <motion.span 
-                  animate={{ scale: [1, 1.1, 1] }} 
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="text-5xl block"
-                >
-                  🔥
-                </motion.span>
-                <div className="absolute inset-x-0 bottom-0 h-4 bg-orange-600/20 blur-xl rounded-full -z-10" />
-              </div>
-              <h4 className="text-4xl font-black text-slate-800 dark:text-white tabular-nums mb-1">
-                {currentStreak}
-              </h4>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Day Streak</p>
-              
-              <div className="pt-4 border-t border-slate-100 dark:border-white/5 w-full">
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest opacity-60 mb-2">Best: {longestStreak}</p>
-                {/* 7-DAY MINI DOTS */}
-                <div className="flex justify-center gap-1.5">
-                  {streakCalendar.slice(-7).map((day, i) => (
-                    <div 
-                      key={i} 
-                      className={`w-2.5 h-2.5 rounded-full transition-all ${
-                        day.completed 
-                          ? 'bg-orange-600 shadow-[0_0_8px_rgba(234,88,12,0.4)]' 
-                          : 'bg-slate-200 dark:bg-white/10'
-                      }`}
-                      title={new Date(day.date).toLocaleDateString()}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </section>
 

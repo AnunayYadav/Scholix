@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { UserProfile, QuizQuestion, LibraryFile } from '../types.ts';
@@ -29,7 +30,7 @@ import HistorySection from './quiz/HistorySection.tsx';
 import { useXP } from '../hooks/useXP.ts';
 import { useStreak } from '../hooks/useStreak.ts';
 import { useDashboard } from '../hooks/useDashboard.ts';
-import { useQuizDashboardStore, getLevelInfo } from '../stores/quizStore.ts';
+import { useQuizDashboardStore, getLevelInfo, LEVEL_THRESHOLDS } from '../stores/quizStore.ts';
 
 const parseText = (text: string | undefined) => {
   if (!text) return null;
@@ -98,6 +99,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [activeChallengeId, setActiveChallengeId] = useState<string | null>(null);
 
   const [subjectsWithSyllabi, setSubjectsWithSyllabi] = useState<SubjectWithSyllabus[]>([]);
+  const [showProgressModal, setShowProgressModal] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<SubjectWithSyllabus | null>(null);
   const [selectedUnits, setSelectedUnits] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
@@ -2361,6 +2363,263 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             onMyHistory={() => setDashboardView('history')}
           />
         </div>
+
+        {/* XP & Streak Stats Refined Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-[1.4fr_0.6fr] gap-4 mb-4">
+          {/* XP & Level Card - Clickable Progress Modal Trigger */}
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            whileHover={{ scale: 1.02, cursor: 'pointer' }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowProgressModal(true)}
+            className="bg-white dark:bg-white/[0.03] p-6 rounded-[24px] border border-slate-100 dark:border-white/5 shadow-sm relative overflow-hidden group hover:shadow-md transition-all flex flex-col gap-6"
+          >
+            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-40 transition-opacity">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+              </svg>
+            </div>
+
+            <div className="flex justify-between items-start">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-orange-600/90 uppercase tracking-widest leading-none">Level {level.level}</p>
+                <h3 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">
+                  {level.title}
+                </h3>
+              </div>
+              <div className="w-14 h-14 rounded-[18px] bg-orange-500/5 dark:bg-orange-500/10 flex items-center justify-center text-2xl">
+                {level.icon || '🌱'}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-baseline gap-2">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total XP</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-black text-orange-600 tabular-nums leading-none">
+                    {totalXP}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-400">XP</span>
+                </div>
+              </div>
+
+              {/* High Contrast Progress Line */}
+              <div className="space-y-2">
+                <div className="h-2 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${level.progress}%` }}
+                    transition={{ duration: 1.5, ease: "circOut" }}
+                    viewport={{ once: true }}
+                    className="h-full bg-orange-600 rounded-full"
+                  />
+                </div>
+                {level.nextLevel && (
+                  <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                    Need <span className="font-bold text-slate-700 dark:text-slate-200">{level.nextLevel!.minXP - totalXP} more</span> to reach {level.nextLevel!.title}
+                  </p>
+                )}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Streak Card - Narrower & Shorter */}
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="bg-white dark:bg-white/[0.03] p-5 rounded-[24px] border border-slate-100 dark:border-white/5 shadow-sm relative overflow-hidden flex flex-col items-center justify-between transition-all"
+          >
+            <div className="flex flex-col items-center w-full">
+              <div className="flex items-center justify-center gap-3 mb-1">
+                <motion.span 
+                  animate={{ scale: [1, 1.1, 1] }} 
+                  transition={{ repeat: Infinity, duration: 2.5 }}
+                  className="text-3xl"
+                >
+                  🔥
+                </motion.span>
+                <h4 className="text-6xl font-black text-slate-900 dark:text-white tabular-nums leading-none">
+                  {currentStreak}
+                </h4>
+              </div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Day Streak</p>
+              
+              <div className="px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 mb-4">
+                <p className="text-[9px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest leading-none">Best: {longestStreak}</p>
+              </div>
+            </div>
+
+            <div className="w-full">
+              <div className="flex justify-between items-center px-0.5">
+                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((label, i) => {
+                  const day = streakCalendar.slice(-7)[i];
+                  const isCompleted = day?.completed;
+                  return (
+                    <div key={i} className="flex flex-col items-center gap-1.5">
+                      <span className="text-[8px] font-bold text-slate-400 uppercase">{label}</span>
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
+                        isCompleted 
+                          ? 'bg-orange-600 border-none shadow-[0_0_8px_rgba(234,88,12,0.4)]' 
+                          : 'border-2 border-slate-200 dark:border-white/10'
+                      }`}>
+                        {isCompleted && (
+                          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" className="w-3 h-3">
+                            <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* ═══════════ Progress Timeline Modal ═══════════ */}
+        {typeof document !== 'undefined' && createPortal(
+          <AnimatePresence>
+            {showProgressModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="modal-overlay"
+                style={{ backdropFilter: 'blur(20px) saturate(180%)', zIndex: 60 }}
+                onClick={() => setShowProgressModal(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                  className="w-full max-w-xl bg-white dark:bg-dark-950 rounded-[40px] shadow-2xl overflow-hidden border border-slate-200 dark:border-white/10 relative"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Close button */}
+                  <button 
+                    onClick={() => setShowProgressModal(false)}
+                    className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 transition-colors z-20"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-slate-400">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+
+                  <div className="p-8 md:p-12 overflow-y-auto max-h-[85vh] custom-scrollbar">
+                    {/* Header */}
+                    <div className="text-center mb-12 space-y-2">
+                      <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Nexus Journey</h2>
+                      <p className="text-sm font-medium text-slate-500">Level up to unlock new rewards & titles</p>
+                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-orange-500/10 border border-orange-500/20 mt-4">
+                        <span className="text-xl">🏆</span>
+                        <span className="text-sm font-black text-orange-600 dark:text-orange-400">{totalXP} Total XP</span>
+                      </div>
+                    </div>
+
+                    {/* Vertical Timeline */}
+                    <div className="relative space-y-12 pl-4">
+                      {/* Central Line */}
+                      <div className="absolute left-[34px] top-6 bottom-6 w-1 bg-slate-100 dark:bg-white/5 rounded-full" />
+                      
+                      {/* Active Progress Line Segment */}
+                      <motion.div 
+                        initial={{ height: 0 }}
+                        animate={{ height: `${Math.min(100, (level.level - 1) * 25 + (level.progress * 0.25))}%` }}
+                        className="absolute left-[34px] top-6 w-1 bg-orange-600 rounded-full z-10"
+                      />
+
+                      {/* Level Tiers */}
+                      {[...LEVEL_THRESHOLDS].map((tier, idx) => {
+                        const isCompleted = totalXP >= tier.maxXP;
+                        const isCurrent = totalXP >= tier.minXP && totalXP <= tier.maxXP;
+                        
+                        return (
+                          <motion.div 
+                            key={tier.level}
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: idx * 0.1 }}
+                            className="relative flex items-center gap-8 group"
+                          >
+                            {/* Connector Point */}
+                            <div className={`relative z-20 w-10 h-10 rounded-full border-4 flex items-center justify-center transition-all ${
+                              isCompleted ? 'bg-orange-600 border-orange-600/20' :
+                              isCurrent ? 'bg-white dark:bg-dark-900 border-orange-600' :
+                              'bg-white dark:bg-dark-900 border-slate-200 dark:border-white/10'
+                            }`}>
+                              {isCompleted ? (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" className="w-5 h-5">
+                                  <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              ) : (
+                                <span className={`text-xs font-black ${isCurrent ? 'text-orange-600' : 'text-slate-400'}`}>
+                                  {tier.level}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Card Content */}
+                            <div className={`flex-1 p-6 rounded-[28px] border transition-all ${
+                              isCurrent ? 'bg-orange-500/5 border-orange-500/20 shadow-lg' :
+                              isCompleted ? 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 opacity-80' :
+                              'bg-slate-50/50 dark:bg-white/[0.01] border-slate-200/50 dark:border-white/5 opacity-40'
+                            }`}>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-xl">{tier.icon}</span>
+                                    <h4 className="font-black text-slate-800 dark:text-white uppercase tracking-tighter text-lg leading-none">
+                                      {tier.title}
+                                    </h4>
+                                  </div>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                    {tier.minXP}{tier.maxXP === Infinity ? '+' : ` - ${tier.maxXP}`} XP
+                                  </p>
+                                </div>
+                                {isCurrent && (
+                                  <div className="px-3 py-1 bg-orange-600 text-white text-[8px] font-black uppercase tracking-widest rounded-full">
+                                    Current Tier
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {isCurrent && level.nextLevel && (
+                                <div className="mt-4 space-y-2">
+                                  <div className="h-1.5 w-full bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                    <motion.div 
+                                      initial={{ width: 0 }}
+                                      animate={{ width: `${level.progress}%` }}
+                                      className="h-full bg-orange-600"
+                                    />
+                                  </div>
+                                  <p className="text-[9px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest">
+                                    {level.nextLevel.minXP - totalXP} XP remaining to Level {tier.level + 1}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.getElementById('modal-root') || document.body
+        )}
+
+
+
+
+
+
 
         {/* Featured Quiz of the Day */}
         {featuredQuiz && (
