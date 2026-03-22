@@ -78,7 +78,8 @@ async function generateFeaturedQuiz(): Promise<FeaturedQuiz | null> {
 
   // Pick subject based on seeded random
   const subject = seededPick(subjects.sort(), rng);
-  const questionsPool: QuizQuestion[] = await NexusServer.fetchQuestions(subject);
+  const subjectCode = (subject || '').split(':')[0].trim();
+  const questionsPool: QuizQuestion[] = await NexusServer.fetchQuestions(subjectCode);
   
   if (!questionsPool || questionsPool.length === 0) return null;
 
@@ -170,11 +171,12 @@ async function generateActiveChallenges(): Promise<ActiveChallenge[]> {
   for (let i = 0; i < numChallenges; i++) {
     const subject = shuffledSubjects[i];
     const template = CHALLENGE_TEMPLATES[i % CHALLENGE_TEMPLATES.length];
+    const subjectCode = (subject || '').split(':')[0].trim();
     const shortName = subject.includes('-') ? subject.split('-').pop()?.trim() || subject : subject;
-    const emoji = CHALLENGE_EMOJIS_MAP[subject] || seededPick(Object.values(CHALLENGE_EMOJIS_MAP), rng);
+    const emoji = CHALLENGE_EMOJIS_MAP[subjectCode] || CHALLENGE_EMOJIS_MAP[subject] || seededPick(Object.values(CHALLENGE_EMOJIS_MAP), rng);
 
     // Verify the subject has enough questions
-    const pool: QuizQuestion[] = await NexusServer.fetchQuestions(subject);
+    const pool: QuizQuestion[] = await NexusServer.fetchQuestions(subjectCode);
     const mcqs = pool.filter(q => q.type !== 'subjective' && q.type !== 'coding');
     
     if (mcqs.length < 5) continue;

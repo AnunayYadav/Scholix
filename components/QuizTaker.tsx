@@ -415,7 +415,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       
       setIsFetchingQuestions(true);
       try {
-        const questions = await NexusServer.fetchQuestions(selectedSubject.name);
+        const subjectCode = (selectedSubject.name || '').split(':')[0].trim();
+        const questions = await NexusServer.fetchQuestions(subjectCode);
         setSubjectQuestions(questions);
       } catch (err) {
         console.error("Error fetching subject questions:", err);
@@ -734,7 +735,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     setStatus('Gathering challenge questions...');
     
     try {
-      const pool = await NexusServer.fetchQuestions(challenge.subject);
+      const subjectCode = (challenge.subject || '').split(':')[0].trim();
+      const pool = await NexusServer.fetchQuestions(subjectCode);
       const mcqs = pool.filter(q => q.type === 'mcq');
       
       if (mcqs.length === 0) {
@@ -891,7 +893,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       if (pool.length === 0) {
         // Double check with a direct fetch if pool is empty (maybe it wasn't fully loaded)
         setStatus('Attempting deep fetch...');
-        pool = await NexusServer.fetchQuestions(selectedSubject.name);
+        const subjectCode = (selectedSubject.name || '').split(':')[0].trim();
+        pool = await NexusServer.fetchQuestions(subjectCode);
         pool = pool.filter(q => selectedUnits.includes(q.unit));
       }
 

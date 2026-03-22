@@ -151,10 +151,11 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return;
 
+    const subjectCode = (subject || '').split(':')[0].trim();
     // Transform from app format to DB format (snake_case)
     const dbRows = questions.map(q => ({
       id: q.id,
-      subject,
+      subject: subjectCode,
       unit,
       topic: q.topic,
       difficulty: q.difficulty,
@@ -187,10 +188,11 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return [];
 
+    const subjectCode = (subject || '').split(':')[0].trim();
     let query = client
       .from('questions')
       .select('*')
-      .eq('subject', subject);
+      .eq('subject', subjectCode);
 
     if (unit !== undefined && unit !== 0) {
       query = query.eq('unit', unit);
