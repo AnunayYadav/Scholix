@@ -555,58 +555,60 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     try {
       const subjectsMap = new Map<string, SubjectWithSyllabus>();
       
-      // Fetch available subject names from Supabase (e.g., ["CHE110", "CSE101"])
+      // Fetch available subject names from Supabase
       const subjectNames = await NexusServer.fetchSubjectNames();
 
       subjectNames.forEach((subjectName, index) => {
-        subjectsMap.set(subjectName, {
+        // Normalize code by removing spaces: "CHE 110" -> "CHE110"
+        const normalizedCode = subjectName.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+        subjectsMap.set(normalizedCode, {
           id: `QUIZ_SUB_${index}`,
           name: subjectName,
           syllabusFile: null as any
         });
       });
 
-      // Also ensure subjects from SYLLABUS_DATA (AI fallback) are included
-      // We deduplicate by checking if the code (e.g., CHE110) already exists in any form
+      // Also ensure subjects from SYLLABUS_DATA (Fallback) are included
+      // We deduplicate by normalized code
       Object.keys(SYLLABUS_DATA).forEach((fullName, index) => {
-        const code = fullName.split(':')[0].trim();
+        const fullCode = fullName.split(':')[0].trim();
+        const normalizedCode = fullCode.replace(/\s+/g, '').toUpperCase();
         
-        // Find if we already have this code in some form
-        let alreadyHasCode = false;
-        let existingFullMatchKey = '';
+        const existing = subjectsMap.get(normalizedCode);
         
-        for (const [key] of subjectsMap.entries()) {
-          const existingCode = key.split(':')[0].trim();
-          if (existingCode === code) {
-            alreadyHasCode = true;
-            existingFullMatchKey = key;
-            break;
-          }
-        }
-
-        if (!alreadyHasCode) {
-          // New subject entirely
-          subjectsMap.set(fullName, {
+        if (!existing) {
+          // New subject
+          subjectsMap.set(normalizedCode, {
             id: `AI_SUB_${index}`,
             name: fullName,
             syllabusFile: null as any
           });
-        } else if (fullName.includes(':') && !existingFullMatchKey.includes(':')) {
-            // If the new name is descriptive (has a colon) but the existing one is just a code,
-            // REPLACE the existing one with the better descriptive name while keeping it unique.
-            const existingVal = subjectsMap.get(existingFullMatchKey)!;
-            subjectsMap.delete(existingFullMatchKey);
-            subjectsMap.set(fullName, {
-                ...existingVal,
-                name: fullName
-            });
+        } else {
+            // If already exists, prefer the name that has a description (colon)
+            // or is generally longer/more descriptive
+            if (fullName.includes(':') && !existing.name.includes(':')) {
+                subjectsMap.set(normalizedCode, {
+                    ...existing,
+                    name: fullName
+                });
+            }
         }
       });
 
-      setSubjectsWithSyllabi(Array.from(subjectsMap.values()).sort((a, b) => a.name.localeCompare(b.name)));
+      // Final unique subjects list
+      const finalSubjects = Array.from(subjectsMap.values())
+        .sort((a, b) => a.name.localeCompare(b.name));
+        
+      setSubjectsWithSyllabi(finalSubjects);
     } catch (err) {
       console.error("Library load error:", err);
-      setSubjectsWithSyllabi([]);
+      // Fallback: at least show what's in SYLLABUS_DATA
+      const fallback = Object.keys(SYLLABUS_DATA).map((name, i) => ({
+          id: `F_SUB_${i}`,
+          name,
+          syllabusFile: null as any
+      }));
+      setSubjectsWithSyllabi(fallback);
     } finally {
       setInitializing(false);
     }
@@ -748,7 +750,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     setVisitedQuestions(new Set([0]));
     setMarkedForReview(new Set());
     setTimeSpentByQuestion({});
-    const newQuizId = `featured_${Date.now()}`;
+    const newQuizId = featuredQuiz.id; // Using static day-based ID
     setQuizIdInState(newQuizId);
     navigate(`/quiz/featured/${newQuizId}`);
   }, [featuredQuiz, featuredCompleted]);
@@ -790,7 +792,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     setVisitedQuestions(new Set([0]));
     setMarkedForReview(new Set());
     setTimeSpentByQuestion({});
-    const newQuizId = `challenge_${challenge.id}_${Date.now()}`;
+    const newQuizId = challenge.id; // Using static window-based ID
     setQuizIdInState(newQuizId);
     navigate(`/quiz/challenge/${newQuizId}`);
     } catch (err) {

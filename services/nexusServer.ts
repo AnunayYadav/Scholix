@@ -205,21 +205,49 @@ class NexusServer {
       return [];
     }
 
-    return data.map(q => ({
-      id: q.id,
-      unit: q.unit,
-      topic: q.topic,
-      difficulty: q.difficulty,
-      questionType: q.question_type as any,
-      type: q.type as any,
-      question: q.question,
-      // Handle the case where JSONB might be returned as string or object depending on driver/API
-      options: typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || []),
-      correctAnswer: q.correct_answer !== null ? Number(q.correct_answer) : undefined,
-      explanation: q.explanation,
-      starterCode: q.starter_code,
-      testCases: typeof q.test_cases === 'string' ? JSON.parse(q.test_cases) : (q.test_cases || [])
-    }));
+    return data.map(q => {
+      const options = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || []);
+      
+      // Robust mapping for correctAnswer index
+      let finalCorrectIdx: number | undefined = undefined;
+      const rawAns = q.correct_answer;
+
+      if (rawAns !== null && rawAns !== undefined) {
+        if (typeof rawAns === 'number') {
+          finalCorrectIdx = rawAns;
+        } else {
+          const strAns = String(rawAns).trim();
+          if (strAns.length === 1 && /^[A-D]$/i.test(strAns)) {
+            // Handle letters A, B, C, D
+            finalCorrectIdx = strAns.toUpperCase().charCodeAt(0) - 65;
+          } else if (!isNaN(Number(strAns))) {
+            // Handle numeric strings "0", "1"
+            finalCorrectIdx = Number(strAns);
+          } else {
+            // Check if matches any option text exactly
+            const idx = options.findIndex((opt: any) => 
+              String(opt).trim().toLowerCase() === strAns.toLowerCase()
+            );
+            if (idx !== -1) finalCorrectIdx = idx;
+          }
+        }
+      }
+
+      return {
+        id: q.id,
+        unit: q.unit,
+        topic: q.topic,
+        difficulty: q.difficulty,
+        questionType: q.question_type as any,
+        type: q.type as any,
+        question: q.question,
+        options,
+        correctAnswer: finalCorrectIdx,
+        explanation: q.explanation,
+        starterCode: q.starter_code,
+        testCases: typeof q.test_cases === 'string' ? JSON.parse(q.test_cases) : (q.test_cases || [])
+      };
+    });
   }
 
   /**
@@ -229,7 +257,7 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return [];
 
-    // Use select('subject', { count: 'exact', distinct: true }) if possible, otherwise map it
+    // Distinct subjects from the questions table
     const { data, error } = await client
       .from('questions')
       .select('subject');
@@ -239,8 +267,10 @@ class NexusServer {
       return [];
     }
 
-    const uniqueSubjects = Array.from(new Set(data.map((item: any) => item.subject)));
-    return uniqueSubjects;
+    // Return unique, trimmed, non-empty codes
+    return Array.from(new Set(
+      data.map(item => String(item.subject || '').trim()).filter(Boolean)
+    ));
   }
 
   /**

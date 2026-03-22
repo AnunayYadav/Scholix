@@ -217,6 +217,7 @@ export function useDashboard(userId: string | null) {
     setFeaturedScore,
     featuredQuiz,
     activeChallenges,
+    markChallengeCompleted,
   } = useQuizDashboardStore();
 
   const loadDashboard = useCallback(async () => {
@@ -233,6 +234,7 @@ export function useDashboard(userId: string | null) {
       setIsDashboardLoading(false);
     }
   }, [userId]);
+
 
   const loadFeaturedQuiz = async () => {
     const today = getTodayIST();
@@ -271,14 +273,25 @@ export function useDashboard(userId: string | null) {
       }
     }
 
-    // Check completion
-    if (userId) {
-      const completions = JSON.parse(localStorage.getItem(`nexus_completions_${userId}`) || '[]');
-      const todayFeatured = completions.find((c: any) => c.type === 'featured' && c.quiz_id?.startsWith(`featured_${today}`));
-      if (todayFeatured) {
+    // Check completion specifically for today's featured quiz
+    // Already have 'today' defined above
+    const storageKeys = [ `nexus_completions_${userId}` ];
+    if (userId && userId !== 'anonymous') storageKeys.push('nexus_completions_anonymous');
+    
+    let todayFeatured: any = null;
+    
+    for (const key of storageKeys) {
+      const completions = JSON.parse(localStorage.getItem(key) || '[]');
+      todayFeatured = completions.find((c: any) => 
+        c.type === 'featured' && 
+        (c.quiz_id === `featured_${today}` || c.quiz_id?.startsWith(`featured_${today}`))
+      );
+      if (todayFeatured) break;
+    }
+
+    if (todayFeatured) {
         setFeaturedCompleted(true);
         setFeaturedScore(todayFeatured.score_percentage);
-      }
     }
   };
 
@@ -289,10 +302,42 @@ export function useDashboard(userId: string | null) {
   };
 
   const loadTodayCompletions = async () => {
-    if (!userId) return;
-    const completions = JSON.parse(localStorage.getItem(`nexus_completions_${userId}`) || '[]');
+    // Check both current user and anonymous fallback
+    const storageKeys = [ `nexus_completions_${userId}` ];
+    if (userId && userId !== 'anonymous') storageKeys.push('nexus_completions_anonymous');
+
     const today = getTodayIST();
-    const todayEntries = completions.filter((c: any) => c.completed_at?.startsWith(today));
+    let allCompletions: any[] = [];
+    
+    for (const key of storageKeys) {
+        const completions = JSON.parse(localStorage.getItem(key) || '[]');
+        allCompletions = [...allCompletions, ...completions];
+    }
+
+    const todayEntries = allCompletions.filter((c: any) => c.completed_at?.startsWith(today));
+    
+    // Also update challenge completions from all time (or at least recent enough)
+    const challengeIds = allCompletions
+      .filter((c: any) => c.type === 'challenge')
+      .map((c: any) => c.quiz_id);
+    
+    challengeIds.forEach((id: string) => {
+      // Extract original challenge ID from quiz ID if it was formatted with timestamp
+      const baseId = id.startsWith('challenge_') ? id.replace(/^challenge_/, '').split('_')[0] : id;
+      // We also save formatted as challenge_WINDOW_I_YEAR directly in some cases
+      // So let's just mark the ID as is
+      markChallengeCompleted(id);
+      // And also if it's the base challenge ID
+      if (id.includes('_')) {
+          const parts = id.split('_');
+          if (parts.length >= 4 && parts[0] === 'challenge') {
+              // Format was challenge_WIN_I_YEAR_TS
+              const originalId = `${parts[0]}_${parts[1]}_${parts[2]}_${parts[3]}`;
+              markChallengeCompleted(originalId);
+          }
+      }
+    });
+
     setTodayCompletions(todayEntries);
   };
 
