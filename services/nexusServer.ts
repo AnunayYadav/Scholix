@@ -193,6 +193,7 @@ class NexusServer {
     current_streak?: number;
     longest_streak?: number;
     last_active_date?: string;
+    xp_history?: any[];
   }) {
     const client = getSupabase();
     if (!client) return;

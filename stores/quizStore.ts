@@ -42,6 +42,7 @@ export interface XPResult {
   leveledUp: boolean;
   newLevel?: typeof LEVEL_THRESHOLDS[0];
   streakBonus?: typeof STREAK_MILESTONES[0];
+  updatedHistory?: { quiz_id: string; xp_earned: number; breakdown: XPBreakdownItem[]; earned_at: string }[];
 }
 
 // ═══════════════════════════════════════
@@ -101,6 +102,7 @@ interface QuizDashboardState {
   // User quiz profile
   userQuizProfile: UserQuizProfile;
   setUserQuizProfile: (profile: UserQuizProfile) => void;
+  updateUserQuizProfile: (update: Partial<UserQuizProfile>) => void;
 
   // Featured quiz
   featuredQuiz: FeaturedQuiz | null;
@@ -158,6 +160,9 @@ const DEFAULT_PROFILE: UserQuizProfile = {
 export const useQuizDashboardStore = create<QuizDashboardState>((set) => ({
   userQuizProfile: DEFAULT_PROFILE,
   setUserQuizProfile: (profile) => set({ userQuizProfile: profile }),
+  updateUserQuizProfile: (update) => set((state) => ({
+    userQuizProfile: { ...state.userQuizProfile, ...update }
+  })),
 
   featuredQuiz: null,
   setFeaturedQuiz: (quiz) => set({ featuredQuiz: quiz }),

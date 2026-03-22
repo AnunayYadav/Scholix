@@ -84,7 +84,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [showCustomQuizBuilder, setShowCustomQuizBuilder] = useState(false);
   const userId = userProfile?.id || 'anonymous';
   const { totalXP, level, awardXP } = useXP(userId);
-  const { currentStreak, streakCalendar, isStreakAtRisk, recordCompletion } = useStreak(userId);
+  const { currentStreak, longestStreak, streakCalendar, isStreakAtRisk, recordCompletion } = useStreak(userId);
   const { saveCompletion, featuredQuiz, activeChallenges } = useDashboard(userId);
   const {
     featuredCompleted, featuredScore,
@@ -758,10 +758,13 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     const totalTimeTaken = Object.values(timeSpentByQuestion).reduce((a: number, b: number) => a + b, 0);
     const totalTimeAllowed = timerMinutes * 60;
 
-    // Award XP
+    // Mark as completed immediately to prevent double execution during async calls
+    setCompletedOnLoad(true);
+
+    // Award XP (using latest hook-functions with latest closures)
     const xpResult = awardXP({
       scorePercentage,
-      timeTakenSeconds: totalTimeTaken,
+      timeTakenSeconds: totalTimeTaken as number,
       totalTimeAllowed,
       hintsUsed: 0,
       isFeaturedQuiz: activeQuizType === 'featured',
@@ -770,11 +773,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       totalQuestions: quizQuestions.length,
     });
 
-
     // Record streak
     const streakResult = recordCompletion();
 
-    // Save completion (localy)
+    // Save completion (locally)
     saveCompletion({
       quiz_id: quizIdInState || 'unknown',
       type: activeQuizType,
@@ -782,33 +784,29 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       xp_earned: xpResult?.totalEarned || 0,
     });
 
-    // ═══════════ NEW: Persist to Supabase ═══════════
-    if (userId && userId !== 'anonymous') {
-      try {
-        // 1. Save detailed attempt record
-        NexusServer.saveQuizAttempt({
-          userId: userId,
-          quizId: quizIdInState || 'unknown',
-          subjectName: selectedSubject?.name,
-          scorePercentage,
-          xpEarned: xpResult?.totalEarned || 0,
-          timeTakenSeconds: totalTimeTaken as number,
-          totalQuestions: quizQuestions.length,
-          correctAnswers: correctCount,
-          breakdown: xpResult?.breakdown || []
-        });
+    // Persist to Supabase if logged in
+    if (userId && userId !== 'anonymous' && xpResult) {
+      NexusServer.saveQuizAttempt({
+        userId: userId,
+        quizId: quizIdInState || 'unknown',
+        subjectName: selectedSubject?.name,
+        scorePercentage,
+        xpEarned: xpResult.totalEarned,
+        timeTakenSeconds: totalTimeTaken as number,
+        totalQuestions: quizQuestions.length,
+        correctAnswers: correctCount,
+        breakdown: xpResult.breakdown || []
+      }).catch(err => console.error("Failed to save quiz attempt:", err));
 
-        // 2. Update overall user profile stats
-        NexusServer.updateProfileXP(userId, {
-          total_xp: xpResult.newTotalXP,
-          level: xpResult.newLevel?.level || level.level,
-          level_title: xpResult.newLevel?.title || level.title,
-          current_streak: (streakResult as any)?.newStreak || 0,
-          last_active_date: new Date().toISOString().split('T')[0]
-        });
-      } catch (err) {
-        console.error("Failed to persist XP to Supabase:", err);
-      }
+      NexusServer.updateProfileXP(userId, {
+        total_xp: xpResult.newTotalXP,
+        level: xpResult.newLevel?.level || level.level,
+        level_title: xpResult.newLevel?.title || level.title,
+        current_streak: (streakResult as any)?.newStreak || currentStreak,
+        longest_streak: (streakResult as any)?.newLongest || longestStreak,
+        last_active_date: new Date().toISOString().split('T')[0],
+        xp_history: xpResult.updatedHistory || []
+      }).catch(err => console.error("Failed to update profile XP:", err));
     }
 
     // Mark featured/challenge as completed
@@ -824,7 +822,29 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       const solvedIds = quizQuestions.map(q => q.id).filter(Boolean) as string[];
       saveSolvedQuestions(solvedIds);
     }
-  }, [quizCompleted, completedOnLoad]);
+  }, [
+    quizCompleted, 
+    completedOnLoad, 
+    quizQuestions, 
+    userAnswers, 
+    userId, 
+    awardXP, 
+    recordCompletion, 
+    saveCompletion, 
+    timeSpentByQuestion, 
+    timerMinutes, 
+    activeQuizType, 
+    quizIdInState, 
+    selectedSubject, 
+    activeChallengeId,
+    level,
+    currentStreak,
+    setFeaturedCompleted,
+    setFeaturedScore,
+    markChallengeCompleted,
+    isPracticeMode,
+    saveSolvedQuestions
+  ]);
 
   const handleGenerate = async () => {
     if (!selectedSubject || selectedUnits.length === 0) return;

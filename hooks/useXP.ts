@@ -8,7 +8,7 @@ import { useQuizDashboardStore, getLevelInfo, LEVEL_THRESHOLDS, XPBreakdownItem,
 export function useXP(userId: string | null) {
   const {
     userQuizProfile,
-    setUserQuizProfile,
+    updateUserQuizProfile,
     setShowXPBreakdown,
     setLastXPResult,
     setShowLevelUp,
@@ -21,8 +21,7 @@ export function useXP(userId: string | null) {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        setUserQuizProfile({
-          ...userQuizProfile,
+        updateUserQuizProfile({
           total_xp: parsed.total_xp ?? 0,
           level: parsed.level ?? 1,
           level_title: parsed.level_title ?? 'Beginner',
@@ -155,6 +154,10 @@ export function useXP(userId: string | null) {
       newTotalXP,
       leveledUp,
       newLevel: leveledUp ? LEVEL_THRESHOLDS.find(l => l.level === newLevel.level) : undefined,
+      updatedHistory: [
+        ...userQuizProfile.xp_history,
+        { quiz_id: quizId, xp_earned: totalEarned, breakdown, earned_at: new Date().toISOString() }
+      ],
     };
 
     // Update profile
@@ -163,13 +166,10 @@ export function useXP(userId: string | null) {
       total_xp: newTotalXP,
       level: newLevel.level,
       level_title: newLevel.title,
-      xp_history: [
-        ...userQuizProfile.xp_history,
-        { quiz_id: quizId, xp_earned: totalEarned, breakdown, earned_at: new Date().toISOString() }
-      ],
+      xp_history: result.updatedHistory!,
     };
 
-    setUserQuizProfile(updatedProfile);
+    updateUserQuizProfile(updatedProfile);
     persistXP(updatedProfile);
     setLastXPResult(result);
     setShowXPBreakdown(true);
@@ -180,7 +180,7 @@ export function useXP(userId: string | null) {
     }
 
     return result;
-  }, [userQuizProfile, setUserQuizProfile, persistXP, setShowXPBreakdown, setLastXPResult, setShowLevelUp]);
+  }, [userQuizProfile, updateUserQuizProfile, persistXP, setShowXPBreakdown, setLastXPResult, setShowLevelUp]);
 
   const levelInfo = getLevelInfo(userQuizProfile.total_xp);
 

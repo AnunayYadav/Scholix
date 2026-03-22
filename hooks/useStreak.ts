@@ -8,7 +8,7 @@ import { useQuizDashboardStore, STREAK_MILESTONES } from '../stores/quizStore';
 export function useStreak(userId: string | null) {
   const {
     userQuizProfile,
-    setUserQuizProfile,
+    updateUserQuizProfile,
     setStreakToastMessage,
   } = useQuizDashboardStore();
 
@@ -19,8 +19,7 @@ export function useStreak(userId: string | null) {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        setUserQuizProfile({
-          ...userQuizProfile,
+        updateUserQuizProfile({
           current_streak: parsed.current_streak ?? 0,
           longest_streak: parsed.longest_streak ?? 0,
           last_active_date: parsed.last_active_date ?? null,
@@ -140,11 +139,11 @@ export function useStreak(userId: string | null) {
       streak_history: updatedHistory,
     };
 
-    setUserQuizProfile(updatedProfile);
+    updateUserQuizProfile(updatedProfile);
     persistStreak(updatedProfile);
 
-    return { newStreak, milestone };
-  }, [userQuizProfile, setUserQuizProfile, persistStreak, setStreakToastMessage]);
+    return { newStreak, newLongest, milestone };
+  }, [userQuizProfile, updateUserQuizProfile, persistStreak, setStreakToastMessage]);
 
   return {
     currentStreak: userQuizProfile.current_streak,
