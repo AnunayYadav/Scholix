@@ -148,6 +148,9 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [markedForReview, setMarkedForReview] = useState<Set<number>>(new Set());
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [timeSpentByQuestion, setTimeSpentByQuestion] = useState<Record<number, number>>({});
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [loginPromptTitle, setLoginPromptTitle] = useState('Nexus Membership');
+  const [loginPromptMessage, setLoginPromptMessage] = useState('This feature is reserved for Nexus members. Login to track your progress and unlock rewards!');
   const resultRef = useRef<HTMLDivElement>(null);
 
   const progressPercent = useMemo(() => {
@@ -748,6 +751,12 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
   // ═══════════ Featured Quiz Start ═══════════
   const handleStartFeaturedQuiz = useCallback(() => {
+    if (userId === 'anonymous') {
+      setLoginPromptTitle('Login to Attempt');
+      setLoginPromptMessage('Daily Featured Quizzes are the heart of LPU-Nexus. Sign in to compete globally and earn exclusive XP!');
+      setShowLoginPrompt(true);
+      return;
+    }
     if (!featuredQuiz || featuredCompleted) return;
     const questions = featuredQuiz.questions.map((q: any, idx: number) => ({
       ...q,
@@ -774,6 +783,12 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
   // ═══════════ Challenge Start ═══════════
   const handleStartChallenge = useCallback(async (challenge: typeof activeChallenges[0]) => {
+    if (userId === 'anonymous') {
+      setLoginPromptTitle('Login to Attempt');
+      setLoginPromptMessage('Active Challenges are high-stakes missions. Join LPU-Nexus to prove your skills and climb the leaderboard!');
+      setShowLoginPrompt(true);
+      return;
+    }
     if (completedChallengeIds.has(challenge.id)) return;
     
     setLoading(true);
@@ -931,10 +946,28 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
   const handleGenerate = async () => {
     if (!selectedSubject || selectedUnits.length === 0) return;
+
+    // Guest Control: Limit to 3 custom tests
+    if (userId === 'anonymous') {
+      try {
+        const key = `nexus_completions_anonymous`;
+        const completions = JSON.parse(localStorage.getItem(key) || '[]');
+        const customCount = completions.filter((c: any) => c.type === 'custom').length;
+        if (customCount >= 3) {
+          setLoginPromptTitle('Login to Create More');
+          setLoginPromptMessage('You have reached the limit of 3 custom tests for guest users. Create a free account to enjoy unlimited creations with no limits!');
+          setShowLoginPrompt(true);
+          return;
+        }
+      } catch (e) {
+        console.error("Auth check failed", e);
+      }
+    }
+
     setLoading(true);
     setError(null);
     setIsCached(false);
-    setStatus('Looking into archives...');
+    setStatus('Searching for questions...');
 
     try {
       let finalSelection: QuizQuestion[] = [];
@@ -944,7 +977,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       
       if (pool.length === 0) {
         // Double check with a direct fetch if pool is empty (maybe it wasn't fully loaded)
-        setStatus('Attempting deep fetch...');
+        setStatus('Checking databases...');
         const subjectCode = (selectedSubject.name || '').split(':')[0].trim();
         pool = await NexusServer.fetchQuestions(subjectCode);
         pool = pool.filter(q => selectedUnits.includes(q.unit));
@@ -2350,6 +2383,74 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       <XPBreakdown />
       <LevelUpOverlay />
       <StreakToast />
+      
+      {/* Login Prompt Modal */}
+      {showLoginPrompt && typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="modal-overlay"
+            style={{ zIndex: 100 }}
+            onClick={() => setShowLoginPrompt(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 30 }}
+              className="w-full max-w-md bg-white dark:bg-dark-950 rounded-[40px] shadow-3xl overflow-hidden border border-slate-200 dark:border-white/10 p-8 text-center relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Decorative Icon */}
+              <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-orange-500/20 rotate-12">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" className="w-10 h-10">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <path d="M12 8v4" /><path d="M12 16h.01" />
+                </svg>
+              </div>
+
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3 tracking-tight leading-none italic uppercase">{loginPromptTitle}</h3>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-8 leading-relaxed px-2">
+                {loginPromptMessage}
+              </p>
+
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    // This logic assumes that a login/auth modal can be triggered globally or via a specific event
+                    // For now, we direct the user to the signup/login flow
+                    setShowLoginPrompt(false);
+                    // Trigger custom event for App.tsx to open auth modal
+                    window.dispatchEvent(new CustomEvent('nexus-trigger-auth'));
+                  }}
+                  className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
+                >
+                  Join Nexus Now
+                </button>
+                <button
+                  onClick={() => setShowLoginPrompt(false)}
+                  className="w-full py-4 bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/40 rounded-2xl font-bold text-xs uppercase tracking-widest hover:text-slate-900 dark:hover:text-white transition-all"
+                >
+                  Maybe Later
+                </button>
+              </div>
+
+              {/* Close Button */}
+              <button 
+                onClick={() => setShowLoginPrompt(false)}
+                className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+                aria-label="Close"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-slate-400">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 
@@ -2718,7 +2819,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           )}
           <div>
             <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">taker</span></h2>
-            <p className="text-slate-500 font-semibold text-[11px] tracking-wider mt-1 opacity-60">Comprehensive Assessment Engine</p>
+            <p className="text-slate-500 font-semibold text-[11px] tracking-wider mt-1 opacity-60">Comprehensive Assessment</p>
           </div>
         </div>
       </header>
@@ -2728,7 +2829,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center mx-auto text-red-500">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
           </div>
-          <h4 className="text-xs font-semibold text-red-500 tracking-wide">Protocol interrupted</h4>
+          <h4 className="text-xs font-semibold text-red-500 tracking-wide">Attempt failed</h4>
           <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{error}</p>
           <button onClick={() => setError(null)} className="text-[10px] font-semibold text-slate-400 hover:text-orange-500 transition-colors tracking-wide">Dismiss</button>
         </div>
@@ -2753,7 +2854,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               </div>
               <div>
                 <label className="text-sm font-semibold text-slate-900 dark:text-white">Select subject</label>
-                <p className="text-[10px] text-slate-500 font-medium opacity-60">Engine Protocol Part A</p>
+                <p className="text-[10px] text-slate-500 font-medium opacity-60">Step 1: Choose Subject</p>
               </div>
             </motion.div>
 
@@ -2809,7 +2910,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               </div>
               <div>
                 <label className="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">Configure scope</label>
-                <p className="text-[10px] text-slate-500 font-semibold tracking-wide opacity-60">Engine Protocol Part B</p>
+                <p className="text-[10px] text-slate-500 font-semibold tracking-wide opacity-60">Step 2: Subject Scope</p>
               </div>
             </motion.div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -2898,7 +2999,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg">3</div>
                     <div>
                       <label className="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">Final configuration</label>
-                      <p className="text-[10px] text-slate-500 font-semibold tracking-wide opacity-60">Engine Protocol Part C</p>
+                      <p className="text-[10px] text-slate-500 font-semibold tracking-wide opacity-60">Step 3: Final Configuration</p>
                     </div>
                   </div>
 
@@ -3034,7 +3135,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         </div>
                         <div className="text-left">
                           <p className={`text-sm font-semibold tracking-tight ${negativeMarking ? 'text-red-500' : 'text-slate-900 dark:text-white'}`}>Negative Marking</p>
-                          <p className="text-[10px] text-slate-500 font-semibold tracking-wider opacity-60">High stakes protocol</p>
+                          <p className="text-[10px] text-slate-500 font-semibold tracking-wider opacity-60">Strict mode enabled</p>
                         </div>
                       </div>
                       <div className={`w-12 h-6 rounded-full relative transition-colors z-10 ${negativeMarking ? 'bg-red-500' : 'bg-slate-200 dark:bg-dark-800'}`}>
@@ -3075,7 +3176,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         <div className="w-6 h-6 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center">
                           <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3 h-3 group-hover:translate-x-0.5 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                         </div>
-                        <span className="text-sm font-semibold text-white drop-shadow-lg">{loading ? 'Processing...' : 'Initialize session'}</span>
+                        <span className="text-sm font-semibold text-white drop-shadow-lg">{loading ? 'Processing...' : 'Start Quiz'}</span>
                       </div>
                       {/* Outer Glow */}
                       <div className="absolute inset-0 bg-orange-600/30 blur-3xl group-hover:bg-orange-600/50 transition-all -z-10" />
