@@ -30,8 +30,6 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [changeHistory, setChangeHistory] = useState<any[]>([]);
-  const [recentAttempts, setRecentAttempts] = useState<any[]>([]);
-  const [isLoadingAttempts, setIsLoadingAttempts] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const userId = userProfile?.id || null;
@@ -49,22 +47,9 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
         is_public: userProfile.is_public || false
       });
       fetchHistory();
-      fetchRecentAttempts();
     }
   }, [userProfile]);
 
-  const fetchRecentAttempts = async () => {
-    if (!userProfile) return;
-    setIsLoadingAttempts(true);
-    try {
-      const attempts = await NexusServer.fetchUserQuizAttempts(userProfile.id);
-      setRecentAttempts(attempts.slice(0, 3));
-    } catch (e) {
-      console.error('Failed to fetch recent attempts:', e);
-    } finally {
-      setIsLoadingAttempts(false);
-    }
-  };
 
   const fetchHistory = async () => {
     if (!userProfile) return;
@@ -317,47 +302,6 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
         </div>
       </section>
 
-      {/* Recent Activity Mini-Section */}
-      <section className="w-full">
-        <div className="flex items-center justify-between mb-6 px-2">
-          <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Recent Activity</h3>
-          <button onClick={() => navigateToModule(ModuleType.DASHBOARD)} className="text-[9px] font-bold text-orange-600 uppercase tracking-widest hover:translate-x-1 transition-transform">Complete History →</button>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {isLoadingAttempts ? (
-            <div className="h-20 bg-slate-100 dark:bg-white/5 animate-pulse rounded-[24px]" />
-          ) : recentAttempts.length > 0 ? (
-            recentAttempts.map((attempt, idx) => (
-              <motion.div 
-                key={attempt.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                className="glass-panel p-5 rounded-[24px] border border-slate-200 dark:border-white/5 bg-white/40 dark:bg-white/[0.01] flex items-center justify-between group hover:bg-white/60 dark:hover:bg-white/5 transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-orange-600/10 flex items-center justify-center text-lg">
-                    {attempt.score_percentage >= 80 ? '🏆' : attempt.score_percentage >= 50 ? '✅' : '📝'}
-                  </div>
-                  <div>
-                    <h5 className="text-sm font-bold text-slate-800 dark:text-white">{attempt.subject_name || 'Generic Quiz'}</h5>
-                    <p className="text-[10px] text-slate-400 font-medium">{new Date(attempt.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-black text-orange-600">+{attempt.xp_earned} XP</div>
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{attempt.score_percentage}% Score</div>
-                </div>
-              </motion.div>
-            ))
-          ) : (
-            <div className="p-10 rounded-[32px] border-2 border-dashed border-slate-200 dark:border-white/5 text-center">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No recent protocols recorded</p>
-            </div>
-          )}
-        </div>
-      </section>
 
       <div className="w-full pt-8">
         <div className="relative group/panel">
