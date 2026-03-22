@@ -48,16 +48,21 @@ const HistorySection: React.FC = () => {
                 </div>
               </div>
 
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2 line-clamp-1 group-hover:text-orange-500 transition-colors">{q.subject}</h3>
-              
-              <div className="h-px bg-slate-100 dark:bg-white/5 w-full mb-4" />
-
+              <div className="h-px bg-slate-100 dark:bg-white/5 w-full mb-4 opacity-50" />
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-semibold text-slate-400 tracking-wider mb-0.5">Performance</p>
-                  <p className={`text-sm font-semibold ${q.score !== null ? 'text-emerald-500' : 'text-amber-500'}`}>
-                    {q.score !== null ? `${q.score} Points` : 'In Progress'}
-                  </p>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-orange-600 transition-colors truncate">
+                    {q.name || q.subject}
+                  </h4>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className={`text-[10px] font-bold ${q.score !== null ? 'text-emerald-500' : 'text-amber-500'}`}>
+                      {q.score !== null ? `${q.score} Points` : 'In Progress'}
+                    </p>
+                    <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+                    <p className="text-[10px] font-semibold text-slate-400">
+                      {new Date(q.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-1.5 text-orange-600">
                   <span className="text-[10px] font-semibold tracking-wider">Review</span>

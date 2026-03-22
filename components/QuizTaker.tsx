@@ -29,7 +29,7 @@ import HistorySection from './quiz/HistorySection.tsx';
 // Dashboard hooks & store
 import { useXP } from '../hooks/useXP.ts';
 import { useStreak } from '../hooks/useStreak.ts';
-import { useDashboard } from '../hooks/useDashboard.ts';
+import { useDashboard, getAllowedUnits } from '../hooks/useDashboard.ts';
 import { useQuizDashboardStore, getLevelInfo, LEVEL_THRESHOLDS } from '../stores/quizStore.ts';
 
 const parseText = (text: string | undefined) => {
@@ -430,6 +430,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     fetchSubjectData();
   }, [selectedSubject]);
 
+  const allowedUnitsByTimeline = useMemo(() => {
+    return getAllowedUnits(new Date().toISOString());
+  }, []);
+
   const availableUnitsForSubject = useMemo(() => {
     if (subjectQuestions.length === 0) return [1, 2, 3, 4, 5, 6]; // Default fallback
     const units = new Set<number>();
@@ -672,8 +676,22 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   // Save progress periodically
   useEffect(() => {
     if (quizId && quizQuestions.length > 0) {
+      // Determine the display name and search key
+      let currentSubjectName = selectedSubject?.name;
+      let displayName = selectedSubject?.name;
+      
+      if (activeQuizType === 'featured') {
+        currentSubjectName = 'featured';
+        displayName = featuredQuiz?.name || 'Today\'s Featured';
+      } else if (activeQuizType === 'challenge') {
+        currentSubjectName = 'challenge';
+        const ch = activeChallenges?.find((c: any) => c.id === activeChallengeId);
+        displayName = ch?.name || 'Active Challenge';
+      }
+
       const data = {
-        subject: selectedSubject?.name,
+        subject: currentSubjectName,
+        displayName: displayName, // Store pretty name
         questions: quizQuestions,
         answers: userAnswers,
         currentIndex: currentQuestionIdx,
@@ -690,13 +708,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       const filtered = recent.filter((q: any) => q.id !== quizId);
       const updated = [{
         id: quizId,
-        subject: selectedSubject?.name,
+        subject: currentSubjectName,
+        name: displayName, // Store pretty name for display
         date: Date.now(),
         score: quizCompleted ? calculateScore() : null
       }, ...filtered].slice(0, 5);
       localStorage.setItem('nexus_recent_quizzes', JSON.stringify(updated));
     }
-  }, [quizQuestions, userAnswers, currentQuestionIdx, timeLeft, timerActive, quizCompleted]);
+  }, [quizQuestions, userAnswers, currentQuestionIdx, timeLeft, timerActive, quizCompleted, activeQuizType, featuredQuiz, activeChallenges, activeChallengeId, selectedSubject]);
 
   const calculateScore = () => {
     let score = 0;
@@ -857,10 +876,17 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
     // Persist to Supabase if logged in
     if (userId && userId !== 'anonymous' && xpResult) {
+      let subjectToSave = selectedSubject?.name;
+      if (activeQuizType === 'featured') subjectToSave = `Featured: ${featuredQuiz?.name || 'Daily'}`;
+      else if (activeQuizType === 'challenge') {
+        const ch = activeChallenges?.find((c: any) => c.id === activeChallengeId);
+        subjectToSave = `Challenge: ${ch?.name || 'Active'}`;
+      }
+
       NexusServer.saveQuizAttempt({
         userId: userId,
         quizId: quizIdInState || 'unknown',
-        subjectName: selectedSubject?.name,
+        subjectName: subjectToSave || 'Experimental Quiz',
         scorePercentage,
         xpEarned: xpResult.totalEarned,
         timeTakenSeconds: totalTimeTaken as number,
@@ -2792,26 +2818,37 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             </motion.div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[1, 2, 3, 4, 5, 6].map((u, i) => {
-                const isAvailable = availableUnitsForSubject.includes(u);
+                const isAvailableInSubject = availableUnitsForSubject.includes(u);
+                const isLockedByTimeline = !allowedUnitsByTimeline.includes(u);
                 const isSelected = selectedUnits.includes(u);
+                
+                // Final availability depends on both having questions AND being unlocked in syllabus timeline
+                const finalEnabled = isAvailableInSubject && !isLockedByTimeline;
+
                 return (
                   <motion.button
                     key={u}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2 + i * 0.05 }}
-                    disabled={!isAvailable}
+                    disabled={!finalEnabled}
                     onClick={() => toggleUnit(u)}
-                    whileHover={isAvailable ? { scale: 1.05, y: -2 } : {}}
-                    whileTap={isAvailable ? { scale: 0.95 } : {}}
-                    className={`relative p-8 rounded-[28px] border transition-all flex flex-col items-center justify-center group ${!isAvailable ? 'bg-slate-100/50 dark:bg-dark-950/20 border-slate-200 dark:border-white/5 opacity-40 grayscale cursor-not-allowed' :
+                    whileHover={finalEnabled ? { scale: 1.05, y: -2 } : {}}
+                    whileTap={finalEnabled ? { scale: 0.95 } : {}}
+                    className={`relative p-8 rounded-[28px] border transition-all flex flex-col items-center justify-center group ${!finalEnabled ? 'bg-slate-100/50 dark:bg-dark-950/20 border-slate-200 dark:border-white/5 opacity-40 grayscale cursor-not-allowed' :
                       isSelected ? 'bg-orange-500/10 border-orange-500 shadow-xl shadow-orange-500/5' :
                         'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 hover:border-orange-500/30'
                       }`}
                   >
-                    {selectedSubject && !isAvailable && (
+                    {selectedSubject && !isAvailableInSubject && (
                       <span className="absolute top-2 left-1/2 -translate-x-1/2 -translate-y-full group-hover:translate-y-4 opacity-0 group-hover:opacity-100 transition-all px-2 py-1 rounded-full bg-slate-800 text-white text-[8px] font-bold uppercase tracking-tighter whitespace-nowrap z-20">
-                        Locked unit
+                        No questions in library
+                      </span>
+                    )}
+
+                    {selectedSubject && isAvailableInSubject && isLockedByTimeline && (
+                      <span className="absolute top-2 left-1/2 -translate-x-1/2 -translate-y-full group-hover:translate-y-4 opacity-0 group-hover:opacity-100 transition-all px-2 py-1 rounded-full bg-orange-600 text-white text-[8px] font-bold uppercase tracking-tighter whitespace-nowrap z-20">
+                        Locked by Semester Timeline
                       </span>
                     )}
                     

@@ -59,6 +59,83 @@ function dayOfYear(dateStr: string): number {
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
+/** 
+ * Logic to follow college semester progression:
+ * Aug -> Unit 1
+ * Sep -> U1, U2
+ * Oct -> U1, U2, U3
+ * Nov -> U1-U4
+ * Dec -> U1-U5
+ * (Same for Jan-May semester)
+ */
+export function getAllowedUnits(dateStr: string): number[] {
+  const d = new Date(dateStr + 'T00:00:00Z');
+  const month = d.getUTCMonth(); // 0=Jan, 7=Aug
+  
+  let progress = 5; // Default to all
+  
+  if (month >= 7 && month <= 11) { // Aug - Dec (Sem 1)
+    progress = (month - 7) + 1;
+  } else if (month >= 0 && month <= 4) { // Jan - May (Sem 2)
+    progress = month + 1;
+  } else if (month === 5 || month === 6) { // June, July (Summer/Extra)
+    progress = 5;
+  }
+  
+  // Special case: By late November, everything should be unlocked
+  const day = d.getUTCDate();
+  if (month === 10 && day > 15) progress = 5; // Late Nov
+  if (month === 4 && day > 15) progress = 5; // Late May
+  
+  const maxUnit = Math.min(5, Math.max(1, progress));
+  return Array.from({ length: maxUnit }, (_, i) => i + 1);
+}
+
+/**
+ * Determine the challenge window based on Mon, Wed, Fri refreshes.
+ */
+function getChallengeWindow(dateStr: string) {
+  const d = new Date(dateStr + 'T00:00:00Z');
+  const day = d.getUTCDay(); // 0=Sun, 1=Mon, ..., 5=Fri, 6=Sat
+  const year = d.getUTCFullYear();
+  
+  // Mon(1), Tue(2) -> Window A
+  // Wed(3), Thu(4) -> Window B
+  // Fri(5), Sat(6), Sun(0) -> Window C
+  
+  let startsAt: Date;
+  let expiresAt: Date;
+  let label: string;
+  
+  if (day === 1 || day === 2) {
+    label = 'mon';
+    startsAt = new Date(d);
+    if (day === 2) startsAt.setUTCDate(d.getUTCDate() - 1);
+    expiresAt = new Date(startsAt);
+    expiresAt.setUTCDate(startsAt.getUTCDate() + 2);
+  } else if (day === 3 || day === 4) {
+    label = 'wed';
+    startsAt = new Date(d);
+    if (day === 4) startsAt.setUTCDate(d.getUTCDate() - 1);
+    expiresAt = new Date(startsAt);
+    expiresAt.setUTCDate(startsAt.getUTCDate() + 2);
+  } else {
+    label = 'fri';
+    startsAt = new Date(d);
+    if (day === 6) startsAt.setUTCDate(d.getUTCDate() - 1);
+    if (day === 0) startsAt.setUTCDate(d.getUTCDate() - 2);
+    expiresAt = new Date(startsAt);
+    expiresAt.setUTCDate(startsAt.getUTCDate() + 3);
+  }
+  
+  const weekNum = Math.ceil(dayOfYear(startsAt.toISOString().split('T')[0]) / 7);
+  return {
+    windowId: `${year}_W${weekNum}_${label}`,
+    startsAt: startsAt.toISOString(),
+    expiresAt: expiresAt.toISOString()
+  };
+}
+
 // ═══════════════════════════════════════
 // Featured Quiz Generation
 // Same quiz for ALL users on the same date.
@@ -88,15 +165,27 @@ async function generateFeaturedQuiz(): Promise<FeaturedQuiz | null> {
   const difficultyMap: Record<number, 'easy' | 'medium' | 'hard'> = { 0: 'easy', 1: 'medium', 2: 'hard' };
   const difficulty = difficultyMap[doy % 3];
 
-  // Try to get questions of the target difficulty, fallback to all MCQs  
+  const allowedUnits = getAllowedUnits(today);
+
+  // Try to get questions of the target difficulty AND allowed units
   let questions = questionsPool.filter(q =>
     q.type !== 'subjective' &&
     q.type !== 'coding' &&
-    (q.difficulty || 'medium') === difficulty
+    (q.difficulty || 'medium') === difficulty &&
+    allowedUnits.includes(q.unit || 1)
   );
 
   if (questions.length < 5) {
-    // Fallback: use all non-subjective, non-coding questions
+    // Fallback: use all non-subjective, non-coding questions within allowed units
+    questions = questionsPool.filter(q => 
+      q.type !== 'subjective' && 
+      q.type !== 'coding' &&
+      allowedUnits.includes(q.unit || 1)
+    );
+  }
+
+  // Final fallback: if NO questions in these units, ignore unit constraint
+  if (questions.length === 0) {
     questions = questionsPool.filter(q => q.type !== 'subjective' && q.type !== 'coding');
   }
 
@@ -148,20 +237,14 @@ const CHALLENGE_TEMPLATES = [
 
 async function generateActiveChallenges(): Promise<ActiveChallenge[]> {
   const today = getTodayIST();
-  // Create a window seed: changes every 3 days
-  const doy = dayOfYear(today);
-  const windowIndex = Math.floor(doy / 3);
-  const year = new Date(today + 'T00:00:00Z').getFullYear();
-  const seed = hashStr(`challenges_${year}_${windowIndex}`);
+  const { windowId, startsAt, expiresAt } = getChallengeWindow(today);
+
+  const seed = hashStr(`challenges_${windowId}`);
   const rng = seededRandom(seed);
+  const allowedUnits = getAllowedUnits(today);
 
   const subjects = await NexusServer.fetchSubjectNames();
   if (subjects.length === 0) return [];
-
-  // Calculate expiration: end of the current 3-day window
-  const windowStart = new Date(new Date(year, 0, windowIndex * 3 + 1).getTime());
-  const expiresAt = new Date(windowStart.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString();
-  const startsAt = windowStart.toISOString();
 
   // Pick 3 unique subjects deterministically
   const shuffledSubjects = seededShuffle(subjects.sort(), rng);
@@ -175,17 +258,26 @@ async function generateActiveChallenges(): Promise<ActiveChallenge[]> {
     const shortName = subject.includes('-') ? subject.split('-').pop()?.trim() || subject : subject;
     const emoji = CHALLENGE_EMOJIS_MAP[subjectCode] || CHALLENGE_EMOJIS_MAP[subject] || seededPick(Object.values(CHALLENGE_EMOJIS_MAP), rng);
 
-    // Verify the subject has enough questions
+    // Verify the subject has enough questions within allowed units
     const pool: QuizQuestion[] = await NexusServer.fetchQuestions(subjectCode);
-    const mcqs = pool.filter(q => q.type !== 'subjective' && q.type !== 'coding');
+    let mcqs = pool.filter(q => 
+      q.type !== 'subjective' && 
+      q.type !== 'coding' &&
+      allowedUnits.includes(q.unit || 1)
+    );
+    
+    if (mcqs.length < 5) {
+      // Fallback to all units if restricted ones are empty
+      mcqs = pool.filter(q => q.type !== 'subjective' && q.type !== 'coding');
+    }
     
     if (mcqs.length < 5) continue;
 
-    // Determine units (from all available MCQs for that subject)
+    // Determine units (from filtered pool)
     const units = Array.from(new Set(mcqs.map(q => String(q.unit || 'General')).filter(Boolean))).sort();
 
     challenges.push({
-      id: `challenge_${windowIndex}_${i}_${year}`,
+      id: `challenge_${windowId}_${i}`,
       name: template.nameTemplate.replace('{subject}', shortName),
       description: template.desc,
       emoji,
