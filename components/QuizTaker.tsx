@@ -772,15 +772,44 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
 
     // Record streak
-    recordCompletion();
+    const streakResult = recordCompletion();
 
-    // Save completion
+    // Save completion (localy)
     saveCompletion({
       quiz_id: quizIdInState || 'unknown',
       type: activeQuizType,
       score_percentage: scorePercentage,
       xp_earned: xpResult?.totalEarned || 0,
     });
+
+    // ═══════════ NEW: Persist to Supabase ═══════════
+    if (userId && userId !== 'anonymous') {
+      try {
+        // 1. Save detailed attempt record
+        NexusServer.saveQuizAttempt({
+          userId: userId,
+          quizId: quizIdInState || 'unknown',
+          subjectName: selectedSubject?.name,
+          scorePercentage,
+          xpEarned: xpResult?.totalEarned || 0,
+          timeTakenSeconds: totalTimeTaken as number,
+          totalQuestions: quizQuestions.length,
+          correctAnswers: correctCount,
+          breakdown: xpResult?.breakdown || []
+        });
+
+        // 2. Update overall user profile stats
+        NexusServer.updateProfileXP(userId, {
+          total_xp: xpResult.newTotalXP,
+          level: xpResult.newLevel?.level || level.level,
+          level_title: xpResult.newLevel?.title || level.title,
+          current_streak: (streakResult as any)?.newStreak || 0,
+          last_active_date: new Date().toISOString().split('T')[0]
+        });
+      } catch (err) {
+        console.error("Failed to persist XP to Supabase:", err);
+      }
+    }
 
     // Mark featured/challenge as completed
     if (activeQuizType === 'featured') {

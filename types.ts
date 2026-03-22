@@ -91,6 +91,14 @@ export interface UserProfile {
   is_public?: boolean;
   last_seen?: string;
   blocked_users?: string[];
+  // XP & Leveling
+  total_xp?: number;
+  level?: number;
+  level_title?: string;
+  current_streak?: number;
+  longest_streak?: number;
+  last_active_date?: string;
+  xp_history?: any[];
 }
 
 export interface TimetableSlot {

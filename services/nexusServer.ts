@@ -151,6 +151,59 @@ class NexusServer {
     }, { onConflict: 'subject_name,unit_number' });
   }
 
+  /**
+   * Quiz Persistence: Save quiz attempts and update profile XP
+   */
+  static async saveQuizAttempt(params: {
+    userId: string;
+    quizId: string;
+    subjectName?: string;
+    scorePercentage: number;
+    xpEarned: number;
+    timeTakenSeconds: number;
+    totalQuestions: number;
+    correctAnswers: number;
+    breakdown: any[];
+  }) {
+    const client = getSupabase();
+    if (!client) return;
+
+    const { error } = await client.from('quiz_attempts').insert([{
+      user_id: params.userId,
+      quiz_id: params.quizId,
+      subject_name: params.subjectName,
+      score_percentage: params.scorePercentage,
+      xp_earned: params.xpEarned,
+      time_taken_seconds: params.timeTakenSeconds,
+      total_questions: params.totalQuestions,
+      correct_answers: params.correctAnswers,
+      xp_breakdown: params.breakdown
+    }]);
+
+    if (error) {
+      console.error('Save Quiz Attempt Error:', error);
+      throw error;
+    }
+  }
+
+  static async updateProfileXP(userId: string, updates: { 
+    total_xp: number; 
+    level: number; 
+    level_title: string;
+    current_streak?: number;
+    longest_streak?: number;
+    last_active_date?: string;
+  }) {
+    const client = getSupabase();
+    if (!client) return;
+
+    const { error } = await client.from('profiles').update(updates).eq('id', userId);
+    if (error) {
+      console.error('Update Profile XP Error:', error);
+      throw error;
+    }
+  }
+
   static async recordVisit(): Promise<void> {
     const client = getSupabase();
     if (!client) return;
@@ -346,7 +399,14 @@ class NexusServer {
       email: user.email!,
       username: metadata.username || user.email?.split('@')[0] || `verto_${user.id.slice(0, 5)}`,
       registration_number: metadata.registration_number || null,
-      is_admin: false
+      is_admin: false,
+      total_xp: 0,
+      level: 1,
+      level_title: 'Beginner',
+      current_streak: 0,
+      longest_streak: 0,
+      last_active_date: null,
+      xp_history: []
     };
 
     const { data, error } = await client.from('profiles').insert([newProfile]).select().single();
