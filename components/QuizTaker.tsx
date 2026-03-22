@@ -2374,7 +2374,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             whileHover={{ scale: 1.02, cursor: 'pointer' }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowProgressModal(true)}
-            className="bg-white dark:bg-white/[0.03] p-6 rounded-[24px] border border-slate-100 dark:border-white/5 shadow-sm relative overflow-hidden group hover:shadow-md transition-all flex flex-col gap-6"
+            className="bg-white dark:bg-white/[0.03] p-6 rounded-[24px] border border-slate-100 dark:border-white/5 shadow-sm relative overflow-hidden group hover:shadow-md transition-all flex flex-col gap-4"
           >
             <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-40 transition-opacity">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
@@ -2385,9 +2385,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             <div className="flex justify-between items-start">
               <div className="space-y-1">
                 <p className="text-[10px] font-black text-orange-600/90 uppercase tracking-widest leading-none">Level {level.level}</p>
-                <h3 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">
-                  {level.title}
-                </h3>
+                <h3 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">{level.title}</h3>
               </div>
               <div className="w-14 h-14 rounded-[18px] bg-orange-500/5 dark:bg-orange-500/10 flex items-center justify-center text-2xl">
                 {level.icon || '🌱'}
@@ -2459,16 +2457,12 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   const day = streakCalendar.slice(-7)[i];
                   const isCompleted = day?.completed;
                   return (
-                    <div key={i} className="flex flex-col items-center gap-1.5">
-                      <span className="text-[8px] font-bold text-slate-400 uppercase">{label}</span>
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
-                        isCompleted 
-                          ? 'bg-orange-600 border-none shadow-[0_0_8px_rgba(234,88,12,0.4)]' 
-                          : 'border-2 border-slate-200 dark:border-white/10'
-                      }`}>
+                    <div key={i} className="flex flex-col items-center gap-2 flex-1">
+                      <span className={`text-[8px] font-bold ${isCompleted ? 'text-orange-600' : 'text-slate-400'}`}>{label}</span>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isCompleted ? 'bg-orange-600 border-orange-600 shadow-lg shadow-orange-600/20' : 'border-slate-100 dark:border-white/5'}`}>
                         {isCompleted && (
                           <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" className="w-3 h-3">
-                            <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                            <polyline points="20 6 9 17 4 12" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         )}
                       </div>

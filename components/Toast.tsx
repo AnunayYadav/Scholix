@@ -136,7 +136,7 @@ export const ToastContainer: React.FC = () => {
 
             {/* Confirm Modal */}
             {confirmState && createPortal(
-                <div className="modal-overlay"
+                <div className="modal-overlay modal-overlay-fade"
                     style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
                     onMouseDown={(e) => { if (e.target === e.currentTarget) handleConfirm(false); }}>
                     <div className="nexus-modal w-full max-w-sm p-8 text-center space-y-6">

@@ -156,7 +156,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
 
   return createPortal(
     <div
-      className={`modal-overlay ${isClosing ? 'closing' : ''}`}
+      className={`modal-overlay modal-overlay-fade ${isClosing ? 'closing' : ''}`}
       style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
       onClick={(e) => { if (e.target === e.currentTarget && !loading) handleClose(); }}
     >

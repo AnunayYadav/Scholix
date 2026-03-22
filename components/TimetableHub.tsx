@@ -867,7 +867,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
 
       {showRenameModal && createPortal(
         <div
-          className={`modal-overlay ${isClosingRename ? 'closing' : ''}`}
+          className={`modal-overlay modal-overlay-fade ${isClosingRename ? 'closing' : ''}`}
           style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
           onClick={(e) => { if (e.target === e.currentTarget) handleCloseRename(); }}
         >
@@ -898,7 +898,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
 
       {showMetadataModal && createPortal(
         <div
-          className={`modal-overlay ${isClosingMetadata ? 'closing' : ''}`}
+          className={`modal-overlay modal-overlay-fade ${isClosingMetadata ? 'closing' : ''}`}
           style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
           onClick={(e) => { if (e.target === e.currentTarget) handleCloseMetadata(); }}
         >
@@ -947,7 +947,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
 
       {showUploadModal && createPortal(
         <div
-          className={`modal-overlay ${isClosingUpload ? 'closing' : ''}`}
+          className={`modal-overlay modal-overlay-fade ${isClosingUpload ? 'closing' : ''}`}
           style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
           onClick={(e) => { if (e.target === e.currentTarget && !isProcessingAI) handleCloseUpload(); }}
         >
