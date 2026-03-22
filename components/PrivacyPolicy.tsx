@@ -58,7 +58,7 @@ const PrivacyPolicy: React.FC = () => {
 
                 <div className="glass-panel p-8 md:p-12 rounded-[48px] space-y-10 border-slate-200 dark:border-white/10">
                     <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                        At <span className="text-orange-600 font-bold">LPU-Nexus</span>, accessible from lpu-nexus.vercel.app, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by LPU-Nexus and how we use it.
+                        At <span className="text-orange-600 font-bold">LPU-Nexus</span>, accessible from lpunexus.vercel.app, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by LPU-Nexus and how we use it.
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
