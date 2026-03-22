@@ -15,6 +15,7 @@ export function useStreak(userId: string | null) {
   // Load streak data on mount
   useEffect(() => {
     if (!userId) return;
+    // 1. Instant load from localStorage
     const stored = localStorage.getItem(`nexus_quiz_streak_${userId}`);
     if (stored) {
       try {
@@ -28,6 +29,24 @@ export function useStreak(userId: string | null) {
       } catch (e) {
         console.error('Failed to parse streak data', e);
       }
+    }
+
+    // 2. Verified sync with Supabase
+    if (userId !== 'anonymous') {
+      import('../services/nexusServer').then(async ({ default: NexusServer }) => {
+        try {
+          const profile = await NexusServer.getProfile(userId);
+          if (profile) {
+            updateUserQuizProfile({
+              current_streak: profile.current_streak ?? 0,
+              longest_streak: profile.longest_streak ?? 0,
+              last_active_date: profile.last_active_date ?? null,
+            });
+          }
+        } catch (e) {
+          console.error("Supabase streak sync failed:", e);
+        }
+      });
     }
   }, [userId]);
 

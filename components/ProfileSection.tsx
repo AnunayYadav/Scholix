@@ -4,6 +4,10 @@ import { UserProfile, ModuleType } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 
 import VerifiedBadge from './VerifiedBadge.tsx';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useXP } from '../hooks/useXP.ts';
+import { useStreak } from '../hooks/useStreak.ts';
+import { getLevelInfo } from '../stores/quizStore.ts';
 
 interface ProfileSectionProps {
 
@@ -26,7 +30,13 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [changeHistory, setChangeHistory] = useState<any[]>([]);
+  const [recentAttempts, setRecentAttempts] = useState<any[]>([]);
+  const [isLoadingAttempts, setIsLoadingAttempts] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const userId = userProfile?.id || null;
+  const { totalXP, level: levelInfo } = useXP(userId);
+  const { currentStreak, longestStreak, streakCalendar } = useStreak(userId);
 
   useEffect(() => {
     if (userProfile) {
@@ -39,8 +49,22 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
         is_public: userProfile.is_public || false
       });
       fetchHistory();
+      fetchRecentAttempts();
     }
   }, [userProfile]);
+
+  const fetchRecentAttempts = async () => {
+    if (!userProfile) return;
+    setIsLoadingAttempts(true);
+    try {
+      const attempts = await NexusServer.fetchUserQuizAttempts(userProfile.id);
+      setRecentAttempts(attempts.slice(0, 3));
+    } catch (e) {
+      console.error('Failed to fetch recent attempts:', e);
+    } finally {
+      setIsLoadingAttempts(false);
+    }
+  };
 
   const fetchHistory = async () => {
     if (!userProfile) return;
@@ -163,27 +187,179 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
           <div className="absolute bottom-1 right-1 bg-orange-600 w-12 h-12 rounded-[18px] border-4 border-white dark:border-[#0a0a0a] flex items-center justify-center shadow-2xl group-hover:bg-orange-500 group-hover:scale-110 transition-all z-30">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-6 h-6"><path d="M12 5v14M5 12h14" /></svg>
           </div>
-          <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
-        </div>
+      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
+    </div>
 
         <div className="mt-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-600/5 border border-orange-600/10 mb-6 group/badge cursor-default hover:bg-orange-600/10 transition-colors">
             <div className="w-2 h-2 rounded-full bg-orange-600 animate-pulse" />
-            <span className="text-[11px] sm:text-xs font-medium text-orange-600">Verification Active</span>
+            <span className="text-[11px] sm:text-xs font-medium text-orange-600 uppercase tracking-widest">Verification Active</span>
           </div>
           <h2 className="text-6xl md:text-7xl font-black text-slate-800 dark:text-white tracking-tighter uppercase leading-none mb-4 italic drop-shadow-2xl flex items-center justify-center gap-4">
             {userProfile.username || 'Citizen Verto'}
             <VerifiedBadge isAdmin={userProfile.is_admin} size="w-10 h-10 md:w-14 md:h-14" />
           </h2>
 
-          <p className="text-slate-500 text-[12px] font-medium opacity-50 flex items-center justify-center gap-2">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-            ID: {userProfile.email}
-          </p>
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em] opacity-50 flex items-center justify-center gap-2">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+              Nexus Protocol ID: {userProfile.email}
+            </p>
+            <p className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.3em] opacity-40">Since {new Date(userProfile.created_at || Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+          </div>
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto">
+      {/* Leveling & Stats Section */}
+      <section className="max-w-3xl mx-auto space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* XP & Level Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="md:col-span-2 glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/5 bg-white/50 dark:bg-white/[0.02] relative overflow-hidden group"
+          >
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-orange-500/10 blur-[80px] rounded-full" />
+            
+            <div className="flex items-start justify-between mb-8 relative z-10">
+              <div>
+                <h3 className="text-[10px] font-bold text-orange-600 uppercase tracking-[0.3em] mb-2">Current Standing</h3>
+                <div className="flex items-center gap-3">
+                  <span className="text-4xl">
+                    {levelInfo.icon}
+                  </span>
+                  <div>
+                    <h4 className="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tighter">
+                      {levelInfo.title}
+                    </h4>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Level {levelInfo.level}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-3xl font-black text-slate-800 dark:text-white tabular-nums drop-shadow-sm">
+                  {totalXP}
+                </span>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total XP Earned</p>
+              </div>
+            </div>
+
+            {/* XP Progress Bar */}
+            <div className="space-y-3 relative z-10">
+              <div className="flex justify-between items-end">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Progress to next tier</span>
+                <span className="text-[10px] font-bold text-orange-600 uppercase tracking-widest">
+                  {levelInfo.progress}%
+                </span>
+              </div>
+              <div className="h-4 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden p-1 border border-slate-200/50 dark:border-white/5">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  whileInView={{ width: `${levelInfo.progress}%` }}
+                  transition={{ duration: 1.5, ease: "circOut" }}
+                  viewport={{ once: true }}
+                  className="h-full bg-gradient-to-r from-orange-500 via-red-600 to-orange-500 bg-[length:200%_auto] animate-gradient-x rounded-full"
+                />
+              </div>
+              {levelInfo.nextLevel && (
+                <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] text-center">
+                  Earn {levelInfo.nextLevel!.minXP - totalXP} more XP to reach <span className="text-orange-600">{levelInfo.nextLevel!.title}</span>
+                </p>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Streak Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/5 bg-white/50 dark:bg-white/[0.02] relative overflow-hidden flex flex-col items-center justify-center text-center group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative z-10">
+              <div className="mb-4 relative">
+                <motion.span 
+                  animate={{ scale: [1, 1.1, 1] }} 
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="text-5xl block"
+                >
+                  🔥
+                </motion.span>
+                <div className="absolute inset-x-0 bottom-0 h-4 bg-orange-600/20 blur-xl rounded-full -z-10" />
+              </div>
+              <h4 className="text-4xl font-black text-slate-800 dark:text-white tabular-nums mb-1">
+                {currentStreak}
+              </h4>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Day Streak</p>
+              
+              <div className="pt-4 border-t border-slate-100 dark:border-white/5 w-full">
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest opacity-60 mb-2">Best: {longestStreak}</p>
+                {/* 7-DAY MINI DOTS */}
+                <div className="flex justify-center gap-1.5">
+                  {streakCalendar.slice(-7).map((day, i) => (
+                    <div 
+                      key={i} 
+                      className={`w-2.5 h-2.5 rounded-full transition-all ${
+                        day.completed 
+                          ? 'bg-orange-600 shadow-[0_0_8px_rgba(234,88,12,0.4)]' 
+                          : 'bg-slate-200 dark:bg-white/10'
+                      }`}
+                      title={new Date(day.date).toLocaleDateString()}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Recent Activity Mini-Section */}
+      <section className="max-w-3xl mx-auto">
+        <div className="flex items-center justify-between mb-6 px-2">
+          <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Recent Activity</h3>
+          <button onClick={() => navigateToModule(ModuleType.DASHBOARD)} className="text-[9px] font-bold text-orange-600 uppercase tracking-widest hover:translate-x-1 transition-transform">Complete History →</button>
+        </div>
+        
+        <div className="grid grid-cols-1 gap-4">
+          {isLoadingAttempts ? (
+            <div className="h-20 bg-slate-100 dark:bg-white/5 animate-pulse rounded-[24px]" />
+          ) : recentAttempts.length > 0 ? (
+            recentAttempts.map((attempt, idx) => (
+              <motion.div 
+                key={attempt.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="glass-panel p-5 rounded-[24px] border border-slate-200 dark:border-white/5 bg-white/40 dark:bg-white/[0.01] flex items-center justify-between group hover:bg-white/60 dark:hover:bg-white/5 transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-orange-600/10 flex items-center justify-center text-lg">
+                    {attempt.score_percentage >= 80 ? '🏆' : attempt.score_percentage >= 50 ? '✅' : '📝'}
+                  </div>
+                  <div>
+                    <h5 className="text-sm font-bold text-slate-800 dark:text-white">{attempt.subject_name || 'Generic Quiz'}</h5>
+                    <p className="text-[10px] text-slate-400 font-medium">{new Date(attempt.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-black text-orange-600">+{attempt.xp_earned} XP</div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{attempt.score_percentage}% Score</div>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <div className="p-10 rounded-[32px] border-2 border-dashed border-slate-200 dark:border-white/5 text-center">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No recent protocols recorded</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <div className="max-w-3xl mx-auto pt-8">
         <div className="relative group/panel">
           <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-600/10 rounded-[48px] blur-3xl opacity-0 group-hover/panel:opacity-100 transition-opacity duration-700" />
           <div className="glass-panel p-10 rounded-[48px] border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#0a0a0a]/80 shadow-[0_32px_128px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_128px_rgba(0,0,0,0.5)] relative z-10 space-y-10 overflow-hidden backdrop-blur-2xl">

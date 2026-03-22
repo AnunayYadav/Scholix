@@ -16,7 +16,6 @@ import { SYLLABUS_DATA } from '../data/syllabusData.ts';
 import { QUIZTAKER_DATA } from '../data/quiztaker/quizData.ts';
 
 // Dashboard components
-import UserCard from './quiz/UserCard.tsx';
 import FeaturedQuizCard from './quiz/FeaturedQuizCard.tsx';
 import ChallengeCard from './quiz/ChallengeCard.tsx';
 import QuickStartBar from './quiz/QuickStartBar.tsx';
@@ -2289,14 +2288,6 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           </div>
         )}
 
-        {/* User Card */}
-        <UserCard
-          username={userProfile?.username || ''}
-          avatarUrl={userProfile?.avatar_url}
-          currentStreak={currentStreak}
-          isStreakAtRisk={isStreakAtRisk}
-          streakCalendar={streakCalendar}
-        />
 
         {/* Quick Start Bar */}
         <div className="space-y-3">

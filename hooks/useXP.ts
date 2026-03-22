@@ -48,6 +48,8 @@ export function useXP(userId: string | null) {
               total_xp: profile.total_xp ?? 0,
               level: profile.level ?? 1,
               level_title: profile.level_title ?? 'Beginner',
+              current_streak: profile.current_streak ?? 0,
+              longest_streak: profile.longest_streak ?? 0,
               xp_history: history || []
             });
           }
