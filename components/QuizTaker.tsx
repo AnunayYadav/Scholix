@@ -555,7 +555,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     try {
       const subjectsMap = new Map<string, SubjectWithSyllabus>();
       
-      // Fetch available subject names from Supabase
+      // Fetch available subject names from Supabase (e.g., ["CHE110", "CSE101"])
       const subjectNames = await NexusServer.fetchSubjectNames();
 
       subjectNames.forEach((subjectName, index) => {
@@ -566,14 +566,40 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         });
       });
 
-      // Also ensure subjects from SYLLABUS_DATA (AI fallback) are included if not already there
-      Object.keys(SYLLABUS_DATA).forEach((name, index) => {
-        if (!subjectsMap.has(name)) {
-          subjectsMap.set(name, {
+      // Also ensure subjects from SYLLABUS_DATA (AI fallback) are included
+      // We deduplicate by checking if the code (e.g., CHE110) already exists in any form
+      Object.keys(SYLLABUS_DATA).forEach((fullName, index) => {
+        const code = fullName.split(':')[0].trim();
+        
+        // Find if we already have this code in some form
+        let alreadyHasCode = false;
+        let existingFullMatchKey = '';
+        
+        for (const [key] of subjectsMap.entries()) {
+          const existingCode = key.split(':')[0].trim();
+          if (existingCode === code) {
+            alreadyHasCode = true;
+            existingFullMatchKey = key;
+            break;
+          }
+        }
+
+        if (!alreadyHasCode) {
+          // New subject entirely
+          subjectsMap.set(fullName, {
             id: `AI_SUB_${index}`,
-            name,
+            name: fullName,
             syllabusFile: null as any
           });
+        } else if (fullName.includes(':') && !existingFullMatchKey.includes(':')) {
+            // If the new name is descriptive (has a colon) but the existing one is just a code,
+            // REPLACE the existing one with the better descriptive name while keeping it unique.
+            const existingVal = subjectsMap.get(existingFullMatchKey)!;
+            subjectsMap.delete(existingFullMatchKey);
+            subjectsMap.set(fullName, {
+                ...existingVal,
+                name: fullName
+            });
         }
       });
 
