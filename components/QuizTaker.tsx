@@ -29,7 +29,7 @@ import HistorySection from './quiz/HistorySection.tsx';
 // Dashboard hooks & store
 import { useXP } from '../hooks/useXP.ts';
 import { useStreak } from '../hooks/useStreak.ts';
-import { useDashboard, getAllowedUnits } from '../hooks/useDashboard.ts';
+import { useDashboard } from '../hooks/useDashboard.ts';
 import { useQuizDashboardStore, getLevelInfo, LEVEL_THRESHOLDS } from '../stores/quizStore.ts';
 
 const parseText = (text: string | undefined) => {
@@ -429,10 +429,6 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     
     fetchSubjectData();
   }, [selectedSubject]);
-
-  const allowedUnitsByTimeline = useMemo(() => {
-    return getAllowedUnits(new Date().toISOString());
-  }, []);
 
   const availableUnitsForSubject = useMemo(() => {
     if (subjectQuestions.length === 0) return [1, 2, 3, 4, 5, 6]; // Default fallback
@@ -2818,37 +2814,26 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             </motion.div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[1, 2, 3, 4, 5, 6].map((u, i) => {
-                const isAvailableInSubject = availableUnitsForSubject.includes(u);
-                const isLockedByTimeline = !allowedUnitsByTimeline.includes(u);
+                const isAvailable = availableUnitsForSubject.includes(u);
                 const isSelected = selectedUnits.includes(u);
-                
-                // Final availability depends on both having questions AND being unlocked in syllabus timeline
-                const finalEnabled = isAvailableInSubject && !isLockedByTimeline;
-
                 return (
                   <motion.button
                     key={u}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2 + i * 0.05 }}
-                    disabled={!finalEnabled}
+                    disabled={!isAvailable}
                     onClick={() => toggleUnit(u)}
-                    whileHover={finalEnabled ? { scale: 1.05, y: -2 } : {}}
-                    whileTap={finalEnabled ? { scale: 0.95 } : {}}
-                    className={`relative p-8 rounded-[28px] border transition-all flex flex-col items-center justify-center group ${!finalEnabled ? 'bg-slate-100/50 dark:bg-dark-950/20 border-slate-200 dark:border-white/5 opacity-40 grayscale cursor-not-allowed' :
+                    whileHover={isAvailable ? { scale: 1.05, y: -2 } : {}}
+                    whileTap={isAvailable ? { scale: 0.95 } : {}}
+                    className={`relative p-8 rounded-[28px] border transition-all flex flex-col items-center justify-center group ${!isAvailable ? 'bg-slate-100/50 dark:bg-dark-950/20 border-slate-200 dark:border-white/5 opacity-40 grayscale cursor-not-allowed' :
                       isSelected ? 'bg-orange-500/10 border-orange-500 shadow-xl shadow-orange-500/5' :
                         'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 hover:border-orange-500/30'
                       }`}
                   >
-                    {selectedSubject && !isAvailableInSubject && (
+                    {selectedSubject && !isAvailable && (
                       <span className="absolute top-2 left-1/2 -translate-x-1/2 -translate-y-full group-hover:translate-y-4 opacity-0 group-hover:opacity-100 transition-all px-2 py-1 rounded-full bg-slate-800 text-white text-[8px] font-bold uppercase tracking-tighter whitespace-nowrap z-20">
-                        No questions in library
-                      </span>
-                    )}
-
-                    {selectedSubject && isAvailableInSubject && isLockedByTimeline && (
-                      <span className="absolute top-2 left-1/2 -translate-x-1/2 -translate-y-full group-hover:translate-y-4 opacity-0 group-hover:opacity-100 transition-all px-2 py-1 rounded-full bg-orange-600 text-white text-[8px] font-bold uppercase tracking-tighter whitespace-nowrap z-20">
-                        Locked by Semester Timeline
+                        Locked unit
                       </span>
                     )}
                     
