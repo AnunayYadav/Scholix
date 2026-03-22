@@ -260,7 +260,8 @@ class NexusServer {
     // Distinct subjects from the questions table
     const { data, error } = await client
       .from('questions')
-      .select('subject');
+      .select('subject')
+      .limit(10000);
 
     if (error || !data) {
       console.error('Fetch Subject Names Error:', error);

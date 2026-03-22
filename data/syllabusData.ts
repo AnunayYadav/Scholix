@@ -180,5 +180,62 @@ Solid state physics : free electron theory (Introduction), diffusion and drift c
 
 Unit VI
 Introduction to engineering materials : dielectric materials definition, dielectric constant, magnetic materials: dia, para, ferromagnetic materials, magnetic data storage, piezoelectric materials: direct and inverse piezoelectric methods, superconducting materials: properties, Meissner effect, Type I & Type II superconductors, applications
+  `,
+  "ECE249: Basic Electrical and Electronics Engineering": `
+Unit I
+Fundamentals of Electrical Laws, Semiconductor Devices and Applications: Ohm's Law, Kirchhoff's Laws (KCL, KVL), Voltage and Current Division Rules, Basics of Semiconductors, Energy Band Theory, N-Type and P-Type Semiconductors, PN Junction Diode, Forward and Reverse Bias.
+
+Unit II
+Introduction to Arduino and Sensors: Fundamentals of Microcontrollers, Introduction to Arduino Platform, Digital and Analog Input/Output, Interfacing Sensors (LDR, Ultrasonic, Temperature), Actuators (LEDs, Motors).
+
+Unit III
+Number Systems and Logic Gates: Binary, Octal, Hexadecimal Number Systems, Binary Arithmetic, Introduction to Logic Gates (AND, OR, NOT, NAND, NOR, XOR, XNOR), Truth Tables and Boolean Algebra.
+
+Unit IV
+Combinational Logic Circuits: Boolean Function Minimization using K-Maps, Half Adder, Full Adder, Multiplexers, De-multiplexers, Encoders, Decoders.
+
+Unit V
+Introduction to Sequential Logic Circuits: Latches vs Flip-Flops, RS, D, JK, T Flip-Flops, Edge Triggering vs Level Triggering, Concepts of Clock and Timing.
+
+Unit VI
+Applications of Sequential Circuits: Registers (SISO, SIPO, PISO, PIPO), Counters (Asynchronous and Synchronous), Design and analysis of Digital Systems.
+  `,
+  "PEL125: Upper Intermediate Communication Skills – I": `
+Unit I
+Tenses: Simple Present vs Present Continuous, Present Perfect vs Past Simple, Past Perfect vs Past Simple, Future Tenses (will, going to, present continuous for future).
+
+Unit II
+Modals and Passives: Modals of Permission, Obligation, and Possibility, Active and Passive Voice, Use of Passives in formal writing and reporting.
+
+Unit III
+Parts of Speech: Nouns, Pronouns, Verbs, Adjectives, Adverbs, Prepositions, Conjunctions, and Interjections - advanced usage and common errors.
+
+Unit IV
+Direct Speech and Clauses: Reported Speech (Direct to Indirect), Relative Clauses (Defining and Non-defining), Prepositional Phrases.
+
+Unit V
+Articles, Determiners, and Quantifiers: Definite and Indefinite Articles, Demonstratives, Quantifiers (much, many, few, little, a lot of), Distributives (each, every, either, neither).
+
+Unit VI
+Vocabulary: Synonyms, Antonyms, Phrasal Verbs, Idioms, Collocations, Corporate Communication Terms.
+  `,
+  "PEL130: Advanced Communication Skills-I": `
+Unit I
+Substitution and Ellipsis: Empty Subject 'It' and 'There', Substitution (One, Ones, So, Do so), Leaving Words Out (Ellipsis), Leaving out Subjects and Objects.
+
+Unit II
+Sentence Structure: Simple, Compound, and Complex Sentences, Punctuation and Capitalization, Parallelism, Sentence Variety and Clarity.
+
+Unit III
+Conditionals: Zero, First, Second, and Third Conditionals, Mixed Conditionals, 'Wish' and 'If Only' structures.
+
+Unit IV
+Infinitives, Gerunds and Quantifiers: Verb + -ing or Verb + to-infinitive, Differences in meaning, Gerunds as subjects/objects, Advanced Quantifiers.
+
+Unit V
+Reduced Clauses, Connectors and Focus Structures: Participle Clauses, Cleft Sentences (It-clefts, What-clefts), Transitions and Linking words (However, Therefore, Despite).
+
+Unit VI
+Professional Vocabulary: Nuances in Formal and Informal language, Rhetorical devices, Presentation and Argumentation skills.
   `
 };
