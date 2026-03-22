@@ -173,11 +173,9 @@ const CampusNavigator: React.FC = () => {
 
   const handleReportSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reportForm.hostelName || !reportForm.issueDetails) {
-      showToast("Please fill in the required fields.", "info");
-      return;
+    if (reportForm.imageProof) {
+      // Logic for image handling could go here
     }
-    console.log("Report submitted:", reportForm);
     showToast("Thank you! Your report has been submitted. We'll verify and update the data shortly.", "success");
     setReportForm({ hostelName: '', issueDetails: '', imageProof: null });
     handleClose();

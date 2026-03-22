@@ -1,38 +1,45 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar.tsx';
-import PlacementPrefect from './components/PlacementPrefect.tsx';
-import ContentLibrary from './components/ContentLibrary.tsx';
-import CampusNavigator from './components/CampusNavigator.tsx';
-import HelpSection from './components/HelpSection.tsx';
-import FreshersKit from './components/FreshersKit.tsx';
-import CGPACalculator from './components/CGPACalculator.tsx';
-import AttendanceTracker from './components/AttendanceTracker.tsx';
-import ShareReport from './components/ShareReport.tsx';
-import AboutUs from './components/AboutUs.tsx';
-import AuthModal from './components/AuthModal.tsx';
-import VerifiedBadge from './components/VerifiedBadge.tsx';
-import ProfileSection from './components/ProfileSection.tsx';
-import TimetableHub from './components/TimetableHub.tsx';
-import QuizTaker from './components/QuizTaker.tsx';
-import MarketplaceHub from './components/MarketplaceHub.tsx';
-import RoommateFinder from './components/RoommateFinder.tsx';
-import EmergencyContacts from './components/EmergencyContacts.tsx';
-import AIToolsDirectory from './components/AIToolsDirectory.tsx';
-import AdminStats from './components/AdminStats.tsx';
-import BuyMeACoffee from './components/BuyMeACoffee.tsx';
-import PaymentSuccess from './components/PaymentSuccess.tsx';
-import PrivacyPolicy from './components/PrivacyPolicy.tsx';
-import CookieBanner from './components/CookieBanner.tsx';
-
 import { ModuleType, UserProfile, TimetableData } from './types.ts';
-
 import NexusServer from './services/nexusServer.ts';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { ToastContainer } from './components/Toast.tsx';
 import NotificationBell from './components/NotificationBell.tsx';
 import UniversalSearch from './components/UniversalSearch.tsx';
+import VerifiedBadge from './components/VerifiedBadge.tsx';
+
+// Lazy loaded components
+const PlacementPrefect = lazy(() => import('./components/PlacementPrefect.tsx'));
+const ContentLibrary = lazy(() => import('./components/ContentLibrary.tsx'));
+const CampusNavigator = lazy(() => import('./components/CampusNavigator.tsx'));
+const HelpSection = lazy(() => import('./components/HelpSection.tsx'));
+const FreshersKit = lazy(() => import('./components/FreshersKit.tsx'));
+const CGPACalculator = lazy(() => import('./components/CGPACalculator.tsx'));
+const AttendanceTracker = lazy(() => import('./components/AttendanceTracker.tsx'));
+const ShareReport = lazy(() => import('./components/ShareReport.tsx'));
+const AboutUs = lazy(() => import('./components/AboutUs.tsx'));
+const ProfileSection = lazy(() => import('./components/ProfileSection.tsx'));
+const TimetableHub = lazy(() => import('./components/TimetableHub.tsx'));
+const QuizTaker = lazy(() => import('./components/QuizTaker.tsx'));
+const MarketplaceHub = lazy(() => import('./components/MarketplaceHub.tsx'));
+const RoommateFinder = lazy(() => import('./components/RoommateFinder.tsx'));
+const EmergencyContacts = lazy(() => import('./components/EmergencyContacts.tsx'));
+const AIToolsDirectory = lazy(() => import('./components/AIToolsDirectory.tsx'));
+const AdminStats = lazy(() => import('./components/AdminStats.tsx'));
+const BuyMeACoffee = lazy(() => import('./components/BuyMeACoffee.tsx'));
+const PaymentSuccess = lazy(() => import('./components/PaymentSuccess.tsx'));
+const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy.tsx'));
+const CookieBanner = lazy(() => import('./components/CookieBanner.tsx'));
+const AuthModal = lazy(() => import('./components/AuthModal.tsx'));
+
+// Skeleton Loader for lazy routes
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[60vh] animate-fade-in">
+    <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
+  </div>
+);
 
 const getModuleFromPath = (path: string): ModuleType => {
   const p = path.toLowerCase();
@@ -488,6 +495,23 @@ const AppContent: React.FC = () => {
     return () => unsubscribeAuth();
   }, []);
 
+  const fetchUserProfile = async () => {
+    const user = await NexusServer.getCurrentUser();
+    if (user) {
+      try {
+        const profile = await NexusServer.ensureProfile(user);
+        setUserProfile(profile);
+      } catch (err) {
+        console.error("Profile refresh error:", err);
+      }
+    }
+  };
+
+  const navigateToModule = React.useCallback((module: ModuleType) => {
+    const path = getPathFromModule(module);
+    navigate(path);
+  }, [navigate]);
+
   const toggleTheme = React.useCallback(() => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
@@ -495,157 +519,155 @@ const AppContent: React.FC = () => {
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
   }, [theme]);
 
-  const navigateToModule = React.useCallback((module: ModuleType) => {
-    const path = getPathFromModule(module);
-    navigate(path);
-  }, [navigate]);
-
-
-
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-slate-200">
-      <Sidebar
-        currentModule={currentModule}
-        setModule={navigateToModule}
-        isMobileMenuOpen={isMobileMenuOpen}
-        toggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        userProfile={userProfile}
-      />
-      <main className="flex-1 flex flex-col h-screen overflow-hidden relative bg-slate-50 dark:bg-[#0a0a0a]">
-        <BackgroundEffects />
+    <div className={`min-h-screen font-['Inter'] selection:bg-orange-500/30 selection:text-orange-900 dark:selection:text-orange-100 transition-colors duration-500 ${theme === 'dark' ? 'dark text-white' : 'text-slate-900'}`} style={{ WebkitTapHighlightColor: 'transparent' }}>
+      <BackgroundEffects />
+      
+      {/* Universal Search Portal Container */}
+      <div id="search-portal-root" className="fixed inset-0 z-[100] pointer-events-none" />
 
-        <div id="app-navbar" className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-white/5 bg-white/90 dark:bg-[#0a0a0a] z-10 relative">
-          <div className="flex items-center">
-            <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="md:hidden w-11 h-11 flex items-center justify-center rounded-xl text-slate-700 dark:text-white mr-1 border-none active:scale-75 transition-all bg-transparent group"
-              aria-label="Open menu"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="w-8 h-8 transition-transform group-hover:scale-110" viewBox="0 0 16 16">
-                <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3" />
-              </svg>
-            </button>
-            <span className="hidden min-[400px]:inline-block md:hidden text-xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tight cursor-pointer ml-1" onClick={() => navigate('/')}>LPU-Nexus</span>
-          </div>
+      <div className="flex relative min-h-screen">
+        <Sidebar currentModule={currentModule} setModule={(m) => navigate(getPathFromModule(m))} userProfile={userProfile} />
 
-          <div className="flex-1 hidden md:flex ml-4">
-            <div className="w-full max-w-[480px]">
-              <UniversalSearch />
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-3 ml-auto">
-            <button 
-              onClick={handleOpenMobileSearch}
-              className="md:hidden p-2.5 rounded-full bg-slate-100 dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-            </button>
-            <NotificationBell userProfile={userProfile} />
-            <button onClick={toggleTheme} className="p-2.5 rounded-full bg-slate-100 dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90">
-              {theme === 'dark' ? (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
-              )}
-            </button>
-            <div className="relative">
-              {userProfile ? (
-                <>
-                  <button onClick={() => isProfileMenuOpen ? handleProfileClose() : setIsProfileMenuOpen(true)} className="w-11 h-11 rounded-full bg-gradient-to-tr from-orange-600 to-red-600 p-[1.5px] border-none shadow-[0_8px_20px_rgba(234,88,12,0.2)] hover:scale-105 active:scale-95 transition-all overflow-hidden cursor-pointer group text-left">
-                    <div className="w-full h-full bg-white dark:bg-[#0a0a0a] rounded-full overflow-hidden flex items-center justify-center text-slate-900 dark:text-orange-600 font-black text-sm">
-                      {userProfile.avatar_url ? (
-                        <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" />
-                      ) : (
-                        <span>{userProfile.username?.[0]?.toUpperCase() || userProfile.email[0].toUpperCase()}</span>
-                      )}
-                    </div>
-                  </button>
-                  {isProfileMenuOpen && (
-                    <>
-                      <div className="fixed inset-0 z-40 bg-transparent" onClick={handleProfileClose} />
-                      <div className={`absolute right-0 mt-3 w-56 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-50 animate-fade-in backdrop-blur-xl transition-all duration-300 ${isClosingProfile ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
-                        <div className="px-5 py-3 border-b border-slate-100 dark:border-white/5 mb-2 flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600 font-bold text-[11px] sm:text-xs shrink-0 border border-orange-600/5 overflow-hidden">
-                            {userProfile.avatar_url ? <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" /> : (userProfile.username?.[0]?.toUpperCase() || 'V')}
-                          </div>
-                          <div className="flex flex-col text-left min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <p className="font-bold text-slate-800 dark:text-white tracking-wider text-[11px] sm:text-xs truncate">{userProfile.username || 'Verto'}</p>
-                              <VerifiedBadge isAdmin={userProfile.is_admin} size="w-3.5 h-3.5" />
-                            </div>
-                            <p className="text-[11px] sm:text-xs font-bold text-slate-400 tracking-widest truncate">{userProfile.email}</p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => { navigate('/profile'); handleProfileClose(); }}
-                          className="w-full text-left px-5 py-3 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-slate-600 dark:text-white/70 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
-                        >
-                          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-600/20 transition-colors">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                          </div>
-                          View Terminal
-                        </button>
-                        <button
-                          onClick={async () => { await NexusServer.signOut(); navigate('/'); handleProfileClose(); }}
-                          className="w-full text-left px-5 py-3 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-red-500 hover:bg-red-500/10 border-none bg-transparent flex items-center gap-3 transition-all"
-                        >
-                          <div className="w-8 h-8 rounded-full bg-red-500/5 flex items-center justify-center">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
-                          </div>
-                          De-authenticate
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </>
-              ) : (
-                    <button onClick={() => setShowAuthModal(true)} className="w-10 h-10 rounded-full border-none bg-slate-100 dark:bg-[#0a0a0a] flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-95">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                    </button>
-                  )}
-                </div>
+        <div className="flex-1 flex flex-col h-screen overflow-hidden">
+          {/* Top Bar Navigation */}
+          <div className="h-16 md:h-20 px-4 md:px-8 flex items-center justify-between z-40 bg-white/10 dark:bg-[#0a0a0a]/10 backdrop-blur-3xl border-b border-slate-200/50 dark:border-white/5 sticky top-0 transition-all">
+            <div className="flex-1 max-w-xl pr-4 md:pr-0">
+              <div className="hidden md:block">
+                <UniversalSearch 
+                  placeholder="Ask anything or find features..." 
+                  shortcut="K"
+                  resultsPortalRef={searchResultsRef}
+                />
+              </div>
+              <div className="md:hidden">
+                <button 
+                  onClick={handleOpenMobileSearch}
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/5 text-slate-400 w-full active:scale-[0.98] transition-all"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                  <span className="text-xs font-bold uppercase tracking-widest opacity-60">Nexus Search</span>
+                </button>
               </div>
             </div>
-        <div id="main-content-area" className={`flex-1 overflow-y-auto relative scroll-smooth ${location.pathname === '/' ? 'p-0' : 'p-4 md:p-8'} bg-transparent`}>
-          <div className={`relative ${location.pathname === '/' ? 'w-full' : 'max-w-7xl mx-auto'}`}>
-            <Routes>
-              <Route path="/" element={<Dashboard userProfile={userProfile} />} />
 
-              <Route path="/placement" element={<PlacementPrefect userProfile={userProfile} />} />
-              <Route path="/placement/:reportId" element={<PlacementPrefect userProfile={userProfile} />} />
-              <Route path="/timetable" element={<TimetableHub userProfile={userProfile} />} />
-              <Route path="/quiz" element={<QuizTaker userProfile={userProfile} />} />
-              <Route path="/quiz/:subjectName" element={<QuizTaker userProfile={userProfile} />} />
-              <Route path="/quiz/:subjectName/:quizId" element={<QuizTaker userProfile={userProfile} />} />
-              <Route path="/library" element={<ContentLibrary userProfile={userProfile} />} />
-              <Route path="/library/:program" element={<ContentLibrary userProfile={userProfile} />} />
-              <Route path="/library/:program/:semester" element={<ContentLibrary userProfile={userProfile} />} />
-              <Route path="/library/:program/:semester/:subject" element={<ContentLibrary userProfile={userProfile} />} />
-              <Route path="/library/:program/:semester/:subject/:category" element={<ContentLibrary userProfile={userProfile} />} />
-              <Route path="/campus" element={<CampusNavigator />} />
-              <Route path="/campus/:tab" element={<CampusNavigator />} />
-              <Route path="/help" element={<HelpSection />} />
-              <Route path="/freshers" element={<FreshersKit />} />
-              <Route path="/cgpa" element={<CGPACalculator userProfile={userProfile} />} />
-              <Route path="/attendance" element={<AttendanceTracker />} />
-              <Route path="/share-cgpa" element={<ShareReport />} />
-              <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
-              <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
-              <Route path="/payment-success/:paymentId" element={<PaymentSuccess userProfile={userProfile} />} />
-              <Route path="/profile" element={<ProfileSection userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={(m) => navigate(getPathFromModule(m))} />} />
-              <Route path="/marketplace" element={<MarketplaceHub userProfile={userProfile} />} />
-              <Route path="/marketplace/:category" element={<MarketplaceHub userProfile={userProfile} />} />
-              <Route path="/marketplace/item/:itemId" element={<MarketplaceHub userProfile={userProfile} />} />
-              <Route path="/roommate" element={<RoommateFinder userProfile={userProfile} />} />
-              <Route path="/emergency" element={<EmergencyContacts />} />
-              <Route path="/ai-tools" element={<AIToolsDirectory />} />
-              <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <div className="flex items-center gap-2 md:gap-4 shrink-0">
+              <button 
+                onClick={() => navigate('/help')}
+                className="p-2.5 rounded-full bg-slate-100 dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90"
+                title="Help Center"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+              </button>
+              <NotificationBell userProfile={userProfile} />
+              <button onClick={toggleTheme} className="p-2.5 rounded-full bg-slate-100 dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90">
+                {theme === 'dark' ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+                )}
+              </button>
+              <div className="relative">
+                {userProfile ? (
+                  <>
+                    <button onClick={() => isProfileMenuOpen ? handleProfileClose() : setIsProfileMenuOpen(true)} className="w-11 h-11 rounded-full bg-gradient-to-tr from-orange-600 to-red-600 p-[1.5px] border-none shadow-[0_8px_20px_rgba(234,88,12,0.2)] hover:scale-105 active:scale-95 transition-all overflow-hidden cursor-pointer group text-left">
+                      <div className="w-full h-full bg-white dark:bg-[#0a0a0a] rounded-full overflow-hidden flex items-center justify-center text-slate-900 dark:text-orange-600 font-black text-sm">
+                        {userProfile.avatar_url ? (
+                          <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" />
+                        ) : (
+                          <span>{userProfile.username?.[0]?.toUpperCase() || userProfile.email[0].toUpperCase()}</span>
+                        )}
+                      </div>
+                    </button>
+                    {isProfileMenuOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40 bg-transparent" onClick={handleProfileClose} />
+                        <div className={`absolute right-0 mt-3 w-56 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-50 animate-fade-in backdrop-blur-xl transition-all duration-300 ${isClosingProfile ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
+                          <div className="px-5 py-3 border-b border-slate-100 dark:border-white/5 mb-2 flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600 font-bold text-[11px] sm:text-xs shrink-0 border border-orange-600/5 overflow-hidden">
+                              {userProfile.avatar_url ? <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" /> : (userProfile.username?.[0]?.toUpperCase() || 'V')}
+                            </div>
+                            <div className="flex flex-col text-left min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <p className="font-bold text-slate-800 dark:text-white tracking-wider text-[11px] sm:text-xs truncate">{userProfile.username || 'Verto'}</p>
+                                <VerifiedBadge isAdmin={userProfile.is_admin} size="w-3.5 h-3.5" />
+                              </div>
+                              <p className="text-[11px] sm:text-xs font-bold text-slate-400 tracking-widest truncate">{userProfile.email}</p>
+                            </div>
+                          </div>
+                          <button 
+                            onClick={() => { navigate('/profile'); handleProfileClose(); }}
+                            className="w-full text-left px-5 py-3 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-slate-600 dark:text-white/70 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-600/20 transition-colors">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                            </div>
+                            View Terminal
+                          </button>
+                          <button 
+                            onClick={async () => { await NexusServer.signOut(); navigate('/'); handleProfileClose(); }}
+                            className="w-full text-left px-5 py-3 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-red-500 hover:bg-red-500/10 border-none bg-transparent flex items-center gap-3 transition-all"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-red-500/5 flex items-center justify-center">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                            </div>
+                            De-authenticate
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <button onClick={() => setShowAuthModal(true)} className="w-10 h-10 rounded-full border-none bg-slate-100 dark:bg-[#0a0a0a] flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-95">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div id="main-content-area" className={`flex-1 overflow-y-auto relative scroll-smooth ${location.pathname === '/' ? 'p-0' : 'p-4 md:p-8'} bg-transparent`}>
+            <div className={`relative ${location.pathname === '/' ? 'w-full' : 'max-w-7xl mx-auto'}`}>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Dashboard userProfile={userProfile} />} />
+                  <Route path="/placement" element={<PlacementPrefect userProfile={userProfile} />} />
+                  <Route path="/placement/:reportId" element={<PlacementPrefect userProfile={userProfile} />} />
+                  <Route path="/timetable" element={<TimetableHub userProfile={userProfile} />} />
+                  <Route path="/quiz" element={<QuizTaker userProfile={userProfile} />} />
+                  <Route path="/quiz/:subjectName" element={<QuizTaker userProfile={userProfile} />} />
+                  <Route path="/quiz/:subjectName/:quizId" element={<QuizTaker userProfile={userProfile} />} />
+                  <Route path="/library" element={<ContentLibrary userProfile={userProfile} />} />
+                  <Route path="/library/:program" element={<ContentLibrary userProfile={userProfile} />} />
+                  <Route path="/library/:program/:semester" element={<ContentLibrary userProfile={userProfile} />} />
+                  <Route path="/library/:program/:semester/:subject" element={<ContentLibrary userProfile={userProfile} />} />
+                  <Route path="/library/:program/:semester/:subject/:category" element={<ContentLibrary userProfile={userProfile} />} />
+                  <Route path="/campus" element={<CampusNavigator />} />
+                  <Route path="/campus/:tab" element={<CampusNavigator />} />
+                  <Route path="/help" element={<HelpSection />} />
+                  <Route path="/freshers" element={<FreshersKit />} />
+                  <Route path="/cgpa" element={<CGPACalculator userProfile={userProfile} />} />
+                  <Route path="/attendance" element={<AttendanceTracker userProfile={userProfile} />} />
+                  <Route path="/share-cgpa" element={<ShareReport />} />
+                  <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
+                  <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
+                  <Route path="/payment-success/:paymentId" element={<PaymentSuccess userProfile={userProfile} />} />
+                  <Route path="/profile" element={<ProfileSection userProfile={userProfile} onUpdate={fetchUserProfile} setUserProfile={setUserProfile} navigateToModule={(m) => navigate(getPathFromModule(m))} />} />
+                  <Route path="/marketplace" element={<MarketplaceHub userProfile={userProfile} />} />
+                  <Route path="/marketplace/:category" element={<MarketplaceHub userProfile={userProfile} />} />
+                  <Route path="/marketplace/item/:itemId" element={<MarketplaceHub userProfile={userProfile} />} />
+                  <Route path="/roommate" element={<RoommateFinder userProfile={userProfile} />} />
+                  <Route path="/emergency" element={<EmergencyContacts />} />
+                  <Route path="/ai-tools" element={<AIToolsDirectory userProfile={userProfile} />} />
+                  <Route path="/admin-stats" element={<AdminStats isAdmin={userProfile?.is_admin || false} />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Suspense>
+            </div>
           </div>
         </div>
+
         {/* Premium Mobile Search Bottom Sheet */}
         {isMobileSearchActive && (
           <div className="md:hidden fixed inset-0 z-[200] flex items-end justify-center pointer-events-auto">
@@ -684,7 +706,7 @@ const AppContent: React.FC = () => {
             </div>
           </div>
         )}
-      </main>
+      </div>
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       <CookieBanner />
       <Analytics />
