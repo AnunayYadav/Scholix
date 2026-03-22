@@ -215,7 +215,7 @@ class NexusServer {
       question: q.question,
       // Handle the case where JSONB might be returned as string or object depending on driver/API
       options: typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || []),
-      correctAnswer: q.correct_answer,
+      correctAnswer: q.correct_answer !== null ? Number(q.correct_answer) : undefined,
       explanation: q.explanation,
       starterCode: q.starter_code,
       testCases: typeof q.test_cases === 'string' ? JSON.parse(q.test_cases) : (q.test_cases || [])
