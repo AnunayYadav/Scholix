@@ -5,6 +5,7 @@ import NexusServer from '../services/nexusServer.ts';
 import { generateSubjectOriginals } from '../services/geminiService.ts';
 import { extractTextFromPdf } from '../services/pdfUtils.ts';
 import { showToast } from './Toast.tsx';
+import { nexusOriginalsData as staticOriginals } from '../data/nexusOriginalsData.ts';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 
@@ -52,7 +53,6 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
     const [selectedUnitIdx, setSelectedUnitIdx] = useState<number | null>(null);
     const progressBarRef = useRef<HTMLDivElement>(null);
 
-    // Optimized Scroll Progress Handler (Direct DOM manipulation for 0-latency)
     useEffect(() => {
         const scrollArea = document.getElementById('main-content-area');
 
@@ -72,33 +72,112 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
         return () => scrollArea?.removeEventListener('scroll', updateProgress);
     }, [viewMode, selectedUnitIdx]);
 
+    // 1. Initial Load - only once on mount
     useEffect(() => {
         loadAllData();
     }, []);
 
-    const loadAllData = async () => {
-        setLoading(true);
-        try {
-            const { nexusOriginalsData } = await import('../data/nexusOriginalsData.ts');
-            setAllOriginals(nexusOriginalsData);
+    // 2. Auto-select matched subject from context or search
+    useEffect(() => {
+        if (initialSubject && initialSubject !== 'Search Subject' && allOriginals.length > 0 && !activeSubjectData) {
+            const matched = allOriginals.find(d => {
+                const normActiveSub = initialSubject.toLowerCase();
+                const normDataSub = d.subject.toLowerCase();
+                return normDataSub.includes(normActiveSub) || normActiveSub.includes(normDataSub.split(':')[0].toLowerCase().trim());
+            });
+            
+            if (matched) {
+                console.log('NexusOriginals: Auto-selected from context:', matched.subject);
+                setActiveSubjectData(matched);
+                setViewMode('units');
+            }
+        }
+    }, [initialSubject, allOriginals, activeSubjectData]);
 
-            if (initialSubject !== 'Search Subject') {
-                const matched = nexusOriginalsData.find(d => {
-                    const normActiveSub = initialSubject.toLowerCase();
-                    const normDataSub = d.subject.toLowerCase();
-                    return normDataSub.includes(normActiveSub) || normActiveSub.includes(normDataSub.split(':')[0].toLowerCase().trim());
+    const loadAllData = async () => {
+        // Only show spinner if we have NO data at all
+        if (allOriginals.length === 0) setLoading(true);
+        console.log('NexusOriginals: Initial global data fetch started');
+        
+        try {
+            // 1. Initial local data for fast UI response
+            const localData = [...staticOriginals];
+            if (allOriginals.length === 0) {
+                setAllOriginals(localData);
+            }
+
+            // 2. Fetch dynamics from Supabase
+            let dynamicData: any[] = [];
+            try {
+                dynamicData = await NexusServer.fetchAllNexusOriginals();
+            } catch (err) {
+                console.error('NexusOriginals: fetch dynamic failed', err);
+                dynamicData = [];
+            }
+            
+            // 3. Merge them
+            const merged = [...localData];
+            if (Array.isArray(dynamicData)) {
+                dynamicData.forEach(dbItem => {
+                    const idx = merged.findIndex(m => m.subject === dbItem.subject && m.program === dbItem.program);
+                    if (idx >= 0) {
+                        merged[idx] = dbItem;
+                    } else {
+                        merged.push(dbItem);
+                    }
                 });
-                if (matched) {
-                    setActiveSubjectData(matched);
-                    setViewMode('units');
+            }
+
+            // Update with merged but unenriched data first
+            setAllOriginals(merged);
+            
+            // 4. Background Enrichment
+            const enriched = await Promise.all(merged.map(async (orig) => {
+                try {
+                    const subjectCode = (orig.subject || '').split(':')[0].trim();
+                    if (!subjectCode) return orig;
+                    const questions = await NexusServer.fetchQuestions(subjectCode);
+                    return {
+                        ...orig,
+                        content: {
+                            ...orig.content,
+                            quizzes: questions && questions.length > 0 ? questions : orig.content.quizzes
+                        }
+                    };
+                } catch (err) {
+                    console.error('Error enriching original:', orig.subject, err);
+                    return orig;
+                }
+            }));
+
+            setAllOriginals(enriched);
+
+            // 5. Final specific fallback if still nothing matches but context was requested
+            if (initialSubject && initialSubject !== 'Search Subject' && !activeSubjectData) {
+                const specificRaw = await NexusServer.fetchNexusOriginal(initialSubject, initialSemester, initialProgram);
+                if (specificRaw) {
+                        const subjectCode = (specificRaw.subject as string).split(':')[0].trim();
+                        const questions = await NexusServer.fetchQuestions(subjectCode);
+                        const specific = {
+                            ...specificRaw,
+                            content: {
+                                ...specificRaw.content,
+                                quizzes: questions && questions.length > 0 ? questions : specificRaw.content.quizzes
+                            }
+                        };
+                        console.log('NexusOriginals: Loaded specific from DB:', specific.subject);
+                        setActiveSubjectData(specific);
+                        setViewMode('units');
                 }
             }
         } catch (e) {
-            console.error(e);
+            console.error("NexusOriginals loadAllData global error:", e);
         } finally {
             setLoading(false);
+            console.log('NexusOriginals: data loading final');
         }
     };
+
 
     const handleSubjectSelect = (subject: NexusOriginal) => {
         setActiveSubjectData(subject);
@@ -184,6 +263,24 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
         return Math.max(1, Math.ceil(wordCount / 200));
     };
 
+    // Filter originals based on program (loose matching)
+    const filteredOriginals = useMemo(() => {
+        return allOriginals.filter(o => {
+            if (!initialProgram || initialProgram === 'All' || initialProgram === 'Search Program') return true;
+            
+            // Normalize: remove dots, spaces, and handle casing (e.g., "B.Tech" -> "btech")
+            const normalize = (s: string) => s.toLowerCase().replace(/[\.\s]/g, '');
+            const normInit = normalize(initialProgram);
+            const normData = normalize(o.program);
+            
+            return normInit.includes(normData) || normData.includes(normInit);
+        }).sort((a, b) => {
+            // Sort by semester then subject
+            if (a.semester !== b.semester) return parseInt(a.semester as string) - parseInt(b.semester as string);
+            return a.subject.localeCompare(b.subject);
+        });
+    }, [allOriginals, initialProgram]);
+
     // --- LOADING STATE ---
     if (loading) return (
         <div className="animate-fade-in h-[60vh] flex flex-col items-center justify-center">
@@ -211,7 +308,33 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                 </header>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {allOriginals.map((subject) => (
+                    {/* Admin Generate Action */}
+                    {initialSubject !== 'Search Subject' && !activeSubjectData && userProfile?.is_admin && (
+                        <div 
+                            onClick={handleGenerate}
+                            className={`group relative cursor-pointer overflow-hidden rounded-[32px] border-2 border-dashed border-orange-500/30 bg-orange-500/5 hover:bg-orange-500/10 transition-all duration-500 flex flex-col items-center justify-center p-8 text-center min-h-[220px] ${generating ? 'pointer-events-none opacity-80' : ''}`}
+                        >
+                            {generating ? (
+                                <div className="flex flex-col items-center gap-4">
+                                    <div className="w-10 h-10 border-4 border-orange-600 border-t-transparent rounded-full animate-spin" />
+                                    <p className="text-sm font-bold text-orange-600 uppercase tracking-widest animate-pulse">Generating Content...</p>
+                                    <p className="text-[10px] text-slate-500">This may take 30-60s</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="w-16 h-16 rounded-full bg-orange-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-orange-600/30 group-hover:scale-110 transition-transform">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-8 h-8"><path d="M12 5v14M5 12h14" /></svg>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <h4 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Initialize Subject</h4>
+                                        <p className="text-[10px] text-slate-500 font-medium px-4">Create Nexus Originals (Notes, MCQs, Cards) for <span className="text-orange-600 font-bold">{initialSubject}</span></p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {filteredOriginals.map((subject) => (
                         <div
                             key={subject.id}
                             onClick={() => handleSubjectSelect(subject)}

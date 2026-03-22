@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { UserProfile, QuizQuestion, LibraryFile } from '../types.ts';
-import NexusServer from '../services/nexusServer.ts';
+import NexusServer from '../services/nexusServer';
 import { generateQuizFromSyllabus } from '../services/geminiService.ts';
 import { extractTextFromPdf } from '../services/pdfUtils.ts';
 import jsPDF from 'jspdf';
@@ -13,7 +13,7 @@ import { InlineMath, BlockMath } from 'react-katex';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
-import { QUIZTAKER_DATA } from '../data/quiztaker/quizData.ts';
+// Removed QUIZTAKER_DATA import to resolve lag - fetching on demand from Supabase instead.
 
 // Dashboard components
 import FeaturedQuizCard from './quiz/FeaturedQuizCard.tsx';
@@ -107,6 +107,8 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [isCached, setIsCached] = useState(false);
 
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
+  const [subjectQuestions, setSubjectQuestions] = useState<QuizQuestion[]>([]);
+  const [isFetchingQuestions, setIsFetchingQuestions] = useState(false);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<number, any>>({});
   const [currentCode, setCurrentCode] = useState('');
@@ -403,30 +405,42 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     }
   }, [quizCompleted]);
 
-  const availableUnitsForSubject = useMemo(() => {
-    if (!selectedSubject) return [];
-    const data = QUIZTAKER_DATA[selectedSubject.name];
-    if (!data) return [];
-    const units = new Set<number>();
-    (data.mcqs || []).forEach(q => units.add(q.unit));
-    (data.subjective || []).forEach(q => units.add(q.unit));
-    return Array.from(units).sort((a, b) => a - b);
+  // Fetch questions for selected subject to populate filters
+  useEffect(() => {
+    const fetchSubjectData = async () => {
+      if (!selectedSubject) {
+        setSubjectQuestions([]);
+        return;
+      }
+      
+      setIsFetchingQuestions(true);
+      try {
+        const questions = await NexusServer.fetchQuestions(selectedSubject.name);
+        setSubjectQuestions(questions);
+      } catch (err) {
+        console.error("Error fetching subject questions:", err);
+      } finally {
+        setIsFetchingQuestions(false);
+      }
+    };
+    
+    fetchSubjectData();
   }, [selectedSubject]);
 
+  const availableUnitsForSubject = useMemo(() => {
+    if (subjectQuestions.length === 0) return [1, 2, 3, 4, 5, 6]; // Default fallback
+    const units = new Set<number>();
+    subjectQuestions.forEach(q => units.add(q.unit));
+    return Array.from(units).sort((a, b) => a - b);
+  }, [subjectQuestions]);
+
   const availableTopicsByUnit = useMemo(() => {
-    if (!selectedSubject) return {};
-    const data = QUIZTAKER_DATA[selectedSubject.name];
-    if (!data) return {};
     const topicsMap: Record<number, Set<string>> = {};
-    const filterByUnits = (qs: QuizQuestion[]) => selectedUnits.length > 0 ? qs.filter(q => selectedUnits.includes(q.unit)) : qs;
+    const filteredQuestions = selectedUnits.length > 0 
+      ? subjectQuestions.filter(q => selectedUnits.includes(q.unit)) 
+      : subjectQuestions;
     
-    filterByUnits(data.mcqs || []).forEach(q => {
-      if (q.topic) {
-        if (!topicsMap[q.unit]) topicsMap[q.unit] = new Set();
-        topicsMap[q.unit].add(q.topic);
-      }
-    });
-    filterByUnits(data.subjective || []).forEach(q => {
+    filteredQuestions.forEach(q => {
       if (q.topic) {
         if (!topicsMap[q.unit]) topicsMap[q.unit] = new Set();
         topicsMap[q.unit].add(q.topic);
@@ -438,7 +452,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       result[parseInt(k)] = Array.from(topicsMap[parseInt(k)]).sort();
     });
     return result;
-  }, [selectedSubject, selectedUnits]);
+  }, [subjectQuestions, selectedUnits]);
 
   const sectionInfo = useMemo(() => {
     let mcqCount = 0;
@@ -466,35 +480,33 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   }, [quizQuestions]);
 
   const hasMCQs = useMemo(() => {
-    if (!selectedSubject) return false;
-    return (QUIZTAKER_DATA[selectedSubject.name]?.mcqs?.length || 0) > 0;
-  }, [selectedSubject]);
+    return subjectQuestions.some(q => q.type === 'mcq');
+  }, [subjectQuestions]);
 
   const hasSubjective = useMemo(() => {
-    if (!selectedSubject) return false;
-    return (QUIZTAKER_DATA[selectedSubject.name]?.subjective?.length || 0) > 0;
-  }, [selectedSubject]);
+    return subjectQuestions.some(q => q.type === 'subjective');
+  }, [subjectQuestions]);
 
   const hasCoding = useMemo(() => {
     if (!selectedSubject) return false;
     // Lock coding questions for CSE101 as requested
     if (selectedSubject.name.includes('CSE101')) return false;
-    const mcqs = QUIZTAKER_DATA[selectedSubject.name]?.mcqs || [];
-    return mcqs.some(q => q.type === 'coding');
-  }, [selectedSubject]);
+    return subjectQuestions.some(q => q.type === 'coding');
+  }, [selectedSubject, subjectQuestions]);
 
   const availableQuestionTypes = useMemo(() => {
-    if (!selectedSubject) return new Set<string>();
-    const data = QUIZTAKER_DATA[selectedSubject.name];
-    if (!data) return new Set<string>();
-
     const types = new Set<string>();
-    const mcqs = (data.mcqs || []).filter(q => selectedUnits.length === 0 || selectedUnits.includes(q.unit));
-    mcqs.forEach(q => {
-      types.add(q.questionType || 'MCQ');
+    const filtered = selectedUnits.length > 0 
+      ? subjectQuestions.filter(q => selectedUnits.includes(q.unit)) 
+      : subjectQuestions;
+
+    filtered.forEach(q => {
+      if (q.type === 'mcq') {
+        types.add(q.questionType || 'MCQ');
+      }
     });
     return types;
-  }, [selectedSubject, selectedUnits]);
+  }, [subjectQuestions, selectedUnits]);
 
   useEffect(() => {
     loadValidSubjects();
@@ -541,14 +553,27 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     setInitializing(true);
     try {
       const subjectsMap = new Map<string, SubjectWithSyllabus>();
+      
+      // Fetch available subject names from Supabase
+      const subjectNames = await NexusServer.fetchSubjectNames();
 
-      // Load only subjects present in QUIZTAKER_DATA
-      Object.keys(QUIZTAKER_DATA).forEach((subjectName, index) => {
+      subjectNames.forEach((subjectName, index) => {
         subjectsMap.set(subjectName, {
           id: `QUIZ_SUB_${index}`,
           name: subjectName,
           syllabusFile: null as any
         });
+      });
+
+      // Also ensure subjects from SYLLABUS_DATA (AI fallback) are included if not already there
+      Object.keys(SYLLABUS_DATA).forEach((name, index) => {
+        if (!subjectsMap.has(name)) {
+          subjectsMap.set(name, {
+            id: `AI_SUB_${index}`,
+            name,
+            syllabusFile: null as any
+          });
+        }
       });
 
       setSubjectsWithSyllabi(Array.from(subjectsMap.values()).sort((a, b) => a.name.localeCompare(b.name)));
@@ -702,14 +727,22 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   }, [featuredQuiz, featuredCompleted]);
 
   // ═══════════ Challenge Start ═══════════
-  const handleStartChallenge = useCallback((challenge: typeof activeChallenges[0]) => {
+  const handleStartChallenge = useCallback(async (challenge: typeof activeChallenges[0]) => {
     if (completedChallengeIds.has(challenge.id)) return;
-    const subjectData = QUIZTAKER_DATA[challenge.subject];
-    if (!subjectData?.mcqs || subjectData.mcqs.length === 0) {
-      showToast('No questions available for this challenge subject.', 'error');
-      return;
-    }
-    const shuffled = [...subjectData.mcqs].sort(() => 0.5 - Math.random()).slice(0, challenge.question_count);
+    
+    setLoading(true);
+    setStatus('Gathering challenge questions...');
+    
+    try {
+      const pool = await NexusServer.fetchQuestions(challenge.subject);
+      const mcqs = pool.filter(q => q.type === 'mcq');
+      
+      if (mcqs.length === 0) {
+        showToast('No questions available for this challenge subject.', 'error');
+        return;
+      }
+      
+      const shuffled = [...mcqs].sort(() => 0.5 - Math.random()).slice(0, challenge.question_count);
     const questions = shuffled.map((q: any, idx: number) => ({
       ...q,
       id: q.id || `challenge-${idx}`,
@@ -732,6 +765,13 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     const newQuizId = `challenge_${challenge.id}_${Date.now()}`;
     setQuizIdInState(newQuizId);
     navigate(`/quiz/challenge/${newQuizId}`);
+    } catch (err) {
+      console.error(err);
+      showToast('Error starting challenge!', 'error');
+    } finally {
+      setLoading(false);
+      setStatus('');
+    }
   }, [activeChallenges, completedChallengeIds]);
 
   // ═══════════ XP & Streak on Completion ═══════════
@@ -843,62 +883,55 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     setStatus('Looking into archives...');
 
     try {
-      const subjectData = QUIZTAKER_DATA[selectedSubject.name];
-      if (!subjectData) throw new Error("No data found for this subject.");
-
       let finalSelection: QuizQuestion[] = [];
 
-      const filterByUnits = (qs: QuizQuestion[]) => (qs || []).filter(q => selectedUnits.includes(q.unit));
-      let availableMcqs = filterByUnits(subjectData.mcqs || []);
-      let availableSubj = filterByUnits(subjectData.subjective || []);
+      // We already have subjectQuestions fetched in the hook
+      let pool = subjectQuestions.filter(q => selectedUnits.includes(q.unit));
+      
+      if (pool.length === 0) {
+        // Double check with a direct fetch if pool is empty (maybe it wasn't fully loaded)
+        setStatus('Attempting deep fetch...');
+        pool = await NexusServer.fetchQuestions(selectedSubject.name);
+        pool = pool.filter(q => selectedUnits.includes(q.unit));
+      }
 
-      // Filter out solved questions
-      const unsolvedMcqs = availableMcqs.filter(q => !solvedQuestionIds.has(q.id));
-      const unsolvedSubj = availableSubj.filter(q => !solvedQuestionIds.has(q.id));
+      if (pool.length === 0) {
+        // Still nothing? Fallback to AI
+        throw new Error("EMPTY_POOL");
+      }
 
-      // Use unsolved if available, otherwise reset or fallback
-      let poolMcq = unsolvedMcqs.length > 0 ? unsolvedMcqs : availableMcqs;
-      let poolSubj = unsolvedSubj.length > 0 ? unsolvedSubj : availableSubj;
-
+      // Apply Filters
       if (selectedDifficulties.length > 0) {
-        poolMcq = poolMcq.filter(q => selectedDifficulties.includes(q.difficulty || 'medium'));
-        poolSubj = poolSubj.filter(q => selectedDifficulties.includes(q.difficulty || 'medium'));
+        pool = pool.filter(q => selectedDifficulties.includes(q.difficulty || 'medium'));
       }
       if (selectedTopics.length > 0) {
-        poolMcq = poolMcq.filter(q => q.topic && selectedTopics.includes(q.topic));
-        poolSubj = poolSubj.filter(q => q.topic && selectedTopics.includes(q.topic));
+        pool = pool.filter(q => q.topic && selectedTopics.includes(q.topic));
       }
       
       // Filter by Question Type (MCQ, PYQ, Case Study)
-      poolMcq = poolMcq.filter(q => selectedQuestionTypes.includes(q.questionType || 'MCQ'));
+      let availableMcqs = pool.filter(q => q.type === 'mcq' && selectedQuestionTypes.includes(q.questionType || 'MCQ'));
+      let availableSubj = pool.filter(q => q.type === 'subjective');
+      let availableCoding = pool.filter(q => q.type === 'coding');
 
-      // Separate coding from MCQ
-      const codingQuestions = poolMcq.filter(q => q.type === 'coding');
-      const pureMcqs = poolMcq.filter(q => q.type !== 'coding');
-
-      // Independent selection based on individual counts
-      const pickedMcq = [...pureMcqs].sort(() => 0.5 - Math.random()).slice(0, numMCQ);
-      const pickedSubj = [...poolSubj].sort(() => 0.5 - Math.random()).slice(0, numSubjective);
+      // Filter out solved questions if needed
+      const unsolvedMcqs = availableMcqs.filter(q => !solvedQuestionIds.has(q.id));
+      const unsolvedSubj = availableSubj.filter(q => !solvedQuestionIds.has(q.id));
       
-      // If coding questions exist (like for INT108), pick from them
-      const pickedCoding = codingQuestions.length > 0 
-        ? [...codingQuestions].sort(() => 0.5 - Math.random()).slice(0, numCoding) 
-        : [];
+      const poolMcq = unsolvedMcqs.length > 0 ? unsolvedMcqs : availableMcqs;
+      const poolSubj = unsolvedSubj.length > 0 ? unsolvedSubj : availableSubj;
 
-      finalSelection = [...pickedMcq, ...pickedCoding, ...pickedSubj].sort(() => 0.5 - Math.random());
+      // Selection logic
+      const pickedMcq = [...poolMcq].sort(() => 0.5 - Math.random()).slice(0, numMCQ);
+      const pickedSubj = [...poolSubj].sort(() => 0.5 - Math.random()).slice(0, numSubjective);
+      const pickedCoding = [...availableCoding].sort(() => 0.5 - Math.random()).slice(0, numCoding);
+
+      finalSelection = [...pickedMcq, ...pickedSubj, ...pickedCoding].sort(() => 0.5 - Math.random());
 
       if (finalSelection.length > 0) {
         startQuiz(finalSelection, true);
         return;
       } else {
-        // Fallback to AI...
-        setStatus('Generating fresh questions via AI...');
-        const syllabusText = SYLLABUS_DATA[selectedSubject.name];
-        if (!syllabusText) throw new Error("No syllabus available for AI generation.");
-
-        const aiQuestions = await generateQuizFromSyllabus(selectedSubject.name, syllabusText, selectedUnits);
-        if (!aiQuestions || aiQuestions.length === 0) throw new Error("Failed to generate questions.");
-        startQuiz(aiQuestions, false);
+        throw new Error("EMPTY_POOL");
       }
     } catch (err: any) {
       console.error(err);

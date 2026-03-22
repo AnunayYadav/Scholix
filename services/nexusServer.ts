@@ -140,15 +140,105 @@ class NexusServer {
     return combined;
   }
 
+
+  /**
+   * Save consolidated questions for a subject unit
+   * @param subject The subject name (e.g., 'CSE121')
+   * @param unit The unit number
+   * @param questions List of QuizQuestion objects
+   */
   static async saveQuestionsToBank(subject: string, unit: number, questions: QuizQuestion[]) {
     const client = getSupabase();
     if (!client) return;
 
-    await client.from('question_banks').upsert({
-      subject_name: subject,
-      unit_number: unit,
-      questions: questions
-    }, { onConflict: 'subject_name,unit_number' });
+    // Transform from app format to DB format (snake_case)
+    const dbRows = questions.map(q => ({
+      id: q.id,
+      subject,
+      unit,
+      topic: q.topic,
+      difficulty: q.difficulty,
+      question_type: q.questionType || 'MCQ',
+      type: q.type || 'mcq',
+      question: q.question,
+      options: Array.isArray(q.options) ? q.options : [], // JSONB handles arrays automatically
+      correct_answer: q.correctAnswer,
+      explanation: q.explanation,
+      starter_code: q.starterCode,
+      test_cases: Array.isArray(q.testCases) ? q.testCases : []
+    }));
+
+    const { error } = await client
+      .from('questions')
+      .upsert(dbRows, { onConflict: 'id' });
+
+    if (error) {
+      console.error('Save Questions Bulk Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch questions from the optimized questions table
+   * @param subject The subject name
+   * @param unit Optional unit number (if not provided, fetches all units for the subject)
+   */
+  static async fetchQuestions(subject: string, unit?: number): Promise<QuizQuestion[]> {
+    const client = getSupabase();
+    if (!client) return [];
+
+    let query = client
+      .from('questions')
+      .select('*')
+      .eq('subject', subject);
+
+    if (unit !== undefined && unit !== 0) {
+      query = query.eq('unit', unit);
+    }
+
+    const { data, error } = await query;
+
+    if (error || !data) {
+      console.error('Fetch Questions Error:', error);
+      return [];
+    }
+
+    return data.map(q => ({
+      id: q.id,
+      unit: q.unit,
+      topic: q.topic,
+      difficulty: q.difficulty,
+      questionType: q.question_type as any,
+      type: q.type as any,
+      question: q.question,
+      // Handle the case where JSONB might be returned as string or object depending on driver/API
+      options: typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || []),
+      correctAnswer: q.correct_answer,
+      explanation: q.explanation,
+      starterCode: q.starter_code,
+      testCases: typeof q.test_cases === 'string' ? JSON.parse(q.test_cases) : (q.test_cases || [])
+    }));
+  }
+
+  /**
+   * Fetch distinct subject names from the questions table
+   */
+  static async fetchSubjectNames(): Promise<string[]> {
+    const client = getSupabase();
+    if (!client) return [];
+
+    // Use select('subject', { count: 'exact', distinct: true }) if possible, otherwise map it
+    const { data, error } = await client
+      .from('questions')
+      .select('subject');
+
+    if (error || !data) {
+      console.error('Fetch Subject Names Error:', error);
+      return [];
+    }
+
+    const uniqueSubjects = Array.from(new Set(data.map((item: any) => item.subject)));
+    return uniqueSubjects;
   }
 
   /**
@@ -920,6 +1010,21 @@ class NexusServer {
       console.error("Fetch Originals Error:", error);
     }
     return data;
+  }
+
+  static async fetchAllNexusOriginals(program?: string, semester?: string): Promise<any[]> {
+    const client = getSupabase();
+    if (!client) return [];
+    let query = client.from('nexus_originals').select('*');
+    if (program) query = query.eq('program', program);
+    if (semester) query = query.eq('semester', semester);
+    
+    const { data, error } = await query;
+    if (error) {
+      console.error("Fetch All Originals Error:", error);
+      return [];
+    }
+    return data || [];
   }
 
   static async upsertNexusOriginal(subject: string, semester: string, program: string, content: any) {

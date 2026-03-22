@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { useQuizDashboardStore, FeaturedQuiz, ActiveChallenge } from '../stores/quizStore';
-import { QUIZTAKER_DATA } from '../data/quiztaker/quizData';
+import NexusServer from '../services/nexusServer';
+import { QuizQuestion } from '../types';
 
 // ═══════════════════════════════════════
 // Deterministic Seeded Random — same result for all users on same date
@@ -67,18 +68,19 @@ function dayOfYear(dateStr: string): number {
 const ADJECTIVES = ['Ultimate', 'Daily', 'Lightning', 'Power', 'Classic', 'Master', 'Speed', 'Elite', 'Pro', 'Rapid'];
 const CHALLENGE_TYPES = ['Challenge', 'Sprint', 'Blitz', 'Showdown', 'Gauntlet', 'Trial', 'Test', 'Quest', 'Exam', 'Rush'];
 
-function generateFeaturedQuiz(): FeaturedQuiz | null {
+async function generateFeaturedQuiz(): Promise<FeaturedQuiz | null> {
   const today = getTodayIST();
   const seed = hashStr(`featured_${today}`);
   const rng = seededRandom(seed);
 
-  const subjects = Object.keys(QUIZTAKER_DATA).sort(); // sort for determinism
-  if (subjects.length === 0) return null;
+  const subjects = await NexusServer.fetchSubjectNames();
+  if (!subjects || subjects.length === 0) return null;
 
   // Pick subject based on seeded random
-  const subject = seededPick(subjects, rng);
-  const data = QUIZTAKER_DATA[subject];
-  if (!data?.mcqs || data.mcqs.length === 0) return null;
+  const subject = seededPick(subjects.sort(), rng);
+  const questionsPool: QuizQuestion[] = await NexusServer.fetchQuestions(subject);
+  
+  if (!questionsPool || questionsPool.length === 0) return null;
 
   // Difficulty cycles based on day of year: 0=easy, 1=medium, 2=hard
   const doy = dayOfYear(today);
@@ -86,7 +88,7 @@ function generateFeaturedQuiz(): FeaturedQuiz | null {
   const difficulty = difficultyMap[doy % 3];
 
   // Try to get questions of the target difficulty, fallback to all MCQs  
-  let questions = data.mcqs.filter(q =>
+  let questions = questionsPool.filter(q =>
     q.type !== 'subjective' &&
     q.type !== 'coding' &&
     (q.difficulty || 'medium') === difficulty
@@ -94,14 +96,14 @@ function generateFeaturedQuiz(): FeaturedQuiz | null {
 
   if (questions.length < 5) {
     // Fallback: use all non-subjective, non-coding questions
-    questions = data.mcqs.filter(q => q.type !== 'subjective' && q.type !== 'coding');
+    questions = questionsPool.filter(q => q.type !== 'subjective' && q.type !== 'coding');
   }
 
   if (questions.length === 0) return null;
 
   // Deterministic shuffle and pick 10
   const shuffled = seededShuffle(questions, rng).slice(0, 10);
-  const unitsFound = Array.from(new Set(shuffled.map(q => q.unit || 'General').filter(Boolean))).sort() as string[];
+  const unitsFound = Array.from(new Set(shuffled.map(q => String(q.unit || 'General')).filter(Boolean))).sort();
 
   // Generate name deterministically
   const adj = seededPick(ADJECTIVES, rng);
@@ -143,7 +145,7 @@ const CHALLENGE_TEMPLATES = [
   { nameTemplate: '{subject} Gauntlet', desc: 'Full syllabus, hard mode — the ultimate test', count: 20, diff: 3, timePerQ: 45, xp: 250, minLevel: 2 },
 ];
 
-function generateActiveChallenges(): ActiveChallenge[] {
+async function generateActiveChallenges(): Promise<ActiveChallenge[]> {
   const today = getTodayIST();
   // Create a window seed: changes every 3 days
   const doy = dayOfYear(today);
@@ -152,7 +154,7 @@ function generateActiveChallenges(): ActiveChallenge[] {
   const seed = hashStr(`challenges_${year}_${windowIndex}`);
   const rng = seededRandom(seed);
 
-  const subjects = Object.keys(QUIZTAKER_DATA).sort();
+  const subjects = await NexusServer.fetchSubjectNames();
   if (subjects.length === 0) return [];
 
   // Calculate expiration: end of the current 3-day window
@@ -161,7 +163,7 @@ function generateActiveChallenges(): ActiveChallenge[] {
   const startsAt = windowStart.toISOString();
 
   // Pick 3 unique subjects deterministically
-  const shuffledSubjects = seededShuffle(subjects, rng);
+  const shuffledSubjects = seededShuffle(subjects.sort(), rng);
   const numChallenges = Math.min(3, subjects.length);
 
   const challenges: ActiveChallenge[] = [];
@@ -172,12 +174,13 @@ function generateActiveChallenges(): ActiveChallenge[] {
     const emoji = CHALLENGE_EMOJIS_MAP[subject] || seededPick(Object.values(CHALLENGE_EMOJIS_MAP), rng);
 
     // Verify the subject has enough questions
-    const data = QUIZTAKER_DATA[subject];
-    const mcqs = data?.mcqs.filter(q => q.type !== 'subjective' && q.type !== 'coding') || [];
+    const pool: QuizQuestion[] = await NexusServer.fetchQuestions(subject);
+    const mcqs = pool.filter(q => q.type !== 'subjective' && q.type !== 'coding');
+    
     if (mcqs.length < 5) continue;
 
     // Determine units (from all available MCQs for that subject)
-    const units = Array.from(new Set(mcqs.map(q => q.unit || 'General').filter(Boolean))).sort() as string[];
+    const units = Array.from(new Set(mcqs.map(q => String(q.unit || 'General')).filter(Boolean))).sort();
 
     challenges.push({
       id: `challenge_${windowIndex}_${i}_${year}`,
@@ -244,7 +247,7 @@ export function useDashboard(userId: string | null) {
           throw new Error('stale');
         }
       } catch {
-        const fresh = generateFeaturedQuiz();
+        const fresh = await generateFeaturedQuiz();
         if (fresh) {
           localStorage.setItem(cacheKey, JSON.stringify(fresh));
           setFeaturedQuiz(fresh);
@@ -259,7 +262,7 @@ export function useDashboard(userId: string | null) {
         }
       }
 
-      const fresh = generateFeaturedQuiz();
+      const fresh = await generateFeaturedQuiz();
       if (fresh) {
         localStorage.setItem(cacheKey, JSON.stringify(fresh));
         setFeaturedQuiz(fresh);
@@ -279,7 +282,7 @@ export function useDashboard(userId: string | null) {
 
   const loadActiveChallenges = async () => {
     // Challenges are deterministic per 3-day window, always regenerate for correctness
-    const fresh = generateActiveChallenges();
+    const fresh = await generateActiveChallenges();
     setActiveChallenges(fresh);
   };
 
