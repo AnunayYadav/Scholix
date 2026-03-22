@@ -40,7 +40,7 @@ const HistorySection: React.FC = () => {
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="p-3 rounded-2xl bg-orange-600/10 text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M12 2v20M2 12h20" className="rotate-45" /></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="w-5 h-5"><path d="M18 6 6 18M6 6l12 12" /></svg>
                 </div>
                 <div className="text-right">
                     <p className="text-[10px] font-semibold text-slate-400 tracking-wider">{new Date(q.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</p>

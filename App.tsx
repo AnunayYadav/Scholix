@@ -259,7 +259,7 @@ const TodaysSchedule: React.FC = () => {
                   </div>
                   {isGoingOn && (
                     <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3.5 h-3.5 md:w-5 md:h-5"><path d="M12 2v20M2 12h20" /></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" className="w-3.5 h-3.5 md:w-5 md:h-5"><path d="M12 2v20M2 12h20" /></svg>
                     </div>
                   )}
                 </div>

@@ -2691,7 +2691,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     >
                       <div className="flex items-center gap-4 z-10">
                         <div className={`p-3 rounded-2xl transition-colors ${negativeMarking ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-slate-100 dark:bg-dark-800 text-slate-500'}`}>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M12 2v20M2 12h20" className="rotate-45" /></svg>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="w-4 h-4"><path d="M18 6 6 18M6 6l12 12" /></svg>
                         </div>
                         <div className="text-left">
                           <p className={`text-sm font-semibold tracking-tight ${negativeMarking ? 'text-red-500' : 'text-slate-900 dark:text-white'}`}>Negative Marking</p>
