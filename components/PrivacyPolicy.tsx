@@ -9,15 +9,11 @@ const PrivacyPolicy: React.FC = () => {
     const sections = [
         {
             title: "Information We Collect",
-            content: "We collect information you provide directly to us when you create an account, such as your name, email address, and profile picture. We also record your academic interactions, including quiz scores, subjects studied, time taken per question, XP earned, and leveling progress to personalize your experience. If you use the Marketplace or Roommate search, we store your listing details, preferences, and contact information you choose to provide."
+            content: "We collect information you provide directly to us when you create an account, such as your name, email address, and profile picture. We also record your academic interactions, including quiz scores, subjects studied, time taken per question, XP earned, and leveling progress to personalize your experience."
         },
         {
             title: "Automatic Data Collection",
             content: "Like most websites, we automatically collect certain technical information. This includes log file data (IP addresses, browser type, ISP, date/time stamps, referring/exit pages) which is used for trend analysis and site administration."
-        },
-        {
-            title: "Marketplace & Roommate Interactions",
-            content: "When using our community features, your public profile (username, avatar, batch) may be visible to other users. In the Marketplace, your specified contact method (email/phone/whatsapp) is shared with potential buyers. In Roommate Search, your lifestyle preferences and budget are stored to help match you with suitable partners."
         },
         {
             title: "Third-Party Services",

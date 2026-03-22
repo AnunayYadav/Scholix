@@ -382,13 +382,6 @@ class NexusServer {
     return result;
   }
 
-  static async getCurrentUser(): Promise<User | null> {
-    const client = getSupabase();
-    if (!client) return null;
-    const { data: { user } } = await client.auth.getUser();
-    return user;
-  }
-
   static async signOut() {
     const client = getSupabase();
     if (!client) return;
