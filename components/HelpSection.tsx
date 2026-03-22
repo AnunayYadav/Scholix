@@ -148,6 +148,28 @@ const HelpSection: React.FC = () => {
         </div>
       )}
 
+      {/* Compliance & Policy Links */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="md:col-span-2 glass-panel p-10 rounded-[32px] border border-orange-500/10 bg-orange-500/5 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[80px] rounded-full -mr-32 -mt-32" />
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
+                <div className="space-y-3">
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Compliance & Policies</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-sm">Learn about how we handle your data, our adherence to university academic rules, and our commitment to privacy.</p>
+                </div>
+                <div className="flex gap-4">
+                  <a 
+                    href="/privacy" 
+                    className="px-8 py-3.5 bg-orange-600 text-white rounded-2xl text-[13px] font-bold hover:bg-orange-500 hover:-translate-y-1 transition-all shadow-lg shadow-orange-600/20 active:scale-95 flex items-center gap-2"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                    View Privacy Policy
+                  </a>
+                </div>
+            </div>
+          </div>
+      </div>
+
       <div className="mt-12 p-10 bg-slate-900 dark:bg-[#0a0a0a] border border-slate-800 dark:border-white/5 rounded-2xl text-center shadow-2xl relative overflow-hidden group">
         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none transition-transform duration-1000 group-hover:scale-110">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">

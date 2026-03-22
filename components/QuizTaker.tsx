@@ -75,59 +75,6 @@ interface SubjectWithSyllabus {
   syllabusFile: LibraryFile;
 }
 
-const StatsSummary: React.FC<{
-  levelInfo: any;
-  totalXP: number;
-  currentStreak: number;
-  longestStreak: number;
-}> = ({ levelInfo, totalXP, currentStreak, longestStreak }) => (
-  <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-    {/* XP & Level Card */}
-    <div className="glass-panel p-6 rounded-[32px] border border-slate-200 dark:border-white/5 bg-white/50 dark:bg-white/[0.02] relative overflow-hidden group">
-      <div className="absolute -right-8 -top-8 w-32 h-32 bg-orange-500/10 blur-[60px] rounded-full" />
-      <div className="flex items-start justify-between mb-6 relative z-10">
-        <div className="flex items-center gap-3">
-          <span className="text-3xl">{levelInfo.icon}</span>
-          <div>
-            <h4 className="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tighter leading-none mb-1">{levelInfo.title}</h4>
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Level {levelInfo.level}</p>
-          </div>
-        </div>
-        <div className="text-right">
-          <span className="text-2xl font-black text-slate-800 dark:text-white tabular-nums">{totalXP}</span>
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Total XP</p>
-        </div>
-      </div>
-      <div className="space-y-2 relative z-10">
-        <div className="flex justify-between items-end">
-          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Tier Progress</span>
-          <span className="text-[9px] font-bold text-orange-600 uppercase tracking-widest">{levelInfo.progress}%</span>
-        </div>
-        <div className="h-2.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden p-0.5 border border-slate-200/50 dark:border-white/5">
-          <motion.div 
-            initial={{ width: 0 }}
-            animate={{ width: `${levelInfo.progress}%` }}
-            transition={{ duration: 1, ease: "circOut" }}
-            className="h-full bg-gradient-to-r from-orange-500 to-red-600 rounded-full"
-          />
-        </div>
-      </div>
-    </div>
-
-    {/* Streak Card */}
-    <div className="glass-panel p-6 rounded-[32px] border border-slate-200 dark:border-white/5 bg-white/50 dark:bg-white/[0.02] relative overflow-hidden flex flex-col items-center justify-center text-center group">
-      <div className="relative z-10 py-1">
-        <div className="mb-2 text-3xl">🔥</div>
-        <h4 className="text-3xl font-black text-slate-800 dark:text-white tabular-nums leading-none mb-1">{currentStreak}</h4>
-        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Day Streak</p>
-        <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/5 w-24 mx-auto">
-          <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest opacity-60">Best: {longestStreak}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
 const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile }) => {
   const { subjectName, quizId } = useParams();
   const navigate = useNavigate();
@@ -2795,12 +2742,6 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       <div className="absolute inset-0 bg-orange-600/30 blur-3xl group-hover:bg-orange-600/50 transition-all -z-10" />
                     </motion.button>
                   </div>
-                  <StatsSummary 
-                    levelInfo={level} 
-                    totalXP={totalXP} 
-                    currentStreak={currentStreak} 
-                    longestStreak={longestStreak} 
-                  />
                 </div>
               </motion.div>
             )}

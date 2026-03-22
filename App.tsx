@@ -22,6 +22,7 @@ import AIToolsDirectory from './components/AIToolsDirectory.tsx';
 import AdminStats from './components/AdminStats.tsx';
 import BuyMeACoffee from './components/BuyMeACoffee.tsx';
 import PaymentSuccess from './components/PaymentSuccess.tsx';
+import PrivacyPolicy from './components/PrivacyPolicy.tsx';
 
 import { ModuleType, UserProfile, TimetableData } from './types.ts';
 
@@ -52,6 +53,7 @@ const getModuleFromPath = (path: string): ModuleType => {
   if (p.includes('/emergency')) return ModuleType.EMERGENCY;
   if (p.includes('/ai-tools')) return ModuleType.AI_TOOLS;
   if (p.includes('/admin-stats')) return ModuleType.ADMIN_STATS;
+  if (p.includes('/privacy')) return ModuleType.PRIVACY;
   return ModuleType.DASHBOARD;
 };
 
@@ -75,6 +77,7 @@ const getPathFromModule = (module: ModuleType): string => {
     case ModuleType.EMERGENCY: return '/emergency';
     case ModuleType.AI_TOOLS: return '/ai-tools';
     case ModuleType.ADMIN_STATS: return '/admin-stats';
+    case ModuleType.PRIVACY: return '/privacy';
     default: return '/';
   }
 };
@@ -637,6 +640,7 @@ const AppContent: React.FC = () => {
               <Route path="/emergency" element={<EmergencyContacts />} />
               <Route path="/ai-tools" element={<AIToolsDirectory />} />
               <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
