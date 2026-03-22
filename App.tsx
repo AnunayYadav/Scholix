@@ -23,6 +23,7 @@ import AdminStats from './components/AdminStats.tsx';
 import BuyMeACoffee from './components/BuyMeACoffee.tsx';
 import PaymentSuccess from './components/PaymentSuccess.tsx';
 import PrivacyPolicy from './components/PrivacyPolicy.tsx';
+import CookieBanner from './components/CookieBanner.tsx';
 
 import { ModuleType, UserProfile, TimetableData } from './types.ts';
 
@@ -685,6 +686,7 @@ const AppContent: React.FC = () => {
         )}
       </main>
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+      <CookieBanner />
       <Analytics />
       <SpeedInsights />
       <ToastContainer />
