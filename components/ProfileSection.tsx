@@ -211,14 +211,14 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
       </header>
 
       {/* Leveling & Stats Section */}
-      <section className="max-w-3xl mx-auto space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="w-full space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* XP & Level Card */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="md:col-span-2 glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/5 bg-white/50 dark:bg-white/[0.02] relative overflow-hidden group"
+            className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/5 bg-white/50 dark:bg-white/[0.02] relative overflow-hidden group"
           >
             <div className="absolute -right-10 -top-10 w-40 h-40 bg-orange-500/10 blur-[80px] rounded-full" />
             
@@ -318,13 +318,13 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
       </section>
 
       {/* Recent Activity Mini-Section */}
-      <section className="max-w-3xl mx-auto">
+      <section className="w-full">
         <div className="flex items-center justify-between mb-6 px-2">
           <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Recent Activity</h3>
           <button onClick={() => navigateToModule(ModuleType.DASHBOARD)} className="text-[9px] font-bold text-orange-600 uppercase tracking-widest hover:translate-x-1 transition-transform">Complete History →</button>
         </div>
         
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {isLoadingAttempts ? (
             <div className="h-20 bg-slate-100 dark:bg-white/5 animate-pulse rounded-[24px]" />
           ) : recentAttempts.length > 0 ? (
@@ -359,7 +359,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
         </div>
       </section>
 
-      <div className="max-w-3xl mx-auto pt-8">
+      <div className="w-full pt-8">
         <div className="relative group/panel">
           <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-600/10 rounded-[48px] blur-3xl opacity-0 group-hover/panel:opacity-100 transition-opacity duration-700" />
           <div className="glass-panel p-10 rounded-[48px] border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#0a0a0a]/80 shadow-[0_32px_128px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_128px_rgba(0,0,0,0.5)] relative z-10 space-y-10 overflow-hidden backdrop-blur-2xl">
