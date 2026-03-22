@@ -797,16 +797,6 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         correctAnswers: correctCount,
         breakdown: xpResult.breakdown || []
       }).catch(err => console.error("Failed to save quiz attempt:", err));
-
-      NexusServer.updateProfileXP(userId, {
-        total_xp: xpResult.newTotalXP,
-        level: xpResult.newLevel?.level || level.level,
-        level_title: xpResult.newLevel?.title || level.title,
-        current_streak: (streakResult as any)?.newStreak || currentStreak,
-        longest_streak: (streakResult as any)?.newLongest || longestStreak,
-        last_active_date: new Date().toISOString().split('T')[0],
-        xp_history: xpResult.updatedHistory || []
-      }).catch(err => console.error("Failed to update profile XP:", err));
     }
 
     // Mark featured/challenge as completed

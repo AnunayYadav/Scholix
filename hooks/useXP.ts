@@ -14,9 +14,11 @@ export function useXP(userId: string | null) {
     setShowLevelUp,
   } = useQuizDashboardStore();
 
-  // Load XP data from localStorage on mount
+  // Load XP data from localStorage then Supabase
   useEffect(() => {
     if (!userId) return;
+    
+    // 1. Instant load from localStorage
     const stored = localStorage.getItem(`nexus_quiz_xp_${userId}`);
     if (stored) {
       try {
@@ -31,8 +33,30 @@ export function useXP(userId: string | null) {
         console.error('Failed to parse XP data', e);
       }
     }
-  }, [userId]);
 
+    // 2. Verified sync with Supabase if logged in
+    if (userId !== 'anonymous') {
+      import('../services/nexusServer').then(async ({ default: NexusServer }) => {
+        try {
+          const [profile, history] = await Promise.all([
+            NexusServer.getProfile(userId),
+            NexusServer.fetchUserQuizAttempts(userId)
+          ]);
+
+          if (profile) {
+            updateUserQuizProfile({
+              total_xp: profile.total_xp ?? 0,
+              level: profile.level ?? 1,
+              level_title: profile.level_title ?? 'Beginner',
+              xp_history: history || []
+            });
+          }
+        } catch (e) {
+          console.error("Supabase sync failed:", e);
+        }
+      });
+    }
+  }, [userId]);
   // Save XP data to localStorage whenever it changes
   const persistXP = useCallback((profile: typeof userQuizProfile) => {
     if (!userId) return;

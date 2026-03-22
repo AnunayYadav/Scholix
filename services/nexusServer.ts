@@ -186,6 +186,30 @@ class NexusServer {
     }
   }
 
+  static async fetchUserQuizAttempts(userId: string) {
+    const client = getSupabase();
+    if (!client) return [];
+
+    const { data, error } = await client
+      .from('quiz_attempts')
+      .select('*')
+      .eq('user_id', userId)
+      .order('completed_at', { ascending: false })
+      .limit(50);
+
+    if (error) {
+      console.error('Fetch Quiz Attempts Error:', error);
+      return [];
+    }
+
+    return (data || []).map(attempt => ({
+      quiz_id: attempt.quiz_id,
+      xp_earned: attempt.xp_earned,
+      breakdown: attempt.xp_breakdown || [],
+      earned_at: attempt.completed_at
+    }));
+  }
+
   static async updateProfileXP(userId: string, updates: { 
     total_xp: number; 
     level: number; 
@@ -193,7 +217,6 @@ class NexusServer {
     current_streak?: number;
     longest_streak?: number;
     last_active_date?: string;
-    xp_history?: any[];
   }) {
     const client = getSupabase();
     if (!client) return;
