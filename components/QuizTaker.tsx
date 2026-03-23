@@ -465,7 +465,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   const availableUnitsForSubject = useMemo(() => {
     if (subjectQuestions.length === 0) return [1, 2, 3, 4, 5, 6]; // Default fallback
     const units = new Set<number>();
-    subjectQuestions.forEach(q => units.add(q.unit));
+    subjectQuestions.forEach(q => units.add(Number(q.unit)));
     return Array.from(units).sort((a, b) => a - b);
   }, [subjectQuestions]);
 
@@ -1012,14 +1012,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       let finalSelection: QuizQuestion[] = [];
 
       // We already have subjectQuestions fetched in the hook
-      let pool = subjectQuestions.filter(q => selectedUnits.includes(q.unit));
+      let pool = subjectQuestions.filter(q => selectedUnits.includes(Number(q.unit)));
       
       if (pool.length === 0) {
         // Double check with a direct fetch if pool is empty (maybe it wasn't fully loaded)
         setStatus('Checking databases...');
         const subjectCode = (selectedSubject.name || '').split(':')[0].trim();
         pool = await NexusServer.fetchQuestions(subjectCode);
-        pool = pool.filter(q => selectedUnits.includes(q.unit));
+        pool = pool.filter(q => selectedUnits.includes(Number(q.unit)));
       }
 
       if (pool.length === 0) {
@@ -1029,16 +1029,28 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
       // Apply Filters
       if (selectedDifficulties.length > 0) {
-        pool = pool.filter(q => selectedDifficulties.includes(q.difficulty || 'medium'));
+        pool = pool.filter(q => {
+          const diff = String(q.difficulty || 'medium').toLowerCase();
+          return selectedDifficulties.includes(diff);
+        });
       }
       if (selectedTopics.length > 0) {
         pool = pool.filter(q => q.topic && selectedTopics.includes(q.topic));
       }
       
       // Filter by Question Type (MCQ, PYQ, Case Study)
-      let availableMcqs = pool.filter(q => q.type === 'mcq' && selectedQuestionTypes.includes(q.questionType || 'MCQ'));
-      let availableSubj = pool.filter(q => q.type === 'subjective');
-      let availableCoding = pool.filter(q => q.type === 'coding');
+      let availableMcqs = pool.filter(q => {
+        const typeMatch = (q.type || '').toLowerCase() === 'mcq';
+        const questionTypeStr = String(q.questionType || 'MCQ').toUpperCase();
+        // Handle variations in naming (e.g., "Case Based" vs "Case Study")
+        const questionTypeMatch = selectedQuestionTypes.some(selected => {
+          const s = selected.toUpperCase();
+          return questionTypeStr.includes(s) || s.includes(questionTypeStr);
+        });
+        return typeMatch && questionTypeMatch;
+      });
+      let availableSubj = pool.filter(q => (q.type || '').toLowerCase() === 'subjective');
+      let availableCoding = pool.filter(q => (q.type || '').toLowerCase() === 'coding');
 
       // Filter out solved questions if needed
       const unsolvedMcqs = availableMcqs.filter(q => !solvedQuestionIds.has(q.id));

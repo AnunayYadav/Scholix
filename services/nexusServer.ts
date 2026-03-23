@@ -235,7 +235,7 @@ class NexusServer {
 
       return {
         id: q.id,
-        unit: q.unit,
+        unit: Number(q.unit),
         topic: q.topic,
         difficulty: q.difficulty,
         questionType: q.question_type as any,
