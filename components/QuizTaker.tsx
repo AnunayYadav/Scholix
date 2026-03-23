@@ -57,6 +57,35 @@ const formatTime = (seconds: number) => {
   return `${m}:${s.toString().padStart(2, '0')}`;
 };
 
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
+const shuffleQuestion = (q: QuizQuestion): QuizQuestion => {
+  if (q.type !== 'mcq' && q.type !== undefined) return q;
+  if (!q.options || q.options.length < 2) return q;
+
+  const optionsWithStatus = q.options.map((option, index) => ({
+    option,
+    isCorrect: index === q.correctAnswer,
+  }));
+
+  const shuffledOptionsWithStatus = shuffleArray(optionsWithStatus);
+  const newOptions = shuffledOptionsWithStatus.map(o => o.option);
+  const newCorrectAnswer = shuffledOptionsWithStatus.findIndex(o => o.isCorrect);
+
+  return {
+    ...q,
+    options: newOptions,
+    correctAnswer: newCorrectAnswer,
+  };
+};
+
 // Static Bank - keeping this for fallback/demo
 const PEL130_STATIC_BANK = [
   { unit: 1, question: "Fill in the blank with correct adjective order. I have bought a _________ bag.", options: ["Tiny red Prada", "Red tiny Prada", "Prada red tiny", "Prada tiny red"], answer: "Tiny red Prada" },
@@ -758,13 +787,20 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       return;
     }
     if (!featuredQuiz || featuredCompleted) return;
-    const questions = featuredQuiz.questions.map((q: any, idx: number) => ({
-      ...q,
-      id: q.id || `featured-${idx}`,
-      unit: q.unit || 1,
-      type: q.type || 'mcq',
-      questionType: q.questionType || 'MCQ',
-    }));
+    
+    // First shuffle the order of questions
+    const shuffledQuestionList = shuffleArray(featuredQuiz.questions);
+    
+    const questions = shuffledQuestionList.map((q: any, idx: number) => {
+      const enriched = {
+        ...q,
+        id: q.id || `featured-${idx}`,
+        unit: q.unit || 1,
+        type: q.type || 'mcq',
+        questionType: q.questionType || 'MCQ',
+      };
+      return shuffleQuestion(enriched as QuizQuestion);
+    });
     setActiveQuizType('featured');
     setQuizQuestions(questions);
     setCurrentQuestionIdx(0);
@@ -805,13 +841,16 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       }
       
       const shuffled = [...mcqs].sort(() => 0.5 - Math.random()).slice(0, challenge.question_count);
-    const questions = shuffled.map((q: any, idx: number) => ({
-      ...q,
-      id: q.id || `challenge-${idx}`,
-      unit: q.unit || 1,
-      type: q.type || 'mcq',
-      questionType: q.questionType || 'MCQ',
-    }));
+    const questions = shuffled.map((q: any, idx: number) => {
+      const enriched = {
+        ...q,
+        id: q.id || `challenge-${idx}`,
+        unit: q.unit || 1,
+        type: q.type || 'mcq',
+        questionType: q.questionType || 'MCQ',
+      };
+      return shuffleQuestion(enriched as QuizQuestion);
+    });
     setActiveQuizType('challenge');
     setActiveChallengeId(challenge.id);
     setQuizQuestions(questions);
@@ -1031,12 +1070,16 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   };
 
   const startQuiz = (questions: QuizQuestion[], cached: boolean) => {
-    // Ensure all questions have IDs (especially AI-generated ones)
+    // Ensure all questions have IDs and shuffle options
     const enriched = questions.map((q, idx) => {
-      if (q.id) return q;
-      // Deterministic ID based on question content to track repeats
-      const contentHash = q.question.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0);
-      return { ...q, id: `ai-${Math.abs(contentHash)}` };
+      let questionWithId = q;
+      if (!q.id) {
+        // Deterministic ID based on question content to track repeats
+        const contentHash = q.question.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0);
+        questionWithId = { ...q, id: `ai-${Math.abs(contentHash)}` };
+      }
+      // Always shuffle options for every new quiz start
+      return shuffleQuestion(questionWithId);
     });
 
     setQuizQuestions(enriched);
