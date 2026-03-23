@@ -198,6 +198,9 @@ class NexusServer {
       query = query.eq('unit', unit);
     }
 
+    // Increase limit to ensure we fetch all subject questions (default might be 100)
+    query = query.range(0, 2000);
+
     const { data, error } = await query;
 
     if (error || !data) {
