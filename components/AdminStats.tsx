@@ -423,6 +423,18 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                                 </linearGradient>
                             </defs>
                             
+                            {/* Horizontal Grid lines */}
+                            {[0, 45, 90, 135].map((y) => (
+                                <line 
+                                    key={y} 
+                                    x1="0" y1={y} x2="100" y2={y} 
+                                    stroke="currentColor" 
+                                    strokeWidth="0.5" 
+                                    strokeDasharray="1,2" 
+                                    className="text-slate-200 dark:text-white/5" 
+                                />
+                            ))}
+
                             <path 
                                 d={`M 0 180 ${chartData.map((d, i) => {
                                     const x = (i / (chartData.length - 1)) * 100;
@@ -447,6 +459,18 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                                 strokeLinejoin="round"
                             />
                         </svg>
+
+                        {/* X-Axis Labels */}
+                        <div className="absolute -bottom-6 left-0 right-0 flex justify-between px-1 pointer-events-none">
+                            {[0, Math.floor((chartData.length - 1) / 2), chartData.length - 1].map((idx) => (
+                                <span 
+                                    key={idx} 
+                                    className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter"
+                                >
+                                    {new Date(chartData[idx].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                </span>
+                            ))}
+                        </div>
 
                         {/* Hover Overlays (HTML for pixel-perfect scaling) */}
                         {hoverIndex !== null && (
