@@ -1315,6 +1315,40 @@ class NexusServer {
     }, { onConflict: 'subject,semester,program' });
     if (error) throw error;
   }
+
+  static async searchUsers(query: string) {
+    const client = getSupabase();
+    if (!client) return [];
+    const { data, error } = await client
+      .from('profiles')
+      .select('id, username, registration_number, avatar_url, xp, level')
+      .or(`username.ilike.%${query}%,registration_number.ilike.%${query}%`)
+      .limit(5);
+    if (error) {
+      console.error("Search Users Error:", error);
+      return [];
+    }
+    return data || [];
+  }
+
+  static async getUserDetailedActivity(userId: string) {
+    const client = getSupabase();
+    if (!client) return null;
+    
+    const [profile, attempts, reports, feedback] = await Promise.all([
+      client.from('profiles').select('*').eq('id', userId).maybeSingle(),
+      client.from('quiz_attempts').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(10),
+      client.from('question_reports').select('*').eq('reporter_id', userId).order('created_at', { ascending: false }).limit(10),
+      client.from('feedback').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(10)
+    ]);
+
+    return {
+      profile: profile.data,
+      attempts: attempts.data || [],
+      reports: reports.data || [],
+      feedback: feedback.data || []
+    };
+  }
 }
 
 export default NexusServer;

@@ -563,6 +563,13 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
     const [isSendingReply, setIsSendingReply] = useState(false);
     const [showDetailedStats, setShowDetailedStats] = useState<string | null>(null);
 
+    // User Tracker States
+    const [reportSubTab, setReportSubTab] = useState<'pending' | 'tracker'>('pending');
+    const [userSearchText, setUserSearchText] = useState('');
+    const [userSearchResults, setUserSearchResults] = useState<any[]>([]);
+    const [selectedUserActivity, setSelectedUserActivity] = useState<any>(null);
+    const [isSearchingUser, setIsSearchingUser] = useState(false);
+
     // Question State for Creator
     const [newQuestion, setNewQuestion] = useState({
         id: undefined as string | undefined,
@@ -614,6 +621,35 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
         try {
             const f = await NexusServer.fetchFeedback();
             setFeedback(f);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUserSearch = async (val: string) => {
+        setUserSearchText(val);
+        if (val.length < 2) {
+            setUserSearchResults([]);
+            return;
+        }
+        setIsSearchingUser(true);
+        try {
+            const results = await NexusServer.searchUsers(val);
+            setUserSearchResults(results);
+        } finally {
+            setIsSearchingUser(false);
+        }
+    };
+
+    const selectUserForTracking = async (user: any) => {
+        setUserSearchResults([]);
+        setUserSearchText('');
+        setLoading(true);
+        try {
+            const activity = await NexusServer.getUserDetailedActivity(user.id);
+            setSelectedUserActivity(activity);
+        } catch (err) {
+            console.error("User Activity Fetch Error:", err);
         } finally {
             setLoading(false);
         }
@@ -906,65 +942,259 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         </div>
                     </motion.div>
                 )}
-
                 {activeTab === 'reports' && (
-                    <motion.div 
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                    >
-                        {reports.map((report, idx) => (
-                            <motion.div 
-                                key={report.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.05 }}
-                                className="glass-panel p-6 rounded-[32px] border border-slate-200 dark:border-white/10 relative group"
+                    <div className="space-y-8">
+                        {/* Sub Navigation */}
+                        <div className="flex gap-2 p-1 bg-slate-100 dark:bg-white/5 rounded-2xl w-fit border border-slate-200/50 dark:border-white/5 shadow-inner">
+                            <button 
+                                onClick={() => setReportSubTab('pending')}
+                                className={`px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${
+                                    reportSubTab === 'pending' 
+                                    ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-xl' 
+                                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                                }`}
                             >
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center font-bold text-xs">
-                                            {report.reporter?.username?.[0] || '?'}
+                                <span className="flex items-center gap-2">
+                                    Pending Issues
+                                    {reports.length > 0 && (
+                                        <span className="bg-red-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[8px] animate-pulse">{reports.length}</span>
+                                    )}
+                                </span>
+                            </button>
+                            <button 
+                                onClick={() => setReportSubTab('tracker')}
+                                className={`px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${
+                                    reportSubTab === 'tracker' 
+                                    ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-xl' 
+                                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                                }`}
+                            >
+                                User Tracker
+                            </button>
+                        </div>
+
+                        {reportSubTab === 'pending' ? (
+                            <motion.div 
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                            >
+                                {reports.length > 0 ? reports.map((report, idx) => (
+                                    <motion.div 
+                                        key={report.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: idx * 0.05 }}
+                                        className="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-white/10 relative group bg-white/50 dark:bg-white/[0.02]"
+                                    >
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center font-bold text-xs border border-slate-200/50 dark:border-white/5 text-slate-600 dark:text-white/60">
+                                                    {report.reporter?.username?.[0] || '?'}
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-tight">{report.reporter?.username || 'Guest'}</h4>
+                                                    <p className="text-[9px] font-semibold text-slate-400 tracking-wider font-mono">{new Date(report.created_at).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+                                            <span className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border shadow-sm ${
+                                                report.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20 animate-pulse'
+                                            }`}>
+                                                {report.status}
+                                            </span>
                                         </div>
-                                        <div>
-                                            <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-tight">{report.reporter?.username || 'Guest'}</h4>
-                                            <p className="text-[9px] font-semibold text-slate-400 tracking-wider font-mono">{new Date(report.created_at).toLocaleDateString()}</p>
+
+                                        <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 mb-6 hover:border-orange-500/20 transition-all cursor-default">
+                                            <p className="text-[10px] font-bold text-orange-600 tracking-wider mb-2 flex items-center gap-2">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                                {report.reason}
+                                            </p>
+                                            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">"{report.question?.question}"</p>
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            {report.status === 'pending' && (
+                                                <>
+                                                    <button 
+                                                        onClick={() => editReportedQuestion(report)}
+                                                        className="flex-1 py-3 rounded-xl bg-orange-600 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-orange-700 transition-all shadow-lg shadow-orange-600/20"
+                                                    >
+                                                        Edit Question
+                                                    </button>
+                                                    <button 
+                                                        disabled={actionLoading === report.id}
+                                                        onClick={() => resolveReport(report.id, 'resolved')}
+                                                        className="px-6 py-3 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-bold uppercase hover:bg-emerald-500 hover:text-white transition-all"
+                                                    >
+                                                        Clear
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )) : (
+                                    <div className="col-span-full py-20 text-center">
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest italic">All systems clear. No pending reports.</p>
+                                    </div>
+                                )}
+                            </motion.div>
+                        ) : (
+                            <motion.div 
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="space-y-8"
+                            >
+                                {/* User Search Header */}
+                                <div className="glass-panel p-8 rounded-[32px] border border-slate-200 dark:border-white/10 shadow-2xl bg-gradient-to-br from-white/80 to-slate-50 dark:from-white/[0.03] dark:to-transparent">
+                                    <div className="max-w-2xl mx-auto space-y-6 text-center">
+                                        <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">Global User Tracking</h3>
+                                        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Search for any Verto by username or registration number to view their full activity spectrum.</p>
+                                        
+                                        <div className="relative group">
+                                            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-orange-500 transition-colors">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
+                                            </div>
+                                            <input 
+                                                type="text" 
+                                                placeholder="Enter username or Reg No..." 
+                                                className="w-full bg-white dark:bg-slate-900/50 border-2 border-slate-100 dark:border-white/5 focus:border-orange-500/50 rounded-2xl py-5 pl-14 pr-6 text-sm font-bold tracking-tight shadow-sm transition-all outline-none"
+                                                value={userSearchText}
+                                                onChange={(e) => handleUserSearch(e.target.value)}
+                                            />
+                                            {isSearchingUser && (
+                                                <div className="absolute inset-y-0 right-5 flex items-center">
+                                                    <div className="w-5 h-5 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
+                                                </div>
+                                            )}
+
+                                            {/* Quick Search Results */}
+                                            {userSearchResults.length > 0 && (
+                                                <div className="absolute top-full left-0 right-0 mt-3 p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl z-50 space-y-1">
+                                                    {userSearchResults.map((user) => (
+                                                        <button 
+                                                            key={user.id}
+                                                            onClick={() => selectUserForTracking(user)}
+                                                            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-all group"
+                                                        >
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-10 h-10 rounded-full bg-slate-900 dark:bg-white text-white dark:text-black flex items-center justify-center font-bold text-xs uppercase tracking-tighter">
+                                                                    {user.username[0]}
+                                                                </div>
+                                                                <div className="text-left">
+                                                                    <p className="text-xs font-black text-slate-900 dark:text-white uppercase">{user.username}</p>
+                                                                    <p className="text-[10px] font-bold text-slate-400 tracking-wider">REG: {user.registration_number}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="text-right mr-4">
+                                                                    <p className="text-[10px] font-black text-emerald-500">LEVEL {user.level || 1}</p>
+                                                                    <p className="text-[8px] font-bold text-slate-400">{user.xp || 0} XP</p>
+                                                                </div>
+                                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-slate-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
-                                    <span className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
-                                        report.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'
-                                    }`}>
-                                        {report.status}
-                                    </span>
                                 </div>
 
-                                <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 mb-6">
-                                    <p className="text-[10px] font-bold text-orange-600 tracking-wider mb-2">Issue Reported: {report.reason}</p>
-                                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">"{report.question?.question}"</p>
-                                </div>
+                                {/* Active Selection Board */}
+                                {selectedUserActivity && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 30 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="space-y-6"
+                                    >
+                                        <div className="flex items-center justify-between px-2">
+                                            <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-[0.2em] flex items-center gap-3">
+                                                <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)]" />
+                                                Active Profile: <span className="text-orange-600">{selectedUserActivity.profile?.username}</span>
+                                            </h4>
+                                            <button 
+                                                onClick={() => setSelectedUserActivity(null)}
+                                                className="text-[9px] font-bold uppercase text-slate-400 hover:text-red-500 transition-colors"
+                                            >
+                                                Close Session
+                                            </button>
+                                        </div>
 
-                                <div className="flex gap-2">
-                                    {report.status === 'pending' && (
-                                        <>
-                                            <button 
-                                                onClick={() => editReportedQuestion(report)}
-                                                className="flex-1 py-3 rounded-xl bg-orange-600 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-orange-700 transition-all shadow-lg shadow-orange-600/20"
-                                            >
-                                                Edit Question
-                                            </button>
-                                            <button 
-                                                disabled={actionLoading === report.id}
-                                                onClick={() => resolveReport(report.id, 'resolved')}
-                                                className="px-6 py-3 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-bold uppercase hover:bg-emerald-500 hover:text-white transition-all"
-                                            >
-                                                Clear Report
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl">
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Current Level</p>
+                                                <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">LVL {selectedUserActivity.profile?.level || 1}</p>
+                                            </div>
+                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl">
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Total XP</p>
+                                                <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{(selectedUserActivity.profile?.xp || 0).toLocaleString()}</p>
+                                            </div>
+                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl">
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Quiz Attempts</p>
+                                                <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{selectedUserActivity.attempts?.length || 0}</p>
+                                            </div>
+                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl">
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Impact Score</p>
+                                                <p className="text-2xl font-black text-emerald-500 tracking-tighter">{(selectedUserActivity.reports?.length + selectedUserActivity.feedback?.length) * 10}</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Activity Log Grid */}
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                            {/* Quiz Performance */}
+                                            <div className="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-white/10">
+                                                <h5 className="text-[10px] font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/5 pb-3">Quiz History (Last 10)</h5>
+                                                <div className="space-y-3">
+                                                    {selectedUserActivity.attempts?.length > 0 ? selectedUserActivity.attempts.map((att: any, i: number) => (
+                                                        <div key={i} className="flex justify-between items-center p-3 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-all group">
+                                                            <div>
+                                                                <p className="text-[10px] font-black text-slate-800 dark:text-white/80 uppercase mb-0.5">{att.subject}</p>
+                                                                <p className="text-[8px] font-bold text-slate-400">{new Date(att.created_at).toLocaleDateString()}</p>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <p className="text-xs font-black text-slate-900 dark:text-white">{Math.round((att.score / att.total_questions) * 100)}%</p>
+                                                                <p className="text-[8px] font-bold text-emerald-500">+{att.xp_gained} XP</p>
+                                                            </div>
+                                                        </div>
+                                                    )) : (
+                                                        <p className="text-[10px] font-bold text-slate-300 italic text-center py-10">No attempts found.</p>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Contributions */}
+                                            <div className="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-white/10">
+                                                <h5 className="text-[10px] font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/5 pb-3">Issues & Feedback</h5>
+                                                <div className="space-y-4">
+                                                    {selectedUserActivity.reports?.map((r: any, i: number) => (
+                                                        <div key={i} className="flex gap-3 items-start border-l-2 border-red-500/30 pl-3">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1" />
+                                                            <div>
+                                                                <p className="text-[10px] font-bold text-slate-800 dark:text-white/70">Reported: {r.reason}</p>
+                                                                <p className="text-[8px] text-slate-500">{new Date(r.created_at).toLocaleDateString()}</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {selectedUserActivity.feedback?.map((f: any, i: number) => (
+                                                        <div key={i} className="flex gap-3 items-start border-l-2 border-orange-500/30 pl-3">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-1" />
+                                                            <div>
+                                                                <p className="text-[10px] font-bold text-slate-800 dark:text-white/70">Feedback: {f.text.slice(0, 40)}...</p>
+                                                                <p className="text-[8px] text-slate-500">{new Date(f.created_at).toLocaleDateString()}</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {selectedUserActivity.reports?.length === 0 && selectedUserActivity.feedback?.length === 0 && (
+                                                        <p className="text-[10px] font-bold text-slate-300 italic text-center py-10">No public reports or feedback.</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
                             </motion.div>
-                        ))}
-                    </motion.div>
+                        )}
+                    </div>
                 )}
 
                 {activeTab === 'constructor' && (
