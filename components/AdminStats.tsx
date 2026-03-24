@@ -801,34 +801,41 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                             <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Communication Stream</h3>
                             <button onClick={loadFeedback} className="text-[10px] font-black text-orange-600 uppercase hover:underline">Refresh Feed</button>
                         </div>
-                        {feedback.map((f, i) => (
-                            <motion.div 
-                                key={f.id}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: i * 0.05 }}
-                                className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/10 shadow-2xl relative"
-                            >
-                                <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-sm shadow-xl shadow-indigo-500/20">
-                                            {f.user?.username?.[0].toUpperCase() || 'G'}
+                        {feedback.length > 0 ? (
+                            feedback.map((f, i) => (
+                                <motion.div 
+                                    key={f.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/10 shadow-2xl relative"
+                                >
+                                    <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-sm shadow-xl shadow-indigo-500/20">
+                                                {f.user?.username?.[0].toUpperCase() || 'G'}
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">{f.user?.username || 'Guest Identity'}</h4>
+                                                <p className="text-[10px] font-mono text-slate-400">{f.user_email || 'SECURED_ORIGIN'}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">{f.user?.username || 'Guest Identity'}</h4>
-                                            <p className="text-[10px] font-mono text-slate-400">{f.user_email || 'SECURED_ORIGIN'}</p>
+                                        <div className="text-right">
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{new Date(f.created_at).toLocaleDateString()}</p>
+                                            <p className="text-[9px] font-bold text-slate-400">{new Date(f.created_at).toLocaleTimeString()}</p>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{new Date(f.created_at).toLocaleDateString()}</p>
-                                        <p className="text-[9px] font-bold text-slate-400">{new Date(f.created_at).toLocaleTimeString()}</p>
+                                    <div className="bg-slate-100 dark:bg-white/5 p-6 rounded-[30px] border border-slate-200 dark:border-white/10">
+                                        <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium italic">"{f.text}"</p>
                                     </div>
-                                </div>
-                                <div className="bg-slate-100 dark:bg-white/5 p-6 rounded-[30px] border border-slate-200 dark:border-white/10">
-                                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium italic">"{f.text}"</p>
-                                </div>
-                            </motion.div>
-                        ))}
+                                </motion.div>
+                            ))
+                        ) : (
+                            <div className="text-center py-20 bg-slate-100/50 dark:bg-white/5 rounded-[40px] border-2 border-dashed border-slate-200 dark:border-white/10">
+                                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">No Incoming Signals Detected</p>
+                                <p className="text-[10px] text-slate-500 mt-2">Communication feed is currently at equilibrium.</p>
+                            </div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>

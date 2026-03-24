@@ -947,15 +947,24 @@ class NexusServer {
   static async fetchFeedback() {
     const client = getSupabase();
     if (!client) return [];
+    // Use a more standard joining syntax to avoid relationship naming issues
     const { data, error } = await client
       .from('feedback')
-      .select('*, user:profiles(username)')
+      .select('*, profiles(username)')
       .order('created_at', { ascending: false });
+    
     if (error) {
       console.error('Fetch Feedback Error:', error);
-      return [];
+      // Fallback to fetch without join if the above failed
+      const { data: simpleData } = await client.from('feedback').select('*').order('created_at', { ascending: false });
+      return simpleData || [];
     }
-    return data || [];
+    
+    // Process to keep the UI's 'user' property expectation if needed
+    return (data || []).map(f => ({
+      ...f,
+      user: (f as any).profiles || null
+    }));
   }
 
   /**
