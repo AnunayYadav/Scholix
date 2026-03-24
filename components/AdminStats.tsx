@@ -369,67 +369,102 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
             initial={{ opacity: 0, scale: 0.95, y: -20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            className="glass-panel w-full p-8 md:p-12 rounded-[40px] border border-slate-200 dark:border-white/10 shadow-3xl overflow-hidden relative mt-8 bg-slate-50/50 dark:bg-white/[0.02]"
+            className="glass-panel w-full p-5 md:p-6 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-xl overflow-hidden relative mt-4 bg-slate-50/50 dark:bg-white/[0.02]"
         >
-            <div className="flex justify-between items-start mb-10">
+            <div className="flex justify-between items-start mb-4">
                 <div>
-                    <p className={`text-[10px] font-bold text-${color}-500 uppercase tracking-[0.2em] mb-2`}>{sub}</p>
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{type} Performance</h2>
+                    <p className={`text-[8px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1`}>{sub}</p>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">{type} Performance</h2>
                 </div>
                 <button 
                     onClick={onClose} 
-                    className="group p-3 hover:bg-red-500/10 rounded-2xl transition-all duration-300 text-slate-400 hover:text-red-500 border border-transparent hover:border-red-500/20"
+                    className="group p-1.5 hover:bg-red-500/10 rounded-lg transition-all duration-300 text-slate-400 hover:text-red-500 border border-transparent hover:border-red-500/20"
                 >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
             </div>
 
-            <div className="mb-14">
-                <div className="flex items-baseline gap-3">
-                    <h3 className="text-5xl font-bold text-slate-900 dark:text-white tracking-tighter">{value}</h3>
-                    <div className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-bold rounded-full border border-emerald-500/20">
+            <div className="mb-6">
+                <div className="flex items-baseline gap-2">
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tighter">{value}</h3>
+                    <div className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-500 text-[8px] font-bold rounded-full border border-emerald-500/20">
                         +12.5% 
                     </div>
                 </div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-4 max-w-xl leading-relaxed">System-wide metrics synchronized with the global operational core. Displaying historical trends and capacity indicators.</p>
+                <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-1.5 max-w-lg leading-relaxed">Historical trends and capacity indicators synchronized.</p>
             </div>
 
-            <div className="h-[350px] w-full relative mb-12">
+            <div className="h-[180px] w-full relative mb-8 group/graph">
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center h-full gap-4 text-slate-400">
-                        <div className="w-10 h-10 border-4 border-slate-200 border-t-orange-500 rounded-full animate-spin" />
-                        <p className="font-bold uppercase tracking-widest text-[9px]">Synchronizing Time-Series Data...</p>
+                    <div className="flex flex-col items-center justify-center h-full gap-2 text-slate-400">
+                        <div className="w-6 h-6 border-2 border-slate-200 border-t-orange-500 rounded-full animate-spin" />
+                        <p className="font-bold uppercase tracking-widest text-[7px]">Syncing...</p>
                     </div>
                 ) : chartData.length > 0 ? (
-                    <div className="h-full w-full flex items-end gap-3 pb-8">
-                        {chartData.map((d, i) => {
-                            // Map dynamic color to specific tailwind classes
-                            const barColorClass = color === 'orange' ? 'bg-orange-500/60 dark:bg-orange-500/50' : 
-                                                color === 'blue' ? 'bg-blue-500/60 dark:bg-blue-500/50' :
-                                                color === 'emerald' ? 'bg-emerald-500/60 dark:bg-emerald-500/50' :
-                                                'bg-indigo-500/60 dark:bg-indigo-500/50';
+                    <div className="h-full w-full relative">
+                        <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 180">
+                            <defs>
+                                <linearGradient id={`line-gradient-${color}`} x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor={color === 'orange' ? '#f97316' : color === 'blue' ? '#3b82f6' : color === 'emerald' ? '#10b981' : '#6366f1'} stopOpacity="0.15" />
+                                    <stop offset="100%" stopColor={color === 'orange' ? '#f97316' : color === 'blue' ? '#3b82f6' : color === 'emerald' ? '#10b981' : '#6366f1'} stopOpacity="0" />
+                                </linearGradient>
+                            </defs>
                             
-                            const barHoverClass = color === 'orange' ? 'group-hover:bg-orange-500 group-hover:shadow-orange-500/30' : 
-                                                color === 'blue' ? 'group-hover:bg-blue-500 group-hover:shadow-blue-500/30' :
-                                                color === 'emerald' ? 'group-hover:bg-emerald-500 group-hover:shadow-emerald-500/30' :
-                                                'group-hover:bg-indigo-500 group-hover:shadow-indigo-500/30';
-                            return (
-                                <div key={i} className="flex-1 group relative h-full flex flex-col justify-end">
-                                    <motion.div 
-                                        initial={{ height: 0 }}
-                                        animate={{ height: `${Math.max(10, (d.count / Math.max(...chartData.map(c => c.count))) * 100)}%` }}
-                                        className={`w-full ${barColorClass} ${barHoverClass} transition-all duration-500 rounded-t-2xl relative shadow-lg group-hover:scale-x-105 group-hover:-translate-y-1 transform`}
-                                    >
-                                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100 bg-slate-900 dark:bg-white px-4 py-2 rounded-2xl text-white dark:text-black text-[11px] font-bold shadow-2xl whitespace-nowrap z-20">
-                                            {d.count} {type.toLowerCase()}
-                                        </div>
-                                    </motion.div>
-                                    <div className="mt-5 text-[9px] font-bold text-slate-400 dark:text-slate-500 text-center uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">
-                                        {d.date.split('/')[0]}/{d.date.split('/')[1]}
-                                    </div>
-                                </div>
-                            );
-                        })}
+                            {/* Area Fill */}
+                            <path 
+                                d={`M 0 180 ${chartData.map((d, i) => {
+                                    const x = (i / (chartData.length - 1)) * 100;
+                                    const y = 180 - (Math.max(5, (d.count / Math.max(...chartData.map(c => c.count))) * 160));
+                                    return `L ${x} ${y}`;
+                                }).join(' ')} L 100 180 Z`}
+                                fill={`url(#line-gradient-${color})`}
+                                className="transition-all duration-1000"
+                            />
+
+                            {/* Main Line */}
+                            <path 
+                                d={`M 0 ${180 - (Math.max(5, (chartData[0].count / Math.max(...chartData.map(c => c.count))) * 160))} ${chartData.map((d, i) => {
+                                    const x = (i / (chartData.length - 1)) * 100;
+                                    const y = 180 - (Math.max(5, (d.count / Math.max(...chartData.map(c => c.count))) * 160));
+                                    return `L ${x} ${y}`;
+                                }).join(' ')}`}
+                                fill="none"
+                                stroke={color === 'orange' ? '#f97316' : color === 'blue' ? '#3b82f6' : color === 'emerald' ? '#10b981' : '#6366f1'}
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+
+                            {/* Interaction Points */}
+                            {chartData.map((d, i) => {
+                                const x = (i / (chartData.length - 1)) * 100;
+                                const y = 180 - (Math.max(5, (d.count / Math.max(...chartData.map(c => c.count))) * 160));
+                                return (
+                                    <g key={i} className="group/point">
+                                        <circle 
+                                            cx={x} 
+                                            cy={y} 
+                                            r="3" 
+                                            fill={color === 'orange' ? '#f97316' : color === 'blue' ? '#3b82f6' : color === 'emerald' ? '#10b981' : '#6366f1'} 
+                                            className="opacity-0 group-hover/graph:opacity-100 transition-all duration-300"
+                                        />
+                                        <rect 
+                                            x={x - 2}
+                                            y="0"
+                                            width="4"
+                                            height="180"
+                                            fill="transparent"
+                                            className="cursor-pointer"
+                                        />
+                                        <foreignObject x={x > 80 ? x - 70 : x - 35} y={y - 40} width="70" height="35" className="pointer-events-none opacity-0 group-hover/point:opacity-100 transition-opacity">
+                                            <div className="bg-slate-900 dark:bg-white text-white dark:text-black py-1 px-1.5 rounded-lg text-[8px] font-bold text-center shadow-xl">
+                                                {d.count} {type.slice(0, 3)}
+                                            </div>
+                                        </foreignObject>
+                                    </g>
+                                );
+                            })}
+                        </svg>
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full gap-5 text-slate-400 p-12 bg-slate-50 dark:bg-white/[0.01] rounded-[30px] border border-dashed border-slate-200 dark:border-white/10">
@@ -733,16 +768,16 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
-                        className="space-y-10"
+                        className="space-y-6"
                     >
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {/* Performance Visualizer */}
-                            <div className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden relative">
-                                <h3 className="text-sm font-bold text-slate-900 dark:text-white tracking-wider mb-8 border-b border-slate-100 dark:border-white/5 pb-4 flex justify-between">
+                            <div className="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-xl overflow-hidden relative">
+                                <h3 className="text-[11px] font-bold text-slate-900 dark:text-white tracking-wider mb-6 border-b border-slate-100 dark:border-white/5 pb-3 flex justify-between uppercase">
                                     Popular Pages
-                                    <span className="text-[10px] font-semibold text-orange-500">Overview</span>
+                                    <span className="text-[9px] font-semibold text-orange-500 lowercase opacity-60">overview</span>
                                 </h3>
-                                <div className="space-y-6 max-h-[400px] overflow-y-auto no-scrollbar scroll-smooth pr-2">
+                                <div className="space-y-4 max-h-[300px] overflow-y-auto no-scrollbar scroll-smooth pr-2">
                                     {topPages.map((page: any, idx: number) => (
                                         <div key={idx} className="space-y-2">
                                             <div className="flex justify-between text-[10px] font-bold tracking-tight">
@@ -766,9 +801,9 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         </div>
 
                         {/* Full Stats Table */}
-                        <div className="glass-panel rounded-[40px] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden">
-                            <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
-                                <h3 className="text-sm font-bold text-slate-900 dark:text-white tracking-wider">Activity Log</h3>
+                        <div className="glass-panel rounded-[24px] border border-slate-200 dark:border-white/10 shadow-xl overflow-hidden">
+                            <div className="p-4 border-b border-slate-200 dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-white/[0.01]">
+                                <h3 className="text-[11px] font-bold text-slate-900 dark:text-white tracking-widest uppercase">Activity Log</h3>
                                 <div className="flex gap-4">
                                     <div className="flex items-center gap-2">
                                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -776,8 +811,8 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="h-[400px] overflow-y-auto no-scrollbar">
-                                <table className="w-full text-left">
+                            <div className="h-[300px] overflow-y-auto no-scrollbar">
+                                <table className="w-full text-left border-collapse">
                                     <thead className="sticky top-0 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md z-10 text-slate-500">
                                         <tr className="border-b border-slate-100 dark:border-white/5">
                                             <th className="px-8 py-4 text-[10px] font-bold tracking-wider">Activity</th>
@@ -1041,7 +1076,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: i * 0.05 }}
-                                    className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/10 shadow-2xl relative"
+                                    className="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-xl relative"
                                 >
                                     <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
                                         <div className="flex items-center gap-4">
