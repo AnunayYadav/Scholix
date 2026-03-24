@@ -441,6 +441,38 @@ class NexusServer {
     }
   }
 
+  static async getTimeSeriesStats(type: 'views' | 'visitors' | 'feedback' | 'reports'): Promise<any[]> {
+    const client = getSupabase();
+    if (!client) return [];
+
+    let table = '';
+    switch (type) {
+      case 'views': table = 'site_views'; break;
+      case 'visitors': table = 'site_visits'; break;
+      case 'feedback': table = 'feedback'; break;
+      case 'reports': table = 'question_reports'; break;
+    }
+
+    // Since we don't have a direct "group by day" RPC that is standard,
+    // we fetch the last 1000 records and group them in JS for the MVP graph.
+    // For a production app, we would use a Postgres View or RPC.
+    const { data, error } = await client
+      .from(table)
+      .select('created_at')
+      .order('created_at', { ascending: false })
+      .limit(1000);
+
+    if (error || !data) return [];
+
+    const groups: { [key: string]: number } = {};
+    data.forEach(item => {
+      const date = new Date(item.created_at).toLocaleDateString();
+      groups[date] = (groups[date] || 0) + 1;
+    });
+
+    return Object.entries(groups).map(([date, count]) => ({ date, count })).reverse();
+  }
+
   static async getDetailedStats(): Promise<{ 
     pageStats: any[], 
     eventStats: any[],
