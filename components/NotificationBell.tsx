@@ -158,7 +158,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                     <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                 </svg>
                 {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-orange-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-black animate-pulse">
+                    <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-orange-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-black animate-pulse">
                         {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                 )}
@@ -167,11 +167,11 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
             {isOpen && (
                 <div className={`absolute right-[-10px] sm:right-0 mt-3 w-[calc(100vw-32px)] sm:w-80 max-w-[340px] bg-white/90 dark:bg-[#0a0a0a]/90 border border-slate-200 dark:border-white/10 rounded-[24px] sm:rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-[60] animate-fade-in backdrop-blur-xl transition-all duration-300 ${isClosing ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
                     <div className="px-5 py-3 border-b border-slate-100 dark:border-white/5 mb-2 flex items-center justify-between">
-                        <h3 className="text-[12px] font-bold text-slate-800 dark:text-white tracking-wider">Updates</h3>
+                        <h3 className="text-[11px] font-bold text-slate-800 dark:text-white tracking-tight">Updates</h3>
                         {unreadCount > 0 && (
                             <button
                                 onClick={markAllAsRead}
-                                className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest hover:underline bg-transparent border-none p-0 cursor-pointer"
+                                className="text-[10px] font-bold text-orange-600 hover:underline bg-transparent border-none p-0 cursor-pointer"
                             >
                                 Clear All
                             </button>
@@ -184,8 +184,8 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                                 <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400 dark:text-white/10 mx-auto mb-4">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
                                 </div>
-                                <p className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest">No Notifications</p>
-                                <p className="text-[11px] sm:text-xs text-slate-400/60 mt-1 uppercase tracking-wider">You're all caught up</p>
+                                <p className="text-[10px] font-bold text-slate-400 tracking-tight">No notifications</p>
+                                <p className="text-[10px] text-slate-400/60 mt-1">You're all caught up</p>
                             </div>
                         ) : (
                             allNotifications.map((item) => {
@@ -213,12 +213,12 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                                         <div className="flex flex-col gap-1 min-w-0">
                                             <div className="flex justify-between items-start gap-2">
                                                 <div className="flex flex-col min-w-0">
-                                                    <p className="font-black text-slate-800 dark:text-white uppercase tracking-wider text-[11px] truncate">{item.title}</p>
+                                                    <p className="font-bold text-slate-800 dark:text-white tracking-tight text-[10px] truncate">{item.title}</p>
                                                 </div>
                                                 {isUnread && <div className="w-2 h-2 rounded-full bg-orange-600 shrink-0 mt-1" />}
                                             </div>
-                                            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{item.message}</p>
-                                            <p className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest mt-1">
+                                            <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{item.message}</p>
+                                            <p className="text-[10px] font-bold text-slate-400 mt-1 opacity-60">
                                                 {new Date(item.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
