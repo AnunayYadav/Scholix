@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import NexusServer from '../services/nexusServer';
 import { NexusNotification, UserProfile } from '../types';
 
@@ -15,6 +16,8 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [selectedNotification, setSelectedNotification] = useState<any | null>(null);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
     const handleClose = () => {
         setIsClosing(true);
@@ -129,10 +132,8 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
             setPersonalNotifications(prev => prev.map(n => n.id === item.id ? { ...n, read: true } : n));
         }
 
-        if (item.link) {
-            navigate(item.link);
-        }
-        handleClose();
+        setSelectedNotification(item);
+        setIsDetailModalOpen(true);
 
         // Refresh count
         const lastSeen = localStorage.getItem('nexus_last_announcement_seen');
@@ -163,9 +164,14 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                     </span>
                 )}
             </button>
-
-            {isOpen && (
-                <div className={`absolute right-[-10px] sm:right-0 mt-3 w-[calc(100vw-32px)] sm:w-80 max-w-[340px] bg-white/90 dark:bg-[#0a0a0a]/90 border border-slate-200 dark:border-white/10 rounded-[24px] sm:rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-[60] animate-fade-in backdrop-blur-xl transition-all duration-300 ${isClosing ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                        className={`absolute right-[-10px] sm:right-0 mt-3 w-[280px] sm:w-[300px] bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[28px] shadow-[0_32px_64px_rgba(0,0,0,0.15)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.6)] overflow-hidden py-3 z-[60] backdrop-blur-xl`}
+                    >
                     <div className="px-5 py-3 border-b border-slate-100 dark:border-white/5 mb-2 flex items-center justify-between">
                         <h3 className="text-[11px] font-bold text-slate-800 dark:text-white tracking-tight">Updates</h3>
                         {unreadCount > 0 && (
@@ -233,8 +239,87 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                             View All History
                         </button>
                     </div>
-                </div>
-            )}
+                </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Notification Detail Modal */}
+            <AnimatePresence>
+                {isDetailModalOpen && selectedNotification && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-0">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsDetailModalOpen(false)}
+                            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+                        />
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-white dark:bg-[#0c0c0c] w-full max-w-sm rounded-[40px] border border-slate-200 dark:border-white/10 shadow-3xl overflow-hidden relative z-10"
+                        >
+                            <div className="p-8">
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                                        selectedNotification.type === 'success' ? 'bg-green-500/10 text-green-500' :
+                                        selectedNotification.type === 'warning' ? 'bg-amber-500/10 text-amber-500' :
+                                        selectedNotification.type === 'error' ? 'bg-red-500/10 text-red-500' :
+                                        'bg-orange-500/10 text-orange-600'
+                                    }`}>
+                                        {selectedNotification.type === 'success' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M20 6L9 17l-5-5" /></svg>}
+                                        {selectedNotification.type === 'warning' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>}
+                                        {selectedNotification.type === 'error' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>}
+                                        {selectedNotification.type === 'info' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>}
+                                    </div>
+                                    <button 
+                                        onClick={() => setIsDetailModalOpen(false)}
+                                        className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 transition-colors border-none bg-transparent text-slate-400 group"
+                                    >
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 group-hover:rotate-90 transition-transform"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                    </button>
+                                </div>
+                                
+                                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight tracking-tight">
+                                    {selectedNotification.title}
+                                </h2>
+                                <p className="text-[10px] font-bold text-slate-400 mb-6 flex items-center gap-2">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    {new Date(selectedNotification.created_at).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                                
+                                <div className="bg-slate-50 dark:bg-white/5 rounded-[24px] p-6 mb-8 border border-slate-100 dark:border-white/5 max-h-[300px] overflow-y-auto no-scrollbar">
+                                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                                        {selectedNotification.message}
+                                    </p>
+                                </div>
+
+                                <div className="flex flex-col gap-3">
+                                    {selectedNotification.link && (
+                                        <button 
+                                            onClick={() => {
+                                                navigate(selectedNotification.link);
+                                                setIsDetailModalOpen(false);
+                                                handleClose();
+                                            }}
+                                            className="w-full py-4 bg-orange-600 dark:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none"
+                                        >
+                                            Access Resource
+                                        </button>
+                                    )}
+                                    <button 
+                                        onClick={() => setIsDetailModalOpen(false)}
+                                        className={`w-full py-4 text-slate-500 dark:text-slate-400 font-bold text-xs rounded-2xl active:scale-95 transition-all border-none ${selectedNotification.link ? 'bg-transparent' : 'bg-slate-100 dark:bg-white/5'}`}
+                                    >
+                                        Close Portal
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
