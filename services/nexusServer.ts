@@ -441,18 +441,43 @@ class NexusServer {
     }
   }
 
-  static async getDetailedStats(): Promise<{ pageStats: any[], eventStats: any[] }> {
+  static async getDetailedStats(): Promise<{ 
+    pageStats: any[], 
+    eventStats: any[],
+    summary: {
+      registered: number,
+      visitors: number,
+      totalViews: number,
+      pendingReports: number,
+      totalFeedback: number
+    }
+  }> {
     const client = getSupabase();
-    if (!client) return { pageStats: [], eventStats: [] };
+    if (!client) return { 
+      pageStats: [], 
+      eventStats: [], 
+      summary: { registered: 0, visitors: 0, totalViews: 0, pendingReports: 0, totalFeedback: 0 } 
+    };
 
-    const [pages, events] = await Promise.all([
+    const [pages, events, reg, vis, reports, feedback] = await Promise.all([
       client.from('page_stats').select('*').order('views', { ascending: false }),
-      client.from('event_stats').select('*').order('count', { ascending: false })
+      client.from('event_stats').select('*').order('count', { ascending: false }),
+      client.from('profiles').select('*', { count: 'exact', head: true }),
+      client.from('site_visits').select('*', { count: 'exact', head: true }),
+      client.from('question_reports').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      client.from('feedback').select('*', { count: 'exact', head: true })
     ]);
 
     return {
       pageStats: pages.data || [],
-      eventStats: events.data || []
+      eventStats: events.data || [],
+      summary: {
+        registered: reg.count || 0,
+        visitors: vis.count || 0,
+        totalViews: (pages.data || []).reduce((acc: number, curr: any) => acc + Number(curr.views), 0),
+        pendingReports: reports.count || 0,
+        totalFeedback: feedback.count || 0
+      }
     };
   }
 

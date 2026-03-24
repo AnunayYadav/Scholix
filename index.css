@@ -600,3 +600,33 @@ body.modal-open {
 .backface-hidden {
   backface-visibility: hidden;
 }
+
+.premium-input {
+  background-color: rgba(241, 245, 249, 1);
+  border: 1px solid rgba(226, 232, 240, 1);
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .premium-input {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.premium-input:focus {
+  background-color: white;
+  border-color: rgba(249, 115, 22, 0.5);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+}
+
+.dark .premium-input:focus {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.rounded-2.5xl {
+  border-radius: 1.25rem;
+}
+
+.shadow-3xl {
+  box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.5);
+}

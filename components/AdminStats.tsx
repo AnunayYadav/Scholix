@@ -1,10 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import NexusServer from '../services/nexusServer';
 import { UserProfile, QuizQuestion } from '../types';
 
 interface AdminStatsProps {
     userProfile: UserProfile | null;
 }
+
+// Sparkline component to simulate data trend
+const Sparkline: React.FC<{ color: string }> = ({ color }) => (
+    <svg className="w-16 h-8 opacity-50" viewBox="0 0 100 40">
+        <path
+            d="M0 35 Q 20 10, 40 30 T 80 5 T 100 25"
+            fill="none"
+            stroke={color}
+            strokeWidth="3"
+            strokeLinecap="round"
+        />
+    </svg>
+);
 
 const GlobalBroadcaster: React.FC = () => {
     const [title, setTitle] = useState('');
@@ -26,6 +40,7 @@ const GlobalBroadcaster: React.FC = () => {
             setTitle('');
             setMessage('');
             setLink('');
+            setTimeout(() => setStatus(null), 5000);
         } catch (err) {
             setStatus({ msg: 'BROADCAST FAILED', error: true });
         } finally {
@@ -34,43 +49,47 @@ const GlobalBroadcaster: React.FC = () => {
     };
 
     return (
-        <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 p-8 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 bg-orange-600/5 blur-3xl rounded-full -mr-10 -mt-10" />
-
-            <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-600/20">
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass-panel p-6 rounded-[32px] border border-slate-200 dark:border-white/10 relative overflow-hidden"
+        >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 blur-3xl -mr-16 -mt-16" />
+            
+            <div className="flex items-center gap-4 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
                 </div>
                 <div>
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-none">Global Broadcast</h3>
-                    <p className="text-[10px] font-semibold text-slate-500 mt-1">Send a notification to everyone</p>
+                    <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Strategic Broadcaster</h3>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest opacity-60">Global Audience Target</p>
                 </div>
             </div>
 
-            <form onSubmit={handleBroadcast} className="space-y-6 relative z-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="space-y-1.5">
-                        <label className="text-[10px] font-semibold text-slate-400 ml-3">Notification Title</label>
+            <form onSubmit={handleBroadcast} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-400 ml-1 uppercase tracking-tighter">Signal Title</label>
                         <input
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            placeholder="e.g., NEW CONTENT ALERT"
-                            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-3 text-sm font-bold focus:outline-none focus:border-orange-500/50 transition-all"
+                            placeholder="SYSTEM ALERT"
+                            className="premium-input w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-2.5 text-xs font-bold"
                             required
                         />
                     </div>
-                    <div className="space-y-1.5">
-                        <label className="text-[10px] font-semibold text-slate-400 ml-3">Type</label>
-                        <div className="flex gap-2 p-1 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10">
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-400 ml-1 uppercase tracking-tighter">Priority Level</label>
+                        <div className="flex gap-1 p-1 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10">
                             {(['info', 'success', 'warning', 'error'] as const).map((t) => (
                                 <button
                                     key={t}
                                     type="button"
                                     onClick={() => setType(t)}
-                                    className={`flex-1 py-2 rounded-xl text-[11px] sm:text-xs font-medium transition-all ${type === t
-                                        ? 'bg-orange-600 text-white shadow-lg'
-                                        : 'text-slate-400 hover:text-slate-600 dark:hover:text-white'
+                                    className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all ${type === t
+                                        ? 'bg-orange-600 text-white shadow-md'
+                                        : 'text-slate-400 hover:text-slate-600'
                                         }`}
                                 >
                                     {t}
@@ -80,51 +99,76 @@ const GlobalBroadcaster: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold text-slate-400 ml-3">Message Content</label>
+                <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 ml-1 uppercase tracking-tighter">Content Payload</label>
                     <textarea
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Detailed information for the user population..."
-                        className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[24px] px-5 py-4 text-sm font-medium focus:outline-none focus:border-orange-500/50 transition-all min-h-[100px] resize-none"
+                        placeholder="Establish message protocol..."
+                        className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[20px] px-4 py-3 text-xs font-medium min-h-[80px] resize-none focus:outline-none focus:border-orange-500/50"
                         required
                     />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
-                    <div className="md:col-span-2 space-y-1.5">
-                        <label className="text-[10px] font-semibold text-slate-400 ml-3">Target Link (Optional)</label>
-                        <input
-                            type="text"
-                            value={link}
-                            onChange={(e) => setLink(e.target.value)}
-                            placeholder="/library, /marketplace, etc."
-                            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-3 text-sm font-mono focus:outline-none focus:border-orange-500/50 transition-all"
-                        />
-                    </div>
+                <div className="flex flex-col sm:flex-row gap-3 items-center">
+                    <input
+                        type="text"
+                        value={link}
+                        onChange={(e) => setLink(e.target.value)}
+                        placeholder="Redirect path (e.g., /library)"
+                        className="flex-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-xs font-mono"
+                    />
                     <button
                         type="submit"
                         disabled={isSending || !title || !message}
-                        className="w-full bg-orange-600 text-white font-bold text-xs py-3 rounded-xl shadow-lg shadow-orange-600/20 hover:bg-orange-700 transition-all disabled:opacity-50"
+                        className="w-full sm:w-auto px-6 py-2.5 bg-orange-600 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-lg shadow-orange-600/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                     >
-                        {isSending ? 'Sending...' : 'Send Broadcast'}
+                        {isSending ? 'Transmitting...' : 'Initialize Blast'}
                     </button>
                 </div>
 
-                {status && (
-                    <div className={`mt-4 p-4 rounded-2xl text-[11px] sm:text-xs font-medium text-center border ${status.error ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                        }`}>
-                        {status.msg}
-                    </div>
-                )}
+                <AnimatePresence>
+                    {status && (
+                        <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className={`p-3 rounded-xl text-[9px] font-black uppercase tracking-widest text-center border ${
+                                status.error ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                            }`}
+                        >
+                            {status.msg}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </form>
-        </div>
+        </motion.div>
     );
 };
 
+const StatCard: React.FC<{ label: string; value: string | number; sub: string; icon: React.ReactNode; color: string }> = ({ label, value, sub, icon, color }) => (
+    <motion.div 
+        whileHover={{ y: -5 }}
+        className="glass-panel p-5 rounded-[28px] border border-slate-200 dark:border-white/10 relative group overflow-hidden"
+    >
+        <div className={`absolute top-0 right-0 w-24 h-24 bg-${color}-500/5 blur-3xl -mr-12 -mt-12`} />
+        <div className="flex items-center justify-between mb-3">
+            <div className={`w-8 h-8 rounded-lg bg-${color}-500/10 flex items-center justify-center text-${color}-500`}>
+                {icon}
+            </div>
+            <Sparkline color={color === 'orange' ? '#f97316' : color === 'blue' ? '#3b82f6' : color === 'emerald' ? '#10b981' : '#6366f1'} />
+        </div>
+        <div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">{label}</p>
+            <h4 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{value}</h4>
+            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1 opacity-70">{sub}</p>
+        </div>
+    </motion.div>
+);
+
 const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
-    const [activeTab, setActiveTab] = useState<'stats' | 'reports' | 'questions' | 'feedback'>('stats');
-    const [stats, setStats] = useState<{ pageStats: any[], eventStats: any[] } | null>(null);
+    const [activeTab, setActiveTab] = useState<'monitor' | 'reports' | 'constructor' | 'inbound'>('monitor');
+    const [data, setData] = useState<any>(null);
     const [reports, setReports] = useState<any[]>([]);
     const [feedback, setFeedback] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -146,32 +190,31 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
 
     const [isSaving, setIsSaving] = useState(false);
 
+    const loadCoreData = async () => {
+        try {
+            const stats = await NexusServer.getDetailedStats();
+            setData(stats);
+        } catch (err) {
+            console.error("Dashboard Sync Error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const loadStats = async () => {
-            try {
-                const data = await NexusServer.getDetailedStats();
-                setStats(data);
-            } catch (err) {
-                console.error("Failed to load stats:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadStats();
+        loadCoreData();
     }, []);
 
     useEffect(() => {
         if (activeTab === 'reports') loadReports();
-        if (activeTab === 'feedback') loadFeedback();
+        if (activeTab === 'inbound') loadFeedback();
     }, [activeTab]);
 
     const loadReports = async () => {
         setLoading(true);
         try {
-            const data = await NexusServer.fetchQuestionReports();
-            setReports(data);
-        } catch (err) {
-            console.error("Failed to load reports:", err);
+            const r = await NexusServer.fetchQuestionReports();
+            setReports(r);
         } finally {
             setLoading(false);
         }
@@ -180,10 +223,8 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
     const loadFeedback = async () => {
         setLoading(true);
         try {
-            const data = await NexusServer.fetchFeedback();
-            setFeedback(data);
-        } catch (err) {
-            console.error("Failed to load feedback:", err);
+            const f = await NexusServer.fetchFeedback();
+            setFeedback(f);
         } finally {
             setLoading(false);
         }
@@ -195,10 +236,8 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
         try {
             if (newQuestion.id) {
                 await NexusServer.updateQuestion(newQuestion as any);
-                alert("QUESTION UPDATED IN BANK");
             } else {
                 await NexusServer.createQuestion(newQuestion);
-                alert("NEW QUESTION ADDED TO BANK");
             }
             setNewQuestion({
                 id: undefined,
@@ -212,9 +251,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                 topic: '',
                 explanation: ''
             });
-        } catch (err) {
-            console.error("Failed to manage question:", err);
-            alert("Error: " + (err as any).message);
+            alert("MATRIX UPDATED SUCCESSFULLY");
         } finally {
             setIsSaving(false);
         }
@@ -225,8 +262,6 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
         try {
             await NexusServer.updateReportStatus(reportId, status);
             setReports(prev => prev.map(r => r.id === reportId ? { ...r, status } : r));
-        } catch (err) {
-            console.error("Failed to update status:", err);
         } finally {
             setActionLoading(null);
         }
@@ -246,41 +281,52 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
             topic: q.topic || '',
             explanation: q.explanation || ''
         } as any);
-        setActiveTab('questions');
+        setActiveTab('constructor');
     };
+
+    const topPages = useMemo(() => {
+        if (!data?.pageStats) return [];
+        return data.pageStats.slice(0, 5);
+    }, [data]);
 
     if (!userProfile?.is_admin) {
         return (
-            <div className="flex items-center justify-center h-full">
-                <div className="text-center p-8 bg-white/5 backdrop-blur-xl rounded-[32px] border border-white/10">
-                    <h2 className="text-2xl font-black text-red-500 mb-4">ACCESS DENIED</h2>
-                    <p className="text-slate-400">This terminal is restricted to Nexus Administrators only.</p>
+            <div className="flex items-center justify-center h-[70vh]">
+                <div className="text-center p-12 bg-white/5 backdrop-blur-2xl rounded-[40px] border border-white/10 max-w-md">
+                    <div className="w-16 h-16 bg-red-500/20 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-8 h-8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                    </div>
+                    <h2 className="text-2xl font-black text-white mb-3">ACCESS RESTRICTED</h2>
+                    <p className="text-slate-400 font-medium leading-relaxed">Administrator level authentication required to access the Nexus Command Terminal.</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-8 pb-20">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="max-w-6xl mx-auto space-y-10 pb-32 pt-6">
+            {/* Command Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Nexus Control Center</h1>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Manage platform health and data bank.</p>
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em]">System Online • v1.3.0</p>
+                    </div>
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">Command Center</h1>
                 </div>
-                
-                {/* Custom Tabs */}
-                <div className="flex gap-1.5 p-1 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10 shrink-0">
+
+                <div className="flex p-1.5 bg-slate-100 dark:bg-white/5 rounded-[20px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-inner">
                     {[
-                        { id: 'stats', label: 'Monitor' },
+                        { id: 'monitor', label: 'Monitor' },
                         { id: 'reports', label: 'Reports' },
-                        { id: 'questions', label: 'Constructor' },
-                        { id: 'feedback', label: 'Inbound' }
+                        { id: 'constructor', label: 'Constructor' },
+                        { id: 'inbound', label: 'Inbound' }
                     ].map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${activeTab === tab.id
-                                ? 'bg-orange-600 text-white shadow-md'
+                            className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id
+                                ? 'bg-orange-600 text-white shadow-xl shadow-orange-600/20'
                                 : 'text-slate-400 hover:text-slate-600 dark:hover:text-white'
                                 }`}
                         >
@@ -290,143 +336,115 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                 </div>
             </div>
 
-            {loading ? (
-                <div className="text-center py-20">
-                  <div className="inline-block w-8 h-8 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin mb-4" />
-                  <p className="text-xs font-semibold text-slate-400">Syncing with Nexus brain...</p>
-                </div>
-            ) : (
-                <>
-                    {activeTab === 'stats' && (
-                        <>
+            {/* High Level Metrics Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <StatCard 
+                    label="Reach" 
+                    value={data?.summary?.totalViews.toLocaleString() || '0'} 
+                    sub="Total Page Views" 
+                    color="orange"
+                    icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>}
+                />
+                <StatCard 
+                    label="Audience" 
+                    value={data?.summary?.visitors.toLocaleString() || '0'} 
+                    sub="Unique Visitors" 
+                    color="blue"
+                    icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>}
+                />
+                <StatCard 
+                    label="Bank Security" 
+                    value={data?.summary?.pendingReports || '0'} 
+                    sub="Active Reports" 
+                    color="emerald"
+                    icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>}
+                />
+                <StatCard 
+                    label="Feedback" 
+                    value={data?.summary?.totalFeedback || '0'} 
+                    sub="Inbound Tickets" 
+                    color="indigo"
+                    icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>}
+                />
+            </div>
+
+            <AnimatePresence mode="wait">
+                {activeTab === 'monitor' && (
+                    <motion.div 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        className="space-y-10"
+                    >
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {/* Performance Visualizer */}
+                            <div className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden relative">
+                                <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-8 border-b border-slate-100 dark:border-white/5 pb-4 flex justify-between">
+                                    Path Distribution
+                                    <span className="text-[10px] text-orange-500">Top 5 Segments</span>
+                                </h3>
+                                
+                                <div className="space-y-6">
+                                    {topPages.map((page: any, idx: number) => (
+                                        <div key={idx} className="space-y-2">
+                                            <div className="flex justify-between text-[10px] font-black uppercase tracking-tighter">
+                                                <span className="text-slate-500 font-mono">{page.path}</span>
+                                                <span className="text-slate-900 dark:text-white">{page.views.toLocaleString()}</span>
+                                            </div>
+                                            <div className="h-2 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                                                <motion.div 
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${(page.views / (topPages[0]?.views || 1)) * 100}%` }}
+                                                    transition={{ duration: 1, delay: idx * 0.1 }}
+                                                    className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full shadow-[0_0_12px_rgba(249,115,22,0.3)]"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
                             <GlobalBroadcaster />
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                {/* Page Views Table */}
-                                <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[24px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-xl">
-                                    <div className="p-4 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
-                                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">Page Performance</h3>
-                                        <span className="text-[10px] font-bold px-2.5 py-0.5 bg-orange-500/10 text-orange-500 rounded-full border border-orange-500/10">Views</span>
-                                    </div>
-                                    <div className="h-[320px] overflow-y-auto no-scrollbar">
-                                        <table className="w-full text-left border-collapse">
-                                            <thead>
-                                                <tr className="bg-slate-50/50 dark:bg-white/[0.01]">
-                                                    <th className="px-6 py-4 text-[11px] sm:text-xs font-medium text-slate-400">Path</th>
-                                                    <th className="px-6 py-4 text-[11px] sm:text-xs font-medium text-slate-400">Visitors</th>
-                                                    <th className="px-6 py-4 text-[11px] sm:text-xs font-medium text-slate-400 text-right">Page Views</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                                                {stats?.pageStats.map((stat) => (
-                                                    <tr key={stat.path} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
-                                                        <td className="px-6 py-4 font-mono text-xs text-orange-600 dark:text-orange-400">{stat.path}</td>
-                                                        <td className="px-6 py-4 font-bold text-slate-600 dark:text-slate-300">{stat.visitors.toLocaleString()}</td>
-                                                        <td className="px-6 py-4 font-black text-slate-900 dark:text-white text-right">{stat.views.toLocaleString()}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
+                        </div>
 
-                                {/* Event Stats Table */}
-                                <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[24px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-xl">
-                                    <div className="p-4 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
-                                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">Interaction Pulse</h3>
-                                        <span className="text-[10px] font-bold px-2.5 py-0.5 bg-red-500/10 text-red-500 rounded-full border border-red-500/10">Live</span>
-                                    </div>
-                                    <div className="h-[320px] overflow-y-auto no-scrollbar">
-                                        <table className="w-full text-left border-collapse">
-                                            <thead>
-                                                <tr className="bg-slate-50/50 dark:bg-white/[0.01]">
-                                                    <th className="px-6 py-4 text-[11px] sm:text-xs font-medium text-slate-400">Event Name</th>
-                                                    <th className="px-6 py-4 text-[11px] sm:text-xs font-medium text-slate-400">Count</th>
-                                                    <th className="px-6 py-4 text-[11px] sm:text-xs font-medium text-slate-400 text-right">Triggered</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                                                {stats?.eventStats.map((stat) => (
-                                                    <tr key={stat.event_name} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
-                                                        <td className="px-6 py-4 font-black text-slate-900 dark:text-white capitalize">{stat.event_name.replace(/_/g, ' ')}</td>
-                                                        <td className="px-6 py-4 font-black text-2xl text-orange-600">{stat.count.toLocaleString()}</td>
-                                                        <td className="px-6 py-4 text-[11px] text-slate-500 dark:text-slate-400 text-right">
-                                                            {new Date(stat.last_triggered).toLocaleDateString()}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                        {/* Full Stats Table */}
+                        <div className="glass-panel rounded-[40px] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden">
+                            <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
+                                <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Interaction Pulse</h3>
+                                <div className="flex gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-orange-500" />
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Active</span>
                                     </div>
                                 </div>
                             </div>
-                        </>
-                    )}
-
-                    {activeTab === 'reports' && (
-                        <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl">
-                            <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between bg-orange-500/5">
-                                <div>
-                                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">Question Reports</h3>
-                                    <p className="text-[10px] font-medium text-slate-400 mt-1">Reviewing user flags and issue tickets</p>
-                                </div>
-                                <button onClick={loadReports} className="p-2 rounded-xl bg-orange-600/10 text-orange-600 hover:bg-orange-600 hover:text-white transition-all">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                                </button>
-                            </div>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="bg-slate-50/50 dark:bg-white/[0.01]">
-                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400">Reporter</th>
-                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400">Issue</th>
-                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400">Context</th>
-                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400">Status</th>
-                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 text-right">Actions</th>
+                            <div className="h-[400px] overflow-y-auto no-scrollbar">
+                                <table className="w-full text-left">
+                                    <thead className="sticky top-0 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md z-10">
+                                        <tr>
+                                            <th className="px-8 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Action Segment</th>
+                                            <th className="px-8 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Aggregate Count</th>
+                                            <th className="px-8 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Last Trigger</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                                        {reports.map((report) => (
-                                            <tr key={report.id} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
-                                                <td className="px-6 py-4">
-                                                    <p className="text-sm font-bold text-slate-900 dark:text-white">{report.reporter?.username || 'Guest'}</p>
-                                                    <p className="text-[9px] text-slate-400 font-mono mt-0.5">{new Date(report.created_at).toLocaleString()}</p>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className="inline-block px-3 py-1 rounded-full bg-red-500/10 text-red-500 text-[10px] font-bold border border-red-500/20 mb-2">
-                                                        {report.reason}
-                                                    </span>
-                                                    <p className="text-xs text-slate-500 font-medium line-clamp-2">{report.question?.question}</p>
-                                                </td>
-                                                <td className="px-6 py-4 font-mono text-[10px] text-orange-600 dark:text-orange-400 uppercase">
-                                                    {report.subject || 'GENERAL'} <br />
-                                                    UNIT {report.question?.unit || report.question?.topic}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`px-2 py-1 rounded-lg text-[9px] font-bold ${report.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-500/10 text-orange-500'
-                                                        }`}>
-                                                        {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
+                                        {data?.eventStats.map((event: any, idx: number) => (
+                                            <tr key={idx} className="group hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                                                <td className="px-8 py-5">
+                                                    <span className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-orange-600 transition-colors">
+                                                        {event.event_name.replace(/_/g, ' ')}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="flex gap-2 justify-end">
-                                                        {report.status === 'pending' && (
-                                                            <>
-                                                                <button
-                                                                    onClick={() => editReportedQuestion(report)}
-                                                                    className="px-3 py-1.5 rounded-lg bg-orange-600 text-white text-[10px] font-bold hover:scale-105 transition-all shadow-lg shadow-orange-600/20"
-                                                                >
-                                                                    Fix/Edit
-                                                                </button>
-                                                                <button
-                                                                    disabled={actionLoading === report.id}
-                                                                    onClick={() => resolveReport(report.id, 'resolved')}
-                                                                    className="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 text-[10px] font-bold hover:bg-emerald-500 hover:text-white transition-all border border-emerald-500/20"
-                                                                >
-                                                                    Resolve
-                                                                </button>
-                                                            </>
-                                                        )}
+                                                <td className="px-8 py-5">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-lg font-black text-slate-900 dark:text-white">{event.count.toLocaleString()}</span>
+                                                        <div className="h-1 w-12 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-orange-500" style={{ width: `${Math.min((event.count / 1000) * 100, 100)}%` }} />
+                                                        </div>
                                                     </div>
+                                                </td>
+                                                <td className="px-8 py-5 text-right font-mono text-[10px] text-slate-500 uppercase">
+                                                    {new Date(event.last_triggered).toLocaleDateString()} at {new Date(event.last_triggered).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </td>
                                             </tr>
                                         ))}
@@ -434,199 +452,298 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 </table>
                             </div>
                         </div>
-                    )}
+                    </motion.div>
+                )}
 
-                    {activeTab === 'feedback' && (
-                        <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl">
-                             <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
-                                <h3 className="font-bold text-sm text-slate-900 dark:text-white">User Feedback</h3>
-                                <button onClick={loadFeedback} className="p-2 rounded-xl bg-orange-600/10 text-orange-600 hover:bg-orange-600 hover:text-white transition-all">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                                </button>
-                            </div>
-                            <div className="divide-y divide-slate-100 dark:divide-white/5">
-                                {feedback.map(f => (
-                                    <div key={f.id} className="p-6 hover:bg-slate-50 dark:hover:bg-white/[0.01] transition-all">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-white/10 flex items-center justify-center font-bold text-[10px]">
-                                                    {f.user?.username?.[0].toUpperCase() || 'G'}
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs font-bold text-slate-900 dark:text-white">{f.user?.username || 'Guest User'}</p>
-                                                    <p className="text-[10px] font-mono text-slate-400">{f.user_email || 'No email associated'}</p>
-                                                </div>
-                                            </div>
-                                            <span className="text-[10px] font-medium text-slate-400">{new Date(f.created_at).toLocaleString()}</span>
+                {activeTab === 'reports' && (
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                    >
+                        {reports.map((report, idx) => (
+                            <motion.div 
+                                key={report.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.05 }}
+                                className="glass-panel p-6 rounded-[32px] border border-slate-200 dark:border-white/10 relative group"
+                            >
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center font-black text-xs">
+                                            {report.reporter?.username?.[0] || '?'}
                                         </div>
-                                        <div className="ml-11 bg-slate-100 dark:bg-white/5 p-4 rounded-2xl border border-slate-200 dark:border-white/10">
-                                            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">{f.text}</p>
+                                        <div>
+                                            <h4 className="text-xs font-black text-slate-800 dark:text-white uppercase">{report.reporter?.username || 'Guest'}</h4>
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{new Date(report.created_at).toLocaleDateString()}</p>
                                         </div>
                                     </div>
-                                ))}
-                                {feedback.length === 0 && <p className="p-10 text-center text-slate-500 italic">No feedback received yet.</p>}
-                            </div>
+                                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                                        report.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'
+                                    }`}>
+                                        {report.status}
+                                    </span>
+                                </div>
+
+                                <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 mb-6">
+                                    <p className="text-[10px] font-black text-orange-600 uppercase tracking-wider mb-2">Claim: {report.reason}</p>
+                                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">"{report.question?.question}"</p>
+                                </div>
+
+                                <div className="flex gap-2">
+                                    {report.status === 'pending' && (
+                                        <>
+                                            <button 
+                                                onClick={() => editReportedQuestion(report)}
+                                                className="flex-1 py-3 rounded-xl bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] transition-all shadow-lg shadow-orange-600/20"
+                                            >
+                                                Fix Entry
+                                            </button>
+                                            <button 
+                                                disabled={actionLoading === report.id}
+                                                onClick={() => resolveReport(report.id, 'resolved')}
+                                                className="px-6 py-3 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-black uppercase hover:bg-emerald-500 hover:text-white transition-all"
+                                            >
+                                                Dismiss
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                )}
+
+                {activeTab === 'constructor' && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+                    >
+                        <div className="lg:col-span-2 space-y-6">
+                             <form onSubmit={handleCreateQuestion} className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/10 shadow-2xl space-y-6">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-black flex items-center justify-center shadow-2xl">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Question Architect</h3>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{newQuestion.id ? `Redefining Entity: ${newQuestion.id}` : 'Designing New Knowledge Point'}</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Subject Code (CSE121)" 
+                                        className="premium-input bg-slate-100 dark:bg-white/5 px-5 py-3 rounded-2xl text-xs font-black uppercase"
+                                        value={newQuestion.subject}
+                                        onChange={e => setNewQuestion({...newQuestion, subject: e.target.value.toUpperCase()})}
+                                        required
+                                    />
+                                    <input 
+                                        type="text" 
+                                        placeholder="Unit ID (1-6)" 
+                                        className="premium-input bg-slate-100 dark:bg-white/5 px-5 py-3 rounded-2xl text-xs font-black"
+                                        value={newQuestion.unit}
+                                        onChange={e => setNewQuestion({...newQuestion, unit: e.target.value})}
+                                        required
+                                    />
+                                </div>
+
+                                <textarea 
+                                    placeholder="Matrix Content Requirement..." 
+                                    className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[30px] px-6 py-5 text-sm font-medium h-32 focus:outline-none focus:border-orange-500/50 resize-none"
+                                    value={newQuestion.question}
+                                    onChange={e => setNewQuestion({...newQuestion, question: e.target.value})}
+                                    required
+                                />
+
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Response Vectors (Mark Correct Variant)</label>
+                                    {newQuestion.options.map((opt, idx) => (
+                                        <div key={idx} className="flex gap-4 items-center group">
+                                            <input 
+                                                type="radio" 
+                                                name="correct-ans" 
+                                                checked={newQuestion.correctAnswer === idx}
+                                                onChange={() => setNewQuestion({...newQuestion, correctAnswer: idx})}
+                                                className="w-5 h-5 accent-orange-500 cursor-pointer"
+                                            />
+                                            <input 
+                                                type="text" 
+                                                placeholder={`Variant ${idx + 1}`} 
+                                                className="flex-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-3 text-xs font-bold transition-all group-hover:border-slate-400 dark:group-hover:border-white/20"
+                                                value={opt}
+                                                onChange={e => {
+                                                    const newOpts = [...newQuestion.options];
+                                                    newOpts[idx] = e.target.value;
+                                                    setNewQuestion({...newQuestion, options: newOpts});
+                                                }}
+                                                required
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <button 
+                                    type="submit" 
+                                    disabled={isSaving}
+                                    className="w-full bg-slate-950 dark:bg-white text-white dark:text-black font-black text-xs py-4 rounded-2.5xl uppercase tracking-[0.3em] shadow-2xl shadow-black/20 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50"
+                                >
+                                    {isSaving ? 'Compiling...' : 'Commit to Database'}
+                                </button>
+                             </form>
                         </div>
-                    )}
 
-                    {activeTab === 'questions' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            <div className="lg:col-span-2">
-                                <form onSubmit={handleCreateQuestion} className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 p-8 shadow-2xl space-y-6">
-                                        <div className="flex items-center gap-4 mb-4">
-                                            <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center text-white shadow-lg">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg>
-                                            </div>
+                        <div className="space-y-6">
+                            <div className="bg-gradient-to-br from-orange-500 to-orange-700 p-8 rounded-[40px] text-white shadow-2xl relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 blur-3xl rounded-full -mr-16 -mt-16" />
+                                <h4 className="text-sm font-black uppercase tracking-widest mb-6 border-b border-white/20 pb-4">Standard Protocol</h4>
+                                <ul className="space-y-5">
+                                    {[
+                                        { t: 'INDEXING', d: 'Correct answer vector is 0-indexed.' },
+                                        { t: 'SUBJECTS', d: 'Use uppercase codes (e.g. CSE121).' },
+                                        { t: 'MARKDOWN', d: 'Supports KaTeX and Rich Formatting.' },
+                                        { t: 'UNIQUENESS', d: 'ID collision will trigger an update.' }
+                                    ].map((step, i) => (
+                                        <li key={i} className="flex gap-4">
+                                            <div className="w-5 h-5 rounded bg-white/20 flex items-center justify-center text-[10px] font-black italic">{i+1}</div>
                                             <div>
-                                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                                                    {newQuestion.id ? 'Edit Question' : 'Add New Question'}
-                                                </h3>
-                                                {newQuestion.id && <p className="text-[10px] font-medium text-orange-600">ID: {newQuestion.id}</p>}
+                                                <p className="text-[10px] font-black uppercase tracking-tighter leading-tight">{step.t}</p>
+                                                <p className="text-[9px] font-bold text-orange-100/70">{step.d}</p>
                                             </div>
-                                        </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
 
-                                    <div className="space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <input 
-                                                type="text" 
-                                                placeholder="Subject (e.g., CSE121)" 
-                                                className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm font-bold w-full"
-                                                value={newQuestion.subject}
-                                                onChange={e => setNewQuestion({...newQuestion, subject: e.target.value})}
-                                                required
-                                            />
-                                            <input 
-                                                type="text" 
-                                                placeholder="Unit (e.g., 1)" 
-                                                className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm font-bold w-full"
-                                                value={newQuestion.unit}
-                                                onChange={e => setNewQuestion({...newQuestion, unit: e.target.value})}
-                                                required
-                                            />
-                                        </div>
-                                        
-                                        <textarea 
-                                            placeholder="Question Content..." 
-                                            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 text-sm font-medium h-24 resize-none"
-                                            value={newQuestion.question}
-                                            onChange={e => setNewQuestion({...newQuestion, question: e.target.value})}
-                                            required
-                                        />
-
-                                        <div className="space-y-3">
-                                            <p className="text-[10px] font-bold text-slate-400 ml-2">Options (Select correct one)</p>
-                                            {newQuestion.options.map((opt, idx) => (
-                                                <div key={idx} className="flex gap-3 items-center">
-                                                    <input 
-                                                        type="radio" 
-                                                        name="correct-ans" 
-                                                        checked={newQuestion.correctAnswer === idx}
-                                                        onChange={() => setNewQuestion({...newQuestion, correctAnswer: idx})}
-                                                        className="w-4 h-4 accent-orange-600"
-                                                    />
-                                                    <input 
-                                                        type="text" 
-                                                        placeholder={`Option ${idx + 1}`} 
-                                                        className="flex-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm font-medium"
-                                                        value={opt}
-                                                        onChange={e => {
-                                                            const newOpts = [...newQuestion.options];
-                                                            newOpts[idx] = e.target.value;
-                                                            setNewQuestion({...newQuestion, options: newOpts});
-                                                        }}
-                                                        required
-                                                    />
-                                                </div>
+                            <div className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/10 shadow-xl">
+                                <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6">Metadata Layer</h4>
+                                <div className="space-y-5">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Target Complexity</label>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {['easy', 'medium', 'hard'].map(level => (
+                                                <button 
+                                                    key={level}
+                                                    type="button"
+                                                    onClick={() => setNewQuestion({...newQuestion, difficulty: level})}
+                                                    className={`py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${
+                                                        newQuestion.difficulty === level 
+                                                        ? 'bg-orange-600 text-white border-orange-600' 
+                                                        : 'bg-slate-100 dark:bg-white/5 text-slate-400 border-transparent hover:border-slate-300'
+                                                    }`}
+                                                >
+                                                    {level}
+                                                </button>
                                             ))}
                                         </div>
-
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Topic Taxonomy</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="e.g. Heapsort, Normalization" 
+                                            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-3 text-xs font-bold"
+                                            value={newQuestion.topic}
+                                            onChange={e => setNewQuestion({...newQuestion, topic: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Explanation Vector</label>
                                         <textarea 
-                                            placeholder="Explanation (Optional)" 
-                                            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-3 text-[11px] font-medium h-20 resize-none opacity-80"
+                                            placeholder="Markdown-enabled logic dump..." 
+                                            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-3 text-[10px] font-medium h-24 focus:outline-none focus:border-orange-500/50"
                                             value={newQuestion.explanation}
                                             onChange={e => setNewQuestion({...newQuestion, explanation: e.target.value})}
                                         />
-
-                                        <button 
-                                            type="submit" 
-                                            disabled={isSaving}
-                                            className="w-full bg-slate-900 dark:bg-white text-white dark:text-black font-bold text-xs py-3.5 rounded-xl shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
-                                        >
-                                            {isSaving ? 'Saving...' : 'Save to Database'}
-                                        </button>
                                     </div>
-                                </form>
-                            </div>
-                            
-                            <div className="space-y-6">
-                                <div className="bg-orange-600 p-8 rounded-[32px] text-white shadow-2xl relative overflow-hidden">
-                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="absolute -bottom-10 -right-10 w-48 h-48 opacity-20"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
-                                     <h4 className="text-lg font-bold relative z-10">Guidelines</h4>
-                                     <ul className="mt-4 space-y-4 text-[11px] font-medium text-orange-100 relative z-10">
-                                         <li className="flex gap-2"><span>×</span> Correct indexing is 0-based in system.</li>
-                                         <li className="flex gap-2"><span>×</span> Subject codes must be exact match.</li>
-                                         <li className="flex gap-2"><span>×</span> Explanations support Markdown formatting.</li>
-                                     </ul>
-                                </div>
-                                <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[24px] border border-slate-200 dark:border-white/10 p-6 shadow-xl">
-                                      <h4 className="text-base font-bold text-slate-900 dark:text-white mb-4">Metadata</h4>
-                                      <div className="space-y-4">
-                                          <div className="space-y-1.5">
-                                              <label className="text-[10px] font-bold text-slate-400">Difficulty</label>
-                                             <select 
-                                                value={newQuestion.difficulty}
-                                                onChange={e => setNewQuestion({...newQuestion, difficulty: e.target.value})}
-                                                className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-bold"
-                                             >
-                                                 <option value="easy">Easy</option>
-                                                 <option value="medium">Medium</option>
-                                                 <option value="hard">Hard</option>
-                                             </select>
-                                         </div>
-                                          <div className="space-y-1.5">
-                                              <label className="text-[10px] font-bold text-slate-400">Category Tag</label>
-                                              <input 
-                                                 type="text" 
-                                                 placeholder="e.g., Recursion, SQL" 
-                                                 className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-semibold"
-                                                value={newQuestion.topic}
-                                                onChange={e => setNewQuestion({...newQuestion, topic: e.target.value})}
-                                            />
-                                         </div>
-                                     </div>
                                 </div>
                             </div>
                         </div>
-                    )}
-                </>
-            )}
+                    </motion.div>
+                )}
 
-            {activeTab === 'stats' && (
-                <div className="bg-gradient-to-br from-slate-900 to-black p-8 rounded-[40px] border border-white/5 shadow-2xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-12 bg-orange-600/10 blur-[100px] rounded-full -mr-20 -mt-20 group-hover:bg-orange-600/20 transition-all duration-700" />
-                    <div className="relative z-10">
-                        <h3 className="text-lg font-bold text-white mb-2">System Health</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
-                            <div>
-                                <p className="text-[10px] font-semibold text-slate-500 mb-1">Total Views</p>
-                                <p className="text-2xl font-bold text-white">{stats?.pageStats.reduce((acc, curr) => acc + Number(curr.views), 0).toLocaleString()}</p>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-semibold text-slate-500 mb-1">Visitors</p>
-                                <p className="text-2xl font-bold text-white">{stats?.pageStats.reduce((acc, curr) => acc + Number(curr.visitors), 0).toLocaleString()}</p>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-semibold text-slate-500 mb-1">Events</p>
-                                <p className="text-2xl font-bold text-white">{stats?.eventStats.length || 0}</p>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-semibold text-slate-500 mb-1">Status</p>
-                                <p className="text-2xl font-bold text-emerald-500">Optimal</p>
-                            </div>
+                {activeTab === 'inbound' && (
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="space-y-6"
+                    >
+                        <div className="flex items-center justify-between px-4">
+                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Communication Stream</h3>
+                            <button onClick={loadFeedback} className="text-[10px] font-black text-orange-600 uppercase hover:underline">Refresh Feed</button>
+                        </div>
+                        {feedback.map((f, i) => (
+                            <motion.div 
+                                key={f.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: i * 0.05 }}
+                                className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/10 shadow-2xl relative"
+                            >
+                                <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-sm shadow-xl shadow-indigo-500/20">
+                                            {f.user?.username?.[0].toUpperCase() || 'G'}
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">{f.user?.username || 'Guest Identity'}</h4>
+                                            <p className="text-[10px] font-mono text-slate-400">{f.user_email || 'SECURED_ORIGIN'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{new Date(f.created_at).toLocaleDateString()}</p>
+                                        <p className="text-[9px] font-bold text-slate-400">{new Date(f.created_at).toLocaleTimeString()}</p>
+                                    </div>
+                                </div>
+                                <div className="bg-slate-100 dark:bg-white/5 p-6 rounded-[30px] border border-slate-200 dark:border-white/10">
+                                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium italic">"{f.text}"</p>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Health Overlay */}
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-slate-900 dark:bg-[#0a0a0a] p-10 rounded-[50px] border border-white/5 shadow-3xl text-white relative overflow-hidden group"
+            >
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-600/10 blur-[150px] rounded-full -mr-64 -mt-64 group-hover:bg-orange-600/20 transition-all duration-1000" />
+                <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
+                    <div className="md:col-span-4">
+                        <h3 className="text-2xl font-black tracking-tighter mb-2">Matrix Health</h3>
+                        <p className="text-xs text-slate-500 font-bold uppercase tracking-[0.2em]">Operational Status Optimization</p>
+                        <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/10 inline-flex items-center gap-3">
+                            <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]" />
+                            <span className="text-xs font-black uppercase tracking-widest text-emerald-500">Peak Performance</span>
+                        </div>
+                    </div>
+                    <div className="md:col-span-8 grid grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Raw Views</p>
+                            <p className="text-3xl font-black">{data?.summary?.totalViews.toLocaleString() || '0'}</p>
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Verto Count</p>
+                            <p className="text-3xl font-black">{data?.summary?.registered.toLocaleString() || '0'}</p>
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Sync Points</p>
+                            <p className="text-3xl font-black">{data?.eventStats.length || '0'}</p>
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Latency</p>
+                            <p className="text-3xl font-black text-emerald-500">12ms</p>
                         </div>
                     </div>
                 </div>
-            )}
+            </motion.div>
         </div>
     );
 };
