@@ -245,7 +245,7 @@ const TodaysSchedule: React.FC = () => {
                     <p className="text-[9px] md:text-xs font-semibold text-white/70 mt-0.5 truncate uppercase tracking-wider">{slot.room} • {slot.type}</p>
                   </div>
 
-                  <div className={`shrink-0 px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[7px] md:text-[10px] font-black uppercase tracking-widest backdrop-blur-md flex items-center gap-1 shadow-sm ${isGoingOn ? 'bg-white text-orange-600' : 'bg-black/20 text-white'}`}>
+                  <div className={`shrink-0 px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[7px] md:text-[10px] font-bold tracking-tight backdrop-blur-md flex items-center gap-1 shadow-sm ${isGoingOn ? 'bg-white text-orange-600' : 'bg-black/20 text-white'}`}>
                     {isGoingOn && (
                       <span className="flex h-1 w-1 md:h-1.5 md:w-1.5 relative">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
@@ -291,7 +291,7 @@ const DashboardHero: React.FC<{ userProfile: UserProfile | null }> = React.memo(
   return (
     <div className="relative overflow-hidden bg-transparent pt-6 pb-6">
       <div className="max-w-6xl mx-auto px-6 text-left space-y-1">
-        <h1 className="text-2xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight ml-1">
+        <h1 className="text-2xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight ml-1">
           {greeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">{displayName}</span>
         </h1>
         <p className="text-slate-500 dark:text-slate-400 text-xs md:text-base font-medium ml-1">
@@ -553,11 +553,11 @@ const AppContent: React.FC = () => {
               {userProfile ? (
                 <>
                   <button onClick={() => isProfileMenuOpen ? handleProfileClose() : setIsProfileMenuOpen(true)} className="w-11 h-11 rounded-full bg-gradient-to-tr from-orange-600 to-red-600 p-[1.5px] border-none shadow-[0_8px_20px_rgba(234,88,12,0.2)] hover:scale-105 active:scale-95 transition-all overflow-hidden cursor-pointer group text-left">
-                    <div className="w-full h-full bg-white dark:bg-[#0a0a0a] rounded-full overflow-hidden flex items-center justify-center text-slate-900 dark:text-orange-600 font-black text-sm">
+                    <div className="w-full h-full bg-white dark:bg-[#0a0a0a] rounded-full overflow-hidden flex items-center justify-center text-slate-900 dark:text-orange-600 font-bold text-sm">
                       {userProfile.avatar_url ? (
                         <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" />
                       ) : (
-                        <span>{userProfile.username?.[0]?.toUpperCase() || userProfile.email[0].toUpperCase()}</span>
+                        <span>{userProfile.username?.[0] || userProfile.email[0]}</span>
                       )}
                     </div>
                   </button>

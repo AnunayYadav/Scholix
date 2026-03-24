@@ -145,9 +145,9 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
         <div className="w-24 h-24 bg-red-500/10 rounded-[32px] flex items-center justify-center mb-8 border border-red-500/20">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-12 h-12 text-red-500"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
         </div>
-        <h2 className="text-3xl font-black text-slate-800 dark:text-white uppercase tracking-tighter mb-2">Access Denied</h2>
+        <h2 className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight mb-2">Access Denied</h2>
         <p className="text-slate-500 text-sm mb-10 max-w-xs">Authentication token missing or expired. Please sign in to manage your Nexus profile.</p>
-        <button onClick={() => navigateToModule(ModuleType.DASHBOARD)} className="bg-slate-900 dark:bg-white text-white dark:text-black px-12 py-5 rounded-[24px] font-black text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all shadow-2xl border-none">Return to Dashboard</button>
+        <button onClick={() => navigateToModule(ModuleType.DASHBOARD)} className="bg-slate-900 dark:bg-white text-white dark:text-black px-12 py-5 rounded-[24px] font-bold text-xs tracking-wide active:scale-95 transition-all shadow-2xl border-none">Return to Dashboard</button>
       </div>
     );
   }
@@ -193,19 +193,19 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
         <div className="mt-8">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-600/5 border border-orange-600/10 mb-4 group/badge cursor-default hover:bg-orange-600/10 transition-colors">
             <div className="w-1.5 h-1.5 rounded-full bg-orange-600 animate-pulse shadow-[0_0_8px_rgba(234,88,12,0.5)]" />
-            <span className="text-[10px] font-black text-orange-600 uppercase tracking-widest">Active Verification</span>
+            <span className="text-[10px] font-bold text-orange-600 tracking-wider">Active Verification</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-black text-slate-800 dark:text-white tracking-tight leading-none mb-3 drop-shadow-sm flex items-center justify-center gap-3">
+          <h2 className="text-4xl md:text-5xl font-bold text-slate-800 dark:text-white tracking-tight leading-none mb-3 drop-shadow-sm flex items-center justify-center gap-3">
             {userProfile.username || 'Citizen Verto'}
             <VerifiedBadge isAdmin={userProfile.is_admin} size="w-7 h-7 md:w-9 md:h-9" />
           </h2>
 
           <div className="flex flex-col items-center">
-            <p className="text-slate-500 text-[9px] font-bold uppercase tracking-[0.2em] opacity-50 flex items-center justify-center gap-2">
+            <p className="text-slate-500 text-[9px] font-bold opacity-50 flex items-center justify-center gap-2">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
               Nexus Protocol ID: <span className="text-slate-700 dark:text-slate-300">{userProfile.email}</span>
             </p>
-            <p className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.3em] opacity-40 mt-1">Since {new Date(userProfile.created_at || Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+            <p className="text-slate-400 text-[9px] font-bold opacity-40 mt-1">Since {new Date(userProfile.created_at || Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
           </div>
         </div>
       </header>
@@ -222,8 +222,8 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6 text-orange-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                 </div>
                 <div>
-                  <h3 className="text-[11px] sm:text-xs font-medium text-orange-600 mb-1 leading-none">Security Core</h3>
-                  <p className="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest leading-none">Profile Visibility Control</p>
+                  <h3 className="text-[11px] sm:text-xs font-semibold text-orange-600 mb-1 leading-none">Security Core</h3>
+                  <p className="text-[11px] sm:text-xs font-bold text-slate-400 opacity-60 leading-none">Profile Visibility Control</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -257,9 +257,9 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                           <div key={i} className={`w-3 h-1 rounded-full ${i <= recentChanges.length ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-orange-600/20'}`} />
                         ))}
                       </div>
-                      <p className="text-[11px] sm:text-xs text-slate-400 font-bold uppercase tracking-widest">Rate Limit {recentChanges.length}/2</p>
+                      <p className="text-[11px] sm:text-xs text-slate-400 font-bold tracking-wide">Rate Limit {recentChanges.length}/2</p>
                     </div>
-                    <p className="text-[11px] sm:text-xs text-slate-300 dark:text-slate-600 font-bold">14-DAY ROTATION</p>
+                    <p className="text-[11px] sm:text-xs text-slate-300 dark:text-slate-600 font-bold opacity-60">14-DAY ROTATION</p>
                   </div>
                 </div>
 
@@ -321,7 +321,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
 
             <button
               onClick={handleUpdate} disabled={isUpdating}
-              className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:scale-[1.01] text-white py-6 rounded-[30px] font-black text-xs uppercase tracking-[0.3em] shadow-[0_20px_50px_rgba(234,88,12,0.3)] active:scale-95 transition-all disabled:opacity-50 border-none group/btn relative overflow-hidden flex items-center justify-center gap-3"
+              className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:scale-[1.01] text-white py-6 rounded-[30px] font-bold text-sm tracking-tight shadow-[0_20px_50px_rgba(234,88,12,0.3)] active:scale-95 transition-all disabled:opacity-50 border-none group/btn relative overflow-hidden flex items-center justify-center gap-3"
             >
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300" />
               {isUpdating && <div className="w-4 h-4 border-3 border-white border-t-transparent rounded-full animate-spin" />}
@@ -333,12 +333,12 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
         <div className="mt-12 flex flex-col items-center">
           <button
             onClick={async () => { await NexusServer.signOut(); navigateToModule(ModuleType.DASHBOARD); }}
-            className="group px-12 py-5 text-red-500/40 hover:text-red-500 font-black text-[11px] sm:text-xs uppercase tracking-[0.4em] transition-all flex items-center justify-center gap-3 border border-red-500/10 hover:border-red-500/30 rounded-[32px] bg-white/5 backdrop-blur-sm active:scale-95"
+            className="group px-12 py-5 text-red-500/60 hover:text-red-500 font-bold text-sm transition-all flex items-center justify-center gap-3 border border-red-500/10 hover:border-red-500/30 rounded-[32px] bg-white/5 backdrop-blur-sm active:scale-95"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 transition-transform group-hover:rotate-12"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
-            Terminate Session
+            Log out
           </button>
-          <p className="mt-8 text-[11px] sm:text-xs font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.3em] opacity-40">Build Version 2.5a • Secure Protocol</p>
+          <p className="mt-8 text-[11px] sm:text-xs font-bold text-slate-400 dark:text-slate-600 opacity-40">Build Version 2.5a • Secure Protocol</p>
         </div>
       </div>
     </div>

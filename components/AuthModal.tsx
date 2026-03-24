@@ -172,7 +172,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
           </div>
 
-          <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white uppercase leading-none mb-2">
+          <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white leading-none mb-2">
             {isLogin ? 'Welcome Back' : 'Join Nexus'}
           </h3>
           <p className="text-slate-500 dark:text-white/40 text-[11px] sm:text-xs font-medium flex items-center justify-center gap-2">
@@ -309,7 +309,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
           <div className="p-5 sm:p-6 md:p-8 pt-0 md:pt-0">
             <button
               type="submit" disabled={loading || (!isLogin && usernameStatus === 'taken')}
-              className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:shadow-[0_20px_40px_-10px_rgba(234,88,12,0.4)] hover:scale-[1.01] text-white py-4 sm:py-5 rounded-[20px] sm:rounded-3xl font-black text-xs uppercase tracking-[0.2em] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3 border-none"
+              className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:shadow-[0_20px_40px_-10px_rgba(234,88,12,0.4)] hover:scale-[1.01] text-white py-4 sm:py-5 rounded-[20px] sm:rounded-3xl font-bold text-sm tracking-tight active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3 border-none"
             >
               {loading ? (
                 <div className="w-5 h-5 border-3 border-white/50 border-t-white rounded-full animate-spin" />
