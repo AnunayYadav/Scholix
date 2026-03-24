@@ -1338,7 +1338,7 @@ class NexusServer {
     const [profile, attempts, reports, feedback] = await Promise.all([
       client.from('profiles').select('*').eq('id', userId).maybeSingle(),
       client.from('quiz_attempts').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(10),
-      client.from('question_reports').select('*').eq('reporter_id', userId).order('created_at', { ascending: false }).limit(10),
+      client.from('question_reports').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(10),
       client.from('feedback').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(10)
     ]);
 
