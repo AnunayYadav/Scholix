@@ -1170,15 +1170,49 @@ class NexusServer {
     if (error) throw error;
   }
 
+  static async fetchAllProfiles(): Promise<Partial<UserProfile>[]> {
+    const client = getSupabase();
+    if (!client) return [];
+    const { data, error } = await client.from('profiles').select('id, username, email, registration_number, avatar_url').order('username', { ascending: true });
+    if (error) {
+      console.error('Fetch All Profiles Error:', error);
+      return [];
+    }
+    return data || [];
+  }
+
   // Keep this for individual/targeted blasts if needed
-  static async sendGlobalNotification(title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', link?: string) {
-    // Blast to all personal notification feeds
+  static async sendGlobalNotification(title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', link?: string, targetUserIds?: string[]) {
+    // Blast to target notification feeds
     const client = getSupabase();
     if (!client) return;
-    const { data: users } = await client.from('profiles').select('id');
-    if (!users) return;
-    const notifications = users.map(user => ({ user_id: user.id, title, message, type, link, read: false }));
-    await client.from('notifications').insert(notifications);
+    
+    let userIds = targetUserIds;
+    if (!userIds) {
+      const { data: users } = await client.from('profiles').select('id');
+      if (!users) return;
+      userIds = users.map(user => user.id);
+    }
+    
+    if (userIds.length === 0) return;
+
+    // Supabase can handle batch inserts. For very large numbers, we might need to chunk.
+    const notifications = userIds.map(uid => ({ 
+      user_id: uid, 
+      title, 
+      message, 
+      type, 
+      link, 
+      read: false 
+    }));
+
+    // Chunking to avoid hitting payload limits (if > 1000 users)
+    const chunkSize = 1000;
+    for (let i = 0; i < notifications.length; i += chunkSize) {
+      const chunk = notifications.slice(i, i + chunkSize);
+      const { error } = await client.from('notifications').insert(chunk);
+      if (error) throw error;
+    }
   }
 
   /**
