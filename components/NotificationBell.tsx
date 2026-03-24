@@ -217,8 +217,8 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                                                 </div>
                                                 {isUnread && <div className="w-2 h-2 rounded-full bg-orange-600 shrink-0 mt-1" />}
                                             </div>
-                                            <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{item.message}</p>
-                                            <p className="text-[10px] font-bold text-slate-400 mt-1 opacity-60">
+                                            <p className="text-[9px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{item.message}</p>
+                                            <p className="text-[9px] font-bold text-slate-400 mt-1 opacity-60">
                                                 {new Date(item.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
@@ -229,7 +229,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                     </div>
 
                     <div className="px-5 pt-3 mt-2 border-t border-slate-100 dark:border-white/5">
-                        <button className="w-full py-3 rounded-2xl bg-slate-100 dark:bg-white/5 text-[11px] sm:text-xs font-medium text-slate-500 dark:text-white/40 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 transition-all border-none cursor-not-allowed">
+                        <button className="w-full py-3 rounded-2xl bg-slate-100 dark:bg-white/5 text-[10px] font-medium text-slate-500 dark:text-white/40 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 transition-all border-none cursor-not-allowed">
                             View All History
                         </button>
                     </div>
