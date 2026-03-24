@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import NexusServer from '../services/nexusServer';
 import { UserProfile, QuizQuestion } from '../types';
@@ -351,6 +351,8 @@ const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string |
 const DetailedDataView: React.FC<{ type: string; value: string | number; sub: string; color: string; onClose: () => void }> = ({ type, value, sub, color, onClose }) => {
     const [chartData, setChartData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetch = async () => {
@@ -394,14 +396,25 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                 <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-1.5 max-w-lg leading-relaxed">Historical trends and capacity indicators synchronized.</p>
             </div>
 
-            <div className="h-[180px] w-full relative mb-8 group/graph">
+            <div 
+                ref={containerRef}
+                className="h-[180px] w-full relative mb-8 group/graph cursor-crosshair"
+                onMouseMove={(e) => {
+                    if (!containerRef.current || chartData.length === 0) return;
+                    const rect = containerRef.current.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const index = Math.round((x / rect.width) * (chartData.length - 1));
+                    setHoverIndex(Math.max(0, Math.min(chartData.length - 1, index)));
+                }}
+                onMouseLeave={() => setHoverIndex(null)}
+            >
                 {loading ? (
                     <div className="flex flex-col items-center justify-center h-full gap-2 text-slate-400">
                         <div className="w-6 h-6 border-2 border-slate-200 border-t-orange-500 rounded-full animate-spin" />
                         <p className="font-bold uppercase tracking-widest text-[7px]">Syncing...</p>
                     </div>
                 ) : chartData.length > 0 ? (
-                    <div className="h-full w-full relative">
+                    <>
                         <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 180">
                             <defs>
                                 <linearGradient id={`line-gradient-${color}`} x1="0" y1="0" x2="0" y2="1">
@@ -410,7 +423,6 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                                 </linearGradient>
                             </defs>
                             
-                            {/* Area Fill */}
                             <path 
                                 d={`M 0 180 ${chartData.map((d, i) => {
                                     const x = (i / (chartData.length - 1)) * 100;
@@ -421,7 +433,6 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                                 className="transition-all duration-1000"
                             />
 
-                            {/* Main Line */}
                             <path 
                                 d={`M 0 ${180 - (Math.max(5, (chartData[0].count / Math.max(...chartData.map(c => c.count))) * 160))} ${chartData.map((d, i) => {
                                     const x = (i / (chartData.length - 1)) * 100;
@@ -435,38 +446,40 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                             />
-
-                            {/* Interaction Points */}
-                            {chartData.map((d, i) => {
-                                const x = (i / (chartData.length - 1)) * 100;
-                                const y = 180 - (Math.max(5, (d.count / Math.max(...chartData.map(c => c.count))) * 160));
-                                return (
-                                    <g key={i} className="group/point">
-                                        <circle 
-                                            cx={x} 
-                                            cy={y} 
-                                            r="1.5" 
-                                            fill={color === 'orange' ? '#f97316' : color === 'blue' ? '#3b82f6' : color === 'emerald' ? '#10b981' : '#6366f1'} 
-                                            className="opacity-0 group-hover/graph:opacity-100 transition-all duration-300"
-                                        />
-                                        <rect 
-                                            x={x - 2}
-                                            y="0"
-                                            width="4"
-                                            height="180"
-                                            fill="transparent"
-                                            className="cursor-pointer"
-                                        />
-                                        <foreignObject x={x > 80 ? x - 70 : x - 35} y={y - 40} width="70" height="35" className="pointer-events-none opacity-0 group-hover/point:opacity-100 transition-opacity">
-                                            <div className="bg-slate-900 dark:bg-white text-white dark:text-black py-1 px-1.5 rounded-lg text-[8px] font-bold text-center shadow-xl">
-                                                {d.count} {type.slice(0, 3)}
-                                            </div>
-                                        </foreignObject>
-                                    </g>
-                                );
-                            })}
                         </svg>
-                    </div>
+
+                        {/* Hover Overlays (HTML for pixel-perfect scaling) */}
+                        {hoverIndex !== null && (
+                            <div 
+                                className="absolute top-0 bottom-0 pointer-events-none transition-all duration-75"
+                                style={{ left: `${(hoverIndex / (chartData.length - 1)) * 100}%` }}
+                            >
+                                {/* Vertical Guideline */}
+                                <div className="absolute top-0 bottom-0 w-[1px] bg-slate-400/20 dark:bg-white/10 border-l border-dashed border-slate-300 dark:border-white/20" />
+                                
+                                {/* Indicator Dot */}
+                                <div 
+                                    className="absolute w-3 h-3 rounded-full border-2 border-white dark:border-slate-900 shadow-lg -translate-x-1/2"
+                                    style={{ 
+                                        top: `${180 - (Math.max(5, (chartData[hoverIndex].count / Math.max(...chartData.map(c => c.count))) * 160))}px`,
+                                        backgroundColor: color === 'orange' ? '#f97316' : color === 'blue' ? '#3b82f6' : color === 'emerald' ? '#10b981' : '#6366f1'
+                                    }}
+                                />
+
+                                {/* Tooltip */}
+                                <div 
+                                    className={`absolute -translate-y-full -mt-4 bg-slate-900 dark:bg-white text-white dark:text-black py-2 px-3 rounded-xl text-[10px] font-bold shadow-2xl z-10 whitespace-nowrap ${hoverIndex > chartData.length / 2 ? '-translate-x-full ml-[-10px]' : '-translate-x-0 ml-[10px]'}`}
+                                    style={{ top: `${180 - (Math.max(5, (chartData[hoverIndex].count / Math.max(...chartData.map(c => c.count))) * 160))}px` }}
+                                >
+                                    <div className="flex flex-col gap-0.5">
+                                        <span className="opacity-60 text-[8px] uppercase tracking-wider">{new Date(chartData[hoverIndex].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                                        <span className="text-sm tracking-tight">{chartData[hoverIndex].count.toLocaleString()} {type}</span>
+                                    </div>
+                                    <div className={`absolute bottom-[-4px] border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent ${hoverIndex > chartData.length / 2 ? 'right-[10px]' : 'left-[10px]'} border-t-slate-900 dark:border-t-white`} />
+                                </div>
+                            </div>
+                        )}
+                    </>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full gap-5 text-slate-400 p-12 bg-slate-50 dark:bg-white/[0.01] rounded-[30px] border border-dashed border-slate-200 dark:border-white/10">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-16 h-16 opacity-10"><path d="M3 3v18h18M7 16l4-4 4 4 5-5" /></svg>
