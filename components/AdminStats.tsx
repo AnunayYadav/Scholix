@@ -271,37 +271,82 @@ const GlobalBroadcaster: React.FC = () => {
     );
 };
 
-const StatCard: React.FC<{ label: string; value: string | number; sub: string; icon: React.ReactNode; color: string; onClick?: () => void }> = ({ label, value, sub, icon, color, onClick }) => (
-    <motion.div 
-        whileHover={onClick ? { y: -5, scale: 1.02 } : { y: -5 }}
-        onClick={onClick}
-        className={`glass-panel p-5 rounded-[28px] border border-slate-200 dark:border-white/10 relative group overflow-hidden ${onClick ? 'cursor-pointer active:scale-95 transition-all' : ''}`}
-    >
-        <div className={`absolute top-0 right-0 w-24 h-24 bg-${color}-500/5 blur-3xl -mr-12 -mt-12`} />
-        <div className="flex items-center justify-between mb-3">
-            <div className={`w-8 h-8 rounded-lg bg-${color}-500/10 flex items-center justify-center text-${color}-500`}>
-                {icon}
+const getColorClasses = (color: string) => {
+    switch(color) {
+        case 'orange': return { 
+            text: 'text-orange-500', 
+            bg: 'bg-orange-500', 
+            lightBg: 'bg-orange-500/10', 
+            veryLightBg: 'bg-orange-500/5', 
+            border: 'border-orange-500/20',
+            shadow: 'shadow-orange-500/20',
+            hoverBg: 'hover:bg-orange-600'
+        };
+        case 'blue': return { 
+            text: 'text-blue-500', 
+            bg: 'bg-blue-500', 
+            lightBg: 'bg-blue-500/10', 
+            veryLightBg: 'bg-blue-500/5', 
+            border: 'border-blue-500/20',
+            shadow: 'shadow-blue-500/20',
+            hoverBg: 'hover:bg-blue-600'
+        };
+        case 'emerald': return { 
+            text: 'text-emerald-500', 
+            bg: 'bg-emerald-500', 
+            lightBg: 'bg-emerald-500/10', 
+            veryLightBg: 'bg-emerald-500/5', 
+            border: 'border-emerald-500/20',
+            shadow: 'shadow-emerald-500/20',
+            hoverBg: 'hover:bg-emerald-600'
+        };
+        default: return { 
+            text: 'text-indigo-500', 
+            bg: 'bg-indigo-500', 
+            lightBg: 'bg-indigo-500/10', 
+            veryLightBg: 'bg-indigo-500/5', 
+            border: 'border-indigo-500/20',
+            shadow: 'shadow-indigo-500/20',
+            hoverBg: 'hover:bg-indigo-600'
+        };
+    }
+};
+
+const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string | number; sub: string; color: string; onClick?: () => void }> = ({ icon, label, value, sub, color, onClick }) => {
+    const classes = getColorClasses(color);
+    return (
+        <motion.div 
+            whileHover={{ y: -5, scale: 1.02 }}
+            onClick={onClick}
+            className={`glass-panel p-6 rounded-[32px] border border-slate-200 dark:border-white/10 shadow-xl relative overflow-hidden group cursor-pointer transition-all duration-300 bg-white dark:bg-white/[0.02]`}
+        >
+            <div className={`absolute top-0 right-0 w-24 h-24 ${classes.veryLightBg} blur-3xl -mr-12 -mt-12`} />
+            <div className="flex items-center justify-between mb-3">
+                <div className={`w-8 h-8 rounded-lg ${classes.lightBg} flex items-center justify-center ${classes.text}`}>
+                    {icon}
+                </div>
+                <Sparkline color={color === 'orange' ? '#f97316' : color === 'blue' ? '#3b82f6' : color === 'emerald' ? '#10b981' : '#6366f1'} />
             </div>
-            <Sparkline color={color === 'orange' ? '#f97316' : color === 'blue' ? '#3b82f6' : color === 'emerald' ? '#10b981' : '#6366f1'} />
-        </div>
-        <div>
-            <p className="text-[10px] font-bold text-slate-500 tracking-wider mb-1">{label}</p>
-            <div className="flex items-baseline gap-2">
-                <h4 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{value}</h4>
-                {onClick && (
-                    <motion.div 
-                        initial={{ opacity: 0, x: -5 }}
-                        whileHover={{ opacity: 1, x: 0 }}
-                        className="text-[8px] font-bold text-orange-500 uppercase tracking-widest hidden group-hover:block"
-                    >
-                        View Details →
-                    </motion.div>
-                )}
+            <div>
+                <p className="text-[10px] font-bold text-slate-500 tracking-wider mb-1 uppercase">{label}</p>
+                <div className="flex items-baseline gap-2">
+                    <h4 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">{value}</h4>
+                    {onClick && (
+                        <motion.div 
+                            initial={{ opacity: 0, x: -5 }}
+                            animate={{ opacity: 0 }}
+                            whileHover={{ opacity: 1, x: 0 }}
+                            className="text-[8px] font-bold text-orange-500 uppercase tracking-widest hidden group-hover:block"
+                        >
+                            View Details →
+                        </motion.div>
+                    )}
+                </div>
+                <p className="text-[9px] font-semibold text-slate-400 tracking-wide mt-1 opacity-70">{sub}</p>
             </div>
-            <p className="text-[9px] font-semibold text-slate-400 tracking-wide mt-1 opacity-70">{sub}</p>
-        </div>
-    </motion.div>
-);
+        </motion.div>
+    );
+}
 
 const DetailedDataView: React.FC<{ type: string; value: string | number; sub: string; color: string; onClose: () => void }> = ({ type, value, sub, color, onClose }) => {
     const [chartData, setChartData] = useState<any[]>([]);
@@ -341,7 +386,7 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
 
             <div className="mb-14">
                 <div className="flex items-baseline gap-3">
-                    <h3 className="text-7xl font-bold text-slate-900 dark:text-white tracking-tighter">{value}</h3>
+                    <h3 className="text-5xl font-bold text-slate-900 dark:text-white tracking-tighter">{value}</h3>
                     <div className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-bold rounded-full border border-emerald-500/20">
                         +12.5% 
                     </div>
@@ -357,22 +402,34 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                     </div>
                 ) : chartData.length > 0 ? (
                     <div className="h-full w-full flex items-end gap-3 pb-8">
-                        {chartData.map((d, i) => (
-                            <div key={i} className="flex-1 group relative h-full flex flex-col justify-end">
-                                <motion.div 
-                                    initial={{ height: 0 }}
-                                    animate={{ height: `${Math.max(10, (d.count / Math.max(...chartData.map(c => c.count))) * 100)}%` }}
-                                    className={`w-full bg-${color}-500/60 dark:bg-${color}-500/40 group-hover:bg-${color}-500 transition-all duration-500 rounded-t-2xl relative shadow-lg group-hover:shadow-${color}-500/20`}
-                                >
-                                    <div className="absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100 bg-slate-900 dark:bg-white px-4 py-2 rounded-2xl text-white dark:text-black text-[11px] font-bold shadow-2xl whitespace-nowrap z-20">
-                                        {d.count} {type.toLowerCase()}
+                        {chartData.map((d, i) => {
+                            // Map dynamic color to specific tailwind classes
+                            const barColorClass = color === 'orange' ? 'bg-orange-500/60 dark:bg-orange-500/50' : 
+                                                color === 'blue' ? 'bg-blue-500/60 dark:bg-blue-500/50' :
+                                                color === 'emerald' ? 'bg-emerald-500/60 dark:bg-emerald-500/50' :
+                                                'bg-indigo-500/60 dark:bg-indigo-500/50';
+                            
+                            const barHoverClass = color === 'orange' ? 'group-hover:bg-orange-500 group-hover:shadow-orange-500/30' : 
+                                                color === 'blue' ? 'group-hover:bg-blue-500 group-hover:shadow-blue-500/30' :
+                                                color === 'emerald' ? 'group-hover:bg-emerald-500 group-hover:shadow-emerald-500/30' :
+                                                'group-hover:bg-indigo-500 group-hover:shadow-indigo-500/30';
+                            return (
+                                <div key={i} className="flex-1 group relative h-full flex flex-col justify-end">
+                                    <motion.div 
+                                        initial={{ height: 0 }}
+                                        animate={{ height: `${Math.max(10, (d.count / Math.max(...chartData.map(c => c.count))) * 100)}%` }}
+                                        className={`w-full ${barColorClass} ${barHoverClass} transition-all duration-500 rounded-t-2xl relative shadow-lg group-hover:scale-x-105 group-hover:-translate-y-1 transform`}
+                                    >
+                                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100 bg-slate-900 dark:bg-white px-4 py-2 rounded-2xl text-white dark:text-black text-[11px] font-bold shadow-2xl whitespace-nowrap z-20">
+                                            {d.count} {type.toLowerCase()}
+                                        </div>
+                                    </motion.div>
+                                    <div className="mt-5 text-[9px] font-bold text-slate-400 dark:text-slate-500 text-center uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {d.date.split('/')[0]}/{d.date.split('/')[1]}
                                     </div>
-                                </motion.div>
-                                <div className="mt-5 text-[9px] font-bold text-slate-400 dark:text-slate-500 text-center uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {d.date.split('/')[0]}/{d.date.split('/')[1]}
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full gap-5 text-slate-400 p-12 bg-slate-50 dark:bg-white/[0.01] rounded-[30px] border border-dashed border-slate-200 dark:border-white/10">
@@ -474,7 +531,22 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
         try {
             const shortText = f.text.length > 40 ? f.text.substring(0, 40) + '...' : f.text;
             const title = `Reply to your feedback "${shortText}"`;
+            
+            // 1. Send the actual notification to the user
             await NexusServer.sendGlobalNotification(title, replyText, 'info', undefined, [f.user_id]);
+            
+            // 2. Link the reply to the feedback record for tracking
+            const currentReplies = f.replies || [];
+            const updatedReplies = [...currentReplies, { text: replyText, date: new Date().toISOString() }];
+            
+            try {
+                await NexusServer.updateFeedback(f.id, { replies: updatedReplies });
+                // Update local state so count increases immediately
+                setFeedback(prev => prev.map(item => item.id === f.id ? { ...item, replies: updatedReplies } : item));
+            } catch (err) {
+                console.warn("Feedback reply tracking failed (likely missing 'replies' column), but notification was sent:", err);
+            }
+
             setReplyingTo(null);
             setReplyText('');
             alert("Reply sent successfully.");
@@ -959,8 +1031,8 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         className="space-y-6"
                     >
                         <div className="flex items-center justify-between px-4">
-                            <h3 className="text-xs font-bold text-slate-500 tracking-wider">Feedback Feed</h3>
-                            <button onClick={loadFeedback} className="text-[10px] font-bold text-orange-600 hover:underline">Refresh List</button>
+                            <h3 className="text-xs font-bold text-slate-500 tracking-wider">feedback feed</h3>
+                            <button onClick={loadFeedback} className="text-[10px] font-bold text-orange-600 hover:underline">refresh list</button>
                         </div>
                         {feedback.length > 0 ? (
                             feedback.map((f, i) => (
@@ -1021,12 +1093,22 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                     </div>
                                                 </motion.div>
                                             ) : (
-                                                <button 
-                                                    onClick={() => setReplyingTo(f.id)}
-                                                    className="w-full sm:w-auto self-start px-8 py-3 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-[10px] tracking-tight rounded-2xl hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm"
-                                                >
-                                                    Reply to feedback
-                                                </button>
+                                                <div className="flex items-center gap-4">
+                                                    <button 
+                                                        onClick={() => setReplyingTo(f.id)}
+                                                        className="px-8 py-3 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-[10px] tracking-tight rounded-2xl hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm"
+                                                    >
+                                                        Reply to feedback
+                                                    </button>
+                                                    {f.replies?.length > 0 && (
+                                                        <div className="flex items-center gap-2 group cursor-default">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                                                                {f.replies.length} {f.replies.length === 1 ? 'reply' : 'replies'}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
                                     ) : (

@@ -995,8 +995,16 @@ class NexusServer {
     // Process to keep the UI's 'user' property expectation if needed
     return (data || []).map(f => ({
       ...f,
-      user: (f as any).profiles || null
+      user: (f as any).profiles || null,
+      replies: (f as any).replies || [] // Default to empty array if nested field doesn't exist yet
     }));
+  }
+
+  static async updateFeedback(id: string, updates: any) {
+    const client = getSupabase();
+    if (!client) return;
+    const { error } = await client.from('feedback').update(updates).eq('id', id);
+    if (error) throw error;
   }
 
   /**
