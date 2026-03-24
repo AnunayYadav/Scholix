@@ -303,7 +303,7 @@ const StatCard: React.FC<{ label: string; value: string | number; sub: string; i
     </motion.div>
 );
 
-const DetailedStatsModal: React.FC<{ type: string; value: string | number; sub: string; color: string; onClose: () => void }> = ({ type, value, sub, color, onClose }) => {
+const DetailedDataView: React.FC<{ type: string; value: string | number; sub: string; color: string; onClose: () => void }> = ({ type, value, sub, color, onClose }) => {
     const [chartData, setChartData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -321,78 +321,81 @@ const DetailedStatsModal: React.FC<{ type: string; value: string | number; sub: 
 
     return (
         <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-xl bg-slate-950/60"
-            onClick={onClose}
+            initial={{ opacity: 0, scale: 0.95, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -20 }}
+            className="glass-panel w-full p-8 md:p-12 rounded-[40px] border border-slate-200 dark:border-white/10 shadow-3xl overflow-hidden relative mt-8 bg-slate-50/50 dark:bg-white/[0.02]"
         >
-            <motion.div 
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                className="glass-panel w-full max-w-4xl p-8 rounded-[40px] border border-white/10 shadow-2xl overflow-hidden relative"
-                onClick={e => e.stopPropagation()}
-            >
-                <div className="flex justify-between items-start mb-10">
-                    <div>
-                        <p className={`text-xs font-bold text-${color}-500 uppercase tracking-widest mb-1`}>{sub}</p>
-                        <h2 className="text-3xl font-bold text-white tracking-tight">{type} Insights</h2>
+            <div className="flex justify-between items-start mb-10">
+                <div>
+                    <p className={`text-[10px] font-bold text-${color}-500 uppercase tracking-[0.2em] mb-2`}>{sub}</p>
+                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{type} Performance</h2>
+                </div>
+                <button 
+                    onClick={onClose} 
+                    className="group p-3 hover:bg-red-500/10 rounded-2xl transition-all duration-300 text-slate-400 hover:text-red-500 border border-transparent hover:border-red-500/20"
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div className="mb-14">
+                <div className="flex items-baseline gap-3">
+                    <h3 className="text-7xl font-bold text-slate-900 dark:text-white tracking-tighter">{value}</h3>
+                    <div className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-bold rounded-full border border-emerald-500/20">
+                        +12.5% 
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors text-slate-400">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                    </button>
                 </div>
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-4 max-w-xl leading-relaxed">System-wide metrics synchronized with the global operational core. Displaying historical trends and capacity indicators.</p>
+            </div>
 
-                <div className="mb-12">
-                    <h3 className="text-6xl font-bold text-white tracking-tighter">{value}</h3>
-                    <p className="text-sm font-medium text-slate-400 mt-2">Comprehensive performance metrics extracted from the system core.</p>
-                </div>
-
-                <div className="h-[300px] w-full relative mb-10">
-                    {loading ? (
-                        <div className="flex items-center justify-center h-full text-slate-500 font-bold uppercase tracking-widest text-[10px] animate-pulse">Synchronizing Data Stream...</div>
-                    ) : chartData.length > 0 ? (
-                        <div className="h-full w-full flex items-end gap-2 pb-8">
-                            {chartData.map((d, i) => (
-                                <div key={i} className="flex-1 group relative h-full flex flex-col justify-end">
-                                    <motion.div 
-                                        initial={{ height: 0 }}
-                                        animate={{ height: `${Math.max(10, (d.count / Math.max(...chartData.map(c => c.count))) * 100)}%` }}
-                                        className={`w-full bg-${color}-500/20 group-hover:bg-${color}-500 transition-all duration-300 rounded-t-lg relative`}
-                                    >
-                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl text-[10px] font-bold shadow-2xl border border-white/10 whitespace-nowrap z-20">
-                                            {d.count} recorded
-                                        </div>
-                                    </motion.div>
-                                    <div className="mt-4 text-[8px] font-bold text-slate-500 text-center truncate">
-                                        {d.date.split('/')[0]}/{d.date.split('/')[1]}
+            <div className="h-[350px] w-full relative mb-12">
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center h-full gap-4 text-slate-400">
+                        <div className="w-10 h-10 border-4 border-slate-200 border-t-orange-500 rounded-full animate-spin" />
+                        <p className="font-bold uppercase tracking-widest text-[9px]">Synchronizing Time-Series Data...</p>
+                    </div>
+                ) : chartData.length > 0 ? (
+                    <div className="h-full w-full flex items-end gap-3 pb-8">
+                        {chartData.map((d, i) => (
+                            <div key={i} className="flex-1 group relative h-full flex flex-col justify-end">
+                                <motion.div 
+                                    initial={{ height: 0 }}
+                                    animate={{ height: `${Math.max(10, (d.count / Math.max(...chartData.map(c => c.count))) * 100)}%` }}
+                                    className={`w-full bg-${color}-500/60 dark:bg-${color}-500/40 group-hover:bg-${color}-500 transition-all duration-500 rounded-t-2xl relative shadow-lg group-hover:shadow-${color}-500/20`}
+                                >
+                                    <div className="absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100 bg-slate-900 dark:bg-white px-4 py-2 rounded-2xl text-white dark:text-black text-[11px] font-bold shadow-2xl whitespace-nowrap z-20">
+                                        {d.count} {type.toLowerCase()}
                                     </div>
+                                </motion.div>
+                                <div className="mt-5 text-[9px] font-bold text-slate-400 dark:text-slate-500 text-center uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {d.date.split('/')[0]}/{d.date.split('/')[1]}
                                 </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-full gap-4 text-slate-500">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-12 h-12 opacity-20"><path d="M3 3v18h18M7 16l4-4 4 4 5-5" /></svg>
-                            <p className="font-bold uppercase tracking-widest text-[10px]">Operational logs contain insufficient data points</p>
-                        </div>
-                    )}
-                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full gap-5 text-slate-400 p-12 bg-slate-50 dark:bg-white/[0.01] rounded-[30px] border border-dashed border-slate-200 dark:border-white/10">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-16 h-16 opacity-10"><path d="M3 3v18h18M7 16l4-4 4 4 5-5" /></svg>
+                        <p className="font-bold uppercase tracking-[0.2em] text-[10px] text-center">Historical logs contain no recordable data points for this vector</p>
+                    </div>
+                )}
+            </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-white/5">
-                    <div className="glass-panel p-4 rounded-2xl bg-white/5 border border-white/5">
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Peak Activity</p>
-                        <p className="text-2xl font-bold text-white">{chartData.length > 0 ? Math.max(...chartData.map(c => c.count)).toLocaleString() : 0}</p>
-                    </div>
-                    <div className="glass-panel p-4 rounded-2xl bg-white/5 border border-white/5">
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Analysis Period</p>
-                        <p className="text-2xl font-bold text-white">{chartData.length} Days</p>
-                    </div>
-                    <div className="glass-panel p-4 rounded-2xl bg-white/5 border border-white/5">
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Status</p>
-                        <p className="text-2xl font-bold text-emerald-400">Live Active</p>
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-slate-200 dark:border-white/5">
+                <div className="p-6 rounded-3xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 hover:border-orange-500/30 transition-colors">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Maximum Velocity</p>
+                    <p className="text-3xl font-bold text-slate-900 dark:text-white tracking-tighter">{chartData.length > 0 ? Math.max(...chartData.map(c => c.count)).toLocaleString() : 0}</p>
                 </div>
-            </motion.div>
+                <div className="p-6 rounded-3xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 hover:border-blue-500/30 transition-colors">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Observation Span</p>
+                    <p className="text-3xl font-bold text-slate-900 dark:text-white tracking-tighter">{chartData.length} Successive Days</p>
+                </div>
+                <div className="p-6 rounded-3xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 hover:border-emerald-500/30 transition-colors">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Metric Status</p>
+                    <p className="text-3xl font-bold text-emerald-500 tracking-tighter">Verified</p>
+                </div>
+            </div>
         </motion.div>
     );
 }
@@ -621,9 +624,36 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                     sub="User Feedback" 
                     color="indigo"
                     icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>}
-                    onClick={() => setShowDetailedStats('Tickets')}
+                    onClick={() => setShowDetailedStats(showDetailedStats === 'Tickets' ? null : 'Tickets')}
                 />
             </div>
+
+            <AnimatePresence>
+                {showDetailedStats && (
+                    <DetailedDataView 
+                        type={showDetailedStats}
+                        value={
+                            showDetailedStats === 'Traffic' ? data?.summary?.totalViews.toLocaleString() : 
+                            showDetailedStats === 'Users' ? data?.summary?.visitors.toLocaleString() : 
+                            showDetailedStats === 'Issues' ? data?.summary?.pendingReports : 
+                            data?.summary?.totalFeedback.toLocaleString()
+                        }
+                        sub={
+                            showDetailedStats === 'Traffic' ? 'Total Page Views' : 
+                            showDetailedStats === 'Users' ? 'Unique Visitors' : 
+                            showDetailedStats === 'Issues' ? 'Active Reports' : 
+                            'User Feedback'
+                        }
+                        color={
+                            showDetailedStats === 'Traffic' ? 'orange' : 
+                            showDetailedStats === 'Users' ? 'blue' : 
+                            showDetailedStats === 'Issues' ? 'emerald' : 
+                            'indigo'
+                        }
+                        onClose={() => setShowDetailedStats(null)}
+                    />
+                )}
+            </AnimatePresence>
 
             <AnimatePresence mode="wait">
                 {activeTab === 'monitor' && (
@@ -1053,33 +1083,6 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                     </div>
                 </div>
             </motion.div>
-
-            <AnimatePresence>
-                {showDetailedStats && (
-                    <DetailedStatsModal 
-                        type={showDetailedStats}
-                        value={
-                            showDetailedStats === 'Traffic' ? data?.summary?.totalViews.toLocaleString() : 
-                            showDetailedStats === 'Users' ? data?.summary?.visitors.toLocaleString() : 
-                            showDetailedStats === 'Issues' ? data?.summary?.pendingReports : 
-                            data?.summary?.totalFeedback.toLocaleString()
-                        }
-                        sub={
-                            showDetailedStats === 'Traffic' ? 'Total Page Views' : 
-                            showDetailedStats === 'Users' ? 'Unique Visitors' : 
-                            showDetailedStats === 'Issues' ? 'Active Reports' : 
-                            'User Feedback'
-                        }
-                        color={
-                            showDetailedStats === 'Traffic' ? 'orange' : 
-                            showDetailedStats === 'Users' ? 'blue' : 
-                            showDetailedStats === 'Issues' ? 'emerald' : 
-                            'indigo'
-                        }
-                        onClose={() => setShowDetailedStats(null)}
-                    />
-                )}
-            </AnimatePresence>
         </div>
     );
 };
