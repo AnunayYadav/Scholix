@@ -37,20 +37,20 @@ const GlobalBroadcaster: React.FC = () => {
         <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 p-8 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 bg-orange-600/5 blur-3xl rounded-full -mr-10 -mt-10" />
 
-            <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-orange-600 flex items-center justify-center text-white shadow-xl shadow-orange-600/20">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
+            <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-600/20">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
                 </div>
                 <div>
-                    <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">Announcements</h3>
-                    <p className="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Send a notification to everyone</p>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-none">Global Broadcast</h3>
+                    <p className="text-[10px] font-semibold text-slate-500 mt-1">Send a notification to everyone</p>
                 </div>
             </div>
 
             <form onSubmit={handleBroadcast} className="space-y-6 relative z-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest ml-4">Notification Title</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-semibold text-slate-400 ml-3">Notification Title</label>
                         <input
                             type="text"
                             value={title}
@@ -60,9 +60,9 @@ const GlobalBroadcaster: React.FC = () => {
                             required
                         />
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest ml-4">Notification Type</label>
-                        <div className="flex gap-2 p-1 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-semibold text-slate-400 ml-3">Type</label>
+                        <div className="flex gap-2 p-1 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10">
                             {(['info', 'success', 'warning', 'error'] as const).map((t) => (
                                 <button
                                     key={t}
@@ -80,8 +80,8 @@ const GlobalBroadcaster: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest ml-4">Message Content</label>
+                <div className="space-y-1.5">
+                    <label className="text-[10px] font-semibold text-slate-400 ml-3">Message Content</label>
                     <textarea
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
@@ -91,9 +91,9 @@ const GlobalBroadcaster: React.FC = () => {
                     />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-                    <div className="md:col-span-2 space-y-2">
-                        <label className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest ml-4">Target Link (Optional)</label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
+                    <div className="md:col-span-2 space-y-1.5">
+                        <label className="text-[10px] font-semibold text-slate-400 ml-3">Target Link (Optional)</label>
                         <input
                             type="text"
                             value={link}
@@ -105,9 +105,9 @@ const GlobalBroadcaster: React.FC = () => {
                     <button
                         type="submit"
                         disabled={isSending || !title || !message}
-                        className="w-full bg-orange-600 text-white font-black text-xs uppercase tracking-[0.2em] py-4 rounded-2xl shadow-xl shadow-orange-600/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
+                        className="w-full bg-orange-600 text-white font-bold text-xs py-3 rounded-xl shadow-lg shadow-orange-600/20 hover:bg-orange-700 transition-all disabled:opacity-50"
                     >
-                        {isSending ? 'SENDING...' : 'SEND NOTIFICATION'}
+                        {isSending ? 'Sending...' : 'Send Broadcast'}
                     </button>
                 </div>
 
@@ -264,23 +264,23 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
         <div className="space-y-8 pb-20">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white uppercase">Nexus Intelligence</h1>
-                    <p className="text-slate-500 dark:text-slate-400 font-medium">System diagnostics and administrative controls.</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Nexus Control Center</h1>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Manage platform health and data bank.</p>
                 </div>
                 
                 {/* Custom Tabs */}
-                <div className="flex gap-2 p-1.5 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
+                <div className="flex gap-1.5 p-1 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10 shrink-0">
                     {[
-                        { id: 'stats', label: 'Stats' },
+                        { id: 'stats', label: 'Monitor' },
                         { id: 'reports', label: 'Reports' },
-                        { id: 'questions', label: 'Question Tool' },
-                        { id: 'feedback', label: 'Feedback' }
+                        { id: 'questions', label: 'Constructor' },
+                        { id: 'feedback', label: 'Inbound' }
                     ].map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id
-                                ? 'bg-orange-600 text-white shadow-lg'
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${activeTab === tab.id
+                                ? 'bg-orange-600 text-white shadow-md'
                                 : 'text-slate-400 hover:text-slate-600 dark:hover:text-white'
                                 }`}
                         >
@@ -293,7 +293,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
             {loading ? (
                 <div className="text-center py-20">
                   <div className="inline-block w-8 h-8 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin mb-4" />
-                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Accessing Secure Records...</p>
+                  <p className="text-xs font-semibold text-slate-400">Syncing with Nexus brain...</p>
                 </div>
             ) : (
                 <>
@@ -302,12 +302,12 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                             <GlobalBroadcaster />
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 {/* Page Views Table */}
-                                <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl">
-                                    <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
-                                        <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">Page Performance</h3>
-                                        <span className="text-[11px] sm:text-xs font-bold px-3 py-1 bg-orange-500/10 text-orange-500 rounded-full border border-orange-500/20 uppercase">By Views</span>
+                                <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[24px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-xl">
+                                    <div className="p-4 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
+                                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">Page Performance</h3>
+                                        <span className="text-[10px] font-bold px-2.5 py-0.5 bg-orange-500/10 text-orange-500 rounded-full border border-orange-500/10">Views</span>
                                     </div>
-                                    <div className="overflow-x-auto">
+                                    <div className="h-[320px] overflow-y-auto no-scrollbar">
                                         <table className="w-full text-left border-collapse">
                                             <thead>
                                                 <tr className="bg-slate-50/50 dark:bg-white/[0.01]">
@@ -330,12 +330,12 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 </div>
 
                                 {/* Event Stats Table */}
-                                <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl">
-                                    <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
-                                        <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">Interaction Events</h3>
-                                        <span className="text-[11px] sm:text-xs font-bold px-3 py-1 bg-red-500/10 text-red-500 rounded-full border border-red-500/20 uppercase">Live Pulse</span>
+                                <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[24px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-xl">
+                                    <div className="p-4 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
+                                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">Interaction Pulse</h3>
+                                        <span className="text-[10px] font-bold px-2.5 py-0.5 bg-red-500/10 text-red-500 rounded-full border border-red-500/10">Live</span>
                                     </div>
-                                    <div className="overflow-x-auto">
+                                    <div className="h-[320px] overflow-y-auto no-scrollbar">
                                         <table className="w-full text-left border-collapse">
                                             <thead>
                                                 <tr className="bg-slate-50/50 dark:bg-white/[0.01]">
@@ -366,8 +366,8 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl">
                             <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between bg-orange-500/5">
                                 <div>
-                                    <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">Question Reports</h3>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Reviewing user flags and error tickets</p>
+                                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">Question Reports</h3>
+                                    <p className="text-[10px] font-medium text-slate-400 mt-1">Reviewing user flags and issue tickets</p>
                                 </div>
                                 <button onClick={loadReports} className="p-2 rounded-xl bg-orange-600/10 text-orange-600 hover:bg-orange-600 hover:text-white transition-all">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
@@ -377,18 +377,18 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr className="bg-slate-50/50 dark:bg-white/[0.01]">
-                                            <th className="px-6 py-4 text-[11px] font-black uppercase text-slate-400">Reporter</th>
-                                            <th className="px-6 py-4 text-[11px] font-black uppercase text-slate-400">Issue</th>
-                                            <th className="px-6 py-4 text-[11px] font-black uppercase text-slate-400">Question Path</th>
-                                            <th className="px-6 py-4 text-[11px] font-black uppercase text-slate-400">Status</th>
-                                            <th className="px-6 py-4 text-[11px] font-black uppercase text-slate-400 text-right">Actions</th>
+                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400">Reporter</th>
+                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400">Issue</th>
+                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400">Context</th>
+                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400">Status</th>
+                                            <th className="px-6 py-4 text-[10px] font-bold text-slate-400 text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                                         {reports.map((report) => (
                                             <tr key={report.id} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
                                                 <td className="px-6 py-4">
-                                                    <p className="text-sm font-black text-slate-900 dark:text-white">{report.reporter?.username || 'GUEST'}</p>
+                                                    <p className="text-sm font-bold text-slate-900 dark:text-white">{report.reporter?.username || 'Guest'}</p>
                                                     <p className="text-[9px] text-slate-400 font-mono mt-0.5">{new Date(report.created_at).toLocaleString()}</p>
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -402,9 +402,9 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                     UNIT {report.question?.unit || report.question?.topic}
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <span className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${report.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-500/10 text-orange-500'
+                                                    <span className={`px-2 py-1 rounded-lg text-[9px] font-bold ${report.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-500/10 text-orange-500'
                                                         }`}>
-                                                        {report.status}
+                                                        {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
@@ -439,7 +439,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                     {activeTab === 'feedback' && (
                         <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 overflow-hidden shadow-2xl">
                              <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
-                                <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">System Feedback</h3>
+                                <h3 className="font-bold text-sm text-slate-900 dark:text-white">User Feedback</h3>
                                 <button onClick={loadFeedback} className="p-2 rounded-xl bg-orange-600/10 text-orange-600 hover:bg-orange-600 hover:text-white transition-all">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                                 </button>
@@ -453,7 +453,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                     {f.user?.username?.[0].toUpperCase() || 'G'}
                                                 </div>
                                                 <div>
-                                                    <p className="text-xs font-black text-slate-900 dark:text-white">{f.user?.username || 'GUEST USER'}</p>
+                                                    <p className="text-xs font-bold text-slate-900 dark:text-white">{f.user?.username || 'Guest User'}</p>
                                                     <p className="text-[10px] font-mono text-slate-400">{f.user_email || 'No email associated'}</p>
                                                 </div>
                                             </div>
@@ -478,10 +478,10 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg>
                                             </div>
                                             <div>
-                                                <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
-                                                    {newQuestion.id ? 'Refine Logic Node' : 'New Question Constructor'}
+                                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                                    {newQuestion.id ? 'Edit Question' : 'Add New Question'}
                                                 </h3>
-                                                {newQuestion.id && <p className="text-[10px] font-bold text-orange-600 uppercase">Managing ID: {newQuestion.id}</p>}
+                                                {newQuestion.id && <p className="text-[10px] font-medium text-orange-600">ID: {newQuestion.id}</p>}
                                             </div>
                                         </div>
 
@@ -514,7 +514,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                         />
 
                                         <div className="space-y-3">
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Options (Mark dot for correct)</p>
+                                            <p className="text-[10px] font-bold text-slate-400 ml-2">Options (Select correct one)</p>
                                             {newQuestion.options.map((opt, idx) => (
                                                 <div key={idx} className="flex gap-3 items-center">
                                                     <input 
@@ -550,9 +550,9 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                         <button 
                                             type="submit" 
                                             disabled={isSaving}
-                                            className="w-full bg-slate-950 dark:bg-white text-white dark:text-black font-black text-xs uppercase tracking-widest py-4 rounded-2xl shadow-xl transition-all hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50"
+                                            className="w-full bg-slate-900 dark:bg-white text-white dark:text-black font-bold text-xs py-3.5 rounded-xl shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
                                         >
-                                            {isSaving ? 'INJECTING...' : 'PERSIST TO BANK'}
+                                            {isSaving ? 'Saving...' : 'Save to Database'}
                                         </button>
                                     </div>
                                 </form>
@@ -561,18 +561,18 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                             <div className="space-y-6">
                                 <div className="bg-orange-600 p-8 rounded-[32px] text-white shadow-2xl relative overflow-hidden">
                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="absolute -bottom-10 -right-10 w-48 h-48 opacity-20"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
-                                     <h4 className="text-xl font-black uppercase tracking-tighter relative z-10">Protocols</h4>
-                                     <ul className="mt-4 space-y-4 text-xs font-bold text-orange-100 relative z-10">
+                                     <h4 className="text-lg font-bold relative z-10">Guidelines</h4>
+                                     <ul className="mt-4 space-y-4 text-[11px] font-medium text-orange-100 relative z-10">
                                          <li className="flex gap-2"><span>×</span> Correct indexing is 0-based in system.</li>
                                          <li className="flex gap-2"><span>×</span> Subject codes must be exact match.</li>
                                          <li className="flex gap-2"><span>×</span> Explanations support Markdown formatting.</li>
                                      </ul>
                                 </div>
-                                <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[32px] border border-slate-200 dark:border-white/10 p-8 shadow-2xl">
-                                     <h4 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-4">Metadata</h4>
-                                     <div className="space-y-4">
-                                         <div className="space-y-2">
-                                             <label className="text-[10px] font-black text-slate-400 uppercase">Difficulty</label>
+                                <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl rounded-[24px] border border-slate-200 dark:border-white/10 p-6 shadow-xl">
+                                      <h4 className="text-base font-bold text-slate-900 dark:text-white mb-4">Metadata</h4>
+                                      <div className="space-y-4">
+                                          <div className="space-y-1.5">
+                                              <label className="text-[10px] font-bold text-slate-400">Difficulty</label>
                                              <select 
                                                 value={newQuestion.difficulty}
                                                 onChange={e => setNewQuestion({...newQuestion, difficulty: e.target.value})}
@@ -583,12 +583,12 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                  <option value="hard">Hard</option>
                                              </select>
                                          </div>
-                                         <div className="space-y-2">
-                                             <label className="text-[10px] font-black text-slate-400 uppercase">Category Tag</label>
-                                             <input 
-                                                type="text" 
-                                                placeholder="e.g., Recursion, SQL" 
-                                                className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-bold"
+                                          <div className="space-y-1.5">
+                                              <label className="text-[10px] font-bold text-slate-400">Category Tag</label>
+                                              <input 
+                                                 type="text" 
+                                                 placeholder="e.g., Recursion, SQL" 
+                                                 className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm font-semibold"
                                                 value={newQuestion.topic}
                                                 onChange={e => setNewQuestion({...newQuestion, topic: e.target.value})}
                                             />
@@ -605,23 +605,23 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                 <div className="bg-gradient-to-br from-slate-900 to-black p-8 rounded-[40px] border border-white/5 shadow-2xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-12 bg-orange-600/10 blur-[100px] rounded-full -mr-20 -mt-20 group-hover:bg-orange-600/20 transition-all duration-700" />
                     <div className="relative z-10">
-                        <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-2">Platform Summary</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-8">
+                        <h3 className="text-lg font-bold text-white mb-2">System Health</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
                             <div>
-                                <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Total Views</p>
-                                <p className="text-3xl font-black text-white">{stats?.pageStats.reduce((acc, curr) => acc + Number(curr.views), 0).toLocaleString()}</p>
+                                <p className="text-[10px] font-semibold text-slate-500 mb-1">Total Views</p>
+                                <p className="text-2xl font-bold text-white">{stats?.pageStats.reduce((acc, curr) => acc + Number(curr.views), 0).toLocaleString()}</p>
                             </div>
                             <div>
-                                <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Total Visitors</p>
-                                <p className="text-3xl font-black text-white">{stats?.pageStats.reduce((acc, curr) => acc + Number(curr.visitors), 0).toLocaleString()}</p>
+                                <p className="text-[10px] font-semibold text-slate-500 mb-1">Visitors</p>
+                                <p className="text-2xl font-bold text-white">{stats?.pageStats.reduce((acc, curr) => acc + Number(curr.visitors), 0).toLocaleString()}</p>
                             </div>
                             <div>
-                                <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Active Events</p>
-                                <p className="text-3xl font-black text-white">{stats?.eventStats.length || 0}</p>
+                                <p className="text-[10px] font-semibold text-slate-500 mb-1">Events</p>
+                                <p className="text-2xl font-bold text-white">{stats?.eventStats.length || 0}</p>
                             </div>
                             <div>
-                                <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Health Status</p>
-                                <p className="text-3xl font-black text-emerald-500">OPTIMAL</p>
+                                <p className="text-[10px] font-semibold text-slate-500 mb-1">Status</p>
+                                <p className="text-2xl font-bold text-emerald-500">Optimal</p>
                             </div>
                         </div>
                     </div>

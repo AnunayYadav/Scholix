@@ -580,31 +580,31 @@ const AppContent: React.FC = () => {
                         {userProfile.is_admin && (
                           <button
                             onClick={() => { navigate('/admin-stats'); handleProfileClose(); }}
-                            className="w-full text-left px-5 py-3 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-orange-600 hover:bg-orange-600/5 border-none bg-transparent flex items-center gap-3 transition-all"
+                            className="w-full text-left px-5 py-2.5 text-xs font-semibold text-orange-600 hover:bg-orange-600/5 border-none bg-transparent flex items-center gap-3 transition-all"
                           >
                             <div className="w-8 h-8 rounded-full bg-orange-600/10 flex items-center justify-center">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M12 2v20M2 12h20" /></svg>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 2v20M2 12h20" /></svg>
                             </div>
                             Admin Dashboard
                           </button>
                         )}
                         <button
                           onClick={() => { navigate('/profile'); handleProfileClose(); }}
-                          className="w-full text-left px-5 py-3 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-slate-600 dark:text-white/70 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
+                          className="w-full text-left px-5 py-2.5 text-xs font-semibold text-slate-700 dark:text-white/80 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
                         >
                           <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-600/20 transition-colors">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                           </div>
-                          View Terminal
+                          View Profile
                         </button>
                         <button
                           onClick={async () => { await NexusServer.signOut(); navigate('/'); handleProfileClose(); }}
-                          className="w-full text-left px-5 py-3 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-red-500 hover:bg-red-500/10 border-none bg-transparent flex items-center gap-3 transition-all"
+                          className="w-full text-left px-5 py-2.5 text-xs font-semibold text-red-500 hover:bg-red-500/10 border-none bg-transparent flex items-center gap-3 transition-all"
                         >
-                          <div className="w-8 h-8 rounded-full bg-red-500/5 flex items-center justify-center">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                          <div className="w-8 h-8 rounded-full bg-red-500/5 flex items-center justify-center text-red-500">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
                           </div>
-                          De-authenticate
+                          Log out
                         </button>
                       </div>
                     </>
