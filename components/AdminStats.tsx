@@ -1088,7 +1088,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                             <div className="flex items-center gap-3">
                                                                 <div className="text-right mr-4">
                                                                     <p className="text-[10px] font-black text-emerald-500">LEVEL {user.level || 1}</p>
-                                                                    <p className="text-[8px] font-bold text-slate-400">{user.xp || 0} XP</p>
+                                                                    <p className="text-[8px] font-bold text-slate-400">{user.total_xp || 0} XP</p>
                                                                 </div>
                                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-slate-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                                                             </div>
@@ -1127,7 +1127,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                             </div>
                                             <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl">
                                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Total XP</p>
-                                                <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{(selectedUserActivity.profile?.xp || 0).toLocaleString()}</p>
+                                                <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{(selectedUserActivity.profile?.total_xp || 0).toLocaleString()}</p>
                                             </div>
                                             <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl">
                                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Quiz Attempts</p>

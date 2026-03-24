@@ -959,7 +959,7 @@ class NexusServer {
     if (!client) return [];
     const { data, error } = await client
       .from('question_reports')
-      .select('*, question:questions(*), reporter:profiles(username)')
+      .select('*, question:questions(*), reporter:profiles!user_id(username)')
       .order('created_at', { ascending: false });
     if (error) {
       console.error('Fetch Question Reports Error:', error);
@@ -1321,7 +1321,7 @@ class NexusServer {
     if (!client) return [];
     const { data, error } = await client
       .from('profiles')
-      .select('id, username, registration_number, avatar_url, xp, level')
+      .select('id, username, registration_number, avatar_url, total_xp, level')
       .or(`username.ilike.%${query}%,registration_number.ilike.%${query}%`)
       .limit(5);
     if (error) {
