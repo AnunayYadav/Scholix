@@ -430,7 +430,8 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                                 }).join(' ')}`}
                                 fill="none"
                                 stroke={color === 'orange' ? '#f97316' : color === 'blue' ? '#3b82f6' : color === 'emerald' ? '#10b981' : '#6366f1'}
-                                strokeWidth="2.5"
+                                strokeWidth="2"
+                                vectorEffect="non-scaling-stroke"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                             />
@@ -444,7 +445,7 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                                         <circle 
                                             cx={x} 
                                             cy={y} 
-                                            r="3" 
+                                            r="1.5" 
                                             fill={color === 'orange' ? '#f97316' : color === 'blue' ? '#3b82f6' : color === 'emerald' ? '#10b981' : '#6366f1'} 
                                             className="opacity-0 group-hover/graph:opacity-100 transition-all duration-300"
                                         />
@@ -469,23 +470,23 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full gap-5 text-slate-400 p-12 bg-slate-50 dark:bg-white/[0.01] rounded-[30px] border border-dashed border-slate-200 dark:border-white/10">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-16 h-16 opacity-10"><path d="M3 3v18h18M7 16l4-4 4 4 5-5" /></svg>
-                        <p className="font-bold uppercase tracking-[0.2em] text-[10px] text-center">Historical logs contain no recordable data points for this vector</p>
+                        <p className="font-bold uppercase tracking-[0.2em] text-[10px] text-center">No data found for this period</p>
                     </div>
                 )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-slate-200 dark:border-white/5">
-                <div className="p-6 rounded-3xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 hover:border-orange-500/30 transition-colors">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Maximum Velocity</p>
-                    <p className="text-3xl font-bold text-slate-900 dark:text-white tracking-tighter">{chartData.length > 0 ? Math.max(...chartData.map(c => c.count)).toLocaleString() : 0}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-slate-200 dark:border-white/5">
+                <div className="px-5 py-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 hover:border-orange-500/30 transition-colors">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Highest Count</p>
+                    <p className="text-xl font-bold text-slate-900 dark:text-white tracking-tighter">{chartData.length > 0 ? Math.max(...chartData.map(c => c.count)).toLocaleString() : 0}</p>
                 </div>
-                <div className="p-6 rounded-3xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 hover:border-blue-500/30 transition-colors">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Observation Span</p>
-                    <p className="text-3xl font-bold text-slate-900 dark:text-white tracking-tighter">{chartData.length} Successive Days</p>
+                <div className="px-5 py-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 hover:border-blue-500/30 transition-colors">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Time Range</p>
+                    <p className="text-xl font-bold text-slate-900 dark:text-white tracking-tighter">{chartData.length} Days</p>
                 </div>
-                <div className="p-6 rounded-3xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 hover:border-emerald-500/30 transition-colors">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Metric Status</p>
-                    <p className="text-3xl font-bold text-emerald-500 tracking-tighter">Verified</p>
+                <div className="px-5 py-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 hover:border-emerald-500/30 transition-colors">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Status</p>
+                    <p className="text-xl font-bold text-emerald-500 tracking-tighter">Live</p>
                 </div>
             </div>
         </motion.div>
