@@ -577,6 +577,17 @@ const AppContent: React.FC = () => {
                             <p className="text-[11px] sm:text-xs font-bold text-slate-400 tracking-widest truncate">{userProfile.email}</p>
                           </div>
                         </div>
+                        {userProfile.is_admin && (
+                          <button
+                            onClick={() => { navigate('/admin-stats'); handleProfileClose(); }}
+                            className="w-full text-left px-5 py-3 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-orange-600 hover:bg-orange-600/5 border-none bg-transparent flex items-center gap-3 transition-all"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-orange-600/10 flex items-center justify-center">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M12 2v20M2 12h20" /></svg>
+                            </div>
+                            Admin Dashboard
+                          </button>
+                        )}
                         <button
                           onClick={() => { navigate('/profile'); handleProfileClose(); }}
                           className="w-full text-left px-5 py-3 text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-slate-600 dark:text-white/70 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"

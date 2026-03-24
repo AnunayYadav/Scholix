@@ -807,6 +807,133 @@ class NexusServer {
   }
 
   /**
+   * Question Management: Reporting and Editing
+   */
+  static async reportQuestion(params: { questionId: string, userId: string, reason: string, subject?: string }) {
+    const client = getSupabase();
+    if (!client) return;
+    const sanitizedReason = sanitizeInput(params.reason, 1000);
+    const { error } = await client.from('question_reports').insert([{
+      question_id: params.questionId,
+      user_id: params.userId,
+      reason: sanitizedReason,
+      subject: params.subject,
+      status: 'pending'
+    }]);
+    if (error) {
+      console.error('Report Question Error:', error);
+      throw error;
+    }
+  }
+
+  static async updateQuestion(q: QuizQuestion) {
+    const client = getSupabase();
+    if (!client) return;
+    
+    // Transform from app format to DB format (snake_case)
+    const dbRow = {
+      id: q.id,
+      topic: q.topic,
+      difficulty: q.difficulty,
+      question_type: q.questionType || 'MCQ',
+      type: q.type || 'mcq',
+      question: q.question,
+      options: Array.isArray(q.options) ? q.options : [],
+      correct_answer: q.correctAnswer,
+      explanation: q.explanation,
+      starter_code: q.starterCode,
+      test_cases: Array.isArray(q.testCases) ? q.testCases : [],
+      subject: (q as any).subject,
+      unit: (q as any).unit
+    };
+
+    const { error } = await client
+      .from('questions')
+      .update(dbRow)
+      .eq('id', q.id);
+
+    if (error) {
+      console.error('Update Question Error:', error);
+      throw error;
+    }
+  }
+
+  static async createQuestion(q: Partial<QuizQuestion>) {
+    const client = getSupabase();
+    if (!client) return;
+    
+    // Transform to DB format
+    const dbRow = {
+      topic: q.topic,
+      difficulty: q.difficulty,
+      question_type: q.questionType || 'MCQ',
+      type: q.type || 'mcq',
+      question: q.question,
+      options: Array.isArray(q.options) ? q.options : [],
+      correct_answer: q.correctAnswer,
+      explanation: q.explanation,
+      starter_code: q.starterCode,
+      test_cases: Array.isArray(q.testCases) ? q.testCases : [],
+      subject: (q as any).subject,
+      unit: (q as any).unit,
+      source: 'admin'
+    };
+
+    const { data, error } = await client
+      .from('questions')
+      .insert([dbRow])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Create Question Error:', error);
+      throw error;
+    }
+    return data;
+  }
+
+  static async fetchQuestionReports() {
+    const client = getSupabase();
+    if (!client) return [];
+    const { data, error } = await client
+      .from('question_reports')
+      .select('*, question:questions(*), reporter:profiles(username)')
+      .order('created_at', { ascending: false });
+    if (error) {
+      console.error('Fetch Question Reports Error:', error);
+      return [];
+    }
+    return data || [];
+  }
+
+  static async updateReportStatus(reportId: string, status: string) {
+    const client = getSupabase();
+    if (!client) return;
+    const { error } = await client
+      .from('question_reports')
+      .update({ status })
+      .eq('id', reportId);
+    if (error) {
+      console.error('Update Report Status Error:', error);
+      throw error;
+    }
+  }
+
+  static async fetchFeedback() {
+    const client = getSupabase();
+    if (!client) return [];
+    const { data, error } = await client
+      .from('feedback')
+      .select('*, user:profiles(username)')
+      .order('created_at', { ascending: false });
+    if (error) {
+      console.error('Fetch Feedback Error:', error);
+      return [];
+    }
+    return data || [];
+  }
+
+  /**
    * Marketplace Methods
    */
   static async fetchMarketplaceItems(): Promise<any[]> {

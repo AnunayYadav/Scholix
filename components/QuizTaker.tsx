@@ -180,6 +180,18 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [loginPromptTitle, setLoginPromptTitle] = useState('Nexus Membership');
   const [loginPromptMessage, setLoginPromptMessage] = useState('This feature is reserved for Nexus members. Login to track your progress and unlock rewards!');
+  
+  // Question Feedback States
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportQuestionId, setReportQuestionId] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState('');
+  const [isReporting, setIsReporting] = useState(false);
+  
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<QuizQuestion | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [editForm, setEditForm] = useState<Partial<QuizQuestion>>({});
+
   const resultRef = useRef<HTMLDivElement>(null);
 
   const progressPercent = useMemo(() => {
@@ -1152,6 +1164,242 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     }
   };
 
+  // ═══════════ Question Management ═══════════
+  const handleReportOpen = (qId: string) => {
+    setReportQuestionId(qId);
+    setReportReason('');
+    setShowReportModal(true);
+  };
+
+  const submitReport = async () => {
+    if (!reportQuestionId || !reportReason.trim()) return;
+    setIsReporting(true);
+    try {
+      await NexusServer.reportQuestion({
+        questionId: reportQuestionId,
+        userId: userId,
+        reason: reportReason,
+        subject: selectedSubject?.name
+      });
+      showToast("Question reported successfully.", "success");
+      setShowReportModal(false);
+    } catch (err) {
+      showToast("Failed to report question.", "error");
+    } finally {
+      setIsReporting(false);
+    }
+  };
+
+  const handleEditOpen = (q: QuizQuestion) => {
+    setEditingQuestion(q);
+    setEditForm({ ...q });
+    setShowEditModal(true);
+  };
+
+  const submitEdit = async () => {
+    if (!editingQuestion || !editForm.question) return;
+    setIsUpdating(true);
+    try {
+      const updatedQ = { ...editingQuestion, ...editForm } as QuizQuestion;
+      await NexusServer.updateQuestion(updatedQ);
+      showToast("Question updated successfully.", "success");
+      
+      // Update local state
+      setQuizQuestions(prev => prev.map(q => q.id === updatedQ.id ? updatedQ : q));
+      setShowEditModal(false);
+    } catch (err) {
+      showToast("Failed to update question.", "error");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // ═══════════ Render Modals ═══════════
+  const renderModals = () => {
+    const modalContent = (
+      <>
+        <AnimatePresence>
+          {/* Report Modal */}
+          {showReportModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-slate-950/60 backdrop-blur-xl" 
+                onClick={() => setShowReportModal(false)} 
+              />
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[32px] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden p-8"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">Report Question</h3>
+                  <button onClick={() => setShowReportModal(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors text-slate-500">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                
+                <div className="space-y-6">
+                  <p className="text-sm text-slate-500 leading-relaxed">What's wrong with this question? Your report will be reviewed by Nexus Moderators to ensure content quality.</p>
+                  
+                  <div className="space-y-3">
+                    {['Incorrect Answer', 'Typo/Grammar Error', 'Out of Syllabus', 'Technical Glitch'].map((option) => (
+                      <button
+                        key={option}
+                        onClick={() => setReportReason(option)}
+                        className={`w-full text-left p-4 rounded-2xl border transition-all ${
+                          reportReason === option 
+                            ? 'bg-red-500/10 border-red-500 text-red-600' 
+                            : 'bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:border-red-500/30'
+                        }`}
+                      >
+                        <span className="text-sm font-semibold">{option}</span>
+                      </button>
+                    ))}
+                    
+                    <textarea
+                      placeholder="Additional details or specific concerns..."
+                      value={reportReason}
+                      onChange={(e) => setReportReason(e.target.value)}
+                      className="w-full p-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all min-h-[100px] text-slate-800 dark:text-slate-200"
+                    />
+                  </div>
+
+                  <button
+                    disabled={!reportReason.trim() || isReporting}
+                    onClick={submitReport}
+                    className="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-sm font-bold shadow-lg shadow-red-600/20 transition-all active:scale-95 disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
+                  >
+                    {isReporting ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : 'Submit Report'}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+
+          {/* Edit Modal (Admin Only) */}
+          {showEditModal && editingQuestion && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-slate-950/60 backdrop-blur-xl" 
+                onClick={() => setShowEditModal(false)} 
+              />
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[32px] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+              >
+                <div className="flex items-center justify-between p-8 border-b border-slate-100 dark:border-white/5">
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Edit Question</h3>
+                    <p className="text-xs text-slate-400 mt-1 uppercase tracking-widest font-bold">Admin Console</p>
+                  </div>
+                  <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors text-slate-500">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Question Text</label>
+                    <textarea
+                      value={editForm.question}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, question: e.target.value }))}
+                      className="w-full p-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all min-h-[80px] text-slate-800 dark:text-slate-200"
+                    />
+                  </div>
+
+                  {editForm.options && editForm.options.length > 0 && (
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Options</label>
+                      {editForm.options.map((opt, idx) => (
+                        <div key={idx} className="flex gap-3">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${editForm.correctAnswer === idx ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-400'}`}>
+                            {String.fromCharCode(65 + idx)}
+                          </div>
+                          <input
+                            value={opt}
+                            onChange={(e) => {
+                              const newOpts = [...(editForm.options || [])];
+                              newOpts[idx] = e.target.value;
+                              setEditForm(prev => ({ ...prev, options: newOpts }));
+                            }}
+                            className="flex-1 p-3 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-xl text-sm focus:outline-none focus:border-emerald-500/50 text-slate-800 dark:text-slate-200"
+                          />
+                          <button 
+                            onClick={() => setEditForm(prev => ({ ...prev, correctAnswer: idx }))}
+                            className={`px-3 rounded-xl border text-[8px] font-bold uppercase transition-all ${editForm.correctAnswer === idx ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200 dark:border-white/10 text-slate-400 hover:border-emerald-500/30'}`}
+                          >
+                            Correct
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Explanation</label>
+                    <textarea
+                      value={editForm.explanation}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, explanation: e.target.value }))}
+                      className="w-full p-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all min-h-[80px] text-slate-800 dark:text-slate-200"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Topic</label>
+                      <input
+                        value={editForm.topic}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, topic: e.target.value }))}
+                        className="w-full p-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Difficulty Level</label>
+                      <select
+                        value={editForm.difficulty}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, difficulty: e.target.value }))}
+                        className="w-full p-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none text-slate-800 dark:text-slate-200 appearance-none cursor-pointer"
+                      >
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-8 border-t border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
+                  <button
+                    disabled={isUpdating}
+                    onClick={submitEdit}
+                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-sm font-bold shadow-lg shadow-emerald-600/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {isUpdating ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : 'Save Changes'}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+      </>
+    );
+
+    return createPortal(modalContent, document.body);
+  };
+
   const handleDownloadPDF = async () => {
     if (!resultRef.current) return;
     try {
@@ -1216,6 +1464,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     <div className="h-[60vh] flex flex-col items-center justify-center space-y-6 animate-fade-in">
       <div className="w-12 h-12 border-4 border-orange-500/10 border-t-orange-600 rounded-full animate-spin" />
       <p className="text-sm font-medium text-slate-500">Setting up your subjects...</p>
+      {renderModals()}
     </div>
   );
 
@@ -1229,6 +1478,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         <h3 className="text-2xl font-semibold text-slate-800 dark:text-white">Starting Quiz</h3>
         <p className="text-sm font-medium text-slate-500 animate-pulse">{status}</p>
       </div>
+      {renderModals()}
     </div>
   );
 
@@ -1333,6 +1583,29 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
                     </svg>
                   </button>
+
+                  <button
+                    onClick={() => handleReportOpen(q.id || '')}
+                    className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-red-400 transition-all active:scale-90"
+                    title="Report Error in Question"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01" />
+                    </svg>
+                  </button>
+
+                  {userProfile?.is_admin && (
+                    <button
+                      onClick={() => handleEditOpen(q)}
+                      className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-emerald-500 transition-all active:scale-90"
+                      title="Edit Question (Admin)"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
 
                 <p className="text-lg md:text-xl font-light leading-relaxed text-slate-800 dark:text-slate-100">
@@ -1823,6 +2096,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             </div>
           </aside>
         </div>
+        {renderModals()}
       </div>
     );
   }
@@ -2428,6 +2702,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             })}
           </div>
         </div>
+        {renderModals()}
       </div>
     );
   }
@@ -2438,6 +2713,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       <XPBreakdown />
       <LevelUpOverlay />
       <StreakToast />
+      {renderModals()}
       
       {/* Login Prompt Modal */}
       {showLoginPrompt && typeof document !== 'undefined' && createPortal(
