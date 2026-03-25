@@ -1382,18 +1382,44 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return null;
     
-    const [profile, attempts, reports, feedback] = await Promise.all([
+    // Fetch profile, attempts, reports, feedback, and history records
+    const [profile, attempts, reports, feedback, history] = await Promise.all([
       client.from('profiles').select('*').eq('id', userId).maybeSingle(),
-      client.from('quiz_attempts').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(10),
-      client.from('question_reports').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(10),
-      client.from('feedback').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(10)
+      client.from('quiz_attempts').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
+      client.from('question_reports').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
+      client.from('feedback').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
+      client.from('user_history').select('*').eq('user_id', userId).order('created_at', { ascending: false })
     ]);
+
+    // Aggregate stats from history records
+    const stats = {
+      studyTime: 0,
+      filesAccessed: 0,
+      cgpaCalculations: 0,
+      quizzesCompleted: 0,
+      history: history.data || []
+    };
+
+    if (history.data) {
+      history.data.forEach((record: any) => {
+        if (record.type === 'study_session' && record.content?.duration) {
+          stats.studyTime += record.content.duration;
+        } else if (record.type === 'file_access') {
+          stats.filesAccessed += 1;
+        } else if (record.type === 'cgpa_calc') {
+          stats.cgpaCalculations += 1;
+        } else if (record.type === 'quiz_complete') {
+          stats.quizzesCompleted = (stats.quizzesCompleted || 0) + 1;
+        }
+      });
+    }
 
     return {
       profile: profile.data,
       attempts: attempts.data || [],
       reports: reports.data || [],
-      feedback: feedback.data || []
+      feedback: feedback.data || [],
+      historyStats: stats
     };
   }
 }

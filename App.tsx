@@ -33,6 +33,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import { ToastContainer } from './components/Toast.tsx';
 import NotificationBell from './components/NotificationBell.tsx';
 import UniversalSearch from './components/UniversalSearch.tsx';
+import StudyHeartbeat from './components/StudyHeartbeat.tsx';
 
 const getModuleFromPath = (path: string): ModuleType => {
   const p = path.toLowerCase();
@@ -455,8 +456,8 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     NexusServer.trackPageView(location.pathname);
-    NexusServer.saveRecord(userProfile?.id || null, 'feature_access', `Accessed ${currentModule}`, { path: location.pathname });
-  }, [location.pathname, currentModule, userProfile?.id]);
+    // StudyHeartbeat now handles fine-grained tracking for study sessions
+  }, [location.pathname]);
 
   useEffect(() => {
     NexusServer.recordVisit();
@@ -698,6 +699,7 @@ const AppContent: React.FC = () => {
       </main>
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       <CookieBanner />
+      {userProfile && <StudyHeartbeat userId={userProfile.id} />}
       <Analytics />
       <SpeedInsights />
       <ToastContainer />

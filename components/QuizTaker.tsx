@@ -449,6 +449,15 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       if (solvedIds.length > 0) {
         saveSolvedQuestions(solvedIds);
       }
+      
+      // Log quiz completion for analytics
+      NexusServer.saveRecord(userProfile?.id || null, 'quiz_complete', `Completed ${selectedSubject?.name} Quiz`, {
+        subject: selectedSubject?.name,
+        score: score,
+        totalQuestions: quizQuestions.length,
+        accuracy: Math.round((score / quizQuestions.length) * 100),
+        duration: timerMinutes * 60 - timeLeft
+      });
     }
   }, [quizCompleted]);
 
@@ -1148,6 +1157,12 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     // Generate random ID for this instance
     const newQuizId = `q${Math.random().toString(36).substring(2, 11)}`;
     setQuizIdInState(newQuizId);
+    NexusServer.saveRecord(userProfile?.id || null, 'quiz_start', `Started ${selectedSubject?.name} Quiz`, { 
+      quizId: newQuizId, 
+      subject: selectedSubject?.name,
+      questionCount: enriched.length,
+      difficulty: selectedDifficulties 
+    });
     navigate(`/quiz/${encodeURIComponent(selectedSubject!.name)}/${newQuizId}`);
 
     setLoading(false);

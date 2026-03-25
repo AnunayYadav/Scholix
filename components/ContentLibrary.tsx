@@ -558,7 +558,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   const handleFileAccess = async (file: LibraryFile) => {
     try {
-      NexusServer.trackEvent('file_opened');
+      NexusServer.saveRecord(userProfile?.id || null, 'file_access', `Opened ${file.name}`, { fileId: file.id, fileName: file.name, path: file.storage_path });
       const url = await NexusServer.getFileUrl(file.storage_path);
       if (file.storage_path.toLowerCase().endsWith('.pdf')) {
         setViewerInfo({ show: true, url, name: file.name });

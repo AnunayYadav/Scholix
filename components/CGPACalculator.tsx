@@ -152,9 +152,22 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile }) => {
       gradeCounts[c.grade] = (gradeCounts[c.grade] || 0) + 1;
     });
     const result = { sgpa: totalCredits === 0 ? 0 : totalPoints / totalCredits, totalPoints, totalCredits, gradeCounts };
-    if (totalCredits > 0) NexusServer.trackEvent('cgpa_calculated');
     return result;
   }, [courses]);
+
+  // Track CGPA Calculation with debounce
+  useEffect(() => {
+    if (currentStats.totalCredits > 0) {
+      const timeout = setTimeout(() => {
+        NexusServer.saveRecord(userProfile?.id || null, 'cgpa_calc', 'Calculated SGPA/CGPA', { 
+          sgpa: currentStats.sgpa, 
+          credits: currentStats.totalCredits,
+          semester: currentSemester
+        });
+      }, 2000); // 2s debounce
+      return () => clearTimeout(timeout);
+    }
+  }, [currentStats.sgpa, currentStats.totalCredits, userProfile?.id, currentSemester]);
 
   const archivedCredits = useMemo(() => {
     if (prevTotalCredits !== '' && !isNaN(Number(prevTotalCredits))) return Number(prevTotalCredits);

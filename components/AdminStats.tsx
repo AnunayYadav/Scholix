@@ -567,6 +567,8 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
     const [reportSubTab, setReportSubTab] = useState<'pending' | 'tracker'>('pending');
     const [userSearchText, setUserSearchText] = useState('');
     const [userSearchResults, setUserSearchResults] = useState<any[]>([]);
+    const [allProfiles, setAllProfiles] = useState<any[]>([]);
+    const [isLoadingProfiles, setIsLoadingProfiles] = useState(false);
     const [selectedUserActivity, setSelectedUserActivity] = useState<any>(null);
     const [isSearchingUser, setIsSearchingUser] = useState(false);
 
@@ -599,12 +601,34 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
 
     useEffect(() => {
         loadCoreData();
+        loadReports();
+        loadFeedback();
     }, []);
 
+    // Load All Profiles for Tracker
     useEffect(() => {
-        if (activeTab === 'reports') loadReports();
-        if (activeTab === 'inbound') loadFeedback();
-    }, [activeTab]);
+        if (reportSubTab === 'tracker' && allProfiles.length === 0) {
+            const fetchProfiles = async () => {
+                setIsLoadingProfiles(true);
+                try {
+                    const profiles = await NexusServer.fetchAllProfiles();
+                    // Fetch summary stats for each profile
+                    const profilesWithStats = await Promise.all(
+                        profiles.map(async (p: any) => {
+                            const activity = await NexusServer.getUserDetailedActivity(p.id);
+                            return { ...p, stats: activity?.historyStats };
+                        })
+                    );
+                    setAllProfiles(profilesWithStats);
+                } catch (err) {
+                    console.error("Profile Fetch Error:", err);
+                } finally {
+                    setIsLoadingProfiles(false);
+                }
+            };
+            fetchProfiles();
+        }
+    }, [reportSubTab, allProfiles.length]);
 
     const loadReports = async () => {
         setLoading(true);
@@ -1068,7 +1092,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                             )}
 
                                             {/* Quick Search Results */}
-                                            {userSearchResults.length > 0 && (
+                                            {userSearchResults.length > 0 && !selectedUserActivity && (
                                                 <div className="absolute top-full left-0 right-0 mt-3 p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl z-50 space-y-1">
                                                     {userSearchResults.map((user) => (
                                                         <button 
@@ -1078,7 +1102,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                         >
                                                             <div className="flex items-center gap-4">
                                                                 <div className="w-10 h-10 rounded-full bg-slate-900 dark:bg-white text-white dark:text-black flex items-center justify-center font-bold text-xs uppercase tracking-tighter">
-                                                                    {user.username[0]}
+                                                                    {user.username?.[0]}
                                                                 </div>
                                                                 <div className="text-left">
                                                                     <p className="text-xs font-black text-slate-900 dark:text-white uppercase">{user.username}</p>
@@ -1087,8 +1111,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                             </div>
                                                             <div className="flex items-center gap-3">
                                                                 <div className="text-right mr-4">
-                                                                    <p className="text-[10px] font-black text-emerald-500">LEVEL {user.level || 1}</p>
-                                                                    <p className="text-[8px] font-bold text-slate-400">{user.total_xp || 0} XP</p>
+                                                                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-tighter">Inspect Full View</p>
                                                                 </div>
                                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-slate-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                                                             </div>
@@ -1098,6 +1121,112 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                             )}
                                         </div>
                                     </div>
+
+                                    {/* Default User Table */}
+                                    {!selectedUserActivity && (
+                                        <div className="mt-12 overflow-hidden">
+                                            <div className="flex items-center justify-between mb-6 px-2">
+                                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                    Global Verto Registry
+                                                </h4>
+                                                <div className="flex items-center gap-3">
+                                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">{allProfiles.length} Members Total</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="glass-panel overflow-hidden border border-slate-100 dark:border-white/5 rounded-[30px] shadow-xl">
+                                                <div className="overflow-x-auto no-scrollbar">
+                                                    <table className="w-full text-left border-collapse">
+                                                        <thead>
+                                                            <tr className="bg-slate-50/50 dark:bg-white/[0.02] border-b border-slate-100 dark:border-white/10">
+                                                                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em]">Verto Profile</th>
+                                                                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] hidden sm:table-cell text-center">Reference</th>
+                                                                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] hidden md:table-cell">Affiliation</th>
+                                                                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] text-right">Access</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                                                            {isLoadingProfiles ? (
+                                                                <tr>
+                                                                    <td colSpan={4} className="py-24 text-center">
+                                                                        <div className="flex flex-col items-center gap-4">
+                                                                            <div className="w-12 h-12 border-4 border-slate-100 dark:border-white/5 border-t-orange-500 rounded-full animate-spin" />
+                                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] font-mono animate-pulse">Synchronizing Records...</p>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            ) : allProfiles.length > 0 ? (
+                                                                allProfiles.filter(u => 
+                                                                    !userSearchText || 
+                                                                    u.username?.toLowerCase().includes(userSearchText.toLowerCase()) || 
+                                                                    u.registration_number?.includes(userSearchText)
+                                                                ).map((user) => (
+                                                                    <tr key={user.id} className="group hover:bg-slate-50/80 dark:hover:bg-white/[0.03] transition-all">
+                                                                        <td className="px-8 py-5">
+                                                                            <div className="flex items-center gap-5">
+                                                                                <div className="relative">
+                                                                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-white/5 dark:to-white/10 flex items-center justify-center text-slate-600 dark:text-white font-black text-sm shadow-sm overflow-hidden border border-white/50 dark:border-white/5 group-hover:scale-105 transition-transform">
+                                                                                        {user.avatar_url ? (
+                                                                                            <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                                                        ) : (
+                                                                                            user.username?.[0]?.toUpperCase() || 'V'
+                                                                                        )}
+                                                                                    </div>
+                                                                                    {user.is_admin && (
+                                                                                        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-500 border-2 border-white dark:border-slate-900 flex items-center justify-center">
+                                                                                            <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                                <div>
+                                                                                    <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">{user.username}</p>
+                                                                                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                                                                                        <p className="text-[9px] font-bold text-emerald-500 px-2 py-0.5 bg-emerald-500/10 rounded-full uppercase tracking-tighter">LVL {user.level || 1}</p>
+                                                                                        <p className="text-[9px] font-bold text-slate-400 font-mono tracking-tighter">{(user.total_xp || 0).toLocaleString()} XP</p>
+                                                                                        {user.stats && (
+                                                                                            <>
+                                                                                                <p className="text-[9px] font-bold text-blue-500 border-l border-slate-200 dark:border-white/10 pl-2 ml-1">{(user.stats.studyTime / 60).toFixed(0)}m Study</p>
+                                                                                                <p className="text-[9px] font-bold text-orange-500">· {user.stats.quizzesCompleted || 0} Quizzes</p>
+                                                                                                <p className="text-[9px] font-bold text-indigo-500">· {user.stats.filesAccessed || 0} Files</p>
+                                                                                            </>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td className="px-8 py-5 hidden sm:table-cell text-center">
+                                                                            <p className="text-[10px] font-black text-slate-600 dark:text-slate-300 font-mono tracking-wider tabular-nums px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-lg inline-block">{user.registration_number || '----------'}</p>
+                                                                        </td>
+                                                                        <td className="px-8 py-5 hidden md:table-cell">
+                                                                            <p className="text-[10px] font-bold text-slate-500 truncate max-w-[180px]">{user.email || 'Email Protected'}</p>
+                                                                        </td>
+                                                                        <td className="px-8 py-5 text-right">
+                                                                            <button 
+                                                                                onClick={() => selectUserForTracking(user)}
+                                                                                className="px-6 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-black text-[9px] font-black uppercase tracking-[0.15em] hover:bg-orange-600 hover:text-white dark:hover:bg-orange-600 dark:hover:text-white transition-all shadow-sm"
+                                                                            >
+                                                                                Inspect
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                ))
+                                                            ) : (
+                                                                <tr>
+                                                                    <td colSpan={4} className="py-24 text-center">
+                                                                        <div className="flex flex-col items-center gap-3 opacity-30 grayscale">
+                                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-16 h-16"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 10v4" /><path d="M10 12h4" /></svg>
+                                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Grid Empty</p>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Active Selection Board */}
@@ -1120,22 +1249,34 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                             </button>
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl">
-                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Current Level</p>
-                                                <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">LVL {selectedUserActivity.profile?.level || 1}</p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Level/XP</p>
+                                                <p className="text-xl font-black text-slate-900 dark:text-white tracking-tighter">LVL {selectedUserActivity.profile?.level || 1} <span className="text-[10px] text-emerald-500 opacity-60 ml-2">{(selectedUserActivity.profile?.total_xp || 0).toLocaleString()} XP</span></p>
                                             </div>
-                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl">
-                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Total XP</p>
-                                                <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{(selectedUserActivity.profile?.total_xp || 0).toLocaleString()}</p>
+                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Quiz Power</p>
+                                                <p className="text-xl font-black text-slate-900 dark:text-white tracking-tighter">{selectedUserActivity.attempts?.length || 0} <span className="text-[10px] text-orange-500 opacity-60 ml-2">Tests</span></p>
                                             </div>
-                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl">
-                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Quiz Attempts</p>
-                                                <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{selectedUserActivity.attempts?.length || 0}</p>
+                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Study Volume</p>
+                                                <p className="text-xl font-black text-blue-500 tracking-tighter">{(selectedUserActivity.historyStats?.studyTime / 3600).toFixed(1)} <span className="text-[10px] opacity-60 ml-2">Hours Active</span></p>
                                             </div>
-                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl">
-                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Impact Score</p>
-                                                <p className="text-2xl font-black text-emerald-500 tracking-tighter">{(selectedUserActivity.reports?.length + selectedUserActivity.feedback?.length) * 10}</p>
+                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Resource Use</p>
+                                                <p className="text-xl font-black text-indigo-500 tracking-tighter">{selectedUserActivity.historyStats?.filesAccessed || 0} <span className="text-[10px] opacity-60 ml-2">Files</span></p>
+                                            </div>
+                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">CGPA Analytics</p>
+                                                <p className="text-xl font-black text-purple-500 tracking-tighter">{selectedUserActivity.historyStats?.cgpaCalculations || 0} <span className="text-[10px] opacity-60 ml-2">Calcs</span></p>
+                                            </div>
+                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Impact Points</p>
+                                                <p className="text-xl font-black text-emerald-500 tracking-tighter">{(selectedUserActivity.reports?.length + selectedUserActivity.feedback?.length) * 10} <span className="text-[10px] opacity-60 ml-2">Social</span></p>
+                                            </div>
+                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Quiz Mastery</p>
+                                                <p className="text-xl font-black text-orange-600 tracking-tighter">{selectedUserActivity.historyStats?.quizzesCompleted || 0} <span className="text-[10px] opacity-60 ml-2">Comp.</span></p>
                                             </div>
                                         </div>
 
