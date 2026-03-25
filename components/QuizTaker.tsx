@@ -169,9 +169,10 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([]);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
 
-  const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>(['MCQ', 'PYQ']);
+  const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>(['MCQ', 'PYQ', 'Case Based']);
   const [completedOnLoad, setCompletedOnLoad] = useState(false);
   const [solvedQuestionIds, setSolvedQuestionIds] = useState<Set<string>>(new Set());
+  const [includeSolved, setIncludeSolved] = useState(true);
   const [showTopics, setShowTopics] = useState(false);
   const [isRecentSessionsExpanded, setIsRecentSessionsExpanded] = useState(false);
   const [markedForReview, setMarkedForReview] = useState<Set<number>>(new Set());
@@ -1090,19 +1091,28 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       
       console.log(`[DEBUG] Available categories: MCQ(${availableMcqs.length}) Subj(${availableSubj.length}) Coding(${availableCoding.length})`);
 
-      // Filter out solved questions if needed
+      // Prioritize unsolved but fill with solved if needed
       const unsolvedMcqs = availableMcqs.filter(q => !solvedQuestionIds.has(q.id));
-      const unsolvedSubj = availableSubj.filter(q => !solvedQuestionIds.has(q.id));
+      const solvedMcqs = availableMcqs.filter(q => solvedQuestionIds.has(q.id));
+      const poolMcq = [...shuffleArray(unsolvedMcqs), ...shuffleArray(solvedMcqs)];
       
-      const poolMcq = unsolvedMcqs.length > 0 ? unsolvedMcqs : availableMcqs;
-      const poolSubj = unsolvedSubj.length > 0 ? unsolvedSubj : availableSubj;
+      const unsolvedSubj = availableSubj.filter(q => !solvedQuestionIds.has(q.id));
+      const solvedSubj = availableSubj.filter(q => solvedQuestionIds.has(q.id));
+      const poolSubj = [...shuffleArray(unsolvedSubj), ...shuffleArray(solvedSubj)];
+      
+      // If includeSolved is false, we strictly use only unsolved
+      const finalMcqPool = includeSolved ? poolMcq : unsolvedMcqs;
+      const finalSubjPool = includeSolved ? poolSubj : unsolvedSubj;
 
       // Selection logic
-      const pickedMcq = [...poolMcq].sort(() => 0.5 - Math.random()).slice(0, numMCQ);
-      const pickedSubj = [...poolSubj].sort(() => 0.5 - Math.random()).slice(0, numSubjective);
+      const pickedMcq = finalMcqPool.slice(0, numMCQ);
+      const pickedSubj = finalSubjPool.slice(0, numSubjective);
       const pickedCoding = [...availableCoding].sort(() => 0.5 - Math.random()).slice(0, numCoding);
 
       finalSelection = [...pickedMcq, ...pickedSubj, ...pickedCoding].sort(() => 0.5 - Math.random());
+      
+      console.log(`[DEBUG] Final selection size: ${finalSelection.length} (Wanted: ${numMCQ + numSubjective + numCoding})`);
+      console.log(`[DEBUG] Unsolved available: ${unsolvedMcqs.length}, Solved available: ${solvedMcqs.length}`);
 
       if (finalSelection.length > 0) {
         startQuiz(finalSelection, true);
@@ -3363,7 +3373,18 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
                     {hasMCQs && (
                       <div className="space-y-3">
-                        <p className="text-[10px] font-semibold text-slate-500 tracking-wider ml-1">MCQ assessment</p>
+                        <div className="flex items-center justify-between ml-1">
+                          <p className="text-[10px] font-semibold text-slate-500 tracking-wider">MCQ assessment</p>
+                          <button 
+                            onClick={() => {
+                              const count = subjectQuestions.filter(q => q.type === 'mcq' && selectedUnits.includes(q.unit)).length;
+                              setNumMCQ(count || 100);
+                            }}
+                            className="text-[9px] font-bold text-orange-500 hover:text-orange-600 uppercase tracking-tighter"
+                          >
+                            Set Max
+                          </button>
+                        </div>
                         <div className="relative group">
                           <input
                             type="number" min="0" max="500" value={numMCQ}
@@ -3503,20 +3524,20 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     <motion.button
                       whileHover={{ y: -2 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => setIsPracticeMode(!isPracticeMode)}
-                      className={`relative p-5 rounded-[28px] border transition-all flex items-center justify-between group overflow-hidden ${isPracticeMode ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 hover:border-emerald-500/20'}`}
+                      onClick={() => setIncludeSolved(!includeSolved)}
+                      className={`relative p-5 rounded-[28px] border transition-all flex items-center justify-between group overflow-hidden ${includeSolved ? 'bg-orange-500/5 border-orange-500/30' : 'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 hover:border-orange-500/20'}`}
                     >
                       <div className="flex items-center gap-4 z-10">
-                        <div className={`p-3 rounded-2xl transition-colors ${isPracticeMode ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-slate-100 dark:bg-dark-800 text-slate-500'}`}>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
+                        <div className={`p-3 rounded-2xl transition-colors ${includeSolved ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'bg-slate-100 dark:bg-dark-800 text-slate-500'}`}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /></svg>
                         </div>
                         <div className="text-left">
-                          <p className={`text-sm font-semibold tracking-tight ${isPracticeMode ? 'text-emerald-500' : 'text-slate-900 dark:text-white'}`}>Practice Mode</p>
-                          <p className="text-[10px] text-slate-500 font-semibold tracking-wider opacity-60">Visual aid enabled</p>
+                          <p className={`text-sm font-semibold tracking-tight ${includeSolved ? 'text-orange-500' : 'text-slate-900 dark:text-white'}`}>Include Solved</p>
+                          <p className="text-[10px] text-slate-500 font-semibold tracking-wider opacity-60">{solvedQuestionIds.size} questions already mastered</p>
                         </div>
                       </div>
-                      <div className={`w-12 h-6 rounded-full relative transition-colors z-10 ${isPracticeMode ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-dark-800'}`}>
-                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${isPracticeMode ? 'right-1 bg-white' : 'left-1 bg-slate-400 dark:bg-slate-600'}`} />
+                      <div className={`w-12 h-6 rounded-full relative transition-colors z-10 ${includeSolved ? 'bg-orange-500' : 'bg-slate-200 dark:bg-dark-800'}`}>
+                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${includeSolved ? 'right-1 bg-white' : 'left-1 bg-slate-400 dark:bg-slate-600'}`} />
                       </div>
                     </motion.button>
                   </div>
