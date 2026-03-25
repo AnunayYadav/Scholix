@@ -552,7 +552,7 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
 }
 
 const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
-    const [activeTab, setActiveTab] = useState<'monitor' | 'reports' | 'constructor' | 'inbound'>('monitor');
+    const [activeTab, setActiveTab] = useState<'monitor' | 'reports' | 'constructor' | 'inbound' | 'tracker'>('monitor');
     const [data, setData] = useState<any>(null);
     const [reports, setReports] = useState<any[]>([]);
     const [feedback, setFeedback] = useState<any[]>([]);
@@ -840,6 +840,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                 <div className="flex p-1.5 bg-slate-100 dark:bg-white/5 rounded-[20px] border border-slate-200 dark:border-white/10 overflow-hidden">
                     {[
                         { id: 'monitor', label: 'Stats' },
+                        { id: 'tracker', label: 'Tracking' },
                         { id: 'reports', label: 'Reports' },
                         { id: 'constructor', label: 'Editor' },
                         { id: 'inbound', label: 'Feedback' }
@@ -1026,9 +1027,9 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 </span>
                             </button>
                             <button 
-                                onClick={() => setReportSubTab('tracker')}
+                                onClick={() => setActiveTab('tracker')}
                                 className={`px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${
-                                    reportSubTab === 'tracker' 
+                                    activeTab === 'tracker' 
                                     ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-xl' 
                                     : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
                                 }`}
@@ -1037,7 +1038,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                             </button>
                         </div>
 
-                        {reportSubTab === 'pending' ? (
+                        {reportSubTab === 'pending' && (
                             <motion.div 
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -1102,7 +1103,11 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     </div>
                                 )}
                             </motion.div>
-                        ) : (
+                        )}
+                    </div>
+                )}
+
+                {activeTab === 'tracker' && (
                             <motion.div 
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
