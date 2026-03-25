@@ -461,7 +461,19 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       
       setIsFetchingQuestions(true);
       try {
-        const subjectCode = (selectedSubject.name || '').split(':')[0].trim();
+        // Consistent normalization: remove spaces and uppercase
+        const subjectCode = (selectedSubject.name || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+        
+        // 1. Fetch metadata (units/topics) to build filters efficiently 
+        // This avoids payload size issues for large subjects
+        const metadata = await NexusServer.fetchSubjectMetadata(subjectCode);
+        if (metadata.units.length > 0) {
+          // If metadata suggests we have units, we can use them to update state
+          // However, for now we rely on the memoized filtered subjectQuestions
+        }
+
+        // 2. Fetch full question pool for initial view
+        // handleGenerate will fetch targeted unit questions later if this pool is incomplete
         const questions = await NexusServer.fetchQuestions(subjectCode);
         setSubjectQuestions(questions);
       } catch (err) {
@@ -1029,8 +1041,9 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       if (pool.length === 0) {
         // Double check with a direct fetch if pool is empty (maybe it wasn't fully loaded)
         setStatus('Checking databases...');
-        const subjectCode = (selectedSubject.name || '').split(':')[0].trim();
-        pool = await NexusServer.fetchQuestions(subjectCode);
+        const subjectCode = (selectedSubject.name || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+        pool = await NexusServer.fetchQuestions(subjectCode, selectedUnits);
+        // Secondary safety filter just in case
         pool = pool.filter(q => selectedUnits.includes(Number(q.unit)));
       }
 

@@ -151,7 +151,8 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return;
 
-    const subjectCode = (subject || '').split(':')[0].trim();
+    // Normalize subject code by removing spaces and making uppercase
+    const subjectCode = (subject || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
     // Transform from app format to DB format (snake_case)
     const dbRows = questions.map(q => ({
       id: q.id,
@@ -184,22 +185,31 @@ class NexusServer {
    * @param subject The subject name
    * @param unit Optional unit number (if not provided, fetches all units for the subject)
    */
-  static async fetchQuestions(subject: string, unit?: number): Promise<QuizQuestion[]> {
+  static async fetchQuestions(subject: string, unitOrUnits?: number | number[]): Promise<QuizQuestion[]> {
     const client = getSupabase();
     if (!client) return [];
 
-    const subjectCode = (subject || '').split(':')[0].trim();
+    // Normalize subject code consistently with saving and subject list
+    const subjectCode = (subject || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+    
     let query = client
       .from('questions')
       .select('*')
       .eq('subject', subjectCode);
 
-    if (unit !== undefined && unit !== 0) {
-      query = query.eq('unit', unit);
+    if (unitOrUnits !== undefined) {
+      if (Array.isArray(unitOrUnits)) {
+        if (unitOrUnits.length > 0 && !unitOrUnits.includes(0)) {
+          query = query.in('unit', unitOrUnits);
+        }
+      } else if (unitOrUnits !== 0) {
+        query = query.eq('unit', unitOrUnits);
+      }
     }
 
-    // Increase limit to ensure we fetch all subject questions (default might be 100)
-    query = query.range(0, 2000);
+    // Increase limit significantly and ensure we fetch all subject questions
+    // Using a larger range for custom generation to avoid missing high-unit questions
+    query = query.range(0, 5000).order('unit', { ascending: true });
 
     const { data, error } = await query;
 
@@ -251,6 +261,41 @@ class NexusServer {
         testCases: typeof q.test_cases === 'string' ? JSON.parse(q.test_cases) : (q.test_cases || [])
       };
     });
+  }
+
+  /**
+   * Fetches unique units and topics for a subject
+   */
+  static async fetchSubjectMetadata(subject: string): Promise<{ units: number[], topics: string[] }> {
+    const client = getSupabase();
+    if (!client) return { units: [], topics: [] };
+
+    const subjectCode = (subject || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+    const { data, error } = await client
+      .from('questions')
+      .select('unit, topic')
+      .eq('subject', subjectCode)
+      .limit(5000);
+
+    if (error || !data) return { units: [], topics: [] };
+
+    const units = Array.from(new Set(data.map(q => Number(q.unit)).filter(u => !isNaN(u)))).sort((a, b) => a - b);
+    const topics = Array.from(new Set(data.map(q => q.topic).filter(Boolean))) as string[];
+
+    return { units, topics };
+  }
+
+  static async fetchQuestionCount(subject: string): Promise<number> {
+    const client = getSupabase();
+    if (!client) return 0;
+    
+    const subjectCode = (subject || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+    const { count, error } = await client
+      .from('questions')
+      .select('*', { count: 'exact', head: true })
+      .eq('subject', subjectCode);
+    
+    return count || 0;
   }
 
   /**
