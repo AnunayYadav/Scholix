@@ -1398,6 +1398,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                     )}
                                                 </div>
                                             </div>
+                                        </div>
                                     </motion.div>
                                 )}
                             </motion.div>
@@ -1550,8 +1551,8 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     </div>
                                 </div>
                             </div>
-                    </motion.div>
-                )}
+                        </motion.div>
+                    )}
 
                 {activeTab === 'inbound' && (
                     <motion.div 
