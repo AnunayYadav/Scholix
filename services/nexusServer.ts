@@ -1271,14 +1271,10 @@ class NexusServer {
     if (error) throw error;
   }
 
-  static async fetchAllProfiles(limit: number = 10, offset: number = 0): Promise<Partial<UserProfile>[]> {
+  static async fetchAllProfiles(): Promise<Partial<UserProfile>[]> {
     const client = getSupabase();
     if (!client) return [];
-    const { data, error } = await client
-      .from('profiles')
-      .select('id, username, email, registration_number, avatar_url')
-      .order('username', { ascending: true })
-      .range(offset, offset + limit - 1);
+    const { data, error } = await client.from('profiles').select('id, username, email, registration_number, avatar_url').order('username', { ascending: true });
     if (error) {
       console.error('Fetch All Profiles Error:', error);
       return [];

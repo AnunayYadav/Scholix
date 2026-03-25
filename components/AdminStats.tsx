@@ -38,7 +38,7 @@ const GlobalBroadcaster: React.FC = () => {
     useEffect(() => {
         if (audienceMode === 'targeted' && allUsers.length === 0) {
             const loadUsers = async () => {
-                const users = await NexusServer.fetchAllProfiles(100, 0);
+                const users = await NexusServer.fetchAllProfiles();
                 setAllUsers(users);
             };
             loadUsers();
@@ -552,7 +552,7 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
 }
 
 const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
-    const [activeTab, setActiveTab] = useState<'monitor' | 'reports' | 'constructor' | 'inbound' | 'tracker'>('monitor');
+    const [activeTab, setActiveTab] = useState<'monitor' | 'reports' | 'constructor' | 'inbound'>('monitor');
     const [data, setData] = useState<any>(null);
     const [reports, setReports] = useState<any[]>([]);
     const [feedback, setFeedback] = useState<any[]>([]);
@@ -571,12 +571,6 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
     const [isLoadingProfiles, setIsLoadingProfiles] = useState(false);
     const [selectedUserActivity, setSelectedUserActivity] = useState<any>(null);
     const [isSearchingUser, setIsSearchingUser] = useState(false);
-
-    // User Tracker Pagination
-    const [profilesOffset, setProfilesOffset] = useState(0);
-    const [hasMoreProfiles, setHasMoreProfiles] = useState(true);
-    const [isLoadingMoreProfiles, setIsLoadingMoreProfiles] = useState(false);
-    const PROFILES_LIMIT = 10;
 
     // Question State for Creator
     const [newQuestion, setNewQuestion] = useState({
@@ -611,13 +605,13 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
         loadFeedback();
     }, []);
 
-    // Load Profiles for Tracker with Pagination
+    // Load All Profiles for Tracker
     useEffect(() => {
         if (reportSubTab === 'tracker' && allProfiles.length === 0) {
-            const fetchInitialProfiles = async () => {
+            const fetchProfiles = async () => {
                 setIsLoadingProfiles(true);
                 try {
-                    const profiles = await NexusServer.fetchAllProfiles(PROFILES_LIMIT, 0);
+                    const profiles = await NexusServer.fetchAllProfiles();
                     // Fetch summary stats for each profile
                     const profilesWithStats = await Promise.all(
                         profiles.map(async (p: any) => {
@@ -626,49 +620,15 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         })
                     );
                     setAllProfiles(profilesWithStats);
-                    setProfilesOffset(PROFILES_LIMIT);
-                    if (profiles.length < PROFILES_LIMIT) {
-                        setHasMoreProfiles(false);
-                    }
                 } catch (err) {
                     console.error("Profile Fetch Error:", err);
                 } finally {
                     setIsLoadingProfiles(false);
                 }
             };
-            fetchInitialProfiles();
+            fetchProfiles();
         }
     }, [reportSubTab, allProfiles.length]);
-
-    const loadMoreProfiles = async () => {
-        if (isLoadingMoreProfiles || !hasMoreProfiles) return;
-        setIsLoadingMoreProfiles(true);
-        try {
-            const nextProfiles = await NexusServer.fetchAllProfiles(PROFILES_LIMIT, profilesOffset);
-            if (nextProfiles.length === 0) {
-                setHasMoreProfiles(false);
-                return;
-            }
-
-            // Fetch summary stats for each profile
-            const profilesWithStats = await Promise.all(
-                nextProfiles.map(async (p: any) => {
-                    const activity = await NexusServer.getUserDetailedActivity(p.id);
-                    return { ...p, stats: activity?.historyStats };
-                })
-            );
-
-            setAllProfiles(prev => [...prev, ...profilesWithStats]);
-            setProfilesOffset(prev => prev + PROFILES_LIMIT);
-            if (nextProfiles.length < PROFILES_LIMIT) {
-                setHasMoreProfiles(false);
-            }
-        } catch (err) {
-            console.error("Load More Profiles Error:", err);
-        } finally {
-            setIsLoadingMoreProfiles(false);
-        }
-    };
 
     const loadReports = async () => {
         setLoading(true);
@@ -840,7 +800,6 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                 <div className="flex p-1.5 bg-slate-100 dark:bg-white/5 rounded-[20px] border border-slate-200 dark:border-white/10 overflow-hidden">
                     {[
                         { id: 'monitor', label: 'Stats' },
-                        { id: 'tracker', label: 'Tracking' },
                         { id: 'reports', label: 'Reports' },
                         { id: 'constructor', label: 'Editor' },
                         { id: 'inbound', label: 'Feedback' }
@@ -1027,9 +986,9 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 </span>
                             </button>
                             <button 
-                                onClick={() => setActiveTab('tracker')}
+                                onClick={() => setReportSubTab('tracker')}
                                 className={`px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${
-                                    activeTab === 'tracker' 
+                                    reportSubTab === 'tracker' 
                                     ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-xl' 
                                     : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
                                 }`}
@@ -1038,7 +997,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                             </button>
                         </div>
 
-                        {reportSubTab === 'pending' && (
+                        {reportSubTab === 'pending' ? (
                             <motion.div 
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -1103,11 +1062,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     </div>
                                 )}
                             </motion.div>
-                        )}
-                    </div>
-                )}
-
-                {activeTab === 'tracker' && (
+                        ) : (
                             <motion.div 
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -1126,7 +1081,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                             <input 
                                                 type="text" 
                                                 placeholder="Enter username or Reg No..." 
-                                                className="w-full bg-white dark:bg-slate-950/20 border-2 border-slate-100 dark:border-white/5 focus:border-orange-500/50 rounded-2xl py-5 pl-14 pr-6 text-sm font-bold tracking-tight shadow-sm transition-all outline-none"
+                                                className="w-full bg-white dark:bg-slate-900/50 border-2 border-slate-100 dark:border-white/5 focus:border-orange-500/50 rounded-2xl py-5 pl-14 pr-6 text-sm font-bold tracking-tight shadow-sm transition-all outline-none"
                                                 value={userSearchText}
                                                 onChange={(e) => handleUserSearch(e.target.value)}
                                             />
@@ -1150,13 +1105,13 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                     {user.username?.[0]}
                                                                 </div>
                                                                 <div className="text-left">
-                                                                    <p className="text-xs font-bold text-slate-900 dark:text-white uppercase">{user.username}</p>
+                                                                    <p className="text-xs font-black text-slate-900 dark:text-white uppercase">{user.username}</p>
                                                                     <p className="text-[10px] font-bold text-slate-400 tracking-wider">REG: {user.registration_number}</p>
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-3">
                                                                 <div className="text-right mr-4">
-                                                                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-tighter">Inspect Full Profile</p>
+                                                                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-tighter">Inspect Full View</p>
                                                                 </div>
                                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-slate-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                                                             </div>
@@ -1171,12 +1126,12 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     {!selectedUserActivity && (
                                         <div className="mt-12 overflow-hidden">
                                             <div className="flex items-center justify-between mb-6 px-2">
-                                                <h4 className="text-xs font-bold text-slate-400 flex items-center gap-2">
+                                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                                                     Global Verto Registry
                                                 </h4>
                                                 <div className="flex items-center gap-3">
-                                                    <p className="text-[10px] font-bold text-slate-500 tracking-tight">{allProfiles.length} Members Loaded</p>
+                                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">{allProfiles.length} Members Total</p>
                                                 </div>
                                             </div>
                                             
@@ -1185,10 +1140,10 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                     <table className="w-full text-left border-collapse">
                                                         <thead>
                                                             <tr className="bg-slate-50/50 dark:bg-white/[0.02] border-b border-slate-100 dark:border-white/10">
-                                                                <th className="px-8 py-5 text-[9px] font-bold text-slate-400 tracking-wide">Verto Profile</th>
-                                                                <th className="px-8 py-5 text-[9px] font-bold text-slate-400 tracking-wide hidden sm:table-cell text-center">Reference</th>
-                                                                <th className="px-8 py-5 text-[9px] font-bold text-slate-400 tracking-wide hidden md:table-cell">Affiliation</th>
-                                                                <th className="px-8 py-5 text-[9px] font-bold text-slate-400 tracking-wide text-right">Access</th>
+                                                                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em]">Verto Profile</th>
+                                                                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] hidden sm:table-cell text-center">Reference</th>
+                                                                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] hidden md:table-cell">Affiliation</th>
+                                                                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] text-right">Access</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody className="divide-y divide-slate-100 dark:divide-white/5">
@@ -1197,7 +1152,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                     <td colSpan={4} className="py-24 text-center">
                                                                         <div className="flex flex-col items-center gap-4">
                                                                             <div className="w-12 h-12 border-4 border-slate-100 dark:border-white/5 border-t-orange-500 rounded-full animate-spin" />
-                                                                            <p className="text-[10px] font-bold text-slate-400 tracking-wide font-mono animate-pulse">Synchronizing Records...</p>
+                                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] font-mono animate-pulse">Synchronizing Records...</p>
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -1225,7 +1180,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                                     )}
                                                                                 </div>
                                                                                 <div>
-                                                                                    <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-tight">{user.username}</p>
+                                                                                    <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">{user.username}</p>
                                                                                     <div className="flex flex-wrap items-center gap-2 mt-1">
                                                                                         <p className="text-[9px] font-bold text-emerald-500 px-2 py-0.5 bg-emerald-500/10 rounded-full uppercase tracking-tighter">LVL {user.level || 1}</p>
                                                                                         <p className="text-[9px] font-bold text-slate-400 font-mono tracking-tighter">{(user.total_xp || 0).toLocaleString()} XP</p>
@@ -1249,7 +1204,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                         <td className="px-8 py-5 text-right">
                                                                             <button 
                                                                                 onClick={() => selectUserForTracking(user)}
-                                                                                className="px-6 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-black text-[10px] font-bold tracking-tight hover:bg-orange-600 hover:text-white dark:hover:bg-orange-600 dark:hover:text-white transition-all shadow-sm"
+                                                                                className="px-6 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-black text-[9px] font-black uppercase tracking-[0.15em] hover:bg-orange-600 hover:text-white dark:hover:bg-orange-600 dark:hover:text-white transition-all shadow-sm"
                                                                             >
                                                                                 Inspect
                                                                             </button>
@@ -1261,37 +1216,14 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                     <td colSpan={4} className="py-24 text-center">
                                                                         <div className="flex flex-col items-center gap-3 opacity-30 grayscale">
                                                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-16 h-16"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 10v4" /><path d="M10 12h4" /></svg>
-                                                                            <p className="text-[10px] font-bold text-slate-400 tracking-wide">Registry Empty</p>
+                                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Grid Empty</p>
                                                                         </div>
                                                                     </td>
                                                                 </tr>
                                                             )}
                                                         </tbody>
                                                     </table>
-                                                 </div>
-                                                 {/* Load More Button */}
-                                                 {hasMoreProfiles && (
-                                                     <div className="p-8 flex justify-center border-t border-slate-100 dark:border-white/5 bg-slate-50/30 dark:bg-white/[0.01]">
-                                                         <button 
-                                                             onClick={loadMoreProfiles}
-                                                             disabled={isLoadingMoreProfiles}
-                                                             className="px-10 py-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-600 dark:text-slate-300 hover:border-orange-500/50 hover:text-orange-600 transition-all shadow-sm disabled:opacity-50 flex items-center gap-3"
-                                                         >
-                                                             {isLoadingMoreProfiles ? (
-                                                                 <>
-                                                                     <div className="w-4 h-4 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
-                                                                     Loading...
-                                                                 </>
-                                                             ) : (
-                                                                 <>
-                                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M19 9l-7 7-7-7" /></svg>
-                                                                     Load More Profiles
-                                                                 </>
-                                                             )}
-                                                         </button>
-                                                     </div>
-                                                 )}
-                                                
+                                                </div>
                                             </div>
                                         </div>
                                     )}
@@ -1305,7 +1237,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                         className="space-y-6"
                                     >
                                         <div className="flex items-center justify-between px-2">
-                                            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-[0.2em] flex items-center gap-3">
+                                            <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-[0.2em] flex items-center gap-3">
                                                 <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)]" />
                                                 Active Profile: <span className="text-orange-600">{selectedUserActivity.profile?.username}</span>
                                             </h4>
@@ -1319,31 +1251,31 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                                             <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
-                                                <p className="text-[9px] font-bold text-slate-400 tracking-wide mb-2">Level/XP</p>
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Level/XP</p>
                                                 <p className="text-xl font-black text-slate-900 dark:text-white tracking-tighter">LVL {selectedUserActivity.profile?.level || 1} <span className="text-[10px] text-emerald-500 opacity-60 ml-2">{(selectedUserActivity.profile?.total_xp || 0).toLocaleString()} XP</span></p>
                                             </div>
                                             <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
-                                                <p className="text-[9px] font-bold text-slate-400 tracking-wide mb-2">Quiz Power</p>
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Quiz Power</p>
                                                 <p className="text-xl font-black text-slate-900 dark:text-white tracking-tighter">{selectedUserActivity.attempts?.length || 0} <span className="text-[10px] text-orange-500 opacity-60 ml-2">Tests</span></p>
                                             </div>
                                             <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
-                                                <p className="text-[9px] font-bold text-slate-400 tracking-wide mb-2">Study Volume</p>
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Study Volume</p>
                                                 <p className="text-xl font-black text-blue-500 tracking-tighter">{(selectedUserActivity.historyStats?.studyTime / 3600).toFixed(1)} <span className="text-[10px] opacity-60 ml-2">Hours Active</span></p>
                                             </div>
                                             <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
-                                                <p className="text-[9px] font-bold text-slate-400 tracking-wide mb-2">Resource Use</p>
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Resource Use</p>
                                                 <p className="text-xl font-black text-indigo-500 tracking-tighter">{selectedUserActivity.historyStats?.filesAccessed || 0} <span className="text-[10px] opacity-60 ml-2">Files</span></p>
                                             </div>
                                             <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
-                                                <p className="text-[9px] font-bold text-slate-400 tracking-wide mb-2">CGPA Analytics</p>
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">CGPA Analytics</p>
                                                 <p className="text-xl font-black text-purple-500 tracking-tighter">{selectedUserActivity.historyStats?.cgpaCalculations || 0} <span className="text-[10px] opacity-60 ml-2">Calcs</span></p>
                                             </div>
                                             <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
-                                                <p className="text-[9px] font-bold text-slate-400 tracking-wide mb-2">Impact Points</p>
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Impact Points</p>
                                                 <p className="text-xl font-black text-emerald-500 tracking-tighter">{(selectedUserActivity.reports?.length + selectedUserActivity.feedback?.length) * 10} <span className="text-[10px] opacity-60 ml-2">Social</span></p>
                                             </div>
                                             <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
-                                                <p className="text-[9px] font-bold text-slate-400 tracking-wide mb-2">Quiz Mastery</p>
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Quiz Mastery</p>
                                                 <p className="text-xl font-black text-orange-600 tracking-tighter">{selectedUserActivity.historyStats?.quizzesCompleted || 0} <span className="text-[10px] opacity-60 ml-2">Comp.</span></p>
                                             </div>
                                         </div>
@@ -1361,7 +1293,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                 <p className="text-[8px] font-bold text-slate-400">{new Date(att.created_at).toLocaleDateString()}</p>
                                                             </div>
                                                             <div className="text-right">
-                                                                <p className="text-xs font-bold text-slate-900 dark:text-white">{Math.round((att.score / att.total_questions) * 100)}%</p>
+                                                                <p className="text-xs font-black text-slate-900 dark:text-white">{Math.round((att.score / att.total_questions) * 100)}%</p>
                                                                 <p className="text-[8px] font-bold text-emerald-500">+{att.xp_gained} XP</p>
                                                             </div>
                                                         </div>
@@ -1403,6 +1335,8 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 )}
                             </motion.div>
                         )}
+                    </div>
+                )}
 
                 {activeTab === 'constructor' && (
                     <motion.div 
