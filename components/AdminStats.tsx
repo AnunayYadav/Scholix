@@ -1295,6 +1295,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                             </div>
                                         </div>
                                     )}
+                                </div>
 
                                 {/* Active Selection Board */}
                                 {selectedUserActivity && (
@@ -1397,13 +1398,10 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                     )}
                                                 </div>
                                             </div>
-                                        </div>
                                     </motion.div>
                                 )}
                             </motion.div>
                         )}
-                    </div>
-                )}
 
                 {activeTab === 'constructor' && (
                     <motion.div 
@@ -1552,7 +1550,6 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
                     </motion.div>
                 )}
 
