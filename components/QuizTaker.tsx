@@ -461,19 +461,15 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       
       setIsFetchingQuestions(true);
       try {
-        // Consistent normalization: remove spaces and uppercase
-        const subjectCode = (selectedSubject.name || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+        // Smart normalization: extract code like CHE110 using regex
+        const subjectName = selectedSubject.name || '';
+        const subjectMatch = subjectName.match(/[A-Za-z]+[0-9]+/);
+        const subjectCode = subjectMatch ? subjectMatch[0].toUpperCase() : subjectName.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
         
         // 1. Fetch metadata (units/topics) to build filters efficiently 
-        // This avoids payload size issues for large subjects
         const metadata = await NexusServer.fetchSubjectMetadata(subjectCode);
-        if (metadata.units.length > 0) {
-          // If metadata suggests we have units, we can use them to update state
-          // However, for now we rely on the memoized filtered subjectQuestions
-        }
-
+        
         // 2. Fetch full question pool for initial view
-        // handleGenerate will fetch targeted unit questions later if this pool is incomplete
         const questions = await NexusServer.fetchQuestions(subjectCode);
         setSubjectQuestions(questions);
       } catch (err) {
@@ -618,7 +614,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
       subjectNames.forEach((subjectName, index) => {
         // Normalize code by removing spaces: "CHE 110" -> "CHE110"
-        const normalizedCode = subjectName.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+        const subjectMatch = subjectName.match(/[A-Za-z]+[0-9]+/);
+        const normalizedCode = subjectMatch ? subjectMatch[0].toUpperCase() : subjectName.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
         subjectsMap.set(normalizedCode, {
           id: `QUIZ_SUB_${index}`,
           name: subjectName,
@@ -1041,41 +1038,57 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       if (pool.length === 0) {
         // Double check with a direct fetch if pool is empty (maybe it wasn't fully loaded)
         setStatus('Checking databases...');
-        const subjectCode = (selectedSubject.name || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+        const subjectName = selectedSubject.name || '';
+        const subjectMatch = subjectName.match(/[A-Za-z]+[0-9]+/);
+        const subjectCode = subjectMatch ? subjectMatch[0].toUpperCase() : subjectName.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+        
+        console.log(`[DEBUG] Attempting targeted fetch for ${subjectCode} units:`, selectedUnits);
         pool = await NexusServer.fetchQuestions(subjectCode, selectedUnits);
-        // Secondary safety filter just in case
+        console.log(`[DEBUG] Fetched ${pool.length} questions from DB`);
+        // Secondary safety filter
         pool = pool.filter(q => selectedUnits.includes(Number(q.unit)));
+        console.log(`[DEBUG] After unit filter: ${pool.length} questions`);
       }
-
-      if (pool.length === 0) {
-        // Still nothing? Fallback to AI
-        throw new Error("EMPTY_POOL");
-      }
-
+      
+      console.log(`[DEBUG] Pool for generation: ${pool.length}`);
+      
       // Apply Filters
       if (selectedDifficulties.length > 0) {
+        const lowerSelected = selectedDifficulties.map(d => d.toLowerCase());
+        console.log(`[DEBUG] Applying difficulty filter (lower):`, lowerSelected);
         pool = pool.filter(q => {
           const diff = String(q.difficulty || 'medium').toLowerCase();
-          return selectedDifficulties.includes(diff);
+          return lowerSelected.includes(diff);
         });
+        console.log(`[DEBUG] After difficulty filter: ${pool.length} questions`);
       }
+      
       if (selectedTopics.length > 0) {
-        pool = pool.filter(q => q.topic && selectedTopics.includes(q.topic));
+        const lowerSelectedTopics = selectedTopics.map(t => t.toLowerCase());
+        console.log(`[DEBUG] Applying topic filter (lower):`, lowerSelectedTopics);
+        pool = pool.filter(q => q.topic && lowerSelectedTopics.includes(q.topic.toLowerCase()));
+        console.log(`[DEBUG] After topic filter: ${pool.length} questions`);
       }
       
       // Filter by Question Type (MCQ, PYQ, Case Study)
       let availableMcqs = pool.filter(q => {
         const typeMatch = (q.type || '').toLowerCase() === 'mcq';
         const questionTypeStr = String(q.questionType || 'MCQ').toUpperCase();
-        // Handle variations in naming (e.g., "Case Based" vs "Case Study")
-        const questionTypeMatch = selectedQuestionTypes.some(selected => {
+        
+        // If nothing selected, default to true for all mcq types
+        const questionTypeMatch = selectedQuestionTypes.length === 0 || selectedQuestionTypes.some(selected => {
           const s = selected.toUpperCase();
           return questionTypeStr.includes(s) || s.includes(questionTypeStr);
         });
+        
         return typeMatch && questionTypeMatch;
       });
+      console.log(`[DEBUG] Available MCQs: ${availableMcqs.length}`);
+      
       let availableSubj = pool.filter(q => (q.type || '').toLowerCase() === 'subjective');
       let availableCoding = pool.filter(q => (q.type || '').toLowerCase() === 'coding');
+      
+      console.log(`[DEBUG] Available categories: MCQ(${availableMcqs.length}) Subj(${availableSubj.length}) Coding(${availableCoding.length})`);
 
       // Filter out solved questions if needed
       const unsolvedMcqs = availableMcqs.filter(q => !solvedQuestionIds.has(q.id));

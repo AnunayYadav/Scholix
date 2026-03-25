@@ -151,8 +151,9 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return;
 
-    // Normalize subject code by removing spaces and making uppercase
-    const subjectCode = (subject || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+    // Extract core subject code (e.g., CHE110) consistently
+    const subjectMatch = (subject || '').match(/[A-Za-z]+[0-9]+/);
+    const subjectCode = subjectMatch ? subjectMatch[0].toUpperCase() : (subject || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
     // Transform from app format to DB format (snake_case)
     const dbRows = questions.map(q => ({
       id: q.id,
@@ -189,8 +190,9 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return [];
 
-    // Normalize subject code consistently with saving and subject list
-    const subjectCode = (subject || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+    // Extract core subject code (e.g., CHE110) consistently
+    const subjectMatch = (subject || '').match(/[A-Za-z]+[0-9]+/);
+    const subjectCode = subjectMatch ? subjectMatch[0].toUpperCase() : (subject || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
     
     let query = client
       .from('questions')
