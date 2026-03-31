@@ -91,31 +91,31 @@ const GlobalBroadcaster: React.FC = () => {
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-panel p-6 rounded-[32px] border border-slate-200 dark:border-white/10 relative overflow-hidden flex flex-col h-full"
+            className="glass-panel p-6 rounded-[32px] border border-neutral-200 dark:border-white/5 relative overflow-hidden flex flex-col h-full"
         >
             <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 blur-3xl -mr-16 -mt-16" />
             
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
+                    <div className="w-10 h-10 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black flex items-center justify-center shadow-lg">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">Notifications</h3>
-                        <p className="text-[10px] font-medium text-slate-500 tracking-wider">Send messages to users</p>
+                        <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 tracking-tight">Broadcaster</h3>
+                        <p className="text-[10px] font-medium text-neutral-500 tracking-tight">Push notifications to users</p>
                     </div>
                 </div>
 
-                <div className="flex p-1 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10 shrink-0">
+                <div className="flex p-1 bg-neutral-100 dark:bg-black/20 rounded-xl border border-neutral-200 dark:border-white/5 shrink-0">
                     <button 
                         onClick={() => setAudienceMode('global')}
-                        className={`px-4 py-1.5 rounded-lg text-[9px] font-bold transition-all ${audienceMode === 'global' ? 'bg-slate-950 dark:bg-white text-white dark:text-black shadow-lg' : 'text-slate-400'}`}
+                        className={`px-4 py-1.5 rounded-lg text-[9px] font-semibold transition-all ${audienceMode === 'global' ? 'bg-neutral-900 dark:bg-white text-white dark:text-black shadow-lg' : 'text-neutral-400'}`}
                     >
                         Global
                     </button>
                     <button 
                         onClick={() => setAudienceMode('targeted')}
-                        className={`px-4 py-1.5 rounded-lg text-[9px] font-bold transition-all ${audienceMode === 'targeted' ? 'bg-slate-950 dark:bg-white text-white dark:text-black shadow-lg' : 'text-slate-400'}`}
+                        className={`px-4 py-1.5 rounded-lg text-[9px] font-semibold transition-all ${audienceMode === 'targeted' ? 'bg-neutral-900 dark:bg-white text-white dark:text-black shadow-lg' : 'text-neutral-400'}`}
                     >
                         Targeted
                     </button>
@@ -130,13 +130,13 @@ const GlobalBroadcaster: React.FC = () => {
                         className="space-y-3 mb-2"
                     >
                         <div className="flex items-center justify-between">
-                            <label className="text-[10px] font-bold text-slate-500 ml-1 tracking-tight">Select Users ({selectedUserIds.length} Selected)</label>
+                            <label className="text-[10px] font-semibold text-neutral-500 ml-1 tracking-tight">Select users ({selectedUserIds.length} active)</label>
                             <button 
                                 type="button"
                                 onClick={() => setShowUserList(!showUserList)}
-                                className="text-[9px] font-bold text-orange-600 hover:underline"
+                                className="text-[9px] font-semibold text-orange-600 hover:text-orange-500 transition-colors"
                             >
-                                {showUserList ? 'Minimize' : 'Expand list'}
+                                {showUserList ? 'Collapse' : 'Manage users'}
                             </button>
                         </div>
                         
@@ -144,8 +144,8 @@ const GlobalBroadcaster: React.FC = () => {
                             <div className="space-y-3">
                                     <input 
                                         type="text"
-                                        placeholder="Search by name or ID..."
-                                        className="premium-input w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-2 text-[10px] font-semibold"
+                                        placeholder="Filter by name or campus ID..."
+                                        className="w-full bg-neutral-100 dark:bg-black/40 border border-neutral-200 dark:border-white/5 rounded-xl px-4 py-2 text-[10px] font-medium focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-all"
                                         value={userSearch}
                                         onChange={e => setUserSearch(e.target.value)}
                                     />
@@ -157,15 +157,15 @@ const GlobalBroadcaster: React.FC = () => {
                                                 onClick={() => user.id && toggleUser(user.id)}
                                                 className={`p-2 rounded-xl border flex items-center gap-2 transition-all text-left ${
                                                     selectedUserIds.includes(user.id!) 
-                                                        ? 'bg-orange-500/10 border-orange-500/30 text-orange-600' 
-                                                        : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-400 opacity-60'
+                                                        ? 'bg-orange-500/10 border-orange-500/30 text-orange-600 shadow-sm' 
+                                                        : 'bg-neutral-50 dark:bg-black/20 border-neutral-200 dark:border-white/5 text-neutral-400 opacity-60'
                                                 }`}
                                             >
-                                                <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] ${selectedUserIds.includes(user.id!) ? 'bg-orange-600 text-white' : 'bg-slate-200 dark:bg-white/10'}`}>
+                                                <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-semibold text-[10px] ${selectedUserIds.includes(user.id!) ? 'bg-orange-600 text-white' : 'bg-neutral-200 dark:bg-white/10'}`}>
                                                     {user.username?.[0].toUpperCase()}
                                                 </div>
                                                 <div className="truncate">
-                                                    <p className="text-[9px] font-bold truncate">{user.username}</p>
+                                                    <p className="text-[9px] font-semibold truncate text-neutral-900 dark:text-neutral-200">{user.username}</p>
                                                     <p className="text-[8px] font-mono opacity-50">{user.registration_number}</p>
                                                 </div>
                                             </button>
@@ -175,12 +175,12 @@ const GlobalBroadcaster: React.FC = () => {
                         ) : (
                             <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
                                 {selectedUserIds.length === 0 ? (
-                                    <p className="text-[9px] text-slate-400 italic">No users selected yet.</p>
+                                    <p className="text-[9px] text-neutral-400 italic">No users selected.</p>
                                 ) : (
                                         selectedUserIds.map(uid => {
                                             const user = allUsers.find(u => u.id === uid);
                                             return (
-                                                <div key={uid} className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-orange-600/10 text-orange-600 border border-orange-500/20 rounded-lg text-[9px] font-bold">
+                                                <div key={uid} className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-neutral-100 dark:bg-black/40 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-white/5 rounded-lg text-[9px] font-semibold">
                                                     {user?.username}
                                                     <button type="button" onClick={() => toggleUser(uid)} className="hover:text-red-500 transition-colors">×</button>
                                                 </div>
@@ -194,27 +194,27 @@ const GlobalBroadcaster: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-500 ml-1 tracking-tight">Notification Title</label>
+                        <label className="text-[10px] font-semibold text-neutral-500 ml-1 tracking-tight">Main heading</label>
                         <input
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Type heading..."
-                            className="premium-input w-full bg-slate-100 dark:bg-white/5 rounded-xl px-4 py-2.5 text-xs font-semibold"
+                            placeholder="Announcement title..."
+                            className="w-full bg-neutral-100 dark:bg-black/20 border border-neutral-200 dark:border-white/5 rounded-xl px-4 py-2.5 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-all"
                             required
                         />
                     </div>
                     <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-500 ml-1 tracking-tight">Importance</label>
-                        <div className="flex gap-1 p-1 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10">
+                        <label className="text-[10px] font-semibold text-neutral-500 ml-1 tracking-tight">Tag level</label>
+                        <div className="flex gap-1 p-1 bg-neutral-100 dark:bg-black/20 rounded-xl border border-neutral-200 dark:border-white/5">
                             {(['info', 'success', 'warning', 'error'] as const).map((t) => (
                                 <button
                                     key={t}
                                     type="button"
                                     onClick={() => setType(t)}
-                                    className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold capitalize transition-all ${type === t
-                                        ? 'bg-orange-600 text-white shadow-md'
-                                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                    className={`flex-1 py-1.5 rounded-lg text-[9px] font-semibold transition-all ${type === t
+                                        ? 'bg-neutral-900 dark:bg-white text-white dark:text-black shadow-sm'
+                                        : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300'
                                         }`}
                                 >
                                     {t}
@@ -225,30 +225,29 @@ const GlobalBroadcaster: React.FC = () => {
                 </div>
 
                 <div className="space-y-1 flex-1">
-                    <label className="text-[10px] font-bold text-slate-500 ml-1 tracking-tight">Message Body</label>
+                    <label className="text-[10px] font-semibold text-neutral-500 ml-1 tracking-tight">Message component</label>
                     <textarea
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Type your message here..."
-                        className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[24px] px-4 py-3 text-xs font-semibold h-full min-h-[100px] resize-none focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                        placeholder="Write detailed broadcast message..."
+                        className="w-full bg-neutral-100 dark:bg-black/20 border border-neutral-200 dark:border-white/5 rounded-[24px] px-4 py-3 text-xs font-medium h-full min-h-[100px] resize-none focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-all"
                         required
                     />
                 </div>
-
                 <div className="flex flex-col sm:flex-row gap-3 items-center pt-2">
                     <input
                         type="text"
                         value={link}
                         onChange={(e) => setLink(e.target.value)}
-                        placeholder="Redirect path (e.g., /library)"
-                        className="flex-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-xs font-mono"
+                        placeholder="Redirect URL (optional)"
+                        className="flex-1 bg-neutral-100 dark:bg-black/20 border border-neutral-200 dark:border-white/5 rounded-xl px-4 py-2.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-all"
                     />
                     <button
                         type="submit"
                         disabled={isSending || !title || !message}
-                        className="w-full sm:w-auto px-10 py-2.5 bg-orange-600 text-white font-bold text-[10px] uppercase tracking-widest rounded-xl shadow-lg shadow-orange-600/20 hover:bg-orange-700 transition-all disabled:opacity-50"
+                        className="w-full sm:w-auto px-10 py-2.5 bg-orange-600 text-white font-semibold text-[10px] rounded-xl shadow-lg shadow-orange-600/20 hover:bg-orange-700 transition-all disabled:opacity-50"
                     >
-                        {isSending ? 'Sending...' : 'Send Now'}
+                        {isSending ? 'Sending...' : 'Transmit now'}
                     </button>
                 </div>
 
@@ -258,14 +257,14 @@ const GlobalBroadcaster: React.FC = () => {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className={`p-3 rounded-xl text-[9px] font-black uppercase tracking-widest text-center border ${
-                                status.error ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                            className={`p-3 rounded-xl text-[9px] font-semibold text-center border mt-4 ${
+                                status.error ? 'bg-red-500/5 text-red-500 border-red-500/10' : 'bg-emerald-500/5 text-emerald-500 border-emerald-500/10'
                             }`}
                         >
                             {status.msg}
                         </motion.div>
                     )}
-                </AnimatePresence>
+                </AnimatePresence>>
             </form>
         </motion.div>
     );
@@ -1176,11 +1175,11 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     <div className="mt-12 overflow-hidden">
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 px-2">
                                                 <div>
-                                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-1">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                    <h4 className="text-[11px] font-semibold text-neutral-400 flex items-center gap-2 mb-1">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
                                                         Global Verto Registry
                                                     </h4>
-                                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">{processedProfiles.length} Members Found</p>
+                                                    <p className="text-[10px] font-medium text-neutral-500">{processedProfiles.length} members found</p>
                                                 </div>
 
                                                 <div className="flex flex-wrap items-center gap-3">
@@ -1189,14 +1188,14 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                         <select 
                                                             value={filterRole}
                                                             onChange={(e) => setFilterRole(e.target.value as any)}
-                                                            className="w-full appearance-none bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:outline-none cursor-pointer dark:text-white hover:border-orange-500/30 transition-all transition-colors"
+                                                            className="w-full appearance-none bg-neutral-100 dark:bg-black/40 border border-neutral-200 dark:border-white/5 rounded-xl px-4 py-2 text-[10px] font-semibold focus:outline-none cursor-pointer dark:text-neutral-400 hover:border-orange-500/30 transition-all"
                                                             style={{ colorScheme: 'dark' }}
                                                         >
-                                                            <option value="all" className="dark:bg-slate-900">All Roles</option>
-                                                            <option value="user" className="dark:bg-slate-900">Regular Users</option>
-                                                            <option value="admin" className="dark:bg-slate-900">Administrators</option>
+                                                            <option value="all">All roles</option>
+                                                            <option value="user">Regular users</option>
+                                                            <option value="admin">Administrators</option>
                                                         </select>
-                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover/select:text-orange-500 transition-colors">
+                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400 group-hover/select:text-orange-500 transition-colors">
                                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M6 9l6 6 6-6" /></svg>
                                                         </div>
                                                     </div>
@@ -1206,14 +1205,14 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                         <select 
                                                             value={sortBy}
                                                             onChange={(e) => setSortBy(e.target.value as any)}
-                                                            className="w-full appearance-none bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:outline-none cursor-pointer dark:text-white hover:border-orange-500/30 transition-all transition-colors"
+                                                            className="w-full appearance-none bg-neutral-100 dark:bg-black/40 border border-neutral-200 dark:border-white/5 rounded-xl px-4 py-2 text-[10px] font-semibold focus:outline-none cursor-pointer dark:text-neutral-400 hover:border-orange-500/30 transition-all"
                                                             style={{ colorScheme: 'dark' }}
                                                         >
-                                                            <option value="username" className="dark:bg-slate-900">Sort by Name</option>
-                                                            <option value="level" className="dark:bg-slate-900">Sort by Level</option>
-                                                            <option value="xp" className="dark:bg-slate-900">Sort by XP</option>
+                                                            <option value="username">Sort by name</option>
+                                                            <option value="level">Sort by level</option>
+                                                            <option value="xp">Sort by XP</option>
                                                         </select>
-                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover/select:text-orange-500 transition-colors">
+                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400 group-hover/select:text-orange-500 transition-colors">
                                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M6 9l6 6 6-6" /></svg>
                                                         </div>
                                                     </div>
@@ -1221,7 +1220,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                     {/* Sort Order */}
                                                     <button 
                                                         onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-                                                        className="p-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-slate-500 hover:text-orange-500 transition-colors"
+                                                        className="p-2 bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/5 rounded-xl text-neutral-500 hover:text-orange-500 transition-colors"
                                                     >
                                                         {sortOrder === 'asc' ? (
                                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 4h13M3 8h9M3 12h5m7-8v16m0 0l-4-4m4 4l4-4" /></svg>
@@ -1236,11 +1235,11 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                 <div className="overflow-x-auto no-scrollbar">
                                                     <table className="w-full text-left border-collapse">
                                                         <thead>
-                                                            <tr className="bg-slate-50/50 dark:bg-white/[0.02] border-b border-slate-100 dark:border-white/10">
-                                                                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em]">Verto Profile</th>
-                                                                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] hidden sm:table-cell text-center">Reference</th>
-                                                                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] hidden md:table-cell">Affiliation</th>
-                                                                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] text-right">Access</th>
+                                                            <tr className="bg-neutral-50/50 dark:bg-white/[0.01] border-b border-neutral-100 dark:border-white/5">
+                                                                <th className="px-8 py-5 text-[9px] font-semibold text-neutral-400 uppercase tracking-wider">Verto profile</th>
+                                                                <th className="px-8 py-5 text-[9px] font-semibold text-neutral-400 uppercase tracking-wider hidden sm:table-cell text-center">Reference</th>
+                                                                <th className="px-8 py-5 text-[9px] font-semibold text-neutral-400 uppercase tracking-wider hidden md:table-cell">Affiliation</th>
+                                                                <th className="px-8 py-5 text-[9px] font-semibold text-neutral-400 uppercase tracking-wider text-right">Access</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody className="divide-y divide-slate-100 dark:divide-white/5">
@@ -1256,11 +1255,11 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                             ) : paginatedProfiles.length > 0 ? (
                                                                 paginatedProfiles.map((user) => (
                                                                     <React.Fragment key={user.id}>
-                                                                        <tr className={`group hover:bg-slate-50/80 dark:hover:bg-white/[0.03] transition-all ${selectedUserActivity?.profile?.id === user.id ? 'bg-slate-50 dark:bg-white/[0.02]' : ''}`}>
+                                                                        <tr className={`group hover:bg-neutral-50/80 dark:hover:bg-white/[0.02] transition-all ${selectedUserActivity?.profile?.id === user.id ? 'bg-neutral-50 dark:bg-white/[0.01]' : ''}`}>
                                                                             <td className="px-8 py-5">
                                                                                 <div className="flex items-center gap-5">
                                                                                     <div className="relative">
-                                                                                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-white/5 dark:to-white/10 flex items-center justify-center text-slate-600 dark:text-white font-black text-sm shadow-sm overflow-hidden border border-white/50 dark:border-white/5 group-hover:scale-105 transition-transform">
+                                                                                        <div className="w-12 h-12 rounded-2xl bg-neutral-100 dark:bg-white/5 flex items-center justify-center text-neutral-600 dark:text-neutral-300 font-semibold text-sm shadow-sm overflow-hidden border border-neutral-200 dark:border-white/5 group-hover:scale-105 transition-transform">
                                                                                             {user.avatar_url ? (
                                                                                                 <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
                                                                                             ) : (
@@ -1268,31 +1267,31 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                                             )}
                                                                                         </div>
                                                                                         {user.is_admin && (
-                                                                                            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-500 border-2 border-white dark:border-slate-900 flex items-center justify-center">
+                                                                                            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-500 border-2 border-white dark:border-black flex items-center justify-center">
                                                                                                 <div className="w-1.5 h-1.5 bg-white rounded-full" />
                                                                                             </div>
                                                                                         )}
                                                                                     </div>
                                                                                     <div>
-                                                                                        <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">{user.username}</p>
+                                                                                        <p className="text-xs font-semibold text-neutral-900 dark:text-neutral-200 tracking-tight">{user.username}</p>
                                                                                         <div className="flex flex-wrap items-center gap-2 mt-1">
-                                                                                            <p className="text-[9px] font-bold text-emerald-500 px-2 py-0.5 bg-emerald-500/10 rounded-full uppercase tracking-tighter">LVL {user.level || 1}</p>
-                                                                                            <p className="text-[9px] font-bold text-slate-400 font-mono tracking-tighter">{(user.total_xp || 0).toLocaleString()} XP</p>
-                                                                                            <p className="text-[9px] font-bold text-slate-400 opacity-50 px-1 border-l border-slate-200 dark:border-white/10 uppercase tracking-tighter">{user.is_admin ? 'Admin' : 'Verto'}</p>
+                                                                                            <p className="text-[9px] font-semibold text-emerald-500 px-2 py-0.5 bg-emerald-500/10 rounded-full">Lvl {user.level || 1}</p>
+                                                                                            <p className="text-[9px] font-medium text-neutral-400 font-mono tracking-tight">{(user.total_xp || 0).toLocaleString()} xp</p>
+                                                                                            <p className="text-[9px] font-medium text-neutral-500 opacity-70 px-1 border-l border-neutral-200 dark:border-white/10">{user.is_admin ? 'Admin' : 'Verto'}</p>
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
                                                                             </td>
                                                                             <td className="px-8 py-5 hidden sm:table-cell text-center">
-                                                                                <p className="text-[10px] font-black text-slate-600 dark:text-slate-300 font-mono tracking-wider tabular-nums px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-lg inline-block">{user.registration_number || '----------'}</p>
+                                                                                <p className="text-[10px] font-medium text-neutral-600 dark:text-neutral-400 font-mono tracking-wider tabular-nums px-3 py-1 bg-neutral-100 dark:bg-white/5 rounded-lg inline-block">{user.registration_number || '----------'}</p>
                                                                             </td>
                                                                             <td className="px-8 py-5 hidden md:table-cell">
-                                                                                <p className="text-[10px] font-bold text-slate-500 truncate max-w-[180px]">{user.email || 'Email Protected'}</p>
+                                                                                <p className="text-[10px] font-medium text-neutral-500 truncate max-w-[180px]">{user.email || 'Email Protected'}</p>
                                                                             </td>
                                                                             <td className="px-8 py-5 text-right">
                                                                                 <button 
                                                                                     onClick={() => selectUserForTracking(user)}
-                                                                                    className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.15em] transition-all shadow-sm ${selectedUserActivity?.profile?.id === user.id ? 'bg-orange-500 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-orange-600 hover:text-white dark:hover:bg-orange-600 dark:hover:text-white'}`}
+                                                                                    className={`px-6 py-2.5 rounded-xl text-[10px] font-semibold transition-all ${selectedUserActivity?.profile?.id === user.id ? 'bg-orange-600 text-white shadow-lg shadow-orange-500/20' : 'bg-neutral-900 dark:bg-white/5 text-white dark:text-neutral-300 hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white'}`}
                                                                                 >
                                                                                     {selectedUserActivity?.profile?.id === user.id ? 'Hide' : 'View'}
                                                                                 </button>
@@ -1307,78 +1306,78 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                                         className="overflow-hidden space-y-8 mt-4"
                                                                                     >
                                                                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-3">
-                                                                                            <div className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm">
-                                                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Level Status</p>
-                                                                                                <p className="text-lg font-black text-slate-900 dark:text-white tracking-tighter">LVL {selectedUserActivity.profile?.level || 1}</p>
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Level status</p>
+                                                                                                <p className="text-lg font-semibold text-neutral-900 dark:text-neutral-200 tracking-tight">Lvl {selectedUserActivity.profile?.level || 1}</p>
                                                                                             </div>
-                                                                                            <div className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm">
-                                                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Progression</p>
-                                                                                                <p className="text-lg font-black text-emerald-500 tracking-tighter">{(selectedUserActivity.profile?.total_xp || 0).toLocaleString()} <span className="text-[8px] opacity-60 uppercase ml-1">XP</span></p>
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Progression</p>
+                                                                                                <p className="text-lg font-semibold text-emerald-500 tracking-tight">{(selectedUserActivity.profile?.total_xp || 0).toLocaleString()} <span className="text-[8px] opacity-60 ml-1">xp</span></p>
                                                                                             </div>
-                                                                                            <div className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm">
-                                                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Quiz Volume</p>
-                                                                                                <p className="text-lg font-black text-orange-500 tracking-tighter">{selectedUserActivity.attempts?.length || 0} <span className="text-[8px] opacity-60 uppercase ml-1">Tests</span></p>
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Quiz volume</p>
+                                                                                                <p className="text-lg font-semibold text-orange-500 tracking-tight">{selectedUserActivity.attempts?.length || 0} <span className="text-[8px] opacity-60 ml-1">tests</span></p>
                                                                                             </div>
-                                                                                            <div className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm">
-                                                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Study Hours</p>
-                                                                                                <p className="text-lg font-black text-blue-500 tracking-tighter">{(selectedUserActivity.historyStats?.studyTime / 3600).toFixed(1)} <span className="text-[8px] opacity-60 uppercase ml-1">Hrs</span></p>
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Study hours</p>
+                                                                                                <p className="text-lg font-semibold text-blue-500 tracking-tight">{(selectedUserActivity.historyStats?.studyTime / 3600).toFixed(1)} <span className="text-[8px] opacity-60 ml-1">hrs</span></p>
                                                                                             </div>
-                                                                                            <div className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm">
-                                                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Library Use</p>
-                                                                                                <p className="text-lg font-black text-indigo-500 tracking-tighter">{selectedUserActivity.historyStats?.filesAccessed || 0} <span className="text-[8px] opacity-60 uppercase ml-1">Files</span></p>
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Library use</p>
+                                                                                                <p className="text-lg font-semibold text-indigo-500 tracking-tight">{selectedUserActivity.historyStats?.filesAccessed || 0} <span className="text-[8px] opacity-60 ml-1">files</span></p>
                                                                                             </div>
-                                                                                            <div className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm">
-                                                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">CGPA Checks</p>
-                                                                                                <p className="text-lg font-black text-purple-500 tracking-tighter">{selectedUserActivity.historyStats?.cgpaCalculations || 0} <span className="text-[8px] opacity-60 uppercase ml-1">Runs</span></p>
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">CGPA checks</p>
+                                                                                                <p className="text-lg font-semibold text-purple-500 tracking-tight">{selectedUserActivity.historyStats?.cgpaCalculations || 0} <span className="text-[8px] opacity-60 ml-1">runs</span></p>
                                                                                             </div>
-                                                                                            <div className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm">
-                                                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Social Sync</p>
-                                                                                                <p className="text-lg font-black text-slate-400 tracking-tighter">{(selectedUserActivity.reports?.length + selectedUserActivity.feedback?.length) * 10} <span className="text-[8px] opacity-60 uppercase ml-1">Pts</span></p>
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Social sync</p>
+                                                                                                <p className="text-lg font-semibold text-neutral-400 tracking-tight">{(selectedUserActivity.reports?.length + selectedUserActivity.feedback?.length) * 10} <span className="text-[8px] opacity-60 ml-1">pts</span></p>
                                                                                             </div>
                                                                                         </div>
 
                                                                                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                                                                            <div className="bg-white dark:bg-white/[0.02] p-6 rounded-3xl border border-slate-200 dark:border-white/10">
-                                                                                                <h5 className="text-[9px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/5 pb-3">Quiz Performance (Recent)</h5>
+                                                                                            <div className="bg-white dark:bg-white/[0.01] p-6 rounded-3xl border border-neutral-200 dark:border-white/5">
+                                                                                                <h5 className="text-[9px] font-semibold text-neutral-900 dark:text-neutral-400 uppercase tracking-widest mb-4 border-b border-neutral-100 dark:border-white/5 pb-3">Quiz performance (recent)</h5>
                                                                                                 <div className="space-y-2">
                                                                                                     {selectedUserActivity.attempts?.length > 0 ? selectedUserActivity.attempts.slice(0, 5).map((att: any, i: number) => (
-                                                                                                        <div key={i} className="flex justify-between items-center p-3 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-all">
+                                                                                                        <div key={i} className="flex justify-between items-center p-3 hover:bg-neutral-50 dark:hover:bg-white/[0.02] rounded-xl transition-all">
                                                                                                             <div>
-                                                                                                                <p className="text-[10px] font-black text-slate-800 dark:text-white/80 uppercase mb-0.5">{att.subject}</p>
-                                                                                                                <p className="text-[8px] font-bold text-slate-400">{new Date(att.created_at).toLocaleDateString()}</p>
+                                                                                                                <p className="text-[10px] font-semibold text-neutral-800 dark:text-neutral-300 mb-0.5">{att.subject}</p>
+                                                                                                                <p className="text-[8px] font-medium text-neutral-400">{new Date(att.created_at).toLocaleDateString()}</p>
                                                                                                             </div>
                                                                                                             <div className="text-right">
-                                                                                                                <p className="text-[10px] font-black text-slate-900 dark:text-white">{Math.round((att.score / att.total_questions) * 100)}%</p>
-                                                                                                                <p className="text-[7px] font-black text-emerald-500">+{att.xp_gained} XP</p>
+                                                                                                                <p className="text-[10px] font-semibold text-neutral-900 dark:text-neutral-200">{Math.round((att.score / att.total_questions) * 100)}%</p>
+                                                                                                                <p className="text-[7px] font-semibold text-emerald-500">+{att.xp_gained} XP</p>
                                                                                                             </div>
                                                                                                         </div>
                                                                                                     )) : (
-                                                                                                        <p className="text-[10px] font-bold text-slate-300 italic text-center py-6">No attempts logged.</p>
+                                                                                                        <p className="text-[10px] font-medium text-neutral-400 italic text-center py-6">No attempts logged.</p>
                                                                                                     )}
                                                                                                 </div>
                                                                                             </div>
 
-                                                                                            <div className="bg-white dark:bg-white/[0.02] p-6 rounded-3xl border border-slate-200 dark:border-white/10">
-                                                                                                <h5 className="text-[9px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/5 pb-3">Community Activity</h5>
-                                                                                                <div className="space-y-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
+                                                                                            <div className="bg-white dark:bg-white/[0.01] p-6 rounded-3xl border border-neutral-200 dark:border-white/5">
+                                                                                                <h5 className="text-[9px] font-semibold text-neutral-900 dark:text-neutral-400 uppercase tracking-widest mb-4 border-b border-neutral-100 dark:border-white/5 pb-3">Community activity</h5>
+                                                                                                <div className="space-y-3 max-h-[220px] overflow-y-auto pr-2 no-scrollbar">
                                                                                                     {selectedUserActivity.reports?.map((r: any, i: number) => (
                                                                                                         <div key={`rep-${i}`} className="flex gap-3 items-start border-l-2 border-red-500/30 pl-3 py-1">
                                                                                                             <div>
-                                                                                                                <p className="text-[10px] font-bold text-slate-800 dark:text-white/70 tracking-tight">Report: {r.reason}</p>
-                                                                                                                <p className="text-[7px] text-slate-500 font-bold uppercase">{new Date(r.created_at).toLocaleDateString()}</p>
+                                                                                                                <p className="text-[10px] font-medium text-neutral-800 dark:text-neutral-400 tracking-tight">Report: {r.reason}</p>
+                                                                                                                <p className="text-[7px] text-neutral-500 font-semibold uppercase">{new Date(r.created_at).toLocaleDateString()}</p>
                                                                                                             </div>
                                                                                                         </div>
                                                                                                     ))}
                                                                                                     {selectedUserActivity.feedback?.map((f: any, i: number) => (
                                                                                                         <div key={`feed-${i}`} className="flex gap-3 items-start border-l-2 border-emerald-500/30 pl-3 py-1">
                                                                                                             <div>
-                                                                                                                <p className="text-[10px] font-bold text-slate-800 dark:text-white/70 tracking-tight">Feedback: {f.text.slice(0, 50)}...</p>
-                                                                                                                <p className="text-[7px] text-slate-500 font-bold uppercase">{new Date(f.created_at).toLocaleDateString()}</p>
+                                                                                                                <p className="text-[10px] font-medium text-neutral-800 dark:text-neutral-400 tracking-tight">Feedback: {f.text.slice(0, 50)}...</p>
+                                                                                                                <p className="text-[7px] text-neutral-500 font-semibold uppercase">{new Date(f.created_at).toLocaleDateString()}</p>
                                                                                                             </div>
                                                                                                         </div>
                                                                                                     ))}
                                                                                                     {selectedUserActivity.reports?.length === 0 && selectedUserActivity.feedback?.length === 0 && (
-                                                                                                        <p className="text-[10px] font-bold text-slate-300 italic text-center py-6">Zero social impact events.</p>
+                                                                                                        <p className="text-[10px] font-medium text-neutral-400 italic text-center py-6">Zero social impact events.</p>
                                                                                                     )}
                                                                                                 </div>
                                                                                             </div>
@@ -1394,7 +1393,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                     <td colSpan={4} className="py-24 text-center">
                                                                         <div className="flex flex-col items-center gap-3 opacity-30 grayscale">
                                                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-16 h-16"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 10v4" /><path d="M10 12h4" /></svg>
-                                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Grid Empty</p>
+                                                                            <p className="text-[10px] font-semibold text-neutral-400 tracking-wider">No records found</p>
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -1404,124 +1403,21 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                 </div>
                                             </div>
 
-                                            {/* Load More Button */}
+                                            {/* Sync More Records Button */}
                                             {displayLimit < processedProfiles.length && (
                                                 <div className="mt-8 flex justify-center pb-12">
                                                     <button 
                                                         onClick={() => setDisplayLimit(prev => prev + 10)}
-                                                        className="px-8 py-3 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 hover:text-orange-500 hover:border-orange-500/30 transition-all shadow-xl active:scale-95"
+                                                        className="px-8 py-3 rounded-2xl bg-white dark:bg-black/40 border border-neutral-200 dark:border-white/5 text-[10px] font-semibold text-neutral-600 dark:text-neutral-400 hover:text-orange-500 hover:border-orange-500/30 transition-all shadow-xl active:scale-95"
                                                     >
-                                                        Sync More Records ({processedProfiles.length - displayLimit} Remaining)
+                                                        Sync more records ({processedProfiles.length - displayLimit} remaining)
                                                     </button>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
 
-                                {/* Active Selection Board */}
-                                {selectedUserActivity && (
-                                    <motion.div 
-                                        initial={{ opacity: 0, y: 30 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="space-y-6"
-                                    >
-                                        <div className="flex items-center justify-between px-2">
-                                            <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-[0.2em] flex items-center gap-3">
-                                                <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)]" />
-                                                Active Profile: <span className="text-orange-600">{selectedUserActivity.profile?.username}</span>
-                                            </h4>
-                                            <button 
-                                                onClick={() => setSelectedUserActivity(null)}
-                                                className="text-[9px] font-bold uppercase text-slate-400 hover:text-red-500 transition-colors"
-                                            >
-                                                Close Session
-                                            </button>
-                                        </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Level/XP</p>
-                                                <p className="text-xl font-black text-slate-900 dark:text-white tracking-tighter">LVL {selectedUserActivity.profile?.level || 1} <span className="text-[10px] text-emerald-500 opacity-60 ml-2">{(selectedUserActivity.profile?.total_xp || 0).toLocaleString()} XP</span></p>
-                                            </div>
-                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Quiz Power</p>
-                                                <p className="text-xl font-black text-slate-900 dark:text-white tracking-tighter">{selectedUserActivity.attempts?.length || 0} <span className="text-[10px] text-orange-500 opacity-60 ml-2">Tests</span></p>
-                                            </div>
-                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Study Volume</p>
-                                                <p className="text-xl font-black text-blue-500 tracking-tighter">{(selectedUserActivity.historyStats?.studyTime / 3600).toFixed(1)} <span className="text-[10px] opacity-60 ml-2">Hours Active</span></p>
-                                            </div>
-                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Resource Use</p>
-                                                <p className="text-xl font-black text-indigo-500 tracking-tighter">{selectedUserActivity.historyStats?.filesAccessed || 0} <span className="text-[10px] opacity-60 ml-2">Files</span></p>
-                                            </div>
-                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">CGPA Analytics</p>
-                                                <p className="text-xl font-black text-purple-500 tracking-tighter">{selectedUserActivity.historyStats?.cgpaCalculations || 0} <span className="text-[10px] opacity-60 ml-2">Calcs</span></p>
-                                            </div>
-                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Impact Points</p>
-                                                <p className="text-xl font-black text-emerald-500 tracking-tighter">{(selectedUserActivity.reports?.length + selectedUserActivity.feedback?.length) * 10} <span className="text-[10px] opacity-60 ml-2">Social</span></p>
-                                            </div>
-                                            <div className="p-5 bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm">
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Quiz Mastery</p>
-                                                <p className="text-xl font-black text-orange-600 tracking-tighter">{selectedUserActivity.historyStats?.quizzesCompleted || 0} <span className="text-[10px] opacity-60 ml-2">Comp.</span></p>
-                                            </div>
-                                        </div>
-
-                                        {/* Activity Log Grid */}
-                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                            {/* Quiz Performance */}
-                                            <div className="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-white/10">
-                                                <h5 className="text-[10px] font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/5 pb-3">Quiz History (Last 10)</h5>
-                                                <div className="space-y-3">
-                                                    {selectedUserActivity.attempts?.length > 0 ? selectedUserActivity.attempts.map((att: any, i: number) => (
-                                                        <div key={i} className="flex justify-between items-center p-3 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-all group">
-                                                            <div>
-                                                                <p className="text-[10px] font-black text-slate-800 dark:text-white/80 uppercase mb-0.5">{att.subject}</p>
-                                                                <p className="text-[8px] font-bold text-slate-400">{new Date(att.created_at).toLocaleDateString()}</p>
-                                                            </div>
-                                                            <div className="text-right">
-                                                                <p className="text-xs font-black text-slate-900 dark:text-white">{Math.round((att.score / att.total_questions) * 100)}%</p>
-                                                                <p className="text-[8px] font-bold text-emerald-500">+{att.xp_gained} XP</p>
-                                                            </div>
-                                                        </div>
-                                                    )) : (
-                                                        <p className="text-[10px] font-bold text-slate-300 italic text-center py-10">No attempts found.</p>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Contributions */}
-                                            <div className="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-white/10">
-                                                <h5 className="text-[10px] font-bold text-slate-900 dark:text-white uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/5 pb-3">Issues & Feedback</h5>
-                                                <div className="space-y-4">
-                                                    {selectedUserActivity.reports?.map((r: any, i: number) => (
-                                                        <div key={i} className="flex gap-3 items-start border-l-2 border-red-500/30 pl-3">
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1" />
-                                                            <div>
-                                                                <p className="text-[10px] font-bold text-slate-800 dark:text-white/70">Reported: {r.reason}</p>
-                                                                <p className="text-[8px] text-slate-500">{new Date(r.created_at).toLocaleDateString()}</p>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    {selectedUserActivity.feedback?.map((f: any, i: number) => (
-                                                        <div key={i} className="flex gap-3 items-start border-l-2 border-orange-500/30 pl-3">
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-1" />
-                                                            <div>
-                                                                <p className="text-[10px] font-bold text-slate-800 dark:text-white/70">Feedback: {f.text.slice(0, 40)}...</p>
-                                                                <p className="text-[8px] text-slate-500">{new Date(f.created_at).toLocaleDateString()}</p>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    {selectedUserActivity.reports?.length === 0 && selectedUserActivity.feedback?.length === 0 && (
-                                                        <p className="text-[10px] font-bold text-slate-300 italic text-center py-10">No public reports or feedback.</p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                )}
                             </motion.div>
                         )}
                     </div>
@@ -1534,14 +1430,14 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         className="grid grid-cols-1 lg:grid-cols-3 gap-8"
                     >
                         <div className="lg:col-span-2 space-y-6">
-                             <form onSubmit={handleCreateQuestion} className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/10 shadow-2xl space-y-6">
+                             <form onSubmit={handleCreateQuestion} className="glass-panel p-8 rounded-[40px] border border-neutral-200 dark:border-white/5 shadow-2xl space-y-6">
                                 <div className="flex items-center gap-4 mb-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-black flex items-center justify-center shadow-2xl">
+                                    <div className="w-12 h-12 rounded-2xl bg-neutral-900 dark:bg-white text-white dark:text-black flex items-center justify-center shadow-2xl">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Question Editor</h3>
-                                        <p className="text-[10px] font-bold text-slate-400 tracking-wider">{newQuestion.id ? `Editing Question: ${newQuestion.id}` : 'Adding a new question to the database'}</p>
+                                        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-200 tracking-tight">Question editor</h3>
+                                        <p className="text-[10px] font-medium text-neutral-400 tracking-wider font-mono">{newQuestion.id ? `Editing question: ${newQuestion.id}` : 'Create a fresh record in the system'}</p>
                                     </div>
                                 </div>
 
@@ -1642,10 +1538,10 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                     key={level}
                                                     type="button"
                                                     onClick={() => setNewQuestion({...newQuestion, difficulty: level})}
-                                                    className={`py-2 rounded-xl text-[9px] font-bold capitalize transition-all border ${
+                                                    className={`py-2 rounded-xl text-[9px] font-semibold transition-all border ${
                                                         newQuestion.difficulty === level 
-                                                        ? 'bg-orange-600 text-white border-orange-600' 
-                                                        : 'bg-slate-100 dark:bg-white/5 text-slate-500 border-transparent hover:border-slate-300'
+                                                        ? 'bg-orange-600 text-white border-orange-600 shadow-lg shadow-orange-600/20' 
+                                                        : 'bg-neutral-100 dark:bg-black/40 text-neutral-500 border-transparent hover:border-neutral-300 dark:hover:border-white/10'
                                                     }`}
                                                 >
                                                     {level}
@@ -1654,20 +1550,20 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-slate-500 tracking-wider ml-1">Topic</label>
+                                        <label className="text-[10px] font-semibold text-neutral-500 tracking-tight ml-1">Topic</label>
                                         <input 
                                             type="text" 
                                             placeholder="e.g. Heapsort, Normalization" 
-                                            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-3 text-xs font-bold"
+                                            className="w-full bg-neutral-100 dark:bg-black/40 border border-neutral-200 dark:border-white/5 rounded-2xl px-5 py-3 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-all"
                                             value={newQuestion.topic}
                                             onChange={e => setNewQuestion({...newQuestion, topic: e.target.value})}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-slate-500 tracking-wider ml-1">Explanation</label>
+                                        <label className="text-[10px] font-semibold text-neutral-500 tracking-tight ml-1">Explanation</label>
                                         <textarea 
                                             placeholder="Explain the correct answer here..." 
-                                            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-3 text-[10px] font-semibold h-24 focus:outline-none focus:ring-1 focus:ring-orange-500/30"
+                                            className="w-full bg-neutral-100 dark:bg-black/40 border border-neutral-200 dark:border-white/5 rounded-2xl px-5 py-3 text-[10px] font-medium h-24 focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-all resize-none"
                                             value={newQuestion.explanation}
                                             onChange={e => setNewQuestion({...newQuestion, explanation: e.target.value})}
                                         />
@@ -1685,8 +1581,8 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         className="space-y-6"
                     >
                         <div className="flex items-center justify-between px-4">
-                            <h3 className="text-xs font-bold text-slate-500 tracking-wider">feedback feed</h3>
-                            <button onClick={loadFeedback} className="text-[10px] font-bold text-orange-600 hover:underline">refresh list</button>
+                            <h3 className="text-xs font-semibold text-neutral-500 tracking-tight">Recent feedback</h3>
+                            <button onClick={loadFeedback} className="text-[10px] font-semibold text-orange-600 hover:text-orange-500 transition-colors">Refresh feed</button>
                         </div>
                         {feedback.length > 0 ? (
                             feedback.map((f, i) => (
@@ -1695,25 +1591,25 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: i * 0.05 }}
-                                    className="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-xl relative"
+                                    className="glass-panel p-6 rounded-[32px] border border-neutral-200 dark:border-white/5 shadow-xl relative"
                                 >
                                     <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-xl shadow-indigo-500/20">
+                                            <div className="w-12 h-12 rounded-2xl bg-neutral-900 dark:bg-white flex items-center justify-center text-white dark:text-black font-semibold text-sm shadow-xl">
                                                 {f.user?.username?.[0] || 'G'}
                                             </div>
                                             <div>
-                                                <h4 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">{f.user?.username || 'Guest'}</h4>
-                                                <p className="text-[10px] font-mono text-slate-500">{f.user_email || 'No Email'}</p>
+                                                <h4 className="text-sm font-semibold text-neutral-900 dark:text-neutral-200 tracking-tight">{f.user?.username || 'Guest'}</h4>
+                                                <p className="text-[10px] font-mono text-neutral-500">{f.user_email || 'No Email'}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-[10px] font-bold text-slate-500 tracking-wider">{new Date(f.created_at).toLocaleDateString()}</p>
-                                            <p className="text-[9px] font-medium text-slate-400">{new Date(f.created_at).toLocaleTimeString()}</p>
+                                            <p className="text-[10px] font-semibold text-neutral-500 tracking-tight">{new Date(f.created_at).toLocaleDateString()}</p>
+                                            <p className="text-[9px] font-medium text-neutral-400">{new Date(f.created_at).toLocaleTimeString()}</p>
                                         </div>
                                     </div>
-                                    <div className="bg-slate-100 dark:bg-white/5 p-6 rounded-[30px] border border-slate-200 dark:border-white/10 mb-6">
-                                        <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium italic">"{f.text}"</p>
+                                    <div className="bg-neutral-100 dark:bg-black/20 p-6 rounded-[24px] border border-neutral-200 dark:border-white/5 mb-6">
+                                        <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed font-medium italic">"{f.text}"</p>
                                     </div>
 
                                     {f.user_id ? (
@@ -1726,7 +1622,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                 >
                                                     <textarea 
                                                         placeholder="Write your reply here..."
-                                                        className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-[28px] p-5 text-sm font-medium focus:outline-none focus:border-indigo-500/50 min-h-[120px] resize-none"
+                                                        className="w-full bg-neutral-50 dark:bg-black/40 border border-neutral-200 dark:border-white/5 rounded-[24px] p-5 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-orange-500/30 min-h-[120px] resize-none transition-all"
                                                         value={replyText}
                                                         onChange={(e) => setReplyText(e.target.value)}
                                                     />
@@ -1734,13 +1630,13 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                         <button 
                                                             onClick={() => handleSendReply(f)}
                                                             disabled={isSendingReply || !replyText.trim()}
-                                                            className="flex-1 bg-indigo-600 text-white font-bold text-xs py-3 rounded-2xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all disabled:opacity-50"
+                                                            className="flex-1 bg-orange-600 text-white font-semibold text-[10px] py-3 rounded-2xl shadow-lg shadow-orange-600/20 hover:bg-orange-700 transition-all disabled:opacity-50"
                                                         >
-                                                            {isSendingReply ? 'Sending...' : 'Send Reply'}
+                                                            {isSendingReply ? 'Sending...' : 'Send reply'}
                                                         </button>
                                                         <button 
                                                             onClick={() => { setReplyingTo(null); setReplyText(''); }}
-                                                            className="px-6 bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-slate-400 font-bold text-xs py-3 rounded-2xl hover:bg-slate-300 dark:hover:bg-white/10 transition-all"
+                                                            className="px-6 bg-neutral-100 dark:bg-black/40 text-neutral-500 font-semibold text-[10px] py-3 rounded-2xl hover:bg-neutral-200 dark:hover:bg-white/5 transition-all"
                                                         >
                                                             Cancel
                                                         </button>
@@ -1750,14 +1646,14 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                 <div className="flex items-center gap-4">
                                                     <button 
                                                         onClick={() => setReplyingTo(f.id)}
-                                                        className="px-8 py-3 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-[10px] tracking-tight rounded-2xl hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm"
+                                                        className="px-8 py-3 bg-neutral-100 dark:bg-black/40 border border-neutral-200 dark:border-white/5 text-neutral-600 dark:text-neutral-400 font-semibold text-[10px] tracking-tight rounded-2xl hover:bg-orange-600 hover:text-white hover:border-orange-600 transition-all shadow-sm"
                                                     >
                                                         Reply to feedback
                                                     </button>
                                                     {f.replies?.length > 0 && (
                                                         <div className="flex items-center gap-2 group cursor-default">
                                                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                                            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                                                            <p className="text-[10px] font-semibold text-neutral-500">
                                                                 {f.replies.length} {f.replies.length === 1 ? 'reply' : 'replies'}
                                                             </p>
                                                         </div>
@@ -1766,17 +1662,17 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                             )}
                                         </div>
                                     ) : (
-                                        <div className="flex items-center gap-2 px-6 py-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl w-fit">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                                            <p className="text-[9px] font-bold text-amber-600 tracking-wider">Guest feedback: Cannot reply</p>
+                                        <div className="flex items-center gap-2 px-6 py-3 bg-orange-500/5 border border-orange-500/10 rounded-2xl w-fit">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+                                            <p className="text-[9px] font-semibold text-orange-600/80 tracking-tight">Guest feedback: Cannot reply</p>
                                         </div>
                                     )}
                                 </motion.div>
                             ))
                         ) : (
-                            <div className="text-center py-20 bg-slate-100/50 dark:bg-white/5 rounded-[40px] border-2 border-dashed border-slate-200 dark:border-white/10">
-                                <p className="text-xs font-bold text-slate-400 tracking-widest">No Feedback Yet</p>
-                                <p className="text-[10px] text-slate-500 mt-2">Everything is quiet for now.</p>
+                            <div className="text-center py-20 bg-neutral-100/50 dark:bg-black/20 rounded-[40px] border-2 border-dashed border-neutral-200 dark:border-white/5">
+                                <p className="text-xs font-semibold text-neutral-400">No feedback yet</p>
+                                <p className="text-[10px] text-neutral-500 mt-2">Everything is quiet for now.</p>
                             </div>
                         )}
                     </motion.div>
@@ -1787,34 +1683,34 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
             <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-slate-900 dark:bg-[#0a0a0a] p-10 rounded-[50px] border border-white/5 shadow-3xl text-white relative overflow-hidden group"
+                className="bg-neutral-900/10 dark:bg-black/40 p-10 rounded-[48px] border border-neutral-200 dark:border-white/5 shadow-2xl backdrop-blur-xl relative overflow-hidden group"
             >
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-600/10 blur-[150px] rounded-full -mr-64 -mt-64 group-hover:bg-orange-600/20 transition-all duration-1000" />
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-600/5 blur-[120px] rounded-full -mr-64 -mt-64 group-hover:bg-orange-600/10 transition-all duration-1000" />
                 <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
                     <div className="md:col-span-4">
-                        <h3 className="text-2xl font-bold tracking-tight mb-2">System Status</h3>
-                        <p className="text-xs text-slate-500 font-semibold tracking-wider">Operational Overview</p>
-                        <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/10 inline-flex items-center gap-3">
+                        <h3 className="text-2xl font-semibold tracking-tight mb-2 text-neutral-900 dark:text-neutral-100">System status</h3>
+                        <p className="text-xs text-neutral-500 font-medium tracking-tight">Active session analytics</p>
+                        <div className="mt-8 p-4 bg-neutral-900 dark:bg-white/5 rounded-2xl border border-white/10 inline-flex items-center gap-3">
                             <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]" />
-                            <span className="text-xs font-bold tracking-wider text-emerald-500">Peak Performance</span>
+                            <span className="text-xs font-semibold tracking-tight text-emerald-500">Live operational</span>
                         </div>
                     </div>
                     <div className="md:col-span-8 grid grid-cols-2 lg:grid-cols-4 gap-8">
                         <div>
-                            <p className="text-[10px] font-bold text-slate-500 tracking-wider mb-1">Page Views</p>
-                            <p className="text-3xl font-bold tracking-tight">{data?.summary?.totalViews.toLocaleString() || '0'}</p>
+                            <p className="text-[10px] font-semibold text-neutral-500 tracking-tight mb-1">Page hits</p>
+                            <p className="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">{data?.summary?.totalViews.toLocaleString() || '0'}</p>
                         </div>
                         <div>
-                            <p className="text-[10px] font-bold text-slate-500 tracking-wider mb-1">Users</p>
-                            <p className="text-3xl font-bold tracking-tight">{data?.summary?.registered.toLocaleString() || '0'}</p>
+                            <p className="text-[10px] font-semibold text-neutral-500 tracking-tight mb-1">Users</p>
+                            <p className="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">{data?.summary?.registered.toLocaleString() || '0'}</p>
                         </div>
                         <div>
-                            <p className="text-[10px] font-bold text-slate-500 tracking-wider mb-1">Events</p>
-                            <p className="text-3xl font-bold tracking-tight">{data?.eventStats.length || '0'}</p>
+                            <p className="text-[10px] font-semibold text-neutral-500 tracking-tight mb-1">Events</p>
+                            <p className="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">{data?.eventStats.length || '0'}</p>
                         </div>
                         <div>
-                            <p className="text-[10px] font-bold text-slate-500 tracking-wider mb-1">Uptime</p>
-                            <p className="text-3xl font-bold tracking-tight text-emerald-500">99.9%</p>
+                            <p className="text-[10px] font-semibold text-neutral-500 tracking-tight mb-1">Uptime</p>
+                            <p className="text-3xl font-semibold tracking-tight text-emerald-500">99.9%</p>
                         </div>
                     </div>
                 </div>
