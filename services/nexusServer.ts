@@ -948,70 +948,59 @@ class NexusServer {
     }
   }
 
-  static async updateQuestion(q: QuizQuestion) {
+  /**
+   * Saves a question to the database using upsert logic.
+   * If an ID is present, it will update the existing record or create it if not found.
+   * If no ID is present, a new record is created with a generated ID.
+   */
+  static async saveQuestion(q: Partial<QuizQuestion>) {
     const client = getSupabase();
-    if (!client) return;
+    if (!client) throw new Error('Supabase client not initialized');
     
     // Transform from app format to DB format (snake_case)
-    const dbRow = {
-      id: q.id,
-      topic: q.topic,
-      difficulty: q.difficulty,
+    const dbRow: any = {
+      topic: q.topic || '',
+      difficulty: q.difficulty || 'medium',
       question_type: q.questionType || 'MCQ',
       type: q.type || 'mcq',
-      question: q.question,
+      question: q.question || '',
       options: Array.isArray(q.options) ? q.options : [],
-      correct_answer: q.correctAnswer,
-      explanation: q.explanation,
-      starter_code: q.starterCode,
+      correct_answer: q.correctAnswer ?? 0,
+      explanation: q.explanation || '',
+      starter_code: q.starterCode || '',
       test_cases: Array.isArray(q.testCases) ? q.testCases : [],
-      subject: (q as any).subject,
-      unit: (q as any).unit
-    };
-
-    const { error } = await client
-      .from('questions')
-      .update(dbRow)
-      .eq('id', q.id);
-
-    if (error) {
-      console.error('Update Question Error:', error);
-      throw error;
-    }
-  }
-
-  static async createQuestion(q: Partial<QuizQuestion>) {
-    const client = getSupabase();
-    if (!client) return;
-    
-    // Transform to DB format
-    const dbRow = {
-      topic: q.topic,
-      difficulty: q.difficulty,
-      question_type: q.questionType || 'MCQ',
-      type: q.type || 'mcq',
-      question: q.question,
-      options: Array.isArray(q.options) ? q.options : [],
-      correct_answer: q.correctAnswer,
-      explanation: q.explanation,
-      starter_code: q.starterCode,
-      test_cases: Array.isArray(q.testCases) ? q.testCases : [],
-      subject: (q as any).subject,
-      unit: (q as any).unit,
+      subject: (q as any).subject || '',
+      unit: (typeof (q as any).unit === 'string' && (q as any).unit.trim() !== '') ? parseInt((q as any).unit) : (typeof (q as any).unit === 'number' ? (q as any).unit : null),
       source: 'admin'
     };
 
+    if (q.id) {
+        dbRow.id = q.id;
+    }
+
+    console.log('NexusServer: Saving question (upsert)', dbRow);
+
     const { data, error } = await client
       .from('questions')
-      .insert([dbRow])
-      .select()
-      .single();
+      .upsert(dbRow, { onConflict: 'id' })
+      .select();
 
     if (error) {
-      console.error('Create Question Error:', error);
+      console.error('Save Question Error:', error);
       throw error;
     }
-    return data;
+    
+    console.log('NexusServer: Save successful:', data);
+    return data?.[0];
+  }
+
+  // Legacy/Shortcut wrappers
+  static async updateQuestion(q: QuizQuestion) {
+      return this.saveQuestion(q);
+  }
+
+  static async createQuestion(q: Partial<QuizQuestion>) {
+      return this.saveQuestion(q);
   }
 
   static async fetchQuestionReports() {

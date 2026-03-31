@@ -765,10 +765,13 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
     const handleCreateQuestion = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSaving(true);
+        console.log('AdminStats: handleCreateQuestion called', { id: newQuestion.id, payload: newQuestion });
         try {
             if (newQuestion.id) {
+                console.log('AdminStats: Updating existing question');
                 await NexusServer.updateQuestion(newQuestion as any);
             } else {
+                console.log('AdminStats: Creating new question');
                 await NexusServer.createQuestion(newQuestion);
             }
             setNewQuestion({
@@ -786,7 +789,10 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                 starterCode: '',
                 testCases: []
             });
-            alert("Question database updated.");
+            alert("Question database updated successfully!");
+        } catch (err: any) {
+            console.error('AdminStats: Failed to save question', err);
+            alert("Failed to save to database: " + (err.message || "Unknown error"));
         } finally {
             setIsSaving(false);
         }
@@ -797,6 +803,9 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
         try {
             await NexusServer.updateReportStatus(reportId, status);
             setReports(prev => prev.map(r => r.id === reportId ? { ...r, status } : r));
+        } catch (err) {
+            console.error("Failed to resolve report", err);
+            alert("Failed to resolve report");
         } finally {
             setActionLoading(null);
         }
@@ -804,20 +813,22 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
 
     const editReportedQuestion = (report: any) => {
         const q = report.question;
+        console.log('AdminStats: Editing reported question', q);
         setNewQuestion({
             id: q.id,
             question: q.question,
             options: Array.isArray(q.options) ? q.options : ['', '', '', ''],
+            // Properly map snake_case to camelCase
             correctAnswer: q.correct_answer ?? 0,
             difficulty: q.difficulty || 'medium',
             type: q.type || 'mcq',
-            questionType: q.questionType || 'MCQ',
+            questionType: q.question_type || q.questionType || 'MCQ',
             subject: q.subject || report.subject || '',
             unit: q.unit || '',
             topic: q.topic || '',
             explanation: q.explanation || '',
-            starterCode: q.starterCode || '',
-            testCases: q.testCases || []
+            starterCode: q.starter_code || q.starterCode || '',
+            testCases: q.test_cases || q.testCases || []
         } as any);
         setActiveTab('constructor');
     };
