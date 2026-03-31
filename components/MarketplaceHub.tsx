@@ -138,6 +138,8 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             } else {
                 await NexusServer.createMarketplaceItem(itemData);
                 showToast("Item listed successfully!", "success");
+                // Tracking
+                NexusServer.saveRecord(userProfile.id, 'marketplace_post', `Listed item: ${itemData.title}`, { title: itemData.title, category: itemData.category });
             }
 
             handleCloseSell();

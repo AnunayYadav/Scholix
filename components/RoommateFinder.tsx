@@ -69,6 +69,8 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             } else {
                 await NexusServer.createRoommateRequest(requestData);
                 showToast("Request posted!", "success");
+                // Tracking
+                NexusServer.saveRecord(userProfile.id, 'roommate_post', `Posted roommate request in ${requestData.location}`, { location: requestData.location, budget: requestData.budget });
             }
 
             closeModal();

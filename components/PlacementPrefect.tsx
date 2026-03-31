@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { extractTextFromPdf } from '../services/pdfUtils';
+import NexusServer from '../services/nexusServer.ts';
 import { analyzeResume } from '../services/geminiService';
 import { ResumeAnalysisResult, UserProfile, AnnotatedFragment } from '../types';
 import { showToast, showConfirm } from './Toast.tsx';
@@ -200,6 +201,10 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile }) => {
     try {
       const data = await analyzeResume(resumeText, jdText, deepAnalysis);
       setResult(data);
+      // Tracking
+      if (userProfile?.id) {
+        NexusServer.saveRecord(userProfile.id, 'placement_analysis', `Analyzed resume against: ${selectedRoleId || 'Custom JD'}`, { score: data.totalScore, role: selectedRoleId });
+      }
       // Reset URL to base placement when new analysis is done
       navigate('/placement');
     } catch (err: any) {

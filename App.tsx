@@ -640,7 +640,7 @@ const AppContent: React.FC = () => {
               <Route path="/help" element={<HelpSection />} />
               <Route path="/freshers" element={<FreshersKit />} />
               <Route path="/cgpa" element={<CGPACalculator userProfile={userProfile} />} />
-              <Route path="/attendance" element={<AttendanceTracker />} />
+              <Route path="/attendance" element={<AttendanceTracker userProfile={userProfile} />} />
               <Route path="/share-cgpa" element={<ShareReport />} />
               <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
               <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />

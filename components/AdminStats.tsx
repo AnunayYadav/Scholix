@@ -1320,7 +1320,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                                         animate={{ opacity: 1, height: 'auto' }}
                                                                                         className="overflow-hidden space-y-8 mt-4"
                                                                                     >
-                                                                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-3">
+                                                                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                                                                                             <div className="p-4 bg-white dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm">
                                                                                                 <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Level status</p>
                                                                                                 <p className="text-lg font-semibold text-neutral-900 dark:text-neutral-200 tracking-tight">Lvl {selectedUserActivity.profile?.level || 1}</p>
@@ -1330,24 +1330,28 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                                                 <p className="text-lg font-semibold text-emerald-500 tracking-tight">{(selectedUserActivity.profile?.total_xp || 0).toLocaleString()} <span className="text-[8px] opacity-60 ml-1">xp</span></p>
                                                                                             </div>
                                                                                             <div className="p-4 bg-white dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm">
-                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Quiz volume</p>
-                                                                                                <p className="text-lg font-semibold text-orange-500 tracking-tight">{selectedUserActivity.attempts?.length || 0} <span className="text-[8px] opacity-60 ml-1">tests</span></p>
+                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Quizzes Taken</p>
+                                                                                                <p className="text-lg font-semibold text-orange-500 tracking-tight">{selectedUserActivity.historyStats?.quizzesCompleted || 0} <span className="text-[8px] opacity-60 ml-1">tests</span></p>
                                                                                             </div>
                                                                                             <div className="p-4 bg-white dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm">
-                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Study hours</p>
+                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Study Focus</p>
                                                                                                 <p className="text-lg font-semibold text-blue-500 tracking-tight">{(selectedUserActivity.historyStats?.studyTime / 3600).toFixed(1)} <span className="text-[8px] opacity-60 ml-1">hrs</span></p>
                                                                                             </div>
                                                                                             <div className="p-4 bg-white dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm">
-                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Library use</p>
+                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Content Access</p>
                                                                                                 <p className="text-lg font-semibold text-indigo-500 tracking-tight">{selectedUserActivity.historyStats?.filesAccessed || 0} <span className="text-[8px] opacity-60 ml-1">files</span></p>
                                                                                             </div>
                                                                                             <div className="p-4 bg-white dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm">
-                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">CGPA checks</p>
+                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">GPA Simulations</p>
                                                                                                 <p className="text-lg font-semibold text-purple-500 tracking-tight">{selectedUserActivity.historyStats?.cgpaCalculations || 0} <span className="text-[8px] opacity-60 ml-1">runs</span></p>
                                                                                             </div>
                                                                                             <div className="p-4 bg-white dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm">
-                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Social sync</p>
-                                                                                                <p className="text-lg font-semibold text-neutral-400 tracking-tight">{(selectedUserActivity.reports?.length + selectedUserActivity.feedback?.length) * 10} <span className="text-[8px] opacity-60 ml-1">pts</span></p>
+                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Attendance Tracking</p>
+                                                                                                <p className="text-lg font-semibold text-rose-500 tracking-tight">{selectedUserActivity.historyStats?.attendanceUpdates || 0} <span className="text-[8px] opacity-60 ml-1">updates</span></p>
+                                                                                            </div>
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">Market/Social</p>
+                                                                                                <p className="text-lg font-semibold text-teal-500 tracking-tight">{(selectedUserActivity.historyStats?.marketplacePosts || 0) + (selectedUserActivity.historyStats?.roommateRequests || 0)} <span className="text-[8px] opacity-60 ml-1">posts</span></p>
                                                                                             </div>
                                                                                         </div>
 

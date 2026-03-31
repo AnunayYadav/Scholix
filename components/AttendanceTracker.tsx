@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import NexusServer from '../services/nexusServer.ts';
+import { UserProfile } from '../types.ts';
 
 interface Subject {
   id: string;
@@ -34,7 +36,11 @@ const SubjectSkeleton = () => (
   </div>
 );
 
-const AttendanceTracker: React.FC = () => {
+interface Props {
+  userProfile?: UserProfile | null;
+}
+
+const AttendanceTracker: React.FC<Props> = ({ userProfile }) => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [isInitializing, setIsInitializing] = useState(true);
 
@@ -122,6 +128,11 @@ const AttendanceTracker: React.FC = () => {
       archived: false
     }]);
 
+    // Tracking
+    if (userProfile?.id) {
+      NexusServer.saveRecord(userProfile.id, 'attendance_update', `Added subject: ${newSub.name}`, { name: newSub.name, present, total });
+    }
+
     setNewSub({ name: '', present: '0', total: '0', dutyLeaves: '0', goal: '75' });
   };
 
@@ -196,6 +207,12 @@ const AttendanceTracker: React.FC = () => {
         return s;
       });
     });
+
+    // Tracking
+    if (userProfile?.id) {
+      const sub = subjects.find(s => s.id === id);
+      NexusServer.saveRecord(userProfile.id, 'attendance_update', `Marked ${type} for ${sub?.name || 'subject'}`, { subjectId: id, type });
+    }
   };
 
   const undoSubjectLastAction = (id: string, e: React.MouseEvent) => {

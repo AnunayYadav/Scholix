@@ -357,6 +357,19 @@ class NexusServer {
       console.error('Save Quiz Attempt Error:', error);
       throw error;
     }
+
+    // Also log to unified history for activity tracking
+    this.saveRecord(
+      params.userId,
+      'quiz_complete',
+      `Completed ${params.subjectName || 'Quiz'}`,
+      {
+        quizId: params.quizId,
+        score: params.scorePercentage,
+        xp: params.xpEarned,
+        time: params.timeTakenSeconds
+      }
+    ).catch(e => console.error("History sync error:", e));
   }
 
   static async fetchUserQuizAttempts(userId: string) {
@@ -1413,19 +1426,40 @@ class NexusServer {
       filesAccessed: 0,
       cgpaCalculations: 0,
       quizzesCompleted: 0,
+      attendanceUpdates: 0,
+      marketplacePosts: 0,
+      roommateRequests: 0,
+      placementAnalyses: 0,
       history: history.data || []
     };
 
     if (history.data) {
       history.data.forEach((record: any) => {
-        if (record.type === 'study_session' && record.content?.duration) {
-          stats.studyTime += record.content.duration;
-        } else if (record.type === 'file_access') {
-          stats.filesAccessed += 1;
-        } else if (record.type === 'cgpa_calc') {
-          stats.cgpaCalculations += 1;
-        } else if (record.type === 'quiz_complete') {
-          stats.quizzesCompleted = (stats.quizzesCompleted || 0) + 1;
+        switch (record.type) {
+          case 'study_session':
+            if (record.content?.duration) stats.studyTime += record.content.duration;
+            break;
+          case 'file_access':
+            stats.filesAccessed += 1;
+            break;
+          case 'cgpa_calc':
+            stats.cgpaCalculations += 1;
+            break;
+          case 'quiz_complete':
+            stats.quizzesCompleted += 1;
+            break;
+          case 'attendance_update':
+            stats.attendanceUpdates += 1;
+            break;
+          case 'marketplace_post':
+            stats.marketplacePosts += 1;
+            break;
+          case 'roommate_post':
+            stats.roommateRequests += 1;
+            break;
+          case 'placement_analysis':
+            stats.placementAnalyses += 1;
+            break;
         }
       });
     }
