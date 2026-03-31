@@ -585,10 +585,13 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
         correctAnswer: 0,
         difficulty: 'medium',
         type: 'mcq',
+        questionType: 'MCQ',
         subject: '',
         unit: '',
         topic: '',
-        explanation: ''
+        explanation: '',
+        starterCode: '',
+        testCases: [] as { input: string; output: string; isHidden?: boolean }[]
     });
 
     const [isSaving, setIsSaving] = useState(false);
@@ -775,10 +778,13 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                 correctAnswer: 0,
                 difficulty: 'medium',
                 type: 'mcq',
+                questionType: 'MCQ',
                 subject: '',
                 unit: '',
                 topic: '',
-                explanation: ''
+                explanation: '',
+                starterCode: '',
+                testCases: []
             });
             alert("Question database updated.");
         } finally {
@@ -805,10 +811,13 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
             correctAnswer: q.correct_answer ?? 0,
             difficulty: q.difficulty || 'medium',
             type: q.type || 'mcq',
+            questionType: q.questionType || 'MCQ',
             subject: q.subject || report.subject || '',
             unit: q.unit || '',
             topic: q.topic || '',
-            explanation: q.explanation || ''
+            explanation: q.explanation || '',
+            starterCode: q.starterCode || '',
+            testCases: q.testCases || []
         } as any);
         setActiveTab('constructor');
     };
@@ -1447,7 +1456,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         className="grid grid-cols-1 lg:grid-cols-3 gap-8"
                     >
                         <div className="lg:col-span-2 space-y-6">
-                             <form onSubmit={handleCreateQuestion} className="glass-panel p-8 rounded-[40px] border border-neutral-200 dark:border-white/5 shadow-2xl space-y-6">
+                            <form onSubmit={handleCreateQuestion} className="glass-panel p-8 rounded-[40px] border border-neutral-200 dark:border-white/5 shadow-2xl space-y-6">
                                 <div className="flex items-center gap-4 mb-4">
                                     <div className="w-12 h-12 rounded-2xl bg-neutral-900 dark:bg-white text-white dark:text-black flex items-center justify-center shadow-2xl">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
@@ -1459,6 +1468,13 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Question ID (optional for creation)" 
+                                        className="premium-input bg-neutral-50 dark:bg-white/5 px-5 py-3 rounded-2xl text-[11px] font-semibold tracking-tight md:col-span-2"
+                                        value={newQuestion.id || ''}
+                                        onChange={e => setNewQuestion({...newQuestion, id: e.target.value})}
+                                    />
                                     <input 
                                         type="text" 
                                         placeholder="Subject code (CSE121)" 
@@ -1475,6 +1491,27 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                         onChange={e => setNewQuestion({...newQuestion, unit: e.target.value})}
                                         required
                                     />
+                                    <select
+                                        className="premium-input bg-neutral-50 dark:bg-white/5 px-5 py-3 rounded-2xl text-[11px] font-semibold tracking-tight appearance-none"
+                                        value={newQuestion.type}
+                                        onChange={e => setNewQuestion({...newQuestion, type: e.target.value as any})}
+                                        required
+                                    >
+                                        <option value="mcq">Type: MCQ</option>
+                                        <option value="subjective">Type: Subjective</option>
+                                        <option value="coding">Type: Coding</option>
+                                    </select>
+                                    <select
+                                        className="premium-input bg-neutral-50 dark:bg-white/5 px-5 py-3 rounded-2xl text-[11px] font-semibold tracking-tight appearance-none"
+                                        value={newQuestion.questionType}
+                                        onChange={e => setNewQuestion({...newQuestion, questionType: e.target.value as any})}
+                                        required
+                                    >
+                                        <option value="MCQ">QType: MCQ</option>
+                                        <option value="PYQ">QType: PYQ</option>
+                                        <option value="Case Study">QType: Case Study</option>
+                                        <option value="Subjective">QType: Subjective</option>
+                                    </select>
                                 </div>
 
                                 <textarea 
@@ -1485,32 +1522,110 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     required
                                 />
 
-                                <div className="space-y-3">
-                                    <label className="text-[10px] font-bold text-slate-500 tracking-wider ml-4">Answer Options (Mark Correct)</label>
-                                    {newQuestion.options.map((opt, idx) => (
-                                        <div key={idx} className="flex gap-4 items-center group">
-                                            <input 
-                                                type="radio" 
-                                                name="correct-ans" 
-                                                checked={newQuestion.correctAnswer === idx}
-                                                onChange={() => setNewQuestion({...newQuestion, correctAnswer: idx})}
-                                                className="w-5 h-5 accent-orange-500 cursor-pointer"
-                                            />
-                                            <input 
-                                                type="text" 
-                                                placeholder={`Option ${idx + 1}`} 
-                                                className="flex-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-3 text-xs font-bold transition-all group-hover:border-slate-400 dark:group-hover:border-white/20"
-                                                value={opt}
-                                                onChange={e => {
-                                                    const newOpts = [...newQuestion.options];
-                                                    newOpts[idx] = e.target.value;
-                                                    setNewQuestion({...newQuestion, options: newOpts});
-                                                }}
-                                                required
-                                            />
+                                {newQuestion.type === 'coding' && (
+                                    <>
+                                        <textarea 
+                                            placeholder="Starter Code..." 
+                                            className="w-full bg-neutral-900 border border-neutral-800 text-green-400 font-mono rounded-[30px] px-6 py-5 text-[12px] h-32 focus:outline-none focus:border-orange-500/50 resize-none transition-all"
+                                            value={newQuestion.starterCode || ''}
+                                            onChange={e => setNewQuestion({...newQuestion, starterCode: e.target.value})}
+                                        />
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center px-4">
+                                                <label className="text-[10px] font-bold text-slate-500 tracking-wider">Test Cases</label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setNewQuestion({
+                                                        ...newQuestion, 
+                                                        testCases: [...(newQuestion.testCases || []), { input: '', output: '', isHidden: false }]
+                                                    })}
+                                                    className="bg-neutral-100 dark:bg-white/10 hover:bg-neutral-200 dark:hover:bg-white/20 text-[9px] font-bold px-3 py-1.5 rounded-xl transition"
+                                                >
+                                                    + Add Test Case
+                                                </button>
+                                            </div>
+                                            {(newQuestion.testCases || []).map((tc: any, tcIdx: number) => (
+                                                <div key={tcIdx} className="flex gap-2 items-center">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Input"
+                                                        className="flex-1 bg-neutral-50 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-mono"
+                                                        value={tc.input}
+                                                        onChange={e => {
+                                                            const nTcs = [...(newQuestion.testCases || [])];
+                                                            nTcs[tcIdx].input = e.target.value;
+                                                            setNewQuestion({...newQuestion, testCases: nTcs});
+                                                        }}
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Output"
+                                                        className="flex-1 bg-neutral-50 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-mono"
+                                                        value={tc.output}
+                                                        onChange={e => {
+                                                            const nTcs = [...(newQuestion.testCases || [])];
+                                                            nTcs[tcIdx].output = e.target.value;
+                                                            setNewQuestion({...newQuestion, testCases: nTcs});
+                                                        }}
+                                                    />
+                                                    <label className="flex items-center gap-1.5 text-[9px] font-bold text-neutral-500 cursor-pointer pl-1 pr-2">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={tc.isHidden || false}
+                                                            onChange={e => {
+                                                                const nTcs = [...(newQuestion.testCases || [])];
+                                                                nTcs[tcIdx].isHidden = e.target.checked;
+                                                                setNewQuestion({...newQuestion, testCases: nTcs});
+                                                            }}
+                                                            className="w-3.5 h-3.5 accent-orange-500 rounded"
+                                                        />
+                                                        Hidden
+                                                    </label>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const nTcs = [...(newQuestion.testCases || [])];
+                                                            nTcs.splice(tcIdx, 1);
+                                                            setNewQuestion({...newQuestion, testCases: nTcs});
+                                                        }}
+                                                        className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition"
+                                                    >
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                    </button>
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
+                                    </>
+                                )}
+
+                                {newQuestion.type === 'mcq' && (
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-bold text-slate-500 tracking-wider ml-4">Answer Options (Mark Correct)</label>
+                                        {newQuestion.options.map((opt, idx) => (
+                                            <div key={idx} className="flex gap-4 items-center group">
+                                                <input 
+                                                    type="radio" 
+                                                    name="correct-ans" 
+                                                    checked={newQuestion.correctAnswer === idx}
+                                                    onChange={() => setNewQuestion({...newQuestion, correctAnswer: idx})}
+                                                    className="w-5 h-5 accent-orange-500 cursor-pointer"
+                                                />
+                                                <input 
+                                                    type="text" 
+                                                    placeholder={`Option ${idx + 1}`} 
+                                                    className="flex-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-3 text-xs font-bold transition-all group-hover:border-slate-400 dark:group-hover:border-white/20"
+                                                    value={opt}
+                                                    onChange={e => {
+                                                        const newOpts = [...newQuestion.options];
+                                                        newOpts[idx] = e.target.value;
+                                                        setNewQuestion({...newQuestion, options: newOpts});
+                                                    }}
+                                                    required={newQuestion.type === 'mcq'}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
 
                                 <button 
                                     type="submit" 
@@ -1519,7 +1634,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 >
                                     {isSaving ? 'Processing...' : 'Save record'}
                                 </button>
-                             </form>
+                            </form>
                         </div>
 
                         <div className="space-y-6">
@@ -1574,6 +1689,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                             className="w-full bg-neutral-100 dark:bg-black/40 border border-neutral-200 dark:border-white/5 rounded-2xl px-5 py-3 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-all"
                                             value={newQuestion.topic}
                                             onChange={e => setNewQuestion({...newQuestion, topic: e.target.value})}
+                                            required
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -1583,6 +1699,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                             className="w-full bg-neutral-100 dark:bg-black/40 border border-neutral-200 dark:border-white/5 rounded-2xl px-5 py-3 text-[10px] font-medium h-24 focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-all resize-none"
                                             value={newQuestion.explanation}
                                             onChange={e => setNewQuestion({...newQuestion, explanation: e.target.value})}
+                                            required
                                         />
                                     </div>
                                 </div>
