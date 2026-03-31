@@ -1026,9 +1026,9 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 }`}
                             >
                                 <span className="flex items-center gap-2">
-                                    Pending issues
-                                    {reports.length > 0 && (
-                                        <span className="bg-red-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[8px] animate-pulse">{reports.length}</span>
+                                    Issue Reports
+                                    {reports.filter((r: any) => r.status === 'pending').length > 0 && (
+                                        <span className="bg-red-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[8px] animate-pulse">{reports.filter((r: any) => r.status === 'pending').length}</span>
                                     )}
                                 </span>
                             </button>

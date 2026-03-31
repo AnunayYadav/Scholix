@@ -1018,26 +1018,43 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return [];
     try {
-      const { data, error } = await client
+      // Direct fetch without joins which often fail due to Postgres FK constraints in Edge Functions
+      const { data: reportsData, error: reportsError } = await client
         .from('question_reports')
-        .select(`
-          *,
-          question:questions(*),
-          reporter:profiles(username)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.warn('Detailed report fetch failed, trying simple fetch:', error.message);
-        const { data: simpleData, error: simpleError } = await client
-          .from('question_reports')
-          .select('*, reporter:profiles(username)')
-          .order('created_at', { ascending: false });
-        
-        if (simpleError) throw simpleError;
-        return (simpleData || []).map(r => ({ ...r, question: null }));
+      if (reportsError) throw reportsError;
+      
+      const reports = reportsData || [];
+      if (reports.length === 0) return [];
+
+      // 1. Fetch related questions
+      const questionIds = [...new Set(reports.map((r: any) => r.question_id).filter((id: any) => !!id))];
+      const questionsMap = new Map();
+      if (questionIds.length > 0) {
+        const { data: qData } = await client.from('questions').select('*').in('id', questionIds);
+        if (qData) {
+          qData.forEach((q: any) => questionsMap.set(q.id, q));
+        }
       }
-      return data || [];
+
+      // 2. Fetch related profiles (reporters)
+      const userIds = [...new Set(reports.map((r: any) => r.user_id).filter((id: any) => !!id))];
+      const profilesMap = new Map();
+      if (userIds.length > 0) {
+        const { data: pData } = await client.from('profiles').select('id, username').in('id', userIds);
+        if (pData) {
+          pData.forEach((p: any) => profilesMap.set(p.id, p));
+        }
+      }
+
+      // 3. Assemble
+      return reports.map((r: any) => ({
+        ...r,
+        question: questionsMap.get(r.question_id) || null,
+        reporter: profilesMap.get(r.user_id) || { username: 'Guest user' }
+      }));
     } catch (e) {
       console.error('Fetch question reports failed:', e);
       return [];
