@@ -109,13 +109,13 @@ const GlobalBroadcaster: React.FC = () => {
                 <div className="flex p-1 bg-neutral-100 dark:bg-black/20 rounded-xl border border-neutral-200 dark:border-white/5 shrink-0">
                     <button 
                         onClick={() => setAudienceMode('global')}
-                        className={`px-4 py-1.5 rounded-lg text-[9px] font-semibold transition-all ${audienceMode === 'global' ? 'bg-neutral-900 dark:bg-white text-white dark:text-black shadow-lg' : 'text-neutral-400'}`}
+                        className={`px-4 py-1.5 rounded-lg text-[9px] font-medium transition-all ${audienceMode === 'global' ? 'bg-neutral-900 dark:bg-white text-white dark:text-black shadow-lg' : 'text-neutral-400'}`}
                     >
                         Global
                     </button>
                     <button 
                         onClick={() => setAudienceMode('targeted')}
-                        className={`px-4 py-1.5 rounded-lg text-[9px] font-semibold transition-all ${audienceMode === 'targeted' ? 'bg-neutral-900 dark:bg-white text-white dark:text-black shadow-lg' : 'text-neutral-400'}`}
+                        className={`px-4 py-1.5 rounded-lg text-[9px] font-medium transition-all ${audienceMode === 'targeted' ? 'bg-neutral-900 dark:bg-white text-white dark:text-black shadow-lg' : 'text-neutral-400'}`}
                     >
                         Targeted
                     </button>
@@ -264,7 +264,7 @@ const GlobalBroadcaster: React.FC = () => {
                             {status.msg}
                         </motion.div>
                     )}
-                </AnimatePresence>>
+                </AnimatePresence>
             </form>
         </motion.div>
     );
@@ -300,13 +300,13 @@ const getColorClasses = (color: string) => {
             hoverBg: 'hover:bg-emerald-600'
         };
         default: return { 
-            text: 'text-indigo-500', 
-            bg: 'bg-indigo-500', 
-            lightBg: 'bg-indigo-500/10', 
-            veryLightBg: 'bg-indigo-500/5', 
-            border: 'border-indigo-500/20',
-            shadow: 'shadow-indigo-500/20',
-            hoverBg: 'hover:bg-indigo-600'
+            text: 'text-orange-500', 
+            bg: 'bg-orange-500', 
+            lightBg: 'bg-orange-500/10', 
+            veryLightBg: 'bg-orange-500/5', 
+            border: 'border-orange-500/20',
+            shadow: 'shadow-orange-500/20',
+            hoverBg: 'hover:bg-orange-600'
         };
     }
 };
@@ -317,7 +317,7 @@ const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string |
         <motion.div 
             whileHover={{ y: -5, scale: 1.02 }}
             onClick={onClick}
-            className={`glass-panel p-6 rounded-[32px] border border-slate-200 dark:border-white/10 shadow-xl relative overflow-hidden group cursor-pointer transition-all duration-300 bg-white dark:bg-white/[0.02]`}
+            className={`glass-panel p-6 rounded-[32px] border border-neutral-200 dark:border-white/10 shadow-xl relative overflow-hidden group cursor-pointer transition-all duration-300 bg-white dark:bg-white/[0.02]`}
         >
             <div className={`absolute top-0 right-0 w-24 h-24 ${classes.veryLightBg} blur-3xl -mr-12 -mt-12`} />
             <div className="flex items-center justify-between mb-3">
@@ -327,9 +327,9 @@ const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string |
                 <Sparkline color={color === 'orange' ? '#f97316' : color === 'blue' ? '#3b82f6' : color === 'emerald' ? '#10b981' : '#6366f1'} />
             </div>
             <div>
-                <p className="text-[10px] font-bold text-slate-500 tracking-wider mb-1 uppercase">{label}</p>
+                <p className="text-[10px] font-medium text-neutral-500 tracking-tight mb-1 capitalize">{label}</p>
                 <div className="flex items-baseline gap-2">
-                    <h4 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">{value}</h4>
+                    <h4 className="text-xl font-semibold text-neutral-900 dark:text-white tracking-tight">{value}</h4>
                     {onClick && (
                         <motion.div 
                             initial={{ opacity: 0, x: -5 }}
@@ -341,7 +341,7 @@ const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string |
                         </motion.div>
                     )}
                 </div>
-                <p className="text-[9px] font-semibold text-slate-400 tracking-wide mt-1 opacity-70">{sub}</p>
+                <p className="text-[9px] font-medium text-neutral-400 tracking-tight mt-1 opacity-70">{sub}</p>
             </div>
         </motion.div>
     );
@@ -372,27 +372,27 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
             initial={{ opacity: 0, scale: 0.95, y: -20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            className="glass-panel w-full p-5 md:p-6 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-xl overflow-hidden relative mt-4 bg-slate-50/50 dark:bg-white/[0.02]"
+            className="glass-panel w-full p-5 md:p-6 rounded-[24px] border border-neutral-200 dark:border-white/10 shadow-xl overflow-hidden relative mt-4 bg-neutral-50/50 dark:bg-white/[0.02]"
         >
             <div className="flex justify-between items-start mb-4">
                 <div>
-                    <p className={`text-[8px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1`}>{sub}</p>
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">{type} Performance</h2>
+                    <p className={`text-[8px] font-medium text-neutral-500 capitalize tracking-tight mb-1`}>{sub}</p>
+                    <h2 className="text-lg font-semibold text-neutral-900 dark:text-white tracking-tight">{type} Performance</h2>
                 </div>
                 <div className="flex items-center gap-4">
                     {/* Time Range Selector */}
-                    <div className="hidden md:flex items-center p-1 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200/50 dark:border-white/5">
+                    <div className="hidden md:flex items-center p-1 bg-neutral-100 dark:bg-white/5 rounded-xl border border-neutral-200/50 dark:border-white/5">
                         {[7, 12, 30, 0].map((d) => (
                             <button
                                 key={d}
                                 onClick={() => setDays(d)}
-                                className={`px-2.5 py-1.5 rounded-lg text-[8px] font-bold uppercase transition-all duration-300 ${
+                                className={`px-2.5 py-1.5 rounded-lg text-[8px] font-semibold transition-all duration-300 ${
                                     days === d 
-                                    ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-sm' 
-                                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                                    ? 'bg-white dark:bg-white/10 text-neutral-900 dark:text-white shadow-sm' 
+                                    : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200'
                                 }`}
                             >
-                                {d === 0 ? 'All' : `${d}d`}
+                                {d === 0 ? 'all' : `${d}d`}
                             </button>
                         ))}
                     </div>
@@ -408,12 +408,12 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
 
             <div className="mb-6">
                 <div className="flex items-baseline gap-2">
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tighter">{value}</h3>
-                    <div className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-500 text-[8px] font-bold rounded-full border border-emerald-500/20">
+                    <h3 className="text-2xl font-semibold text-neutral-900 dark:text-white tracking-tighter">{value}</h3>
+                    <div className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-500 text-[8px] font-semibold rounded-full border border-emerald-500/20">
                         +12.5% 
                     </div>
                 </div>
-                <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-1.5 max-w-lg leading-relaxed">Historical trends and capacity indicators synchronized.</p>
+                <p className="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-lg leading-relaxed">Historical trends and capacity indicators synchronized.</p>
             </div>
 
             <div 
@@ -429,9 +429,9 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                 onMouseLeave={() => setHoverIndex(null)}
             >
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center h-full gap-2 text-slate-400">
-                        <div className="w-6 h-6 border-2 border-slate-200 border-t-orange-500 rounded-full animate-spin" />
-                        <p className="font-bold uppercase tracking-widest text-[7px]">Syncing...</p>
+                    <div className="flex flex-col items-center justify-center h-full gap-2 text-neutral-400">
+                        <div className="w-6 h-6 border-2 border-neutral-200 border-t-orange-500 rounded-full animate-spin" />
+                        <p className="font-semibold tracking-widest text-[7px] lowercase">syncing...</p>
                     </div>
                 ) : chartData.length > 0 ? (
                     <>
@@ -525,25 +525,25 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                         )}
                     </>
                 ) : (
-                    <div className="flex flex-col items-center justify-center h-full gap-5 text-slate-400 p-12 bg-slate-50 dark:bg-white/[0.01] rounded-[30px] border border-dashed border-slate-200 dark:border-white/10">
+                    <div className="flex flex-col items-center justify-center h-full gap-5 text-neutral-400 p-12 bg-neutral-50 dark:bg-white/[0.01] rounded-[30px] border border-dashed border-neutral-200 dark:border-white/10">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-16 h-16 opacity-10"><path d="M3 3v18h18M7 16l4-4 4 4 5-5" /></svg>
-                        <p className="font-bold uppercase tracking-[0.2em] text-[10px] text-center">No data found for this period</p>
+                        <p className="font-semibold tracking-[0.2em] text-[10px] text-center lowercase">no data found for this period</p>
                     </div>
                 )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-slate-200 dark:border-white/5">
-                <div className="px-5 py-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 hover:border-orange-500/30 transition-colors">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Highest Count</p>
-                    <p className="text-xl font-bold text-slate-900 dark:text-white tracking-tighter">{chartData.length > 0 ? Math.max(...chartData.map(c => c.count)).toLocaleString() : 0}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-neutral-200 dark:border-white/5">
+                <div className="px-5 py-4 rounded-2xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-100 dark:border-white/5 hover:border-orange-500/30 transition-colors">
+                    <p className="text-[9px] font-semibold text-neutral-400 tracking-widest mb-1.5 lowercase">highest count</p>
+                    <p className="text-xl font-semibold text-neutral-900 dark:text-white tracking-tighter">{chartData.length > 0 ? Math.max(...chartData.map(c => c.count)).toLocaleString() : 0}</p>
                 </div>
-                <div className="px-5 py-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 hover:border-blue-500/30 transition-colors">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Time Range</p>
-                    <p className="text-xl font-bold text-slate-900 dark:text-white tracking-tighter">{chartData.length} Days</p>
+                <div className="px-5 py-4 rounded-2xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-100 dark:border-white/5 hover:border-blue-500/30 transition-colors">
+                    <p className="text-[9px] font-semibold text-neutral-400 tracking-widest mb-1.5 lowercase">time range</p>
+                    <p className="text-xl font-semibold text-neutral-900 dark:text-white tracking-tighter">{chartData.length} Days</p>
                 </div>
-                <div className="px-5 py-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 hover:border-emerald-500/30 transition-colors">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Status</p>
-                    <p className="text-xl font-bold text-emerald-500 tracking-tighter">Live</p>
+                <div className="px-5 py-4 rounded-2xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-100 dark:border-white/5 hover:border-emerald-500/30 transition-colors">
+                    <p className="text-[9px] font-semibold text-neutral-400 tracking-widest mb-1.5 lowercase">status</p>
+                    <p className="text-xl font-semibold text-emerald-500 tracking-tighter">live</p>
                 </div>
             </div>
         </motion.div>
@@ -608,7 +608,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
         loadCoreData();
         loadReports();
         loadFeedback();
-    }, []);
+    }, [activeTab]);
 
     // Load All Profiles for Tracker
     useEffect(() => {
@@ -828,7 +828,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-8 h-8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                     </div>
                     <h2 className="text-2xl font-bold text-white mb-3">Access Restricted</h2>
-                    <p className="text-slate-400 font-medium leading-relaxed">Administrator level authentication required to access the Command Center.</p>
+                    <p className="text-neutral-400 font-medium leading-relaxed">Administrator level authentication required to access the Command Center.</p>
                 </div>
             </div>
         );
@@ -843,22 +843,22 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         <p className="text-[10px] font-bold text-emerald-600 tracking-wide">System Online • v1.3.0</p>
                     </div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Dashboard</h1>
+                    <h1 className="text-3xl font-bold text-neutral-900 dark:text-white tracking-tight">Dashboard</h1>
                 </div>
 
-                <div className="flex p-1.5 bg-slate-100 dark:bg-white/5 rounded-[20px] border border-slate-200 dark:border-white/10 overflow-hidden">
+                <div className="flex p-1.5 bg-neutral-100 dark:bg-white/5 rounded-[20px] border border-neutral-200 dark:border-white/10 overflow-hidden">
                     {[
-                        { id: 'monitor', label: 'Stats' },
-                        { id: 'reports', label: 'Reports' },
-                        { id: 'constructor', label: 'Editor' },
-                        { id: 'inbound', label: 'Feedback' }
+                        { id: 'monitor', label: 'overview' },
+                        { id: 'reports', label: 'issues' },
+                        { id: 'constructor', label: 'editor' },
+                        { id: 'inbound', label: 'feedback' }
                     ].map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`px-5 py-2 rounded-xl text-[10px] font-bold transition-all ${activeTab === tab.id
-                                ? 'bg-orange-600 text-white shadow-xl shadow-orange-600/20'
-                                : 'text-slate-400 hover:text-slate-600 dark:hover:text-white'
+                            className={`px-5 py-2 rounded-xl text-[10px] font-semibold transition-all ${activeTab === tab.id
+                                ? 'bg-neutral-900 dark:bg-white text-white dark:text-black shadow-xl shadow-black/10'
+                                : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-white'
                                 }`}
                         >
                             {tab.label}
@@ -897,7 +897,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                     label="Tickets" 
                     value={data?.summary?.totalFeedback || '0'} 
                     sub="User Feedback" 
-                    color="indigo"
+                    color="orange"
                     icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>}
                     onClick={() => setShowDetailedStats(showDetailedStats === 'Tickets' ? null : 'Tickets')}
                 />
@@ -940,10 +940,10 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                     >
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {/* Performance Visualizer */}
-                            <div className="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-xl overflow-hidden relative">
-                                <h3 className="text-[11px] font-bold text-slate-900 dark:text-white tracking-wider mb-6 border-b border-slate-100 dark:border-white/5 pb-3 flex justify-between uppercase">
-                                    Popular Pages
-                                    <span className="text-[9px] font-semibold text-orange-500 lowercase opacity-60">overview</span>
+                            <div className="glass-panel p-6 rounded-[24px] border border-neutral-200 dark:border-white/10 shadow-xl overflow-hidden relative">
+                                <h3 className="text-[11px] font-semibold text-neutral-900 dark:text-white tracking-tight mb-6 border-b border-neutral-100 dark:border-white/5 pb-3 flex justify-between capitalize">
+                                    Popular pages
+                                    <span className="text-[9px] font-medium text-orange-500 lowercase opacity-60">overview</span>
                                 </h3>
                                 <div className="space-y-4 max-h-[300px] overflow-y-auto no-scrollbar scroll-smooth pr-2">
                                     {topPages.map((page: any, idx: number) => (
@@ -969,13 +969,13 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         </div>
 
                         {/* Full Stats Table */}
-                        <div className="glass-panel rounded-[24px] border border-slate-200 dark:border-white/10 shadow-xl overflow-hidden">
-                            <div className="p-4 border-b border-slate-200 dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-white/[0.01]">
-                                <h3 className="text-[11px] font-bold text-slate-900 dark:text-white tracking-widest uppercase">Activity Log</h3>
+                        <div className="glass-panel rounded-[24px] border border-neutral-200 dark:border-white/10 shadow-xl overflow-hidden">
+                            <div className="p-4 border-b border-neutral-200 dark:border-white/5 flex items-center justify-between bg-neutral-50/50 dark:bg-white/[0.01]">
+                                <h3 className="text-[11px] font-semibold text-neutral-900 dark:text-white tracking-tight capitalize">Activity log</h3>
                                 <div className="flex gap-4">
                                     <div className="flex items-center gap-2">
                                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                        <span className="text-[9px] font-bold tracking-wider text-slate-500">Live</span>
+                                        <span className="text-[9px] font-medium tracking-tight text-neutral-500">Live</span>
                                     </div>
                                 </div>
                             </div>
@@ -1018,17 +1018,17 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                 {activeTab === 'reports' && (
                     <div className="space-y-8">
                         {/* Sub Navigation */}
-                        <div className="flex gap-2 p-1 bg-slate-100 dark:bg-white/5 rounded-2xl w-fit border border-slate-200/50 dark:border-white/5 shadow-inner">
+                        <div className="flex gap-2 p-1 bg-neutral-100 dark:bg-white/5 rounded-2xl w-fit border border-neutral-200/50 dark:border-white/5 shadow-inner">
                             <button 
                                 onClick={() => setReportSubTab('pending')}
-                                className={`px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${
+                                className={`px-6 py-2.5 rounded-xl text-[10px] font-medium capitalize transition-all duration-300 ${
                                     reportSubTab === 'pending' 
-                                    ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-xl' 
-                                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                                    ? 'bg-white dark:bg-white/10 text-neutral-900 dark:text-white shadow-xl' 
+                                    : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200'
                                 }`}
                             >
                                 <span className="flex items-center gap-2">
-                                    Pending Issues
+                                    Pending issues
                                     {reports.length > 0 && (
                                         <span className="bg-red-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[8px] animate-pulse">{reports.length}</span>
                                     )}
@@ -1036,13 +1036,13 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                             </button>
                             <button 
                                 onClick={() => setReportSubTab('tracker')}
-                                className={`px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${
+                                className={`px-6 py-2.5 rounded-xl text-[10px] font-medium capitalize transition-all duration-300 ${
                                     reportSubTab === 'tracker' 
-                                    ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-xl' 
-                                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                                    ? 'bg-white dark:bg-white/10 text-neutral-900 dark:text-white shadow-xl' 
+                                    : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200'
                                 }`}
                             >
-                                User Tracker
+                                User tracker
                             </button>
                         </div>
 
@@ -1055,49 +1055,63 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 {reports.length > 0 ? reports.map((report, idx) => (
                                     <motion.div 
                                         key={report.id}
-                                        initial={{ opacity: 0, y: 20 }}
+                                        initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: idx * 0.05 }}
-                                        className="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-white/10 relative group bg-white/50 dark:bg-white/[0.02]"
+                                        className="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-white/10 relative group bg-white/50 dark:bg-white/[0.02] hover:border-orange-500/30 transition-colors"
                                     >
                                         <div className="flex justify-between items-start mb-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center font-bold text-xs border border-slate-200/50 dark:border-white/5 text-slate-600 dark:text-white/60">
+                                                <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center font-bold text-xs border border-slate-200/50 dark:border-white/5 text-slate-600 dark:text-white/60">
                                                     {report.reporter?.username?.[0] || '?'}
                                                 </div>
                                                 <div>
-                                                    <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-tight">{report.reporter?.username || 'Guest'}</h4>
-                                                    <p className="text-[9px] font-semibold text-slate-400 tracking-wider font-mono">{new Date(report.created_at).toLocaleDateString()}</p>
+                                                    <h4 className="text-[13px] font-semibold text-slate-800 dark:text-white tracking-tight">{report.reporter?.username || 'Guest'}</h4>
+                                                    <p className="text-[10px] text-slate-400 font-mono">{new Date(report.created_at).toLocaleDateString()}</p>
                                                 </div>
                                             </div>
-                                            <span className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border shadow-sm ${
-                                                report.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20 animate-pulse'
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-medium border ${
+                                                report.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'
                                             }`}>
                                                 {report.status}
                                             </span>
                                         </div>
 
-                                        <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 mb-6 hover:border-orange-500/20 transition-all cursor-default">
-                                            <p className="text-[10px] font-bold text-orange-600 tracking-wider mb-2 flex items-center gap-2">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                                                {report.reason}
-                                            </p>
-                                            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">"{report.question?.question}"</p>
+                                        <div className="p-4 bg-neutral-50 dark:bg-white/5 rounded-2xl border border-neutral-200 dark:border-white/5 mb-6">
+                                            <div className="flex items-center justify-between gap-2 mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+                                                    <p className="text-[11px] font-semibold text-orange-600/90 dark:text-orange-400 tracking-tight">
+                                                        {report.reason}
+                                                    </p>
+                                                </div>
+                                                <div className="text-[9px] font-mono text-neutral-400">
+                                                    {report.subject || 'GUEST'} {report.topic && `• ${report.topic}`}
+                                                </div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="text-[12px] text-neutral-600 dark:text-neutral-400 leading-relaxed italic opacity-80">
+                                                    {report.question?.question ? `"${report.question.question}"` : 'Question content could not be resolved.'}
+                                                </p>
+                                                {!report.question && (
+                                                    <p className="text-[9px] text-neutral-500/60 font-medium">Link: {report.question_id || 'unlinked'}</p>
+                                                )}
+                                            </div>
                                         </div>
 
-                                        <div className="flex gap-2">
+                                        <div className="grid grid-cols-2 gap-3">
                                             {report.status === 'pending' && (
                                                 <>
                                                     <button 
                                                         onClick={() => editReportedQuestion(report)}
-                                                        className="flex-1 py-3 rounded-xl bg-orange-600 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-orange-700 transition-all shadow-lg shadow-orange-600/20"
+                                                        className="py-3 rounded-xl bg-orange-600 text-white text-[11px] font-semibold hover:bg-orange-700 transition-all shadow-lg shadow-orange-600/10"
                                                     >
-                                                        Edit Question
+                                                        Edit question
                                                     </button>
                                                     <button 
                                                         disabled={actionLoading === report.id}
                                                         onClick={() => resolveReport(report.id, 'resolved')}
-                                                        className="px-6 py-3 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-bold uppercase hover:bg-emerald-500 hover:text-white transition-all"
+                                                        className="py-3 rounded-xl bg-emerald-500/5 text-emerald-500 border border-emerald-500/10 text-[11px] font-semibold hover:bg-emerald-500 hover:text-white transition-all"
                                                     >
                                                         Clear
                                                     </button>
@@ -1106,8 +1120,11 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                         </div>
                                     </motion.div>
                                 )) : (
-                                    <div className="col-span-full py-20 text-center">
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest italic">All systems clear. No pending reports.</p>
+                                    <div className="col-span-full py-20 text-center flex flex-col items-center gap-4">
+                                        <div className="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-white/[0.02] flex items-center justify-center text-slate-300 dark:text-white/10 scale-110">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        </div>
+                                        <p className="text-[13px] font-medium text-slate-400 tracking-tight italic">All systems clear. No pending reports.</p>
                                     </div>
                                 )}
                             </motion.div>
@@ -1118,51 +1135,49 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 className="space-y-8"
                             >
                                 {/* User Search Header */}
-                                <div className="glass-panel p-8 rounded-[32px] border border-slate-200 dark:border-white/10 shadow-2xl bg-gradient-to-br from-white/80 to-slate-50 dark:from-white/[0.03] dark:to-transparent">
+                                <div className="glass-panel p-8 rounded-[32px] border border-neutral-200 dark:border-white/10 shadow-2xl bg-gradient-to-br from-white/80 to-neutral-50 dark:from-white/[0.03] dark:to-transparent">
                                     <div className="max-w-2xl mx-auto space-y-6 text-center">
-                                        <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">Global User Tracking</h3>
-                                        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Search for any Verto by username or registration number to view their full activity spectrum.</p>
+                                        <h3 className="text-2xl font-bold text-neutral-900 dark:text-white tracking-tight capitalize">Global user tracking</h3>
+                                        <p className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">Search for any Verto by username or registration number to view their full activity spectrum.</p>
                                         
                                         <div className="relative group">
-                                            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-orange-500 transition-colors">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
+                                            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-neutral-400 group-focus-within:text-orange-500 transition-colors">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
                                             </div>
                                             <input 
                                                 type="text" 
                                                 placeholder="Enter username or Reg No..." 
-                                                className="w-full bg-white dark:bg-slate-900/50 border-2 border-slate-100 dark:border-white/5 focus:border-orange-500/50 rounded-2xl py-5 pl-14 pr-6 text-sm font-bold tracking-tight shadow-sm transition-all outline-none"
+                                                className="w-full bg-white dark:bg-black/20 border border-neutral-100 dark:border-white/5 focus:border-orange-500/50 rounded-2xl py-4 pl-14 pr-6 text-sm font-semibold tracking-tight shadow-sm transition-all outline-none"
                                                 value={userSearchText}
                                                 onChange={(e) => handleUserSearch(e.target.value)}
                                             />
                                             {isSearchingUser && (
                                                 <div className="absolute inset-y-0 right-5 flex items-center">
-                                                    <div className="w-5 h-5 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
+                                                    <div className="w-4 h-4 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
                                                 </div>
                                             )}
 
                                             {/* Quick Search Results */}
                                             {userSearchResults.length > 0 && !selectedUserActivity && (
-                                                <div className="absolute top-full left-0 right-0 mt-3 p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl z-50 space-y-1">
+                                                <div className="absolute top-full left-0 right-0 mt-3 p-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-2xl shadow-2xl z-50 space-y-1">
                                                     {userSearchResults.map((user) => (
                                                         <button 
                                                             key={user.id}
                                                             onClick={() => selectUserForTracking(user)}
-                                                            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-all group"
+                                                            className="w-full flex items-center justify-between p-4 hover:bg-neutral-50 dark:hover:bg-white/5 rounded-xl transition-all group"
                                                         >
                                                             <div className="flex items-center gap-4">
-                                                                <div className="w-10 h-10 rounded-full bg-slate-900 dark:bg-white text-white dark:text-black flex items-center justify-center font-bold text-xs uppercase tracking-tighter">
+                                                                <div className="w-10 h-10 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-black flex items-center justify-center font-bold text-xs capitalize">
                                                                     {user.username?.[0]}
                                                                 </div>
                                                                 <div className="text-left">
-                                                                    <p className="text-xs font-black text-slate-900 dark:text-white uppercase">{user.username}</p>
-                                                                    <p className="text-[10px] font-bold text-slate-400 tracking-wider">REG: {user.registration_number}</p>
+                                                                    <p className="text-[11px] font-semibold text-neutral-900 dark:text-white capitalize">{user.username}</p>
+                                                                    <p className="text-[9px] font-medium text-neutral-400 lowercase">id: {user.registration_number}</p>
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-3">
-                                                                <div className="text-right mr-4">
-                                                                    <p className="text-[10px] font-black text-orange-500 tracking-tighter">View Profile</p>
-                                                                </div>
-                                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-slate-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                                                <p className="text-[9px] font-semibold text-orange-500 capitalize px-2 py-0.5 bg-orange-500/10 rounded-full">View profile</p>
+                                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-neutral-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                                                             </div>
                                                         </button>
                                                     ))}
@@ -1231,18 +1246,18 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                 </div>
                                             </div>
                                             
-                                            <div className="glass-panel overflow-hidden border border-slate-100 dark:border-white/5 rounded-[30px] shadow-xl">
+                                            <div className="glass-panel overflow-hidden border border-neutral-100 dark:border-white/5 rounded-[30px] shadow-xl">
                                                 <div className="overflow-x-auto no-scrollbar">
                                                     <table className="w-full text-left border-collapse">
                                                         <thead>
                                                             <tr className="bg-neutral-50/50 dark:bg-white/[0.01] border-b border-neutral-100 dark:border-white/5">
-                                                                <th className="px-8 py-5 text-[9px] font-semibold text-neutral-400 uppercase tracking-wider">Verto profile</th>
-                                                                <th className="px-8 py-5 text-[9px] font-semibold text-neutral-400 uppercase tracking-wider hidden sm:table-cell text-center">Reference</th>
-                                                                <th className="px-8 py-5 text-[9px] font-semibold text-neutral-400 uppercase tracking-wider hidden md:table-cell">Affiliation</th>
-                                                                <th className="px-8 py-5 text-[9px] font-semibold text-neutral-400 uppercase tracking-wider text-right">Access</th>
+                                                                <th className="px-8 py-5 text-[10px] font-semibold text-neutral-400 capitalize tracking-tight">Verto profile</th>
+                                                                <th className="px-8 py-5 text-[10px] font-semibold text-neutral-400 capitalize tracking-tight hidden sm:table-cell text-center">Reference</th>
+                                                                <th className="px-8 py-5 text-[10px] font-semibold text-neutral-400 capitalize tracking-tight hidden md:table-cell">Affiliation</th>
+                                                                <th className="px-8 py-5 text-[10px] font-semibold text-neutral-400 capitalize tracking-tight text-right">Access</th>
                                                             </tr>
                                                         </thead>
-                                                        <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                                                        <tbody className="divide-y divide-neutral-50 dark:divide-white/5">
                                                             {isLoadingProfiles ? (
                                                                 <tr>
                                                                     <td colSpan={4} className="py-24 text-center">
@@ -1433,19 +1448,19 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                              <form onSubmit={handleCreateQuestion} className="glass-panel p-8 rounded-[40px] border border-neutral-200 dark:border-white/5 shadow-2xl space-y-6">
                                 <div className="flex items-center gap-4 mb-4">
                                     <div className="w-12 h-12 rounded-2xl bg-neutral-900 dark:bg-white text-white dark:text-black flex items-center justify-center shadow-2xl">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-200 tracking-tight">Question editor</h3>
-                                        <p className="text-[10px] font-medium text-neutral-400 tracking-wider font-mono">{newQuestion.id ? `Editing question: ${newQuestion.id}` : 'Create a fresh record in the system'}</p>
+                                        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-200 tracking-tight capitalize">Question editor</h3>
+                                        <p className="text-[10px] font-medium text-neutral-400 tracking-wider font-mono">{newQuestion.id ? `Editing record: ${newQuestion.id.slice(0, 12)}...` : 'Create a fresh record in the system'}</p>
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <input 
                                         type="text" 
-                                        placeholder="Subject Code (CSE121)" 
-                                        className="premium-input bg-slate-100 dark:bg-white/5 px-5 py-3 rounded-2xl text-xs font-bold uppercase"
+                                        placeholder="Subject code (CSE121)" 
+                                        className="premium-input bg-neutral-50 dark:bg-white/5 px-5 py-3 rounded-2xl text-[11px] font-semibold uppercase tracking-tight"
                                         value={newQuestion.subject}
                                         onChange={e => setNewQuestion({...newQuestion, subject: e.target.value.toUpperCase()})}
                                         required
@@ -1453,7 +1468,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     <input 
                                         type="text" 
                                         placeholder="Unit ID (1-6)" 
-                                        className="premium-input bg-slate-100 dark:bg-white/5 px-5 py-3 rounded-2xl text-xs font-bold"
+                                        className="premium-input bg-neutral-50 dark:bg-white/5 px-5 py-3 rounded-2xl text-[11px] font-semibold"
                                         value={newQuestion.unit}
                                         onChange={e => setNewQuestion({...newQuestion, unit: e.target.value})}
                                         required
@@ -1462,7 +1477,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
 
                                 <textarea 
                                     placeholder="Type your question here..." 
-                                    className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[30px] px-6 py-5 text-sm font-medium h-32 focus:outline-none focus:border-orange-500/50 resize-none"
+                                    className="w-full bg-neutral-50 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-[30px] px-6 py-5 text-[13px] font-medium h-32 focus:outline-none focus:border-orange-500/50 resize-none transition-all"
                                     value={newQuestion.question}
                                     onChange={e => setNewQuestion({...newQuestion, question: e.target.value})}
                                     required
@@ -1498,9 +1513,9 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 <button 
                                     type="submit" 
                                     disabled={isSaving}
-                                    className="w-full bg-slate-950 dark:bg-white text-white dark:text-black font-bold text-xs py-4 rounded-2.5xl uppercase tracking-[0.2em] shadow-2xl shadow-black/20 hover:bg-slate-900 transition-all disabled:opacity-50"
+                                    className="w-full bg-neutral-900 dark:bg-white text-white dark:text-black font-bold text-[11px] py-4 rounded-2.5xl capitalize tracking-tight shadow-2xl shadow-black/20 hover:bg-orange-600 hover:text-white transition-all disabled:opacity-50"
                                 >
-                                    {isSaving ? 'Saving...' : 'Save Question'}
+                                    {isSaving ? 'Processing...' : 'Save record'}
                                 </button>
                              </form>
                         </div>
@@ -1591,7 +1606,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: i * 0.05 }}
-                                    className="glass-panel p-6 rounded-[32px] border border-neutral-200 dark:border-white/5 shadow-xl relative"
+                                    className="glass-panel p-6 rounded-[32px] border border-neutral-100 dark:border-white/5 shadow-xl relative"
                                 >
                                     <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
                                         <div className="flex items-center gap-4">
@@ -1599,17 +1614,17 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                 {f.user?.username?.[0] || 'G'}
                                             </div>
                                             <div>
-                                                <h4 className="text-sm font-semibold text-neutral-900 dark:text-neutral-200 tracking-tight">{f.user?.username || 'Guest'}</h4>
-                                                <p className="text-[10px] font-mono text-neutral-500">{f.user_email || 'No Email'}</p>
+                                                <h4 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-200 tracking-tight capitalize">{f.user?.username || 'Guest user'}</h4>
+                                                <p className="text-[10px] font-mono text-neutral-400 lowercase">{f.user_email || 'anonymous submission'}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-[10px] font-semibold text-neutral-500 tracking-tight">{new Date(f.created_at).toLocaleDateString()}</p>
-                                            <p className="text-[9px] font-medium text-neutral-400">{new Date(f.created_at).toLocaleTimeString()}</p>
+                                            <p className="text-[10px] font-semibold text-neutral-500 tracking-tight">{new Date(f.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</p>
+                                            <p className="text-[9px] font-medium text-neutral-400 opacity-60">{new Date(f.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                                         </div>
                                     </div>
-                                    <div className="bg-neutral-100 dark:bg-black/20 p-6 rounded-[24px] border border-neutral-200 dark:border-white/5 mb-6">
-                                        <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed font-medium italic">"{f.text}"</p>
+                                    <div className="p-6 rounded-[24px] bg-neutral-50 dark:bg-white/[0.02] border border-neutral-100 dark:border-white/5 mb-6">
+                                        <p className="text-[13px] text-neutral-700 dark:text-neutral-300 leading-relaxed font-medium italic">"{f.text}"</p>
                                     </div>
 
                                     {f.user_id ? (

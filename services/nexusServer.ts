@@ -1004,15 +1004,31 @@ class NexusServer {
   static async fetchQuestionReports() {
     const client = getSupabase();
     if (!client) return [];
-    const { data, error } = await client
-      .from('question_reports')
-      .select('*, question:questions(*), reporter:profiles!user_id(username)')
-      .order('created_at', { ascending: false });
-    if (error) {
-      console.error('Fetch Question Reports Error:', error);
+    try {
+      const { data, error } = await client
+        .from('question_reports')
+        .select(`
+          *,
+          question:questions(*),
+          reporter:profiles(username)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.warn('Detailed report fetch failed, trying simple fetch:', error.message);
+        const { data: simpleData, error: simpleError } = await client
+          .from('question_reports')
+          .select('*, reporter:profiles(username)')
+          .order('created_at', { ascending: false });
+        
+        if (simpleError) throw simpleError;
+        return (simpleData || []).map(r => ({ ...r, question: null }));
+      }
+      return data || [];
+    } catch (e) {
+      console.error('Fetch question reports failed:', e);
       return [];
     }
-    return data || [];
   }
 
   static async updateReportStatus(reportId: string, status: string) {
