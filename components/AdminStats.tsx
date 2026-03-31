@@ -715,8 +715,6 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
             setSelectedUserActivity(null);
             return;
         }
-        setUserSearchResults([]);
-        setUserSearchText('');
         setLoading(true);
         try {
             const activity = await NexusServer.getUserDetailedActivity(user.id);
@@ -848,10 +846,10 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
 
                 <div className="flex p-1.5 bg-neutral-100 dark:bg-white/5 rounded-[20px] border border-neutral-200 dark:border-white/10 overflow-hidden">
                     {[
-                        { id: 'monitor', label: 'overview' },
-                        { id: 'reports', label: 'issues' },
-                        { id: 'constructor', label: 'editor' },
-                        { id: 'inbound', label: 'feedback' }
+                        { id: 'monitor', label: 'Overview' },
+                        { id: 'reports', label: 'Reports' },
+                        { id: 'constructor', label: 'Editor' },
+                        { id: 'inbound', label: 'Feedbacks' }
                     ].map(tab => (
                         <button
                             key={tab.id}
@@ -1667,13 +1665,13 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                         onClick={() => setReplyingTo(f.id)}
                                                         className="px-8 py-3 bg-neutral-100 dark:bg-black/40 border border-neutral-200 dark:border-white/5 text-neutral-600 dark:text-neutral-400 font-semibold text-[10px] tracking-tight rounded-2xl hover:bg-orange-600 hover:text-white hover:border-orange-600 transition-all shadow-sm"
                                                     >
-                                                        Reply to feedback
+                                                        {f.replies?.length > 0 ? 'Send another reply' : 'Reply to feedback'}
                                                     </button>
                                                     {f.replies?.length > 0 && (
-                                                        <div className="flex items-center gap-2 group cursor-default">
+                                                        <div className="flex items-center gap-2 group cursor-default px-4 py-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
                                                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                                            <p className="text-[10px] font-semibold text-neutral-500">
-                                                                {f.replies.length} {f.replies.length === 1 ? 'reply' : 'replies'}
+                                                            <p className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                                                Already replied ({f.replies.length} {f.replies.length === 1 ? 'time' : 'times'})
                                                             </p>
                                                         </div>
                                                     )}

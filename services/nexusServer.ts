@@ -1060,25 +1060,58 @@ class NexusServer {
   static async fetchFeedback() {
     const client = getSupabase();
     if (!client) return [];
-    // Use a more standard joining syntax to avoid relationship naming issues
-    const { data, error } = await client
-      .from('feedback')
-      .select('*, profiles(username)')
-      .order('created_at', { ascending: false });
     
+    // First, try to fetch feedback directly
+    const { data: feedbackData, error } = await client
+      .from('feedback')
+      .select('*')
+      .order('created_at', { ascending: false });
+      
     if (error) {
       console.error('Fetch Feedback Error:', error);
-      // Fallback to fetch without join if the above failed
-      const { data: simpleData } = await client.from('feedback').select('*').order('created_at', { ascending: false });
-      return simpleData || [];
+      return [];
     }
+
+    const feedbacks = feedbackData || [];
+
+    // Collect all unique user IDs
+    const userIds = [...new Set(feedbacks.map(f => f.user_id).filter(id => !!id))];
     
-    // Process to keep the UI's 'user' property expectation if needed
-    return (data || []).map(f => ({
-      ...f,
-      user: (f as any).profiles || null,
-      replies: (f as any).replies || [] // Default to empty array if nested field doesn't exist yet
-    }));
+    // Fetch their profiles
+    let profilesMap: Record<string, any> = {};
+    if (userIds.length > 0) {
+        const { data: profiles } = await client
+            .from('profiles')
+            .select('id, username')
+            .in('id', userIds);
+            
+        if (profiles) {
+            profilesMap = profiles.reduce((acc, profile) => {
+                acc[profile.id] = profile;
+                return acc;
+            }, {} as Record<string, any>);
+        }
+    }
+
+    // Process strings -> JSON for replies if needed, and map user
+    return feedbacks.map(f => {
+        let parsedReplies = [];
+        if (typeof f.replies === 'string') {
+            try {
+                parsedReplies = JSON.parse(f.replies);
+            } catch (e) {
+                parsedReplies = [];
+            }
+        } else if (Array.isArray(f.replies)) {
+            parsedReplies = f.replies;
+        }
+
+        return {
+            ...f,
+            user: f.user_id ? (profilesMap[f.user_id] || null) : null,
+            replies: parsedReplies
+        };
+    });
   }
 
   static async updateFeedback(id: string, updates: any) {
