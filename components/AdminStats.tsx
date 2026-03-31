@@ -571,6 +571,12 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
     const [isLoadingProfiles, setIsLoadingProfiles] = useState(false);
     const [selectedUserActivity, setSelectedUserActivity] = useState<any>(null);
     const [isSearchingUser, setIsSearchingUser] = useState(false);
+    
+    // Pagination and Sorting
+    const [displayLimit, setDisplayLimit] = useState(10);
+    const [sortBy, setSortBy] = useState<'username' | 'level' | 'xp'>('username');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+    const [filterRole, setFilterRole] = useState<'all' | 'admin' | 'user'>('all');
 
     // Question State for Creator
     const [newQuestion, setNewQuestion] = useState({
@@ -612,14 +618,8 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                 setIsLoadingProfiles(true);
                 try {
                     const profiles = await NexusServer.fetchAllProfiles();
-                    // Fetch summary stats for each profile
-                    const profilesWithStats = await Promise.all(
-                        profiles.map(async (p: any) => {
-                            const activity = await NexusServer.getUserDetailedActivity(p.id);
-                            return { ...p, stats: activity?.historyStats };
-                        })
-                    );
-                    setAllProfiles(profilesWithStats);
+                    // We no longer eager-fetch stats for every profile here to prevent rate limits
+                    setAllProfiles(profiles);
                 } catch (err) {
                     console.error("Profile Fetch Error:", err);
                 } finally {
@@ -629,6 +629,52 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
             fetchProfiles();
         }
     }, [reportSubTab, allProfiles.length]);
+
+    // Sorting and Filtering Logic
+    const processedProfiles = useMemo(() => {
+        let result = [...allProfiles];
+
+        // 1. Search Filter
+        if (userSearchText) {
+            const query = userSearchText.toLowerCase();
+            result = result.filter(u => 
+                u.username?.toLowerCase().includes(query) || 
+                u.registration_number?.includes(query)
+            );
+        }
+
+        // 2. Role Filter
+        if (filterRole === 'admin') {
+            result = result.filter(u => u.is_admin);
+        } else if (filterRole === 'user') {
+            result = result.filter(u => !u.is_admin);
+        }
+
+        // 3. Sorting
+        result.sort((a, b) => {
+            let valA, valB;
+            if (sortBy === 'level') {
+                valA = a.level || 0;
+                valB = b.level || 0;
+            } else if (sortBy === 'xp') {
+                valA = a.total_xp || 0;
+                valB = b.total_xp || 0;
+            } else {
+                valA = (a.username || '').toLowerCase();
+                valB = (b.username || '').toLowerCase();
+            }
+
+            if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+            if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        return result;
+    }, [allProfiles, userSearchText, filterRole, sortBy, sortOrder]);
+
+    const paginatedProfiles = useMemo(() => {
+        return processedProfiles.slice(0, displayLimit);
+    }, [processedProfiles, displayLimit]);
 
     const loadReports = async () => {
         setLoading(true);
@@ -1125,13 +1171,49 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     {/* Default User Table */}
                                     {!selectedUserActivity && (
                                         <div className="mt-12 overflow-hidden">
-                                            <div className="flex items-center justify-between mb-6 px-2">
-                                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                                    Global Verto Registry
-                                                </h4>
-                                                <div className="flex items-center gap-3">
-                                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">{allProfiles.length} Members Total</p>
+                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 px-2">
+                                                <div>
+                                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-1">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                        Global Verto Registry
+                                                    </h4>
+                                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">{processedProfiles.length} Members Found</p>
+                                                </div>
+
+                                                <div className="flex flex-wrap items-center gap-3">
+                                                    {/* Role Filter */}
+                                                    <select 
+                                                        value={filterRole}
+                                                        onChange={(e) => setFilterRole(e.target.value as any)}
+                                                        className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-[9px] font-bold uppercase tracking-widest focus:outline-none"
+                                                    >
+                                                        <option value="all">All Roles</option>
+                                                        <option value="user">Regular Users</option>
+                                                        <option value="admin">Administrators</option>
+                                                    </select>
+
+                                                    {/* Sort By */}
+                                                    <select 
+                                                        value={sortBy}
+                                                        onChange={(e) => setSortBy(e.target.value as any)}
+                                                        className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-[9px] font-bold uppercase tracking-widest focus:outline-none"
+                                                    >
+                                                        <option value="username">Sort by Name</option>
+                                                        <option value="level">Sort by Level</option>
+                                                        <option value="xp">Sort by XP</option>
+                                                    </select>
+
+                                                    {/* Sort Order */}
+                                                    <button 
+                                                        onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                                                        className="p-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-slate-500 hover:text-orange-500 transition-colors"
+                                                    >
+                                                        {sortOrder === 'asc' ? (
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 4h13M3 8h9M3 12h5m7-8v16m0 0l-4-4m4 4l4-4" /></svg>
+                                                        ) : (
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 4h13M3 8h9M3 12h5m7 8V4m0 16l-4-4m4 4l4-4" /></svg>
+                                                        )}
+                                                    </button>
                                                 </div>
                                             </div>
                                             
@@ -1156,12 +1238,8 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                         </div>
                                                                     </td>
                                                                 </tr>
-                                                            ) : allProfiles.length > 0 ? (
-                                                                allProfiles.filter(u => 
-                                                                    !userSearchText || 
-                                                                    u.username?.toLowerCase().includes(userSearchText.toLowerCase()) || 
-                                                                    u.registration_number?.includes(userSearchText)
-                                                                ).map((user) => (
+                                                            ) : paginatedProfiles.length > 0 ? (
+                                                                paginatedProfiles.map((user) => (
                                                                     <tr key={user.id} className="group hover:bg-slate-50/80 dark:hover:bg-white/[0.03] transition-all">
                                                                         <td className="px-8 py-5">
                                                                             <div className="flex items-center gap-5">
@@ -1184,13 +1262,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                                     <div className="flex flex-wrap items-center gap-2 mt-1">
                                                                                         <p className="text-[9px] font-bold text-emerald-500 px-2 py-0.5 bg-emerald-500/10 rounded-full uppercase tracking-tighter">LVL {user.level || 1}</p>
                                                                                         <p className="text-[9px] font-bold text-slate-400 font-mono tracking-tighter">{(user.total_xp || 0).toLocaleString()} XP</p>
-                                                                                        {user.stats && (
-                                                                                            <>
-                                                                                                <p className="text-[9px] font-bold text-blue-500 border-l border-slate-200 dark:border-white/10 pl-2 ml-1">{(user.stats.studyTime / 60).toFixed(0)}m Study</p>
-                                                                                                <p className="text-[9px] font-bold text-orange-500">· {user.stats.quizzesCompleted || 0} Quizzes</p>
-                                                                                                <p className="text-[9px] font-bold text-indigo-500">· {user.stats.filesAccessed || 0} Files</p>
-                                                                                            </>
-                                                                                        )}
+                                                                                        <p className="text-[9px] font-bold text-slate-400 opacity-50 px-1 border-l border-slate-200 dark:border-white/10 uppercase tracking-tighter">{user.is_admin ? 'Admin' : 'Verto'}</p>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -1225,6 +1297,18 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                     </table>
                                                 </div>
                                             </div>
+
+                                            {/* Load More Button */}
+                                            {displayLimit < processedProfiles.length && (
+                                                <div className="mt-8 flex justify-center pb-12">
+                                                    <button 
+                                                        onClick={() => setDisplayLimit(prev => prev + 10)}
+                                                        className="px-8 py-3 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 hover:text-orange-500 hover:border-orange-500/30 transition-all shadow-xl active:scale-95"
+                                                    >
+                                                        Sync More Records ({processedProfiles.length - displayLimit} Remaining)
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>

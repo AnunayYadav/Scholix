@@ -1274,7 +1274,7 @@ class NexusServer {
   static async fetchAllProfiles(): Promise<Partial<UserProfile>[]> {
     const client = getSupabase();
     if (!client) return [];
-    const { data, error } = await client.from('profiles').select('id, username, email, registration_number, avatar_url').order('username', { ascending: true });
+    const { data, error } = await client.from('profiles').select('id, username, email, registration_number, avatar_url, is_admin, total_xp, level').order('username', { ascending: true });
     if (error) {
       console.error('Fetch All Profiles Error:', error);
       return [];
