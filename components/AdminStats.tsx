@@ -712,6 +712,10 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
     };
 
     const selectUserForTracking = async (user: any) => {
+        if (selectedUserActivity?.profile?.id === user.id) {
+            setSelectedUserActivity(null);
+            return;
+        }
         setUserSearchResults([]);
         setUserSearchText('');
         setLoading(true);
@@ -1157,7 +1161,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                             </div>
                                                             <div className="flex items-center gap-3">
                                                                 <div className="text-right mr-4">
-                                                                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-tighter">Inspect Full View</p>
+                                                                    <p className="text-[10px] font-black text-orange-500 tracking-tighter">View Profile</p>
                                                                 </div>
                                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-slate-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                                                             </div>
@@ -1168,10 +1172,9 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                         </div>
                                     </div>
 
-                                    {/* Default User Table */}
-                                    {!selectedUserActivity && (
-                                        <div className="mt-12 overflow-hidden">
-                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 px-2">
+                                    {/* Default User Table - Persistent Navigation */}
+                                    <div className="mt-12 overflow-hidden">
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 px-2">
                                                 <div>
                                                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-1">
                                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -1182,26 +1185,38 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
 
                                                 <div className="flex flex-wrap items-center gap-3">
                                                     {/* Role Filter */}
-                                                    <select 
-                                                        value={filterRole}
-                                                        onChange={(e) => setFilterRole(e.target.value as any)}
-                                                        className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-[9px] font-bold uppercase tracking-widest focus:outline-none"
-                                                    >
-                                                        <option value="all">All Roles</option>
-                                                        <option value="user">Regular Users</option>
-                                                        <option value="admin">Administrators</option>
-                                                    </select>
+                                                    <div className="relative group/select min-w-[140px]">
+                                                        <select 
+                                                            value={filterRole}
+                                                            onChange={(e) => setFilterRole(e.target.value as any)}
+                                                            className="w-full appearance-none bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:outline-none cursor-pointer dark:text-white hover:border-orange-500/30 transition-all transition-colors"
+                                                            style={{ colorScheme: 'dark' }}
+                                                        >
+                                                            <option value="all" className="dark:bg-slate-900">All Roles</option>
+                                                            <option value="user" className="dark:bg-slate-900">Regular Users</option>
+                                                            <option value="admin" className="dark:bg-slate-900">Administrators</option>
+                                                        </select>
+                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover/select:text-orange-500 transition-colors">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M6 9l6 6 6-6" /></svg>
+                                                        </div>
+                                                    </div>
 
                                                     {/* Sort By */}
-                                                    <select 
-                                                        value={sortBy}
-                                                        onChange={(e) => setSortBy(e.target.value as any)}
-                                                        className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-[9px] font-bold uppercase tracking-widest focus:outline-none"
-                                                    >
-                                                        <option value="username">Sort by Name</option>
-                                                        <option value="level">Sort by Level</option>
-                                                        <option value="xp">Sort by XP</option>
-                                                    </select>
+                                                    <div className="relative group/select min-w-[140px]">
+                                                        <select 
+                                                            value={sortBy}
+                                                            onChange={(e) => setSortBy(e.target.value as any)}
+                                                            className="w-full appearance-none bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:outline-none cursor-pointer dark:text-white hover:border-orange-500/30 transition-all transition-colors"
+                                                            style={{ colorScheme: 'dark' }}
+                                                        >
+                                                            <option value="username" className="dark:bg-slate-900">Sort by Name</option>
+                                                            <option value="level" className="dark:bg-slate-900">Sort by Level</option>
+                                                            <option value="xp" className="dark:bg-slate-900">Sort by XP</option>
+                                                        </select>
+                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover/select:text-orange-500 transition-colors">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M6 9l6 6 6-6" /></svg>
+                                                        </div>
+                                                    </div>
 
                                                     {/* Sort Order */}
                                                     <button 
@@ -1240,48 +1255,139 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                 </tr>
                                                             ) : paginatedProfiles.length > 0 ? (
                                                                 paginatedProfiles.map((user) => (
-                                                                    <tr key={user.id} className="group hover:bg-slate-50/80 dark:hover:bg-white/[0.03] transition-all">
-                                                                        <td className="px-8 py-5">
-                                                                            <div className="flex items-center gap-5">
-                                                                                <div className="relative">
-                                                                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-white/5 dark:to-white/10 flex items-center justify-center text-slate-600 dark:text-white font-black text-sm shadow-sm overflow-hidden border border-white/50 dark:border-white/5 group-hover:scale-105 transition-transform">
-                                                                                        {user.avatar_url ? (
-                                                                                            <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
-                                                                                        ) : (
-                                                                                            user.username?.[0]?.toUpperCase() || 'V'
+                                                                    <React.Fragment key={user.id}>
+                                                                        <tr className={`group hover:bg-slate-50/80 dark:hover:bg-white/[0.03] transition-all ${selectedUserActivity?.profile?.id === user.id ? 'bg-slate-50 dark:bg-white/[0.02]' : ''}`}>
+                                                                            <td className="px-8 py-5">
+                                                                                <div className="flex items-center gap-5">
+                                                                                    <div className="relative">
+                                                                                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-white/5 dark:to-white/10 flex items-center justify-center text-slate-600 dark:text-white font-black text-sm shadow-sm overflow-hidden border border-white/50 dark:border-white/5 group-hover:scale-105 transition-transform">
+                                                                                            {user.avatar_url ? (
+                                                                                                <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                                                            ) : (
+                                                                                                user.username?.[0]?.toUpperCase() || 'V'
+                                                                                            )}
+                                                                                        </div>
+                                                                                        {user.is_admin && (
+                                                                                            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-500 border-2 border-white dark:border-slate-900 flex items-center justify-center">
+                                                                                                <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                                                                                            </div>
                                                                                         )}
                                                                                     </div>
-                                                                                    {user.is_admin && (
-                                                                                        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-500 border-2 border-white dark:border-slate-900 flex items-center justify-center">
-                                                                                            <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                                                                                    <div>
+                                                                                        <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">{user.username}</p>
+                                                                                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                                                                                            <p className="text-[9px] font-bold text-emerald-500 px-2 py-0.5 bg-emerald-500/10 rounded-full uppercase tracking-tighter">LVL {user.level || 1}</p>
+                                                                                            <p className="text-[9px] font-bold text-slate-400 font-mono tracking-tighter">{(user.total_xp || 0).toLocaleString()} XP</p>
+                                                                                            <p className="text-[9px] font-bold text-slate-400 opacity-50 px-1 border-l border-slate-200 dark:border-white/10 uppercase tracking-tighter">{user.is_admin ? 'Admin' : 'Verto'}</p>
                                                                                         </div>
-                                                                                    )}
-                                                                                </div>
-                                                                                <div>
-                                                                                    <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">{user.username}</p>
-                                                                                    <div className="flex flex-wrap items-center gap-2 mt-1">
-                                                                                        <p className="text-[9px] font-bold text-emerald-500 px-2 py-0.5 bg-emerald-500/10 rounded-full uppercase tracking-tighter">LVL {user.level || 1}</p>
-                                                                                        <p className="text-[9px] font-bold text-slate-400 font-mono tracking-tighter">{(user.total_xp || 0).toLocaleString()} XP</p>
-                                                                                        <p className="text-[9px] font-bold text-slate-400 opacity-50 px-1 border-l border-slate-200 dark:border-white/10 uppercase tracking-tighter">{user.is_admin ? 'Admin' : 'Verto'}</p>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td className="px-8 py-5 hidden sm:table-cell text-center">
-                                                                            <p className="text-[10px] font-black text-slate-600 dark:text-slate-300 font-mono tracking-wider tabular-nums px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-lg inline-block">{user.registration_number || '----------'}</p>
-                                                                        </td>
-                                                                        <td className="px-8 py-5 hidden md:table-cell">
-                                                                            <p className="text-[10px] font-bold text-slate-500 truncate max-w-[180px]">{user.email || 'Email Protected'}</p>
-                                                                        </td>
-                                                                        <td className="px-8 py-5 text-right">
-                                                                            <button 
-                                                                                onClick={() => selectUserForTracking(user)}
-                                                                                className="px-6 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-black text-[9px] font-black uppercase tracking-[0.15em] hover:bg-orange-600 hover:text-white dark:hover:bg-orange-600 dark:hover:text-white transition-all shadow-sm"
-                                                                            >
-                                                                                Inspect
-                                                                            </button>
-                                                                        </td>
-                                                                    </tr>
+                                                                            </td>
+                                                                            <td className="px-8 py-5 hidden sm:table-cell text-center">
+                                                                                <p className="text-[10px] font-black text-slate-600 dark:text-slate-300 font-mono tracking-wider tabular-nums px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-lg inline-block">{user.registration_number || '----------'}</p>
+                                                                            </td>
+                                                                            <td className="px-8 py-5 hidden md:table-cell">
+                                                                                <p className="text-[10px] font-bold text-slate-500 truncate max-w-[180px]">{user.email || 'Email Protected'}</p>
+                                                                            </td>
+                                                                            <td className="px-8 py-5 text-right">
+                                                                                <button 
+                                                                                    onClick={() => selectUserForTracking(user)}
+                                                                                    className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.15em] transition-all shadow-sm ${selectedUserActivity?.profile?.id === user.id ? 'bg-orange-500 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-orange-600 hover:text-white dark:hover:bg-orange-600 dark:hover:text-white'}`}
+                                                                                >
+                                                                                    {selectedUserActivity?.profile?.id === user.id ? 'Hide' : 'View'}
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                        {selectedUserActivity?.profile?.id === user.id && (
+                                                                            <tr>
+                                                                                <td colSpan={4} className="px-8 pb-10 pt-2 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/[0.01]">
+                                                                                    <motion.div 
+                                                                                        initial={{ opacity: 0, height: 0 }}
+                                                                                        animate={{ opacity: 1, height: 'auto' }}
+                                                                                        className="overflow-hidden space-y-8 mt-4"
+                                                                                    >
+                                                                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-3">
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Level Status</p>
+                                                                                                <p className="text-lg font-black text-slate-900 dark:text-white tracking-tighter">LVL {selectedUserActivity.profile?.level || 1}</p>
+                                                                                            </div>
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Progression</p>
+                                                                                                <p className="text-lg font-black text-emerald-500 tracking-tighter">{(selectedUserActivity.profile?.total_xp || 0).toLocaleString()} <span className="text-[8px] opacity-60 uppercase ml-1">XP</span></p>
+                                                                                            </div>
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Quiz Volume</p>
+                                                                                                <p className="text-lg font-black text-orange-500 tracking-tighter">{selectedUserActivity.attempts?.length || 0} <span className="text-[8px] opacity-60 uppercase ml-1">Tests</span></p>
+                                                                                            </div>
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Study Hours</p>
+                                                                                                <p className="text-lg font-black text-blue-500 tracking-tighter">{(selectedUserActivity.historyStats?.studyTime / 3600).toFixed(1)} <span className="text-[8px] opacity-60 uppercase ml-1">Hrs</span></p>
+                                                                                            </div>
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Library Use</p>
+                                                                                                <p className="text-lg font-black text-indigo-500 tracking-tighter">{selectedUserActivity.historyStats?.filesAccessed || 0} <span className="text-[8px] opacity-60 uppercase ml-1">Files</span></p>
+                                                                                            </div>
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">CGPA Checks</p>
+                                                                                                <p className="text-lg font-black text-purple-500 tracking-tighter">{selectedUserActivity.historyStats?.cgpaCalculations || 0} <span className="text-[8px] opacity-60 uppercase ml-1">Runs</span></p>
+                                                                                            </div>
+                                                                                            <div className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm">
+                                                                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Social Sync</p>
+                                                                                                <p className="text-lg font-black text-slate-400 tracking-tighter">{(selectedUserActivity.reports?.length + selectedUserActivity.feedback?.length) * 10} <span className="text-[8px] opacity-60 uppercase ml-1">Pts</span></p>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                                                                            <div className="bg-white dark:bg-white/[0.02] p-6 rounded-3xl border border-slate-200 dark:border-white/10">
+                                                                                                <h5 className="text-[9px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/5 pb-3">Quiz Performance (Recent)</h5>
+                                                                                                <div className="space-y-2">
+                                                                                                    {selectedUserActivity.attempts?.length > 0 ? selectedUserActivity.attempts.slice(0, 5).map((att: any, i: number) => (
+                                                                                                        <div key={i} className="flex justify-between items-center p-3 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-all">
+                                                                                                            <div>
+                                                                                                                <p className="text-[10px] font-black text-slate-800 dark:text-white/80 uppercase mb-0.5">{att.subject}</p>
+                                                                                                                <p className="text-[8px] font-bold text-slate-400">{new Date(att.created_at).toLocaleDateString()}</p>
+                                                                                                            </div>
+                                                                                                            <div className="text-right">
+                                                                                                                <p className="text-[10px] font-black text-slate-900 dark:text-white">{Math.round((att.score / att.total_questions) * 100)}%</p>
+                                                                                                                <p className="text-[7px] font-black text-emerald-500">+{att.xp_gained} XP</p>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    )) : (
+                                                                                                        <p className="text-[10px] font-bold text-slate-300 italic text-center py-6">No attempts logged.</p>
+                                                                                                    )}
+                                                                                                </div>
+                                                                                            </div>
+
+                                                                                            <div className="bg-white dark:bg-white/[0.02] p-6 rounded-3xl border border-slate-200 dark:border-white/10">
+                                                                                                <h5 className="text-[9px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/5 pb-3">Community Activity</h5>
+                                                                                                <div className="space-y-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
+                                                                                                    {selectedUserActivity.reports?.map((r: any, i: number) => (
+                                                                                                        <div key={`rep-${i}`} className="flex gap-3 items-start border-l-2 border-red-500/30 pl-3 py-1">
+                                                                                                            <div>
+                                                                                                                <p className="text-[10px] font-bold text-slate-800 dark:text-white/70 tracking-tight">Report: {r.reason}</p>
+                                                                                                                <p className="text-[7px] text-slate-500 font-bold uppercase">{new Date(r.created_at).toLocaleDateString()}</p>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    ))}
+                                                                                                    {selectedUserActivity.feedback?.map((f: any, i: number) => (
+                                                                                                        <div key={`feed-${i}`} className="flex gap-3 items-start border-l-2 border-emerald-500/30 pl-3 py-1">
+                                                                                                            <div>
+                                                                                                                <p className="text-[10px] font-bold text-slate-800 dark:text-white/70 tracking-tight">Feedback: {f.text.slice(0, 50)}...</p>
+                                                                                                                <p className="text-[7px] text-slate-500 font-bold uppercase">{new Date(f.created_at).toLocaleDateString()}</p>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    ))}
+                                                                                                    {selectedUserActivity.reports?.length === 0 && selectedUserActivity.feedback?.length === 0 && (
+                                                                                                        <p className="text-[10px] font-bold text-slate-300 italic text-center py-6">Zero social impact events.</p>
+                                                                                                    )}
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </motion.div>
+                                                                                </td>
+                                                                            </tr>
+                                                                        )}
+                                                                    </React.Fragment>
                                                                 ))
                                                             ) : (
                                                                 <tr>
@@ -1310,8 +1416,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                 </div>
                                             )}
                                         </div>
-                                    )}
-                                </div>
+                                    </div>
 
                                 {/* Active Selection Board */}
                                 {selectedUserActivity && (
