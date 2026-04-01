@@ -1271,20 +1271,20 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       <>
         <AnimatePresence>
           {/* Report Modal */}
-          {showReportModal && (
+            {showReportModal && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-slate-950/60 backdrop-blur-xl" 
+                className="absolute inset-0 bg-black/80 backdrop-blur-xl" 
                 onClick={() => setShowReportModal(false)} 
               />
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[32px] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden p-8"
+                className="relative w-full max-w-lg bg-white dark:bg-black rounded-[32px] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden p-8"
               >
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">Report Question</h3>
@@ -1303,8 +1303,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         onClick={() => setReportReason(option)}
                         className={`w-full text-left p-4 rounded-2xl border transition-all ${
                           reportReason === option 
-                            ? 'bg-red-500/10 border-red-500 text-red-600' 
-                            : 'bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:border-red-500/30'
+                            ? 'bg-orange-500/10 border-orange-500 text-orange-600 dark:text-orange-400' 
+                            : 'bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:border-orange-500/30'
                         }`}
                       >
                         <span className="text-sm font-semibold">{option}</span>
@@ -1315,14 +1315,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       placeholder="Additional details or specific concerns..."
                       value={reportReason}
                       onChange={(e) => setReportReason(e.target.value)}
-                      className="w-full p-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all min-h-[100px] text-slate-800 dark:text-slate-200"
+                      className="w-full p-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all min-h-[100px] text-slate-800 dark:text-slate-200"
                     />
                   </div>
 
                   <button
                     disabled={!reportReason.trim() || isReporting}
                     onClick={submitReport}
-                    className="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-sm font-bold shadow-lg shadow-red-600/20 transition-all active:scale-95 disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-600 hover:shadow-xl hover:shadow-orange-500/20 text-white rounded-2xl text-sm font-bold shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2 border-none"
                   >
                     {isReporting ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
