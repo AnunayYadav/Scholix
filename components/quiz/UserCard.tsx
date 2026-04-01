@@ -49,7 +49,7 @@ const UserCard: React.FC<UserCardProps> = ({
                     />
                   )}
                   <div 
-                    className={`w-full h-full rounded-full overflow-hidden bg-white dark:bg-dark-950 flex items-center justify-center border-2 border-orange-500/10`}
+                    className={`w-full h-full rounded-full overflow-hidden flex items-center justify-center`}
                     style={{ padding: frameConfig.padding }}
                   >
                     {avatarUrl ? (

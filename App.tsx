@@ -572,7 +572,7 @@ const AppContent: React.FC = () => {
                             />
                           )}
                           <div 
-                            className={`w-full h-full rounded-full overflow-hidden border-2 border-white/10 bg-nexus-darker flex items-center justify-center`}
+                            className={`w-full h-full rounded-full overflow-hidden bg-nexus-darker flex items-center justify-center`}
                             style={{ padding: frameConfig.padding }}
                           >
                             {userProfile.avatar_url ? (

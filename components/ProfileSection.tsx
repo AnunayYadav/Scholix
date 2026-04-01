@@ -176,7 +176,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
               />
             )}
             <div 
-              className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-[#0a0a0a] flex items-center justify-center relative"
+              className="w-full h-full rounded-full overflow-hidden flex items-center justify-center relative"
               style={{ padding: frameConfig.padding }}
             >
               <div className="w-full h-full bg-slate-50 dark:bg-[#0a0a0a] rounded-full flex items-center justify-center overflow-hidden relative">
