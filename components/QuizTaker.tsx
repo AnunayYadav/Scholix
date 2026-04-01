@@ -2961,7 +2961,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                             key={tier.level}
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
+                            viewport={{ once: true }} 
                             transition={{ delay: idx * 0.1 }}
                             className="relative flex items-center gap-8 group"
                           >
