@@ -169,10 +169,10 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
               <img 
                 src={`/Nexus-Journey/${userProfile.avatar_frame}`}
                 alt="Avatar Frame"
-                className="absolute -inset-8 w-[calc(100%+64px)] h-[calc(100%+64px)] z-10 pointer-events-none object-contain max-w-none left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                className="absolute w-[180%] h-[180%] z-20 pointer-events-none object-contain max-w-none left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
               />
             )}
-            <div className={`w-full h-full rounded-full ${!userProfile.avatar_frame ? 'bg-white dark:bg-[#0a0a0a] p-[1.5px]' : 'p-0'}`}>
+            <div className={`w-full h-full rounded-full transition-all duration-500 ${userProfile.avatar_frame ? 'p-5' : 'bg-white dark:bg-[#0a0a0a] p-[1.5px]'}`}>
               <div className="w-full h-full bg-slate-50 dark:bg-[#0a0a0a] rounded-full flex items-center justify-center overflow-hidden relative">
                 {userProfile.avatar_url ? (
                   <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
