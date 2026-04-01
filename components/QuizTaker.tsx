@@ -105,7 +105,7 @@ interface SubjectWithSyllabus {
   syllabusFile: LibraryFile;
 }
 
-const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile }) => {
+const QuizTaker: React.FC<{ userProfile: UserProfile | null, onAuthRequired?: () => void }> = ({ userProfile, onAuthRequired }) => {
   const { subjectName, quizId } = useParams();
   const navigate = useNavigate();
 
@@ -178,9 +178,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile 
   const [markedForReview, setMarkedForReview] = useState<Set<number>>(new Set());
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [timeSpentByQuestion, setTimeSpentByQuestion] = useState<Record<number, number>>({});
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [loginPromptTitle, setLoginPromptTitle] = useState('Nexus Membership');
-  const [loginPromptMessage, setLoginPromptMessage] = useState('This feature is reserved for Nexus members. Login to track your progress and unlock rewards!');
+
   
   // Question Feedback States
   const [showReportModal, setShowReportModal] = useState(false);
@@ -811,10 +809,9 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
   // ═══════════ Featured Quiz Start ═══════════
   const handleStartFeaturedQuiz = useCallback(() => {
-    if (userId === 'anonymous') {
-      setLoginPromptTitle('Login to Attempt');
-      setLoginPromptMessage('Daily Featured Quizzes are the heart of LPU-Nexus. Sign in to compete globally and earn exclusive XP!');
-      setShowLoginPrompt(true);
+    if (!userProfile || userId === 'anonymous') {
+      showToast("Please login to attempt the featured quiz.", "error");
+      onAuthRequired?.();
       return;
     }
     if (!featuredQuiz || featuredCompleted) return;
@@ -850,10 +847,9 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
   // ═══════════ Challenge Start ═══════════
   const handleStartChallenge = useCallback(async (challenge: typeof activeChallenges[0]) => {
-    if (userId === 'anonymous') {
-      setLoginPromptTitle('Login to Attempt');
-      setLoginPromptMessage('Active Challenges are high-stakes missions. Join LPU-Nexus to prove your skills and climb the leaderboard!');
-      setShowLoginPrompt(true);
+    if (!userProfile || userId === 'anonymous') {
+      showToast("Please login to attempt challenges.", "error");
+      onAuthRequired?.();
       return;
     }
     if (completedChallengeIds.has(challenge.id)) return;
@@ -1015,24 +1011,12 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   ]);
 
   const handleGenerate = async () => {
-    if (!selectedSubject || selectedUnits.length === 0) return;
-
-    // Guest Control: Limit to 3 custom tests
-    if (userId === 'anonymous') {
-      try {
-        const key = `nexus_completions_anonymous`;
-        const completions = JSON.parse(localStorage.getItem(key) || '[]');
-        const customCount = completions.filter((c: any) => c.type === 'custom').length;
-        if (customCount >= 3) {
-          setLoginPromptTitle('Login to Create More');
-          setLoginPromptMessage('You have reached the limit of 3 custom tests for guest users. Create a free account to enjoy unlimited creations with no limits!');
-          setShowLoginPrompt(true);
-          return;
-        }
-      } catch (e) {
-        console.error("Auth check failed", e);
-      }
+    if (!userProfile || userId === 'anonymous') {
+      showToast("Please login to start a custom quiz.", "error");
+      onAuthRequired?.();
+      return;
     }
+    if (!selectedSubject || selectedUnits.length === 0) return;
 
     setLoading(true);
     setError(null);
@@ -2766,73 +2750,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       <StreakToast />
       {renderModals()}
       
-      {/* Login Prompt Modal */}
-      {showLoginPrompt && typeof document !== 'undefined' && createPortal(
-        <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="modal-overlay"
-            style={{ zIndex: 100 }}
-            onClick={() => setShowLoginPrompt(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 30 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 30 }}
-              className="w-full max-w-md bg-white dark:bg-dark-950 rounded-[40px] shadow-3xl overflow-hidden border border-slate-200 dark:border-white/10 p-8 text-center relative"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Decorative Icon */}
-              <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-orange-500/20 rotate-12">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" className="w-10 h-10">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  <path d="M12 8v4" /><path d="M12 16h.01" />
-                </svg>
-              </div>
 
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3 tracking-tight leading-none italic uppercase">{loginPromptTitle}</h3>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-8 leading-relaxed px-2">
-                {loginPromptMessage}
-              </p>
-
-              <div className="space-y-3">
-                <button
-                  onClick={() => {
-                    // This logic assumes that a login/auth modal can be triggered globally or via a specific event
-                    // For now, we direct the user to the signup/login flow
-                    setShowLoginPrompt(false);
-                    // Trigger custom event for App.tsx to open auth modal
-                    window.dispatchEvent(new CustomEvent('nexus-trigger-auth'));
-                  }}
-                  className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
-                >
-                  Join Nexus Now
-                </button>
-                <button
-                  onClick={() => setShowLoginPrompt(false)}
-                  className="w-full py-4 bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/40 rounded-2xl font-bold text-xs uppercase tracking-widest hover:text-slate-900 dark:hover:text-white transition-all"
-                >
-                  Maybe Later
-                </button>
-              </div>
-
-              {/* Close Button */}
-              <button 
-                onClick={() => setShowLoginPrompt(false)}
-                className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-                aria-label="Close"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-slate-400">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </button>
-            </motion.div>
-          </motion.div>
-        </AnimatePresence>,
-        document.body
-      )}
     </>
   );
 
