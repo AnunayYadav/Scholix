@@ -139,11 +139,46 @@ function getChallengeWindow(dateStr: string) {
 // ═══════════════════════════════════════
 // Featured Quiz Generation
 // Same quiz for ALL users on the same date.
-// Difficulty cycles: easy → medium → hard → easy ...
 // ═══════════════════════════════════════
 
-const ADJECTIVES = ['Ultimate', 'Daily', 'Lightning', 'Power', 'Classic', 'Master', 'Speed', 'Elite', 'Pro', 'Rapid'];
-const CHALLENGE_TYPES = ['Challenge', 'Sprint', 'Blitz', 'Showdown', 'Gauntlet', 'Trial', 'Test', 'Quest', 'Exam', 'Rush'];
+const PREFIXES = [
+  'Elite', 'Master', 'Legendary', 'Diamond', 'Grandmaster', 'Apex', 'Zenith', 
+  'Prime', 'Ultra', 'Super', 'Pro', 'Gold', 'Silver', 'Ultimate', 'Hyper',
+  'Titan', 'Mystic', 'Cosmic', 'Inferno', 'Nebula', 'Omega', 'Alpha', 'Velocity',
+  'Radiant', 'Stellar', 'Eternal', 'Shadow', 'Azure', 'Crimson', 'Sonic'
+];
+
+const SUFFIXES = [
+  'Challenge', 'Mastery', 'Champion', 'Gauntlet', 'Showdown', 'Sprint', 
+  'Pro', 'Exam', 'Test', 'Assessment', 'Blitz', 'Trial', 'Rush', 'Quest',
+  'Marathon', 'Conqueror', 'Vanguard', 'Clash', 'Duel', 'Hero', 'Warrior', 'Sage',
+  'Specialist', 'Expert', 'Wizard', 'Architect', 'Commander', 'Reign'
+];
+
+const SPECIAL_ROUNDS = [
+  'Speed Round:', 'Rapid Fire:', 'Deep Dive:', 'Expert Mode:', 'Sprint:',
+  'The Great', 'Nexus Prime:', 'Lightning:', 'Insane Mode:', 'Turbo:',
+  'Masterclass:', 'Final Frontier:'
+];
+
+function generateDynamicName(subject: string, rng: () => number): string {
+  const shortName = subject.includes(':') ? subject.split(':')[1].trim() : (subject.includes('-') ? subject.split('-').pop()?.trim() || subject : subject);
+  const pattern = Math.floor(rng() * 5);
+  
+  switch (pattern) {
+    case 0: // Elite [Subject] Challenge
+      return `${seededPick(PREFIXES, rng)} ${shortName} ${seededPick(SUFFIXES, rng)}`;
+    case 1: // Speed Round: [Subject] Mastery
+      return `${seededPick(SPECIAL_ROUNDS, rng)} ${shortName} ${seededPick(['Mastery', 'Champion', 'Sprint', 'Pro', 'Rush'], rng)}`;
+    case 2: // [Subject] Mastery champion
+      return `${shortName} ${seededPick(SUFFIXES, rng)} ${seededPick(['Master', 'Pro', 'Champion', 'Legend'], rng)}`;
+    case 3: // [Subject] Mastery
+      return `${shortName} ${seededPick(SUFFIXES, rng)}`;
+    case 4: // [Prefix] [Subject] Mastery
+    default:
+      return `${seededPick(PREFIXES, rng)} ${shortName} ${seededPick(['Mastery', 'Expert', 'Pro'], rng)}`;
+  }
+}
 
 async function generateFeaturedQuiz(): Promise<FeaturedQuiz | null> {
   const today = getTodayIST();
@@ -153,68 +188,65 @@ async function generateFeaturedQuiz(): Promise<FeaturedQuiz | null> {
   const subjects = await NexusServer.fetchSubjectNames();
   if (!subjects || subjects.length === 0) return null;
 
-  // Pick subject based on seeded random
-  const subject = seededPick(subjects.sort(), rng);
-  const subjectCode = (subject || '').split(':')[0].trim();
-  const questionsPool: QuizQuestion[] = await NexusServer.fetchQuestions(subjectCode);
+  // Shuffle subjects to pick a random one, but retry if it has no questions
+  const shuffledSubjects = seededShuffle(subjects.sort(), rng);
   
-  if (!questionsPool || questionsPool.length === 0) return null;
+  for (let sIdx = 0; sIdx < Math.min(10, shuffledSubjects.length); sIdx++) {
+    const subject = shuffledSubjects[sIdx];
+    const subjectCode = (subject || '').split(':')[0].trim();
+    const questionsPool: QuizQuestion[] = await NexusServer.fetchQuestions(subjectCode);
+    
+    if (!questionsPool || questionsPool.length === 0) continue;
 
-  // Difficulty cycles based on day of year: 0=easy, 1=medium, 2=hard
-  const doy = dayOfYear(today);
-  const difficultyMap: Record<number, 'easy' | 'medium' | 'hard'> = { 0: 'easy', 1: 'medium', 2: 'hard' };
-  const difficulty = difficultyMap[doy % 3];
+    const difficulty = seededPick(['easy', 'medium', 'hard'] as const, rng);
+    const allowedUnits = getAllowedUnits(today);
 
-  const allowedUnits = getAllowedUnits(today);
-
-  // Try to get questions of the target difficulty AND allowed units
-  let questions = questionsPool.filter(q =>
-    q.type !== 'subjective' &&
-    q.type !== 'coding' &&
-    (q.difficulty || 'medium') === difficulty &&
-    allowedUnits.includes(q.unit || 1)
-  );
-
-  if (questions.length < 5) {
-    // Fallback: use all non-subjective, non-coding questions within allowed units
-    questions = questionsPool.filter(q => 
-      q.type !== 'subjective' && 
+    // Filter relevant questions
+    let questions = questionsPool.filter(q =>
+      q.type !== 'subjective' &&
       q.type !== 'coding' &&
+      (q.difficulty || 'medium') === difficulty &&
       allowedUnits.includes(q.unit || 1)
     );
+
+    if (questions.length < 5) {
+      // Fallback 1: use all non-subjective, non-coding questions within allowed units
+      questions = questionsPool.filter(q => 
+        q.type !== 'subjective' && 
+        q.type !== 'coding' &&
+        allowedUnits.includes(q.unit || 1)
+      );
+    }
+
+    if (questions.length === 0) {
+      // Fallback 2: ignore unit constraint if no questions in current units
+      questions = questionsPool.filter(q => q.type !== 'subjective' && q.type !== 'coding');
+    }
+
+    if (questions.length < 5) continue; // Try next subject if this one is too sparse
+
+    // We found a good subject!
+    const shuffled = seededShuffle(questions, rng).slice(0, 10);
+    const unitsFound = Array.from(new Set(shuffled.map(q => String(q.unit || 'General')).filter(Boolean))).sort();
+    const name = generateDynamicName(subject, rng);
+
+    const xpBase = shuffled.length * 10;
+    const featuredBonus = 25;
+
+    return {
+      id: `featured_${today}`,
+      date: today,
+      name,
+      subject,
+      difficulty,
+      questions: shuffled,
+      units: unitsFound,
+      xp_reward: xpBase + featuredBonus,
+      generated_at: new Date().toISOString(),
+    };
   }
 
-  // Final fallback: if NO questions in these units, ignore unit constraint
-  if (questions.length === 0) {
-    questions = questionsPool.filter(q => q.type !== 'subjective' && q.type !== 'coding');
-  }
-
-  if (questions.length === 0) return null;
-
-  // Deterministic shuffle and pick 10
-  const shuffled = seededShuffle(questions, rng).slice(0, 10);
-  const unitsFound = Array.from(new Set(shuffled.map(q => String(q.unit || 'General')).filter(Boolean))).sort();
-
-  // Generate name deterministically
-  const adj = seededPick(ADJECTIVES, rng);
-  const type = seededPick(CHALLENGE_TYPES, rng);
-  const shortName = subject.includes('-') ? subject.split('-').pop()?.trim() || subject : subject;
-  const name = `${adj} ${shortName} ${type}`;
-
-  const xpBase = shuffled.length * 10;
-  const featuredBonus = 25;
-
-  return {
-    id: `featured_${today}`,
-    date: today,
-    name,
-    subject,
-    difficulty,
-    questions: shuffled,
-    units: unitsFound,
-    xp_reward: xpBase + featuredBonus,
-    generated_at: new Date().toISOString(),
-  };
+  return null;
 }
 
 // ═══════════════════════════════════════
@@ -230,9 +262,9 @@ const CHALLENGE_EMOJIS_MAP: Record<string, string> = {
 };
 
 const CHALLENGE_TEMPLATES = [
-  { nameTemplate: '{subject} Mastery', desc: 'Prove your mastery — all difficulty levels mixed', count: 15, diff: 2, timePerQ: 45, xp: 200, minLevel: undefined },
-  { nameTemplate: 'Speed Round: {subject}', desc: '20 seconds per question — think fast!', count: 10, diff: 2, timePerQ: 20, xp: 150, minLevel: undefined },
-  { nameTemplate: '{subject} Gauntlet', desc: 'Full syllabus, hard mode — the ultimate test', count: 20, diff: 3, timePerQ: 45, xp: 250, minLevel: 2 },
+  { desc: 'Prove your mastery — all difficulty levels mixed', count: 15, timePerQ: 45, xp: 200, minLevel: undefined },
+  { desc: 'Think fast and answer accurately!', count: 10, timePerQ: 20, xp: 150, minLevel: undefined },
+  { desc: 'The ultimate syllabus challenge', count: 20, timePerQ: 45, xp: 250, minLevel: 2 },
 ];
 
 async function generateActiveChallenges(): Promise<ActiveChallenge[]> {
@@ -255,7 +287,6 @@ async function generateActiveChallenges(): Promise<ActiveChallenge[]> {
     const subject = shuffledSubjects[i];
     const template = CHALLENGE_TEMPLATES[i % CHALLENGE_TEMPLATES.length];
     const subjectCode = (subject || '').split(':')[0].trim();
-    const shortName = subject.includes('-') ? subject.split('-').pop()?.trim() || subject : subject;
     const emoji = CHALLENGE_EMOJIS_MAP[subjectCode] || CHALLENGE_EMOJIS_MAP[subject] || seededPick(Object.values(CHALLENGE_EMOJIS_MAP), rng);
 
     // Verify the subject has enough questions within allowed units
@@ -275,14 +306,20 @@ async function generateActiveChallenges(): Promise<ActiveChallenge[]> {
 
     // Determine units (from filtered pool)
     const units = Array.from(new Set(mcqs.map(q => String(q.unit || 'General')).filter(Boolean))).sort();
+    
+    // Seeded random items for this specific challenge
+    const cSeed = hashStr(`${windowId}_c${i}`);
+    const cRng = seededRandom(cSeed);
+    const difficulty = seededPick(['easy', 'medium', 'hard'] as const, cRng);
+    const diffNum = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3;
 
     challenges.push({
       id: `challenge_${windowId}_${i}`,
-      name: template.nameTemplate.replace('{subject}', shortName),
+      name: generateDynamicName(subject, cRng),
       description: template.desc,
       emoji,
       subject,
-      difficulty: template.diff,
+      difficulty: diffNum,
       question_count: Math.min(template.count, mcqs.length),
       time_limit_per_question: template.timePerQ,
       xp_reward: template.xp,

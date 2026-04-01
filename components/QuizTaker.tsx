@@ -1284,17 +1284,17 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="relative w-full max-w-lg bg-white dark:bg-black rounded-[32px] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden p-8"
+                className="relative w-full max-w-lg bg-black rounded-[32px] border border-white/10 shadow-2xl overflow-hidden p-8"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">Report Question</h3>
-                  <button onClick={() => setShowReportModal(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors text-slate-500">
+                  <h3 className="text-xl font-bold text-white leading-tight">Report Question</h3>
+                  <button onClick={() => setShowReportModal(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors text-slate-400">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                   </button>
                 </div>
                 
                 <div className="space-y-6">
-                  <p className="text-sm text-slate-500 leading-relaxed">What's wrong with this question? Your report will be reviewed by Nexus Moderators to ensure content quality.</p>
+                  <p className="text-sm text-slate-400 leading-relaxed">What's wrong with this question? Your report will be reviewed by Nexus Moderators to ensure content quality.</p>
                   
                   <div className="space-y-3">
                     {['Incorrect Answer', 'Typo/Grammar Error', 'Out of Syllabus', 'Technical Glitch'].map((option) => (
@@ -1303,8 +1303,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         onClick={() => setReportReason(option)}
                         className={`w-full text-left p-4 rounded-2xl border transition-all ${
                           reportReason === option 
-                            ? 'bg-orange-500/10 border-orange-500 text-orange-600 dark:text-orange-400' 
-                            : 'bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:border-orange-500/30'
+                            ? 'bg-orange-500/10 border-orange-500 text-orange-400' 
+                            : 'bg-white/5 border-white/5 text-slate-400 hover:border-orange-500/30'
                         }`}
                       >
                         <span className="text-sm font-semibold">{option}</span>
@@ -1315,7 +1315,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       placeholder="Additional details or specific concerns..."
                       value={reportReason}
                       onChange={(e) => setReportReason(e.target.value)}
-                      className="w-full p-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all min-h-[100px] text-slate-800 dark:text-slate-200"
+                      className="w-full p-4 bg-white/5 border border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all min-h-[100px] text-slate-200"
                     />
                   </div>
 
