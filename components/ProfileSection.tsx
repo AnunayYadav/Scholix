@@ -164,7 +164,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
           onClick={() => fileInputRef.current?.click()}
           className="relative group cursor-pointer"
         >
-          <div className={`w-32 h-32 transition-all duration-700 group-hover:scale-105 active:scale-95 relative ${userProfile?.avatar_frame ? 'rounded-[32px] p-0' : 'rounded-full bg-gradient-to-tr from-orange-600 to-red-600 p-[2.5px] shadow-[0_20px_40px_rgba(234,88,12,0.2)]'}`}>
+          <div className={`w-32 h-32 transition-all duration-700 group-hover:scale-105 active:scale-95 relative rounded-full ${!userProfile?.avatar_frame ? 'bg-gradient-to-tr from-orange-600 to-red-600 p-[2.5px] shadow-[0_20px_40px_rgba(234,88,12,0.2)]' : ''}`}>
             {userProfile?.avatar_frame && (
               <img 
                 src={`/Nexus-Journey/${userProfile.avatar_frame}`}
@@ -172,12 +172,12 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                 className="absolute w-[180%] h-[180%] z-20 pointer-events-none object-contain max-w-none left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
               />
             )}
-            <div className={`w-full h-full transition-all duration-500 ${userProfile.avatar_frame ? 'rounded-[28px] p-2' : 'rounded-full bg-white dark:bg-[#0a0a0a] p-[1.5px]'}`}>
-              <div className={`w-full h-full bg-slate-50 dark:bg-[#0a0a0a] transition-all duration-500 ${userProfile.avatar_frame ? 'rounded-[24px]' : 'rounded-full'} flex items-center justify-center overflow-hidden relative`}>
+            <div className={`w-full h-full transition-all duration-500 rounded-full ${userProfile.avatar_frame ? 'p-2' : 'bg-white dark:bg-[#0a0a0a] p-[1.5px]'}`}>
+              <div className="w-full h-full bg-slate-50 dark:bg-[#0a0a0a] transition-all duration-500 rounded-full flex items-center justify-center overflow-hidden relative">
                 {userProfile.avatar_url ? (
                   <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                 ) : (
-                  <span className={`text-orange-600 text-4xl font-black transition-all duration-500 group-hover:scale-110 ${userProfile.avatar_frame ? 'mb-1' : ''}`}>
+                  <span className="text-orange-600 text-4xl font-black transition-all duration-500 group-hover:scale-110">
                     {userProfile.username?.[0]?.toUpperCase() || userProfile.email[0].toUpperCase()}
                   </span>
                 )}

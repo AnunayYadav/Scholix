@@ -555,17 +555,17 @@ const AppContent: React.FC = () => {
                 <>
                   <button 
                     onClick={() => isProfileMenuOpen ? handleProfileClose() : setIsProfileMenuOpen(true)} 
-                    className={`w-11 h-11 transition-all relative group text-left border-none cursor-pointer flex items-center justify-center ${userProfile.avatar_frame ? 'rounded-xl' : 'rounded-full bg-gradient-to-tr from-orange-600 to-red-600 p-[1.5px] shadow-[0_8px_20px_rgba(234,88,12,0.2)] hover:scale-105 active:scale-95'}`}
+                    className={`w-11 h-11 transition-all relative group text-left border-none cursor-pointer flex items-center justify-center rounded-full ${!userProfile.avatar_frame ? 'bg-gradient-to-tr from-orange-600 to-red-600 p-[1.5px] shadow-[0_8px_20px_rgba(234,88,12,0.2)] hover:scale-105 active:scale-95' : ''}`}
                   >
                     {userProfile.avatar_frame && (
                       <img 
                         src={`/Nexus-Journey/${userProfile.avatar_frame}`}
                         alt=""
-                        className="absolute w-[180%] h-[180%] z-20 pointer-events-none object-contain max-w-none left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                        className="absolute w-[155%] h-[155%] z-20 pointer-events-none object-contain max-w-none left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
                       />
                     )}
-                    <div className={`w-full h-full flex items-center justify-center overflow-hidden transition-all ${userProfile.avatar_frame ? 'rounded-[10px] p-0.5' : 'rounded-full bg-white dark:bg-[#0a0a0a]'}`}>
-                      <div className={`w-full h-full flex items-center justify-center overflow-hidden bg-white dark:bg-[#0a0a0a] ${userProfile.avatar_frame ? 'rounded-[8px]' : 'rounded-full'}`}>
+                    <div className={`w-full h-full flex items-center justify-center overflow-hidden transition-all rounded-full ${userProfile.avatar_frame ? 'p-1' : 'bg-white dark:bg-[#0a0a0a]'}`}>
+                      <div className="w-full h-full flex items-center justify-center overflow-hidden bg-white dark:bg-[#0a0a0a] rounded-full">
                         {userProfile.avatar_url ? (
                           <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" />
                         ) : (
