@@ -19,14 +19,14 @@ export const FRAME_CONFIGS: Record<string, FrameConfig> = {
     padding: '1.5%',
     scale: 1.4,
     navbarScale: 1.35,
-    translateY: '-1.5%', 
+    translateY: '-2.5%', 
   },
   'Legend.png': {
     id: 'Legend.png',
     padding: '2%',
     scale: 1.5,
     navbarScale: 1.45,
-    translateY: '-2%',
+    translateY: '-3.5%',
   },
   'Grandmaster.png': {
     id: 'Grandmaster.png',
