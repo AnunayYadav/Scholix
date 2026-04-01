@@ -164,15 +164,15 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
           onClick={() => fileInputRef.current?.click()}
           className="relative group cursor-pointer"
         >
-          <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-orange-600 to-red-600 p-[2.5px] shadow-[0_20px_40px_rgba(234,88,12,0.2)] transition-all duration-700 group-hover:scale-105 active:scale-95 relative">
+          <div className={`w-32 h-32 rounded-full transition-all duration-700 group-hover:scale-105 active:scale-95 relative ${!userProfile?.avatar_frame ? 'bg-gradient-to-tr from-orange-600 to-red-600 p-[2.5px] shadow-[0_20px_40px_rgba(234,88,12,0.2)]' : 'p-0'}`}>
             {userProfile?.avatar_frame && (
               <img 
                 src={`/Nexus-Journey/${userProfile.avatar_frame}`}
                 alt="Avatar Frame"
-                className="absolute -inset-4 w-[calc(100%+32px)] h-[calc(100%+32px)] z-10 pointer-events-none object-contain max-w-none"
+                className="absolute -inset-8 w-[calc(100%+64px)] h-[calc(100%+64px)] z-10 pointer-events-none object-contain max-w-none left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
               />
             )}
-            <div className="w-full h-full bg-white dark:bg-[#0a0a0a] rounded-full p-[1.5px]">
+            <div className={`w-full h-full rounded-full ${!userProfile.avatar_frame ? 'bg-white dark:bg-[#0a0a0a] p-[1.5px]' : 'p-0'}`}>
               <div className="w-full h-full bg-slate-50 dark:bg-[#0a0a0a] rounded-full flex items-center justify-center overflow-hidden relative">
                 {userProfile.avatar_url ? (
                   <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
@@ -381,9 +381,9 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                   }}
                   className={`p-4 rounded-3xl border-2 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 relative overflow-hidden ${isActive ? 'border-orange-600 bg-orange-600/5' : 'border-slate-100 dark:border-white/5 hover:border-orange-600/30'}`}
                 >
-                  <div className="relative w-16 h-16 flex items-center justify-center">
+                  <div className="relative w-20 h-20 flex items-center justify-center">
                     <img src={`/Nexus-Journey/${frame}`} alt={frameTitle} className="absolute inset-0 w-full h-full object-contain z-10" />
-                    <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5" />
+                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5" />
                   </div>
                   <span className={`text-[9px] font-black uppercase tracking-widest ${isActive ? 'text-orange-600' : 'text-slate-500'}`}>{frameTitle}</span>
                   {isActive && <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-orange-600 shadow-[0_0_8px_rgba(234,88,12,0.8)]" />}
