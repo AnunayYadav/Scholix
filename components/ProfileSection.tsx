@@ -7,7 +7,7 @@ import VerifiedBadge from './VerifiedBadge.tsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useXP } from '../hooks/useXP.ts';
 import { useStreak } from '../hooks/useStreak.ts';
-import { getLevelInfo } from '../stores/quizStore.ts';
+import { getLevelInfo, useQuizDashboardStore } from '../stores/quizStore.ts';
 
 interface ProfileSectionProps {
 
@@ -17,6 +17,7 @@ interface ProfileSectionProps {
 }
 
 const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserProfile, navigateToModule }) => {
+  const { updateUserQuizProfile } = useQuizDashboardStore();
   const [form, setForm] = useState({
     username: userProfile?.username || '',
     program: userProfile?.program || '',
@@ -353,10 +354,12 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
             {/* None Option */}
             <div 
               onClick={() => {
+                if (!userProfile?.id) return;
                 NexusServer.updateProfile(userProfile.id, { avatar_frame: '' });
                 setUserProfile({ ...userProfile, avatar_frame: '' });
+                updateUserQuizProfile({ avatar_frame: '' });
               }}
-              className={`p-4 rounded-3xl border-2 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 ${!userProfile.avatar_frame ? 'border-orange-600 bg-orange-600/5' : 'border-slate-100 dark:border-white/5 hover:border-orange-600/30'}`}
+              className={`p-4 rounded-3xl border-2 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 ${!userProfile?.avatar_frame ? 'border-orange-600 bg-orange-600/5' : 'border-slate-100 dark:border-white/5 hover:border-orange-600/30'}`}
             >
               <div className="w-12 h-12 rounded-full border-2 border-dashed border-slate-300 dark:border-white/10 flex items-center justify-center text-[10px] font-black text-slate-400">NONE</div>
               <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Default</span>
@@ -371,8 +374,10 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                 <div 
                   key={frame}
                   onClick={() => {
+                    if (!userProfile?.id) return;
                     NexusServer.updateProfile(userProfile.id, { avatar_frame: frame });
                     setUserProfile({ ...userProfile, avatar_frame: frame });
+                    updateUserQuizProfile({ avatar_frame: frame });
                   }}
                   className={`p-4 rounded-3xl border-2 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 relative overflow-hidden ${isActive ? 'border-orange-600 bg-orange-600/5' : 'border-slate-100 dark:border-white/5 hover:border-orange-600/30'}`}
                 >

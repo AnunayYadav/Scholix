@@ -31,10 +31,9 @@ const UserCard: React.FC<UserCardProps> = ({
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="glass-panel p-6 md:p-8 rounded-[32px]"
     >
-      <div className="flex flex-col md:flex-row md:items-center gap-6">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-8">
         {/* Avatar + Info */}
         <div className="flex items-center gap-4 flex-1 min-w-0">
-          {/* Avatar */}
           <div className="relative flex-shrink-0">
             {avatarUrl ? (
               <img
@@ -47,8 +46,17 @@ const UserCard: React.FC<UserCardProps> = ({
                 {initials}
               </div>
             )}
+            
+            {userQuizProfile.avatar_frame && (
+              <img 
+                src={`/Nexus-Journey/${userQuizProfile.avatar_frame}`} 
+                alt="Frame" 
+                className="absolute inset-0 w-full h-full object-contain pointer-events-none z-10 scale-[1.35]" 
+              />
+            )}
+            
             {/* Level badge on avatar */}
-            <div className="absolute -bottom-1.5 -right-1.5 bg-white dark:bg-dark-950 rounded-full p-0.5 shadow-sm">
+            <div className="absolute -bottom-1.5 -right-1.5 bg-white dark:bg-dark-950 rounded-full p-0.5 shadow-sm z-20">
               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-[10px] font-semibold text-white">
                 {levelInfo.level}
               </div>
