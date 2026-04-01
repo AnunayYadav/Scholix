@@ -2945,7 +2945,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       {/* Active Progress Line Segment */}
                       <motion.div 
                         initial={{ height: 0 }}
-                        animate={{ height: `${Math.min(100, (level.level - 1) * 25 + (level.progress * 0.25))}%` }}
+                        animate={{ height: `${Math.min(100, (level.level - 1) * (100 / (LEVEL_THRESHOLDS.length - 1)) + (level.progress * (1 / (LEVEL_THRESHOLDS.length - 1))))}%` }}
                         className="absolute left-[34px] top-6 w-1 bg-orange-600 rounded-full z-10"
                       />
 
@@ -2994,9 +2994,25 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                       {tier.title}
                                     </h4>
                                   </div>
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-[9px]">
                                     {tier.minXP}{tier.maxXP === Infinity ? '+' : ` - ${tier.maxXP}`} XP
                                   </p>
+                                  
+                                  {tier.rewardFrame && (
+                                    <div className="mt-4 p-3 rounded-2xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 flex items-center gap-3">
+                                      <div className="relative w-12 h-12 bg-slate-100 dark:bg-white/10 rounded-xl overflow-hidden flex items-center justify-center p-1">
+                                        <img 
+                                          src={`/Nexus-Journey/${tier.rewardFrame}`} 
+                                          alt="Reward Frame" 
+                                          className="w-full h-full object-contain"
+                                        />
+                                      </div>
+                                      <div className="flex flex-col">
+                                        <span className="text-[8px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest">Collectible Reward</span>
+                                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-200">Avatar Frame: {tier.title}</span>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                                 {isCurrent && (
                                   <div className="px-3 py-1 bg-orange-600 text-white text-[8px] font-black uppercase tracking-widest rounded-full">

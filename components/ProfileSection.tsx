@@ -163,7 +163,14 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
           onClick={() => fileInputRef.current?.click()}
           className="relative group cursor-pointer"
         >
-          <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-orange-600 to-red-600 p-[2.5px] shadow-[0_20px_40px_rgba(234,88,12,0.2)] transition-all duration-700 group-hover:scale-105 active:scale-95">
+          <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-orange-600 to-red-600 p-[2.5px] shadow-[0_20px_40px_rgba(234,88,12,0.2)] transition-all duration-700 group-hover:scale-105 active:scale-95 relative">
+            {userProfile?.avatar_frame && (
+              <img 
+                src={`/Nexus-Journey/${userProfile.avatar_frame}`}
+                alt="Avatar Frame"
+                className="absolute -inset-4 w-[calc(100%+32px)] h-[calc(100%+32px)] z-10 pointer-events-none object-contain max-w-none"
+              />
+            )}
             <div className="w-full h-full bg-white dark:bg-[#0a0a0a] rounded-full p-[1.5px]">
               <div className="w-full h-full bg-slate-50 dark:bg-[#0a0a0a] rounded-full flex items-center justify-center overflow-hidden relative">
                 {userProfile.avatar_url ? (
@@ -327,6 +334,70 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
               {isUpdating && <div className="w-4 h-4 border-3 border-white border-t-transparent rounded-full animate-spin" />}
               <span className="relative z-10">{isUpdating ? 'Synchronizing Profiles...' : 'Authorize Profile Sync'}</span>
             </button>
+          </div>
+        </div>
+
+        {/* ═══════════ Avatar Frame Selector ═══════════ */}
+        <div className="glass-panel p-10 rounded-[48px] border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#0a0a0a]/80 shadow-xl relative z-10 overflow-hidden backdrop-blur-2xl">
+          <div className="flex items-center gap-5 mb-8 border-b border-white/5 pb-6">
+            <div className="w-12 h-12 rounded-2xl bg-orange-600/10 border border-orange-600/20 flex items-center justify-center text-2xl">
+              🖼️
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tighter">Avatar Frames</h3>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest opacity-60 leading-none">Customize your digital identity</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {/* None Option */}
+            <div 
+              onClick={() => {
+                NexusServer.updateProfile(userProfile.id, { avatar_frame: '' });
+                setUserProfile({ ...userProfile, avatar_frame: '' });
+              }}
+              className={`p-4 rounded-3xl border-2 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 ${!userProfile.avatar_frame ? 'border-orange-600 bg-orange-600/5' : 'border-slate-100 dark:border-white/5 hover:border-orange-600/30'}`}
+            >
+              <div className="w-12 h-12 rounded-full border-2 border-dashed border-slate-300 dark:border-white/10 flex items-center justify-center text-[10px] font-black text-slate-400">NONE</div>
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Default</span>
+            </div>
+
+            {/* Unlocked Frames */}
+            {(userProfile.unlocked_frames || []).map(frame => {
+              const isActive = userProfile.avatar_frame === frame;
+              const frameTitle = frame.replace('.png', '');
+              
+              return (
+                <div 
+                  key={frame}
+                  onClick={() => {
+                    NexusServer.updateProfile(userProfile.id, { avatar_frame: frame });
+                    setUserProfile({ ...userProfile, avatar_frame: frame });
+                  }}
+                  className={`p-4 rounded-3xl border-2 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 relative overflow-hidden ${isActive ? 'border-orange-600 bg-orange-600/5' : 'border-slate-100 dark:border-white/5 hover:border-orange-600/30'}`}
+                >
+                  <div className="relative w-16 h-16 flex items-center justify-center">
+                    <img src={`/Nexus-Journey/${frame}`} alt={frameTitle} className="absolute inset-0 w-full h-full object-contain z-10" />
+                    <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5" />
+                  </div>
+                  <span className={`text-[9px] font-black uppercase tracking-widest ${isActive ? 'text-orange-600' : 'text-slate-500'}`}>{frameTitle}</span>
+                  {isActive && <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-orange-600 shadow-[0_0_8px_rgba(234,88,12,0.8)]" />}
+                </div>
+              );
+            })}
+
+            {/* Empty State / locked hint */}
+            {(!userProfile.unlocked_frames || userProfile.unlocked_frames.length === 0) && (
+              <div className="col-span-full py-8 text-center bg-slate-50 dark:bg-white/[0.02] rounded-[32px] border border-dashed border-slate-200 dark:border-white/5">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Level up in Nexus Journey to unlock frames</p>
+                <button 
+                  onClick={() => navigateToModule(ModuleType.QUIZ)}
+                  className="mt-4 px-6 py-2 bg-slate-900 dark:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl active:scale-95 transition-all"
+                >
+                  Go to Quiz
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

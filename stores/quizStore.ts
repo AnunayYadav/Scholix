@@ -5,10 +5,13 @@ import { create } from 'zustand';
 // ═══════════════════════════════════════
 export const LEVEL_THRESHOLDS = [
   { level: 1, minXP: 0, maxXP: 199, title: 'Beginner', icon: '🌱' },
-  { level: 2, minXP: 200, maxXP: 499, title: 'Learner', icon: '📘' },
+  { level: 2, minXP: 200, maxXP: 499, title: 'Learner', icon: '📘', rewardFrame: 'Learner.png' },
   { level: 3, minXP: 500, maxXP: 999, title: 'Scholar', icon: '⭐' },
   { level: 4, minXP: 1000, maxXP: 1999, title: 'Expert', icon: '🔥' },
-  { level: 5, minXP: 2000, maxXP: Infinity, title: 'Master', icon: '👑' },
+  { level: 5, minXP: 2000, maxXP: 3499, title: 'Master', icon: '👑', rewardFrame: 'Master.png' },
+  { level: 6, minXP: 3500, maxXP: 6499, title: 'Legend', icon: '🏆', rewardFrame: 'Legend.png' },
+  { level: 7, minXP: 6500, maxXP: 9999, title: 'Grandmaster', icon: '🎖️', rewardFrame: 'Grandmaster.png' },
+  { level: 8, minXP: 10000, maxXP: Infinity, title: 'Immortal', icon: '♾️', rewardFrame: 'Immortal.png' },
 ];
 
 export const STREAK_MILESTONES = [
@@ -85,6 +88,8 @@ export interface UserQuizProfile {
   last_active_date: string | null;
   streak_history: { date: string; count: number }[];
   xp_history: { quiz_id: string; xp_earned: number; breakdown: XPBreakdownItem[]; earned_at: string }[];
+  unlocked_frames?: string[];
+  avatar_frame?: string;
 }
 
 export interface UserCompletion {

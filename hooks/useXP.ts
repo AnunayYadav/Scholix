@@ -44,21 +44,42 @@ export function useXP(userId: string | null) {
           ]);
 
           if (profile) {
-            updateUserQuizProfile({
+            const currentLevel = profile.level ?? 1;
+            const unlockedFrames = profile.unlocked_frames || [];
+            let newUnlocked = false;
+
+            // Check if user should have frames for current or lower levels
+            LEVEL_THRESHOLDS.forEach(tier => {
+              if (tier.level <= currentLevel && tier.rewardFrame && !unlockedFrames.includes(tier.rewardFrame)) {
+                unlockedFrames.push(tier.rewardFrame);
+                newUnlocked = true;
+              }
+            });
+
+            const profileUpdates = {
               total_xp: profile.total_xp ?? 0,
-              level: profile.level ?? 1,
+              level: currentLevel,
               level_title: profile.level_title ?? 'Beginner',
               current_streak: profile.current_streak ?? 0,
               longest_streak: profile.longest_streak ?? 0,
-              xp_history: history || []
-            });
+              xp_history: history || [],
+              unlocked_frames: unlockedFrames,
+              avatar_frame: profile.avatar_frame || '',
+            };
+
+            updateUserQuizProfile(profileUpdates);
+
+            // Sync back to Supabase if catch-up happened
+            if (newUnlocked) {
+              NexusServer.updateProfile(userId, { unlocked_frames: unlockedFrames }).catch(console.error);
+            }
           }
         } catch (e) {
           console.error("Supabase sync failed:", e);
         }
       });
     }
-  }, [userId]);
+  }, [userId, updateUserQuizProfile]);
   // Save XP data to localStorage whenever it changes
   const persistXP = useCallback((profile: typeof userQuizProfile) => {
     if (!userId) return;
@@ -186,27 +207,69 @@ export function useXP(userId: string | null) {
       ],
     };
 
-    // Update profile
-    const updatedProfile = {
-      ...userQuizProfile,
-      total_xp: newTotalXP,
-      level: newLevel.level,
-      level_title: newLevel.title,
-      xp_history: result.updatedHistory!,
-    };
-
-    updateUserQuizProfile(updatedProfile);
-    persistXP(updatedProfile);
-    setLastXPResult(result);
-    setShowXPBreakdown(true);
-
     if (leveledUp) {
+      // Unlock frame if new level has one
+      const unlockedFrames = [...(userQuizProfile.unlocked_frames || [])];
+      let updatedFrameState = {};
+      
+      if (newLevel.rewardFrame && !unlockedFrames.includes(newLevel.rewardFrame)) {
+        unlockedFrames.push(newLevel.rewardFrame);
+        updatedFrameState = { unlocked_frames: unlockedFrames };
+      }
+
+      // Update profile with new XP, level AND rewards
+      const updatedProfile = {
+        ...userQuizProfile,
+        total_xp: newTotalXP,
+        level: newLevel.level,
+        level_title: newLevel.title,
+        xp_history: result.updatedHistory!,
+        ...updatedFrameState
+      };
+
+      updateUserQuizProfile(updatedProfile);
+      persistXP(updatedProfile);
+      
+      // Update Supabase if logged in
+      if (userId && userId !== 'anonymous') {
+        import('../services/nexusServer').then(({ default: NexusServer }) => {
+          NexusServer.updateProfile(userId, {
+            total_xp: newTotalXP,
+            level: newLevel.level,
+            level_title: newLevel.title,
+            xp_history: result.updatedHistory!,
+            ...updatedFrameState
+          }).catch(console.error);
+        });
+      }
+
       // Delay level-up overlay slightly for dramatic effect
       setTimeout(() => setShowLevelUp(true), 2000);
+    } else {
+      // Just update current state if no level up
+      const updatedProfile = {
+        ...userQuizProfile,
+        total_xp: newTotalXP,
+        level: newLevel.level,
+        level_title: newLevel.title,
+        xp_history: result.updatedHistory!,
+      };
+      updateUserQuizProfile(updatedProfile);
+      persistXP(updatedProfile);
+      
+      // Update Supabase
+      if (userId && userId !== 'anonymous') {
+        import('../services/nexusServer').then(({ default: NexusServer }) => {
+          NexusServer.updateProfile(userId, {
+            total_xp: newTotalXP,
+            xp_history: result.updatedHistory!
+          }).catch(console.error);
+        });
+      }
     }
 
     return result;
-  }, [userQuizProfile, updateUserQuizProfile, persistXP, setShowXPBreakdown, setLastXPResult, setShowLevelUp]);
+  }, [userId, userQuizProfile, updateUserQuizProfile, persistXP, setShowXPBreakdown, setLastXPResult, setShowLevelUp]);
 
   const levelInfo = getLevelInfo(userQuizProfile.total_xp);
 

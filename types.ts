@@ -100,6 +100,8 @@ export interface UserProfile {
   longest_streak?: number;
   last_active_date?: string;
   xp_history?: any[];
+  unlocked_frames?: string[];
+  avatar_frame?: string;
 }
 
 export interface TimetableSlot {
