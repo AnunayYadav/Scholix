@@ -813,13 +813,15 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
 
     const editReportedQuestion = (report: any) => {
         const q = report.question;
+        if (!q) return;
+
         console.log('AdminStats: Editing reported question', q);
         setNewQuestion({
             id: q.id,
             question: q.question,
             options: Array.isArray(q.options) ? q.options : ['', '', '', ''],
-            // Properly map snake_case to camelCase
-            correctAnswer: q.correct_answer ?? 0,
+            // Ensure index is treated as a Number so radio input checked={===idx} works
+            correctAnswer: q.correct_answer !== undefined && q.correct_answer !== null ? Number(q.correct_answer) : (q.correctAnswer !== undefined ? Number(q.correctAnswer) : 0),
             difficulty: q.difficulty || 'medium',
             type: q.type || 'mcq',
             questionType: q.question_type || q.questionType || 'MCQ',
