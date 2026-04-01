@@ -627,14 +627,14 @@ const AppContent: React.FC = () => {
               <Route path="/placement" element={<PlacementPrefect userProfile={userProfile} />} />
               <Route path="/placement/:reportId" element={<PlacementPrefect userProfile={userProfile} />} />
               <Route path="/timetable" element={<TimetableHub userProfile={userProfile} />} />
-              <Route path="/quiz" element={<QuizTaker userProfile={userProfile} />} />
-              <Route path="/quiz/:subjectName" element={<QuizTaker userProfile={userProfile} />} />
-              <Route path="/quiz/:subjectName/:quizId" element={<QuizTaker userProfile={userProfile} />} />
-              <Route path="/library" element={<ContentLibrary userProfile={userProfile} />} />
-              <Route path="/library/:program" element={<ContentLibrary userProfile={userProfile} />} />
-              <Route path="/library/:program/:semester" element={<ContentLibrary userProfile={userProfile} />} />
-              <Route path="/library/:program/:semester/:subject" element={<ContentLibrary userProfile={userProfile} />} />
-              <Route path="/library/:program/:semester/:subject/:category" element={<ContentLibrary userProfile={userProfile} />} />
+              <Route path="/quiz" element={<QuizTaker userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
+              <Route path="/quiz/:subjectName" element={<QuizTaker userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
+              <Route path="/quiz/:subjectName/:quizId" element={<QuizTaker userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
+              <Route path="/library" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
+              <Route path="/library/:program" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
+              <Route path="/library/:program/:semester" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
+              <Route path="/library/:program/:semester/:subject" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
+              <Route path="/library/:program/:semester/:subject/:category" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
               <Route path="/campus" element={<CampusNavigator />} />
               <Route path="/campus/:tab" element={<CampusNavigator />} />
               <Route path="/help" element={<HelpSection />} />

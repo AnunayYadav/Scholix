@@ -57,9 +57,10 @@ const SkeletonCard = () => (
 interface ContentLibraryProps {
   userProfile: UserProfile | null;
   initialView?: 'browse' | 'my-uploads';
+  onAuthRequired?: () => void;
 }
 
-const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialView = 'browse' }) => {
+const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialView = 'browse', onAuthRequired }) => {
   const [allFiles, setAllFiles] = useState<LibraryFile[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [viewMode, setViewMode] = useState<'browse' | 'my-uploads' | 'originals'>(initialView);
@@ -557,6 +558,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   };
 
   const handleFileAccess = async (file: LibraryFile) => {
+    if (!userProfile) {
+      showToast("Please login to access documents.", "info");
+      onAuthRequired?.();
+      return;
+    }
+
     try {
       NexusServer.saveRecord(userProfile?.id || null, 'file_access', `Opened ${file.name}`, { fileId: file.id, fileName: file.name, path: file.storage_path });
       const url = await NexusServer.getFileUrl(file.storage_path);
