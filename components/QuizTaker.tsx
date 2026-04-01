@@ -2954,6 +2954,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       {[...LEVEL_THRESHOLDS].map((tier, idx) => {
                         const isCompleted = totalXP >= tier.maxXP;
                         const isCurrent = totalXP >= tier.minXP && totalXP <= tier.maxXP;
+                        const isRewardUnlocked = totalXP >= tier.minXP;
                         
                         return (
                           <motion.div 
@@ -2968,7 +2969,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                             <div className={`relative z-20 w-10 h-10 rounded-full border-4 flex items-center justify-center transition-all ${
                               isCompleted ? 'bg-orange-600 border-orange-600/20' :
                               isCurrent ? 'bg-white dark:bg-dark-900 border-orange-600' :
-                              'bg-white dark:bg-dark-900 border-slate-200 dark:border-white/10'
+                              'bg-slate-100 dark:bg-dark-800 border-slate-200 dark:border-white/10'
                             }`}>
                               {isCompleted ? (
                                 <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" className="w-5 h-5">
@@ -3001,10 +3002,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                   
                                   {tier.rewardFrame && (
                                     <div className={`mt-4 p-3 rounded-2xl border transition-all flex items-center justify-between group overflow-hidden relative ${
-                                      isCompleted ? 'bg-orange-600/5 dark:bg-orange-600/10 border-orange-600/30 shadow-sm' : 'bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/10 opacity-70'
+                                      isRewardUnlocked ? 'bg-orange-600/5 dark:bg-orange-600/10 border-orange-600/30 shadow-sm' : 'bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/10 opacity-70'
                                     }`}>
                                       {/* Aura for unlocked rewards */}
-                                      {isCompleted && <div className="absolute inset-0 bg-gradient-to-r from-orange-600/10 to-transparent animate-pulse opacity-40" />}
+                                      {isRewardUnlocked && <div className="absolute inset-0 bg-gradient-to-r from-orange-600/10 to-transparent animate-pulse opacity-40" />}
 
                                       <div className="flex items-center gap-3 relative z-10">
                                         <div className="relative w-12 h-12 bg-white dark:bg-white/10 rounded-xl overflow-hidden flex items-center justify-center p-1.5 shadow-sm border border-black/5 dark:border-white/5 group-hover:scale-110 transition-transform">
@@ -3016,17 +3017,17 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                         </div>
                                         <div className="flex flex-col">
                                           <span className="text-[8px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest flex items-center gap-1.5 leading-none mb-1">
-                                            {isCompleted && (
+                                            {isRewardUnlocked && (
                                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2 h-2"><polyline points="20 6 9 17 4 12" /></svg>
                                             )}
-                                            {isCompleted ? 'Unlocked Reward' : 'Collectible Reward'}
+                                            {isRewardUnlocked ? 'Unlocked Reward' : 'Collectible Reward'}
                                           </span>
                                           <span className="text-[10px] sm:text-[11px] font-black text-slate-700 dark:text-slate-100 uppercase tracking-tight">Avatar Frame {tier.title}</span>
                                         </div>
                                       </div>
 
                                       {/* Interaction Logic */}
-                                      {isCompleted ? (
+                                      {isRewardUnlocked ? (
                                         userQuizProfile.avatar_frame === tier.rewardFrame ? (
                                           <div className="relative z-10 px-3 py-1.5 bg-slate-800 dark:bg-white/10 text-white dark:text-white/60 text-[8px] font-black uppercase tracking-widest rounded-xl border border-black/10 dark:border-white/5 backdrop-blur-md">
                                             Currently Active
@@ -3035,14 +3036,18 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                           <button 
                                             onClick={async () => {
                                               const NexusServer = (await import('../services/nexusServer')).default;
-                                              if (!userId || userId === 'anonymous') return;
+                                              if (!userId || userId === 'anonymous') {
+                                                showToast("Please sign in to equip rewards", "info");
+                                                return;
+                                              }
                                               
                                               try {
                                                 await NexusServer.updateProfile(userId, { avatar_frame: tier.rewardFrame });
                                                 updateUserQuizProfile({ avatar_frame: tier.rewardFrame });
-                                                // Trigger a subtle haptic/feedback if possible or toast
+                                                showToast(`${tier.title} Frame Equipped!`, "success");
                                               } catch (e) {
                                                 console.error('Failed to equip frame', e);
+                                                showToast("Failed to equip reward", "error");
                                               }
                                             }}
                                             className="relative z-10 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-[9px] font-black uppercase tracking-widest rounded-xl shadow-[0_8px_16px_rgba(234,88,12,0.3)] active:scale-95 transition-all flex items-center gap-2 group/equip"
