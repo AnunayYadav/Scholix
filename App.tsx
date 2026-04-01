@@ -564,8 +564,8 @@ const AppContent: React.FC = () => {
                         className="absolute w-[155%] h-[155%] z-20 pointer-events-none object-contain max-w-none left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
                       />
                     )}
-                    <div className={`w-full h-full flex items-center justify-center overflow-hidden transition-all rounded-full ${userProfile.avatar_frame ? 'p-1' : 'bg-white dark:bg-[#0a0a0a]'}`}>
-                      <div className="w-full h-full flex items-center justify-center overflow-hidden bg-white dark:bg-[#0a0a0a] rounded-full">
+                    <div className={`w-full h-full flex items-center justify-center overflow-hidden transition-all ${userProfile.avatar_frame ? 'rounded-[35%] p-0' : 'rounded-full bg-white dark:bg-[#0a0a0a]'}`}>
+                      <div className={`w-full h-full flex items-center justify-center overflow-hidden bg-white dark:bg-[#0a0a0a] ${userProfile.avatar_frame ? 'rounded-[35%]' : 'rounded-full'}`}>
                         {userProfile.avatar_url ? (
                           <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" />
                         ) : (
