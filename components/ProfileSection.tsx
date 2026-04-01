@@ -7,7 +7,8 @@ import VerifiedBadge from './VerifiedBadge.tsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useXP } from '../hooks/useXP.ts';
 import { useStreak } from '../hooks/useStreak.ts';
-import { getLevelInfo, useQuizDashboardStore } from '../stores/quizStore.ts';
+import { useQuizDashboardStore, getLevelInfo } from '../stores/quizStore.ts';
+import { getFrameConfig } from '../data/frameConfigs.ts';
 
 interface ProfileSectionProps {
 
@@ -38,6 +39,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
   const userId = userProfile?.id || null;
   const { totalXP, level: levelInfo } = useXP(userId);
   const { currentStreak, longestStreak, streakCalendar } = useStreak(userId);
+  const frameConfig = getFrameConfig(userProfile?.avatar_frame || '');
 
   useEffect(() => {
     if (userProfile) {
@@ -164,16 +166,20 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
           onClick={() => fileInputRef.current?.click()}
           className="relative group cursor-pointer"
         >
-          <div className={`w-32 h-32 transition-all duration-700 group-hover:scale-105 active:scale-95 relative rounded-full ${!userProfile?.avatar_frame ? 'bg-gradient-to-tr from-orange-600 to-red-600 p-[2.5px] shadow-[0_20px_40px_rgba(234,88,12,0.2)]' : ''}`}>
+          <div className="relative w-32 h-32 flex items-center justify-center transition-all duration-700 group-hover:scale-105 active:scale-95">
             {userProfile?.avatar_frame && (
               <img 
                 src={`/Nexus-Journey/${userProfile.avatar_frame}`}
                 alt="Avatar Frame"
-                className="absolute w-[180%] h-[180%] z-20 pointer-events-none object-contain max-w-none left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                className="absolute inset-0 w-full h-full object-contain pointer-events-none z-20"
+                style={{ transform: `scale(${frameConfig.scale}) translateY(${frameConfig.translateY || '0%'})` }}
               />
             )}
-            <div className={`w-full h-full transition-all duration-500 rounded-full ${userProfile.avatar_frame ? 'p-1.5' : 'bg-white dark:bg-[#0a0a0a] p-[1.5px]'}`}>
-              <div className="w-full h-full bg-slate-50 dark:bg-[#0a0a0a] transition-all duration-500 rounded-full flex items-center justify-center overflow-hidden relative">
+            <div 
+              className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-[#0a0a0a] flex items-center justify-center relative"
+              style={{ padding: frameConfig.padding }}
+            >
+              <div className="w-full h-full bg-slate-50 dark:bg-[#0a0a0a] rounded-full flex items-center justify-center overflow-hidden relative">
                 {userProfile.avatar_url ? (
                   <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                 ) : (

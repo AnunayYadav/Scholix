@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useQuizDashboardStore, getLevelInfo } from '../../stores/quizStore';
+import { getFrameConfig } from '../../data/frameConfigs.ts';
 
 interface UserCardProps {
   username: string;
@@ -34,29 +35,41 @@ const UserCard: React.FC<UserCardProps> = ({
       <div className="flex flex-col md:flex-row items-center justify-between gap-8">
         {/* Avatar + Info */}
         <div className="flex items-center gap-4 flex-1 min-w-0">
-          <div className="relative flex-shrink-0">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={username}
-                className="w-14 h-14 rounded-2xl object-cover border-2 border-orange-500/20"
-              />
-            ) : (
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-semibold text-lg shadow-lg shadow-orange-500/20">
-                {initials}
-              </div>
-            )}
-            
-            {userQuizProfile.avatar_frame && (
-              <img 
-                src={`/Nexus-Journey/${userQuizProfile.avatar_frame}`} 
-                alt="Frame" 
-                className="absolute inset-0 w-full h-full object-contain pointer-events-none z-10 scale-[1.35]" 
-              />
-            )}
+          <div className="relative flex-shrink-0 flex items-center justify-center w-14 h-14">
+            {(() => {
+              const frameConfig = getFrameConfig(userQuizProfile.avatar_frame);
+              return (
+                <>
+                  {userQuizProfile.avatar_frame && (
+                    <img 
+                      src={`/Nexus-Journey/${userQuizProfile.avatar_frame}`} 
+                      alt="Frame" 
+                      className="absolute inset-0 w-full h-full object-contain pointer-events-none z-20" 
+                      style={{ transform: `scale(${frameConfig.navbarScale}) translateY(${frameConfig.translateY || '0%'})` }} 
+                    />
+                  )}
+                  <div 
+                    className={`w-full h-full rounded-full overflow-hidden bg-white dark:bg-dark-950 flex items-center justify-center border-2 border-orange-500/10`}
+                    style={{ padding: frameConfig.padding }}
+                  >
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt={username}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-semibold text-lg shadow-lg shadow-orange-500/20">
+                        {initials}
+                      </div>
+                    )}
+                  </div>
+                </>
+              );
+            })()}
             
             {/* Level badge on avatar */}
-            <div className="absolute -bottom-1.5 -right-1.5 bg-white dark:bg-dark-950 rounded-full p-0.5 shadow-sm z-20">
+            <div className="absolute -bottom-1.5 -right-1.5 bg-white dark:bg-dark-950 rounded-full p-0.5 shadow-sm z-30">
               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-[10px] font-semibold text-white">
                 {levelInfo.level}
               </div>

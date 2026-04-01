@@ -28,6 +28,8 @@ import CookieBanner from './components/CookieBanner.tsx';
 import { ModuleType, UserProfile, TimetableData } from './types.ts';
 
 import NexusServer from './services/nexusServer.ts';
+import { useQuizDashboardStore, getLevelInfo } from './stores/quizStore.ts';
+import { getFrameConfig } from './data/frameConfigs.ts';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { ToastContainer } from './components/Toast.tsx';
@@ -557,24 +559,37 @@ const AppContent: React.FC = () => {
                     onClick={() => isProfileMenuOpen ? handleProfileClose() : setIsProfileMenuOpen(true)} 
                     className={`w-11 h-11 transition-all relative group text-left border-none cursor-pointer flex items-center justify-center rounded-full ${!userProfile.avatar_frame ? 'bg-gradient-to-tr from-orange-600 to-red-600 p-[1.5px] shadow-[0_8px_20px_rgba(234,88,12,0.2)] hover:scale-105 active:scale-95' : ''}`}
                   >
-                    {userProfile.avatar_frame && (
-                      <img 
-                        src={`/Nexus-Journey/${userProfile.avatar_frame}`}
-                        alt=""
-                        className="absolute w-[155%] h-[155%] z-20 pointer-events-none object-contain max-w-none left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                      />
-                    )}
-                    <div className={`w-full h-full flex items-center justify-center overflow-hidden transition-all rounded-full ${userProfile.avatar_frame ? 'p-1' : 'bg-white dark:bg-[#0a0a0a]'}`}>
-                      <div className="w-full h-full flex items-center justify-center overflow-hidden bg-white dark:bg-[#0a0a0a] rounded-full">
-                        {userProfile.avatar_url ? (
-                          <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" />
-                        ) : (
-                          <span className="text-slate-900 dark:text-orange-600 font-bold text-xs">
-                            {userProfile.username?.[0] || userProfile.email[0]}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                    {(() => {
+                      const frameConfig = getFrameConfig(userProfile.avatar_frame);
+                      return (
+                        <div className="relative w-10 h-10 flex items-center justify-center">
+                          {userProfile.avatar_frame && (
+                            <img
+                              src={`/Nexus-Journey/${userProfile.avatar_frame}`}
+                              alt="Avatar Frame"
+                              className="absolute inset-0 w-full h-full object-contain pointer-events-none z-20"
+                              style={{ transform: `scale(${frameConfig.navbarScale}) translateY(${frameConfig.translateY || '0%'})` }}
+                            />
+                          )}
+                          <div 
+                            className={`w-full h-full rounded-full overflow-hidden border-2 border-white/10 bg-nexus-darker flex items-center justify-center`}
+                            style={{ padding: frameConfig.padding }}
+                          >
+                            {userProfile.avatar_url ? (
+                              <img
+                                src={userProfile.avatar_url}
+                                alt="Avatar"
+                                className="w-full h-full object-cover rounded-full"
+                              />
+                            ) : (
+                              <span className="text-slate-900 dark:text-orange-600 font-bold text-xs">
+                                {userProfile.username?.[0] || userProfile.email[0]}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </button>
                   {isProfileMenuOpen && (
                     <>
