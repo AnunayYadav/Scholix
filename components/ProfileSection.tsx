@@ -192,17 +192,10 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
               </div>
             </div>
           </div>
-          <div className="absolute bottom-0 right-0 bg-orange-600 w-10 h-10 rounded-[15px] border-4 border-white dark:border-[#0a0a0a] flex items-center justify-center shadow-xl group-hover:bg-orange-500 group-hover:scale-110 transition-all z-30">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-5 h-5"><path d="M12 5v14M5 12h14" strokeLinecap="round" /></svg>
-          </div>
       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
     </div>
 
         <div className="mt-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-600/5 border border-orange-600/10 mb-4 group/badge cursor-default hover:bg-orange-600/10 transition-colors">
-            <div className="w-1.5 h-1.5 rounded-full bg-orange-600 animate-pulse shadow-[0_0_8px_rgba(234,88,12,0.5)]" />
-            <span className="text-[10px] font-bold text-orange-600 tracking-wider">Active Verification</span>
-          </div>
           <h2 className="text-4xl md:text-5xl font-bold text-slate-800 dark:text-white tracking-tight leading-none mb-3 drop-shadow-sm flex items-center justify-center gap-3">
             {userProfile.username || 'Citizen Verto'}
             <VerifiedBadge isAdmin={userProfile.is_admin} size="w-7 h-7 md:w-9 md:h-9" />

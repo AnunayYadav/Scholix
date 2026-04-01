@@ -553,13 +553,27 @@ const AppContent: React.FC = () => {
             <div className="relative">
               {userProfile ? (
                 <>
-                  <button onClick={() => isProfileMenuOpen ? handleProfileClose() : setIsProfileMenuOpen(true)} className="w-11 h-11 rounded-full bg-gradient-to-tr from-orange-600 to-red-600 p-[1.5px] border-none shadow-[0_8px_20px_rgba(234,88,12,0.2)] hover:scale-105 active:scale-95 transition-all overflow-hidden cursor-pointer group text-left">
-                    <div className="w-full h-full bg-white dark:bg-[#0a0a0a] rounded-full overflow-hidden flex items-center justify-center text-slate-900 dark:text-orange-600 font-bold text-sm">
-                      {userProfile.avatar_url ? (
-                        <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" />
-                      ) : (
-                        <span>{userProfile.username?.[0] || userProfile.email[0]}</span>
-                      )}
+                  <button 
+                    onClick={() => isProfileMenuOpen ? handleProfileClose() : setIsProfileMenuOpen(true)} 
+                    className={`w-11 h-11 transition-all relative group text-left border-none cursor-pointer flex items-center justify-center ${userProfile.avatar_frame ? 'rounded-xl' : 'rounded-full bg-gradient-to-tr from-orange-600 to-red-600 p-[1.5px] shadow-[0_8px_20px_rgba(234,88,12,0.2)] hover:scale-105 active:scale-95'}`}
+                  >
+                    {userProfile.avatar_frame && (
+                      <img 
+                        src={`/Nexus-Journey/${userProfile.avatar_frame}`}
+                        alt=""
+                        className="absolute w-[180%] h-[180%] z-20 pointer-events-none object-contain max-w-none left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                      />
+                    )}
+                    <div className={`w-full h-full flex items-center justify-center overflow-hidden transition-all ${userProfile.avatar_frame ? 'rounded-[10px] p-0.5' : 'rounded-full bg-white dark:bg-[#0a0a0a]'}`}>
+                      <div className={`w-full h-full flex items-center justify-center overflow-hidden bg-white dark:bg-[#0a0a0a] ${userProfile.avatar_frame ? 'rounded-[8px]' : 'rounded-full'}`}>
+                        {userProfile.avatar_url ? (
+                          <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" />
+                        ) : (
+                          <span className="text-slate-900 dark:text-orange-600 font-bold text-xs">
+                            {userProfile.username?.[0] || userProfile.email[0]}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </button>
                   {isProfileMenuOpen && (
