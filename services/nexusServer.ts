@@ -970,8 +970,7 @@ class NexusServer {
       starter_code: q.starterCode || '',
       test_cases: Array.isArray(q.testCases) ? q.testCases : [],
       subject: (q as any).subject || '',
-      unit: (typeof (q as any).unit === 'string' && (q as any).unit.trim() !== '') ? parseInt((q as any).unit) : (typeof (q as any).unit === 'number' ? (q as any).unit : null),
-      source: 'admin'
+      unit: (typeof (q as any).unit === 'string' && (q as any).unit.trim() !== '') ? parseInt((q as any).unit) : (typeof (q as any).unit === 'number' ? (q as any).unit : null)
     };
 
     if (q.id) {
