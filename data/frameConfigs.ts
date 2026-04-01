@@ -9,38 +9,38 @@ export interface FrameConfig {
 export const FRAME_CONFIGS: Record<string, FrameConfig> = {
   'Learner.png': {
     id: 'Learner.png',
-    padding: '0%', 
+    padding: '1%', // Adding a small amount to match shield geometry
     scale: 1.25,
     navbarScale: 1.2,
-    translateY: '0%',
+    translateY: '-1%', // Slight upward shift for better alignment
   },
   'Master.png': {
     id: 'Master.png',
-    padding: '1.5%',
+    padding: '2.5%', // Increased padding to prevent edge bleed
     scale: 1.4,
     navbarScale: 1.35,
-    translateY: '-2.5%', 
+    translateY: '-5%', // Shifted more UP
   },
   'Legend.png': {
     id: 'Legend.png',
-    padding: '2%',
+    padding: '3.5%', // Increased padding to prevent edge bleed
     scale: 1.5,
     navbarScale: 1.45,
-    translateY: '-3.5%',
+    translateY: '-8%', // Shifted more UP
   },
   'Grandmaster.png': {
     id: 'Grandmaster.png',
-    padding: '3%',
+    padding: '5%', // Increased padding to prevent edge bleed
     scale: 1.6,
     navbarScale: 1.55,
-    translateY: '-2.5%',
+    translateY: '-10%', // Shifted more UP
   },
   'Immortal.png': {
     id: 'Immortal.png',
-    padding: '4.5%',
+    padding: '6%', // Increased padding to prevent edge bleed
     scale: 1.7,
     navbarScale: 1.65,
-    translateY: '-3%',
+    translateY: '-12%', // Shifted more UP
   },
   'default': {
     id: 'default',
