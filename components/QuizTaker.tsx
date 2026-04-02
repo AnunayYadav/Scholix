@@ -31,6 +31,7 @@ import { useXP } from '../hooks/useXP.ts';
 import { useStreak } from '../hooks/useStreak.ts';
 import { useDashboard } from '../hooks/useDashboard.ts';
 import { useQuizDashboardStore, getLevelInfo, LEVEL_THRESHOLDS } from '../stores/quizStore.ts';
+import { FRAME_CONFIGS, getFrameConfig } from '../data/frameConfigs.ts';
 
 const parseText = (text: string | undefined) => {
   if (!text) return null;
@@ -2907,167 +2908,188 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="modal-overlay"
-                style={{ backdropFilter: 'blur(20px) saturate(180%)', zIndex: 60 }}
+                style={{ backdropFilter: 'blur(24px) saturate(180%)', zIndex: 60 }}
                 onClick={() => setShowProgressModal(false)}
               >
                 <motion.div
-                  initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                  initial={{ scale: 0.95, opacity: 0, y: 30 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
-                  exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                  className="w-full max-w-xl md:max-w-4xl bg-white dark:bg-dark-950 rounded-[40px] shadow-2xl overflow-hidden border border-slate-200 dark:border-white/10 relative"
+                  exit={{ scale: 0.95, opacity: 0, y: 30 }}
+                  className="w-[95vw] max-w-6xl bg-white/90 dark:bg-dark-950/90 rounded-[48px] shadow-2xl overflow-hidden border border-slate-200 dark:border-white/10 relative"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {/* Close button */}
                   <button 
                     onClick={() => setShowProgressModal(false)}
-                    className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 transition-colors z-20"
+                    className="absolute top-8 right-8 p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-white/5 transition-all z-20 group"
                   >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-slate-400">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 text-slate-400 group-hover:text-orange-500 group-hover:rotate-90 transition-all duration-300">
                       <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
                   </button>
 
-                  <div className="p-8 md:p-12 overflow-y-auto max-h-[85vh] custom-scrollbar">
+                  <div className="p-8 md:p-16 overflow-y-auto max-h-[90vh] custom-scrollbar">
                     {/* Header */}
-                    <div className="text-center mb-12 space-y-3">
-                      <h2 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">Nexus Journey</h2>
-                      <p className="text-sm font-medium text-slate-500 max-w-xs mx-auto">Track your academic progress, level up, and unlock exclusive rewards.</p>
-                      <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-orange-500/10 border border-orange-500/20 mt-6 shadow-xl shadow-orange-500/5 backdrop-blur-sm">
-                        <span className="text-2xl animate-bounce-subtle">🏆</span>
+                    <div className="text-center mb-16 space-y-4">
+                      <motion.h2 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none"
+                      >
+                        Nexus <span className="text-orange-600">Journey</span>
+                      </motion.h2>
+                      <p className="text-sm md:text-base font-medium text-slate-500 max-w-md mx-auto">Track your academic progress, level up, and unlock exclusive rewards.</p>
+                      
+                      <div className="inline-flex items-center gap-4 px-8 py-4 rounded-3xl bg-orange-600/10 border border-orange-500/20 mt-8 shadow-2xl shadow-orange-500/10 backdrop-blur-xl relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-r from-orange-600/0 via-orange-600/10 to-orange-600/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                        <span className="text-3xl animate-bounce-subtle">🏆</span>
                         <div className="text-left">
-                          <p className="text-[10px] font-black text-orange-500/60 uppercase tracking-widest leading-tight mb-0.5">Account Rank</p>
-                          <span className="text-xl font-black text-orange-600 dark:text-orange-400 leading-none">{totalXP} <span className="text-sm opacity-60">Total XP</span></span>
+                          <p className="text-[10px] font-black text-orange-500/80 uppercase tracking-widest leading-tight mb-1">Account Rank</p>
+                          <span className="text-2xl font-black text-orange-600 dark:text-orange-400 leading-none">{totalXP} <span className="text-sm font-bold opacity-60">Total XP</span></span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Vertical Timeline */}
-                    <div className="relative flex flex-col md:flex-row md:overflow-x-auto md:pb-12 md:pt-6 md:px-8 space-y-12 md:space-y-0 md:space-x-8 pl-4 md:pl-0 custom-scrollbar snap-x">
-                      {/* Timeline Line - Vertical on Mobile */}
-                      <div className="absolute left-[34px] top-6 bottom-6 w-1 bg-slate-100 dark:bg-white/5 rounded-full md:hidden" />
-                      
-                      {/* Active Progress - Vertical on Mobile */}
-                      <motion.div 
-                        initial={{ height: 0 }}
-                        animate={{ height: `${Math.min(100, (level.level - 1) * (100 / (LEVEL_THRESHOLDS.length - 1)) + (level.progress * (1 / (LEVEL_THRESHOLDS.length - 1))))}%` }}
-                        className="absolute left-[34px] top-6 w-1 bg-orange-600 rounded-full z-10 md:hidden"
-                      />
+                    {/* Timeline Items Container */}
+                    <div className="md:overflow-x-auto md:snap-x md:snap-mandatory pb-8 pt-4 scrollbar-hide">
+                      <div className="flex flex-col md:flex-row gap-8 pb-12 pt-8 px-4 md:px-0">
+                        {LEVEL_THRESHOLDS.map((tier, index) => {
+                          const isRewardUnlocked = userQuizProfile.total_xp >= tier.minXP;
+                          const isCurrent = level.level === tier.level;
+                          const isCollected = (userQuizProfile.unlocked_frames || []).includes(tier.rewardFrame!);
+                          const frameConfig = tier.rewardFrame ? getFrameConfig(tier.rewardFrame) : null;
+                          
+                          return (
+                            <motion.div
+                              key={tier.level}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="flex-shrink-0 w-full md:w-[600px] relative pb-12 snap-center group/card"
+                            >
+                              {/* Vertical Connector for Mobile */}
+                              {index < LEVEL_THRESHOLDS.length - 1 && (
+                                <div className="absolute left-1/2 md:left-auto md:top-[120px] md:right-[-48px] w-1 md:w-[64px] h-[64px] md:h-1 bg-gradient-to-b md:bg-gradient-to-r from-orange-600/30 to-slate-200 dark:to-white/10 z-0 bottom-[-32px] md:bottom-auto translate-x-[-50%] md:translate-x-0" />
+                              )}
 
-                      {/* Timeline Line - Horizontal on Desktop */}
-                      <div className="absolute left-12 right-12 top-[52px] h-1 bg-slate-100 dark:bg-white/5 rounded-full hidden md:block" />
-                      
-                      {/* Active Progress - Horizontal on Desktop */}
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(100, (level.level - 1) * (100 / (LEVEL_THRESHOLDS.length - 1)) + (level.progress * (1 / (LEVEL_THRESHOLDS.length - 1))))}%` }}
-                        className="absolute left-12 top-[52px] h-1 bg-orange-600 rounded-full z-10 hidden md:block"
-                      />
-
-                      {/* Level Tiers */}
-                      {[...LEVEL_THRESHOLDS].map((tier, idx) => {
-                        const isCompleted = totalXP >= tier.maxXP;
-                        const isCurrent = totalXP >= tier.minXP && totalXP <= tier.maxXP;
-                        const isRewardUnlocked = totalXP >= tier.minXP;
-                        
-                        return (
-                          <motion.div 
-                            key={tier.level}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }} 
-                            transition={{ delay: idx * 0.1 }}
-                            className="relative flex flex-col md:min-w-[440px] items-start md:items-center gap-4 md:gap-10 group snap-center"
-                          >
-                            {/* Connector & Card Alignment Wrapper */}
-                            <div className="flex md:flex-col items-center md:items-stretch gap-6 md:gap-8 w-full relative">
-                              {/* Connector Point */}
-                              <div className={`relative z-20 w-12 h-12 rounded-full border-[5px] flex items-center justify-center transition-all duration-500 flex-shrink-0 md:mx-auto ${
-                                isCompleted ? 'bg-orange-600 border-orange-600/20 shadow-[0_0_25px_rgba(234,88,12,0.4)] scale-110' :
-                                isCurrent ? 'bg-white dark:bg-dark-900 border-orange-600 shadow-[0_0_30px_rgba(234,88,12,0.6)] ring-4 ring-orange-500/10 scale-110' :
-                                'bg-slate-100 dark:bg-dark-800 border-slate-200 dark:border-white/10'
-                              }`}>
-                                {isCompleted ? (
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" className="w-6 h-6">
-                                    <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
-                                  </svg>
-                                ) : (
-                                  <span className={`text-sm font-black ${isCurrent ? 'text-orange-600' : 'text-slate-400'}`}>
-                                    {tier.level}
-                                  </span>
-                                )}
-                              </div>
-
-                              {/* Card Content */}
-                              <div className={`flex-1 p-8 sm:p-10 rounded-[40px] border-2 transition-all duration-500 relative overflow-hidden ${
-                                isCurrent ? 'bg-orange-500/[0.08] border-orange-500/40 shadow-[0_30px_60px_-15px_rgba(234,88,12,0.25)] dark:shadow-[0_30px_60px_-15px_rgba(234,88,12,0.15)] ring-2 ring-orange-500/20' :
-                                isCompleted ? 'bg-slate-50 dark:bg-white/[0.04] border-slate-200 dark:border-white/10 opacity-90' :
-                                'bg-slate-50/50 dark:bg-white/[0.01] border-slate-200/50 dark:border-white/5 opacity-40'
-                              }`}>
-                                {/* Card Background Glow */}
-                                {isCurrent && (
-                                  <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-500/10 blur-[60px] rounded-full pointer-events-none" />
-                                )}
-
-                                <div className="flex justify-between items-start mb-6">
-                                  <div>
-                                    <div className="flex items-center gap-3 mb-2">
-                                      <span className="text-2xl drop-shadow-sm">{tier.icon}</span>
-                                      <h4 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter text-xl leading-none">
+                              <div className="relative z-10 space-y-6">
+                                {/* Level Badge Header */}
+                                <div className="flex items-center justify-between px-2">
+                                  <div className="flex items-center gap-4">
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black transition-all duration-500 ${
+                                      isRewardUnlocked 
+                                        ? 'bg-gradient-to-br from-orange-600 to-orange-500 text-white shadow-[0_10px_20px_-5px_rgba(234,88,12,0.4)] rotate-3' 
+                                        : 'bg-slate-100 dark:bg-white/5 text-slate-400 border border-slate-200 dark:border-white/10'
+                                    }`}>
+                                      {tier.level}
+                                    </div>
+                                    <div>
+                                      <h4 className={`text-xl font-black uppercase tracking-tight leading-none mb-1 ${
+                                        isRewardUnlocked ? 'text-slate-800 dark:text-white' : 'text-slate-400'
+                                      }`}>
                                         {tier.title}
                                       </h4>
+                                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em]">
+                                        {tier.minXP}{tier.maxXP === Infinity ? '+' : ` - ${tier.maxXP}`} XP Requirements
+                                      </p>
                                     </div>
-                                    <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-1">
-                                      {tier.minXP}{tier.maxXP === Infinity ? '+' : ` - ${tier.maxXP}`} XP Requirement
-                                    </p>
                                   </div>
                                   {isCurrent && (
-                                    <div className="px-4 py-1.5 bg-orange-600 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-orange-600/20">
+                                    <motion.div 
+                                      animate={{ scale: [1, 1.05, 1] }}
+                                      transition={{ repeat: Infinity, duration: 2 }}
+                                      className="px-5 py-2 bg-gradient-to-br from-orange-600 to-orange-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-orange-600/30 border border-orange-400/30"
+                                    >
                                       Current Level
-                                    </div>
+                                    </motion.div>
                                   )}
                                 </div>
                                 
+                                {/* Premium Reward Card */}
                                 {tier.rewardFrame && (
-                                  <div className={`p-6 rounded-[32px] border transition-all duration-500 flex items-center justify-between group/reward overflow-hidden relative ${
+                                  <div className={`p-8 md:p-10 rounded-[40px] border-2 transition-all duration-700 flex flex-col sm:flex-row items-center gap-8 group/reward overflow-hidden relative ${
                                     isRewardUnlocked 
-                                      ? 'bg-white dark:bg-orange-600/[0.1] border-orange-600/30 shadow-[0_20px_40px_-10px_rgba(234,88,12,0.3)] ring-1 ring-orange-500/20' 
-                                      : 'bg-slate-100/50 dark:bg-white/[0.03] border-slate-200 dark:border-white/10 opacity-70'
+                                      ? 'bg-white/90 dark:bg-black/40 border-orange-600/40 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.3)]' 
+                                      : 'bg-slate-100/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/10 grayscale opacity-60'
                                   }`}>
-                                    {/* Unlocked Aura */}
-                                    {isRewardUnlocked && <div className="absolute inset-0 bg-gradient-to-r from-orange-600/[0.05] to-transparent animate-pulse" />}
+                                    {/* Enhanced Background Glows */}
+                                    {isRewardUnlocked && (
+                                      <>
+                                        <div className="absolute -top-10 -left-10 w-40 h-40 bg-orange-600/20 blur-[60px] opacity-0 group-hover/reward:opacity-100 transition-opacity duration-700" />
+                                        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-orange-400/20 blur-[60px] opacity-0 group-hover/reward:opacity-100 transition-opacity duration-700" />
+                                        <div className="absolute inset-0 bg-gradient-to-br from-orange-600/[0.04] via-transparent to-orange-400/[0.04] group-hover/reward:opacity-100 opacity-0 transition-opacity duration-700" />
+                                      </>
+                                    )}
 
-                                    <div className="flex items-center gap-5 relative z-10 w-full">
-                                      <div className={`relative w-16 h-16 flex items-center justify-center transition-all duration-700 group-hover/reward:scale-110 rounded-2xl ${
-                                        isRewardUnlocked ? 'bg-orange-50 dark:bg-white/5 ring-4 ring-orange-500/5' : 'bg-slate-200/50 dark:bg-white/5'
-                                      }`}>
-                                        <img 
-                                          src={`/Nexus-Journey/${tier.rewardFrame}`} 
-                                          alt="Reward Frame" 
-                                          className="w-full h-full object-contain drop-shadow-xl"
-                                        />
-                                      </div>
+                                    {/* Live Avatar Preview Container */}
+                                    <div className="relative w-32 h-32 flex-shrink-0">
+                                      <div className={`absolute inset-0 rounded-full blur-3xl transition-all duration-700 ${
+                                        isRewardUnlocked ? 'bg-orange-500/40 scale-110' : 'bg-transparent'
+                                      }`} />
                                       
-                                      <div className="flex flex-col flex-1 min-w-0">
-                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-1.5 ${
+                                      <div className="relative w-full h-full flex items-center justify-center rounded-full group-hover/reward:scale-110 transition-transform duration-700 z-10">
+                                        {/* User Avatar */}
+                                        <div 
+                                          className="w-full h-full rounded-full overflow-hidden flex items-center justify-center relative bg-slate-200 dark:bg-white/5 border-2 border-white/10"
+                                          style={{ padding: frameConfig?.padding || '0%' }}
+                                        >
+                                          {userProfile?.avatar_url ? (
+                                            <img src={userProfile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                          ) : (
+                                            <span className="text-orange-500 font-bold text-3xl">
+                                              {(userProfile?.username?.[0] || userProfile?.email?.[0] || 'V').toUpperCase()}
+                                            </span>
+                                          )}
+                                        </div>
+
+                                        {/* Frame Overlay */}
+                                        <div className="absolute inset-x-[-15%] inset-y-[-15%] pointer-events-none flex items-center justify-center">
+                                          <motion.img 
+                                            src={`/Nexus-Journey/${tier.rewardFrame}`}
+                                            alt="Reward Frame"
+                                            className="w-full h-full object-contain"
+                                            style={{ 
+                                              transform: `scale(${frameConfig?.scale || 1.1}) translateY(${frameConfig?.translateY || '0%'})`,
+                                              filter: isRewardUnlocked ? 'drop-shadow(0 15px 30px rgba(234,88,12,0.4))' : 'none'
+                                            }}
+                                            animate={isRewardUnlocked ? { 
+                                              rotate: [0, 2, -2, 0],
+                                              scale: [frameConfig?.scale || 1.1, (frameConfig?.scale || 1.1) + 0.05, frameConfig?.scale || 1.1]
+                                            } : {}}
+                                            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="flex flex-col flex-1 text-center sm:text-left relative z-10">
+                                      <div className="flex items-center justify-center sm:justify-start gap-2 mb-3">
+                                        <span className={`text-[10px] font-black uppercase tracking-[0.25em] ${
                                           isRewardUnlocked ? 'text-orange-600 dark:text-orange-400' : 'text-slate-400'
                                         }`}>
-                                          {isRewardUnlocked ? 'Exclusive Unlock' : 'Locked Reward'}
-                                        </span>
-                                        <span className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight truncate">
-                                          {tier.title} Frame
+                                          {isRewardUnlocked ? '✨ Unique Reward Unlocked' : '🔒 Tier Locked'}
                                         </span>
                                       </div>
+                                      <h5 className="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tight mb-2">
+                                        {tier.title} Frame
+                                      </h5>
+                                      <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-6 max-w-[240px] mx-auto sm:mx-0 leading-relaxed">
+                                        A legendary symbol of your dedication and mastery in this field.
+                                      </p>
 
-                                      <div className="ml-auto">
+                                      <div className="flex items-center justify-center sm:justify-start">
                                         {isRewardUnlocked ? (
-                                          (userQuizProfile.unlocked_frames || []).includes(tier.rewardFrame) ? (
-                                            <div className="flex flex-col items-end gap-1.5">
-                                              <div className="px-4 py-2.5 bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] font-black uppercase tracking-widest rounded-2xl border border-green-500/20 flex items-center gap-2 backdrop-blur-md">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><polyline points="20 6 9 17 4 12" /></svg>
+                                          isCollected ? (
+                                            <div className="flex flex-col items-center sm:items-start gap-3">
+                                              <div className="px-6 py-3 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-500/20 flex items-center gap-3">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><polyline points="20 6 9 17 4 12" /></svg>
                                                 Collected
                                               </div>
                                               {userQuizProfile.avatar_frame === tier.rewardFrame && (
-                                                <span className="text-[8px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest mr-1 animate-pulse">Active</span>
+                                                <div className="flex items-center gap-2 px-3 py-1 bg-orange-500/10 rounded-full">
+                                                  <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+                                                  <span className="text-[9px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-[0.15em]">Currently Equipped</span>
+                                                </div>
                                               )}
                                             </div>
                                           ) : (
@@ -3083,21 +3105,22 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                                   const updatedFrames = await NexusServer.collectReward(userId, tier.rewardFrame!);
                                                   updateUserQuizProfile({ unlocked_frames: updatedFrames });
                                                   showToast(`${tier.title} Frame Collected!`, "success");
-                                                  showToast("Equip it from your profile settings", "info");
+                                                  showToast("Equip it from your profile section", "info");
                                                 } catch (e) {
                                                   console.error('Failed to collect frame', e);
                                                   showToast("Something went wrong. Please try again.", "error");
                                                 }
                                               }}
-                                              className="px-6 py-3 bg-gradient-to-br from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-[0_12px_24px_-8px_rgba(234,88,12,0.6)] hover:shadow-[0_15px_30px_-5px_rgba(234,88,12,0.5)] active:scale-95 transition-all flex items-center gap-2.5 group/btn"
+                                              className="px-10 py-4 bg-gradient-to-br from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-[0_20px_40px_-10px_rgba(234,88,12,0.5)] hover:shadow-[0_25px_50px_-10px_rgba(234,88,12,0.4)] active:scale-95 transition-all flex items-center justify-center gap-3 group/btn w-full sm:w-auto"
                                             >
-                                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 group-hover/btn:translate-y-0.5 transition-transform"><path d="M12 2v12m0 0l-3-3m3 3l3-3M5 22h14" /></svg>
-                                              Collect
+                                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 group-hover:translate-y-1 transition-transform duration-300"><path d="M12 2v12m0 0l-3-3m3 3l3-3M5 22h14" /></svg>
+                                              Collect Reward
                                             </button>
                                           )
                                         ) : (
-                                          <div className="w-10 h-10 rounded-full bg-slate-200/50 dark:bg-white/5 flex items-center justify-center border border-slate-300/30 dark:border-white/5">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-slate-400 dark:text-slate-600"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                          <div className="px-8 py-4 bg-slate-200/50 dark:bg-white/5 rounded-2xl inline-flex items-center gap-3 text-slate-400 dark:text-slate-600 text-[10px] font-black uppercase tracking-widest border border-slate-300/30 dark:border-white/5">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                            Locked at {tier.minXP} XP
                                           </div>
                                         )}
                                       </div>
@@ -3105,10 +3128,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                   </div>
                                 )}
                               </div>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
+                            </motion.div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 </motion.div>
