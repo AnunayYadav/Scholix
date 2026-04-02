@@ -7,6 +7,13 @@ export interface FrameConfig {
 }
 
 export const FRAME_CONFIGS: Record<string, FrameConfig> = {
+  'Beginner.png': {
+    id: 'Beginner.png',
+    padding: '11%',
+    scale: 1.25,
+    navbarScale: 1.2,
+    translateY: '0%',
+  },
   'Learner.png': {
     id: 'Learner.png',
     padding: '12%',
