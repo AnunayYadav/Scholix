@@ -686,6 +686,31 @@ class NexusServer {
     return data;
   }
 
+  static async collectReward(userId: string, frameId: string) {
+    const client = getSupabase();
+    if (!client) return [];
+
+    // Get current profile
+    const { data: profile } = await client
+      .from('profiles')
+      .select('unlocked_frames')
+      .eq('id', userId)
+      .maybeSingle();
+
+    const currentUnlocked = profile?.unlocked_frames || [];
+    if (!currentUnlocked.includes(frameId)) {
+      const updatedUnlocked = [...currentUnlocked, frameId];
+      const { error } = await client
+        .from('profiles')
+        .update({ unlocked_frames: updatedUnlocked })
+        .eq('id', userId);
+
+      if (error) throw error;
+      return updatedUnlocked;
+    }
+    return currentUnlocked;
+  }
+
   static async updateProfile(userId: string, updates: Partial<UserProfile>): Promise<void> {
     const client = getSupabase();
     if (!client || !userId) return;
