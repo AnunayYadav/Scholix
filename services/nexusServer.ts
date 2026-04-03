@@ -636,7 +636,13 @@ class NexusServer {
     await client.auth.signOut();
   }
 
-  static onAuthStateChange(callback: (user: User | null) => void) {
+  static async getSession() {
+    const client = getSupabase();
+    if (!client) return { data: { session: null }, error: new Error("Offline") };
+    return await client.auth.getSession();
+  }
+
+  static onAuthStateChange(callback: (user: any) => void) {
     const client = getSupabase();
     if (!client) return () => { };
     const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {

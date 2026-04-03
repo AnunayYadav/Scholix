@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom';
 import { UserProfile } from '../types.ts';
 import { showToast } from './Toast.tsx';
+import NexusServer from '../services/nexusServer.ts';
 
 interface PDFViewerProps {
     url: string;
@@ -418,7 +419,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             try {
                 setIsLoading(true);
                 // Security: Fetch PDF as binary data to obfuscate URL in network tab
-                const response = await fetch(url);
+                // 🔐 Session Token Verification: Get the current user's session token
+                const { data: { session } } = await NexusServer.getSession();
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': session ? `Bearer ${session.access_token}` : ''
+                    }
+                });
                 if (!response.ok) throw new Error("Security response failed (Protocol 403)");
                 const arrayBuffer = await response.arrayBuffer();
                 const data = new Uint8Array(arrayBuffer);

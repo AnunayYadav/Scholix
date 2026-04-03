@@ -17,13 +17,20 @@ export default async function handler(req: any, res: any) {
   }
 
   const { path } = req.query;
+  const authHeader = req.headers['authorization'];
 
   if (!path) {
     return res.status(400).json({ error: "Missing protocol path parameter." });
   }
 
+  // 🛡️ Identity Check: Ensure the requester has a valid session
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: "Unauthorized access: Session signature missing." });
+  }
+
+  const token = authHeader.split(' ')[1];
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  // Use Service Role Key for server-side bypass of storage restrictions
+  // Use Service Role Key for server-side bypass of storage restrictions (Internal Only)
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
@@ -32,6 +39,14 @@ export default async function handler(req: any, res: any) {
 
   try {
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // 🕵️ Verification: Ask Supabase if this token belongs to an active user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      console.error("Auth verification failed:", authError);
+      return res.status(401).json({ error: "Invalid session: Access request denied." });
+    }
 
     // Fetch the file directly as a blob/stream
     const { data, error } = await supabase.storage.from('nexus-documents').download(path);
