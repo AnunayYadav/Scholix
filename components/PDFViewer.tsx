@@ -813,19 +813,37 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         jumpToPage(searchResults[prev].pageIndex);
     };
 
-    // Download Functionality
+    // 💾 Authenticated Download Functionality
     const handleDownload = async () => {
         if (!isAdmin || !url) return;
         try {
+            showToast('Preparing Secure Download...', 'info');
+            
+            const { data: { session } } = await NexusServer.getSession();
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': session ? `Bearer ${session.access_token}` : ''
+                }
+            });
+
+            if (!response.ok) throw new Error("Vault re-verification failed.");
+            
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            
             const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', fileName);
+            link.href = blobUrl;
+            link.setAttribute('download', fileName || 'document.pdf');
             document.body.appendChild(link);
             link.click();
             link.remove();
-            showToast('Secure Download Complete.', 'success');
+            
+            // Clean up memory
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+            showToast('Download Verified & Complete.', 'success');
         } catch (err) {
-            showToast('Download failed. Protocol interrupted.', 'error');
+            console.error("Download failure:", err);
+            showToast('Download Blocked: Protocol Fault.', 'error');
         }
     };
 
