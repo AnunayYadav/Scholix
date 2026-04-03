@@ -258,6 +258,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const [error, setError] = useState<string | null>(null);
     const [pdfDoc, setPdfDoc] = useState<any>(null);
     const [pdfjsLibState, setPdfjsLibState] = useState<any>(null);
+    const [blobUrl, setBlobUrl] = useState<string | null>(null);
+    const [isPrintBlocked, setIsPrintBlocked] = useState(false);
+
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [renderScale, setRenderScale] = useState(scale);
     const [isClosing, setIsClosing] = useState(false);
@@ -415,7 +418,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
             try {
                 setIsLoading(true);
-                const loadingTask = pdfjsLib.getDocument(url);
+                // Security: Fetch PDF as a blob to obfuscate URL in network tab and prevent direct access
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Security response failed (Protocol 403)");
+                const blob = await response.blob();
+                const localUrl = URL.createObjectURL(blob);
+                setBlobUrl(localUrl);
+
+                const loadingTask = pdfjsLib.getDocument(localUrl);
                 const pdf = await loadingTask.promise;
                 pdfDocRef.current = pdf;
                 setPdfDoc(pdf);
@@ -424,16 +434,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 // Get first page to calculate initial scale
                 const firstPage = await pdf.getPage(1);
                 const originalViewport = firstPage.getViewport({ scale: 1.0 });
-                const containerWidth = containerRef.current?.clientWidth || window.innerWidth;
-
-                // Set default scale based on device
-                if (window.innerWidth < 768) {
-                    // Mobile: default to page-width (with 20px padding)
-                    const pageWidthScale = (window.innerWidth - 40) / originalViewport.width;
-                    setScale(pageWidthScale);
-                } else {
-                    setScale(1.0);
-                }
+                setScale(window.innerWidth < 768 ? (window.innerWidth - 40) / originalViewport.width : 1.0);
 
                 setIsLoading(false);
             } catch (err: any) {
@@ -445,11 +446,20 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
         loadPdfJs();
 
-        // Security: Disable Right Click & Print
+        // Security: Enhanced Event Blocking
         const handleContextMenu = (e: MouseEvent) => e.preventDefault();
         const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 's')) {
-                if (!isAdmin) e.preventDefault();
+            // Block Print, Save, Inspect
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 's' || e.key === 'u' || e.shiftKey && e.key === 'i')) {
+                if (!isAdmin) {
+                    e.preventDefault();
+                    showToast('Security Protocol Active: Download Protected.', 'error');
+                }
+            }
+            // Block F12
+            if (e.key === 'F12' && !isAdmin) {
+                e.preventDefault();
+                showToast('Developer Console Access Prohibited.', 'error');
             }
             if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
                 e.preventDefault();
@@ -461,15 +471,40 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             }
         };
 
+        const handleCopy = (e: ClipboardEvent) => {
+            if (!isAdmin) {
+                e.preventDefault();
+                showToast('Content Copying Restricted.', 'error');
+            }
+        };
+
+        const handleBeforePrint = () => {
+            if (!isAdmin) {
+                setIsPrintBlocked(true);
+            }
+        };
+
+        const handleAfterPrint = () => {
+            setIsPrintBlocked(false);
+        };
+
         window.addEventListener('contextmenu', handleContextMenu);
         window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('copy', handleCopy);
+        window.addEventListener('beforeprint', handleBeforePrint);
+        window.addEventListener('afterprint', handleAfterPrint);
 
         return () => {
             document.body.style.overflow = 'auto';
             window.removeEventListener('contextmenu', handleContextMenu);
             window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('copy', handleCopy);
+            window.removeEventListener('beforeprint', handleBeforePrint);
+            window.removeEventListener('afterprint', handleAfterPrint);
+            if (blobUrl) URL.revokeObjectURL(blobUrl);
         };
     }, [url, isAdmin, numPages]);
+
 
     // Handle Resize
     useEffect(() => {
@@ -775,21 +810,20 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
     // Download Functionality
     const handleDownload = async () => {
-        if (!isAdmin) return;
+        if (!isAdmin || !blobUrl) return;
         try {
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const downloadUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = downloadUrl;
+            link.href = blobUrl;
             link.setAttribute('download', fileName);
             document.body.appendChild(link);
             link.click();
             link.remove();
+            showToast('Secure Download Complete.', 'success');
         } catch (err) {
             showToast('Download failed. Protocol interrupted.', 'error');
         }
     };
+
 
     // Thumbnail Renderer Removed
 
@@ -1072,8 +1106,49 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 .is-zooming .page-container {
                     transition: none !important;
                 }
+
+                /* Security Print Shield */
+                @media print {
+                    body {
+                        display: none !important;
+                    }
+                    * {
+                        visibility: hidden !important;
+                    }
+                    .pdf-print-shield {
+                        visibility: visible !important;
+                        display: block !important;
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100% !important;
+                        height: 100% !important;
+                        background: #000 !important;
+                        color: #ff0000 !important;
+                        text-align: center !important;
+                        padding-top: 200px !important;
+                        font-family: sans-serif !important;
+                        font-size: 24px !important;
+                        font-weight: bold !important;
+                        z-index: 999999 !important;
+                    }
+                }
+                
+                @media screen {
+                    .pdf-print-shield {
+                        display: none;
+                    }
+                }
             `}</style>
-        </div >,
+
+            {/* Print Shield Overlay */}
+            <div className="pdf-print-shield">
+                <h1>SECURITY BREACH DETECTED</h1>
+                <p>UNAUTHORIZED PRINTING IS STRICTLY PROHIBITED</p>
+                <p>IP and User Session Logged to Registry Service.</p>
+            </div>
+        </div >
+,
         document.getElementById('modal-root') || document.body
     );
 };
