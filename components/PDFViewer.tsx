@@ -258,7 +258,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const [error, setError] = useState<string | null>(null);
     const [pdfDoc, setPdfDoc] = useState<any>(null);
     const [pdfjsLibState, setPdfjsLibState] = useState<any>(null);
-    const [blobUrl, setBlobUrl] = useState<string | null>(null);
     const [isPrintBlocked, setIsPrintBlocked] = useState(false);
 
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -418,14 +417,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
             try {
                 setIsLoading(true);
-                // Security: Fetch PDF as a blob to obfuscate URL in network tab and prevent direct access
+                // Security: Fetch PDF as binary data to obfuscate URL in network tab
                 const response = await fetch(url);
                 if (!response.ok) throw new Error("Security response failed (Protocol 403)");
-                const blob = await response.blob();
-                const localUrl = URL.createObjectURL(blob);
-                setBlobUrl(localUrl);
+                const arrayBuffer = await response.arrayBuffer();
+                const data = new Uint8Array(arrayBuffer);
 
-                const loadingTask = pdfjsLib.getDocument(localUrl);
+                const loadingTask = pdfjsLib.getDocument({ data });
                 const pdf = await loadingTask.promise;
                 pdfDocRef.current = pdf;
                 setPdfDoc(pdf);
@@ -501,7 +499,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             window.removeEventListener('copy', handleCopy);
             window.removeEventListener('beforeprint', handleBeforePrint);
             window.removeEventListener('afterprint', handleAfterPrint);
-            if (blobUrl) URL.revokeObjectURL(blobUrl);
         };
     }, [url, isAdmin, numPages]);
 
@@ -810,10 +807,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
     // Download Functionality
     const handleDownload = async () => {
-        if (!isAdmin || !blobUrl) return;
+        if (!isAdmin || !url) return;
         try {
             const link = document.createElement('a');
-            link.href = blobUrl;
+            link.href = url;
             link.setAttribute('download', fileName);
             document.body.appendChild(link);
             link.click();
@@ -976,6 +973,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 <main
                     ref={containerRef}
                     onScroll={handleScroll}
+                    onContextMenu={(e) => !isAdmin && e.preventDefault()}
+                    onDragStart={(e) => !isAdmin && e.preventDefault()}
+                    onSelectStart={(e) => !isAdmin && e.preventDefault()}
                     className="flex-1 overflow-auto bg-slate-100 dark:bg-[#0a0a0a] relative select-none touch-auto overscroll-none pt-16 md:pt-20"
                     style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'none' }}
                 >
