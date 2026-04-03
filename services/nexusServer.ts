@@ -868,17 +868,14 @@ class NexusServer {
   }
 
   static async getFileUrl(path: string) {
-    const client = getSupabase();
-    if (!client) return '';
+    if (!path) return '';
     try {
-      const { data, error } = await client.storage.from('nexus-documents').createSignedUrl(path, 3600); // 1 hour expiry
-      if (error) {
-        console.error("Signed URL error:", error);
-        return client.storage.from('nexus-documents').getPublicUrl(path).data.publicUrl; // Fallback to public if signed fails
-      }
-      return data.signedUrl;
+      // Security: Use our own server-side proxy to hide Supabase backend completely
+      // This makes the Network tab show only our local domain
+      return `/api/secure-proxy?path=${encodeURIComponent(path)}`;
     } catch (e) {
-      return client.storage.from('nexus-documents').getPublicUrl(path).data.publicUrl;
+      console.error("PDF Proxy redirection failed:", e);
+      return '';
     }
   }
 
