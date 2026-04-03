@@ -8,6 +8,7 @@ import PDFViewer from './PDFViewer.tsx';
 import NexusOriginals from './NexusOriginals.tsx';
 import NexusDropdown from './NexusDropdown.tsx';
 import { showToast, showConfirm } from './Toast.tsx';
+import { slugify } from '../utils/slugify.ts';
 import {
   DndContext,
   closestCenter,
@@ -79,7 +80,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const initialPrograms = ["BTech CSE", "BTech IT", "BCA", "MCA", "MBA", "BCom", "BA"];
   const [availablePrograms, setAvailablePrograms] = useState(initialPrograms);
   const [selectedProgram, setSelectedProgram] = useState(() => {
-    if (program && initialPrograms.includes(decodeURIComponent(program))) return decodeURIComponent(program);
+    if (program) {
+      const found = initialPrograms.find(p => slugify(p) === program);
+      if (found) return found;
+      if (initialPrograms.includes(decodeURIComponent(program))) return decodeURIComponent(program);
+    }
     if (userProfile?.program && initialPrograms.includes(userProfile.program)) return userProfile.program;
     return initialPrograms[0];
   });
@@ -282,25 +287,27 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   // Sync state with URL params
   useEffect(() => {
     if (folders.length > 0) {
-      const decodedProgram = program ? decodeURIComponent(program) : selectedProgram;
-      const decodedSemester = semester ? decodeURIComponent(semester) : null;
-      const decodedSubject = subject ? decodeURIComponent(subject) : null;
-      const decodedCategory = category ? decodeURIComponent(category) : null;
-
-      if (decodedProgram !== selectedProgram) {
-        setSelectedProgram(decodedProgram);
+      let matchedProgram = selectedProgram;
+      if (program) {
+        const found = availablePrograms.find(p => slugify(p) === program);
+        if (found) matchedProgram = found;
+        else matchedProgram = decodeURIComponent(program);
       }
 
-      if (decodedSemester) {
-        const sem = folders.find(f => f.type === 'semester' && f.name === decodedSemester && f.program === decodedProgram);
+      if (matchedProgram !== selectedProgram) {
+        setSelectedProgram(matchedProgram);
+      }
+
+      if (semester) {
+        const sem = folders.find(f => f.type === 'semester' && slugify(f.name) === semester && f.program === matchedProgram);
         setActiveSemester(sem || null);
         
-        if (decodedSubject) {
-          const subj = folders.find(f => f.type === 'subject' && f.name === decodedSubject && f.parent_id === sem?.id);
+        if (subject && sem) {
+          const subj = folders.find(f => f.type === 'subject' && slugify(f.name) === subject && f.parent_id === sem.id);
           setActiveSubject(subj || null);
           
-          if (decodedCategory) {
-            const cat = folders.find(f => f.type === 'category' && f.name === decodedCategory && f.parent_id === subj?.id);
+          if (category && subj) {
+            const cat = folders.find(f => f.type === 'category' && slugify(f.name) === category && f.parent_id === subj.id);
             setActiveCategory(cat || null);
           } else {
             setActiveCategory(null);
@@ -315,7 +322,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         setActiveCategory(null);
       }
     }
-  }, [program, semester, subject, category, folders]);
+  }, [program, semester, subject, category, folders, availablePrograms, selectedProgram]);
 
   const displayFiles = useMemo(() => {
     let data = [...allFiles];
@@ -447,13 +454,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [isCreatingNew, setIsCreatingNew] = useState({ program: false, semester: false, subject: false, type: false });
 
   const navigateTo = (sem: Folder | null, subj: Folder | null, cat: Folder | null) => {
-    let path = `/library/${encodeURIComponent(selectedProgram)}`;
+    let path = `/library/${slugify(selectedProgram)}`;
     if (sem) {
-      path += `/${encodeURIComponent(sem.name)}`;
+      path += `/${slugify(sem.name)}`;
       if (subj) {
-        path += `/${encodeURIComponent(subj.name)}`;
+        path += `/${slugify(subj.name)}`;
         if (cat) {
-          path += `/${encodeURIComponent(cat.name)}`;
+          path += `/${slugify(cat.name)}`;
         }
       }
     }
@@ -554,7 +561,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     }
     setViewMode('browse');
     setSearchQuery('');
-    navigate(`/library/${encodeURIComponent(userProfile?.program || availablePrograms[0])}`);
+    navigate(`/library/${slugify(userProfile?.program || availablePrograms[0])}`);
   };
 
   const handleFileAccess = async (file: LibraryFile) => {
@@ -679,7 +686,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 options={availablePrograms}
                 value={selectedProgram}
                 onChange={(val) => {
-                  navigate(`/library/${encodeURIComponent(val)}`);
+                  navigate(`/library/${slugify(val)}`);
                 }}
                 className="flex-shrink-0"
                 buttonClassName="!h-12 !py-0 !rounded-2xl"

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useParams } from 'react-router-dom';
+import { slugify } from '../utils/slugify';
 import { MarketplaceItem, UserProfile } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import { showToast } from './Toast.tsx';
@@ -39,7 +40,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             if (filter === 'All') {
                 navigate('/marketplace');
             } else {
-                navigate(`/marketplace/${filter}`);
+                navigate(`/marketplace/${slugify(filter)}`);
             }
         }, 250);
     };
@@ -65,7 +66,12 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     // Sync state with URL category
     useEffect(() => {
         if (urlCategory) {
-            setFilter(urlCategory);
+            const matched = categories.find(c => slugify(c) === urlCategory);
+            if (matched) {
+                setFilter(matched);
+            } else {
+                setFilter(urlCategory);
+            }
         } else if (!urlItemId) {
             setFilter('All');
         }
@@ -83,7 +89,7 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
         if (newCategory === 'All') {
             navigate('/marketplace');
         } else {
-            navigate(`/marketplace/${newCategory}`);
+            navigate(`/marketplace/${slugify(newCategory)}`);
         }
     };
 

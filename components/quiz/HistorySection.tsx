@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { slugify } from '../../utils/slugify';
 import { useQuizDashboardStore } from '../../stores/quizStore';
 
 const HistorySection: React.FC = () => {
@@ -35,7 +36,7 @@ const HistorySection: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
-              onClick={() => navigate(`/quiz/${encodeURIComponent(q.subject)}/${q.id}`)}
+              onClick={() => navigate(`/quiz/${slugify(q.subject)}/${q.id}`)}
               className="glass-panel p-6 rounded-[40px] text-left hover:border-orange-500/30 transition-all group"
             >
               <div className="flex items-start justify-between mb-4">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
+import { slugify } from '../utils/slugify';
 import Editor from '@monaco-editor/react';
 import { UserProfile, QuizQuestion, LibraryFile } from '../types.ts';
 import NexusServer from '../services/nexusServer';
@@ -794,9 +795,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   // Sync selectedSubject with URL param
   useEffect(() => {
     if (subjectsWithSyllabi.length > 0 && subjectName) {
-      const decoded = decodeURIComponent(subjectName);
-      const sub = subjectsWithSyllabi.find(s => s.name === decoded);
-      if (sub && (!selectedSubject || selectedSubject.name !== decoded)) {
+      const sub = subjectsWithSyllabi.find(s => slugify(s.name) === subjectName);
+      if (sub && (!selectedSubject || selectedSubject.name !== sub.name)) {
         setSelectedSubject(sub);
       }
     }
@@ -807,7 +807,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     if (sub) {
       // If we are already in a quiz for this subject, maybe we don't want to reset? 
       // But if we're picking a new subject from the setup screen, we reset.
-      navigate(`/quiz/${encodeURIComponent(sub.name)}`);
+      navigate(`/quiz/${slugify(sub.name)}`);
       setQuizQuestions([]);
       setQuizIdInState(null);
     } else {
@@ -1261,7 +1261,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       questionCount: enriched.length,
       difficulty: selectedDifficulties 
     });
-    navigate(`/quiz/${encodeURIComponent(selectedSubject!.name)}/${newQuizId}`);
+    navigate(`/quiz/${slugify(selectedSubject!.name)}/${newQuizId}`);
 
     setLoading(false);
     setCurrentQuestionIdx(0);
