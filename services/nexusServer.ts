@@ -873,16 +873,11 @@ class NexusServer {
     if (client) await client.from('feedback').insert([{ text: sanitizedText, user_id: uid, user_email: email }]);
   }
 
-  static async getFileUrl(path: string) {
+  static getFileUrl(path: string) {
     if (!path) return '';
-    try {
-      // Security: Use our own server-side proxy to hide Supabase backend completely
-      // This makes the Network tab show only our local domain
-      return `/api/secure-proxy?path=${encodeURIComponent(path)}`;
-    } catch (e) {
-      console.error("PDF Proxy redirection failed:", e);
-      return '';
-    }
+    if (path.startsWith('http')) return path;
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    return `${baseUrl}/api/vault?path=${encodeURIComponent(path)}`;
   }
 
   static async deleteFile(id: string, path: string) {
