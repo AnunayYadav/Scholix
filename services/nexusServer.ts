@@ -751,19 +751,54 @@ class NexusServer {
 
   static async createFolder(name: string, type: 'semester' | 'subject' | 'category', parentId: string | null, program: string, is_shining: boolean = false) {
     const client = getSupabase();
-    if (client) await client.from('folders').insert([{ name, type, parent_id: parentId, program, is_shining }]);
+    if (!client) return;
+    
+    // Attempt with is_shining first
+    const { error: firstError } = await client.from('folders').insert([{ name, type, parent_id: parentId, program, is_shining }]);
+    
+    if (firstError) {
+      // If error sounds like missing column, retry without is_shining
+      if (firstError.message.includes('column "is_shining" does not exist') || firstError.code === '42703' || firstError.message.includes('column "is_shining" of relation "folders" does not exist')) {
+        console.warn("Retrying folder creation without 'is_shining' due to missing column.");
+        const { error: secondError } = await client.from('folders').insert([{ name, type, parent_id: parentId, program }]);
+        if (secondError) throw new Error(secondError.message);
+      } else {
+        console.error("Create Folder Error:", firstError);
+        throw new Error(firstError.message);
+      }
+    }
   }
 
   static async renameFolder(id: string, name: string, is_shining?: boolean) {
     const client = getSupabase();
+    if (!client) return;
+    
     const updateData: any = { name };
     if (is_shining !== undefined) updateData.is_shining = is_shining;
-    if (client) await client.from('folders').update(updateData).eq('id', id);
+    
+    // Attempt with is_shining (if specified) first
+    const { error: firstError } = await client.from('folders').update(updateData).eq('id', id);
+    
+    if (firstError) {
+      if (firstError.message.includes('column "is_shining" does not exist') || firstError.code === '42703' || firstError.message.includes('column "is_shining" of relation "folders" does not exist')) {
+        console.warn("Retrying folder rename without 'is_shining' due to missing column.");
+        const { error: secondError } = await client.from('folders').update({ name }).eq('id', id);
+        if (secondError) throw new Error(secondError.message);
+      } else {
+        console.error("Rename Folder Error:", firstError);
+        throw new Error(firstError.message);
+      }
+    }
   }
 
   static async deleteFolder(id: string) {
     const client = getSupabase();
-    if (client) await client.from('folders').delete().eq('id', id);
+    if (!client) return;
+    const { error } = await client.from('folders').delete().eq('id', id);
+    if (error) {
+      console.error("Delete Folder Error:", error);
+      throw new Error(error.message);
+    }
   }
 
   static async fetchFiles(program: string, q?: string): Promise<LibraryFile[]> {
