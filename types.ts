@@ -219,6 +219,7 @@ export interface Folder {
   type: 'semester' | 'subject' | 'category';
   parent_id: string | null;
   program: string;
+  is_shining?: boolean;
 }
 
 export interface Flashcard {

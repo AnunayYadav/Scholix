@@ -101,6 +101,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [selectedFile, setSelectedFile] = useState<LibraryFile | null>(null);
   const [folderToManage, setFolderToManage] = useState<Folder | null>(null);
   const [newFolderName, setNewFolderName] = useState('');
+  const [isShining, setIsShining] = useState(false);
 
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [pendingUploads, setPendingUploads] = useState<{
@@ -475,8 +476,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       let parentId: string | null = null;
       if (activeSubject) { type = 'category'; parentId = activeSubject.id; }
       else if (activeSemester) { type = 'subject'; parentId = activeSemester.id; }
-      await NexusServer.createFolder(newFolderName, type, parentId, selectedProgram);
+      await NexusServer.createFolder(newFolderName, type, parentId, selectedProgram, isShining);
       setNewFolderName('');
+      setIsShining(false);
       handleCloseFolder();
       fetchFromSource(false);
     } catch (e: any) { showToast(e.message, 'error'); } finally { setIsProcessing(false); }
@@ -531,8 +533,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     if (!folderToManage || !newFolderName.trim() || !userProfile?.is_admin) return;
     setIsProcessing(true);
     try {
-      await NexusServer.renameFolder(folderToManage.id, newFolderName);
+      await NexusServer.renameFolder(folderToManage.id, newFolderName, isShining);
       setNewFolderName('');
+      setIsShining(false);
       setFolderToManage(null);
       handleCloseRename();
       fetchFromSource(false);
@@ -727,10 +730,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 >
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                     {currentFolders.map(folder => (
-                      <div key={folder.id} onDragOver={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(folder.id); }} onDragLeave={() => setDraggingOverId(null)} onDrop={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(null); const droppedFiles = e.dataTransfer.files; if (droppedFiles && droppedFiles.length > 0) { handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : ''); } }} onClick={() => { if (folder.type === 'semester') navigateTo(folder, null, null); else if (folder.type === 'subject') navigateTo(activeSemester, folder, null); else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder); }} className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${draggingOverId === folder.id ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-orange-500/50 hover:shadow-lg'}`}>
+                      <div key={folder.id} onDragOver={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(folder.id); }} onDragLeave={() => setDraggingOverId(null)} onDrop={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(null); const droppedFiles = e.dataTransfer.files; if (droppedFiles && droppedFiles.length > 0) { handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : ''); } }} onClick={() => { if (folder.type === 'semester') navigateTo(folder, null, null); else if (folder.type === 'subject') navigateTo(activeSemester, folder, null); else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder); }} className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''} ${draggingOverId === folder.id ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-orange-500/50 hover:shadow-lg'}`}>
                         {userProfile?.is_admin && (
                           <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                            <button onClick={(e) => { e.stopPropagation(); setFolderToManage(folder); setNewFolderName(folder.name); setShowRenameModal(true); }} className="p-1.5 bg-slate-100 dark:bg-[#0a0a0a] rounded-lg text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+                            <button onClick={(e) => { e.stopPropagation(); setFolderToManage(folder); setNewFolderName(folder.name); setIsShining(folder.is_shining || false); setShowRenameModal(true); }} className="p-1.5 bg-slate-100 dark:bg-[#0a0a0a] rounded-lg text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
                             <button onClick={(e) => handleDeleteFolder(folder, e)} className="p-1.5 bg-slate-100 dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
                           </div>
                         )}
@@ -901,6 +904,26 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               <div className="bg-slate-50 dark:bg-[#0a0a0a]/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5"><h3 className="text-[11px] sm:text-xs font-semibold">New Folder</h3><button onClick={handleCloseFolder} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
               <div className="p-6 space-y-4">
                 <input autoFocus placeholder="Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-[#0a0a0a]/60 p-4 rounded-xl font-bold border dark:border-white/10 text-[11px] sm:text-xs dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
+                
+                <div className="flex items-center justify-between p-4 bg-slate-100 dark:bg-[#0a0a0a]/40 rounded-xl border border-transparent dark:border-white/5 transition-all">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isShining ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-slate-200 dark:bg-white/5 text-slate-400'}`}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-900 dark:text-white">Shining Effect</p>
+                      <p className="text-[8px] text-slate-400 font-medium">Adds a continuous shimmer anim</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsShining(!isShining)}
+                    className={`w-10 h-6 rounded-full relative transition-all duration-300 border-none px-0 ${isShining ? 'bg-orange-500' : 'bg-slate-300 dark:bg-white/10'}`}
+                  >
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${isShining ? 'left-5 shadow-sm' : 'left-1'}`} />
+                  </button>
+                </div>
+
                 <button onClick={handleCreateFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-semibold text-[11px] sm:text-xs shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Saving...' : 'Create Folder'}</button>
               </div>
             </div>
@@ -923,6 +946,26 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               </div>
               <div className="p-6 space-y-4">
                 <input autoFocus placeholder="New Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-[#0a0a0a]/60 p-4 rounded-xl font-bold border dark:border-white/10 text-[11px] sm:text-xs dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
+
+                <div className="flex items-center justify-between p-4 bg-slate-100 dark:bg-[#0a0a0a]/40 rounded-xl border border-transparent dark:border-white/5 transition-all">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isShining ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-slate-200 dark:bg-white/5 text-slate-400'}`}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-900 dark:text-white">Shining Effect</p>
+                      <p className="text-[8px] text-slate-400 font-medium">Adds a continuous shimmer anim</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsShining(!isShining)}
+                    className={`w-10 h-6 rounded-full relative transition-all duration-300 border-none px-0 ${isShining ? 'bg-orange-500' : 'bg-slate-300 dark:bg-white/10'}`}
+                  >
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${isShining ? 'left-5 shadow-sm' : 'left-1'}`} />
+                  </button>
+                </div>
+
                 <button onClick={handleRenameFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-semibold text-[11px] sm:text-xs shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Updating...' : 'Save Changes'}</button>
               </div>
             </div>

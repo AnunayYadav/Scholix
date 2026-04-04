@@ -749,14 +749,16 @@ class NexusServer {
     return data || [];
   }
 
-  static async createFolder(name: string, type: 'semester' | 'subject' | 'category', parentId: string | null, program: string) {
+  static async createFolder(name: string, type: 'semester' | 'subject' | 'category', parentId: string | null, program: string, is_shining: boolean = false) {
     const client = getSupabase();
-    if (client) await client.from('folders').insert([{ name, type, parent_id: parentId, program }]);
+    if (client) await client.from('folders').insert([{ name, type, parent_id: parentId, program, is_shining }]);
   }
 
-  static async renameFolder(id: string, name: string) {
+  static async renameFolder(id: string, name: string, is_shining?: boolean) {
     const client = getSupabase();
-    if (client) await client.from('folders').update({ name }).eq('id', id);
+    const updateData: any = { name };
+    if (is_shining !== undefined) updateData.is_shining = is_shining;
+    if (client) await client.from('folders').update(updateData).eq('id', id);
   }
 
   static async deleteFolder(id: string) {
