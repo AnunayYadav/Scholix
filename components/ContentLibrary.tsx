@@ -737,13 +737,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                             <button onClick={(e) => handleDeleteFolder(folder, e)} className="p-1.5 bg-slate-100 dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
                           </div>
                         )}
-                        <div className="relative z-20">
-                          <FolderIcon type={folder.type} size="w-10 h-10" />
-                          <h3 className="text-[11px] sm:text-xs md:text-base font-semibold text-slate-800 dark:text-white tracking-tight leading-tight mt-1">{folder.name}</h3>
-                          <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 mt-1">
-                            {folderFileCounts[folder.id] || 0} File{folderFileCounts[folder.id] !== 1 ? 's' : ''}
-                          </p>
-                        </div>
+                        <FolderIcon type={folder.type} size="w-10 h-10" />
+                        <h3 className="text-[11px] sm:text-xs md:text-base font-semibold text-slate-800 dark:text-white tracking-tight leading-tight mt-1">{folder.name}</h3>
+                        <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 mt-1">
+                          {folderFileCounts[folder.id] || 0} File{folderFileCounts[folder.id] !== 1 ? 's' : ''}
+                        </p>
                         <div className="absolute -right-2 -bottom-2 opacity-5 group-hover:scale-110 transition-transform"><FolderIcon type={folder.type} size="w-24 h-24" /></div>
                       </div>
                     ))}
