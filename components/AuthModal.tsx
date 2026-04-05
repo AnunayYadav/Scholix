@@ -32,23 +32,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [resending, setResending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [otp, setOtp] = useState('');
-  const [resendStatus, setResendStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [step, setStep] = useState<'details' | 'otp'>('details');
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const [isClosing, setIsClosing] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
-  const otpInputRef = useRef<HTMLInputElement>(null);
-
-  // Focus OTP input when step changes
-  useEffect(() => {
-    if (step === 'otp' && otpInputRef.current) {
-      otpInputRef.current.focus();
-    }
-  }, [step]);
-
   // Body scroll lock
   useEffect(() => {
     document.body.classList.add('modal-open');
@@ -140,46 +127,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
         // Success: Close modal
         handleClose();
       } else {
-        if (step === 'details') {
-          if (!email.trim()) throw new Error("Official email is required.");
-          if (!regNo.trim()) throw new Error("Registration number is required.");
-          if (username.length < 3) throw new Error("Username must be at least 3 characters.");
-          if (usernameStatus === 'taken') throw new Error("This username is already claimed.");
-          if (password.length < 6) throw new Error("Password must be at least 6 characters.");
+        // Direct Registration (Bypassing OTP for now)
+        if (!email.trim()) throw new Error("Email is required.");
+        if (!regNo.trim()) throw new Error("Registration number is required.");
+        if (username.length < 3) throw new Error("Username must be at least 3 characters.");
+        if (usernameStatus === 'taken') throw new Error("This username is already claimed.");
+        if (password.length < 6) throw new Error("Password must be at least 6 characters.");
 
-          const isLpuEmail = email.toLowerCase().endsWith('@lpu.in') || email.toLowerCase().endsWith('@lpu.co.in') || email.toLowerCase().endsWith('@lpumail.in');
-          // Removed restriction: users can now use any email.
+        // Proceed with signup in Supabase
+        const result = await NexusServer.signUp(email, password, username, regNo);
+        if (result.error) throw result.error;
 
-          // Step 1: Send OTP via Brevo
-          const sendOtpRes = await fetch('/api/send-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, username })
-          });
-          const sendOtpData = await sendOtpRes.json();
-          if (!sendOtpRes.ok) throw new Error(sendOtpData.error || "Failed to send verification code.");
-
-          // Success: Move to OTP step
-          setStep('otp');
-        } else {
-          // Step 2: Verify OTP
-          if (!otp || otp.length !== 6) throw new Error("Please enter a valid 6-digit code.");
-
-          const verifyRes = await fetch('/api/verify-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, otp })
-          });
-          const verifyData = await verifyRes.json();
-          if (!verifyRes.ok) throw new Error(verifyData.error || "Verification failed.");
-
-          // Step 3: Proceed with signup in Supabase
-          const result = await NexusServer.signUp(email, password, username, regNo);
-          if (result.error) throw result.error;
-
-          // Final Success
-          handleClose();
-        }
+        // Final Success
+        handleClose();
       }
     } catch (err: any) {
       console.error("Auth Failure:", err);
@@ -277,166 +237,96 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {step === 'details' ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <div className="md:col-span-2">
-                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Unique Username</label>
-                        <div className="relative group">
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm group-focus-within:text-orange-600">@</span>
-                          <input
-                            type="text" required value={username} onChange={e => handleUsernameChange(e.target.value)}
-                            disabled={loading}
-                            className={`w-full bg-slate-50 dark:bg-[#0a0a0a] pl-9 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white disabled:opacity-50 ${usernameStatus === 'available' ? 'border-emerald-500/50 ring-4 ring-emerald-500/5' :
-                              usernameStatus === 'taken' ? 'border-red-500/50 ring-4 ring-red-500/5' : 'border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
-                              }`}
-                            placeholder="choose_a_tag"
-                          />
-                          <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                            {usernameStatus === 'checking' && <div className="w-3 h-3 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />}
-                            {usernameStatus === 'available' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5 text-emerald-500"><polyline points="20 6 9 17 4 12" /></svg>}
-                            {usernameStatus === 'taken' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5 text-red-500"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>}
-                          </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="md:col-span-2">
+                      <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Unique Username</label>
+                      <div className="relative group">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm group-focus-within:text-orange-600">@</span>
+                        <input
+                          type="text" required value={username} onChange={e => handleUsernameChange(e.target.value)}
+                          disabled={loading}
+                          className={`w-full bg-slate-50 dark:bg-[#0a0a0a] pl-9 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white disabled:opacity-50 ${usernameStatus === 'available' ? 'border-emerald-500/50 ring-4 ring-emerald-500/5' :
+                            usernameStatus === 'taken' ? 'border-red-500/50 ring-4 ring-red-500/5' : 'border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
+                            }`}
+                          placeholder="choose_a_tag"
+                        />
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                          {usernameStatus === 'checking' && <div className="w-3 h-3 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />}
+                          {usernameStatus === 'available' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5 text-emerald-500"><polyline points="20 6 9 17 4 12" /></svg>}
+                          {usernameStatus === 'taken' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5 text-red-500"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>}
                         </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Email Address</label>
-                        <div className="relative group">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
-                          <input
-                            type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                            disabled={loading}
-                            className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
-                            placeholder="Enter your email"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Reg Number</label>
-                        <div className="relative group">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><path d="M7 21v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4" /><circle cx="12" cy="11" r="3" /></svg>
-                          <input
-                            type="text" required value={regNo} onChange={e => setRegNo(e.target.value.replace(/[^0-9]/g, '').slice(0, 8))}
-                            disabled={loading}
-                            className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
-                            placeholder="1240...."
-                          />
-                        </div>
-                      </div>
-
-                      <div className="md:col-span-2">
-                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Secure Password</label>
-                        <div className="relative group">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                          <input
-                            type={showPassword ? "text" : "password"} required value={password} onChange={e => setPassword(e.target.value)}
-                            disabled={loading}
-                            className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-12 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
-                            placeholder="Min. 6 characters"
-                          />
-                          <button 
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-orange-500 transition-colors bg-transparent border-none"
-                          >
-                            {showPassword ? (
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
-                            ) : (
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-                            )}
-                          </button>
-                        </div>
-                        {/* Password Strength Indicator */}
-                        {password.length > 0 && (
-                          <div className="mt-3 space-y-1.5 animate-fade-in">
-                            <div className="flex gap-1">
-                              {[1, 2, 3, 4, 5].map(i => (
-                                <div
-                                  key={i}
-                                  className={`password-strength-bar flex-1 ${i <= passwordStrength.score ? passwordStrength.color : 'bg-slate-200 dark:bg-white/5'}`}
-                                />
-                              ))}
-                            </div>
-                            <p className={`text-[11px] sm:text-xs font-medium ${passwordStrength.score <= 1 ? 'text-red-500' :
-                              passwordStrength.score <= 2 ? 'text-orange-500' :
-                                passwordStrength.score <= 3 ? 'text-yellow-500' : 'text-emerald-500'
-                              }`}>
-                              {passwordStrength.label}
-                            </p>
-                          </div>
-                        )}
                       </div>
                     </div>
-                  ) : (
-                    <div className="space-y-6 py-4">
-                      <div className="text-center space-y-2">
-                        <p className="text-sm font-bold text-slate-900 dark:text-white">Verify Your Identity</p>
-                        <p className="text-[11px] text-slate-500 dark:text-white/40 leading-relaxed">
-                          We've sent a 6-digit synchronization code to <br />
-                          <span className="text-orange-600 font-black">{email}</span>
-                        </p>
-                      </div>
 
-                      <div>
-                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1 text-center uppercase tracking-widest">Access Code</label>
-                        <div className="relative group max-w-[240px] mx-auto">
-                          <input
-                            ref={otpInputRef}
-                            type="text" required value={otp} onChange={e => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
-                            disabled={loading}
-                            autoComplete="one-time-code"
-                            inputMode="numeric"
-                            className="w-full bg-slate-50 dark:bg-white/5 px-4 py-5 rounded-2xl text-2xl font-black text-center tracking-[0.3em] sm:tracking-[0.5em] outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50 placeholder:tracking-normal placeholder:font-medium placeholder:text-sm"
-                            placeholder="Type Code Here"
-                          />
-                        </div>
+                    <div>
+                      <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Email Address</label>
+                      <div className="relative group">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                        <input
+                          type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                          disabled={loading}
+                          className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                          placeholder="Enter your email"
+                        />
                       </div>
+                    </div>
 
-                      <div className="text-center">
-                        <button
+                    <div>
+                      <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Reg Number</label>
+                      <div className="relative group">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><path d="M7 21v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4" /><circle cx="12" cy="11" r="3" /></svg>
+                        <input
+                          type="text" required value={regNo} onChange={e => setRegNo(e.target.value.replace(/[^0-9]/g, '').slice(0, 8))}
+                          disabled={loading}
+                          className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                          placeholder="1240...."
+                        />
+                      </div>
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Secure Password</label>
+                      <div className="relative group">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                        <input
+                          type={showPassword ? "text" : "password"} required value={password} onChange={e => setPassword(e.target.value)}
+                          disabled={loading}
+                          className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-12 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                          placeholder="Min. 6 characters"
+                        />
+                        <button 
                           type="button"
-                          onClick={async () => {
-                            if (loading || resending) return;
-                            setResending(true);
-                            setError(null);
-                            try {
-                              const res = await fetch('/api/send-otp', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ email, username })
-                              });
-                              if (!res.ok) throw new Error("Failed to resend code.");
-                              
-                              setResendStatus('success');
-                              setTimeout(() => setResendStatus('idle'), 3000);
-                            } catch (e: any) {
-                              setError(e.message);
-                              setResendStatus('error');
-                            } finally {
-                              setResending(false);
-                            }
-                          }}
-                          className={`text-[10px] font-bold transition-colors uppercase tracking-widest bg-transparent border-none p-2 disabled:opacity-50 ${
-                            resendStatus === 'success' ? 'text-emerald-500' : 
-                            resendStatus === 'error' ? 'text-red-500' : 'text-orange-600 hover:text-orange-500'
-                          }`}
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-orange-500 transition-colors bg-transparent border-none"
                         >
-                          {resending ? 'Dispatching...' : 
-                           resendStatus === 'success' ? 'Code Sent Successfully' : 
-                           resendStatus === 'error' ? 'Dispatch Failed' : 'Request New Code'}
+                          {showPassword ? (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+                          ) : (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                          )}
                         </button>
                       </div>
-
-                      <button
-                        type="button"
-                        onClick={() => { setStep('details'); setError(null); }}
-                        className="w-full text-[10px] font-medium text-slate-400 hover:text-slate-600 transition-colors bg-transparent border-none"
-                      >
-                        Change Email Address
-                      </button>
+                      {/* Password Strength Indicator */}
+                      {password.length > 0 && (
+                        <div className="mt-3 space-y-1.5 animate-fade-in">
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map(i => (
+                              <div
+                                key={i}
+                                className={`password-strength-bar flex-1 ${i <= passwordStrength.score ? passwordStrength.color : 'bg-slate-200 dark:bg-white/5'}`}
+                              />
+                            ))}
+                          </div>
+                          <p className={`text-[11px] sm:text-xs font-medium ${passwordStrength.score <= 1 ? 'text-red-500' :
+                            passwordStrength.score <= 2 ? 'text-orange-500' :
+                              passwordStrength.score <= 3 ? 'text-yellow-500' : 'text-emerald-500'
+                            }`}>
+                            {passwordStrength.label}
+                          </p>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
               )}
             </div>
@@ -449,17 +339,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             >
               {loading ? (
                 <div className="w-5 h-5 border-3 border-white/50 border-t-white rounded-full animate-spin" />
-              ) : (isLogin ? 'Sign In' : (step === 'details' ? 'Next Protocol' : 'Verify & Join'))}
+              ) : (isLogin ? 'Sign In' : 'Join Nexus')}
             </button>
 
             <button
               type="button"
               onClick={() => { 
                 setIsLogin(!isLogin); 
-                setStep('details'); 
                 setError(null); 
                 setPassword(''); 
-                setOtp('');
               }}
               className="w-full text-[11px] sm:text-xs font-medium text-slate-400 hover:text-orange-500 transition-colors py-4 sm:py-6 bg-transparent border-none"
             >
