@@ -80,8 +80,8 @@ export default async function handler(req: any, res: any) {
             <body style="font-family: 'Inter', Helvetica, sans-serif; background-color: #f8fafc; margin: 0; padding: 40px;">
               <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; padding: 40px; border: 1px solid #e2e8f0; border-bottom: 4px solid #ea580c;">
                 <div style="margin-bottom: 30px;">
-                  <div style="width: 40px; height: 40px; background-color: #ea580c; border-radius: 12px; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;">
-                    <img src="https://lpunexus.vercel.app/apple-touch-icon.png" style="width: 100%; height: 100%; object-fit: cover;" alt="Logo" />
+                  <div style="width: 40px; height: 40px; background-color: #ea580c; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; display: inline-flex; vertical-align: middle;">
+                    🛰️
                   </div>
                   <span style="font-size: 20px; font-weight: 800; color: #0f172a; margin-left: 12px; vertical-align: middle;">LPU Nexus</span>
                 </div>
@@ -110,15 +110,10 @@ export default async function handler(req: any, res: any) {
     });
 
     const emailData = await emailResponse.json();
+
     if (!emailResponse.ok) {
-      console.error('--- BREVO DISPATCH FAILURE ---');
-      console.error('Status:', emailResponse.status);
-      console.error('Response Body:', JSON.stringify(emailData, null, 2));
-      console.error('------------------------------');
-      return res.status(500).json({ 
-        error: 'Failed to dispatch verification email.',
-        details: emailData.message || 'Check server logs for platform debugging.'
-      });
+      console.error('Brevo Error:', emailData);
+      return res.status(500).json({ error: 'Failed to dispatch verification email.' });
     }
 
     return res.status(200).json({ success: true, messageId: emailData.messageId });
