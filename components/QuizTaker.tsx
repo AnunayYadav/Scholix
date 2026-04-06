@@ -2901,6 +2901,12 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             onMyHistory={() => setDashboardView('history')}
           />
         </div>
+        
+        {/* Study Leaderboard - Moved below Quick Start */}
+        <div className="space-y-3">
+          <LeaderboardSection currentUserId={userId} />
+        </div>
+
 
         {/* XP & Streak Stats Refined Layout */}
         <div className="grid grid-cols-1 md:grid-cols-[1.4fr_0.6fr] gap-4 mb-4">
@@ -3242,10 +3248,6 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           </div>
         )}
 
-        {/* Study Leaderboard */}
-        <div className="space-y-3">
-          <LeaderboardSection currentUserId={userId} />
-        </div>
       </div>
     );
   }

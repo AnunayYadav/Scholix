@@ -67,8 +67,8 @@ const LeaderboardSection: React.FC<LeaderboardProps> = ({ currentUserId }) => {
                         <CrownIcon className="w-6 h-6" />
                     </div>
                     <div>
-                        <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Study Kings</h3>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[0.25em]">Total focus milestones</p>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Study Kings</h3>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-[0.25em]">Total focus milestones</p>
                     </div>
                 </div>
             </div>
@@ -78,9 +78,9 @@ const LeaderboardSection: React.FC<LeaderboardProps> = ({ currentUserId }) => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="dark:bg-white/[0.01]">
-                                <th className="px-10 py-6 text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Rank</th>
-                                <th className="px-8 py-6 text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Top Achiever</th>
-                                <th className="px-10 py-6 text-[11px] font-black dtext-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] text-right">Focustime</th>
+                                <th className="px-10 py-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em]">Rank</th>
+                                <th className="px-8 py-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em]">Top Achiever</th>
+                                <th className="px-10 py-6 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] text-right">Focustime</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-white/[0.05]">
@@ -105,8 +105,8 @@ const LeaderboardSection: React.FC<LeaderboardProps> = ({ currentUserId }) => {
                                                         <CrownIcon className="w-4 h-4" />
                                                     </motion.div>
                                                 )}
-                                                <div className={`w-full h-full rounded-2xl flex items-center justify-center text-sm font-black transition-all group-hover:scale-110
-                                                    ${idx === 0 ? 'bg-gradient-to-br from-amber-300 via-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/30 ring-4 ring-amber-500/10' : 
+                                                <div className={`w-full h-full rounded-2xl flex items-center justify-center text-sm font-bold transition-all group-hover:scale-110
+                                                    ${idx === 0 ? 'bg-gradient-to-br from-amber-300 via-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/30' : 
                                                       idx === 1 ? 'bg-gradient-to-br from-slate-200 via-slate-400 to-slate-500 text-white shadow-lg shadow-slate-400/30' : 
                                                       idx === 2 ? 'bg-gradient-to-br from-orange-600 via-orange-800 to-orange-900 text-white shadow-lg shadow-orange-900/30' : 
                                                       'text-slate-400 dark:text-slate-600 group-hover:text-slate-900 dark:group-hover:text-white'}
@@ -139,29 +139,29 @@ const LeaderboardSection: React.FC<LeaderboardProps> = ({ currentUserId }) => {
                                                   )}
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className={`text-base font-black transition-colors truncate max-w-[200px]
+                                                    <span className={`text-base font-bold transition-colors truncate max-w-[200px]
                                                         ${idx === 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}
                                                     `}>
                                                         {entry.username}
                                                     </span>
                                                     {entry.id === currentUserId && (
-                                                        <span className="text-[10px] font-bold text-orange-500 uppercase tracking-tighter animate-pulse">You are here</span>
+                                                        <span className="text-[10px] font-semibold text-orange-500 uppercase tracking-tighter animate-pulse">You are here</span>
                                                     )}
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-10 py-6 text-right">
                                             <div className="flex flex-col items-end gap-1">
-                                                <span className={`text-lg font-black font-mono tracking-tight transition-all
-                                                    ${idx === 0 ? 'text-amber-600 dark:text-amber-400 scale-110 origin-right' : 'text-slate-900 dark:text-white'}
+                                                <span className={`text-base font-bold font-mono tracking-tight transition-all
+                                                    ${idx === 0 ? 'text-amber-600 dark:text-amber-400 scale-105 origin-right' : 'text-slate-900 dark:text-white'}
                                                 `}>
                                                     {formatTime(entry.totalStudyTime)}
                                                 </span>
-                                                <div className="w-24 h-1.5 bg-slate-100 dark:bg-white/[0.05] rounded-full overflow-hidden shadow-inner">
+                                                <div className="w-20 h-1 bg-slate-100 dark:bg-white/[0.05] rounded-full overflow-hidden">
                                                     <motion.div 
                                                         initial={{ width: 0 }}
                                                         animate={{ width: `${Math.min(100, (entry.totalStudyTime / (leaderboard[0]?.totalStudyTime || 1)) * 100)}%` }}
-                                                        className={`h-full rounded-full ${idx === 0 ? 'bg-gradient-to-r from-amber-400 to-amber-600 shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-gradient-to-r from-orange-500 to-amber-500'}`}
+                                                        className={`h-full rounded-full ${idx === 0 ? 'bg-gradient-to-r from-amber-400 to-amber-600' : 'bg-gradient-to-r from-orange-500 to-amber-500'}`}
                                                     />
                                                 </div>
                                             </div>
