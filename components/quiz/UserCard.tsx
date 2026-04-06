@@ -32,9 +32,9 @@ const UserCard: React.FC<UserCardProps> = ({
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="glass-panel p-6 md:p-8 rounded-[32px]"
     >
-      <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+      <div className="flex flex-row items-center justify-between gap-3 md:gap-8 min-w-0">
         {/* Avatar + Info */}
-        <div className="flex items-center gap-4 flex-1 min-w-0">
+        <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
           <div className="relative flex-shrink-0 flex items-center justify-center w-14 h-14">
             {(() => {
               const frameConfig = getFrameConfig(userQuizProfile.avatar_frame);
@@ -79,12 +79,18 @@ const UserCard: React.FC<UserCardProps> = ({
           {/* Name + Level */}
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white tracking-tight truncate">
+              <h3 className="text-base md:text-lg font-semibold text-slate-900 dark:text-white tracking-tight truncate">
                 {username || 'Verto'}
               </h3>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-semibold tracking-wider whitespace-nowrap">
-                {levelInfo.icon} {levelInfo.title}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-0.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-semibold tracking-wider whitespace-nowrap">
+                  {levelInfo.icon} {levelInfo.title}
+                </span>
+                {/* Horizontal Streak for Mobile */}
+                <span className="inline-flex md:hidden items-center gap-1 px-2 py-0.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[10px] font-bold whitespace-nowrap">
+                  🔥 {currentStreak}
+                </span>
+              </div>
             </div>
 
             {/* XP Progress Bar */}
@@ -113,9 +119,9 @@ const UserCard: React.FC<UserCardProps> = ({
         </div>
 
         {/* Streak + Calendar */}
-        <div className="flex items-center gap-5 flex-shrink-0">
-          {/* Streak count */}
-          <div className="flex flex-col items-center gap-1">
+        <div className="flex items-center gap-3 md:gap-5 flex-shrink-0">
+          {/* Streak count - Desktop only */}
+          <div className="hidden md:flex flex-col items-center gap-1">
             <div className="flex items-center gap-1.5">
               <span className="text-2xl">🔥</span>
               <span className="text-2xl font-semibold text-slate-900 dark:text-white tabular-nums">

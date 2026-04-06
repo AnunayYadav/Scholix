@@ -86,6 +86,7 @@ export interface UserQuizProfile {
   current_streak: number;
   longest_streak: number;
   last_active_date: string | null;
+  last_quiz_completed_at: string | null; // Timestamp for 24h streak logic
   streak_history: { date: string; count: number }[];
   xp_history: { quiz_id: string; xp_earned: number; breakdown: XPBreakdownItem[]; earned_at: string }[];
   unlocked_frames?: string[];
@@ -158,6 +159,7 @@ const DEFAULT_PROFILE: UserQuizProfile = {
   current_streak: 0,
   longest_streak: 0,
   last_active_date: null,
+  last_quiz_completed_at: null,
   streak_history: [],
   xp_history: [],
 };

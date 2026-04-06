@@ -180,19 +180,33 @@ function generateDynamicName(subject: string, rng: () => number): string {
   }
 }
 
+const CHALLENGE_EMOJIS_MAP: Record<string, string> = {
+  CHE110: '🧪', CSE101: '💻', CSE121: '🖥️', CSE320: '⚙️', CSE326: '📊',
+  ECE249: '📡', PEL125: '🔬', PEL130: '🌍', INT108: '🐍', INT306: '🌐',
+  MTH166: '📐', PHY110: '🔭',
+};
+
+const CHALLENGE_TEMPLATES = [
+  { desc: 'Prove your mastery — all difficulty levels mixed', count: 15, timePerQ: 45, xp: 200, minLevel: undefined },
+  { desc: 'Think fast and answer accurately!', count: 10, timePerQ: 20, xp: 150, minLevel: undefined },
+  { desc: 'The ultimate syllabus challenge', count: 20, timePerQ: 45, xp: 250, minLevel: 2 },
+];
+
 async function generateFeaturedQuiz(): Promise<FeaturedQuiz | null> {
   const today = getTodayIST();
-  const seed = hashStr(`featured_${today}`);
+  const seed = hashStr(`featured_v3_${today}`);
   const rng = seededRandom(seed);
 
   const subjects = await NexusServer.fetchSubjectNames();
   if (!subjects || subjects.length === 0) return null;
 
-  // Shuffle subjects to pick a random one, but retry if it has no questions
-  const shuffledSubjects = seededShuffle(subjects.sort(), rng);
+  // Using a larger multiplier (e.g. 7) ensures we jump around more and don't just stay with 
+  // alphabetical orders if only a few subjects have questions.
+  const startIdx = (dayOfYear(today) * 7) % subjects.length;
+  const candidateSubjects = [...subjects.slice(startIdx), ...subjects.slice(0, startIdx)];
   
-  for (let sIdx = 0; sIdx < Math.min(10, shuffledSubjects.length); sIdx++) {
-    const subject = shuffledSubjects[sIdx];
+  for (let sIdx = 0; sIdx < candidateSubjects.length; sIdx++) {
+    const subject = candidateSubjects[sIdx];
     const subjectCode = (subject || '').split(':')[0].trim();
     const questionsPool: QuizQuestion[] = await NexusServer.fetchQuestions(subjectCode);
     
@@ -210,7 +224,6 @@ async function generateFeaturedQuiz(): Promise<FeaturedQuiz | null> {
     );
 
     if (questions.length < 5) {
-      // Fallback 1: use all non-subjective, non-coding questions within allowed units
       questions = questionsPool.filter(q => 
         q.type !== 'subjective' && 
         q.type !== 'coding' &&
@@ -218,20 +231,12 @@ async function generateFeaturedQuiz(): Promise<FeaturedQuiz | null> {
       );
     }
 
-    if (questions.length === 0) {
-      // Fallback 2: ignore unit constraint if no questions in current units
-      questions = questionsPool.filter(q => q.type !== 'subjective' && q.type !== 'coding');
-    }
+    if (questions.length < 5) continue; 
 
-    if (questions.length < 5) continue; // Try next subject if this one is too sparse
-
-    // We found a good subject!
+    // Once we find a valid subject, use entropy for questions and name
     const shuffled = seededShuffle(questions, rng).slice(0, 10);
     const unitsFound = Array.from(new Set(shuffled.map(q => String(q.unit || 'General')).filter(Boolean))).sort();
     const name = generateDynamicName(subject, rng);
-
-    const xpBase = shuffled.length * 10;
-    const featuredBonus = 25;
 
     return {
       id: `featured_${today}`,
@@ -241,7 +246,7 @@ async function generateFeaturedQuiz(): Promise<FeaturedQuiz | null> {
       difficulty,
       questions: shuffled,
       units: unitsFound,
-      xp_reward: xpBase + featuredBonus,
+      xp_reward: shuffled.length * 10 + 25,
       generated_at: new Date().toISOString(),
     };
   }
@@ -251,86 +256,88 @@ async function generateFeaturedQuiz(): Promise<FeaturedQuiz | null> {
 
 // ═══════════════════════════════════════
 // Active Challenges Generation
-// Generated per 3-day window — same for all users.
-// Up to 3 challenges, each from a different subject.
+// Mon, Wed, Fri releases with 3-5 day durations
 // ═══════════════════════════════════════
-
-const CHALLENGE_EMOJIS_MAP: Record<string, string> = {
-  CHE110: '🧪', CSE101: '💻', CSE121: '🖥️', CSE320: '⚙️', CSE326: '📊',
-  ECE249: '📡', PEL125: '🔬', PEL130: '🌍', INT108: '🐍', INT306: '🌐',
-  MTH166: '📐', PHY110: '🔭',
-};
-
-const CHALLENGE_TEMPLATES = [
-  { desc: 'Prove your mastery — all difficulty levels mixed', count: 15, timePerQ: 45, xp: 200, minLevel: undefined },
-  { desc: 'Think fast and answer accurately!', count: 10, timePerQ: 20, xp: 150, minLevel: undefined },
-  { desc: 'The ultimate syllabus challenge', count: 20, timePerQ: 45, xp: 250, minLevel: 2 },
-];
 
 async function generateActiveChallenges(): Promise<ActiveChallenge[]> {
   const today = getTodayIST();
-  const { windowId, startsAt, expiresAt } = getChallengeWindow(today);
-
-  const seed = hashStr(`challenges_${windowId}`);
-  const rng = seededRandom(seed);
-  const allowedUnits = getAllowedUnits(today);
-
+  const currentFullDate = new Date(today + 'T00:00:00Z');
+  
+  // We check for the last 7 days to find active challenges released on Mon, Wed, Fri
+  const releaseDays = [1, 3, 5]; // Mon, Wed, Fri
+  const challenges: ActiveChallenge[] = [];
   const subjects = await NexusServer.fetchSubjectNames();
   if (subjects.length === 0) return [];
 
-  // Pick 3 unique subjects deterministically
-  const shuffledSubjects = seededShuffle(subjects.sort(), rng);
-  const numChallenges = Math.min(3, subjects.length);
+  // Iterate back up to 7 days
+  for (let i = 0; i < 7; i++) {
+    const checkDate = new Date(currentFullDate);
+    checkDate.setUTCDate(currentFullDate.getUTCDate() - i);
+    const dayOfWeek = checkDate.getUTCDay();
+    const checkDateStr = checkDate.toISOString().split('T')[0];
 
-  const challenges: ActiveChallenge[] = [];
-  for (let i = 0; i < numChallenges; i++) {
-    const subject = shuffledSubjects[i];
-    const template = CHALLENGE_TEMPLATES[i % CHALLENGE_TEMPLATES.length];
-    const subjectCode = (subject || '').split(':')[0].trim();
-    const emoji = CHALLENGE_EMOJIS_MAP[subjectCode] || CHALLENGE_EMOJIS_MAP[subject] || seededPick(Object.values(CHALLENGE_EMOJIS_MAP), rng);
+    if (releaseDays.includes(dayOfWeek)) {
+      // This was a release day!
+      const releaseSeed = hashStr(`challenge_release_v3_${checkDateStr}`);
+      const rng = seededRandom(releaseSeed);
+      
+      // Fixed 3 challenges per release day for better subject coverage
+      const numOnThisDay = 3;
+      
+      // Rotate subjects based on checkDate + release index to ensure wide coverage
+      // We use a different offset for each release day to avoid picking the same 3 subjects every week
+      const dayOffset = dayOfYear(checkDateStr);
+      
+      for (let cIdx = 0; cIdx < numOnThisDay; cIdx++) {
+        // Pick subject using rotation logic
+        const subjectIdx = (dayOffset * 3 + cIdx) % subjects.length;
+        const subject = subjects[subjectIdx];
+        
+        const cSeed = hashStr(`c_v3_${checkDateStr}_${cIdx}`);
+        const cRng = seededRandom(cSeed);
+        
+        // Expiry: Exactly 3 to 5 days as requested
+        const durationDays = Math.floor(cRng() * 3) + 3; // 3, 4, or 5
+        const randomHours = Math.floor(cRng() * 24);
+        const randomMins = Math.floor(cRng() * 60);
 
-    // Verify the subject has enough questions within allowed units
-    const pool: QuizQuestion[] = await NexusServer.fetchQuestions(subjectCode);
-    let mcqs = pool.filter(q => 
-      q.type !== 'subjective' && 
-      q.type !== 'coding' &&
-      allowedUnits.includes(q.unit || 1)
-    );
-    
-    if (mcqs.length < 5) {
-      // Fallback to all units if restricted ones are empty
-      mcqs = pool.filter(q => q.type !== 'subjective' && q.type !== 'coding');
+        const expiryDate = new Date(checkDate);
+        expiryDate.setUTCDate(checkDate.getUTCDate() + durationDays);
+        expiryDate.setUTCHours(randomHours, randomMins, 0, 0);
+
+        // If today is before expiry, it's active
+        if (currentFullDate.getTime() < expiryDate.getTime()) {
+           const template = CHALLENGE_TEMPLATES[cIdx % CHALLENGE_TEMPLATES.length];
+           const subjectCode = (subject || '').split(':')[0].trim();
+           const emoji = CHALLENGE_EMOJIS_MAP[subjectCode] || seededPick(Object.values(CHALLENGE_EMOJIS_MAP), cRng);
+
+           // Check pool
+           const pool: QuizQuestion[] = await NexusServer.fetchQuestions(subjectCode);
+           if (pool.length < 5) continue;
+
+           challenges.push({
+             id: `challenge_${checkDateStr}_${cIdx}`,
+             name: generateDynamicName(subject, cRng),
+             description: template.desc,
+             emoji,
+             subject,
+             difficulty: Math.floor(cRng() * 3) + 1,
+             question_count: Math.min(template.count, pool.length),
+             time_limit_per_question: template.timePerQ,
+             xp_reward: template.xp,
+             starts_at: checkDate.toISOString(),
+             expires_at: expiryDate.toISOString(),
+             units: Array.from(new Set(pool.filter(q => q.unit).map(q => String(q.unit)))).slice(0, 3),
+             min_level: template.minLevel,
+           });
+        }
+      }
     }
-    
-    if (mcqs.length < 5) continue;
-
-    // Determine units (from filtered pool)
-    const units = Array.from(new Set(mcqs.map(q => String(q.unit || 'General')).filter(Boolean))).sort();
-    
-    // Seeded random items for this specific challenge
-    const cSeed = hashStr(`${windowId}_c${i}`);
-    const cRng = seededRandom(cSeed);
-    const difficulty = seededPick(['easy', 'medium', 'hard'] as const, cRng);
-    const diffNum = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3;
-
-    challenges.push({
-      id: `challenge_${windowId}_${i}`,
-      name: generateDynamicName(subject, cRng),
-      description: template.desc,
-      emoji,
-      subject,
-      difficulty: diffNum,
-      question_count: Math.min(template.count, mcqs.length),
-      time_limit_per_question: template.timePerQ,
-      xp_reward: template.xp,
-      starts_at: startsAt,
-      expires_at: expiresAt,
-      units,
-      min_level: template.minLevel,
-    });
   }
 
-  return challenges;
+  // Deduplicate by ID and Sort by expiry (soonest first)
+  const uniqueChallenges = Array.from(new Map(challenges.map(c => [c.id, c])).values());
+  return uniqueChallenges.sort((a, b) => new Date(a.expires_at).getTime() - new Date(b.expires_at).getTime());
 }
 
 // ═══════════════════════════════════════
