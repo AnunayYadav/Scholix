@@ -58,6 +58,8 @@ const getModuleFromPath = (path: string): ModuleType => {
   if (p.includes('/ai-tools')) return ModuleType.AI_TOOLS;
   if (p.includes('/admin-stats')) return ModuleType.ADMIN_STATS;
   if (p.includes('/privacy')) return ModuleType.PRIVACY;
+  if (p.includes('/login')) return ModuleType.LOGIN;
+  if (p.includes('/signup')) return ModuleType.SIGNUP;
   return ModuleType.DASHBOARD;
 };
 
@@ -82,6 +84,8 @@ const getPathFromModule = (module: ModuleType): string => {
     case ModuleType.AI_TOOLS: return '/ai-tools';
     case ModuleType.ADMIN_STATS: return '/admin-stats';
     case ModuleType.PRIVACY: return '/privacy';
+    case ModuleType.LOGIN: return '/login';
+    case ModuleType.SIGNUP: return '/signup';
     default: return '/';
   }
 };
@@ -416,6 +420,7 @@ const AppContent: React.FC = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [isClosingAuth, setIsClosingAuth] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isClosingProfile, setIsClosingProfile] = useState(false);
@@ -449,6 +454,10 @@ const AppContent: React.FC = () => {
     setTimeout(() => {
       setShowAuthModal(false);
       setIsClosingAuth(false);
+      if (location.pathname === '/login' || location.pathname === '/signup') {
+        const lastModulePath = localStorage.getItem('last_active_path') || '/';
+        navigate(lastModulePath !== location.pathname ? lastModulePath : '/', { replace: true });
+      }
     }, 400); // AuthModal animation is 0.4s
   };
 
@@ -458,8 +467,27 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     NexusServer.trackPageView(location.pathname);
-    // StudyHeartbeat now handles fine-grained tracking for study sessions
+    if (location.pathname !== '/login' && location.pathname !== '/signup') {
+      localStorage.setItem('last_active_path', location.pathname);
+    }
+    
+    if (location.pathname === '/login') {
+      setAuthMode('login');
+      setShowAuthModal(true);
+    } else if (location.pathname === '/signup') {
+      setAuthMode('signup');
+      setShowAuthModal(true);
+    } else {
+      setShowAuthModal(false);
+    }
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (userProfile && (location.pathname === '/login' || location.pathname === '/signup')) {
+      const lastPath = localStorage.getItem('last_active_path') || '/';
+      navigate(lastPath !== location.pathname ? lastPath : '/', { replace: true });
+    }
+  }, [userProfile, location.pathname, navigate]);
 
   useEffect(() => {
     NexusServer.recordVisit();
@@ -641,7 +669,7 @@ const AppContent: React.FC = () => {
                   )}
                 </>
               ) : (
-                    <button onClick={() => setShowAuthModal(true)} className="w-10 h-10 rounded-full border-none bg-slate-100 dark:bg-[#0a0a0a] flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-95">
+                    <button onClick={() => navigate('/login')} className="w-10 h-10 rounded-full border-none bg-slate-100 dark:bg-[#0a0a0a] flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-95">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                     </button>
                   )}
@@ -656,14 +684,14 @@ const AppContent: React.FC = () => {
               <Route path="/placement" element={<PlacementPrefect userProfile={userProfile} />} />
               <Route path="/placement/:reportId" element={<PlacementPrefect userProfile={userProfile} />} />
               <Route path="/timetable" element={<TimetableHub userProfile={userProfile} />} />
-              <Route path="/quiz" element={<QuizTaker userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
-              <Route path="/quiz/:subjectName" element={<QuizTaker userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
-              <Route path="/quiz/:subjectName/:quizId" element={<QuizTaker userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
-              <Route path="/library" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
-              <Route path="/library/:program" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
-              <Route path="/library/:program/:semester" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
-              <Route path="/library/:program/:semester/:subject" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
-              <Route path="/library/:program/:semester/:subject/:category" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => setShowAuthModal(true)} />} />
+              <Route path="/quiz" element={<QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} />} />
+              <Route path="/quiz/:subjectName" element={<QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} />} />
+              <Route path="/quiz/:subjectName/:quizId" element={<QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} />} />
+              <Route path="/library" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} />} />
+              <Route path="/library/:program" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} />} />
+              <Route path="/library/:program/:semester" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} />} />
+              <Route path="/library/:program/:semester/:subject" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} />} />
+              <Route path="/library/:program/:semester/:subject/:category" element={<ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} />} />
               <Route path="/campus" element={<CampusNavigator />} />
               <Route path="/campus/:tab" element={<CampusNavigator />} />
               <Route path="/help" element={<HelpSection />} />
@@ -683,6 +711,8 @@ const AppContent: React.FC = () => {
               <Route path="/ai-tools" element={<AIToolsDirectory />} />
               <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/login" element={<Dashboard userProfile={userProfile} />} />
+              <Route path="/signup" element={<Dashboard userProfile={userProfile} />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
@@ -726,7 +756,7 @@ const AppContent: React.FC = () => {
           </div>
         )}
       </main>
-      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+      {showAuthModal && <AuthModal onClose={handleAuthClose} initialMode={authMode} />}
       <CookieBanner />
       {userProfile && <StudyHeartbeat userId={userProfile.id} />}
       <Analytics />

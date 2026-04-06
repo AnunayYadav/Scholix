@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import NexusServer from '../services/nexusServer.ts';
 
 interface AuthModalProps {
   onClose: () => void;
+  initialMode?: 'login' | 'signup';
 }
 
 const getPasswordStrength = (password: string): { score: number; label: string; color: string } => {
@@ -23,8 +25,8 @@ const getPasswordStrength = (password: string): { score: number; label: string; 
   return { score: 5, label: 'Excellent', color: 'bg-emerald-400' };
 };
 
-const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
-  const [isLogin, setIsLogin] = useState(true);
+const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' }) => {
+  const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const [identifier, setIdentifier] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -36,6 +38,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const [isClosing, setIsClosing] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    setIsLogin(initialMode === 'login');
+  }, [initialMode]);
+
   // Body scroll lock
   useEffect(() => {
     document.body.classList.add('modal-open');
@@ -345,9 +354,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             <button
               type="button"
               onClick={() => { 
-                setIsLogin(!isLogin); 
+                const newMode = !isLogin;
+                setIsLogin(newMode); 
                 setError(null); 
                 setPassword(''); 
+                navigate(newMode ? '/login' : '/signup', { replace: true });
               }}
               className="w-full text-[11px] sm:text-xs font-medium text-slate-400 hover:text-orange-500 transition-colors py-4 sm:py-6 bg-transparent border-none"
             >
