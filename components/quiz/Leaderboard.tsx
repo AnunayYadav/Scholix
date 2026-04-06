@@ -112,13 +112,13 @@ const LeaderboardSection: React.FC<LeaderboardProps> = ({ currentUserId }) => {
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.4, ease: "easeInOut" }}
                         >
-                            <div className="border-t border-slate-100 dark:divide-white/[0.05] overflow-x-auto">
-                                <table className="w-full text-left border-collapse min-w-[600px]">
-                                    <thead>
-                                        <tr className="bg-slate-50/50 dark:bg-white/[0.01]">
-                                            <th className="px-10 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em]">Rank</th>
-                                            <th className="px-8 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em]">Top Achiever</th>
-                                            <th className="px-10 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] text-right">Focustime</th>
+                            <div className="border-t border-slate-100 dark:border-white/[0.05] max-h-[580px] overflow-y-auto custom-scrollbar relative overflow-x-auto">
+                                <table className="w-full text-left border-separate border-spacing-0 min-w-[600px]">
+                                    <thead className="sticky top-0 z-10">
+                                        <tr className="bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-md">
+                                            <th className="px-10 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] border-b border-slate-100 dark:border-white/[0.05]">Rank</th>
+                                            <th className="px-8 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] border-b border-slate-100 dark:border-white/[0.05]">Top Achiever</th>
+                                            <th className="px-10 py-5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] text-right border-b border-slate-100 dark:border-white/[0.05]">Focustime</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 dark:divide-white/[0.05]">
