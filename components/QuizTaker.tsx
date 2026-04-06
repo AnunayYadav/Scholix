@@ -25,6 +25,7 @@ import XPBreakdown from './quiz/XPBreakdown.tsx';
 import LevelUpOverlay from './quiz/LevelUpOverlay.tsx';
 import StreakToast from './quiz/StreakToast.tsx';
 import HistorySection from './quiz/HistorySection.tsx';
+import LeaderboardSection from './quiz/Leaderboard.tsx';
 
 
 // Dashboard hooks & store
@@ -3240,6 +3241,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             </div>
           </div>
         )}
+
+        {/* Study Leaderboard */}
+        <div className="space-y-3">
+          <LeaderboardSection currentUserId={userId} />
+        </div>
       </div>
     );
   }
