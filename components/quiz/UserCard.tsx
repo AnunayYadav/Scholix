@@ -88,7 +88,7 @@ const UserCard: React.FC<UserCardProps> = ({
                 </span>
                 {/* Horizontal Streak for Mobile */}
                 <span className="inline-flex md:hidden items-center gap-1 px-2 py-0.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[10px] font-bold whitespace-nowrap">
-                  🔥 {currentStreak}
+                  🔥{isStreakAtRisk && '⌛'} {currentStreak}
                 </span>
               </div>
             </div>
@@ -124,6 +124,7 @@ const UserCard: React.FC<UserCardProps> = ({
           <div className="hidden md:flex flex-col items-center gap-1">
             <div className="flex items-center gap-1.5">
               <span className="text-2xl">🔥</span>
+              {isStreakAtRisk && <span className="text-xl animate-pulse">⌛</span>}
               <span className="text-2xl font-semibold text-slate-900 dark:text-white tabular-nums">
                 {currentStreak}
               </span>
