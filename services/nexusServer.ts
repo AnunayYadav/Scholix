@@ -1581,59 +1581,14 @@ class NexusServer {
   }
 
   static async getStudyLeaderboard() {
-    const client = getSupabase();
-    if (!client) return [];
-
     try {
-      // Fetch user_history records for study sessions
-      // We only select needed fields to reduce payload
-      const { data: records, error: historyError } = await client
-        .from('user_history')
-        .select('user_id, content')
-        .eq('type', 'study_session');
-
-      if (historyError) throw historyError;
-
-      // Group and sum durations by userId
-      const userDurations: Record<string, number> = {};
-      records?.forEach((record: any) => {
-        const uid = record.user_id;
-        if (!uid) return;
-        const duration = record.content?.duration || 0;
-        userDurations[uid] = (userDurations[uid] || 0) + duration;
-      });
-
-      // Get top user IDs by duration
-      const sortedUserIds = Object.keys(userDurations)
-        .sort((a, b) => userDurations[b] - userDurations[a])
-        .slice(0, 50); // Get top 50 
-
-      if (sortedUserIds.length === 0) return [];
-
-      // Fetch profile details for these users
-      const { data: profiles, error: profileError } = await client
-        .from('profiles')
-        .select('id, username, avatar_url, total_xp, level, avatar_frame')
-        .in('id', sortedUserIds);
-
-      if (profileError) throw profileError;
-
-      // Combine profiles with durations and sort again to ensure correct order
-      return sortedUserIds
-        .map((uid) => {
-          const profile = profiles?.find((p) => p.id === uid);
-          return {
-            id: uid,
-            username: profile?.username || 'Nexus Student',
-            avatar_url: profile?.avatar_url,
-            total_xp: profile?.total_xp || 0,
-            level: profile?.level || 1,
-            avatar_frame: profile?.avatar_frame,
-            totalStudyTime: userDurations[uid]
-          };
-        })
-        .filter(item => !!item.username)
-        .sort((a, b) => b.totalStudyTime - a.totalStudyTime);
+      // Use the server-side API route to bypass RLS and allow public users to view the leaderboard
+      const response = await fetch('/api/study-leaderboard');
+      if (!response.ok) {
+        throw new Error('Leaderboard synchronization failed.');
+      }
+      const data = await response.json();
+      return data || [];
     } catch (e) {
       console.error('Fetch study leaderboard failed:', e);
       return [];
