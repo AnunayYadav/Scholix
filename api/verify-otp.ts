@@ -4,7 +4,7 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email, otp, type = 'signup' } = req.body || {};
+  const { email, otp, type = 'signup', oldEmail } = req.body || {};
 
   if (!email || !otp) {
     return res.status(400).json({ error: 'Email and OTP are required.' });
@@ -53,7 +53,69 @@ export default async function handler(req: any, res: any) {
       return res.status(410).json({ error: 'Verification code expired. Please request a new one.' });
     }
 
-    // 3. Clear the record on success to prevent reuse
+    // 3. Handle data updates
+    let userId: string | null = null;
+    
+    // Attempt to find user to get their ID (needed for email_update)
+    try {
+      const searchEmail = (type === 'email_update' && oldEmail) ? oldEmail : email;
+      const userQuery = await fetch(`${supabaseUrl}/auth/v1/admin/users?email=eq.${encodeURIComponent(searchEmail.toLowerCase().trim())}`, {
+        headers: {
+          'apikey': supabaseServiceKey,
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+        }
+      });
+      const userData = await userQuery.json();
+      if (userData && userData.users && userData.users.length > 0) {
+        userId = userData.users[0].id;
+      }
+    } catch (e) {
+      console.error('Failed to resolve userId:', e);
+    }
+
+    // 4. Update profile to mark as verified
+    try {
+      const updateData: any = { is_verified: 'yes' };
+      if (type === 'email_update') {
+        updateData.email = email.toLowerCase().trim();
+      }
+
+      const profileUpdateUrl = userId 
+        ? `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`
+        : `${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email.toLowerCase().trim())}`;
+
+      await fetch(profileUpdateUrl, {
+        method: 'PATCH',
+        headers: {
+          'apikey': supabaseServiceKey,
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(updateData)
+      });
+    } catch (e) {
+      console.error('Failed to update profile:', e);
+    }
+
+    // 5. Handle auth email update
+    if (type === 'email_update' && userId) {
+      try {
+        await fetch(`${supabaseUrl}/auth/v1/admin/users/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'apikey': supabaseServiceKey,
+            'Authorization': `Bearer ${supabaseServiceKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email: email.toLowerCase().trim(), email_confirm: true })
+        });
+      } catch (e) {
+        console.error('Auth email update failed:', e);
+      }
+    }
+
+    // 6. Clear the OTP record
     await fetch(`${supabaseUrl}/rest/v1/registration_otps?email=eq.${encodeURIComponent(email.toLowerCase().trim())}`, {
       method: 'DELETE',
       headers: {
@@ -62,9 +124,8 @@ export default async function handler(req: any, res: any) {
       },
     });
 
-    // 4. If it's a login, generate a Supabase session
-    if (type === 'login') {
-      // Use admin API to generate a magic link which gives us a session
+    // 7. Session generation for login/signup
+    if (type === 'login' || type === 'signup') {
       const authResponse = await fetch(`${supabaseUrl}/auth/v1/admin/generate_link`, {
         method: 'POST',
         headers: {
@@ -84,7 +145,6 @@ export default async function handler(req: any, res: any) {
         return res.status(500).json({ error: 'Identity verified, but session generation failed. Try standard login.' });
       }
 
-      // Return the magic link data (contains action_link which has access_token/refresh_token)
       return res.status(200).json({ 
         success: true, 
         message: 'Identity verified. Syncing session...',

@@ -3,10 +3,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NexusServer from '../services/nexusServer.ts';
+import { UserProfile } from '../types.ts';
 
 interface AuthModalProps {
   onClose: () => void;
-  initialMode?: 'login' | 'signup';
+  initialMode?: 'login' | 'signup' | 'verify_email';
+  userProfile?: UserProfile | null;
 }
 
 const getPasswordStrength = (password: string): { score: number; label: string; color: string } => {
@@ -25,15 +27,16 @@ const getPasswordStrength = (password: string): { score: number; label: string; 
   return { score: 5, label: 'Excellent', color: 'bg-emerald-400' };
 };
 
-const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' }) => {
-  const [isLogin, setIsLogin] = useState(initialMode === 'login');
+const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', userProfile }) => {
+  const [mode, setMode] = useState<'login' | 'signup' | 'verify_email'>(initialMode);
+  const isLogin = mode === 'login';
   const [identifier, setIdentifier] = useState('');
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [regNo, setRegNo] = useState('');
+  const [email, setEmail] = useState(userProfile?.email || '');
+  const [username, setUsername] = useState(userProfile?.username || '');
+  const [regNo, setRegNo] = useState(userProfile?.registration_number || '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,16 +46,21 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
   const [otpValue, setOtpValue] = useState('');
   const [isClosing, setIsClosing] = useState(false);
   const [emailError, setEmailError] = useState(false);
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    setIsLogin(initialMode === 'login');
+    setMode(initialMode);
     setStep('form');
     setError(null);
     setEmailError(false);
-  }, [initialMode]);
+    if (initialMode === 'verify_email' && userProfile) {
+      setEmail(userProfile.email);
+      setUsername(userProfile.username);
+    }
+  }, [initialMode, userProfile]);
 
   // Body scroll lock
   useEffect(() => {
@@ -63,11 +71,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
   // Escape key handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't allow closing with escape if verification is mandatory
+      if (mode === 'verify_email') return;
       if (e.key === 'Escape' && !loading) handleClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [loading]);
+  }, [loading, mode]);
 
   // Focus trap
   useEffect(() => {
@@ -98,15 +108,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
     modal.addEventListener('keydown', handleTab);
     firstFocusable?.focus();
     return () => modal.removeEventListener('keydown', handleTab);
-  }, [isLogin]);
+  }, [mode]);
 
   const handleClose = () => {
+    if (mode === 'verify_email') return; // Cannot close mandatory verification
     setIsClosing(true);
     setTimeout(() => onClose(), 250);
   };
 
   useEffect(() => {
-    if (!isLogin && username.length >= 3) {
+    if (mode === 'signup' && username.length >= 3) {
       const timer = setTimeout(async () => {
         setUsernameStatus('checking');
         try {
@@ -120,7 +131,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
     } else {
       setUsernameStatus('idle');
     }
-  }, [username, isLogin]);
+  }, [username, mode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,10 +147,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
     setEmailError(false);
 
     try {
-      if (isLogin) {
+      if (mode === 'login') {
         if (!identifier.trim()) throw new Error("Email or Username required.");
         if (!password.trim()) throw new Error("Password required.");
-
 
         if (identifier.includes('@') && !validateEmail(identifier.trim())) {
           setEmailError(true);
@@ -149,10 +159,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
         const result = await NexusServer.signIn(identifier, password);
         if (result.error) throw result.error;
 
-        // Success: Close modal
         handleClose();
-      } else {
-        // Multi-Step Registration with OTP
+      } else if (mode === 'signup') {
         if (step === 'form') {
           if (!email.trim()) throw new Error("Email is required.");
           if (!validateEmail(email.trim())) {
@@ -164,43 +172,80 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
           if (usernameStatus === 'taken') throw new Error("This username is already claimed.");
           if (password.length < 6) throw new Error("Password must be at least 6 characters.");
 
-          // 1. Send OTP via Brevo API
           const response = await fetch('/api/send-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email.toLowerCase().trim(), username })
+            body: JSON.stringify({ email: email.toLowerCase().trim(), username, type: 'signup' })
           });
 
           const data = await response.json();
           if (!response.ok) throw new Error(data.error || "Failed to dispatch verification code.");
-
-          // 2. Move to OTP step
           setStep('otp');
         } else {
-          // Verify OTP and then Sign Up
           if (otpValue.length !== 6) throw new Error("6-digit verification code is required.");
 
-          // 1. Verify OTP
           const verifyResponse = await fetch('/api/verify-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email.toLowerCase().trim(), otp: otpValue })
+            body: JSON.stringify({ email: email.toLowerCase().trim(), otp: otpValue, type: 'signup' })
           });
 
           const verifyData = await verifyResponse.json();
           if (!verifyResponse.ok) throw new Error(verifyData.error || "Verification failed. Check the code.");
 
-          // 2. Proceed with signup in Supabase
           const result = await NexusServer.signUp(email, password, username, regNo);
           if (result.error) throw result.error;
 
-          // Final Success
           handleClose();
+        }
+      } else if (mode === 'verify_email' && userProfile) {
+        if (step === 'form') {
+          if (!email.trim() || !validateEmail(email.trim())) {
+            setEmailError(true);
+            throw new Error("Please enter a valid email address.");
+          }
+
+          const isEmailChanged = email.toLowerCase().trim() !== userProfile.email.toLowerCase().trim();
+          
+          const response = await fetch('/api/send-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              email: email.toLowerCase().trim(), 
+              username: userProfile.username, 
+              type: isEmailChanged ? 'email_update' : 'signup' // Use email_update if changed
+            })
+          });
+
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || "Failed to dispatch verification code.");
+          setStep('otp');
+        } else {
+          if (otpValue.length !== 6) throw new Error("6-digit verification code is required.");
+
+          const isEmailChanged = email.toLowerCase().trim() !== userProfile.email.toLowerCase().trim();
+
+          const verifyResponse = await fetch('/api/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              email: email.toLowerCase().trim(), 
+              otp: otpValue, 
+              type: isEmailChanged ? 'email_update' : 'signup',
+              oldEmail: isEmailChanged ? userProfile.email : undefined
+            })
+          });
+
+          const verifyData = await verifyResponse.json();
+          if (!verifyResponse.ok) throw new Error(verifyData.error || "Verification failed. Check the code.");
+
+          // Force reload profile to reflect changes
+          window.location.reload();
         }
       }
     } catch (err: any) {
       console.error("Auth Failure:", err);
-      setError(err.message || "Authentication protocol failed. Check your network or identity parameters.");
+      setError(err.message || "Authentication protocol failed.");
     } finally {
       setLoading(false);
     }
@@ -249,21 +294,30 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
           </button>
 
-          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-600/10 rounded-[20px] sm:rounded-[24px] flex items-center justify-center mx-auto mb-3 sm:mb-4 border border-orange-600/20 shadow-[0_0_40px_rgba(234,88,12,0.1)]">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+          <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mx-auto mb-3 sm:mb-4 transition-transform hover:scale-110 active:scale-95 duration-500">
+            <img src="/apple-touch-icon.png" alt="LPU-Nexus Logo" className="w-full h-full object-contain pointer-events-none drop-shadow-[0_0_20px_rgba(234,88,12,0.3)]" />
           </div>
 
           <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white leading-none mb-2">
-            {isLogin ? 'Welcome Back' : 'Join Nexus'}
+            {mode === 'verify_email' ? 'Security Protocol' : isLogin ? 'Welcome Back' : 'Join Nexus'}
           </h3>
           <p className="text-slate-500 dark:text-white/40 text-[11px] sm:text-xs font-medium flex items-center justify-center gap-2">
             <span className="w-1.5 h-1.5 bg-orange-600 rounded-full shadow-[0_0_10px_rgba(234,88,12,0.5)]" />
-            {isLogin ? 'Sign in to your account' : 'Apply for student access'}
+            {mode === 'verify_email' ? 'Identity verification mandated' : isLogin ? 'Sign in to your account' : 'Apply for student access'}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1 overflow-hidden">
           <div className="p-5 sm:p-6 md:p-8 space-y-5 sm:space-y-6 overflow-y-auto custom-scrollbar flex-1">
+            {mode === 'verify_email' && step === 'form' && (
+              <div className="p-5 bg-orange-500/5 dark:bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-500 rounded-2xl animate-fade-in mb-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider">Mandatory Security Verification</span>
+                </div>
+                <p className="text-[11px] sm:text-xs font-medium opacity-90 leading-relaxed"> For enhanced security, it is mandatory to verify your registered email before accessing the platform features.</p>
+              </div>
+            )}
             {error && (
               <div className="p-5 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl animate-fade-in">
                 <div className="flex items-center gap-2 mb-1">
@@ -321,6 +375,84 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
                       </button>
                     </div>
                   </div>
+                </div>
+              ) : mode === 'verify_email' ? (
+                <div className="space-y-5">
+                   {step === 'form' ? (
+                    <div className="animate-fade-in space-y-5">
+                      <div>
+                        <div className="flex justify-between items-end mb-2.5 ml-1">
+                          <label className="block text-[11px] sm:text-xs font-medium text-slate-400">Registered Email</label>
+                          {!isEditingEmail && (
+                            <button 
+                              type="button" 
+                              onClick={() => setIsEditingEmail(true)}
+                              className="text-[10px] font-bold text-orange-500 hover:text-orange-600 bg-transparent border-none p-0"
+                            >
+                              Edit Email
+                            </button>
+                          )}
+                        </div>
+                        <div className="relative group">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                          <input
+                            type="email" required value={email} 
+                            onChange={e => setEmail(e.target.value)}
+                            disabled={loading || !isEditingEmail}
+                            className={`w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white ${!isEditingEmail ? 'opacity-70 grayscale-[0.5]' : ''} ${
+                              emailError 
+                                ? 'border-red-500/50 ring-4 ring-red-500/5' 
+                                : 'border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
+                            }`}
+                            placeholder="your@email.com"
+                          />
+                        </div>
+                        {isEditingEmail && (
+                          <p className="mt-3 text-[10px] text-slate-400 font-medium leading-relaxed italic ml-1">
+                            * Updating your email will replace your current registered email.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                   ) : (
+                     <div className="space-y-6 animate-fade-in py-4 text-center">
+                      <div className="w-16 h-16 flex items-center justify-center mx-auto mb-6 transition-all duration-700 hover:scale-110 active:scale-90">
+                        <img src="/apple-touch-icon.png" alt="Verification Logo" className="w-full h-full object-contain drop-shadow-[0_0_30px_rgba(234,88,12,0.4)]" />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <h4 className="text-xl font-bold dark:text-white">Verify Identity</h4>
+                        <p className="text-[11px] sm:text-xs text-slate-400 max-w-[240px] mx-auto leading-relaxed">
+                          Enter the code sent to <span className="text-orange-500 font-bold">{email}</span>
+                        </p>
+                      </div>
+
+                      <div className="relative group pt-4">
+                        <input
+                          type="text" required value={otpValue} 
+                          onChange={e => setOtpValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                          disabled={loading}
+                          className="w-full bg-slate-50 dark:bg-[#0a0a0a] px-4 py-5 rounded-2xl text-[28px] font-black tracking-[12px] text-center outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                          placeholder="000000"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-3 pt-2">
+                        <button 
+                          type="button" onClick={handleResendOTP} disabled={loading}
+                          className="text-[11px] font-bold text-orange-500 hover:text-orange-600 transition-colors bg-transparent border-none"
+                        >
+                          Didn't receive the code? Resend
+                        </button>
+                        <button 
+                          type="button" onClick={() => { setStep('form'); setError(null); }}
+                          className="text-[11px] font-medium text-slate-400 hover:text-slate-600 transition-colors bg-transparent border-none"
+                        >
+                          Go back and edit email
+                        </button>
+                      </div>
+                    </div>
+                   )}
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -469,28 +601,30 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
 
           <div className="p-5 sm:p-6 md:p-8 pt-0 md:pt-0">
             <button
-              type="submit" disabled={loading || (!isLogin && usernameStatus === 'taken')}
+              type="submit" disabled={loading || (mode === 'signup' && usernameStatus === 'taken')}
               className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:shadow-[0_20px_40px_-10px_rgba(234,88,12,0.4)] hover:scale-[1.01] text-white py-4 sm:py-5 rounded-[20px] sm:rounded-3xl font-bold text-sm tracking-tight active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3 border-none"
             >
               {loading ? (
                 <div className="w-5 h-5 border-3 border-white/50 border-t-white rounded-full animate-spin" />
-              ) : (isLogin ? 'Sign In' : (step === 'form' ? 'Get Verification Code' : 'Verify & Join Nexus'))}
+              ) : (mode === 'verify_email' ? (step === 'form' ? 'Send Code' : 'Verify & Continue') : isLogin ? 'Sign In' : (step === 'form' ? 'Get Verification Code' : 'Verify & Join Nexus'))}
             </button>
 
-            <button
-              type="button"
-              onClick={() => { 
-                const newMode = !isLogin;
-                setIsLogin(newMode); 
-                setError(null); 
-                setEmailError(false);
-                setPassword(''); 
-                navigate(newMode ? '/login' : '/signup', { replace: true });
-              }}
-              className="w-full text-[11px] sm:text-xs font-medium text-slate-400 hover:text-orange-500 transition-colors py-4 sm:py-6 bg-transparent border-none"
-            >
-              {isLogin ? "New here? Create an account" : "Have an account? Sign in"}
-            </button>
+            {mode !== 'verify_email' && (
+              <button
+                type="button"
+                onClick={() => { 
+                  const newMode = isLogin ? 'signup' : 'login';
+                  setMode(newMode); 
+                  setError(null); 
+                  setEmailError(false);
+                  setPassword(''); 
+                  navigate(newMode === 'login' ? '/login' : '/signup', { replace: true });
+                }}
+                className="w-full text-[11px] sm:text-xs font-medium text-slate-400 hover:text-orange-500 transition-colors py-4 sm:py-6 bg-transparent border-none"
+              >
+                {isLogin ? "New here? Create an account" : "Have an account? Sign in"}
+              </button>
+            )}
           </div>
         </form>
       </div>

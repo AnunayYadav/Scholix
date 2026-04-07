@@ -696,7 +696,8 @@ class NexusServer {
       current_streak: 0,
       longest_streak: 0,
       last_active_date: null,
-      xp_history: []
+      xp_history: [],
+      is_verified: 'yes'
     };
 
     const { data, error } = await client.from('profiles').insert([newProfile]).select().single();

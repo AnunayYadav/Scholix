@@ -420,7 +420,7 @@ const AppContent: React.FC = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'verify_email'>('login');
   const [isClosingAuth, setIsClosingAuth] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isClosingProfile, setIsClosingProfile] = useState(false);
@@ -487,7 +487,13 @@ const AppContent: React.FC = () => {
       const lastPath = localStorage.getItem('last_active_path') || '/';
       navigate(lastPath !== location.pathname ? lastPath : '/', { replace: true });
     }
-  }, [userProfile, location.pathname, navigate]);
+    
+    // Mandatory verification check
+    if (userProfile && (userProfile.is_verified === 'no' || !userProfile.is_verified) && !showAuthModal) {
+      setAuthMode('verify_email');
+      setShowAuthModal(true);
+    }
+  }, [userProfile, location.pathname, navigate, showAuthModal]);
 
   useEffect(() => {
     NexusServer.recordVisit();
@@ -756,7 +762,7 @@ const AppContent: React.FC = () => {
           </div>
         )}
       </main>
-      {showAuthModal && <AuthModal onClose={handleAuthClose} initialMode={authMode} />}
+      {showAuthModal && <AuthModal onClose={handleAuthClose} initialMode={authMode} userProfile={userProfile || undefined} />}
       <CookieBanner />
       {userProfile && <StudyHeartbeat userId={userProfile.id} />}
       <Analytics />

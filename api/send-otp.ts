@@ -71,17 +71,33 @@ export default async function handler(req: any, res: any) {
     }
 
     // 2. Send Email via Brevo
-    const emailTemplate = type === 'login' ? `
-      <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Access Protocol</h1>
-      <p style="color: #64748b; font-size: 14px; margin-bottom: 32px; line-height: 1.6;">
-        Welcome back, cadet. Your secure access code for Nexus is listed below. Use it to finalize your session synchronization.
-      </p>
-    ` : `
-      <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Verification Protocol</h1>
-      <p style="color: #64748b; font-size: 14px; margin-bottom: 32px; line-height: 1.6;">
-        Greetings, cadet. To complete your student join protocol, please use the following access code.
-      </p>
-    `;
+    let emailTemplate = '';
+    let emailSubject = `${otp} is your Nexus Verification Code`;
+
+    if (type === 'login') {
+      emailTemplate = `
+        <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Access Protocol</h1>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 32px; line-height: 1.6;">
+          Welcome back, cadet. Your secure access code for Nexus is listed below. Use it to finalize your session synchronization.
+        </p>
+      `;
+      emailSubject = `${otp} is your Nexus Login Code`;
+    } else if (type === 'email_update') {
+      emailTemplate = `
+        <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Security Update</h1>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 32px; line-height: 1.6;">
+          Cadet, you are updating your primary communication channel. Use the code below to verify your new email address.
+        </p>
+      `;
+      emailSubject = `${otp} is your Nexus Security Code`;
+    } else {
+      emailTemplate = `
+        <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Verification Protocol</h1>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 32px; line-height: 1.6;">
+          Greetings, cadet. To complete your student join protocol, please use the following access code.
+        </p>
+      `;
+    }
 
     const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
@@ -101,7 +117,7 @@ export default async function handler(req: any, res: any) {
             name: username || 'User',
           },
         ],
-        subject: `${otp} is your Nexus ${type === 'login' ? 'Login' : 'Verification'} Code`,
+        subject: emailSubject,
         htmlContent: `
           <html>
             <body style="font-family: 'Inter', Helvetica, sans-serif; background-color: #f8fafc; margin: 0; padding: 40px;">

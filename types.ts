@@ -104,6 +104,7 @@ export interface UserProfile {
   xp_history?: any[];
   unlocked_frames?: string[];
   avatar_frame?: string;
+  is_verified?: 'yes' | 'no';
 }
 
 export interface TimetableSlot {
