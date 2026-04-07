@@ -47,6 +47,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
   const [isClosing, setIsClosing] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
   const modalRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -140,6 +141,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
     }
   }, [username, mode]);
 
+  // Resend OTP Timer Logic - decrements every second
+  useEffect(() => {
+    let interval: any;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
@@ -188,6 +200,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
           const data = await response.json();
           if (!response.ok) throw new Error(data.error || "Failed to dispatch verification code.");
           setStep('otp');
+          setResendTimer(60);
         } else {
           if (otpValue.length !== 6) throw new Error("6-digit verification code is required.");
 
@@ -227,6 +240,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
           const data = await response.json();
           if (!response.ok) throw new Error(data.error || "Failed to dispatch verification code.");
           setStep('otp');
+          setResendTimer(60);
         } else {
           if (otpValue.length !== 6) throw new Error("6-digit verification code is required.");
 
@@ -275,6 +289,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Failed to resend verification code.");
       
+      setResendTimer(60);
       // Success visual feedback could be added here
       setError(null);
     } catch (err: any) {
@@ -483,10 +498,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
 
                       <div className="flex flex-col gap-4 pt-4">
                         <button 
-                          type="button" onClick={handleResendOTP} disabled={loading}
-                          className="text-[11px] font-black uppercase tracking-widest text-orange-500 hover:text-orange-600 transition-all bg-transparent border-none py-2 hover:scale-105 active:scale-95"
+                          type="button" 
+                          onClick={handleResendOTP} 
+                          disabled={loading || resendTimer > 0}
+                          className="text-[11px] font-black uppercase tracking-widest text-orange-500 hover:text-orange-600 transition-all bg-transparent border-none py-2 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
                         >
-                          Resend Code
+                          {resendTimer > 0 ? `Resend Code in ${resendTimer}s` : 'Resend Code'}
                         </button>
                         <button 
                           type="button" onClick={() => { setStep('form'); setError(null); }}
@@ -624,10 +641,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
 
                       <div className="flex flex-col gap-3 pt-2">
                         <button 
-                          type="button" onClick={handleResendOTP} disabled={loading}
-                          className="text-[11px] font-bold text-orange-500 hover:text-orange-600 transition-colors bg-transparent border-none"
+                          type="button" 
+                          onClick={handleResendOTP} 
+                          disabled={loading || resendTimer > 0}
+                          className="text-[11px] font-bold text-orange-500 hover:text-orange-600 transition-colors bg-transparent border-none disabled:opacity-50"
                         >
-                          Didn't receive the code? Resend
+                          {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Didn't receive the code? Resend"}
                         </button>
                         <button 
                           type="button" onClick={() => { setStep('form'); setError(null); }}

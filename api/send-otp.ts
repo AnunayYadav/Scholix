@@ -43,6 +43,31 @@ export default async function handler(req: any, res: any) {
       }
     }
 
+    // 0.5 Rate Limit Check: Prevent spamming multiple OTP calls
+    const rateLimitResponse = await fetch(`${supabaseUrl}/rest/v1/registration_otps?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=created_at&order=created_at.desc&limit=1`, {
+      method: 'GET',
+      headers: {
+        'apikey': supabaseServiceKey,
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+      }
+    });
+
+    if (rateLimitResponse.ok) {
+      const existingOtps = await rateLimitResponse.json();
+      if (existingOtps && existingOtps.length > 0) {
+        const lastCreatedAt = new Date(existingOtps[0].created_at).getTime();
+        const now = Date.now();
+        const secondsElapsed = (now - lastCreatedAt) / 1000;
+        
+        if (secondsElapsed < 60) {
+          const waitSeconds = Math.ceil(60 - secondsElapsed);
+          return res.status(429).json({ 
+            error: `Transmission cooling down. Please wait ${waitSeconds}s before requesting a new code.` 
+          });
+        }
+      }
+    }
+
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
