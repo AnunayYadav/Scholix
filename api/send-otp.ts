@@ -4,7 +4,7 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email, username } = req.body || {};
+  const { email, username, type = 'signup' } = req.body || {};
 
   if (!email || !email.includes('@')) {
     return res.status(400).json({ error: 'Valid email is required.' });
@@ -27,11 +27,26 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({ error: 'Database configuration missing on server.' });
   }
 
-  // Generate 6-digit OTP
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
-
   try {
+    // 0. If it's a login, check if the user exists
+    if (type === 'login') {
+      const checkResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=id`, {
+        method: 'GET',
+        headers: {
+          'apikey': supabaseServiceKey,
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+        }
+      });
+      const userData = await checkResponse.json();
+      if (!checkResponse.ok || !userData || userData.length === 0) {
+        return res.status(404).json({ error: 'No account found with this email. Please join Nexus first.' });
+      }
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+
     // 1. Store/Update OTP in Supabase
     const dbResponse = await fetch(`${supabaseUrl}/rest/v1/registration_otps`, {
       method: 'POST',
@@ -56,6 +71,18 @@ export default async function handler(req: any, res: any) {
     }
 
     // 2. Send Email via Brevo
+    const emailTemplate = type === 'login' ? `
+      <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Access Protocol</h1>
+      <p style="color: #64748b; font-size: 14px; margin-bottom: 32px; line-height: 1.6;">
+        Welcome back, cadet. Your secure access code for Nexus is listed below. Use it to finalize your session synchronization.
+      </p>
+    ` : `
+      <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Verification Protocol</h1>
+      <p style="color: #64748b; font-size: 14px; margin-bottom: 32px; line-height: 1.6;">
+        Greetings, cadet. To complete your student join protocol, please use the following access code.
+      </p>
+    `;
+
     const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
@@ -74,7 +101,7 @@ export default async function handler(req: any, res: any) {
             name: username || 'User',
           },
         ],
-        subject: `${otp} is your Nexus Verification Code`,
+        subject: `${otp} is your Nexus ${type === 'login' ? 'Login' : 'Verification'} Code`,
         htmlContent: `
           <html>
             <body style="font-family: 'Inter', Helvetica, sans-serif; background-color: #f8fafc; margin: 0; padding: 40px;">
@@ -86,10 +113,7 @@ export default async function handler(req: any, res: any) {
                   <span style="font-size: 20px; font-weight: 800; color: #0f172a; margin-left: 12px; vertical-align: middle;">LPU Nexus</span>
                 </div>
                 
-                <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Verification Protocol</h1>
-                <p style="color: #64748b; font-size: 14px; margin-bottom: 32px; line-height: 1.6;">
-                  Greetings, cadet. To complete your student synchronization, please use the following access code.
-                </p>
+                ${emailTemplate}
                 
                 <div style="background-color: #fff7ed; padding: 24px; border-radius: 16px; text-align: center; border: 1px dashed #fdba74;">
                   <span style="font-size: 42px; font-weight: 900; color: #ea580c; letter-spacing: 8px; font-family: monospace;">${otp}</span>

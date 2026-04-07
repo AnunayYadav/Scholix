@@ -578,6 +578,13 @@ class NexusServer {
     };
   }
 
+  static async resolveEmailByUsername(username: string): Promise<string | null> {
+    const client = getSupabase();
+    if (!client) return null;
+    const { data } = await client.from('profiles').select('email').eq('username', username.toLowerCase().trim()).maybeSingle();
+    return data?.email || null;
+  }
+
   static async signIn(identifier: string, pass: string) {
     const client = getSupabase();
     if (!client) throw new Error("Registry is offline.");
@@ -587,9 +594,8 @@ class NexusServer {
     }
     let email = sanitizeInput(identifier.trim(), 100);
     if (!identifier.includes('@')) {
-      const { data } = await client.from('profiles').select('email').eq('username', identifier.toLowerCase().trim()).maybeSingle();
-      if (data?.email) email = data.email;
-      else throw new Error("No Verto found with that username.");
+      email = await this.resolveEmailByUsername(identifier) || email;
+      if (!email.includes('@')) throw new Error("No Verto found with that username.");
     }
     const authResponse = await client.auth.signInWithPassword({ email, password: pass });
     if (authResponse.error) throw authResponse.error;
@@ -640,6 +646,12 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return { data: { session: null }, error: new Error("Offline") };
     return await client.auth.getSession();
+  }
+
+  static async setSession(access_token: string, refresh_token: string) {
+    const client = getSupabase();
+    if (!client) throw new Error("Registry is offline.");
+    return await client.auth.setSession({ access_token, refresh_token });
   }
 
   static onAuthStateChange(callback: (user: any) => void) {

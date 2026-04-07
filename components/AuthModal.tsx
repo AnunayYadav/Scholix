@@ -28,6 +28,9 @@ const getPasswordStrength = (password: string): { score: number; label: string; 
 const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' }) => {
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const [identifier, setIdentifier] = useState('');
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [regNo, setRegNo] = useState('');
@@ -39,6 +42,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
   const [step, setStep] = useState<'form' | 'otp'>('form');
   const [otpValue, setOtpValue] = useState('');
   const [isClosing, setIsClosing] = useState(false);
+  const [emailError, setEmailError] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,6 +50,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
   useEffect(() => {
     setIsLogin(initialMode === 'login');
     setStep('form');
+    setError(null);
+    setEmailError(false);
   }, [initialMode]);
 
   // Body scroll lock
@@ -127,11 +133,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
 
     setLoading(true);
     setError(null);
+    setEmailError(false);
 
     try {
       if (isLogin) {
         if (!identifier.trim()) throw new Error("Email or Username required.");
         if (!password.trim()) throw new Error("Password required.");
+
+
+        if (identifier.includes('@') && !validateEmail(identifier.trim())) {
+          setEmailError(true);
+          throw new Error("Please enter a valid email address.");
+        }
 
         const result = await NexusServer.signIn(identifier, password);
         if (result.error) throw result.error;
@@ -142,6 +155,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
         // Multi-Step Registration with OTP
         if (step === 'form') {
           if (!email.trim()) throw new Error("Email is required.");
+          if (!validateEmail(email.trim())) {
+            setEmailError(true);
+            throw new Error("Please enter a valid email address.");
+          }
           if (!regNo.trim()) throw new Error("Registration number is required.");
           if (username.length < 3) throw new Error("Username must be at least 3 characters.");
           if (usernameStatus === 'taken') throw new Error("This username is already claimed.");
@@ -265,9 +282,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
                     <div className="relative group">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                       <input
-                        type="text" required value={identifier} onChange={e => setIdentifier(e.target.value)}
+                        type="text" required value={identifier} 
+                        onChange={e => {
+                          setIdentifier(e.target.value);
+                          if (emailError) setEmailError(false);
+                        }}
                         disabled={loading}
-                        className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                        className={`w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white disabled:opacity-50 ${
+                          emailError 
+                            ? 'border-red-500/50 ring-4 ring-red-500/5' 
+                            : 'border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
+                        }`}
                         placeholder="Enter email or username"
                       />
                     </div>
@@ -326,9 +351,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
                         <div className="relative group">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
                           <input
-                            type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                            type="email" required value={email} 
+                            onChange={e => {
+                              setEmail(e.target.value);
+                              if (emailError) setEmailError(false);
+                            }}
                             disabled={loading}
-                            className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                            className={`w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white disabled:opacity-50 ${
+                              emailError 
+                                ? 'border-red-500/50 ring-4 ring-red-500/5' 
+                                : 'border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
+                            }`}
                             placeholder="Enter your email"
                           />
                         </div>
@@ -450,6 +483,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login' })
                 const newMode = !isLogin;
                 setIsLogin(newMode); 
                 setError(null); 
+                setEmailError(false);
                 setPassword(''); 
                 navigate(newMode ? '/login' : '/signup', { replace: true });
               }}

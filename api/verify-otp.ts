@@ -4,7 +4,7 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email, otp } = req.body || {};
+  const { email, otp, type = 'signup' } = req.body || {};
 
   if (!email || !otp) {
     return res.status(400).json({ error: 'Email and OTP are required.' });
@@ -53,7 +53,7 @@ export default async function handler(req: any, res: any) {
       return res.status(410).json({ error: 'Verification code expired. Please request a new one.' });
     }
 
-    // 3. Optional: Clear the record on success to prevent reuse
+    // 3. Clear the record on success to prevent reuse
     await fetch(`${supabaseUrl}/rest/v1/registration_otps?email=eq.${encodeURIComponent(email.toLowerCase().trim())}`, {
       method: 'DELETE',
       headers: {
@@ -61,6 +61,36 @@ export default async function handler(req: any, res: any) {
         'Authorization': `Bearer ${supabaseServiceKey}`,
       },
     });
+
+    // 4. If it's a login, generate a Supabase session
+    if (type === 'login') {
+      // Use admin API to generate a magic link which gives us a session
+      const authResponse = await fetch(`${supabaseUrl}/auth/v1/admin/generate_link`, {
+        method: 'POST',
+        headers: {
+          'apikey': supabaseServiceKey,
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'magiclink',
+          email: email.toLowerCase().trim(),
+        })
+      });
+
+      const authData = await authResponse.json();
+      if (!authResponse.ok) {
+        console.error('Magic Link Error:', authData);
+        return res.status(500).json({ error: 'Identity verified, but session generation failed. Try standard login.' });
+      }
+
+      // Return the magic link data (contains action_link which has access_token/refresh_token)
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Identity verified. Syncing session...',
+        session: authData
+      });
+    }
 
     return res.status(200).json({ success: true, message: 'Identity verified successfully.' });
   } catch (error: any) {
