@@ -42,7 +42,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
-  const [step, setStep] = useState<'form' | 'otp'>('form');
+  const [step, setStep] = useState<'form' | 'otp' | 'verified'>('form');
   const [otpValue, setOtpValue] = useState('');
   const [isClosing, setIsClosing] = useState(false);
   const [emailError, setEmailError] = useState(false);
@@ -239,15 +239,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
               email: email.toLowerCase().trim(), 
               otp: otpValue, 
               type: isEmailChanged ? 'email_update' : 'signup',
-              oldEmail: isEmailChanged ? userProfile.email : undefined
+              oldEmail: isEmailChanged ? userProfile.email : undefined,
+              userId: userProfile.id // Pass the specific user ID for guaranteed match
             })
           });
 
           const verifyData = await verifyResponse.json();
           if (!verifyResponse.ok) throw new Error(verifyData.error || "Verification failed. Check the code.");
 
-          // Force reload profile to reflect changes
-          window.location.reload();
+          // Show success state before reload
+          setStep('verified');
+          setTimeout(() => {
+            window.location.reload();
+          }, 1200);
         }
       }
     } catch (err: any) {
@@ -432,8 +436,29 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                         )}
                       </div>
                     </div>
-                   ) : (
-                     <div className="space-y-6 animate-fade-in py-4 text-center">
+                    ) : step === 'verified' ? (
+                      <div className="flex flex-col items-center justify-center space-y-6 py-8 animate-in fade-in zoom-in duration-500">
+                        <div className="relative w-24 h-24 flex items-center justify-center">
+                          <div className="absolute inset-0 bg-green-500/20 rounded-full animate-ping" />
+                          <div className="relative w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" className="w-10 h-10 animate-check-draw">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="text-center space-y-2">
+                          <h4 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Access Granted</h4>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium max-w-[240px] mx-auto leading-relaxed">
+                            Your identity has been authenticated. Core Nexus systems are now initializing.
+                          </p>
+                        </div>
+                        <div className="w-48 h-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                          <div className="h-full bg-emerald-500 animate-progress-fast" />
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest animate-pulse">Synchronizing Database...</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-6 animate-fade-in py-4 text-center">
                       <div className="w-20 h-20 flex items-center justify-center mx-auto mb-8 transition-all duration-700 animate-pulse-glow">
                         <img src="/apple-touch-icon.png" alt="Verification Logo" className="w-full h-full object-contain drop-shadow-[0_0_35px_rgba(234,88,12,0.5)]" />
                       </div>

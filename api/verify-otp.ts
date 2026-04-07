@@ -4,7 +4,7 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email, otp, type = 'signup', oldEmail } = req.body || {};
+  const { email, otp, type = 'signup', oldEmail, userId: passedUserId } = req.body || {};
 
   if (!email || !otp) {
     return res.status(400).json({ error: 'Email and OTP are required.' });
@@ -54,48 +54,80 @@ export default async function handler(req: any, res: any) {
     }
 
     // 3. Handle data updates
-    let userId: string | null = null;
+    let userId: string | null = passedUserId || null;
+    const searchEmail = (type === 'email_update' && oldEmail) ? oldEmail : email;
     
-    // Attempt to find user to get their ID (needed for email_update)
-    try {
-      const searchEmail = (type === 'email_update' && oldEmail) ? oldEmail : email;
-      const userQuery = await fetch(`${supabaseUrl}/auth/v1/admin/users?email=eq.${encodeURIComponent(searchEmail.toLowerCase().trim())}`, {
-        headers: {
-          'apikey': supabaseServiceKey,
-          'Authorization': `Bearer ${supabaseServiceKey}`,
+    // If no userId passed (e.g. signup flow), attempt to resolve it
+    if (!userId) {
+      try {
+        console.log(`Attempting to resolve userId for email: ${searchEmail}`);
+        // Use the standard profiles table to find the ID if possible
+        // Try searching with case-insensitive ilike if available, or fetch all then match
+        const profileQuery = await fetch(`${supabaseUrl}/rest/v1/profiles?email=ilike.${encodeURIComponent(searchEmail.trim())}&select=id`, {
+          headers: {
+            'apikey': supabaseServiceKey,
+            'Authorization': `Bearer ${supabaseServiceKey}`,
+          }
+        });
+        const profileData = await profileQuery.json();
+        if (profileData && profileData.length > 0) {
+          userId = profileData[0].id;
+          console.log(`Resolved userId from profiles: ${userId}`);
+        } else {
+          // Fallback to auth admin if not in profiles
+          const userQuery = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+            headers: {
+              'apikey': supabaseServiceKey,
+              'Authorization': `Bearer ${supabaseServiceKey}`,
+            }
+          });
+          const allUsersData = await userQuery.json();
+          if (allUsersData && allUsersData.users) {
+            const user = allUsersData.users.find((u: any) => u.email?.toLowerCase() === searchEmail.toLowerCase().trim());
+            if (user) {
+              userId = user.id;
+              console.log(`Resolved userId from auth admin: ${userId}`);
+            }
+          }
         }
-      });
-      const userData = await userQuery.json();
-      if (userData && userData.users && userData.users.length > 0) {
-        userId = userData.users[0].id;
+      } catch (e) {
+        console.error('Failed to resolve userId:', e);
       }
-    } catch (e) {
-      console.error('Failed to resolve userId:', e);
+    } else {
+      console.log(`Using passed userId: ${userId}`);
     }
 
     // 4. Update profile to mark as verified
-    try {
-      const updateData: any = { is_verified: 'yes' };
-      if (type === 'email_update') {
-        updateData.email = email.toLowerCase().trim();
-      }
+    const updateData: any = { is_verified: 'yes' };
+    if (type === 'email_update') {
+      updateData.email = email.toLowerCase().trim();
+    }
 
-      const profileUpdateUrl = userId 
-        ? `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`
-        : `${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email.toLowerCase().trim())}`;
+    // Use ID if we have it, otherwise fallback to the email used to find the profile
+    const profileUpdateUrl = userId 
+      ? `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`
+      : `${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(searchEmail.toLowerCase().trim())}`;
 
-      await fetch(profileUpdateUrl, {
-        method: 'PATCH',
-        headers: {
-          'apikey': supabaseServiceKey,
-          'Authorization': `Bearer ${supabaseServiceKey}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify(updateData)
-      });
-    } catch (e) {
-      console.error('Failed to update profile:', e);
+    const updateResponse = await fetch(profileUpdateUrl, {
+      method: 'PATCH',
+      headers: {
+        'apikey': supabaseServiceKey,
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation' // Return updated data to confirm
+      },
+      body: JSON.stringify(updateData)
+    });
+
+    const updateResult = await updateResponse.json();
+    if (!updateResponse.ok) {
+      console.error('Profile update failed:', updateResult);
+      return res.status(500).json({ error: 'Failed to update verification status in database.' });
+    }
+
+    if (updateResult.length === 0) {
+       console.error('Profile not found for update:', profileUpdateUrl);
+       return res.status(404).json({ error: 'Profile record not found to update.' });
     }
 
     // 5. Handle auth email update
