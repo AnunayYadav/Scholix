@@ -51,7 +51,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Use a ref to track if we've already initialized for a specific user/mode to prevent focus-driven resets
+  const lastInitKey = useRef<string>('');
+
   useEffect(() => {
+    const initKey = `${initialMode}_${userProfile?.id || 'none'}`;
+    if (lastInitKey.current === initKey) return;
+    
+    lastInitKey.current = initKey;
     setMode(initialMode);
     setStep('form');
     setError(null);
@@ -60,7 +67,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
       setEmail(userProfile.email);
       setUsername(userProfile.username);
     }
-  }, [initialMode, userProfile]);
+  }, [initialMode, userProfile?.id]); // Only re-init if the mode or user ID actually changes
 
   // Body scroll lock
   useEffect(() => {
@@ -296,9 +303,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
             </button>
           )}
 
-          <div className={`w-12 h-12 flex items-center justify-center mx-auto mb-4 transition-all duration-700 ${mode === 'verify_email' ? 'animate-pulse-glow hover:scale-110' : 'hover:scale-110 active:scale-95'}`}>
-            <img src="/apple-touch-icon.png" alt="LPU-Nexus Logo" className="w-full h-full object-contain pointer-events-none drop-shadow-[0_0_25px_rgba(234,88,12,0.4)]" />
-          </div>
+          {step !== 'otp' && (
+            <div className={`w-12 h-12 flex items-center justify-center mx-auto mb-4 transition-all duration-700 ${mode === 'verify_email' ? 'animate-pulse-glow hover:scale-110' : 'hover:scale-110 active:scale-95'}`}>
+              <img src="/apple-touch-icon.png" alt="LPU-Nexus Logo" className="w-full h-full object-contain pointer-events-none drop-shadow-[0_0_25px_rgba(234,88,12,0.4)]" />
+            </div>
+          )}
 
           <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none mb-2">
             {mode === 'verify_email' ? 'Security Protocol' : isLogin ? 'Welcome Back' : 'Join Nexus'}
@@ -567,14 +576,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                     </div>
                   ) : (
                     <div className="space-y-6 animate-fade-in py-4 text-center">
-                      <div className="w-16 h-16 bg-orange-600/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-orange-600/20">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-8 h-8 text-orange-600"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                      <div className="w-20 h-20 flex items-center justify-center mx-auto mb-8 transition-all duration-700 animate-pulse-glow">
+                        <img src="/apple-touch-icon.png" alt="Verification Logo" className="w-full h-full object-contain drop-shadow-[0_0_35px_rgba(234,88,12,0.5)]" />
                       </div>
                       
-                      <div className="space-y-2">
-                        <h4 className="text-xl font-bold dark:text-white">Verify Your Identity</h4>
-                        <p className="text-[11px] sm:text-xs text-slate-400 max-w-[240px] mx-auto leading-relaxed">
-                          Enter the 6-digit synchronization code sent to <span className="text-orange-500 font-bold">{email}</span>
+                      <div className="space-y-3">
+                        <h4 className="text-2xl font-black dark:text-white tracking-tight">Identity Sync</h4>
+                        <p className="text-xs text-slate-400 max-w-[260px] mx-auto leading-relaxed font-medium">
+                          We've dispatched a secure synchronization code to <span className="text-orange-500 font-bold block mt-1">{email}</span>
                         </p>
                       </div>
 
