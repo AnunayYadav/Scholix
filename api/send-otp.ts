@@ -107,10 +107,8 @@ export default async function handler(req: any, res: any) {
             <body style="font-family: 'Inter', Helvetica, sans-serif; background-color: #f8fafc; margin: 0; padding: 40px;">
               <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; padding: 40px; border: 1px solid #e2e8f0; border-bottom: 4px solid #ea580c;">
                 <div style="margin-bottom: 30px;">
-                  <div style="width: 40px; height: 40px; background-color: #ea580c; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; display: inline-flex; vertical-align: middle;">
-                    🛰️
-                  </div>
-                  <span style="font-size: 20px; font-weight: 800; color: #0f172a; margin-left: 12px; vertical-align: middle;">LPU Nexus</span>
+                  <img src="https://lpunexus.vercel.app/apple-touch-icon.png" width="44" height="44" style="width: 44px; height: 44px; border-radius: 10px; vertical-align: middle; display: inline-block;" alt="Nexus Logo">
+                  <span style="font-size: 22px; font-weight: 800; color: #0f172a; margin-left: 12px; vertical-align: middle; letter-spacing: -0.5px;">LPU Nexus</span>
                 </div>
                 
                 ${emailTemplate}
