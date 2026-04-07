@@ -286,23 +286,25 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
       style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
       onClick={(e) => { if (e.target === e.currentTarget && !loading) handleClose(); }}
     >
-      <div ref={modalRef} className={`nexus-modal w-full max-w-md mx-4 overflow-hidden ${isClosing ? 'closing' : ''}`}>
+      <div ref={modalRef} className={`nexus-modal w-full max-w-md mx-4 overflow-hidden ${isClosing ? 'closing' : ''} ${mode === 'verify_email' ? 'ring-2 ring-orange-500/20' : ''}`}>
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-600/10 blur-[80px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
 
         <div className="bg-white dark:bg-[#0a0a0a] p-6 sm:p-8 md:p-10 text-center relative border-b border-slate-100 dark:border-white/5">
-          <button onClick={handleClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-orange-500 transition-colors border-none bg-transparent active:scale-95">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
-          </button>
+          {mode !== 'verify_email' && (
+            <button onClick={handleClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-orange-500 transition-colors border-none bg-transparent active:scale-95">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            </button>
+          )}
 
-          <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mx-auto mb-3 sm:mb-4 transition-transform hover:scale-110 active:scale-95 duration-500">
-            <img src="/apple-touch-icon.png" alt="LPU-Nexus Logo" className="w-full h-full object-contain pointer-events-none drop-shadow-[0_0_20px_rgba(234,88,12,0.3)]" />
+          <div className={`w-12 h-12 flex items-center justify-center mx-auto mb-4 transition-all duration-700 ${mode === 'verify_email' ? 'animate-pulse-glow hover:scale-110' : 'hover:scale-110 active:scale-95'}`}>
+            <img src="/apple-touch-icon.png" alt="LPU-Nexus Logo" className="w-full h-full object-contain pointer-events-none drop-shadow-[0_0_25px_rgba(234,88,12,0.4)]" />
           </div>
 
-          <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white leading-none mb-2">
+          <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none mb-2">
             {mode === 'verify_email' ? 'Security Protocol' : isLogin ? 'Welcome Back' : 'Join Nexus'}
           </h3>
-          <p className="text-slate-500 dark:text-white/40 text-[11px] sm:text-xs font-medium flex items-center justify-center gap-2">
-            <span className="w-1.5 h-1.5 bg-orange-600 rounded-full shadow-[0_0_10px_rgba(234,88,12,0.5)]" />
+          <p className="text-slate-500 dark:text-white/40 text-[11px] sm:text-xs font-bold flex items-center justify-center gap-2 uppercase tracking-[0.1em]">
+            <span className={`w-1.5 h-1.5 rounded-full shadow-[0_0_12px_rgba(234,88,12,0.6)] ${mode === 'verify_email' ? 'bg-orange-500 animate-pulse' : 'bg-orange-600'}`} />
             {mode === 'verify_email' ? 'Identity verification mandated' : isLogin ? 'Sign in to your account' : 'Apply for student access'}
           </p>
         </div>
@@ -310,12 +312,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
         <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1 overflow-hidden">
           <div className="p-5 sm:p-6 md:p-8 space-y-5 sm:space-y-6 overflow-y-auto custom-scrollbar flex-1">
             {mode === 'verify_email' && step === 'form' && (
-              <div className="p-5 bg-orange-500/5 dark:bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-500 rounded-2xl animate-fade-in mb-2">
-                <div className="flex items-center gap-2 mb-1">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider">Mandatory Security Verification</span>
+              <div className="relative p-6 overflow-hidden rounded-2xl group transition-all duration-500 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(234,88,12,0.05)] border border-orange-500/10 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] mb-2">
+                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-orange-400 to-red-600" />
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-orange-600 dark:text-orange-500"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-500 block mb-1">Authorization Required</span>
+                    <p className="text-xs text-slate-600 dark:text-white/60 font-medium leading-relaxed">
+                      For enhanced platform security, cadets must verify their registered email address to unlock core features.
+                    </p>
+                  </div>
                 </div>
-                <p className="text-[11px] sm:text-xs font-medium opacity-90 leading-relaxed"> For enhanced security, it is mandatory to verify your registered email before accessing the platform features.</p>
               </div>
             )}
             {error && (
@@ -416,39 +425,40 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                     </div>
                    ) : (
                      <div className="space-y-6 animate-fade-in py-4 text-center">
-                      <div className="w-16 h-16 flex items-center justify-center mx-auto mb-6 transition-all duration-700 hover:scale-110 active:scale-90">
-                        <img src="/apple-touch-icon.png" alt="Verification Logo" className="w-full h-full object-contain drop-shadow-[0_0_30px_rgba(234,88,12,0.4)]" />
+                      <div className="w-20 h-20 flex items-center justify-center mx-auto mb-8 transition-all duration-700 animate-pulse-glow">
+                        <img src="/apple-touch-icon.png" alt="Verification Logo" className="w-full h-full object-contain drop-shadow-[0_0_35px_rgba(234,88,12,0.5)]" />
                       </div>
                       
-                      <div className="space-y-2">
-                        <h4 className="text-xl font-bold dark:text-white">Verify Identity</h4>
-                        <p className="text-[11px] sm:text-xs text-slate-400 max-w-[240px] mx-auto leading-relaxed">
-                          Enter the code sent to <span className="text-orange-500 font-bold">{email}</span>
+                      <div className="space-y-3">
+                        <h4 className="text-2xl font-black dark:text-white tracking-tight">Identity Sync</h4>
+                        <p className="text-xs text-slate-400 max-w-[260px] mx-auto leading-relaxed font-medium">
+                          We've dispatched a secure access code to <span className="text-orange-500 font-bold block mt-1">{email}</span>
                         </p>
                       </div>
 
-                      <div className="relative group pt-4">
+                      <div className="relative group pt-6">
                         <input
                           type="text" required value={otpValue} 
                           onChange={e => setOtpValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                           disabled={loading}
-                          className="w-full bg-slate-50 dark:bg-[#0a0a0a] px-4 py-5 rounded-2xl text-[28px] font-black tracking-[12px] text-center outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                          className="w-full bg-slate-50/50 dark:bg-white/[0.02] px-4 py-6 rounded-[24px] text-[32px] font-black tracking-[0.4em] text-center outline-none border border-slate-200 dark:border-white/5 focus:border-orange-500/50 focus:ring-8 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50 shadow-inner"
                           placeholder="000000"
                         />
+                        <div className="absolute inset-0 rounded-[24px] pointer-events-none border border-orange-500/0 group-focus-within:border-orange-500/20 transition-all duration-500" />
                       </div>
 
-                      <div className="flex flex-col gap-3 pt-2">
+                      <div className="flex flex-col gap-4 pt-4">
                         <button 
                           type="button" onClick={handleResendOTP} disabled={loading}
-                          className="text-[11px] font-bold text-orange-500 hover:text-orange-600 transition-colors bg-transparent border-none"
+                          className="text-[11px] font-black uppercase tracking-widest text-orange-500 hover:text-orange-600 transition-all bg-transparent border-none py-2 hover:scale-105 active:scale-95"
                         >
-                          Didn't receive the code? Resend
+                          Resend Code
                         </button>
                         <button 
                           type="button" onClick={() => { setStep('form'); setError(null); }}
-                          className="text-[11px] font-medium text-slate-400 hover:text-slate-600 transition-colors bg-transparent border-none"
+                          className="text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-all bg-transparent border-none opacity-60 hover:opacity-100"
                         >
-                          Go back and edit email
+                          Change Registered Email
                         </button>
                       </div>
                     </div>
@@ -599,14 +609,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
             </div>
           </div>
 
-          <div className="p-5 sm:p-6 md:p-8 pt-0 md:pt-0">
+          <div className="p-5 sm:p-6 md:p-8 pt-0 md:pt-2">
             <button
               type="submit" disabled={loading || (mode === 'signup' && usernameStatus === 'taken')}
-              className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:shadow-[0_20px_40px_-10px_rgba(234,88,12,0.4)] hover:scale-[1.01] text-white py-4 sm:py-5 rounded-[20px] sm:rounded-3xl font-bold text-sm tracking-tight active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3 border-none"
+              className={`w-full bg-gradient-to-r from-orange-500 to-red-600 shadow-[0_10px_30px_-10px_rgba(234,88,12,0.4)] hover:shadow-[0_20px_40px_-5px_rgba(234,88,12,0.5)] hover:scale-[1.02] text-white py-5 rounded-3xl font-black text-sm tracking-widest uppercase active:scale-95 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-3 border-none ring-1 ring-white/10`}
             >
               {loading ? (
                 <div className="w-5 h-5 border-3 border-white/50 border-t-white rounded-full animate-spin" />
-              ) : (mode === 'verify_email' ? (step === 'form' ? 'Send Code' : 'Verify & Continue') : isLogin ? 'Sign In' : (step === 'form' ? 'Get Verification Code' : 'Verify & Join Nexus'))}
+              ) : (
+                <span className="flex items-center gap-2">
+                  {mode === 'verify_email' ? (step === 'form' ? 'Initialize Verification' : 'Finalize Identity Sync') : isLogin ? 'Authenticate' : (step === 'form' ? 'Request Access Code' : 'Verify & Join Protocol')}
+                  {!loading && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M5 12h14M12 5l7 7-7 7" /></svg>}
+                </span>
+              )}
             </button>
 
             {mode !== 'verify_email' && (
