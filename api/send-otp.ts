@@ -51,8 +51,9 @@ export default async function handler(req: any, res: any) {
         return res.status(404).json({ error: errorMsg });
       }
     } else if (type === 'signup') {
-      // For signup, ensure the email is NOT already in use
-      const checkResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=id`, {
+      // For signup, only block if the email is already registered AND VERIFIED.
+      // If it exists but isn't verified, it might be the user trying to re-register or verify.
+      const checkResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=id,is_verified`, {
         method: 'GET',
         headers: {
           'apikey': supabaseServiceKey,
@@ -60,8 +61,9 @@ export default async function handler(req: any, res: any) {
         }
       });
       const userData = await checkResponse.json();
-      if (userData && userData.length > 0) {
-        return res.status(409).json({ error: 'This email is already registered. Please login instead.' });
+      
+      if (userData && userData.length > 0 && userData[0].is_verified) {
+        return res.status(409).json({ error: 'This email is already registered and verified. Please login instead.' });
       }
     }
 

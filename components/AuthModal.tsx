@@ -275,7 +275,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
             body: JSON.stringify({ 
               email: email.toLowerCase().trim(), 
               username: userProfile.username, 
-              type: isEmailChanged ? 'email_update' : 'signup' // Use email_update if changed
+              type: isEmailChanged ? 'email_update' : 'verification' 
             })
           });
 
@@ -294,7 +294,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
             body: JSON.stringify({ 
               email: email.toLowerCase().trim(), 
               otp: otpValue, 
-              type: isEmailChanged ? 'email_update' : 'signup',
+              type: isEmailChanged ? 'email_update' : 'verification',
               oldEmail: isEmailChanged ? userProfile.email : undefined,
               userId: userProfile.id // Pass the specific user ID for guaranteed match
             })
