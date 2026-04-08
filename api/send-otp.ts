@@ -28,8 +28,8 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // 0. If it's a login, check if the user exists
-    if (type === 'login') {
+    // 0. Identity Verification Checks
+    if (type === 'login' || type === 'password_reset') {
       const checkResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=id`, {
         method: 'GET',
         headers: {
@@ -38,8 +38,30 @@ export default async function handler(req: any, res: any) {
         }
       });
       const userData = await checkResponse.json();
-      if (!checkResponse.ok || !userData || userData.length === 0) {
-        return res.status(404).json({ error: 'No account found with this email. Please join Nexus first.' });
+      
+      if (!checkResponse.ok) {
+        console.error('Database Check Error:', userData);
+        return res.status(500).json({ error: 'Identity verification system offline.' });
+      }
+
+      if (!userData || userData.length === 0) {
+        const errorMsg = type === 'login' 
+          ? 'No account found with this email. Please join Nexus first.' 
+          : 'Recovery protocol failed: This email is not registered in the Nexus database.';
+        return res.status(404).json({ error: errorMsg });
+      }
+    } else if (type === 'signup') {
+      // For signup, ensure the email is NOT already in use
+      const checkResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=id`, {
+        method: 'GET',
+        headers: {
+          'apikey': supabaseServiceKey,
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+        }
+      });
+      const userData = await checkResponse.json();
+      if (userData && userData.length > 0) {
+        return res.status(409).json({ error: 'This email is already registered. Please login instead.' });
       }
     }
 
