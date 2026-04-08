@@ -115,6 +115,14 @@ export default async function handler(req: any, res: any) {
         </p>
       `;
       emailSubject = `${otp} is your Nexus Security Code`;
+    } else if (type === 'password_reset') {
+      emailTemplate = `
+        <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Password Reset Protocol</h1>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 32px; line-height: 1.6;">
+          Cadet, a password reset has been requested for your Nexus account. Use the secure code below to authorize this change. If you didn't request this, ignore this transmission.
+        </p>
+      `;
+      emailSubject = `${otp} is your Nexus Reset Code`;
     } else {
       emailTemplate = `
         <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Verification Protocol</h1>

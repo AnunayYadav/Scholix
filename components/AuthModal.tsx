@@ -28,7 +28,7 @@ const getPasswordStrength = (password: string): { score: number; label: string; 
 };
 
 const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', userProfile }) => {
-  const [mode, setMode] = useState<'login' | 'signup' | 'verify_email'>(initialMode);
+  const [mode, setMode] = useState<'login' | 'signup' | 'verify_email' | 'forgot_password'>(initialMode);
   const isLogin = mode === 'login';
   const [identifier, setIdentifier] = useState('');
   const validateEmail = (email: string) => {
@@ -179,6 +179,48 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
         if (result.error) throw result.error;
 
         handleClose();
+      } else if (mode === 'forgot_password') {
+        if (step === 'form') {
+          if (!email.trim() || !validateEmail(email.trim())) {
+            setEmailError(true);
+            throw new Error("Valid email required for password recovery.");
+          }
+
+          const response = await fetch('/api/send-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email.toLowerCase().trim(), type: 'password_reset' })
+          });
+
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || "Failed to dispatch recovery code.");
+          setStep('otp');
+          setResendTimer(60);
+        } else {
+          if (otpValue.length !== 6) throw new Error("6-digit recovery code is required.");
+          if (password.length < 6) throw new Error("New password must be at least 6 characters.");
+
+          const resetResponse = await fetch('/api/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              email: email.toLowerCase().trim(), 
+              otp: otpValue, 
+              newPassword: password 
+            })
+          });
+
+          const resetData = await resetResponse.json();
+          if (!resetResponse.ok) throw new Error(resetData.error || "Reset failed. Check code.");
+
+          // Password reset successful, go to login
+          setStep('form');
+          setMode('login');
+          setIdentifier(email);
+          setPassword('');
+          setError(null);
+          // Optional: show a success toast or notification
+        }
       } else if (mode === 'signup') {
         if (step === 'form') {
           if (!email.trim()) throw new Error("Email is required.");
@@ -329,11 +371,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
           )}
 
           <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none mb-2">
-            {mode === 'verify_email' ? 'Security Protocol' : isLogin ? 'Welcome Back' : 'Join Nexus'}
+            {mode === 'verify_email' ? 'Security Protocol' : mode === 'forgot_password' ? 'Password Recovery' : isLogin ? 'Welcome Back' : 'Join Nexus'}
           </h3>
           <p className="text-slate-500 dark:text-white/40 text-[11px] sm:text-xs font-bold flex items-center justify-center gap-2 uppercase tracking-[0.1em]">
             <span className={`w-1.5 h-1.5 rounded-full shadow-[0_0_12px_rgba(234,88,12,0.6)] ${mode === 'verify_email' ? 'bg-orange-500 animate-pulse' : 'bg-orange-600'}`} />
-            {mode === 'verify_email' ? 'Identity verification mandated' : isLogin ? 'Sign in to your account' : 'Apply for student access'}
+            {mode === 'verify_email' ? 'Identity verification mandated' : mode === 'forgot_password' ? 'Reset your access credentials' : isLogin ? 'Sign in to your account' : 'Apply for student access'}
           </p>
         </div>
 
@@ -411,7 +453,107 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                         )}
                       </button>
                     </div>
+                    <div className="flex justify-end mt-2">
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setMode('forgot_password');
+                          setStep('form');
+                          setError(null);
+                          setEmail(identifier.includes('@') ? identifier : '');
+                        }}
+                        className="text-[10px] font-bold text-slate-400 hover:text-orange-500 transition-colors bg-transparent border-none p-0"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
                   </div>
+                </div>
+              ) : mode === 'forgot_password' ? (
+                <div className="space-y-5">
+                  {step === 'form' ? (
+                    <div className="animate-fade-in space-y-5">
+                      <div>
+                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Recovery Email</label>
+                        <div className="relative group">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                          <input
+                            type="email" required value={email} 
+                            onChange={e => {
+                              setEmail(e.target.value);
+                              if (emailError) setEmailError(false);
+                            }}
+                            disabled={loading}
+                            className={`w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white ${
+                              emailError 
+                                ? 'border-red-500/50 ring-4 ring-red-500/5' 
+                                : 'border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
+                            }`}
+                            placeholder="your@email.com"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-6 animate-fade-in">
+                      <div className="text-center space-y-2">
+                        <p className="text-xs text-slate-400 font-medium">
+                          Enter the code sent to <span className="text-orange-500 font-bold">{email}</span> and your new password.
+                        </p>
+                      </div>
+
+                      <div className="relative group pt-2">
+                        <input
+                          type="text" required value={otpValue} 
+                          onChange={e => setOtpValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                          disabled={loading}
+                          className="w-full bg-slate-50 dark:bg-[#0a0a0a] px-4 py-4.5 rounded-2xl text-[24px] font-black tracking-[8px] text-center outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                          placeholder="000000"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">New Secure Password</label>
+                        <div className="relative group">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                          <input
+                            type={showPassword ? "text" : "password"} required value={password} onChange={e => setPassword(e.target.value)}
+                            disabled={loading}
+                            className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-12 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                            placeholder="••••••••"
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-orange-500 transition-colors bg-transparent border-none"
+                          >
+                            {showPassword ? (
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+                            ) : (
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-3 pt-2">
+                        <button 
+                          type="button" 
+                          onClick={handleResendOTP} 
+                          disabled={loading || resendTimer > 0}
+                          className="text-[11px] font-bold text-orange-500 hover:text-orange-600 transition-colors bg-transparent border-none disabled:opacity-50"
+                        >
+                          {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Didn't receive the code? Resend"}
+                        </button>
+                        <button 
+                          type="button" onClick={() => { setStep('form'); setError(null); }}
+                          className="text-[11px] font-medium text-slate-400 hover:text-slate-600 transition-colors bg-transparent border-none"
+                        >
+                          Go back to email
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : mode === 'verify_email' ? (
                 <div className="space-y-5">
@@ -671,7 +813,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                 <div className="w-5 h-5 border-3 border-white/50 border-t-white rounded-full animate-spin" />
               ) : (
                 <span className="flex items-center gap-2">
-                  {mode === 'verify_email' ? (step === 'form' ? 'Initialize Verification' : 'Finalize Identity Sync') : isLogin ? 'Authenticate' : (step === 'form' ? 'Request Access Code' : 'Verify & Join Protocol')}
+                  {mode === 'verify_email' ? (step === 'form' ? 'Initialize Verification' : 'Finalize Identity Sync') : 
+                   mode === 'forgot_password' ? (step === 'form' ? 'Request Recovery Code' : 'Update Credentials') :
+                   isLogin ? 'Authenticate' : (step === 'form' ? 'Request Access Code' : 'Verify & Join Protocol')}
                   {!loading && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M5 12h14M12 5l7 7-7 7" /></svg>}
                 </span>
               )}
@@ -690,7 +834,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                 }}
                 className="w-full text-[11px] sm:text-xs font-medium text-slate-400 hover:text-orange-500 transition-colors py-4 sm:py-6 bg-transparent border-none"
               >
-                {isLogin ? "New here? Create an account" : "Have an account? Sign in"}
+                {isLogin ? "New here? Create an account" : mode === 'forgot_password' ? "Return to authentication" : "Have an account? Sign in"}
               </button>
             )}
           </div>
