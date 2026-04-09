@@ -125,7 +125,7 @@ export default async function handler(req: any, res: any) {
       return res.status(500).json({ error: 'Failed to update verification status in database.' });
     }
 
-    if (updateResult.length === 0) {
+    if (updateResult.length === 0 && type !== 'signup') {
        console.error('Profile not found for update:', profileUpdateUrl);
        return res.status(404).json({ error: 'Profile record not found to update.' });
     }

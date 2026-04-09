@@ -616,7 +616,7 @@ class NexusServer {
       email: cleanEmail,
       password: pass,
       options: {
-        data: { username: cleanUsername, registration_number: cleanRegNo },
+        data: { username: cleanUsername, registration_number: cleanRegNo, is_verified: 'yes' },
         emailRedirectTo: window.location.origin
       }
     });
@@ -626,7 +626,8 @@ class NexusServer {
       try {
         await client.from('profiles').update({
           username: cleanUsername,
-          registration_number: cleanRegNo
+          registration_number: cleanRegNo,
+          is_verified: 'yes'
         }).eq('id', result.data.user.id);
       } catch (e) {
         console.warn("Manual profile sync failed:", e);
@@ -680,10 +681,15 @@ class NexusServer {
     if (!client) throw new Error("Registry offline.");
 
     const { data: existing } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
-
-    if (existing) return existing;
-
     const metadata = user.user_metadata || {};
+
+    if (existing) {
+      if ((!existing.is_verified || existing.is_verified === 'no') && metadata.is_verified === 'yes') {
+        const { data: updated } = await client.from('profiles').update({ is_verified: 'yes' }).eq('id', user.id).select().single();
+        if (updated) return updated;
+      }
+      return existing;
+    }
     const newProfile = {
       id: user.id,
       email: user.email!,
@@ -697,10 +703,13 @@ class NexusServer {
       longest_streak: 0,
       last_active_date: null,
       xp_history: [],
-      is_verified: 'yes'
+      is_verified: metadata.is_verified || 'no'
     };
 
-    const { data, error } = await client.from('profiles').insert([newProfile]).select().single();
+    const { data, error } = await client.from('profiles')
+      .upsert(newProfile, { onConflict: 'id' })
+      .select()
+      .single();
     if (error) throw error;
     return data;
   }

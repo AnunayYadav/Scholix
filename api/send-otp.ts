@@ -62,7 +62,7 @@ export default async function handler(req: any, res: any) {
       });
       const userData = await checkResponse.json();
       
-      if (userData && userData.length > 0 && userData[0].is_verified) {
+      if (userData && userData.length > 0 && userData[0].is_verified === 'yes') {
         return res.status(409).json({ error: 'This email is already registered and verified. Please login instead.' });
       }
     }
