@@ -53,7 +53,7 @@ const XPBreakdown: React.FC = () => {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="w-full max-w-sm bg-white dark:bg-dark-950 rounded-[40px] shadow-2xl overflow-hidden border border-slate-200 dark:border-white/10"
+            className="w-full max-w-sm bg-white dark:bg-dark-950 rounded-[40px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-white/10"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-8 space-y-8 relative z-10">
@@ -68,8 +68,8 @@ const XPBreakdown: React.FC = () => {
                   <span className="text-4xl filter drop-shadow-md">⚡</span>
                 </motion.div>
                 <div className="space-y-1">
-                  <h3 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight leading-none">XP Earned</h3>
-                  <p className="text-slate-500 font-semibold text-[10px] uppercase tracking-[0.2em] opacity-60">Mission Protocol Complete</p>
+                  <h3 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight leading-none">XP Earned</h3>
+                  <p className="text-zinc-500 font-semibold text-[10px] uppercase tracking-[0.2em] opacity-60">Mission Protocol Complete</p>
                 </div>
               </div>
 
@@ -81,9 +81,9 @@ const XPBreakdown: React.FC = () => {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.4 + idx * 0.1 }}
-                    className="flex items-center justify-between p-4 bg-slate-50/50 dark:bg-white/[0.02] rounded-2xl border border-slate-100/50 dark:border-white/5"
+                    className="flex items-center justify-between p-4 bg-zinc-50/50 dark:bg-white/[0.02] rounded-2xl border border-zinc-100/50 dark:border-white/5"
                   >
-                    <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 capitalize">{item.label.toLowerCase()}</span>
+                    <span className="text-sm font-semibold text-zinc-600 dark:text-zinc-400 capitalize">{item.label.toLowerCase()}</span>
                     <span className="text-sm font-bold text-emerald-500 tabular-nums">+{item.value}</span>
                   </motion.div>
                 ))}
@@ -93,14 +93,14 @@ const XPBreakdown: React.FC = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.8 }}
-                  className="mt-6 pt-6 border-t border-slate-100 dark:border-white/5"
+                  className="mt-6 pt-6 border-t border-zinc-100 dark:border-white/5"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-base font-bold text-slate-900 dark:text-white">Total Gained</span>
+                    <span className="text-base font-bold text-zinc-900 dark:text-white">Total Gained</span>
                     <span className="text-3xl font-bold text-orange-500 tabular-nums">+{countUpValue}</span>
                   </div>
                   <div className="text-center">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                        Account Balance: {lastXPResult.newTotalXP} XP
                     </span>
                   </div>

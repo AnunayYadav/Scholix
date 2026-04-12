@@ -1,132 +1,132 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://lpunexus.vercel.app/</loc>
+    <loc>https://scholix.app/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   
   <!-- Core Services -->
   <url>
-    <loc>https://lpunexus.vercel.app/attendance</loc>
+    <loc>https://scholix.app/attendance</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/cgpa</loc>
+    <loc>https://scholix.app/cgpa</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/placement</loc>
+    <loc>https://scholix.app/placement</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/library</loc>
+    <loc>https://scholix.app/library</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/campus</loc>
+    <loc>https://scholix.app/campus</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/campus/mess</loc>
+    <loc>https://scholix.app/campus/mess</loc>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/campus/map</loc>
+    <loc>https://scholix.app/campus/map</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/freshers</loc>
+    <loc>https://scholix.app/freshers</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/timetable</loc>
+    <loc>https://scholix.app/timetable</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/emergency</loc>
+    <loc>https://scholix.app/emergency</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/ai-tools</loc>
+    <loc>https://scholix.app/ai-tools</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/roommate</loc>
+    <loc>https://scholix.app/roommate</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <!-- Marketplace Categories -->
   <url>
-    <loc>https://lpunexus.vercel.app/marketplace</loc>
+    <loc>https://scholix.app/marketplace</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/marketplace/Books</loc>
+    <loc>https://scholix.app/marketplace/Books</loc>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/marketplace/Electronics</loc>
+    <loc>https://scholix.app/marketplace/Electronics</loc>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/marketplace/Cycles</loc>
+    <loc>https://scholix.app/marketplace/Cycles</loc>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/marketplace/Hostel%20Essentials</loc>
+    <loc>https://scholix.app/marketplace/Hostel%20Essentials</loc>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
 
   <!-- Quiz Sections -->
   <url>
-    <loc>https://lpunexus.vercel.app/quiz</loc>
+    <loc>https://scholix.app/quiz</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url><loc>https://lpunexus.vercel.app/quiz/CHE110</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://lpunexus.vercel.app/quiz/CSE101</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://lpunexus.vercel.app/quiz/CSE121</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://lpunexus.vercel.app/quiz/CSE320</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://lpunexus.vercel.app/quiz/CSE326</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://lpunexus.vercel.app/quiz/INT108</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://lpunexus.vercel.app/quiz/INT306</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://lpunexus.vercel.app/quiz/MTH166</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://lpunexus.vercel.app/quiz/PHY110</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://lpunexus.vercel.app/quiz/ECE249</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://lpunexus.vercel.app/quiz/PEL125</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://lpunexus.vercel.app/quiz/PEL130</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://scholix.app/quiz/CHE110</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://scholix.app/quiz/CSE101</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://scholix.app/quiz/CSE121</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://scholix.app/quiz/CSE320</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://scholix.app/quiz/CSE326</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://scholix.app/quiz/INT108</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://scholix.app/quiz/INT306</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://scholix.app/quiz/MTH166</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://scholix.app/quiz/PHY110</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://scholix.app/quiz/ECE249</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://scholix.app/quiz/PEL125</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://scholix.app/quiz/PEL130</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
 
   <!-- Legal & Info -->
   <url>
-    <loc>https://lpunexus.vercel.app/help</loc>
+    <loc>https://scholix.app/help</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/about</loc>
+    <loc>https://scholix.app/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://lpunexus.vercel.app/privacy</loc>
+    <loc>https://scholix.app/privacy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

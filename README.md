@@ -1,7 +1,6 @@
+# 🚀 Scholix
 
-# 🚀 LPU-Nexus
-
-**LPU-Nexus** is a comprehensive, AI-powered student utility platform designed specifically for the students of Lovely Professional University.
+**Scholix** is a comprehensive, AI-powered student utility platform designed to empower students across multiple universities. Originally built as LPU-Nexus, it has evolved into a multi-tenant ecosystem starting with Lovely Professional University.
 
 ---
 

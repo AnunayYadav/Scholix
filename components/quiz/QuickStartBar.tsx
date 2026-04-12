@@ -41,10 +41,10 @@ const QuickStartBar: React.FC<QuickStartBarProps> = ({ onCustomQuiz, onMyHistory
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
           onClick={onMyHistory}
-          className="group flex items-center gap-4 p-5 rounded-[24px] bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl hover:border-orange-500/20 transition-all text-left"
+          className="group flex items-center gap-4 p-5 rounded-[24px] bg-white dark:bg-white/[0.03] border border-zinc-200 dark:border-white/5 shadow-lg hover:shadow-xl hover:border-orange-500/20 transition-all text-left"
         >
-          <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/10 transition-colors">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-slate-400 group-hover:text-orange-500 transition-colors">
+          <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/10 transition-colors">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-zinc-400 group-hover:text-orange-500 transition-colors">
               <rect x="3" y="3" width="7" height="7" rx="1" />
               <rect x="14" y="3" width="7" height="7" rx="1" />
               <rect x="3" y="14" width="7" height="7" rx="1" />
@@ -52,10 +52,10 @@ const QuickStartBar: React.FC<QuickStartBarProps> = ({ onCustomQuiz, onMyHistory
             </svg>
           </div>
           <div>
-            <span className="block text-sm font-semibold text-slate-900 dark:text-white tracking-tight">My History</span>
-            <span className="block text-[11px] font-medium text-slate-500">Review past results & progress</span>
+            <span className="block text-sm font-semibold text-zinc-900 dark:text-white tracking-tight">My History</span>
+            <span className="block text-[11px] font-medium text-zinc-500">Review past results & progress</span>
           </div>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 ml-auto text-slate-300 dark:text-white/10 group-hover:text-orange-500 transition-colors">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 ml-auto text-zinc-300 dark:text-white/10 group-hover:text-orange-500 transition-colors">
             <path d="M9 18l6-6-6-6" />
           </svg>
         </motion.button>

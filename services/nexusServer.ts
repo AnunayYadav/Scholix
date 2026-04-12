@@ -602,7 +602,7 @@ class NexusServer {
     return authResponse;
   }
 
-  static async signUp(email: string, pass: string, username: string, regNo: string) {
+  static async signUp(email: string, pass: string, username: string, regNo: string, university: string) {
     const client = getSupabase();
     if (!client) throw new Error("Registry is offline.");
     // Rate limiting: 3 signup attempts per 2 minutes per email
@@ -616,7 +616,12 @@ class NexusServer {
       email: cleanEmail,
       password: pass,
       options: {
-        data: { username: cleanUsername, registration_number: cleanRegNo, is_verified: 'yes' },
+        data: { 
+          username: cleanUsername, 
+          registration_number: cleanRegNo, 
+          is_verified: 'yes',
+          university: university || 'none'
+        },
         emailRedirectTo: window.location.origin
       }
     });
@@ -627,7 +632,8 @@ class NexusServer {
         await client.from('profiles').update({
           username: cleanUsername,
           registration_number: cleanRegNo,
-          is_verified: 'yes'
+          is_verified: 'yes',
+          university: university || 'none'
         }).eq('id', result.data.user.id);
       } catch (e) {
         console.warn("Manual profile sync failed:", e);
@@ -703,7 +709,8 @@ class NexusServer {
       longest_streak: 0,
       last_active_date: null,
       xp_history: [],
-      is_verified: metadata.is_verified || 'no'
+      is_verified: metadata.is_verified || 'no',
+      university: metadata.university || 'none'
     };
 
     const { data, error } = await client.from('profiles')

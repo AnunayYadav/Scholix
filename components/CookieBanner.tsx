@@ -28,7 +28,7 @@ const CookieBanner: React.FC = () => {
                     transition={{ type: "spring", damping: 25, stiffness: 200 }}
                     className="fixed bottom-6 left-6 right-6 md:left-auto md:right-8 md:max-w-md z-[9999]"
                 >
-                    <div className="glass-panel p-6 rounded-[32px] border border-slate-200 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] bg-white/70 dark:bg-black/60 backdrop-blur-3xl overflow-hidden relative group">
+                    <div className="glass-panel p-6 rounded-[32px] border border-zinc-200 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] bg-white/70 dark:bg-black/60 backdrop-blur-3xl overflow-hidden relative group">
                         {/* Detail accent */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-[40px] rounded-full -mr-16 -mt-16" />
                         
@@ -45,8 +45,8 @@ const CookieBanner: React.FC = () => {
                                     </svg>
                                 </div>
                                 <div className="space-y-1">
-                                    <h4 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Cookie Preference</h4>
-                                    <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+                                    <h4 className="text-sm font-black text-zinc-800 dark:text-white uppercase tracking-wider">Cookie Preference</h4>
+                                    <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed">
                                         We use cookies to improve your experience, analyze site performance, and serve personalized ads. By clicking "Accept All", you agree to our usage of these tools.
                                     </p>
                                 </div>
@@ -61,7 +61,7 @@ const CookieBanner: React.FC = () => {
                                 </button>
                                 <a 
                                     href="/privacy"
-                                    className="px-6 py-3 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-white/10 transition-all active:scale-95"
+                                    className="px-6 py-3 bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 dark:hover:bg-white/10 transition-all active:scale-95"
                                 >
                                     Details
                                 </a>

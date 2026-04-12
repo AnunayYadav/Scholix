@@ -5,6 +5,7 @@ import NexusServer from '../services/nexusServer.ts';
 import { aiTools } from '../data/aiToolsData.ts';
 import { allDirectory } from '../data/emergencyData.ts';
 import { slugify } from '../utils/slugify.ts';
+import { useUniversity } from '../hooks/useUniversity.tsx';
 
 interface SearchResult {
   id: string;
@@ -39,6 +40,7 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { shortBrandName, brandPrimary } = useUniversity();
 
   useEffect(() => {
     if (autoFocus && inputRef.current) {
@@ -55,9 +57,9 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
     { id: 'attendance', name: 'Attendance', desc: 'Track your attendance and safe-bunks.', path: '/attendance', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg> },
     { id: 'placement', name: 'Placement Prefect', desc: 'Analyze resumes and prep for jobs.', path: '/placement', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg> },
     { id: 'campus', name: 'Campus Navigator', desc: 'Find blocks and rooms with ease.', path: '/campus', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /></svg> },
-    { id: 'marketplace', name: 'LPU Market', desc: 'Buy/Sell used books and items.', path: '/marketplace', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/></svg> },
-    { id: 'roommate', name: 'Roommate Finder', desc: 'Find your perfect LPU flatmate.', path: '/roommate', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg> },
-    { id: 'emergency', name: 'Rescue Line', desc: 'Emergency LPU official contacts.', path: '/emergency', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6" /></svg> },
+    { id: 'marketplace', name: `${shortBrandName} Market`, desc: 'Buy/Sell used books and items.', path: '/marketplace', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/></svg> },
+    { id: 'roommate', name: 'Roommate Finder', desc: `Find your perfect ${shortBrandName} flatmate.`, path: '/roommate', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg> },
+    { id: 'emergency', name: 'Rescue Line', desc: `Emergency ${shortBrandName} official contacts.`, path: '/emergency', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6" /></svg> },
     { id: 'ai-tools', name: 'AI Directory', desc: 'Curated AI tools for students.', path: '/ai-tools', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><circle cx="12" cy="12" r="3"/></svg> },
   ];
 
@@ -240,7 +242,7 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
           title: f.name,
           description: `${f.subject} • ${f.size}`,
           path: `/library/${slugify(f.program)}/${slugify(f.semester)}/${slugify(f.subject)}`,
-          icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-slate-400"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>,
+          icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-zinc-400"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>,
           category: 'Library Files'
         });
       });
@@ -295,12 +297,12 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
     if (!isOpen) return null;
 
     const resultsDropdown = (
-      <div className={`${isInline || resultsPortalRef ? 'relative mt-6' : 'absolute top-full left-0 right-0 mt-3 shadow-2xl z-[100]'} bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[32px] overflow-hidden search-dropdown-anim`}>
+      <div className={`${isInline || resultsPortalRef ? 'relative mt-6' : 'absolute top-full left-0 right-0 mt-3 shadow-2xl z-[100]'} bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-[32px] overflow-hidden search-dropdown-anim`}>
         <div className={`no-scrollbar p-3 ${(isInline || resultsPortalRef) ? 'max-h-none' : 'max-h-[70vh] overflow-y-auto'}`}>
           {isLoading ? (
             <div className="py-12 flex flex-col items-center justify-center opacity-40">
-              <div className="w-6 h-6 rounded-full border-2 border-orange-500 border-t-transparent animate-spin mb-4"></div>
-              <p className="text-[10px] font-medium uppercase tracking-[0.2em]">Searching Nexus...</p>
+              <div className="w-6 h-6 rounded-full border-2 border-brand-primary border-t-transparent animate-spin mb-4"></div>
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em]">Searching {shortBrandName} Nexus...</p>
             </div>
           ) : results.length > 0 ? (
             <div className="grid grid-cols-1 gap-1">
@@ -310,18 +312,18 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
                   onClick={() => handleSelect(result)}
                   onMouseEnter={() => setSelectedIndex(index)}
                   style={{ animationDelay: `${index * 50}ms` }}
-                  className={`w-full text-left p-3.5 rounded-2xl flex items-center gap-4 transition-all border-none group search-result-anim ${selectedIndex === index ? 'bg-orange-600' : 'bg-transparent hover:bg-slate-50 dark:hover:bg-white/5'}`}
+                  className={`w-full text-left p-3.5 rounded-2xl flex items-center gap-4 transition-all border-none group search-result-anim ${selectedIndex === index ? 'bg-brand-primary' : 'bg-transparent hover:bg-zinc-50 dark:hover:bg-white/5'}`}
                 >
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${selectedIndex === index ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/40'}`}>
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${selectedIndex === index ? 'bg-white/20 text-white' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-white/40'}`}>
                     {result.icon}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className={`text-sm font-normal truncate ${selectedIndex === index ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{result.title}</h4>
-                      <span className={`text-[8px] font-medium uppercase tracking-widest shrink-0 ${selectedIndex === index ? 'text-white/60' : 'text-slate-400 dark:text-white/20'}`}>{result.category}</span>
+                      <h4 className={`text-sm font-normal truncate ${selectedIndex === index ? 'text-white' : 'text-zinc-900 dark:text-white'}`}>{result.title}</h4>
+                      <span className={`text-[8px] font-medium uppercase tracking-widest shrink-0 ${selectedIndex === index ? 'text-white/60' : 'text-zinc-400 dark:text-white/20'}`}>{result.category}</span>
                     </div>
                     {result.description && (
-                      <p className={`text-[11px] font-light truncate ${selectedIndex === index ? 'text-white/70' : 'text-slate-500 dark:text-slate-400'}`}>{result.description}</p>
+                      <p className={`text-[11px] font-light truncate ${selectedIndex === index ? 'text-white/70' : 'text-zinc-500 dark:text-zinc-400'}`}>{result.description}</p>
                     )}
                   </div>
                 </button>
@@ -334,13 +336,13 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
           ) : (
             <div className="p-4 space-y-4">
               <div className="space-y-2">
-                <h3 className="text-[9px] font-medium uppercase tracking-[0.2em] text-slate-400 dark:text-white/20">Trending Now</h3>
+                <h3 className="text-[9px] font-medium uppercase tracking-[0.2em] text-zinc-400 dark:text-white/20">Trending Now</h3>
                 <div className="flex flex-wrap gap-1.5">
                   {['Library', 'Quizzes', 'Timetable', 'Market', 'Attendance'].map(s => (
                     <button 
                       key={s} 
                       onClick={() => setQuery(s)}
-                      className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[10px] font-normal text-slate-500 dark:text-white/60 hover:border-orange-500/50 hover:text-orange-600 transition-all"
+                      className="px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-[10px] font-normal text-zinc-500 dark:text-white/60 hover:border-brand-primary/50 hover:text-brand-primary transition-all"
                     >
                       {s}
                     </button>
@@ -352,9 +354,9 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
         </div>
         
         {!(isInline || resultsPortalRef) && (
-          <div className="px-5 py-2.5 bg-slate-50/50 dark:bg-black/40 border-t border-slate-200 dark:border-white/5 flex items-center justify-between">
+          <div className="px-5 py-2.5 bg-zinc-50/50 dark:bg-black/40 border-t border-zinc-200 dark:border-white/5 flex items-center justify-between">
             <div className="flex gap-3">
-              <span className="text-[9px] font-medium text-slate-400 dark:text-white/20 tracking-widest cursor-default">ESC TO CLOSE</span>
+              <span className="text-[9px] font-medium text-zinc-400 dark:text-white/20 tracking-widest cursor-default">ESC TO CLOSE</span>
             </div>
           </div>
         )}
@@ -372,8 +374,8 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
     <div ref={containerRef} className={`relative w-full ${className}`}>
       {/* Search Bar Input */}
       <div className={`relative group transition-all duration-300 ${isOpen && !isInline && !resultsPortalRef ? 'z-[60]' : 'z-40'}`}>
-        <div className={`flex items-center gap-3 px-6 h-11 rounded-full bg-slate-100/80 dark:bg-white/5 transition-all ${isOpen && !isInline && !resultsPortalRef ? 'shadow-2xl shadow-orange-500/10 bg-white dark:bg-[#0a0a0a]' : 'hover:bg-slate-200/80 dark:hover:bg-white/10'}`}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-4 h-4 transition-colors ${isOpen ? 'text-orange-500' : 'text-slate-400 group-hover:text-slate-500'}`}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+        <div className={`flex items-center gap-3 px-6 h-11 rounded-full bg-zinc-100/80 dark:bg-white/5 transition-all ${isOpen && !isInline && !resultsPortalRef ? 'shadow-2xl shadow-brand-primary/10 bg-white dark:bg-[#0a0a0a]' : 'hover:bg-zinc-200/80 dark:hover:bg-white/10'}`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-4 h-4 transition-colors ${isOpen ? 'text-brand-primary' : 'text-zinc-400 group-hover:text-zinc-500'}`}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
           <input
             ref={inputRef}
             type="text"
@@ -384,18 +386,18 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
               if (!isOpen) setIsOpen(true);
             }}
             onFocus={() => setIsOpen(true)}
-            className="flex-1 bg-transparent border-none outline-none text-sm font-normal text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20"
+            className="flex-1 bg-transparent border-none outline-none text-sm font-normal text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-white/20"
           />
           {!isOpen && (
             <div className="flex items-center gap-1 opacity-20 group-hover:opacity-40 transition-all">
-              <span className="px-1 py-0.5 rounded bg-white dark:bg-white/10 border border-slate-200 dark:border-white/20 text-[9px] font-medium tracking-tighter">CTRL</span>
-              <span className="px-1 py-0.5 rounded bg-white dark:bg-white/10 border border-slate-200 dark:border-white/20 text-[9px] font-medium tracking-tighter">K</span>
+              <span className="px-1 py-0.5 rounded bg-white dark:bg-white/10 border border-zinc-200 dark:border-white/20 text-[9px] font-medium tracking-tighter">CTRL</span>
+              <span className="px-1 py-0.5 rounded bg-white dark:bg-white/10 border border-zinc-200 dark:border-white/20 text-[9px] font-medium tracking-tighter">K</span>
             </div>
           )}
           {query && (
             <button 
               onClick={() => { setQuery(''); setResults([]); }}
-              className="p-1 hover:text-orange-600 transition-colors border-none bg-transparent"
+              className="p-1 hover:text-brand-primary transition-colors border-none bg-transparent"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>

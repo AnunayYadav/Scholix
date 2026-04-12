@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import NexusServer from '../services/nexusServer.ts';
 import { UserProfile } from '../types.ts';
+import { useUniversity } from '../hooks/useUniversity.tsx';
 
 const StatCounter: React.FC<{ target: number; label: string; subLabel: string; accentColor: string; isVisible: boolean; isAdmin?: boolean }> = ({ target, label, subLabel, accentColor, isVisible, isAdmin }) => {
   const [count, setCount] = useState(0);
@@ -39,10 +40,10 @@ const StatCounter: React.FC<{ target: number; label: string; subLabel: string; a
   return (
     <div className="space-y-1">
       <p className={`text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] ${accentColor} opacity-80`}>{label}</p>
-      <h4 className="text-4xl lg:text-5xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">
+      <h4 className="text-4xl lg:text-5xl font-black text-zinc-800 dark:text-white tracking-tighter leading-none">
         {count.toLocaleString()}{(!label.includes('Global') && !isAdmin) ? '' : '+'}
       </h4>
-      <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] mt-2">{subLabel}</p>
+      <p className="text-[11px] sm:text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mt-2">{subLabel}</p>
     </div>
   );
 };
@@ -55,7 +56,9 @@ interface AboutUsProps {
 }
 
 const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
-
+  const { fullBrandName, shortBrandName, universityInfo } = useUniversity();
+  const universityShortName = universityInfo?.shortName || 'University';
+  
   const [stats, setStats] = useState<{ registered: number; visitors: number; totalViews: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSectionVisible, setIsSectionVisible] = useState(false);
@@ -94,34 +97,38 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
   return (
     <div className="max-w-4xl mx-auto space-y-12 animate-fade-in pb-24 px-4 md:px-0">
       {/* About Us - Hero Header */}
-      <section className="text-center space-y-4 pt-8">
-        <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
+      <section className="text-center space-y-6 pt-8">
+        <div className="flex items-center justify-center mb-4">
+          <img src="/Scholix_light.png" alt="Scholix Logo" className="h-16 md:h-20 w-auto object-contain dark:hidden" />
+          <img src="/Scholix_dark.png" alt="Scholix Logo" className="h-16 md:h-20 w-auto object-contain hidden dark:block" />
+        </div>
+        <h2 className="text-3xl md:text-5xl font-black text-zinc-900 dark:text-white tracking-tighter leading-none">
           About <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Us</span>
         </h2>
-        <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-bold uppercase tracking-[0.4em]">The AI-Powered Student Community</p>
+        <p className="text-zinc-500 dark:text-zinc-400 text-xs md:text-sm font-bold uppercase tracking-[0.4em]">The AI-Powered Student Community</p>
       </section>
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/5 space-y-4">
-          <h3 className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest border-b border-slate-100 dark:border-white/5 pb-4">The Mission</h3>
-          <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-            LPU-Nexus was born from a simple observation: campus life is complex. Between tracking attendance, calculating CGPA, and preparing for placements, students are often overwhelmed.
+        <div className="glass-panel p-8 rounded-[40px] border border-zinc-200 dark:border-white/5 space-y-4">
+          <h3 className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest border-b border-zinc-100 dark:border-white/5 pb-4">The Mission</h3>
+          <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium">
+            {fullBrandName} was born from a simple observation: campus life is complex. Between tracking attendance, calculating CGPA, and preparing for placements, students are often overwhelmed.
             <br /><br />
             Our mission is to consolidate these fragmented experiences into a single, high-performance platform powered by cutting-edge AI.
           </p>
         </div>
 
-        <div className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/5 space-y-4">
-          <h3 className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest border-b border-slate-100 dark:border-white/5 pb-4">Key Innovation</h3>
-          <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+        <div className="glass-panel p-8 rounded-[40px] border border-zinc-200 dark:border-white/5 space-y-4">
+          <h3 className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest border-b border-zinc-100 dark:border-white/5 pb-4">Key Innovation</h3>
+          <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium">
             By integrating <strong>Google's Gemini AI</strong>, we provide tools that don't just calculate numbers but offer strategic insights.
-            From "Placement Prefect" to "Global Gateway", Nexus is designed to be your academic advantage.
+            From "Placement Prefect" to "Global Gateway", {shortBrandName} is designed to be your academic advantage.
           </p>
         </div>
       </section>
 
       {/* Credit & Heritage Section */}
-      <section className="p-10 md:p-16 rounded-[60px] bg-white/[0.03] dark:bg-[#0a0a0a]/20 backdrop-blur-3xl text-slate-800 dark:text-white shadow-[0_32px_128px_rgba(0,0,0,0.5)] border border-white/10 relative overflow-hidden transition-all duration-700 group">
+      <section className="p-10 md:p-16 rounded-[60px] bg-white/[0.03] dark:bg-[#0a0a0a]/20 backdrop-blur-3xl text-zinc-800 dark:text-white shadow-[0_32px_128px_rgba(0,0,0,0.5)] border border-white/10 relative overflow-hidden transition-all duration-700 group">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(249,115,22,0.05)_0%,transparent_70%)] pointer-events-none" />
         {/* Abstract Background Decor */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-600/10 blur-[120px] rounded-full -mr-32 -mt-32"></div>
@@ -132,7 +139,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
           <div className="lg:col-span-7 space-y-10">
             <div>
               <h3 className="text-[11px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.3em] mb-6">Architect & Heritage</h3>
-              <p className="text-4xl lg:text-[42px] font-black tracking-tighter mb-4 leading-tight text-slate-800 dark:text-white">
+              <p className="text-4xl lg:text-[42px] font-black tracking-tighter mb-4 leading-tight text-zinc-800 dark:text-white">
                 <span className="whitespace-nowrap">Made with <span className="text-orange-500 underline decoration-white/10 underline-offset-8">Purpose</span>.</span><br />
                 <span className="whitespace-nowrap">For the <span className="text-orange-500">Future</span>.</span>
               </p>
@@ -140,25 +147,25 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
 
             <div className="space-y-6">
               <div>
-                <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Lead Developer</p>
-                <p className="text-4xl font-black text-slate-800 dark:text-white tracking-tight">Anunay Yadav</p>
+                <p className="text-[11px] sm:text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-2">Lead Developer</p>
+                <p className="text-4xl font-black text-zinc-800 dark:text-white tracking-tight">Anunay Yadav</p>
               </div>
 
               <div className="flex gap-12 pt-4">
                 <div>
-                  <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Batch</p>
-                  <p className="text-xl font-black text-slate-800 dark:text-white">2025-29</p>
+                  <p className="text-[11px] sm:text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">Batch</p>
+                  <p className="text-xl font-black text-zinc-800 dark:text-white">2025-29</p>
                 </div>
                 <div>
-                  <p className="text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Branch</p>
-                  <p className="text-xl font-black text-slate-800 dark:text-white">CSE</p>
+                  <p className="text-[11px] sm:text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">Branch</p>
+                  <p className="text-xl font-black text-zinc-800 dark:text-white">CSE</p>
                 </div>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-3 pt-6">
               {[
-                { label: 'WA Help', icon: <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 .004 5.412.001 12.04c0 2.123.542 4.198 1.585 6.03l-1.585 6.187 6.326-1.66A11.826 11.826 0 0012.05 24.122c6.635 0 12.047-5.412 12.05-12.046a11.83 11.83 0 00-3.517-8.477z" />, url: 'https://wa.me/918935031251?text=Hi!%20I%20need%20help%20with%20Nexus.' },
+                { label: 'WA Help', icon: <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 .004 5.412.001 12.04c0 2.123.542 4.198 1.585 6.03l-1.585 6.187 6.326-1.66A11.826 11.826 0 0012.05 24.122c6.635 0 12.047-5.412 12.05-12.046a11.83 11.83 0 00-3.517-8.477z" />, url: `https://wa.me/918935031251?text=Hi!%20I%20need%20help%20with%20${shortBrandName}.` },
                 { label: 'Email', icon: <><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></>, url: 'https://mail.google.com/mail/?view=cm&fs=1&to=anunayarvind@gmail.com' },
                 { label: 'Insta', icon: <><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></>, url: 'https://www.instagram.com/anunay07' },
                 { label: 'LinkedIn', icon: <><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></>, url: 'https://www.linkedin.com/in/anunayyadav/' },
@@ -179,7 +186,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
                     strokeWidth={link.label === 'WA Help' ? '0' : '2.5'}
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-orange-500 group-hover:scale-110 transition-all"
+                    className="w-5 h-5 text-zinc-400 dark:text-zinc-500 group-hover:text-orange-500 group-hover:scale-110 transition-all"
                   >
                     {link.icon}
                   </svg>
@@ -194,9 +201,9 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
               <div className="space-y-12 animate-pulse">
                 {[1, 2].map(i => (
                   <div key={i} className="space-y-3">
-                    <div className="h-2 w-24 bg-slate-200 dark:bg-white/10 rounded shimmer" />
-                    <div className="h-12 w-48 bg-slate-200 dark:bg-white/10 rounded shimmer" />
-                    <div className="h-2 w-32 bg-slate-200 dark:bg-white/10 rounded shimmer" />
+                    <div className="h-2 w-24 bg-zinc-200 dark:bg-white/10 rounded shimmer" />
+                    <div className="h-12 w-48 bg-zinc-200 dark:bg-white/10 rounded shimmer" />
+                    <div className="h-2 w-32 bg-zinc-200 dark:bg-white/10 rounded shimmer" />
                   </div>
                 ))}
               </div>
@@ -204,7 +211,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
               <>
                 <StatCounter
                   target={stats?.registered || 0}
-                  label="LPU Students"
+                  label={`${universityShortName} Students`}
                   subLabel="Registered Website Users"
                   accentColor="text-orange-500"
                   isVisible={isSectionVisible}
@@ -236,8 +243,8 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
 
       <footer className="text-center pt-8">
 
-        <p className="text-[11px] sm:text-xs font-medium text-slate-400 opacity-50">
-          LPU-Nexus v1.3.0 • Independent Student Project
+        <p className="text-[11px] sm:text-xs font-medium text-zinc-400 opacity-50">
+          {fullBrandName} v1.3.0 • Independent Student Project
         </p>
       </footer>
     </div>

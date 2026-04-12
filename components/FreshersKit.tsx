@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useUniversity } from '../hooks/useUniversity.tsx';
 
 const STORAGE_KEY = 'nexus_freshers_checklist';
 
@@ -29,6 +30,7 @@ const loadChecklist = () => {
 
 const FreshersKit: React.FC = () => {
   const [checklist, setChecklist] = useState(loadChecklist);
+  const { shortBrandName, brandPrimary, brandSecondary } = useUniversity();
 
   useEffect(() => {
     const map: Record<number, boolean> = {};
@@ -50,31 +52,31 @@ const FreshersKit: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-20">
       <header className="mb-8">
-        <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-2 tracking-tight">Freshmen <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Kit</span></h2>
-        <p className="text-slate-600 dark:text-slate-400 font-semibold">The essential checklist for a seamless start at LPU.</p>
+        <h2 className="text-3xl font-bold text-zinc-800 dark:text-white mb-2 tracking-tight">Freshmen <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Kit</span></h2>
+        <p className="text-zinc-600 dark:text-zinc-400 font-semibold">The essential checklist for a seamless start at {shortBrandName}.</p>
       </header>
 
       {/* Progress Bar */}
       <div className="glass-panel p-5 rounded-2xl border dark:border-white/5 bg-white dark:bg-[#0a0a0a] shadow-sm">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400">Progress</span>
-          <span className="text-[11px] sm:text-xs font-semibold text-orange-600 dark:text-orange-500">{progress.done}/{progress.total} — {progress.pct}%</span>
+          <span className="text-[11px] sm:text-xs font-semibold text-zinc-500 dark:text-zinc-400">Progress</span>
+          <span className="text-[11px] sm:text-xs font-semibold text-brand-primary">{progress.done}/{progress.total} — {progress.pct}%</span>
         </div>
-        <div className="h-2.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+        <div className="h-2.5 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-orange-500 to-red-600 rounded-full transition-all duration-500 ease-out"
+            className="h-full bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full transition-all duration-500 ease-out"
             style={{ width: `${progress.pct}%` }}
           />
         </div>
         {progress.pct === 100 && (
-          <p className="text-[11px] sm:text-xs font-semibold text-green-500 mt-3 text-center animate-pulse">🎉 All packed! You're ready for LPU.</p>
+          <p className="text-[11px] sm:text-xs font-semibold text-green-500 mt-3 text-center animate-pulse">🎉 All packed! You're ready for {shortBrandName}.</p>
         )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {categories.map(cat => (
           <div key={cat} className="glass-panel p-6 rounded-2xl border dark:border-white/5 bg-white dark:bg-[#0a0a0a] shadow-sm">
-            <h3 className="text-[11px] sm:text-xs font-bold text-orange-600 dark:text-orange-500 tracking-tight mb-6 border-b border-slate-100 dark:border-white/5 pb-4">
+            <h3 className="text-[11px] sm:text-xs font-bold text-brand-primary tracking-tight mb-6 border-b border-zinc-100 dark:border-white/5 pb-4">
               {cat}
             </h3>
             <ul className="space-y-4">
@@ -86,19 +88,19 @@ const FreshersKit: React.FC = () => {
                       className={`w-6 h-6 rounded-xl border-2 flex items-center justify-center transition-all duration-300 border-none
                         ${item.checked
                           ? 'bg-green-500 text-white shadow-lg shadow-green-500/20'
-                          : 'bg-slate-100 dark:bg-white/5 text-transparent hover:bg-orange-500/20'
+                          : 'bg-zinc-100 dark:bg-white/5 text-transparent hover:bg-brand-primary/20'
                         }`}
                     >
                       {item.checked && (
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3"><polyline points="20 6 9 17 4 12" /></svg>
                       )}
                     </button>
-                    <span className={`text-sm font-bold transition-all duration-300 ${item.checked ? 'text-slate-400 dark:text-slate-600 line-through opacity-50' : 'text-slate-700 dark:text-slate-200'}`}>
+                    <span className={`text-sm font-bold transition-all duration-300 ${item.checked ? 'text-zinc-400 dark:text-zinc-600 line-through opacity-50' : 'text-zinc-700 dark:text-zinc-200'}`}>
                       {item.item}
                     </span>
                   </div>
                   {item.link && (
-                    <a href={item.link} target="_blank" rel="noreferrer" className="text-[11px] sm:text-xs font-medium text-orange-500 hover:text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity bg-orange-500/10 px-3 py-1.5 rounded-lg">Get ↗</a>
+                    <a href={item.link} target="_blank" rel="noreferrer" className="text-[11px] sm:text-xs font-medium text-brand-primary hover:text-brand-primary/80 opacity-0 group-hover:opacity-100 transition-opacity bg-brand-primary/10 px-3 py-1.5 rounded-lg">Get ↗</a>
                   )}
                 </li>
               ))}
@@ -107,7 +109,7 @@ const FreshersKit: React.FC = () => {
         ))}
       </div>
 
-      <div className="p-8 bg-gradient-to-br from-orange-600 to-red-700 rounded-2xl text-white shadow-2xl relative overflow-hidden group">
+      <div className="p-8 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-2xl text-white shadow-2xl relative overflow-hidden group">
         <div className="relative z-10 flex items-start space-x-6">
           <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center flex-shrink-0 backdrop-blur-md">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" /><path d="M12 16V12" /><path d="M12 8H12.01" /></svg>

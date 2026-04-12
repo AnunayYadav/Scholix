@@ -3,161 +3,134 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-gradient: var(--brand-gradient);
+  --color-brand-glow: var(--brand-glow);
+
+  /* Global Brand Override: Redirecting standard utilities to brand variables */
+  --color-orange-500: var(--brand-primary);
+  --color-orange-600: var(--brand-secondary);
+  --color-red-600: var(--brand-secondary);
+  
   --color-insta-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
+  @keyframes bounceSubtle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
   --animate-shimmer: shimmer 1.5s infinite linear;
   --animate-fade-in: fadeIn 0.4s ease-out forwards;
+  --animate-fade-in-up: slideInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-float-slow: float 12s ease-in-out infinite;
+  --animate-float-slower: float 18s ease-in-out infinite;
+  --animate-bounce-subtle: bounceSubtle 3s ease-in-out infinite;
 
   --color-dark-800: #1e1e1e;
   --color-dark-900: #121212;
   --color-dark-950: #0a0a0a;
 
-
   @keyframes shimmer {
-    from {
-      background-position: -200% 0;
-    }
-
-    to {
-      background-position: 200% 0;
-    }
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
   }
 
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes slideInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px) scale(0.98);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
+    from { opacity: 0; transform: translateY(30px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
 
   @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.9);
-    }
-
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
   }
 
   @keyframes slideUpSheet {
-    from {
-      transform: translateY(100%);
-    }
-    to {
-      transform: translateY(0);
-    }
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
   }
 
   @keyframes slideDownSheet {
-    from {
-      transform: translateY(0);
-    }
-    to {
-      transform: translateY(100%);
-    }
+    from { transform: translateY(0); }
+    to { transform: translateY(100%); }
   }
 
   @keyframes float {
-
-    0%,
-    100% {
-      transform: translateY(0) rotate(0);
-    }
-
-    50% {
-      transform: translateY(var(--float-move)) rotate(2deg);
-    }
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(var(--float-move)) rotate(2deg); }
   }
 
   @keyframes float-delayed {
-
-    0%,
-    100% {
-      transform: translateY(0) rotate(0);
-    }
-
-    50% {
-      transform: translateY(var(--float-delay-move)) rotate(-2deg);
-    }
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(var(--float-delay-move)) rotate(-2deg); }
   }
 
   @keyframes pulse-glow {
-
-    0%,
-    100% {
-      filter: drop-shadow(0 0 20px rgba(249, 115, 22, 0.4));
-    }
-
-    50% {
-      filter: drop-shadow(0 0 40px rgba(249, 115, 22, 0.8));
-    }
+    0%, 100% { filter: drop-shadow(0 0 20px var(--brand-glow)); }
+    50% { filter: drop-shadow(0 0 40px var(--brand-glow)); }
   }
 
   @keyframes blob-bounce {
-
-    0%,
-    100% {
-      border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-    }
-
-    33% {
-      border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%;
-    }
-
-    66% {
-      border-radius: 30% 60% 70% 40% / 50% 60% 30% 40%;
-    }
+    0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+    33% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+    66% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 40%; }
   }
 
   @keyframes blink {
-
-    0%,
-    100% {
-      opacity: 1;
-      transform: scaleY(1);
-    }
-
-    50% {
-      opacity: 0;
-      transform: scaleY(0.8);
-    }
+    0%, 100% { opacity: 1; transform: scaleY(1); }
+    50% { opacity: 0; transform: scaleY(0.8); }
   }
 
   @keyframes char-reveal {
-    from {
-      opacity: 0;
-      transform: translateY(4px);
-      filter: blur(4px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-      filter: blur(0);
-    }
+    from { opacity: 0; transform: translateY(4px); filter: blur(4px); }
+    to { opacity: 1; transform: translateY(0); filter: blur(0); }
   }
 
+  @keyframes portalExpansion {
+    0% { transform: scale(1) rotate(0deg); opacity: 0; }
+    50% { opacity: 0.5; }
+    100% { transform: scale(12) rotate(180deg); opacity: 0; }
+  }
+
+  @keyframes hyperScale {
+    from { transform: scale(0.8); filter: blur(10px); opacity: 0; }
+    to { transform: scale(1); filter: blur(0px); opacity: 1; }
+  }
+
+  @keyframes dataBeam {
+    0% { transform: scale(0.1) rotate(0deg); opacity: 0; filter: blur(10px); }
+    30% { opacity: 0.8; }
+    100% { transform: scale(5) rotate(45deg); opacity: 0; filter: blur(2px); }
+  }
+
+  @keyframes auraPulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); filter: blur(60px); }
+    50% { opacity: 0.7; transform: scale(1.3); filter: blur(40px); }
+  }
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+
+  @keyframes logoFloat {
+    0%, 100% { transform: translateY(0) scale(1.05); }
+    50% { transform: translateY(-15px) scale(1.1); }
+  }
+
+  --animate-beam: dataBeam 1.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  --animate-aura: auraPulse 3s ease-in-out infinite;
+  --animate-scanline: scanline 4s linear infinite;
+  --animate-logo-float: logoFloat 2.5s ease-in-out infinite;
+  --animate-portal: portalExpansion 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-hyper-scale: hyperScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-cursor-blink: blink 0.8s ease-in-out infinite;
   --animate-char-reveal: char-reveal 0.2s ease-out forwards;
   --animate-slide-up: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -166,6 +139,20 @@
   --animate-sheet-out: slideDownSheet 0.25s ease-in forwards;
   --animate-overlay-in: overlayFadeIn 0.3s ease-out forwards;
   --animate-overlay-out: overlayFadeOut 0.2s ease-in forwards;
+}
+
+/* Hide arrows/spinners from number inputs */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button,
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number],
+.no-spinner {
+  -moz-appearance: textfield;
 }
 
 :root {
@@ -244,7 +231,7 @@ h4,
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(234, 88, 12, 0.4);
+  background: var(--brand-glow);
 }
 
 
@@ -566,13 +553,13 @@ body.modal-open {
 
 .equation-box:hover {
   transform: translateY(-4px) scale(1.01);
-  border-color: rgba(249, 115, 22, 0.3) !important;
-  background: rgba(249, 115, 22, 0.03) !important;
+  border-color: var(--brand-primary) !important;
+  background: var(--brand-glow) !important;
 }
 
 .dark .equation-box:hover {
-  border-color: rgba(249, 115, 22, 0.4) !important;
-  background: rgba(249, 115, 22, 0.05) !important;
+  border-color: var(--brand-primary) !important;
+  background: var(--brand-glow) !important;
 }
 
 /* KaTeX custom overrides */
@@ -615,15 +602,15 @@ body.modal-open {
 
 .premium-input:focus {
   background-color: white;
-  border-color: rgba(249, 115, 22, 0.5);
-  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 4px var(--brand-glow);
 }
 
 .dark .premium-input:focus {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.rounded-2.5xl {
+.rounded-2\.5xl {
   border-radius: 1.25rem;
 }
 
@@ -664,4 +651,15 @@ body.modal-open {
   pointer-events: none;
   z-index: 10;
   filter: blur(12px);
+}
+
+/* Hide number input arrows */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
 }

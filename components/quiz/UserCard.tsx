@@ -79,7 +79,7 @@ const UserCard: React.FC<UserCardProps> = ({
           {/* Name + Level */}
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-base md:text-lg font-semibold text-slate-900 dark:text-white tracking-tight truncate">
+              <h3 className="text-base md:text-lg font-semibold text-zinc-900 dark:text-white tracking-tight truncate">
                 {username || 'Verto'}
               </h3>
               <div className="flex items-center gap-1.5">
@@ -96,17 +96,17 @@ const UserCard: React.FC<UserCardProps> = ({
             {/* XP Progress Bar */}
             <div className="mt-2.5 space-y-1.5">
               <div className="flex items-center justify-between text-[10px] font-semibold">
-                <span className="text-slate-400 tracking-wider">
+                <span className="text-zinc-400 tracking-wider">
                   Level {levelInfo.level}
                 </span>
                 <span className="text-orange-500 tabular-nums">
                   {userQuizProfile.total_xp} / {levelInfo.nextLevel ? levelInfo.nextLevel.minXP : '∞'} XP
                   {levelInfo.nextLevel && (
-                    <span className="text-slate-400 ml-1">→ {levelInfo.nextLevel.title}</span>
+                    <span className="text-zinc-400 ml-1">→ {levelInfo.nextLevel.title}</span>
                   )}
                 </span>
               </div>
-              <div className="h-2 w-full max-w-xs bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+              <div className="h-2 w-full max-w-xs bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${levelInfo.progress}%` }}
@@ -125,21 +125,21 @@ const UserCard: React.FC<UserCardProps> = ({
             <div className="flex items-center gap-1.5">
               <span className="text-2xl">🔥</span>
               {isStreakAtRisk && <span className="text-xl animate-pulse">⌛</span>}
-              <span className="text-2xl font-semibold text-slate-900 dark:text-white tabular-nums">
+              <span className="text-2xl font-semibold text-zinc-900 dark:text-white tabular-nums">
                 {currentStreak}
               </span>
             </div>
-            <span className="text-[10px] font-semibold text-slate-400 tracking-wider">
+            <span className="text-[10px] font-semibold text-zinc-400 tracking-wider">
               Day Streak
             </span>
           </div>
 
           {/* Divider */}
-          <div className="h-10 w-px bg-slate-200 dark:bg-white/10 hidden md:block" />
+          <div className="h-10 w-px bg-zinc-200 dark:bg-white/10 hidden md:block" />
 
           {/* 7-day calendar */}
           <div className="hidden md:flex flex-col gap-1.5">
-            <span className="text-[9px] font-semibold text-slate-400 tracking-wider text-center">
+            <span className="text-[9px] font-semibold text-zinc-400 tracking-wider text-center">
               Last 7 Days
             </span>
             <div className="flex items-center gap-1.5">
@@ -150,10 +150,10 @@ const UserCard: React.FC<UserCardProps> = ({
                       day.isToday
                         ? day.completed
                           ? 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]'
-                          : 'bg-slate-200 dark:bg-dark-950 ring-2 ring-orange-500 ring-offset-1 ring-offset-white dark:ring-offset-dark-950 animate-pulse'
+                          : 'bg-zinc-200 dark:bg-dark-950 ring-2 ring-orange-500 ring-offset-1 ring-offset-white dark:ring-offset-dark-950 animate-pulse'
                         : day.completed
                         ? 'bg-emerald-500'
-                        : 'bg-slate-200 dark:bg-white/10'
+                        : 'bg-zinc-200 dark:bg-white/10'
                     }`}
                   >
                     {day.completed && (
@@ -162,7 +162,7 @@ const UserCard: React.FC<UserCardProps> = ({
                       </svg>
                     )}
                   </div>
-                  <span className="text-[7px] font-semibold text-slate-400 tabular-nums">
+                  <span className="text-[7px] font-semibold text-zinc-400 tabular-nums">
                     {new Date(day.date).toLocaleDateString('en', { weekday: 'narrow' })}
                   </span>
                 </div>

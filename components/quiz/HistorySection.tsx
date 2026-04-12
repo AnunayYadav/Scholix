@@ -14,12 +14,12 @@ const HistorySection: React.FC = () => {
     <div className="space-y-4 animate-in fade-in duration-500">
       {recent.length === 0 ? (
         <div className="glass-panel p-12 rounded-[48px] text-center space-y-4 border-dashed">
-          <div className="w-16 h-16 bg-slate-100 dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto text-slate-300 dark:text-slate-700">
+          <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto text-zinc-300 dark:text-zinc-700">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           </div>
           <div className="space-y-1">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">No history yet</h3>
-            <p className="text-sm text-slate-500 max-w-xs mx-auto">Start your first quiz to see your performance history and progress trackers here.</p>
+            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">No history yet</h3>
+            <p className="text-sm text-zinc-500 max-w-xs mx-auto">Start your first quiz to see your performance history and progress trackers here.</p>
           </div>
           <button
             onClick={() => setDashboardView('dashboard')}
@@ -44,23 +44,23 @@ const HistorySection: React.FC = () => {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="w-5 h-5"><path d="M18 6 6 18M6 6l12 12" /></svg>
                 </div>
                 <div className="text-right">
-                    <p className="text-[10px] font-semibold text-slate-400 tracking-wider">{new Date(q.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</p>
-                    <p className="text-[10px] font-medium text-slate-500 opacity-60">{new Date(q.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-[10px] font-semibold text-zinc-400 tracking-wider">{new Date(q.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</p>
+                    <p className="text-[10px] font-medium text-zinc-500 opacity-60">{new Date(q.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
               </div>
 
-              <div className="h-px bg-slate-100 dark:bg-white/5 w-full mb-4 opacity-50" />
+              <div className="h-px bg-zinc-100 dark:bg-white/5 w-full mb-4 opacity-50" />
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-orange-600 transition-colors truncate">
+                  <h4 className="text-sm font-bold text-zinc-900 dark:text-white group-hover:text-orange-600 transition-colors truncate">
                     {q.name || q.subject}
                   </h4>
                   <div className="flex items-center gap-2 mt-0.5">
                     <p className={`text-[10px] font-bold ${q.score !== null ? 'text-emerald-500' : 'text-amber-500'}`}>
                       {q.score !== null ? `${q.score} Points` : 'In Progress'}
                     </p>
-                    <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
-                    <p className="text-[10px] font-semibold text-slate-400">
+                    <div className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+                    <p className="text-[10px] font-semibold text-zinc-400">
                       {new Date(q.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                     </p>
                   </div>

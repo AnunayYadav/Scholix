@@ -4,7 +4,7 @@ export const config = {
 };
 
 /**
- * LPU-Nexus Heartbeat
+ * Scholix Heartbeat
  * Triggered daily via Vercel Crons to prevent Supabase from pausing.
  */
 export default async function handler() {
@@ -28,7 +28,7 @@ export default async function handler() {
     });
 
     if (response.ok) {
-      return new Response('Nexus heartbeat successful: Activity registered.', { status: 200 });
+      return new Response('Scholix heartbeat successful: Activity registered.', { status: 200 });
     } else {
       const errorText = await response.text();
       console.error('Heartbeat rejected by registry:', errorText);

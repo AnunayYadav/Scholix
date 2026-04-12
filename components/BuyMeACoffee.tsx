@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserProfile } from '../types.ts';
+import { useUniversity } from '../hooks/useUniversity.tsx';
 
 interface BuyMeACoffeeProps {
   userProfile?: UserProfile | null;
@@ -8,6 +9,7 @@ interface BuyMeACoffeeProps {
 }
 
 const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className }) => {
+  const { fullBrandName, shortBrandName, studentTerm } = useUniversity();
   const [amount, setAmount] = useState<number>(50);
   const [loading, setLoading] = useState(false);
   const [customAmount, setCustomAmount] = useState('');
@@ -55,9 +57,9 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className }) =
         amount: orderData.amount,
 
         currency: orderData.currency,
-        name: "LPU-Nexus",
-        description: "Support the creator",
-        image: "https://lpu-nexus.vercel.app/logo.png", // Replace with actual logo URL
+        name: "Scholix",
+        description: "Support Scholix Development",
+        image: "/logo.png", // Dynamic logo from public directory
         order_id: orderData.id,
         handler: function (response: any) {
           // Success callback
@@ -76,7 +78,7 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className }) =
           });
         },
         prefill: {
-          name: userProfile?.username || "Verto",
+          name: userProfile?.username || studentTerm,
           email: userProfile?.email || "",
           contact: ""
         },
@@ -104,7 +106,7 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className }) =
   const presetAmounts = [50, 100, 200, 500];
 
   return (
-    <div className={`relative overflow-hidden p-5 sm:p-10 md:p-14 rounded-[32px] sm:rounded-[48px] bg-white/5 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 ${className}`}>
+    <div className={`relative overflow-hidden p-5 sm:p-10 md:p-14 rounded-[32px] sm:rounded-[48px] bg-white/5 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 ${className}`}>
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 blur-[80px] rounded-full -mr-32 -mt-32"></div>
       <div className="absolute bottom-0 left-0 w-48 h-48 bg-red-500/5 blur-[60px] rounded-full -ml-24 -mb-24"></div>
@@ -117,12 +119,12 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className }) =
             <span className="text-[10px] font-black uppercase tracking-widest text-orange-600">Buy me a coffee</span>
           </div>
 
-          <h3 className="text-2xl sm:text-4xl font-black text-slate-800 dark:text-white tracking-tight leading-tight">
-            Support <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">LPU-Nexus</span>
+          <h3 className="text-2xl sm:text-4xl font-black text-zinc-800 dark:text-white tracking-tight leading-tight">
+            Support <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Scholix</span>
           </h3>
 
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-sm mx-auto md:mx-0">
-            Maintaining servers and developing AI features costs money. If Nexus helped you, consider supporting its growth.
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed max-w-sm mx-auto md:mx-0">
+            Maintaining servers and developing AI features costs money. If Scholix helped you, consider supporting its growth.
           </p>
         </div>
 
@@ -134,7 +136,7 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className }) =
                 key={amt}
                 disabled={loading}
                 onClick={() => { setAmount(amt); setCustomAmount(''); }}
-                className={`px-4 py-3 rounded-2xl text-sm font-bold transition-all border ${amount === amt && !customAmount ? 'bg-orange-500 text-white border-orange-400 shadow-[0_8px_20px_rgba(249,115,22,0.3)]' : 'bg-transparent text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-orange-500/50'}`}
+                className={`px-4 py-3 rounded-2xl text-sm font-bold transition-all border ${amount === amt && !customAmount ? 'bg-orange-500 text-white border-orange-400 shadow-[0_8px_20px_rgba(249,115,22,0.3)]' : 'bg-transparent text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-white/10 hover:border-orange-500/50'}`}
               >
                 ₹{amt}
               </button>
@@ -150,9 +152,9 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className }) =
                 setCustomAmount(e.target.value);
                 if (e.target.value) setAmount(Number(e.target.value));
               }}
-              className="w-full px-5 py-4 rounded-2xl bg-slate-50 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
+              className="w-full px-5 py-4 rounded-2xl bg-zinc-50 dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-800 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all no-spinner"
             />
-            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-black">INR</span>
+            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 font-black">INR</span>
           </div>
 
           <button
@@ -168,10 +170,10 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className }) =
             ) : (
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="w-4 h-4"><path d="M12 2v20M2 12h20" /></svg>
             )}
-            {loading ? 'Processing...' : 'Support Creator'}
+            {loading ? 'Processing...' : 'Support Scholix'}
           </button>
 
-          <p className="text-[9px] text-center text-slate-400 font-bold uppercase tracking-widest opacity-60">
+          <p className="text-[9px] text-center text-zinc-400 font-bold uppercase tracking-widest opacity-60">
             Securely processed via Razorpay
           </p>
         </div>

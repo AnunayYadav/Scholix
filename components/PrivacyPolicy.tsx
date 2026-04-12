@@ -17,11 +17,11 @@ const PrivacyPolicy: React.FC = () => {
         },
         {
             title: "Third-Party Services",
-            content: "LPU-Nexus integrates several third-party services:\n• Supabase: Managed database and authentication infrastructure.\n• Vercel: Hosting provider with Web Analytics and Speed Insights.\n• Google Gemini AI: Powers our 'Placement Prefect' and AI study tools. Queries may be processed by Google's LLM infrastructure.\n• Google AdSense: Provides advertising services to keep the platform free."
+            content: "Scholix integrates several third-party services:\n• Supabase: Managed database and authentication infrastructure.\n• Vercel: Hosting provider with Web Analytics and Speed Insights.\n• Google Gemini AI: Powers our 'Placement Prefect' and AI study tools. Queries may be processed by Google's LLM infrastructure.\n• Google AdSense: Provides advertising services to keep the platform free."
         },
         {
             title: "Google AdSense & Cookies",
-            content: "Google uses cookies to serve ads based on your previous visits to LPU-Nexus and other sites. Google's use of advertising cookies enables it and its partners to serve ads to our users based on their visits. You may opt-out of personalized advertising by visiting your Google Ad Settings."
+            content: "Google uses cookies to serve ads based on your previous visits to Scholix and other sites. Google's use of advertising cookies enables it and its partners to serve ads to our users based on their visits. You may opt-out of personalized advertising by visiting your Google Ad Settings."
         },
         {
             title: "Data Retention & Security",
@@ -33,11 +33,11 @@ const PrivacyPolicy: React.FC = () => {
         },
         {
             title: "Children's Information",
-            content: "LPU-Nexus does not knowingly collect any Personal Identifiable Information from children under the age of 13. If you believe your child provided this information on our website, please contact us immediately for prompt removal."
+            content: "Scholix does not knowingly collect any Personal Identifiable Information from children under the age of 13. If you believe your child provided this information on our website, please contact us immediately for prompt removal."
         },
         {
             title: "Academic Ethics",
-            content: "LPU-Nexus is an independent student-led project. While we help students prepare for exams, we do not store university-sensitive 'official' data beyond what you manually enter. We encourage all users to follow the University's Academic Integrity rules."
+            content: "Scholix is an independent student-led project. While we help students prepare for exams, we do not store university-sensitive 'official' data beyond what you manually enter. We encourage all users to follow the University's Academic Integrity rules."
         }
     ];
 
@@ -52,30 +52,30 @@ const PrivacyPolicy: React.FC = () => {
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20">
                         <span className="text-[10px] font-black uppercase tracking-widest text-orange-600">Legal Compliance</span>
                     </div>
-                    <h1 className="text-4xl md:text-6xl font-black text-slate-800 dark:text-white tracking-tight">Privacy Policy</h1>
-                    <p className="text-slate-500 font-medium">Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                    <h1 className="text-4xl md:text-6xl font-black text-zinc-800 dark:text-white tracking-tight">Privacy Policy</h1>
+                    <p className="text-zinc-500 font-medium">Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
                 </div>
 
-                <div className="glass-panel p-8 md:p-12 rounded-[48px] space-y-10 border-slate-200 dark:border-white/10">
-                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                        At <span className="text-orange-600 font-bold">LPU-Nexus</span>, accessible from lpunexus.vercel.app, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by LPU-Nexus and how we use it.
+                <div className="glass-panel p-8 md:p-12 rounded-[48px] space-y-10 border-zinc-200 dark:border-white/10">
+                    <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
+                        At <span className="text-orange-600 font-bold">Scholix</span>, accessible from scholix.app, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by Scholix and how we use it.
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {sections.map((section, idx) => (
                             <div key={idx} className="space-y-3">
-                                <h3 className="text-lg font-black text-slate-800 dark:text-white uppercase tracking-wider text-sm opacity-80">{section.title}</h3>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium whitespace-pre-wrap">
+                                <h3 className="text-lg font-black text-zinc-800 dark:text-white uppercase tracking-wider text-sm opacity-80">{section.title}</h3>
+                                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium whitespace-pre-wrap">
                                     {section.content}
                                 </p>
                             </div>
                         ))}
                     </div>
 
-                    <div className="pt-10 border-t border-slate-100 dark:border-white/5">
-                        <div className="bg-slate-50 dark:bg-white/[0.02] p-8 rounded-3xl border border-slate-200 dark:border-white/10 text-center">
-                            <h4 className="text-slate-800 dark:text-white font-black mb-2">Consent & Agreement</h4>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">By using our website, you hereby consent to our Privacy Policy and agree to its terms.</p>
+                    <div className="pt-10 border-t border-zinc-100 dark:border-white/5">
+                        <div className="bg-zinc-50 dark:bg-white/[0.02] p-8 rounded-3xl border border-zinc-200 dark:border-white/10 text-center">
+                            <h4 className="text-zinc-800 dark:text-white font-black mb-2">Consent & Agreement</h4>
+                            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed mb-6">By using our website, you hereby consent to our Privacy Policy and agree to its terms.</p>
                             <div className="flex justify-center gap-4">
                                 <a href="mailto:anunayarvind@gmail.com" className="px-6 py-3 bg-orange-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-500 transition-all">Support Contact</a>
                             </div>

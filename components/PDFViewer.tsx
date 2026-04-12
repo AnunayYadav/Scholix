@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { UserProfile } from '../types.ts';
 import { showToast } from './Toast.tsx';
 import NexusServer from '../services/nexusServer.ts';
+import { useUniversity } from '../hooks/useUniversity.tsx';
 
 interface PDFViewerProps {
     url: string;
@@ -204,7 +205,7 @@ const PageRenderer = React.memo<{
                 }
             }}
             data-page={pageNum}
-            className="relative bg-white dark:bg-[#0a0a0a] rounded-md origin-top-left select-none border border-slate-200 dark:border-white/5 overflow-visible page-container"
+            className="relative bg-white dark:bg-[#0a0a0a] rounded-md origin-top-left select-none border border-zinc-200 dark:border-white/5 overflow-visible page-container"
             style={{
                 width: pageInfo ? `calc(${pageInfo.width}px * var(--pdf-scale))` : '100%',
                 height: pageInfo ? `calc(${pageInfo.height}px * var(--pdf-scale))` : '100vh',
@@ -252,6 +253,8 @@ const PageRenderer = React.memo<{
 });
 
 const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfile }) => {
+    const { fullBrandName } = useUniversity();
+
     const [numPages, setNumPages] = useState<number>(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [scale, setScale] = useState(1.0);
@@ -858,7 +861,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
                     </div>
                     <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Connection Fault</h3>
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-widest leading-relaxed">{error}</p>
+                    <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest leading-relaxed">{error}</p>
                     <button onClick={handleClose} className="bg-white text-black px-10 py-4 rounded-3xl text-[10px] font-medium hover:scale-105 active:scale-95 transition-all shadow-xl">Abort Protocol</button>
                 </div>
             </div>,
@@ -867,27 +870,27 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     }
 
     return createPortal(
-        <div className={`fixed inset-0 z-[9999] flex flex-col bg-slate-100 dark:bg-[#0a0a0a] animate-fade-in overflow-hidden transition-all duration-300 ${isClosing ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'} ${isFullscreen ? 'p-0' : ''}`}>
+        <div className={`fixed inset-0 z-[9999] flex flex-col bg-zinc-100 dark:bg-[#0a0a0a] animate-fade-in overflow-hidden transition-all duration-300 ${isClosing ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'} ${isFullscreen ? 'p-0' : ''}`}>
             {/* Toolbar */}
-            <div className={`absolute top-0 left-0 right-0 flex items-center justify-between px-4 md:px-6 h-16 md:h-20 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-2xl border-b border-slate-200 dark:border-white/5 z-50 transition-transform duration-300 ${showToolbar ? 'translate-y-0' : '-translate-y-full'}`}>
+            <div className={`absolute top-0 left-0 right-0 flex items-center justify-between px-4 md:px-6 h-16 md:h-20 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-2xl border-b border-zinc-200 dark:border-white/5 z-50 transition-transform duration-300 ${showToolbar ? 'translate-y-0' : '-translate-y-full'}`}>
                 <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
                     <button
                         onClick={handleClose}
-                        className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-slate-200 dark:bg-white/5 hover:bg-orange-600 text-slate-600 dark:text-white transition-all border-none group"
+                        className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-zinc-200 dark:bg-white/5 hover:bg-orange-600 text-zinc-600 dark:text-white transition-all border-none group"
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                     </button>
                     <div className="hidden sm:block truncate">
-                        <h3 className="text-[13px] font-medium text-slate-900 dark:text-white tracking-tight truncate max-w-[200px]">{fileName}</h3>
-                        <p className="text-[10px] font-medium text-orange-500 tracking-wide leading-none mt-1">LPU Nexus Secure Protocol</p>
+                        <h3 className="text-[13px] font-medium text-zinc-900 dark:text-white tracking-tight truncate max-w-[200px]">{fileName}</h3>
+                        <p className="text-[10px] font-medium text-orange-500 tracking-wide leading-none mt-1">{fullBrandName} Secure Protocol</p>
                     </div>
                 </div>
 
                 {/* Center: Search & Zoom */}
                 <div className="flex items-center gap-2 md:gap-6">
                     {/* Search Bar */}
-                    <div className="hidden sm:flex items-center bg-slate-200 dark:bg-white/5 rounded-2xl border border-slate-300 dark:border-white/10 px-3 py-1.5 focus-within:border-orange-600 transition-all group">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-slate-400 dark:text-white/30 group-focus-within:text-orange-500"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                    <div className="hidden sm:flex items-center bg-zinc-200 dark:bg-white/5 rounded-2xl border border-zinc-300 dark:border-white/10 px-3 py-1.5 focus-within:border-orange-600 transition-all group">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-zinc-400 dark:text-white/30 group-focus-within:text-orange-500"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
                         <input
                             type="text"
                             placeholder="Find..."
@@ -898,37 +901,37 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                             autoCorrect="off"
                             autoComplete="off"
                             spellCheck="false"
-                            className="bg-transparent border-none outline-none text-xs font-normal text-slate-900 dark:text-white px-2 w-24 md:w-32 placeholder:text-slate-400 dark:placeholder:text-white/20"
+                            className="bg-transparent border-none outline-none text-xs font-normal text-zinc-900 dark:text-white px-2 w-24 md:w-32 placeholder:text-zinc-400 dark:placeholder:text-white/20"
                         />
                         {searchResults.length > 0 && (
                             <div className="flex items-center gap-2 pr-2">
                                 <span className="text-[10px] font-medium text-orange-500 whitespace-nowrap">{currentSearchIndex + 1} / {searchResults.length}</span>
-                                <div className="h-4 w-px bg-slate-300 dark:bg-white/10 mx-1" />
-                                <button onClick={prevSearch} className="text-slate-400 dark:text-white/40 hover:text-slate-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3"><path d="m15 18-6-6 6-6" /></svg></button>
-                                <button onClick={nextSearch} className="text-slate-400 dark:text-white/40 hover:text-slate-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3"><path d="m9 18 6-6-6-6" /></svg></button>
+                                <div className="h-4 w-px bg-zinc-300 dark:bg-white/10 mx-1" />
+                                <button onClick={prevSearch} className="text-zinc-400 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3"><path d="m15 18-6-6 6-6" /></svg></button>
+                                <button onClick={nextSearch} className="text-zinc-400 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3"><path d="m9 18 6-6-6-6" /></svg></button>
                             </div>
                         )}
                     </div>
 
                     {/* Scale Controls */}
-                    <div className="flex items-center gap-1 bg-slate-200 dark:bg-white/5 rounded-2xl p-1 border border-slate-300 dark:border-white/10">
+                    <div className="flex items-center gap-1 bg-zinc-200 dark:bg-white/5 rounded-2xl p-1 border border-zinc-300 dark:border-white/10">
                         <button
                             onClick={() => handleZoom(Math.max(0.2, scaleRef.current - 0.1))}
-                            className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 dark:text-white/50 hover:text-slate-900 dark:hover:text-white hover:bg-slate-300 dark:hover:bg-white/10 transition-all border-none bg-transparent"
+                            className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-500 dark:text-white/50 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300 dark:hover:bg-white/10 transition-all border-none bg-transparent"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="5" y1="12" x2="19" y2="12" /></svg>
                         </button>
-                        <span className="text-xs font-medium text-slate-900 dark:text-white px-2 min-w-[50px] text-center">{Math.round(scale * 100)}%</span>
+                        <span className="text-xs font-medium text-zinc-900 dark:text-white px-2 min-w-[50px] text-center">{Math.round(scale * 100)}%</span>
                         <button
                             onClick={() => handleZoom(Math.min(3, scaleRef.current + 0.1))}
-                            className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 dark:text-white/50 hover:text-slate-900 dark:hover:text-white hover:bg-slate-300 dark:hover:bg-white/10 transition-all border-none bg-transparent"
+                            className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-500 dark:text-white/50 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300 dark:hover:bg-white/10 transition-all border-none bg-transparent"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                         </button>
 
                         <button
                             onClick={toggleFit}
-                            className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-300/50 dark:bg-white/5 text-slate-500 dark:text-white/50 hover:text-slate-900 dark:hover:text-white hover:bg-orange-600 transition-all border-none"
+                            className="w-10 h-10 rounded-xl flex items-center justify-center bg-zinc-300/50 dark:bg-white/5 text-zinc-500 dark:text-white/50 hover:text-zinc-900 dark:hover:text-white hover:bg-orange-600 transition-all border-none"
                             title={viewMode === 'width' ? "Fit to Width" : "Fit to Page"}
                         >
                             {viewMode === 'width' ? (
@@ -949,21 +952,21 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
                 {/* Right: Actions */}
                 <div className="flex items-center gap-2">
-                    <div className="hidden sm:flex items-center bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-2xl px-4 py-3 gap-3">
+                    <div className="hidden sm:flex items-center bg-zinc-200 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-2xl px-4 py-3 gap-3">
                         <input
                             type="number"
                             min={1}
                             max={numPages}
                             value={currentPage}
                             onChange={e => jumpToPage(parseInt(e.target.value) || 1)}
-                            className="w-10 bg-transparent border-none outline-none text-center text-xs font-medium text-slate-900 dark:text-white"
+                            className="w-10 bg-transparent border-none outline-none text-center text-xs font-medium text-zinc-900 dark:text-white"
                         />
-                        <span className="text-xs font-medium text-slate-400 dark:text-white/20 tracking-wide">/ {numPages}</span>
+                        <span className="text-xs font-medium text-zinc-400 dark:text-white/20 tracking-wide">/ {numPages}</span>
                     </div>
 
                     <button
                         onClick={toggleTheme}
-                        className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white border-none group"
+                        className="w-10 h-10 rounded-xl flex items-center justify-center bg-zinc-200 dark:bg-white/5 text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white border-none group"
                         title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
                     >
                         {isDarkMode ? (
@@ -975,7 +978,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
                     <button
                         onClick={toggleFullscreen}
-                        className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white border-none group"
+                        className="w-10 h-10 rounded-xl flex items-center justify-center bg-zinc-200 dark:bg-white/5 text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white border-none group"
                         title="Toggle Fullscreen"
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 group-hover:scale-110 transition-transform"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" /></svg>
@@ -1002,14 +1005,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     onContextMenu={(e) => !isAdmin && e.preventDefault()}
                     onDragStart={(e) => !isAdmin && e.preventDefault()}
                     onSelectStart={(e) => !isAdmin && e.preventDefault()}
-                    className="flex-1 overflow-auto bg-slate-100 dark:bg-[#0a0a0a] relative select-none touch-auto overscroll-none pt-16 md:pt-20"
+                    className="flex-1 overflow-auto bg-zinc-100 dark:bg-[#0a0a0a] relative select-none touch-auto overscroll-none pt-16 md:pt-20"
                     style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'none' }}
                 >
                     {isLoading ? (
                         <div className="flex flex-col items-center w-full max-w-4xl px-4 mx-auto space-y-8">
                             {Array.from({ length: 3 }).map((_, i) => (
-                                <div key={i} className="w-full bg-slate-200 dark:bg-white/5 rounded-xl aspect-[1/1.4] animate-pulse relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-300/20 dark:via-white/5 to-transparent shimmer-effect" />
+                                <div key={i} className="w-full bg-zinc-200 dark:bg-white/5 rounded-xl aspect-[1/1.4] animate-pulse relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-300/20 dark:via-white/5 to-transparent shimmer-effect" />
                                 </div>
                             ))}
                         </div>
@@ -1119,7 +1122,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 }
 
                 .watermark-overlay {
-                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' transform='rotate(-35 150 150)' fill='currentColor' fill-opacity='1' font-family='Inter, sans-serif' font-weight='700' font-size='32'%3ELPU NEXUS%3C/text%3E%3C/svg%3E");
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' transform='rotate(-35 150 150)' fill='currentColor' fill-opacity='1' font-family='Inter, sans-serif' font-weight='700' font-size='32'%3E${fullBrandName.toUpperCase()}%3C/text%3E%3C/svg%3E");
                     background-repeat: repeat;
                     background-size: 300px 300px;
                 }

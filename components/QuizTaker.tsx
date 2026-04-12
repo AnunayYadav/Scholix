@@ -5,6 +5,7 @@ import { slugify } from '../utils/slugify';
 import Editor from '@monaco-editor/react';
 import { UserProfile, QuizQuestion, LibraryFile } from '../types.ts';
 import NexusServer from '../services/nexusServer';
+import { useUniversity } from '../hooks/useUniversity.tsx';
 import { generateQuizFromSyllabus } from '../services/geminiService.ts';
 import { extractTextFromPdf } from '../services/pdfUtils.ts';
 import jsPDF from 'jspdf';
@@ -174,7 +175,7 @@ const RewardItemCard: React.FC<{
 
         {/* Status Overlay */}
         {!isRewardUnlocked && (
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[1px] flex items-center justify-center z-20">
+          <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-[1px] flex items-center justify-center z-20">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-white/50"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
           </div>
         )}
@@ -211,7 +212,7 @@ const RewardItemCard: React.FC<{
             </button>
           )
         ) : (
-          <div className="text-[5.5px] font-black text-slate-500 dark:text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded-full border border-slate-200 dark:border-white/5">
+          <div className="text-[5.5px] font-black text-zinc-500 dark:text-zinc-500 uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-1.5 py-0.5 rounded-full border border-zinc-200 dark:border-white/5">
             LOCKED
           </div>
         )}
@@ -221,6 +222,8 @@ const RewardItemCard: React.FC<{
 };
 
 const QuizTaker: React.FC<{ userProfile: UserProfile | null, onAuthRequired?: () => void }> = ({ userProfile, onAuthRequired }) => {
+  const { fullBrandName, shortBrandName, selectedUniversity } = useUniversity();
+  const isLPU = selectedUniversity === 'lpu';
   const { subjectName, quizId } = useParams();
   const navigate = useNavigate();
 
@@ -1387,13 +1390,13 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               >
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-white leading-tight">Report Question</h3>
-                  <button onClick={() => setShowReportModal(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors text-slate-400">
+                  <button onClick={() => setShowReportModal(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-400">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                   </button>
                 </div>
                 
                 <div className="space-y-6">
-                  <p className="text-sm text-slate-400 leading-relaxed">What's wrong with this question? Your report will be reviewed by Nexus Moderators to ensure content quality.</p>
+                  <p className="text-sm text-zinc-400 leading-relaxed">What's wrong with this question? Your report will be reviewed by {fullBrandName} Moderators to ensure content quality.</p>
                   
                   <div className="space-y-3">
                     {['Incorrect Answer', 'Typo/Grammar Error', 'Out of Syllabus', 'Technical Glitch'].map((option) => (
@@ -1403,7 +1406,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         className={`w-full text-left p-4 rounded-2xl border transition-all ${
                           reportReason === option 
                             ? 'bg-orange-500/10 border-orange-500 text-orange-400' 
-                            : 'bg-white/5 border-white/5 text-slate-400 hover:border-orange-500/30'
+                            : 'bg-white/5 border-white/5 text-zinc-400 hover:border-orange-500/30'
                         }`}
                       >
                         <span className="text-sm font-semibold">{option}</span>
@@ -1414,7 +1417,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       placeholder="Additional details or specific concerns..."
                       value={reportReason}
                       onChange={(e) => setReportReason(e.target.value)}
-                      className="w-full p-4 bg-white/5 border border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all min-h-[100px] text-slate-200"
+                      className="w-full p-4 bg-white/5 border border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all min-h-[100px] text-zinc-200"
                     />
                   </div>
 
@@ -1439,41 +1442,41 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-slate-950/60 backdrop-blur-xl" 
+                className="absolute inset-0 bg-zinc-950/60 backdrop-blur-xl" 
                 onClick={() => setShowEditModal(false)} 
               />
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[32px] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+                className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-white/10 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
               >
-                <div className="flex items-center justify-between p-8 border-b border-slate-100 dark:border-white/5">
+                <div className="flex items-center justify-between p-8 border-b border-zinc-100 dark:border-white/5">
                   <div>
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Edit Question</h3>
-                    <p className="text-xs text-slate-400 mt-1 uppercase tracking-widest font-bold">Admin Console</p>
+                    <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Edit Question</h3>
+                    <p className="text-xs text-zinc-400 mt-1 uppercase tracking-widest font-bold">Admin Console</p>
                   </div>
-                  <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors text-slate-500">
+                  <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-full transition-colors text-zinc-500">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                   </button>
                 </div>
                 
                 <div className="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Question Text</label>
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Question Text</label>
                     <textarea
                       value={editForm.question}
                       onChange={(e) => setEditForm(prev => ({ ...prev, question: e.target.value }))}
-                      className="w-full p-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all min-h-[80px] text-slate-800 dark:text-slate-200"
+                      className="w-full p-4 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all min-h-[80px] text-zinc-800 dark:text-zinc-200"
                     />
                   </div>
 
                   {editForm.options && editForm.options.length > 0 && (
                     <div className="space-y-4">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Options</label>
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Options</label>
                       {editForm.options.map((opt, idx) => (
                         <div key={idx} className="flex gap-3">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${editForm.correctAnswer === idx ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-100 dark:bg-white/5 text-slate-400'}`}>
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${editForm.correctAnswer === idx ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400'}`}>
                             {String.fromCharCode(65 + idx)}
                           </div>
                           <input
@@ -1483,11 +1486,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                               newOpts[idx] = e.target.value;
                               setEditForm(prev => ({ ...prev, options: newOpts }));
                             }}
-                            className="flex-1 p-3 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-xl text-sm focus:outline-none focus:border-emerald-500/50 text-slate-800 dark:text-slate-200"
+                            className="flex-1 p-3 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 rounded-xl text-sm focus:outline-none focus:border-emerald-500/50 text-zinc-800 dark:text-zinc-200"
                           />
                           <button 
                             onClick={() => setEditForm(prev => ({ ...prev, correctAnswer: idx }))}
-                            className={`px-3 rounded-xl border text-[8px] font-bold uppercase transition-all ${editForm.correctAnswer === idx ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200 dark:border-white/10 text-slate-400 hover:border-emerald-500/30'}`}
+                            className={`px-3 rounded-xl border text-[8px] font-bold uppercase transition-all ${editForm.correctAnswer === idx ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-zinc-200 dark:border-white/10 text-zinc-400 hover:border-emerald-500/30'}`}
                           >
                             Correct
                           </button>
@@ -1497,29 +1500,29 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   )}
 
                   <div className="space-y-3">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Explanation</label>
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Explanation</label>
                     <textarea
                       value={editForm.explanation}
                       onChange={(e) => setEditForm(prev => ({ ...prev, explanation: e.target.value }))}
-                      className="w-full p-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all min-h-[80px] text-slate-800 dark:text-slate-200"
+                      className="w-full p-4 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all min-h-[80px] text-zinc-800 dark:text-zinc-200"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Topic</label>
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Topic</label>
                       <input
                         value={editForm.topic}
                         onChange={(e) => setEditForm(prev => ({ ...prev, topic: e.target.value }))}
-                        className="w-full p-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none text-slate-800 dark:text-slate-200"
+                        className="w-full p-4 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none text-zinc-800 dark:text-zinc-200"
                       />
                     </div>
                     <div className="space-y-3">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Difficulty Level</label>
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Difficulty Level</label>
                       <select
                         value={editForm.difficulty}
                         onChange={(e) => setEditForm(prev => ({ ...prev, difficulty: e.target.value }))}
-                        className="w-full p-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none text-slate-800 dark:text-slate-200 appearance-none cursor-pointer"
+                        className="w-full p-4 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none text-zinc-800 dark:text-zinc-200 appearance-none cursor-pointer"
                       >
                         <option value="easy">Easy</option>
                         <option value="medium">Medium</option>
@@ -1529,7 +1532,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   </div>
                 </div>
 
-                <div className="p-8 border-t border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
+                <div className="p-8 border-t border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
                   <button
                     disabled={isUpdating}
                     onClick={submitEdit}
@@ -1613,7 +1616,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   if (initializing) return (
     <div className="h-[60vh] flex flex-col items-center justify-center space-y-6 animate-fade-in">
       <div className="w-12 h-12 border-4 border-orange-500/10 border-t-orange-600 rounded-full animate-spin" />
-      <p className="text-sm font-medium text-slate-500">Setting up your subjects...</p>
+      <p className="text-sm font-medium text-zinc-500">Setting up your subjects...</p>
       {renderModals()}
     </div>
   );
@@ -1625,8 +1628,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         <div className="absolute inset-0 w-24 h-24 border-8 border-orange-600 border-t-transparent rounded-full animate-spin" />
       </div>
       <div className="text-center space-y-2">
-        <h3 className="text-2xl font-semibold text-slate-800 dark:text-white">Starting Quiz</h3>
-        <p className="text-sm font-medium text-slate-500 animate-pulse">{status}</p>
+        <h3 className="text-2xl font-semibold text-zinc-800 dark:text-white">Starting Quiz</h3>
+        <p className="text-sm font-medium text-zinc-500 animate-pulse">{status}</p>
       </div>
       {renderModals()}
     </div>
@@ -1645,20 +1648,20 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           {/* Aligned with Question Box (lg:col-span-8) */}
           <div className="lg:col-span-8 px-4 md:px-0">
             {/* Extremely Compact Progress Indicator - Matching Reference with LPU Nexus Theme */}
-            <div className="glass-panel p-5 px-8 rounded-3xl bg-white dark:bg-dark-900/40 border border-slate-200 dark:border-white/5 shadow-sm space-y-3">
+            <div className="glass-panel p-5 px-8 rounded-3xl bg-white dark:bg-dark-900/40 border border-zinc-200 dark:border-white/5 shadow-sm space-y-3">
               <div className="space-y-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                   {isSubjectiveSection ? 'Subjective' : isCodingSection ? 'Coding' : 'MCQ'} Section
                 </span>
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
                     Question {currentQuestionIdx + 1} of {quizQuestions.length}
                   </h3>
                   <span className="text-base font-bold text-orange-500">{progressPercent}%</span>
                 </div>
               </div>
 
-              <div className="h-2 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden relative">
+              <div className="h-2 w-full bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden relative">
                 <div 
                   className="h-full bg-orange-500 rounded-full transition-all duration-1000 ease-out" 
                   style={{ width: `${progressPercent}%` }}
@@ -1670,11 +1673,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           {/* Actions Column (Timer & Submit) */}
           <div className="lg:col-span-4 flex items-center justify-end gap-3 px-4 md:px-0">
             {timerActive && (
-              <div className="flex items-center gap-3 px-5 h-11 rounded-2xl bg-white/60 dark:bg-dark-900/40 border border-slate-200 dark:border-white/5 backdrop-blur-md shadow-sm">
+              <div className="flex items-center gap-3 px-5 h-11 rounded-2xl bg-white/60 dark:bg-dark-900/40 border border-zinc-200 dark:border-white/5 backdrop-blur-md shadow-sm">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`w-4 h-4 ${timeLeft < 60 ? 'text-red-500 animate-pulse' : 'text-orange-500'}`}>
                   <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
                 </svg>
-                <p className={`text-[15px] font-bold tabular-nums ${timeLeft < 60 ? 'text-red-500' : 'text-slate-900 dark:text-slate-100'}`}>
+                <p className={`text-[15px] font-bold tabular-nums ${timeLeft < 60 ? 'text-red-500' : 'text-zinc-900 dark:text-zinc-100'}`}>
                   {formatTime(timeLeft)}
                 </p>
               </div>
@@ -1695,11 +1698,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Main Question Area */}
           <div className="lg:col-span-8 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
-            <div className="glass-panel p-10 md:p-12 rounded-[48px] shadow-2xl bg-white/80 dark:bg-dark-900/50 border-slate-200 dark:border-white/5 relative">
+            <div className="glass-panel p-10 md:p-12 rounded-[48px] shadow-2xl bg-white/80 dark:bg-dark-900/50 border-zinc-200 dark:border-white/5 relative">
               <div className="space-y-10">
                 <div className="flex items-center flex-wrap gap-3">
                   <span className="bg-orange-600/10 dark:bg-orange-600/20 text-orange-600 dark:text-orange-500 px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest">Question {sectionInfo.mapping[currentQuestionIdx]}</span>
-                  <span className="bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-400 px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest">Unit {q.unit}</span>
+                  <span className="bg-zinc-100 dark:bg-dark-800 text-zinc-600 dark:text-zinc-400 px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest">Unit {q.unit}</span>
                   {q.difficulty && (
                     <span className={`px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest ${
                       q.difficulty === 'easy' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
@@ -1725,7 +1728,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     className={`ml-auto p-1.5 transition-all active:scale-90 ${
                       bookmarkedIds.has(q.id || '')
                         ? 'text-blue-500'
-                        : 'text-slate-300 dark:text-slate-600 hover:text-blue-400'
+                        : 'text-zinc-300 dark:text-zinc-600 hover:text-blue-400'
                     }`}
                     title={bookmarkedIds.has(q.id || '') ? 'Remove Bookmark' : 'Bookmark Question'}
                   >
@@ -1736,7 +1739,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
                   <button
                     onClick={() => handleReportOpen(q.id || '')}
-                    className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-red-400 transition-all active:scale-90"
+                    className="p-1.5 text-zinc-300 dark:text-zinc-600 hover:text-red-400 transition-all active:scale-90"
                     title="Report Error in Question"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5">
@@ -1747,7 +1750,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   {userProfile?.is_admin && (
                     <button
                       onClick={() => handleEditOpen(q)}
-                      className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-emerald-500 transition-all active:scale-90"
+                      className="p-1.5 text-zinc-300 dark:text-zinc-600 hover:text-emerald-500 transition-all active:scale-90"
                       title="Edit Question (Admin)"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5">
@@ -1758,40 +1761,40 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   )}
                 </div>
 
-                <p className="text-lg md:text-xl font-light leading-relaxed text-slate-800 dark:text-slate-100">
+                <p className="text-lg md:text-xl font-light leading-relaxed text-zinc-800 dark:text-zinc-100">
                   {isCodingSection ? 'Implement the following:' : 'Q)'} {parseText(q.question)}
                 </p>
 
                 {isCodingSection ? (
                   <div className="space-y-4">
                     {/* Editor Header Bar */}
-                    <div className="flex items-center justify-between px-6 py-3 bg-slate-100 dark:bg-[#252526] rounded-t-[20px] border-x border-t border-slate-200 dark:border-white/10">
+                    <div className="flex items-center justify-between px-6 py-3 bg-zinc-100 dark:bg-[#252526] rounded-t-[20px] border-x border-t border-zinc-200 dark:border-white/10">
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
                           <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
                           <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
                         </div>
-                        <div className="h-4 w-px bg-slate-300 dark:bg-white/10 mx-1" />
+                        <div className="h-4 w-px bg-zinc-300 dark:bg-white/10 mx-1" />
                         <div className="flex items-center gap-2">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-blue-500"><path d="M12 2C6.48 2 2 6.48 2 12s4.1 10 9.1 10c4.1 0 7.7-2.7 8.7-6.5h-2.1c-.9 2.7-3.4 4.5-6.6 4.5-3.6 0-6.6-2.9-6.6-6.5S7.4 7 11 7c3.1 0 5.8 2.1 6.7 5h2.1C18.8 8 15.3 5.5 11 5.5s-8 2.5-8 6.5" /></svg>
-                          <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">{currentLanguage === 'cpp' ? 'C++' : currentLanguage === 'c' ? 'C' : 'Python 3'}</span>
+                          <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest">{currentLanguage === 'cpp' ? 'C++' : currentLanguage === 'c' ? 'C' : 'Python 3'}</span>
                         </div>
-                        <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">|</span>
-                        <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300 tabular-nums">main.{currentLanguage === 'cpp' ? 'cpp' : currentLanguage === 'c' ? 'c' : 'py'}</span>
+                        <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">|</span>
+                        <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-300 tabular-nums">main.{currentLanguage === 'cpp' ? 'cpp' : currentLanguage === 'c' ? 'c' : 'py'}</span>
                       </div>
                       
                       <button 
                         onClick={resetCode}
-                        className="flex items-center gap-1.5 px-3 py-1 hover:bg-slate-200 dark:hover:bg-white/5 rounded-lg transition-colors group"
+                        className="flex items-center gap-1.5 px-3 py-1 hover:bg-zinc-200 dark:hover:bg-white/5 rounded-lg transition-colors group"
                         title="Reset code to starter"
                       >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-slate-400 group-hover:text-orange-500"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
-                        <span className="text-[10px] font-medium text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200">Reset</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-zinc-400 group-hover:text-orange-500"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+                        <span className="text-[10px] font-medium text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200">Reset</span>
                       </button>
                     </div>
 
-                    <div className="rounded-b-[20px] overflow-hidden border-x border-b border-slate-200 dark:border-white/10 shadow-xl bg-[#1e1e1e]">
+                    <div className="rounded-b-[20px] overflow-hidden border-x border-b border-zinc-200 dark:border-white/10 shadow-xl bg-[#1e1e1e]">
                       <Editor
                         height="400px"
                         language={currentLanguage === 'cpp' ? 'cpp' : currentLanguage === 'c' ? 'c' : 'python'}
@@ -1835,7 +1838,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                          <button
                            onClick={() => runCode(false)}
                            disabled={isExecuting || (currentLanguage === 'python' && !pyodide)}
-                           className="px-6 py-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-sm"
+                           className="px-6 py-2.5 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-200 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-zinc-50 dark:hover:bg-white/10 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-sm"
                          >
                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M5 3l14 9-14 9V3z" /></svg>
                            Run Code
@@ -1857,8 +1860,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       <div className="bg-[#0f0f0f] rounded-2xl border border-white/5 overflow-hidden flex flex-col h-[200px] shadow-2xl">
                         <div className="px-4 py-2 border-b border-white/5 bg-white/5 flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <div className="w-1 h-1 rounded-full bg-slate-500" />
-                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Console</span>
+                            <div className="w-1 h-1 rounded-full bg-zinc-500" />
+                            <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Console</span>
                           </div>
                            <div className="flex items-center gap-3">
                              {isExecuting ? (
@@ -1875,14 +1878,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                              ) : (
                                <button 
                                  onClick={() => setShowStdin(!showStdin)}
-                                 className={`text-[9px] font-bold uppercase tracking-widest transition-colors ${showStdin ? 'text-orange-500' : 'text-slate-600 hover:text-slate-400'}`}
+                                 className={`text-[9px] font-bold uppercase tracking-widest transition-colors ${showStdin ? 'text-orange-500' : 'text-zinc-600 hover:text-zinc-400'}`}
                                >
                                  {showStdin ? 'Hide Input' : 'Add Input'}
                                </button>
                              )}
                              <button 
                                onClick={() => setExecutionOutput('')}
-                               className="text-[9px] font-bold text-slate-600 hover:text-slate-400 uppercase tracking-widest transition-colors"
+                               className="text-[9px] font-bold text-zinc-600 hover:text-zinc-400 uppercase tracking-widest transition-colors"
                              >
                                Clear
                              </button>
@@ -1892,13 +1895,13 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           {showStdin && (
                             <div className="h-1/2 border-b border-white/5 flex flex-col">
                               <div className="px-4 py-1.5 bg-white/[0.02] border-b border-white/5">
-                                <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest">Standard Input (stdin)</span>
+                                <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">Standard Input (stdin)</span>
                               </div>
                               <textarea
                                 value={stdinValue}
                                 onChange={(e) => setStdinValue(e.target.value)}
                                 placeholder="Type input here..."
-                                className="flex-1 w-full bg-transparent p-3 font-mono text-xs text-orange-200/80 outline-none resize-none placeholder:text-slate-700"
+                                className="flex-1 w-full bg-transparent p-3 font-mono text-xs text-orange-200/80 outline-none resize-none placeholder:text-zinc-700"
                               />
                             </div>
                           )}
@@ -1906,8 +1909,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                               ref={consoleRef}
                               className={`flex-1 p-4 font-mono text-xs overflow-auto custom-scrollbar flex flex-col ${showStdin ? 'h-1/2' : 'h-full'}`}
                             >
-                               <pre className="text-slate-300 whitespace-pre-wrap leading-relaxed inline">
-                                 {executionOutput || <span className="text-slate-600 italic"># Output will appear here...</span>}
+                               <pre className="text-zinc-300 whitespace-pre-wrap leading-relaxed inline">
+                                 {executionOutput || <span className="text-zinc-600 italic"># Output will appear here...</span>}
                               </pre>
                               {isAwaitingInput && (
                                 <div className="flex items-center gap-1 mt-1 pb-4">
@@ -1931,7 +1934,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         <div className="px-4 py-2 border-b border-white/5 bg-white/5 flex items-center">
                           <div className="flex items-center gap-2">
                             <div className="w-1 h-1 rounded-full bg-orange-500" />
-                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Test Results</span>
+                            <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Test Results</span>
                           </div>
                         </div>
                         <div className="flex-1 overflow-auto custom-scrollbar p-1">
@@ -1941,7 +1944,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                 <div key={idx} className="p-3">
                                   <div className="flex items-center justify-between mb-2">
                                     <span className={`text-[9px] font-bold uppercase tracking-wider ${
-                                      tr.passed === undefined ? 'text-slate-500' :
+                                      tr.passed === undefined ? 'text-zinc-500' :
                                       tr.passed ? 'text-emerald-500' : 'text-red-500'
                                     }`}>
                                       Test Case {idx + 1} {tr.passed === undefined && '(Pending)'}
@@ -1954,11 +1957,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                   </div>
                                   <div className="space-y-1 font-mono text-[10px]">
                                     {tr.isHidden ? (
-                                      <div className="text-slate-500 italic">[Hidden Test Case]</div>
+                                      <div className="text-zinc-500 italic">[Hidden Test Case]</div>
                                     ) : (
                                       <>
-                                        <div className="flex gap-2 text-slate-500 font-medium"><span>Input:</span> <span className="text-slate-400 whitespace-pre-wrap break-words">{tr.input || tr.in || 'None'}</span></div>
-                                        <div className="flex gap-2 text-slate-500 font-medium"><span>Exp:</span> <span className="text-slate-400 whitespace-pre-wrap break-words">{(tr.output || tr.out || "").trim()}</span></div>
+                                        <div className="flex gap-2 text-zinc-500 font-medium"><span>Input:</span> <span className="text-zinc-400 whitespace-pre-wrap break-words">{tr.input || tr.in || 'None'}</span></div>
+                                        <div className="flex gap-2 text-zinc-500 font-medium"><span>Exp:</span> <span className="text-zinc-400 whitespace-pre-wrap break-words">{(tr.output || tr.out || "").trim()}</span></div>
                                         {tr.passed !== undefined && (
                                           <div className={`flex gap-2 ${tr.passed ? 'text-emerald-500/70' : 'text-red-500'}`}><span>Got:</span> <span className="whitespace-pre-wrap break-words">{tr.actual || 'No output'}</span></div>
                                         )}
@@ -1984,7 +1987,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       isPracticeMode ? (
                         <button
                           onClick={handleShowExplanation}
-                          className="w-full py-10 rounded-[32px] border-2 border-dashed border-white/10 bg-white/[0.02] text-slate-500 font-bold hover:border-orange-500/30 hover:text-orange-600 transition-all flex flex-col items-center gap-4 group"
+                          className="w-full py-10 rounded-[32px] border-2 border-dashed border-white/10 bg-white/[0.02] text-zinc-500 font-bold hover:border-orange-500/30 hover:text-orange-600 transition-all flex flex-col items-center gap-4 group"
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 opacity-20 group-hover:opacity-100 transition-opacity"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
                           <span className="text-xs font-semibold">View Model Answer</span>
@@ -1993,8 +1996,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         <div className="p-10 rounded-[32px] border border-orange-500/10 bg-orange-600/[0.02] flex flex-col items-center gap-4 text-center">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-orange-500/30"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                           <div>
-                            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Test Mode Active</p>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Model solutions will be available in the final report.</p>
+                            <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Test Mode Active</p>
+                            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">Model solutions will be available in the final report.</p>
                           </div>
                         </div>
                       )
@@ -2004,7 +2007,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           <div className="w-2 h-2 rounded-full bg-emerald-500" />
                           <h4 className="text-xs font-semibold text-emerald-600 dark:text-emerald-500 uppercase tracking-widest">Model Solution</h4>
                         </div>
-                        <div className="text-base font-medium text-slate-700 dark:text-slate-300 leading-relaxed border-l-4 border-emerald-500/30 dark:border-emerald-500/30 pl-6">{parseText(q.explanation)}</div>
+                        <div className="text-base font-medium text-zinc-700 dark:text-zinc-300 leading-relaxed border-l-4 border-emerald-500/30 dark:border-emerald-500/30 pl-6">{parseText(q.explanation)}</div>
                       </div>
                     )}
                   </div>
@@ -2015,7 +2018,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       const isCorrect = isShowingExplanation && i === q.correctAnswer;
                       const isWrong = isShowingExplanation && isSelected && i !== q.correctAnswer;
 
-                      let style = "bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.05] hover:border-slate-300 dark:hover:border-white/10";
+                      let style = "bg-zinc-50 dark:bg-white/[0.03] border-zinc-200 dark:border-white/5 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/[0.05] hover:border-zinc-300 dark:hover:border-white/10";
                       if (isCorrect) style = "bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.1)]";
                       else if (isWrong) style = "bg-red-500/10 border-red-500 text-red-600 dark:text-red-500";
                       else if (isSelected) style = "bg-orange-600/10 border-orange-500 text-orange-600 dark:text-orange-500";
@@ -2026,11 +2029,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           onClick={() => handleAnswer(i)}
                           className={`p-4 rounded-2xl border text-left transition-all duration-300 flex items-center gap-4 group relative ${style}`}
                         >
-                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-orange-500' : 'border-slate-300 dark:border-dark-800'}`}>
+                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-orange-500' : 'border-zinc-300 dark:border-dark-800'}`}>
                             {isSelected && <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_#ea580c]" />}
                           </div>
                           <span className="font-medium text-[13px] md:text-sm tracking-tight flex items-center gap-2">
-                            <span className="text-slate-400 dark:text-slate-500 font-medium">{String.fromCharCode(65 + i)}.</span>
+                            <span className="text-zinc-400 dark:text-zinc-500 font-medium">{String.fromCharCode(65 + i)}.</span>
                             <span className="flex-1">{parseText(opt)}</span>
                           </span>
                         </button>
@@ -2040,7 +2043,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     {isShowingExplanation && (
                       <div className="p-8 mt-6 bg-orange-600/[0.03] dark:bg-orange-600/5 border border-orange-500/20 dark:border-orange-600/10 rounded-[32px] animate-in fade-in slide-in-from-top-4 duration-500">
                         <p className="text-[10px] font-semibold text-orange-600 uppercase tracking-widest mb-3">Expert Insights</p>
-                        <div className="text-base font-medium text-slate-600 dark:text-slate-400 leading-relaxed italic border-l-2 border-orange-500/30 dark:border-orange-600/30 pl-6">{parseText(q.explanation)}</div>
+                        <div className="text-base font-medium text-zinc-600 dark:text-zinc-400 leading-relaxed italic border-l-2 border-orange-500/30 dark:border-orange-600/30 pl-6">{parseText(q.explanation)}</div>
                       </div>
                     )}
                   </div>
@@ -2056,7 +2059,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       setIsShowingExplanation(false);
                       setVisitedQuestions(prev => new Set(prev).add(prevIdx));
                     }}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-slate-100 dark:bg-dark-800 text-slate-600 dark:text-slate-400 rounded-xl text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all disabled:opacity-20 active:scale-95 border border-slate-200 dark:border-transparent"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-zinc-100 dark:bg-dark-800 text-zinc-600 dark:text-zinc-400 rounded-xl text-xs font-semibold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all disabled:opacity-20 active:scale-95 border border-zinc-200 dark:border-transparent"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M15 18l-6-6 6-6" /></svg>
                     Previous
@@ -2090,15 +2093,15 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             </div>
           </div>
 
-          <aside className="lg:col-span-4 sticky top-8 max-h-[calc(100vh-120px)] flex flex-col glass-panel p-8 rounded-[40px] shadow-2xl bg-white/90 dark:bg-black/40 border-slate-200 dark:border-white/5 overflow-hidden">
+          <aside className="lg:col-span-4 sticky top-8 max-h-[calc(100vh-120px)] flex flex-col glass-panel p-8 rounded-[40px] shadow-2xl bg-white/90 dark:bg-black/40 border-zinc-200 dark:border-white/5 overflow-hidden">
             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-8">
-              <h4 className="text-xs font-semibold text-slate-500 text-center sticky top-0 bg-inherit py-2 z-10">Question Palette</h4>
+              <h4 className="text-xs font-semibold text-zinc-500 text-center sticky top-0 bg-inherit py-2 z-10">Question Palette</h4>
 
               {/* Section 1: Objective */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <div className={`w-1 h-4 rounded-full ${(!isSubjectiveSection && !isCodingSection) ? 'bg-orange-600 shadow-[0_0_8px_#ea580c]' : 'bg-slate-300 dark:bg-slate-700'}`} />
-                  <span className={`text-[13px] font-semibold uppercase tracking-widest ${(!isSubjectiveSection && !isCodingSection) ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-600'}`}>Section 1: Objective</span>
+                  <div className={`w-1 h-4 rounded-full ${(!isSubjectiveSection && !isCodingSection) ? 'bg-orange-600 shadow-[0_0_8px_#ea580c]' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
+                  <span className={`text-[13px] font-semibold uppercase tracking-widest ${(!isSubjectiveSection && !isCodingSection) ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-600'}`}>Section 1: Objective</span>
                 </div>
                 <div className="grid grid-cols-5 gap-2.5">
                   {quizQuestions.map((q, idx) => {
@@ -2108,7 +2111,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     const isMarked = markedForReview.has(idx);
                     const isCurrent = currentQuestionIdx === idx;
 
-                    let bgColor = "bg-slate-100 dark:bg-dark-800/40 text-slate-400 dark:text-slate-500";
+                    let bgColor = "bg-zinc-100 dark:bg-dark-800/40 text-zinc-400 dark:text-zinc-500";
                     if (isMarked) bgColor = "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.3)]";
                     else if (isAnswered) bgColor = "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]";
                     else if (isVisited) bgColor = "bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.2)]";
@@ -2125,7 +2128,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       >
                         {sectionInfo.mapping[idx]}
                         {isMarked && isAnswered && (
-                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900" />
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-zinc-900" />
                         )}
                       </button>
                     );
@@ -2137,8 +2140,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               {hasSubjective && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
-                    <div className={`w-1 h-4 rounded-full ${isSubjectiveSection ? 'bg-orange-600 shadow-[0_0_8px_#ea580c]' : 'bg-slate-300 dark:bg-slate-700'}`} />
-                    <span className={`text-[13px] font-semibold uppercase tracking-widest ${isSubjectiveSection ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-600'}`}>Section 2: Subjective</span>
+                    <div className={`w-1 h-4 rounded-full ${isSubjectiveSection ? 'bg-orange-600 shadow-[0_0_8px_#ea580c]' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
+                    <span className={`text-[13px] font-semibold uppercase tracking-widest ${isSubjectiveSection ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-600'}`}>Section 2: Subjective</span>
                   </div>
                   <div className="grid grid-cols-5 gap-2.5">
                     {quizQuestions.map((q, idx) => {
@@ -2148,7 +2151,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       const isMarked = markedForReview.has(idx);
                       const isCurrent = currentQuestionIdx === idx;
 
-                      let bgColor = "bg-zinc-100 dark:bg-white/5 text-slate-400 dark:text-zinc-500";
+                      let bgColor = "bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-zinc-500";
                       if (isMarked) bgColor = "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.3)]";
                       else if (isAnswered) bgColor = "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]";
                       else if (isVisited) bgColor = "bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.2)]";
@@ -2165,7 +2168,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         >
                           {sectionInfo.mapping[idx]}
                           {isMarked && isAnswered && (
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900" />
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-zinc-900" />
                           )}
                         </button>
                       );
@@ -2178,8 +2181,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               {hasCoding && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
-                    <div className={`w-1 h-4 rounded-full ${isCodingSection ? 'bg-orange-600 shadow-[0_0_8px_#ea580c]' : 'bg-slate-300 dark:bg-slate-700'}`} />
-                    <span className={`text-[13px] font-semibold uppercase tracking-widest ${isCodingSection ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-600'}`}>Section 3: Coding</span>
+                    <div className={`w-1 h-4 rounded-full ${isCodingSection ? 'bg-orange-600 shadow-[0_0_8px_#ea580c]' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
+                    <span className={`text-[13px] font-semibold uppercase tracking-widest ${isCodingSection ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-600'}`}>Section 3: Coding</span>
                   </div>
                   <div className="grid grid-cols-5 gap-2.5">
                     {quizQuestions.map((q, idx) => {
@@ -2190,7 +2193,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       const isMarked = markedForReview.has(idx);
                       const isCurrent = currentQuestionIdx === idx;
 
-                      let bgColor = "bg-slate-100 dark:bg-dark-800/40 text-slate-400 dark:text-slate-500";
+                      let bgColor = "bg-zinc-100 dark:bg-dark-800/40 text-zinc-400 dark:text-zinc-500";
                       if (isMarked) bgColor = "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.3)]";
                       else if (isAnswered) bgColor = "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]";
                       else if (isVisited) bgColor = "bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.2)]";
@@ -2207,7 +2210,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         >
                           {sectionInfo.mapping[idx]}
                           {isMarked && isAnswered && (
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900" />
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-zinc-900" />
                           )}
                         </button>
                       );
@@ -2222,25 +2225,25 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                 <div className="flex items-center gap-2">
                   <div className="w-3.5 h-3.5 rounded-lg bg-emerald-500" />
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none">Answered</span>
+                  <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest leading-none">Answered</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3.5 h-3.5 rounded-lg bg-red-500" />
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none">Visited</span>
+                  <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest leading-none">Visited</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3.5 h-3.5 rounded-lg bg-zinc-100 dark:bg-white/5" />
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest leading-none">Not Visited</span>
+                  <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-widest leading-none">Not Visited</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3.5 h-3.5 rounded-lg bg-purple-600" />
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none">Review</span>
+                  <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest leading-none">Review</span>
                 </div>
                 <div className="flex items-center gap-2 col-span-2">
                   <div className="relative w-3.5 h-3.5 rounded-lg bg-purple-600">
-                    <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full border border-white dark:border-slate-900" />
+                    <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full border border-white dark:border-zinc-900" />
                   </div>
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none">Answered & Marked</span>
+                  <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest leading-none">Answered & Marked</span>
                 </div>
               </div>
             </div>
@@ -2334,7 +2337,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           case 'ninja': return 'text-indigo-400';
           case 'bullseye': return 'text-rose-600';
           case 'zap': return 'text-yellow-400';
-          case 'sword': return 'text-slate-500';
+          case 'sword': return 'text-zinc-500';
           case 'perfect': return 'text-emerald-500';
           case 'fire': return 'text-orange-600';
           case 'crown': return 'text-amber-500';
@@ -2527,7 +2530,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
 
     return (
-      <div className="font-sans text-slate-900 dark:text-white selection:bg-orange-500/30 transition-all duration-300" ref={resultRef} id="quiz-result">
+      <div className="font-sans text-zinc-900 dark:text-white selection:bg-orange-500/30 transition-all duration-300" ref={resultRef} id="quiz-result">
         <div className="max-w-4xl mx-auto py-12 px-6 space-y-12 animate-fade-in">
           
           {/* Centered Results Header */}
@@ -2546,11 +2549,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
             <div className="space-y-3">
               <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
-                <span className="text-orange-600">{percentage}%</span> <span className="text-zinc-300">/</span> <span className="text-slate-900 dark:text-white">
+                <span className="text-orange-600">{percentage}%</span> <span className="text-zinc-300">/</span> <span className="text-zinc-900 dark:text-white">
                   {percentage >= 90 ? 'Outstanding!' : percentage >= 80 ? 'Great job!' : percentage >= 60 ? 'Good Effort!' : 'Keep Pushing!'}
                 </span>
               </h1>
-              <p className="text-slate-500 dark:text-slate-400 font-medium text-sm max-w-xl mx-auto leading-relaxed">
+              <p className="text-zinc-500 dark:text-zinc-400 font-medium text-sm max-w-xl mx-auto leading-relaxed">
                 {percentage >= 80 
                   ? `You've outperformed ${Math.min(99, 70 + Math.floor(percentage / 4))}% of users in ${selectedSubject?.name}. Mastery achieved.`
                   : `Steady progress in ${selectedSubject?.name}. Review the detailed breakdown below to polish your skills.`}
@@ -2564,32 +2567,32 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-3 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 6L9 17l-5-5"/></svg>
               </div>
-              <span className="text-[10px] font-semibold text-slate-400 tracking-wider mb-1">Correct</span>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white">{score}/{totalAuto}</p>
+              <span className="text-[10px] font-semibold text-zinc-400 tracking-wider mb-1">Correct</span>
+              <p className="text-3xl font-bold text-zinc-900 dark:text-white">{score}/{totalAuto}</p>
             </div>
 
             <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
               <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-600 mb-3 group-hover:bg-red-500 group-hover:text-white transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </div>
-              <span className="text-[10px] font-semibold text-slate-400 tracking-wider mb-1">Incorrect</span>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white">{totalAuto - score}</p>
+              <span className="text-[10px] font-semibold text-zinc-400 tracking-wider mb-1">Incorrect</span>
+              <p className="text-3xl font-bold text-zinc-900 dark:text-white">{totalAuto - score}</p>
             </div>
 
             <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
               <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 mb-3 group-hover:bg-blue-500 group-hover:text-white transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
               </div>
-              <span className="text-[10px] font-semibold text-slate-400 tracking-wider mb-1">Avg Speed</span>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white">{Math.round(avgTimePerQuestion)}s <span className="text-[10px] text-zinc-400">/ Q</span></p>
+              <span className="text-[10px] font-semibold text-zinc-400 tracking-wider mb-1">Avg Speed</span>
+              <p className="text-3xl font-bold text-zinc-900 dark:text-white">{Math.round(avgTimePerQuestion)}s <span className="text-[10px] text-zinc-400">/ Q</span></p>
             </div>
 
             <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
               <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-600 mb-3 group-hover:bg-orange-600 group-hover:text-white transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               </div>
-              <span className="text-[10px] font-semibold text-slate-400 tracking-wider mb-1">Time Taken</span>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white">{formatTime(totalTimeTaken)}</p>
+              <span className="text-[10px] font-semibold text-zinc-400 tracking-wider mb-1">Time Taken</span>
+              <p className="text-3xl font-bold text-zinc-900 dark:text-white">{formatTime(totalTimeTaken)}</p>
             </div>
           </div>
 
@@ -2606,16 +2609,16 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             <div className="flex gap-4 w-full max-w-lg">
               <button 
                 onClick={handleGenerate}
-                className="flex-1 py-4 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl font-bold text-xs text-slate-600 dark:text-zinc-400 transition-all flex items-center justify-center gap-2 group border-none"
+                className="flex-1 py-4 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl font-bold text-xs text-zinc-600 dark:text-zinc-400 transition-all flex items-center justify-center gap-2 group border-none"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-orange-600 transition-colors"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-400 dark:text-zinc-500 group-hover:text-orange-600 transition-colors"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
                 Retake Quiz
               </button>
               <button 
                 onClick={handleBackToDashboard}
-                className="flex-1 py-4 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl font-bold text-xs text-slate-600 dark:text-zinc-400 transition-all flex items-center justify-center gap-2 group border-none"
+                className="flex-1 py-4 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl font-bold text-xs text-zinc-600 dark:text-zinc-400 transition-all flex items-center justify-center gap-2 group border-none"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-slate-400 dark:text-zinc-500 group-hover:text-orange-600 transition-colors"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-400 dark:text-zinc-500 group-hover:text-orange-600 transition-colors"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></svg>
                 Dashboard
               </button>
             </div>
@@ -2625,7 +2628,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           {activeMilestones.length > 0 && (
             <div className="pt-8">
               <div className="flex items-center mb-6">
-                <span className="text-[10px] font-semibold text-slate-400 tracking-wider transition-all duration-500 opacity-60">Achievements Unlocked</span>
+                <span className="text-[10px] font-semibold text-zinc-400 tracking-wider transition-all duration-500 opacity-60">Achievements Unlocked</span>
               </div>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4">
@@ -2646,7 +2649,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     </div>
                     
                     <div className="relative space-y-0.5">
-                      <p className="text-[12px] font-bold tracking-tight leading-none text-slate-800 dark:text-zinc-300">{m.label}</p>
+                      <p className="text-[12px] font-bold tracking-tight leading-none text-zinc-800 dark:text-zinc-300">{m.label}</p>
                       <p className={`text-[8px] font-bold tracking-wider ${
                         m.rarity === 'legendary' ? 'text-orange-500' :
                         m.rarity === 'epic' ? 'text-indigo-500' :
@@ -2667,11 +2670,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         <div id="question-review-section" className="max-w-4xl mx-auto py-16 px-6 space-y-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Question Review</h3>
-              <p className="text-xs font-medium text-slate-500 mt-0.5">Evaluation of your performance per question</p>
+              <h3 className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">Question Review</h3>
+              <p className="text-xs font-medium text-zinc-500 mt-0.5">Evaluation of your performance per question</p>
             </div>
-            <div className="px-3 py-1.5 bg-slate-100 dark:bg-dark-800/50 rounded-lg border border-slate-200 dark:border-dark-800/50 inline-flex items-center gap-2">
-              <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 tracking-wider">{quizQuestions.length} Items Total</span>
+            <div className="px-3 py-1.5 bg-zinc-100 dark:bg-dark-800/50 rounded-lg border border-zinc-200 dark:border-dark-800/50 inline-flex items-center gap-2">
+              <span className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 tracking-wider">{quizQuestions.length} Items Total</span>
             </div>
           </div>
           
@@ -2716,15 +2719,15 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           Struggle Area
                         </span>
                       )}
-                      <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-semibold text-slate-500 border border-slate-200/50 dark:border-white/10 tracking-wider flex items-center gap-1.5">
+                      <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-semibold text-zinc-500 border border-zinc-200/50 dark:border-white/10 tracking-wider flex items-center gap-1.5">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5 opacity-60"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                         {timeSpent}s
                       </span>
-                      <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-semibold text-slate-500 border border-slate-200/50 dark:border-white/10 tracking-wider">
+                      <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-semibold text-zinc-500 border border-zinc-200/50 dark:border-white/10 tracking-wider">
                         Unit 0{q.unit}
                       </span>
                       {q.difficulty && (
-                        <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-semibold text-slate-500 border border-slate-200/50 dark:border-white/10 tracking-wider">
+                        <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-semibold text-zinc-500 border border-zinc-200/50 dark:border-white/10 tracking-wider">
                           {q.difficulty}
                         </span>
                       )}
@@ -2739,7 +2742,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         className={`ml-auto p-1 transition-all active:scale-90 ${
                           bookmarkedIds.has(q.id || '')
                             ? 'text-blue-500'
-                            : 'text-slate-300 dark:text-slate-600 hover:text-blue-400'
+                            : 'text-zinc-300 dark:text-zinc-600 hover:text-blue-400'
                         }`}
                         title={bookmarkedIds.has(q.id || '') ? 'Remove Bookmark' : 'Bookmark Question'}
                       >
@@ -2750,7 +2753,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     </div>
                     
                     {/* Question Text */}
-                    <h4 className="text-sm md:text-base font-bold text-slate-800 dark:text-slate-100 leading-relaxed">
+                    <h4 className="text-sm md:text-base font-bold text-zinc-800 dark:text-zinc-100 leading-relaxed">
                       {parseText(q.question)}
                     </h4>
 
@@ -2758,15 +2761,15 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     {isCoding ? (
                       <div className="space-y-4">
                         <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5">
-                          <span className="text-slate-500 dark:text-slate-400 font-semibold block mb-1.5 tracking-wider text-[10px]">Submitted Code</span>
-                          <pre className="font-mono text-xs bg-slate-900/50 p-4 rounded-xl overflow-auto dark:text-slate-300">
+                          <span className="text-zinc-500 dark:text-zinc-400 font-semibold block mb-1.5 tracking-wider text-[10px]">Submitted Code</span>
+                          <pre className="font-mono text-xs bg-zinc-900/50 p-4 rounded-xl overflow-auto dark:text-zinc-300">
                             {ansObj?.code || '# No code submitted'}
                           </pre>
                         </div>
                         
                         {ansObj?.results && ansObj.results.length > 0 && (
                           <div className="space-y-2">
-                            <span className="text-slate-500 dark:text-slate-400 font-semibold block mb-1 tracking-wider text-[10px]">Test Results</span>
+                            <span className="text-zinc-500 dark:text-zinc-400 font-semibold block mb-1 tracking-wider text-[10px]">Test Results</span>
                             <div className="grid grid-cols-1 gap-2">
                               {ansObj.results.map((res: any, idx: number) => (
                                 <div key={idx} className={`p-3 rounded-xl border text-[11px] flex items-center justify-between ${res.passed ? 'bg-emerald-500/5 border-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/5 border-red-500/10 text-red-600 dark:text-red-400'}`}>
@@ -2778,10 +2781,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                   </div>
                                   <div className="text-[10px] opacity-70 italic truncate flex gap-4 ml-4">
                                     {res.isHidden ? (
-                                      <span className="text-slate-500">[Hidden Test Case]</span>
+                                      <span className="text-zinc-500">[Hidden Test Case]</span>
                                     ) : (
                                       <>
-                                        <span className="text-slate-500">Exp: {(res.output || res.out || "").trim()}</span>
+                                        <span className="text-zinc-500">Exp: {(res.output || res.out || "").trim()}</span>
                                         <span className={res.passed ? "text-emerald-500" : "text-red-500"}>Got: {res.actual || 'None'}</span>
                                       </>
                                     )}
@@ -2802,8 +2805,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       </div>
                     ) : !isSubjective ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                        <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5 text-slate-800 dark:text-slate-200">
-                          <span className="text-slate-500 dark:text-slate-400 font-semibold block mb-1.5 tracking-wider text-[10px] flex items-center gap-1">
+                        <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5 text-zinc-800 dark:text-zinc-200">
+                          <span className="text-zinc-500 dark:text-zinc-400 font-semibold block mb-1.5 tracking-wider text-[10px] flex items-center gap-1">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M20 6L9 17l-5-5" /></svg>
                             Your Answer
                           </span>
@@ -2812,7 +2815,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           </span>
                         </div>
                         {!isCorrect && (
-                          <div className="p-4 bg-emerald-50/50 dark:bg-emerald-500/10 rounded-2xl border border-emerald-100 dark:border-emerald-500/20 text-slate-800 dark:text-slate-200">
+                          <div className="p-4 bg-emerald-50/50 dark:bg-emerald-500/10 rounded-2xl border border-emerald-100 dark:border-emerald-500/20 text-zinc-800 dark:text-zinc-200">
                             <span className="text-emerald-600/70 dark:text-emerald-400/70 font-semibold block mb-1.5 tracking-wider text-[10px] flex items-center gap-1">
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                               Correct Solution
@@ -2838,10 +2841,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     {/* Explanation Box */}
                     <div className="mt-4 p-5 md:p-6 bg-white dark:bg-white/[0.02] rounded-2xl border border-zinc-100 dark:border-white/5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                       <div className="flex items-center gap-2 mb-3">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-slate-400"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                        <span className="text-[11px] font-semibold text-slate-500 tracking-wider">Explanation</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-zinc-400"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span className="text-[11px] font-semibold text-zinc-500 tracking-wider">Explanation</span>
                       </div>
-                      <div className="text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                      <div className="text-sm text-zinc-600 dark:text-zinc-300 font-medium leading-relaxed">
                         {parseText(q.explanation)}
                       </div>
                     </div>
@@ -2877,8 +2880,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
         {/* Header */}
         <header className="text-center space-y-3 pt-2">
-          <h2 className="text-2xl md:text-4xl font-semibold text-slate-900 dark:text-white tracking-tighter leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Taker</span></h2>
-          <p className="text-slate-500 font-medium text-xs">Your personal assessment dashboard</p>
+          <h2 className="text-2xl md:text-4xl font-semibold text-zinc-900 dark:text-white tracking-tighter leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Taker</span></h2>
+          <p className="text-zinc-500 font-medium text-xs">Your personal assessment dashboard</p>
         </header>
 
         {error && (
@@ -2887,15 +2890,15 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
             </div>
             <h4 className="text-xs font-medium text-red-500 tracking-widest">Protocol Interrupted</h4>
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{error}</p>
-            <button onClick={() => setError(null)} className="text-[9px] font-medium text-slate-400 hover:text-orange-500 transition-colors">Dismiss</button>
+            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{error}</p>
+            <button onClick={() => setError(null)} className="text-[9px] font-medium text-zinc-400 hover:text-orange-500 transition-colors">Dismiss</button>
           </div>
         )}
 
 
         {/* Quick Start Bar */}
         <div className="space-y-3">
-          <h3 className="text-[10px] font-semibold text-slate-400 tracking-wider px-1">Quick Start</h3>
+          <h3 className="text-[10px] font-semibold text-zinc-400 tracking-wider px-1">Quick Start</h3>
           <QuickStartBar
             onCustomQuiz={() => setShowCustomQuizBuilder(true)}
             onMyHistory={() => setDashboardView('history')}
@@ -2918,7 +2921,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             whileHover={{ scale: 1.02, cursor: 'pointer' }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowProgressModal(true)}
-            className="bg-white dark:bg-white/[0.03] p-6 rounded-[24px] border border-slate-100 dark:border-white/5 shadow-sm relative overflow-hidden group hover:shadow-md transition-all flex flex-col gap-4"
+            className="bg-white dark:bg-white/[0.03] p-6 rounded-[24px] border border-zinc-100 dark:border-white/5 shadow-sm relative overflow-hidden group hover:shadow-md transition-all flex flex-col gap-4"
           >
             <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-40 transition-opacity">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
@@ -2929,7 +2932,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             <div className="flex justify-between items-start">
               <div className="space-y-1">
                 <p className="text-[10px] font-black text-orange-600/90 uppercase tracking-widest leading-none">Level {level.level}</p>
-                <h3 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">{level.title}</h3>
+                <h3 className="text-4xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter leading-none">{level.title}</h3>
               </div>
               <div className="w-14 h-14 rounded-[18px] bg-orange-500/5 dark:bg-orange-500/10 flex items-center justify-center text-2xl">
                 {level.icon || '🌱'}
@@ -2938,18 +2941,18 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
             <div className="space-y-3">
               <div className="flex items-baseline gap-2">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total XP</p>
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Total XP</p>
                 <div className="flex items-baseline gap-1">
                   <span className="text-3xl font-black text-orange-600 tabular-nums leading-none">
                     {totalXP}
                   </span>
-                  <span className="text-[11px] font-bold text-slate-400">XP</span>
+                  <span className="text-[11px] font-bold text-zinc-400">XP</span>
                 </div>
               </div>
 
               {/* High Contrast Progress Line */}
               <div className="space-y-2">
-                <div className="h-2 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                <div className="h-2 w-full bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     whileInView={{ width: `${level.progress}%` }}
@@ -2959,8 +2962,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   />
                 </div>
                 {level.nextLevel && (
-                  <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
-                    Need <span className="font-bold text-slate-700 dark:text-slate-200">{level.nextLevel!.minXP - totalXP} more</span> to reach {level.nextLevel!.title}
+                  <p className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
+                    Need <span className="font-bold text-zinc-700 dark:text-zinc-200">{level.nextLevel!.minXP - totalXP} more</span> to reach {level.nextLevel!.title}
                   </p>
                 )}
               </div>
@@ -2973,7 +2976,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="bg-white dark:bg-white/[0.03] p-5 rounded-[24px] border border-slate-100 dark:border-white/5 shadow-sm relative overflow-hidden flex flex-col items-center justify-between transition-all"
+            className="bg-white dark:bg-white/[0.03] p-5 rounded-[24px] border border-zinc-100 dark:border-white/5 shadow-sm relative overflow-hidden flex flex-col items-center justify-between transition-all"
           >
             <div className="flex flex-col items-center w-full">
               <div className="flex items-center justify-center gap-3 mb-1">
@@ -2984,11 +2987,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 >
                   🔥
                 </motion.span>
-                <h4 className="text-6xl font-black text-slate-900 dark:text-white tabular-nums leading-none">
+                <h4 className="text-6xl font-black text-zinc-900 dark:text-white tabular-nums leading-none">
                   {currentStreak}
                 </h4>
               </div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Day Streak</p>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Day Streak</p>
               
               <div className="px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 mb-4">
                 <p className="text-[9px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest leading-none">Best: {longestStreak}</p>
@@ -3002,8 +3005,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   const isCompleted = day?.completed;
                   return (
                     <div key={i} className="flex flex-col items-center gap-2 flex-1">
-                      <span className={`text-[8px] font-bold ${isCompleted ? 'text-orange-600' : 'text-slate-400'}`}>{label}</span>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isCompleted ? 'bg-orange-600 border-orange-600 shadow-lg shadow-orange-600/20' : 'border-slate-100 dark:border-white/5'}`}>
+                      <span className={`text-[8px] font-bold ${isCompleted ? 'text-orange-600' : 'text-zinc-400'}`}>{label}</span>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isCompleted ? 'bg-orange-600 border-orange-600 shadow-lg shadow-orange-600/20' : 'border-zinc-100 dark:border-white/5'}`}>
                         {isCompleted && (
                           <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" className="w-3 h-3">
                             <polyline points="20 6 9 17 4 12" strokeLinecap="round" strokeLinejoin="round" />
@@ -3034,28 +3037,28 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   initial={{ scale: 0.95, opacity: 0, y: 30 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.95, opacity: 0, y: 30 }}
-                  className="w-[95vw] max-w-6xl bg-white/90 dark:bg-dark-950/90 rounded-[48px] shadow-2xl overflow-hidden border border-slate-200 dark:border-white/10 relative"
+                  className="w-[95vw] max-w-6xl bg-white/90 dark:bg-dark-950/90 rounded-[48px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-white/10 relative"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {/* Close button */}
                   <button 
                     onClick={() => setShowProgressModal(false)}
-                    className="absolute top-4 right-4 p-2.5 rounded-2xl bg-white/50 dark:bg-black/50 hover:bg-slate-100 dark:hover:bg-white/10 backdrop-blur-sm transition-all z-50 group border border-slate-200 dark:border-white/10"
+                    className="absolute top-4 right-4 p-2.5 rounded-2xl bg-white/50 dark:bg-black/50 hover:bg-zinc-100 dark:hover:bg-white/10 backdrop-blur-sm transition-all z-50 group border border-zinc-200 dark:border-white/10"
                   >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-slate-400 group-hover:text-orange-500 group-hover:rotate-90 transition-all duration-300">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-zinc-400 group-hover:text-orange-500 group-hover:rotate-90 transition-all duration-300">
                       <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
                   </button>
 
                   <div className="p-6 md:p-10 overflow-y-auto max-h-[90vh] custom-scrollbar">
                     {/* Header & Rank Row */}
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 border-b border-slate-100 dark:border-white/5 pb-8 relative pr-16">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 border-b border-zinc-100 dark:border-white/5 pb-8 relative pr-16">
                       <div className="text-left space-y-1">
                         <h2 className="text-3xl md:text-4xl font-black flex items-center gap-3">
-                          <span className="text-slate-800 dark:text-white uppercase tracking-tighter">Nexus</span>
+                          <span className="text-zinc-800 dark:text-white uppercase tracking-tighter">{shortBrandName}</span>
                           <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-400 uppercase tracking-tighter">Journey</span>
                         </h2>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium max-w-lg leading-relaxed">
+                        <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium max-w-lg leading-relaxed">
                           Track your academic progress, level up, and unlock exclusive rewards.
                         </p>
                       </div>
@@ -3071,8 +3074,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           <div className="text-left">
                             <p className="text-[10px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-0.5 whitespace-nowrap">Account Rank</p>
                             <div className="flex items-baseline gap-1.5 leading-none">
-                              <span className="text-xl font-black text-slate-800 dark:text-white">{userQuizProfile.total_xp}</span>
-                              <span className="text-[9px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest">Total XP</span>
+                              <span className="text-xl font-black text-zinc-800 dark:text-white">{userQuizProfile.total_xp}</span>
+                              <span className="text-[9px] font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">Total XP</span>
                             </div>
                           </div>
                         </div>
@@ -3104,7 +3107,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                             >
                               {/* Connector - Improved with exact progress */}
                               {index < LEVEL_THRESHOLDS.length - 1 && (
-                                <div className="absolute left-1/2 md:left-auto md:top-[38px] md:right-[-32px] w-2 md:w-[64px] h-[40px] md:h-[4px] z-0 bottom-[-20px] md:bottom-auto translate-x-[-50%] md:translate-x-0 overflow-hidden bg-slate-100 dark:bg-white/5 rounded-full border border-slate-200/50 dark:border-white/5 shadow-inner">
+                                <div className="absolute left-1/2 md:left-auto md:top-[38px] md:right-[-32px] w-2 md:w-[64px] h-[40px] md:h-[4px] z-0 bottom-[-20px] md:bottom-auto translate-x-[-50%] md:translate-x-0 overflow-hidden bg-zinc-100 dark:bg-white/5 rounded-full border border-zinc-200/50 dark:border-white/5 shadow-inner">
                                   <motion.div 
                                     initial={{ width: 0 }}
                                     animate={{ width: `${connectorProgress * 100}%` }}
@@ -3118,8 +3121,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                 isCurrent 
                                   ? 'bg-gradient-to-br from-white to-orange-50/30 dark:from-dark-900 dark:to-orange-500/5 border-orange-500/30 shadow-2xl shadow-orange-500/10 scale-105' 
                                   : isRewardUnlocked
-                                    ? 'bg-white/80 dark:bg-white/5 border-slate-200 dark:border-white/10 hover:border-orange-500/20'
-                                    : 'bg-slate-50/50 dark:bg-white/[0.02] border-slate-200/50 dark:border-white/5 opacity-80'
+                                    ? 'bg-white/80 dark:bg-white/5 border-zinc-200 dark:border-white/10 hover:border-orange-500/20'
+                                    : 'bg-zinc-50/50 dark:bg-white/[0.02] border-zinc-200/50 dark:border-white/5 opacity-80'
                               }`}>
                                 {/* Active Glow for Current Level */}
                                 {isCurrent && (
@@ -3133,17 +3136,17 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black transition-all duration-500 ${
                                         isRewardUnlocked 
                                           ? 'bg-gradient-to-br from-orange-600 to-orange-500 text-white shadow-xl shadow-orange-600/30 ring-4 ring-orange-500/10 rotate-3 group-hover/card:rotate-0' 
-                                          : 'bg-slate-200 dark:bg-white/10 text-slate-400 dark:text-slate-600 border border-slate-300 dark:border-white/10'
+                                          : 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-600 border border-zinc-300 dark:border-white/10'
                                       }`}>
                                         {tier.level}
                                       </div>
                                       <div>
                                         <h4 className={`text-base font-black uppercase tracking-tight leading-none mb-1 flex items-center gap-2 ${
-                                          isRewardUnlocked ? 'text-slate-800 dark:text-white' : 'text-slate-400'
+                                          isRewardUnlocked ? 'text-zinc-800 dark:text-white' : 'text-zinc-400'
                                         }`}>
                                           {tier.title} <span className="text-lg">{tier.icon}</span>
                                         </h4>
-                                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                                        <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
                                           {tier.minXP}{tier.maxXP === Infinity ? '+' : ` - ${tier.maxXP}`} XP
                                         </p>
                                       </div>
@@ -3158,8 +3161,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                   {/* Collectible Section - Integrated */}
                                   <div className={`p-4 rounded-2xl border transition-all duration-500 ${
                                     isRewardUnlocked 
-                                      ? 'bg-slate-50 dark:bg-black/20 border-slate-100 dark:border-white/5' 
-                                      : 'bg-transparent border-dashed border-slate-200 dark:border-white/10'
+                                      ? 'bg-zinc-50 dark:bg-black/20 border-zinc-100 dark:border-white/5' 
+                                      : 'bg-transparent border-dashed border-zinc-200 dark:border-white/10'
                                   }`}>
                                     <div className="flex items-center gap-4">
                                       {tier.rewardFrame ? (
@@ -3175,18 +3178,18 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                         />
                                       ) : (
                                         <div className="flex-1 flex flex-col items-center justify-center py-4 text-center">
-                                          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic">No Reward</div>
-                                          <div className="text-[8px] text-slate-500">Keep climbing!</div>
+                                          <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1 italic">No Reward</div>
+                                          <div className="text-[8px] text-zinc-500">Keep climbing!</div>
                                         </div>
                                       )}
                                       
                                       {tier.rewardFrame && (
                                         <div className="flex-1 space-y-1">
-                                          <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Collectible</p>
-                                          <p className={`text-[10px] font-bold ${isRewardUnlocked ? 'text-slate-700 dark:text-white' : 'text-slate-400'}`}>
+                                          <p className="text-[8px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Collectible</p>
+                                          <p className={`text-[10px] font-bold ${isRewardUnlocked ? 'text-zinc-700 dark:text-white' : 'text-zinc-400'}`}>
                                             {tier.rarity} Frame
                                           </p>
-                                          <div className={`text-[8px] leading-tight ${isRewardUnlocked ? 'text-slate-500' : 'text-slate-400/60'}`}>
+                                          <div className={`text-[8px] leading-tight ${isRewardUnlocked ? 'text-zinc-500' : 'text-zinc-400/60'}`}>
                                             {isRewardUnlocked 
                                               ? 'Unlocked and ready for your profile.' 
                                               : `Reach ${tier.title} to unlock this frame.`}
@@ -3219,7 +3222,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         {/* Featured Quiz of the Day */}
         {featuredQuiz && (
           <div className="space-y-3">
-            <h3 className="text-[10px] font-semibold text-slate-400 tracking-wider px-1">Today's Featured</h3>
+            <h3 className="text-[10px] font-semibold text-zinc-400 tracking-wider px-1">Today's Featured</h3>
             <FeaturedQuizCard
               quiz={featuredQuiz}
               isCompleted={featuredCompleted}
@@ -3232,7 +3235,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         {/* Active Challenges */}
         {activeChallenges.length > 0 && (
           <div className="space-y-3">
-            <h3 className="text-[10px] font-semibold text-slate-400 tracking-wider px-1">Active Challenges</h3>
+            <h3 className="text-[10px] font-semibold text-zinc-400 tracking-wider px-1">Active Challenges</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {activeChallenges.map((challenge, i) => (
                 <ChallengeCard
@@ -3263,13 +3266,13 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setDashboardView('dashboard')}
-            className="p-3 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-orange-500/10 text-slate-400 hover:text-orange-500 transition-colors border border-slate-200 dark:border-white/10"
+            className="p-3 rounded-2xl bg-zinc-100 dark:bg-white/5 hover:bg-orange-500/10 text-zinc-400 hover:text-orange-500 transition-colors border border-zinc-200 dark:border-white/10"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
           </motion.button>
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Quiz <span className="text-orange-500">history</span></h2>
-            <p className="text-slate-500 font-medium text-[11px] uppercase tracking-widest">Review your past performance</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">Quiz <span className="text-orange-500">history</span></h2>
+            <p className="text-zinc-500 font-medium text-[11px] uppercase tracking-widest">Review your past performance</p>
           </div>
         </div>
 
@@ -3291,14 +3294,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowCustomQuizBuilder(false)}
-              className="p-3 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-orange-500/10 text-slate-400 hover:text-orange-500 transition-colors border border-slate-200 dark:border-white/10"
+              className="p-3 rounded-2xl bg-zinc-100 dark:bg-white/5 hover:bg-orange-500/10 text-zinc-400 hover:text-orange-500 transition-colors border border-zinc-200 dark:border-white/10"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             </motion.button>
           )}
           <div>
-            <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">taker</span></h2>
-            <p className="text-slate-500 font-semibold text-[11px] tracking-wider mt-1 opacity-60">Comprehensive Assessment</p>
+            <h2 className="text-3xl md:text-5xl font-bold text-zinc-900 dark:text-white tracking-tight leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">taker</span></h2>
+            <p className="text-zinc-500 font-semibold text-[11px] tracking-wider mt-1 opacity-60">Comprehensive Assessment</p>
           </div>
         </div>
       </header>
@@ -3309,8 +3312,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
           </div>
           <h4 className="text-xs font-semibold text-red-500 tracking-wide">Attempt failed</h4>
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{error}</p>
-          <button onClick={() => setError(null)} className="text-[10px] font-semibold text-slate-400 hover:text-orange-500 transition-colors tracking-wide">Dismiss</button>
+          <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{error}</p>
+          <button onClick={() => setError(null)} className="text-[10px] font-semibold text-zinc-400 hover:text-orange-500 transition-colors tracking-wide">Dismiss</button>
         </div>
       )}
 
@@ -3332,8 +3335,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 {selectedSubject ? '✓' : '1'}
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-900 dark:text-white">Select subject</label>
-                <p className="text-[10px] text-slate-500 font-medium opacity-60">Step 1: Choose Subject</p>
+                <label className="text-sm font-semibold text-zinc-900 dark:text-white">Select subject</label>
+                <p className="text-[10px] text-zinc-500 font-medium opacity-60">Step 1: Choose Subject</p>
               </div>
             </motion.div>
 
@@ -3350,11 +3353,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   className={`relative p-5 rounded-[24px] border text-left transition-all group overflow-hidden ${
                     selectedSubject?.id === s.id 
                       ? 'bg-gradient-to-r from-orange-500 to-red-600 border-transparent text-white shadow-xl shadow-orange-500/20' 
-                      : 'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:border-orange-500/30 hover:bg-white dark:hover:bg-white/[0.04]'
+                      : 'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 text-zinc-600 dark:text-zinc-400 hover:border-orange-500/30 hover:bg-white dark:hover:bg-white/[0.04]'
                     }`}
                 >
                   <div className="flex items-center justify-between pointer-events-none">
-                    <p className={`text-sm font-normal ${selectedSubject?.id === s.id ? 'text-white' : 'text-slate-900 dark:text-white group-hover:text-orange-500'}`}>{s.name}</p>
+                    <p className={`text-sm font-normal ${selectedSubject?.id === s.id ? 'text-white' : 'text-zinc-900 dark:text-white group-hover:text-orange-500'}`}>{s.name}</p>
                     {selectedSubject?.id === s.id && (
                       <motion.div layoutId="selection-active" className="w-2 h-2 rounded-full bg-white shadow-[0_0_10px_white]" />
                     )}
@@ -3368,11 +3371,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               
               {subjectsWithSyllabi.length === 0 && !initializing && (
                 <div className="py-16 text-center space-y-4">
-                  <div className="w-16 h-16 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto opacity-20">
+                  <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto opacity-20">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3A2.5 2.5 0 0 1 6.5 0.5H20" /></svg>
                   </div>
-                  <p className="text-[10px] font-semibold text-slate-500 tracking-widest opacity-40">Library is empty</p>
-                  <p className="text-xs text-slate-400 max-w-[200px] mx-auto leading-relaxed">Connect a subject syllabus to the repository to initialize testing modules.</p>
+                  <p className="text-[10px] font-semibold text-zinc-500 tracking-widest opacity-40">Library is empty</p>
+                  <p className="text-xs text-zinc-400 max-w-[200px] mx-auto leading-relaxed">Connect a subject syllabus to the repository to initialize testing modules.</p>
                 </div>
               )}
             </div>
@@ -3388,8 +3391,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 {selectedUnits.length > 0 && selectedDifficulties.length > 0 ? '✓' : '2'}
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">Configure scope</label>
-                <p className="text-[10px] text-slate-500 font-semibold tracking-wide opacity-60">Step 2: Subject Scope</p>
+                <label className="text-sm font-semibold text-zinc-900 dark:text-white tracking-tight">Configure scope</label>
+                <p className="text-[10px] text-zinc-500 font-semibold tracking-wide opacity-60">Step 2: Subject Scope</p>
               </div>
             </motion.div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -3406,21 +3409,21 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     onClick={() => toggleUnit(u)}
                     whileHover={isAvailable ? { scale: 1.05, y: -2 } : {}}
                     whileTap={isAvailable ? { scale: 0.95 } : {}}
-                    className={`relative p-8 rounded-[28px] border transition-all flex flex-col items-center justify-center group ${!isAvailable ? 'bg-slate-100/50 dark:bg-dark-950/20 border-slate-200 dark:border-white/5 opacity-40 grayscale cursor-not-allowed' :
+                    className={`relative p-8 rounded-[28px] border transition-all flex flex-col items-center justify-center group ${!isAvailable ? 'bg-zinc-100/50 dark:bg-dark-950/20 border-zinc-200 dark:border-white/5 opacity-40 grayscale cursor-not-allowed' :
                       isSelected ? 'bg-orange-500/10 border-orange-500 shadow-xl shadow-orange-500/5' :
-                        'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 hover:border-orange-500/30'
+                        'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 hover:border-orange-500/30'
                       }`}
                   >
                     {selectedSubject && !isAvailable && (
-                      <span className="absolute top-2 left-1/2 -translate-x-1/2 -translate-y-full group-hover:translate-y-4 opacity-0 group-hover:opacity-100 transition-all px-2 py-1 rounded-full bg-slate-800 text-white text-[8px] font-bold uppercase tracking-tighter whitespace-nowrap z-20">
+                      <span className="absolute top-2 left-1/2 -translate-x-1/2 -translate-y-full group-hover:translate-y-4 opacity-0 group-hover:opacity-100 transition-all px-2 py-1 rounded-full bg-zinc-800 text-white text-[8px] font-bold uppercase tracking-tighter whitespace-nowrap z-20">
                         Locked unit
                       </span>
                     )}
                     
-                    <span className={`text-3xl font-semibold tracking-tighter mb-1 transition-all duration-300 ${isSelected ? 'text-orange-500 scale-110 drop-shadow-[0_0_8px_rgba(249,115,22,0.3)]' : 'text-slate-200 dark:text-slate-800 group-hover:text-slate-300 dark:group-hover:text-slate-700'}`}>
+                    <span className={`text-3xl font-semibold tracking-tighter mb-1 transition-all duration-300 ${isSelected ? 'text-orange-500 scale-110 drop-shadow-[0_0_8px_rgba(249,115,22,0.3)]' : 'text-zinc-200 dark:text-zinc-800 group-hover:text-zinc-300 dark:group-hover:text-zinc-700'}`}>
                       0{u}
                     </span>
-                    <span className={`text-[10px] font-semibold tracking-wider transition-colors ${isSelected ? 'text-orange-600' : 'text-slate-400 dark:text-slate-500'}`}>
+                    <span className={`text-[10px] font-semibold tracking-wider transition-colors ${isSelected ? 'text-orange-600' : 'text-zinc-400 dark:text-zinc-500'}`}>
                       Unit {u}
                     </span>
                   </motion.button>
@@ -3453,11 +3456,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       onClick={() => setSelectedDifficulties(prev => prev.includes(lvl.id) ? prev.filter(d => d !== lvl.id) : [...prev, lvl.id])}
                       className={`relative p-5 rounded-[24px] border transition-all flex flex-col items-center justify-center group overflow-hidden ${
                         isSelected ? `${colorMap.bg} ${colorMap.border} shadow-lg shadow-black/5` :
-                        `bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 ${colorMap.hover}`
+                        `bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 ${colorMap.hover}`
                       }`}
                     >
-                      <span className={`text-xl font-semibold tracking-tight transition-all duration-300 ${isSelected ? colorMap.text : 'text-slate-400 dark:text-slate-700'}`}>{lvl.num}</span>
-                      <span className={`text-[10px] font-semibold tracking-wide mt-1 transition-colors ${isSelected ? colorMap.text : 'text-slate-500/60'}`}>{lvl.label}</span>
+                      <span className={`text-xl font-semibold tracking-tight transition-all duration-300 ${isSelected ? colorMap.text : 'text-zinc-400 dark:text-zinc-700'}`}>{lvl.num}</span>
+                      <span className={`text-[10px] font-semibold tracking-wide mt-1 transition-colors ${isSelected ? colorMap.text : 'text-zinc-500/60'}`}>{lvl.label}</span>
                     </motion.button>
                   );
                 })}
@@ -3471,14 +3474,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="pt-10 border-t border-slate-100 dark:border-white/5 space-y-12"
+                className="pt-10 border-t border-zinc-100 dark:border-white/5 space-y-12"
               >
                 <div className="space-y-10">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg">3</div>
                     <div>
-                      <label className="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">Final configuration</label>
-                      <p className="text-[10px] text-slate-500 font-semibold tracking-wide opacity-60">Step 3: Final Configuration</p>
+                      <label className="text-sm font-semibold text-zinc-900 dark:text-white tracking-tight">Final configuration</label>
+                      <p className="text-[10px] text-zinc-500 font-semibold tracking-wide opacity-60">Step 3: Final Configuration</p>
                     </div>
                   </div>
 
@@ -3486,7 +3489,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     {hasMCQs && (
                       <div className="space-y-3">
                         <div className="flex items-center justify-between ml-1">
-                          <p className="text-[10px] font-semibold text-slate-500 tracking-wider">MCQ assessment</p>
+                          <p className="text-[10px] font-semibold text-zinc-500 tracking-wider">MCQ assessment</p>
                           <button 
                             onClick={() => {
                               const count = subjectQuestions.filter(q => q.type === 'mcq' && selectedUnits.includes(q.unit)).length;
@@ -3501,53 +3504,53 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           <input
                             type="number" min="0" max="500" value={numMCQ}
                             onChange={(e) => setNumMCQ(parseInt(e.target.value) || 0)}
-                            className="w-full px-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-slate-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
+                            className="w-full px-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-zinc-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
                           />
-                          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">qty</div>
+                          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-zinc-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">qty</div>
                         </div>
                       </div>
                     )}
 
                     {hasSubjective && (
                       <div className="space-y-3">
-                        <p className="text-[10px] font-semibold text-slate-500 tracking-wider ml-1">Subjective questions</p>
+                        <p className="text-[10px] font-semibold text-zinc-500 tracking-wider ml-1">Subjective questions</p>
                         <div className="relative group">
                           <input
                             type="number" min="0" max="500" value={numSubjective}
                             onChange={(e) => setNumSubjective(parseInt(e.target.value) || 0)}
-                            className="w-full px-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-slate-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
+                            className="w-full px-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-zinc-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
                           />
-                          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">qty</div>
+                          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-zinc-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">qty</div>
                         </div>
                       </div>
                     )}
                     
                     <div className="space-y-3">
-                      <p className="text-[10px] font-semibold text-slate-500 tracking-wider ml-1">Time limit</p>
+                      <p className="text-[10px] font-semibold text-zinc-500 tracking-wider ml-1">Time limit</p>
                       <div className="relative group">
-                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-orange-500 transition-colors">
+                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400 group-hover:text-orange-500 transition-colors">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
                         </div>
                         <input
                           type="number" min="1" max="180" value={timerMinutes}
                           onChange={(e) => setTimerMinutes(parseInt(e.target.value) || 0)}
-                          className="w-full pl-12 pr-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-slate-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
+                          className="w-full pl-12 pr-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-zinc-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
                         />
-                        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">min</div>
+                        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-zinc-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">min</div>
                       </div>
                     </div>
 
                     {hasCoding && (
                       <div className="space-y-3">
-                        <p className="text-[10px] font-semibold text-slate-500 tracking-wider ml-1">Coding logic</p>
+                        <p className="text-[10px] font-semibold text-zinc-500 tracking-wider ml-1">Coding logic</p>
                         <div className="relative group">
                           <input
                             type="number" min="0" max="50" value={numCoding}
                             onChange={(e) => setNumCoding(parseInt(e.target.value) || 0)}
                             disabled={selectedSubject?.name.includes('CSE101')}
-                            className={`w-full px-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-slate-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm ${selectedSubject?.name.includes('CSE101') ? 'opacity-30 cursor-not-allowed' : ''}`}
+                            className={`w-full px-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-zinc-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm ${selectedSubject?.name.includes('CSE101') ? 'opacity-30 cursor-not-allowed' : ''}`}
                           />
-                          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">qty</div>
+                          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-zinc-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">qty</div>
                         </div>
                       </div>
                     )}
@@ -3558,19 +3561,19 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     <div className="space-y-4 pt-2">
                       <button 
                         onClick={() => setShowTopics(!showTopics)}
-                        className="flex items-center justify-between w-full px-5 py-4 rounded-[24px] bg-slate-50 dark:bg-white/5 hover:bg-orange-500/5 transition-all group border border-slate-100 dark:border-white/5"
+                        className="flex items-center justify-between w-full px-5 py-4 rounded-[24px] bg-zinc-50 dark:bg-white/5 hover:bg-orange-500/5 transition-all group border border-zinc-100 dark:border-white/5"
                       >
                         <div className="flex items-center gap-4">
                           <div className={`p-2.5 rounded-2xl transition-colors ${showTopics ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-orange-500/10 text-orange-500'}`}>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M4 6h16M4 12h16m-7 6h7" /></svg>
                           </div>
                           <div className="text-left">
-                            <span className="block text-sm font-semibold tracking-tight text-slate-900 dark:text-white">Refine by topics</span>
-                            <span className="block text-[11px] text-slate-500 font-semibold tracking-wide opacity-60">Fine-tune assessment focus</span>
+                            <span className="block text-sm font-semibold tracking-tight text-zinc-900 dark:text-white">Refine by topics</span>
+                            <span className="block text-[11px] text-zinc-500 font-semibold tracking-wide opacity-60">Fine-tune assessment focus</span>
                           </div>
                         </div>
                         <motion.div animate={{ rotate: showTopics ? 180 : 0 }}>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 text-slate-400"><path d="M19 9l-7 7-7-7" /></svg>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 text-zinc-400"><path d="M19 9l-7 7-7-7" /></svg>
                         </motion.div>
                       </button>
 
@@ -3585,7 +3588,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                             className={`px-4 py-3 rounded-2xl text-[10px] font-semibold tracking-wider text-center transition-all border ${
                               selectedTopics.length === 0 
                                 ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20' 
-                                : 'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 text-slate-500 hover:border-orange-500/30'
+                                : 'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 text-zinc-500 hover:border-orange-500/30'
                             }`}
                           >
                             All topics
@@ -3600,7 +3603,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                 className={`px-4 py-3 rounded-2xl text-[10px] font-semibold text-center transition-all border ${
                                   isSelected 
                                     ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20' 
-                                    : 'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 text-slate-500 hover:border-orange-500/30'
+                                    : 'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 text-zinc-500 hover:border-orange-500/30'
                                 }`}
                               >
                                 {topic}
@@ -3617,19 +3620,19 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       whileHover={{ y: -2 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setNegativeMarking(!negativeMarking)}
-                      className={`relative p-5 rounded-[28px] border transition-all flex items-center justify-between group overflow-hidden ${negativeMarking ? 'bg-red-500/5 border-red-500/30' : 'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 hover:border-red-500/20'}`}
+                      className={`relative p-5 rounded-[28px] border transition-all flex items-center justify-between group overflow-hidden ${negativeMarking ? 'bg-red-500/5 border-red-500/30' : 'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 hover:border-red-500/20'}`}
                     >
                       <div className="flex items-center gap-4 z-10">
-                        <div className={`p-3 rounded-2xl transition-colors ${negativeMarking ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-slate-100 dark:bg-dark-800 text-slate-500'}`}>
+                        <div className={`p-3 rounded-2xl transition-colors ${negativeMarking ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-zinc-100 dark:bg-dark-800 text-zinc-500'}`}>
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="w-4 h-4"><path d="M18 6 6 18M6 6l12 12" /></svg>
                         </div>
                         <div className="text-left">
-                          <p className={`text-sm font-semibold tracking-tight ${negativeMarking ? 'text-red-500' : 'text-slate-900 dark:text-white'}`}>Negative Marking</p>
-                          <p className="text-[10px] text-slate-500 font-semibold tracking-wider opacity-60">Strict mode enabled</p>
+                          <p className={`text-sm font-semibold tracking-tight ${negativeMarking ? 'text-red-500' : 'text-zinc-900 dark:text-white'}`}>Negative Marking</p>
+                          <p className="text-[10px] text-zinc-500 font-semibold tracking-wider opacity-60">Strict mode enabled</p>
                         </div>
                       </div>
-                      <div className={`w-12 h-6 rounded-full relative transition-colors z-10 ${negativeMarking ? 'bg-red-500' : 'bg-slate-200 dark:bg-dark-800'}`}>
-                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${negativeMarking ? 'right-1 bg-white' : 'left-1 bg-slate-400 dark:bg-slate-600'}`} />
+                      <div className={`w-12 h-6 rounded-full relative transition-colors z-10 ${negativeMarking ? 'bg-red-500' : 'bg-zinc-200 dark:bg-dark-800'}`}>
+                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${negativeMarking ? 'right-1 bg-white' : 'left-1 bg-zinc-400 dark:bg-zinc-600'}`} />
                       </div>
                     </motion.button>
 
@@ -3637,19 +3640,19 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       whileHover={{ y: -2 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setIncludeSolved(!includeSolved)}
-                      className={`relative p-5 rounded-[28px] border transition-all flex items-center justify-between group overflow-hidden ${includeSolved ? 'bg-orange-500/5 border-orange-500/30' : 'bg-white/50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 hover:border-orange-500/20'}`}
+                      className={`relative p-5 rounded-[28px] border transition-all flex items-center justify-between group overflow-hidden ${includeSolved ? 'bg-orange-500/5 border-orange-500/30' : 'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 hover:border-orange-500/20'}`}
                     >
                       <div className="flex items-center gap-4 z-10">
-                        <div className={`p-3 rounded-2xl transition-colors ${includeSolved ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'bg-slate-100 dark:bg-dark-800 text-slate-500'}`}>
+                        <div className={`p-3 rounded-2xl transition-colors ${includeSolved ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'bg-zinc-100 dark:bg-dark-800 text-zinc-500'}`}>
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /></svg>
                         </div>
                         <div className="text-left">
-                          <p className={`text-sm font-semibold tracking-tight ${includeSolved ? 'text-orange-500' : 'text-slate-900 dark:text-white'}`}>Include Solved</p>
-                          <p className="text-[10px] text-slate-500 font-semibold tracking-wider opacity-60">{solvedQuestionIds.size} questions already mastered</p>
+                          <p className={`text-sm font-semibold tracking-tight ${includeSolved ? 'text-orange-500' : 'text-zinc-900 dark:text-white'}`}>Include Solved</p>
+                          <p className="text-[10px] text-zinc-500 font-semibold tracking-wider opacity-60">{solvedQuestionIds.size} questions already mastered</p>
                         </div>
                       </div>
-                      <div className={`w-12 h-6 rounded-full relative transition-colors z-10 ${includeSolved ? 'bg-orange-500' : 'bg-slate-200 dark:bg-dark-800'}`}>
-                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${includeSolved ? 'right-1 bg-white' : 'left-1 bg-slate-400 dark:bg-slate-600'}`} />
+                      <div className={`w-12 h-6 rounded-full relative transition-colors z-10 ${includeSolved ? 'bg-orange-500' : 'bg-zinc-200 dark:bg-dark-800'}`}>
+                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${includeSolved ? 'right-1 bg-white' : 'left-1 bg-zinc-400 dark:bg-zinc-600'}`} />
                       </div>
                     </motion.button>
                   </div>

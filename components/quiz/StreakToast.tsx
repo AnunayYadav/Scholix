@@ -26,7 +26,7 @@ const StreakToast: React.FC = () => {
           </motion.span>
 
           <div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">
+            <h4 className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight">
               {streakToastMessage}
             </h4>
             <p className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 mt-0.5">
@@ -37,7 +37,7 @@ const StreakToast: React.FC = () => {
           {/* Close */}
           <button
             onClick={() => setStreakToastMessage(null)}
-            className="ml-2 p-1 text-slate-400 hover:text-slate-600 transition-colors"
+            className="ml-2 p-1 text-zinc-400 hover:text-zinc-600 transition-colors"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
               <path d="M18 6L6 18M6 6l12 12" />

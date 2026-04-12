@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AITool } from '../types';
 import NexusDropdown from './NexusDropdown';
+import { useUniversity } from '../hooks/useUniversity.tsx';
 import { aiTools } from '../data/aiToolsData';
 
 const AIToolsDirectory: React.FC = () => {
+    const { shortBrandName } = useUniversity();
     const [filter, setFilter] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
     const location = useLocation();
@@ -204,18 +206,18 @@ const AIToolsDirectory: React.FC = () => {
             {/* Header Section */}
             <header className="text-center space-y-4 relative">
                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 bg-orange-500/10 blur-[80px] rounded-full" />
-                <h2 className="text-3xl md:text-5xl font-bold text-slate-800 dark:text-white tracking-tighter leading-none">
+                <h2 className="text-3xl md:text-5xl font-bold text-zinc-800 dark:text-white tracking-tighter leading-none">
                     AI <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600">Forge</span>
                 </h2>
                 <div className="flex flex-col items-center justify-center gap-3">
                     <div className="flex items-center gap-2">
-                        <div className="h-[1px] w-8 md:w-16 bg-slate-200 dark:bg-white/10" />
-                        <p className="text-slate-500 text-[11px] sm:text-xs font-medium leading-none">
-                            Intelligence Hub Nexus
+                        <div className="h-[1px] w-8 md:w-16 bg-zinc-200 dark:bg-white/10" />
+                        <p className="text-zinc-500 text-[11px] sm:text-xs font-medium leading-none">
+                            Intelligence Hub {shortBrandName}
                         </p>
-                        <div className="h-[1px] w-8 md:w-16 bg-slate-200 dark:bg-white/10" />
+                        <div className="h-[1px] w-8 md:w-16 bg-zinc-200 dark:bg-white/10" />
                     </div>
-                    <p className="text-[11px] sm:text-xs font-bold text-slate-400 dark:text-white/30 uppercase tracking-[0.5em] mt-2">
+                    <p className="text-[11px] sm:text-xs font-bold text-zinc-400 dark:text-white/30 uppercase tracking-[0.5em] mt-2">
                         Discovery of <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500 font-black">500+</span> Premium AI Solutions
                     </p>
                 </div>
@@ -223,7 +225,7 @@ const AIToolsDirectory: React.FC = () => {
                 <div className="flex flex-col md:flex-row items-stretch md:items-center justify-center gap-4 max-w-5xl mx-auto mt-8">
                     {/* Search Input Container */}
                     <div className="relative flex-1 group">
-                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-all duration-300 z-10 pointer-events-none">
+                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-orange-500 transition-all duration-300 z-10 pointer-events-none">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
                         </div>
                         <input
@@ -232,11 +234,11 @@ const AIToolsDirectory: React.FC = () => {
                             placeholder="Ignite your search..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-16 pr-24 h-[62px] bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-[28px] text-[13px] md:text-[14px] font-bold outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500/40 transition-all dark:text-white shadow-2xl shadow-black/5"
+                            className="w-full pl-16 pr-24 h-[62px] bg-white dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 rounded-[28px] text-[13px] md:text-[14px] font-bold outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500/40 transition-all dark:text-white shadow-2xl shadow-black/5"
                         />
                         <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
-                            <kbd className="hidden md:flex h-6 px-1.5 items-center justify-center rounded-md bg-slate-100 dark:bg-white/10 text-[11px] sm:text-xs font-black text-slate-400 dark:text-slate-500">CMD</kbd>
-                            <kbd className="hidden md:flex h-6 px-1.5 items-center justify-center rounded-md bg-slate-100 dark:bg-white/10 text-[11px] sm:text-xs font-black text-slate-400 dark:text-slate-500">K</kbd>
+                            <kbd className="hidden md:flex h-6 px-1.5 items-center justify-center rounded-md bg-zinc-100 dark:bg-white/10 text-[11px] sm:text-xs font-black text-zinc-400 dark:text-zinc-500">CMD</kbd>
+                            <kbd className="hidden md:flex h-6 px-1.5 items-center justify-center rounded-md bg-zinc-100 dark:bg-white/10 text-[11px] sm:text-xs font-black text-zinc-400 dark:text-zinc-500">K</kbd>
                         </div>
                     </div>
 
@@ -261,7 +263,7 @@ const AIToolsDirectory: React.FC = () => {
                                         onClick={() => { setFilter(cat); close(); }}
                                         className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-xs font-bold transition-all cursor-pointer border-none ${filter === cat
                                             ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
-                                            : 'text-slate-500 dark:text-slate-400 bg-transparent hover:bg-slate-100 dark:hover:bg-white/5 hover:text-orange-600'
+                                            : 'text-zinc-500 dark:text-zinc-400 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-orange-600'
                                             }`}
                                     >
                                         <span className="flex items-center gap-3">
@@ -272,7 +274,7 @@ const AIToolsDirectory: React.FC = () => {
                                         </span>
                                         <span className={`px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-black border transition-colors ${filter === cat
                                             ? 'bg-white/20 border-white/30 text-white'
-                                            : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-400 dark:text-slate-500'
+                                            : 'bg-zinc-50 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-400 dark:text-zinc-500'
                                             }`}>
                                             {categoryCounts[cat]}
                                         </span>
@@ -293,12 +295,12 @@ const AIToolsDirectory: React.FC = () => {
                             style={{ animationDelay: `${i * 50}ms` }}
                             className={`group relative p-6 bg-white dark:bg-[#0d0d0d] border rounded-[48px] transition-[border-color,transform,box-shadow,background-color] duration-300 flex flex-col justify-between overflow-hidden group/card shadow-2xl shadow-black/5 ${tool.isHero
                                 ? 'border-amber-500/20 dark:border-amber-500/10 ring-1 ring-amber-500/5 bg-amber-50/20 dark:bg-amber-500/[0.02] hover:border-amber-500/40'
-                                : 'border-slate-100 dark:border-white/5 hover:border-orange-500/30'
+                                : 'border-zinc-100 dark:border-white/5 hover:border-orange-500/30'
                                 }`}
                         >
 
                             {/* Watermark Icon */}
-                            <div className="absolute -right-6 -top-6 w-32 h-32 text-slate-900/[0.02] dark:text-white/[0.02] group-hover/card:text-orange-500/[0.05] transition-colors duration-500 pointer-events-none -rotate-12">
+                            <div className="absolute -right-6 -top-6 w-32 h-32 text-zinc-900/[0.02] dark:text-white/[0.02] group-hover/card:text-orange-500/[0.05] transition-colors duration-500 pointer-events-none -rotate-12">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                                     {getCategoryIcon(tool.category)}
                                 </svg>
@@ -307,8 +309,8 @@ const AIToolsDirectory: React.FC = () => {
                             <div className="relative z-10 space-y-5">
                                 <div className="flex items-center justify-between">
                                     {tool.isHero ? (
-                                        <div className="flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-white/5 rounded-full border border-slate-200 dark:border-white/10 shadow-sm">
-                                            <span className="text-[11px] sm:text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600 uppercase tracking-widest">Nexus Pick</span>
+                                        <div className="flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-white/5 rounded-full border border-zinc-200 dark:border-white/10 shadow-sm">
+                                            <span className="text-[11px] sm:text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600 uppercase tracking-widest">{shortBrandName} Pick</span>
                                             <span className="text-xs">✨</span>
                                         </div>
                                     ) : <div />}
@@ -321,24 +323,24 @@ const AIToolsDirectory: React.FC = () => {
                                 </div>
 
                                 <div className={`w-16 h-16 rounded-[24px] flex items-center justify-center p-4 transition-[background-color,color,box-shadow,border-color] duration-300 ${tool.isHero
-                                    ? 'bg-slate-50 dark:bg-white/5 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-inner'
-                                    : 'bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white group-hover:bg-slate-900 dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-slate-900 group-hover:shadow-xl'
+                                    ? 'bg-zinc-50 dark:bg-white/5 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-inner'
+                                    : 'bg-zinc-50 dark:bg-white/5 text-zinc-900 dark:text-white group-hover:bg-zinc-900 dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-zinc-900 group-hover:shadow-xl'
                                     }`}>
                                     {getToolIcon(tool.name)}
                                 </div>
 
                                 <div className="space-y-2 text-left">
-                                    <h4 className="text-xl font-bold text-slate-900 dark:text-white tracking-tighter leading-none">
+                                    <h4 className="text-xl font-bold text-zinc-900 dark:text-white tracking-tighter leading-none">
                                         {tool.name}
                                     </h4>
-                                    <p className="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 tracking-wide">
+                                    <p className="text-[11px] sm:text-xs font-bold text-zinc-500 dark:text-zinc-400 leading-relaxed line-clamp-2 tracking-wide">
                                         {tool.description}
                                     </p>
                                 </div>
 
                                 <div className="flex flex-wrap gap-2 pt-2">
                                     {tool.tags.map(tag => (
-                                        <span key={tag} className="text-[11px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-slate-100 dark:border-white/5">
+                                        <span key={tag} className="text-[11px] sm:text-xs font-semibold text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-zinc-100 dark:border-white/5">
                                             {tag}
                                         </span>
                                     ))}
@@ -351,7 +353,7 @@ const AIToolsDirectory: React.FC = () => {
                                 rel="noopener noreferrer"
                                 className={`relative z-10 mt-8 group/btn h-14 flex items-center justify-center gap-2 rounded-[24px] text-[11px] sm:text-xs font-bold uppercase transition-all duration-300 no-underline shadow-lg active:scale-95 ${tool.isHero
                                     ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-orange-500/25 hover:-translate-y-0.5'
-                                    : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white dark:hover:text-white'
+                                    : 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white dark:hover:text-white'
                                     }`}
                             >
                                 Forge Ahead
@@ -361,10 +363,10 @@ const AIToolsDirectory: React.FC = () => {
                     ))
                 ) : (
                     <div className="col-span-full py-20 text-center space-y-4">
-                        <div className="w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto text-slate-300">
+                        <div className="w-20 h-20 bg-zinc-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto text-zinc-300">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-10 h-10"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M12 12l4 4M12 12l-4-4" /></svg>
                         </div>
-                        <p className="text-slate-400 font-medium text-xs">No intelligence found in the forge.</p>
+                        <p className="text-zinc-400 font-medium text-xs">No intelligence found in the forge.</p>
                     </div>
                 )}
             </div>

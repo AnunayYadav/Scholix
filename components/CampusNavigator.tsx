@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { showToast } from './Toast.tsx';
+import { useUniversity } from '../hooks/useUniversity.tsx';
 
 const IconMess = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 mr-2"><path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" /></svg>
@@ -42,10 +43,10 @@ const IconAlert = () => (
 
 const MealSkeleton = () => (
   <div className="glass-panel rounded-2xl overflow-hidden border dark:border-white/5 bg-white dark:bg-[#0a0a0a] p-5 flex items-center space-x-4 animate-pulse">
-    <div className="w-12 h-12 rounded-2xl bg-slate-200 dark:bg-white/10 shimmer" />
+    <div className="w-12 h-12 rounded-2xl bg-zinc-200 dark:bg-white/10 shimmer" />
     <div className="flex-1 space-y-2">
-      <div className="h-3 w-1/4 bg-slate-200 dark:bg-white/10 rounded shimmer" />
-      <div className="h-4 w-1/2 bg-slate-200 dark:bg-white/10 rounded shimmer" />
+      <div className="h-3 w-1/4 bg-zinc-200 dark:bg-white/10 rounded shimmer" />
+      <div className="h-4 w-1/2 bg-zinc-200 dark:bg-white/10 rounded shimmer" />
     </div>
   </div>
 );
@@ -54,12 +55,25 @@ import { MESS_DATA, DAYS, type MealCategories } from '../data/messData';
 
 
 const CampusNavigator: React.FC = () => {
+  const { universityInfo } = useUniversity();
   const navigate = useNavigate();
   const { tab: urlTab } = useParams();
-  const [activeTab, setActiveTab] = useState<'mess' | 'map'>((urlTab as 'mess' | 'map') || 'mess');
+  const availableTabs = universityInfo?.features.campusTabs || ['mess', 'map'];
+  const [activeTab, setActiveTab] = useState<'mess' | 'map'>(() => {
+    if (urlTab && availableTabs.includes(urlTab as any)) return urlTab as any;
+    return availableTabs[0] || 'map';
+  });
+
   const [isInitializing, setIsInitializing] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const reportModalRef = useRef<HTMLDivElement>(null);
+
+  // Sync tab with available tabs when universityInfo changes
+  useEffect(() => {
+    if (!availableTabs.includes(activeTab)) {
+      setActiveTab(availableTabs[0] || 'map');
+    }
+  }, [universityInfo]);
 
   // Reference logic: Today (Feb 27, 2025) as Thursday, Week 2.
   const REF_SUNDAY = new Date('2025-02-23T00:00:00Z').getTime();
@@ -91,10 +105,10 @@ const CampusNavigator: React.FC = () => {
 
   // Sync tab with URL
   useEffect(() => {
-    if (urlTab && (urlTab === 'mess' || urlTab === 'map')) {
-      setActiveTab(urlTab);
+    if (urlTab && (urlTab === 'mess' || urlTab === 'map') && availableTabs.includes(urlTab as any)) {
+      setActiveTab(urlTab as any);
     }
-  }, [urlTab]);
+  }, [urlTab, availableTabs]);
 
   const handleTabChange = (tab: 'mess' | 'map') => {
     setActiveTab(tab);
@@ -185,22 +199,22 @@ const CampusNavigator: React.FC = () => {
 
   const MealCard = ({ title, items, icon, colorClass }: { title: string, items: MealCategories, icon: React.ReactNode, colorClass: string }) => (
     <details className="group glass-panel rounded-2xl overflow-hidden transition-all duration-300 shadow-sm border dark:border-white/5" open>
-      <summary className="flex items-center justify-between p-5 cursor-pointer select-none bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 transition-colors">
+      <summary className="flex items-center justify-between p-5 cursor-pointer select-none bg-white dark:bg-white/5 hover:bg-zinc-50 dark:hover:bg-white/10 transition-colors">
         <div className="flex items-center space-x-4">
           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${colorClass} bg-opacity-10 dark:bg-opacity-20`}>
             {icon}
           </div>
-          <h4 className="font-bold text-slate-800 dark:text-white uppercase tracking-widest text-[11px] sm:text-xs">{title}</h4>
+          <h4 className="font-bold text-zinc-800 dark:text-white uppercase tracking-widest text-[11px] sm:text-xs">{title}</h4>
         </div>
-        <span className="transform group-open:rotate-180 transition-transform text-slate-400">
+        <span className="transform group-open:rotate-180 transition-transform text-zinc-400">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><polyline points="6 9 12 15 18 9" /></svg>
         </span>
       </summary>
-      <div className="px-8 py-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed animate-fade-in space-y-4">
+      <div className="px-8 py-4 text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed animate-fade-in space-y-4">
         {Object.entries(items).map(([category, dishes]) => (
-          <div key={category} className="border-b border-slate-100 dark:border-white/5 last:border-0 pb-3 last:pb-0">
-            <span className="font-black text-[11px] sm:text-xs uppercase tracking-widest text-slate-400 block mb-1">{category}</span>
-            <span className="text-slate-800 dark:text-slate-200 font-bold block">{dishes}</span>
+          <div key={category} className="border-b border-zinc-100 dark:border-white/5 last:border-0 pb-3 last:pb-0">
+            <span className="font-black text-[11px] sm:text-xs uppercase tracking-widest text-zinc-400 block mb-1">{category}</span>
+            <span className="text-zinc-800 dark:text-zinc-200 font-bold block">{dishes}</span>
           </div>
         ))}
       </div>
@@ -210,37 +224,45 @@ const CampusNavigator: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-10">
       <header className="mb-4">
-        <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-2 tracking-tighter">Campus <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Navigator</span></h2>
-        <p className="text-slate-600 dark:text-slate-400">Survival guide: Boys Hostel Mess menu & Interactive Map.</p>
+        <h2 className="text-3xl font-bold text-zinc-800 dark:text-white mb-2 tracking-tighter">Campus <span className="text-transparent bg-clip-text bg-[var(--brand-gradient)]">Navigator</span></h2>
+        <p className="text-zinc-600 dark:text-zinc-400">
+          Survival guide: {availableTabs.includes('mess') ? 'Boys Hostel Mess menu & ' : ''}Interactive Map.
+        </p>
       </header>
 
-      <div className="flex flex-wrap gap-2 bg-slate-200 dark:bg-white/5 p-1 rounded-2xl w-fit mb-8">
-        <button
-          onClick={() => handleTabChange('mess')}
-          className={`px-6 py-2.5 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center ${activeTab === 'mess' ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'}`}
-        >
-          <IconMess /> Mess Menu
-        </button>
-        <button
-          onClick={() => handleTabChange('map')}
-          className={`px-6 py-2.5 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center ${activeTab === 'map' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'}`}
-        >
-          <IconMap /> 3D Map
-        </button>
-      </div>
+      {availableTabs.length > 1 && (
+        <div className="flex flex-wrap gap-2 bg-zinc-200 dark:bg-white/5 p-1 rounded-2xl w-fit mb-8">
+          {availableTabs.includes('mess') && (
+            <button
+              onClick={() => handleTabChange('mess')}
+              className={`px-6 py-2.5 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center ${activeTab === 'mess' ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-white'}`}
+            >
+              <IconMess /> Mess Menu
+            </button>
+          )}
+          {availableTabs.includes('map') && (
+            <button
+              onClick={() => handleTabChange('map')}
+              className={`px-6 py-2.5 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center ${activeTab === 'map' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-white'}`}
+            >
+              <IconMap /> 3D Map
+            </button>
+          )}
+        </div>
+      )}
 
       {activeTab === 'mess' && (
         <div className="space-y-6 animate-fade-in">
           <div className="flex justify-center space-x-3 mb-6">
             <button
               onClick={() => setCurrentWeek(1)}
-              className={`px-5 py-2 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all border ${currentWeek === 1 ? 'bg-orange-600/10 border-orange-600 text-orange-600' : 'border-slate-300 dark:border-white/10 text-slate-500'}`}
+              className={`px-5 py-2 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all border ${currentWeek === 1 ? 'bg-orange-600/10 border-orange-600 text-orange-600' : 'border-zinc-300 dark:border-white/10 text-zinc-500'}`}
             >
               Week 1
             </button>
             <button
               onClick={() => setCurrentWeek(2)}
-              className={`px-5 py-2 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all border ${currentWeek === 2 ? 'bg-orange-600/10 border-orange-600 text-orange-600' : 'border-slate-300 dark:border-white/10 text-slate-500'}`}
+              className={`px-5 py-2 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all border ${currentWeek === 2 ? 'bg-orange-600/10 border-orange-600 text-orange-600' : 'border-zinc-300 dark:border-white/10 text-zinc-500'}`}
             >
               Week 2
             </button>
@@ -263,7 +285,7 @@ const CampusNavigator: React.FC = () => {
                     flex-none snap-center flex flex-col items-center justify-center w-24 h-32 rounded-3xl border transition-all duration-300 relative
                     ${isSelected
                       ? 'bg-orange-600 border-orange-700 text-white shadow-2xl shadow-orange-600/30 transform scale-105'
-                      : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-500 hover:border-orange-500/50'
+                      : 'bg-white dark:bg-white/5 border-zinc-200 dark:border-white/5 text-zinc-500 hover:border-orange-500/50'
                     }
                   `}
                 >
@@ -289,8 +311,8 @@ const CampusNavigator: React.FC = () => {
           ) : selectedMeals ? (
             <div className="space-y-4 animate-fade-in">
               <div className="flex items-center justify-between mb-4 px-2">
-                <h3 className="text-xl font-black text-slate-800 dark:text-white tracking-tighter uppercase">{selectedDay} Menu</h3>
-                <span className="text-[11px] sm:text-xs text-slate-500 font-black uppercase tracking-widest">W{currentWeek} Cycle</span>
+                <h3 className="text-xl font-black text-zinc-800 dark:text-white tracking-tighter uppercase">{selectedDay} Menu</h3>
+                <span className="text-[11px] sm:text-xs text-zinc-500 font-black uppercase tracking-widest">W{currentWeek} Cycle</span>
               </div>
 
               <MealCard title="Breakfast" items={selectedMeals.breakfast} icon={<IconBreakfast />} colorClass="text-yellow-500" />
@@ -299,7 +321,7 @@ const CampusNavigator: React.FC = () => {
               <MealCard title="Dinner" items={selectedMeals.dinner} icon={<IconDinner />} colorClass="text-indigo-500" />
             </div>
           ) : (
-            <div className="text-center py-20 text-slate-500">
+            <div className="text-center py-20 text-zinc-500">
               <p className="font-bold">Menu not available.</p>
             </div>
           )}
@@ -307,7 +329,7 @@ const CampusNavigator: React.FC = () => {
           <div className="pt-10 flex justify-center pb-20">
             <button
               onClick={() => setIsReportModalOpen(true)}
-              className="flex items-center px-6 py-3 bg-slate-100 dark:bg-white/5 hover:bg-orange-500/10 hover:text-orange-600 border border-transparent dark:border-white/5 hover:border-orange-500/30 rounded-2xl transition-all group"
+              className="flex items-center px-6 py-3 bg-zinc-100 dark:bg-white/5 hover:bg-orange-500/10 hover:text-orange-600 border border-transparent dark:border-white/5 hover:border-orange-500/30 rounded-2xl transition-all group"
             >
               <IconAlert />
               <span className="text-[11px] sm:text-xs font-black uppercase tracking-widest">Report Issue / Outdated Data</span>
@@ -318,13 +340,19 @@ const CampusNavigator: React.FC = () => {
 
       {activeTab === 'map' && (
         <div className="glass-panel p-1 rounded-3xl h-[650px] overflow-hidden shadow-2xl relative animate-fade-in border dark:border-white/5 bg-black">
-          <iframe
-            src="https://iviewd.com/lpu2/"
-            className="w-full h-full rounded-2xl transition-all duration-700"
-            frameBorder="0"
-            allowFullScreen
-            title="LPU 3D Campus Map"
-          />
+          {universityInfo?.campusMapUrl ? (
+            <iframe
+              src={universityInfo.campusMapUrl}
+              className="w-full h-full rounded-2xl transition-all duration-700"
+              frameBorder="0"
+              allowFullScreen
+              title={`${universityInfo.shortName} Campus Map`}
+            />
+          ) : (
+            <div className="w-full h-full flex flex-center items-center justify-center text-zinc-500 font-bold uppercase tracking-widest">
+               Map Protocol Pending...
+            </div>
+          )}
         </div>
       )}
 
@@ -332,7 +360,7 @@ const CampusNavigator: React.FC = () => {
         <button
           onClick={scrollToTop}
           aria-label="Scroll to top"
-          className="fixed bottom-10 right-6 md:right-10 z-[100] w-14 h-14 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-full flex items-center justify-center shadow-2xl text-slate-800 dark:text-white hover:scale-110 active:scale-95 transition-all animate-fade-in"
+          className="fixed bottom-10 right-6 md:right-10 z-[100] w-14 h-14 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-white/10 rounded-full flex items-center justify-center shadow-2xl text-zinc-800 dark:text-white hover:scale-110 active:scale-95 transition-all animate-fade-in"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-6 h-6"><polyline points="18 15 12 9 6 15" /></svg>
         </button>
@@ -345,42 +373,42 @@ const CampusNavigator: React.FC = () => {
           <div ref={reportModalRef} className={`nexus-modal w-full max-w-md p-6 relative ${isClosing ? 'closing' : ''}`}>
             <button
               onClick={handleClose}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent"
+              className="absolute top-5 right-5 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors border-none bg-transparent"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
 
             <header className="mb-6">
-              <h3 className="text-xl font-black text-slate-800 dark:text-white mb-1 tracking-tight">Report Issue</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Help us keep the mess menu accurate.</p>
+              <h3 className="text-xl font-black text-zinc-800 dark:text-white mb-1 tracking-tight">Report Issue</h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">Help us keep the mess menu accurate.</p>
             </header>
 
             <form onSubmit={handleReportSubmit} className="space-y-4">
               <div>
-                <label className="block text-[11px] sm:text-xs font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">Hostel Name</label>
+                <label className="block text-[11px] sm:text-xs font-black uppercase tracking-widest text-zinc-500 mb-2 ml-1">Hostel Name</label>
                 <input
                   type="text"
                   placeholder="e.g., BH-1, GH-4, Sun Hostel"
                   value={reportForm.hostelName}
                   onChange={(e) => setReportForm(prev => ({ ...prev, hostelName: e.target.value }))}
-                  className="w-full px-5 py-4 rounded-2xl bg-slate-100 dark:bg-[#0a0a0a] border border-transparent dark:border-white/5 focus:ring-2 focus:ring-orange-500 outline-none text-slate-800 dark:text-slate-200 transition-all font-bold"
+                  className="w-full px-5 py-4 rounded-2xl bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent dark:border-white/5 focus:ring-2 focus:ring-orange-500 outline-none text-zinc-800 dark:text-zinc-200 transition-all font-bold"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] sm:text-xs font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">What's the issue?</label>
+                <label className="block text-[11px] sm:text-xs font-black uppercase tracking-widest text-zinc-500 mb-2 ml-1">What's the issue?</label>
                 <textarea
                   placeholder="e.g., Sunday breakfast items are swapped..."
                   value={reportForm.issueDetails}
                   onChange={(e) => setReportForm(prev => ({ ...prev, issueDetails: e.target.value }))}
-                  className="w-full h-32 px-5 py-4 rounded-2xl bg-slate-100 dark:bg-[#0a0a0a] border border-transparent dark:border-white/5 focus:ring-2 focus:ring-orange-500 outline-none text-slate-800 dark:text-slate-200 transition-all font-bold resize-none"
+                  className="w-full h-32 px-5 py-4 rounded-2xl bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent dark:border-white/5 focus:ring-2 focus:ring-orange-500 outline-none text-zinc-800 dark:text-zinc-200 transition-all font-bold resize-none"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] sm:text-xs font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">Image Proof (Optional)</label>
+                <label className="block text-[11px] sm:text-xs font-black uppercase tracking-widest text-zinc-500 mb-2 ml-1">Image Proof (Optional)</label>
                 <div className="relative group">
                   <input
                     type="file"
@@ -388,7 +416,7 @@ const CampusNavigator: React.FC = () => {
                     onChange={handleImageUpload}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   />
-                  <div className={`w-full py-6 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-[#0a0a0a]/40 flex flex-col items-center justify-center transition-all ${reportForm.imageProof ? 'border-orange-500 bg-orange-500/5' : 'group-hover:border-orange-500/50'}`}>
+                  <div className={`w-full py-6 rounded-2xl border-2 border-dashed border-zinc-300 dark:border-white/10 bg-zinc-50 dark:bg-[#0a0a0a]/40 flex flex-col items-center justify-center transition-all ${reportForm.imageProof ? 'border-orange-500 bg-orange-500/5' : 'group-hover:border-orange-500/50'}`}>
                     {reportForm.imageProof ? (
                       <div className="flex flex-col items-center">
                         <img src={reportForm.imageProof} alt="Proof" className="h-16 w-16 object-cover rounded-lg mb-2 shadow-lg" />
@@ -396,8 +424,8 @@ const CampusNavigator: React.FC = () => {
                       </div>
                     ) : (
                       <>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-slate-400 mb-2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
-                        <span className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest text-center px-4">Tap to upload photo of menu board</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-zinc-400 mb-2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+                        <span className="text-[11px] sm:text-xs font-black text-zinc-400 uppercase tracking-widest text-center px-4">Tap to upload photo of menu board</span>
                       </>
                     )}
                   </div>
@@ -408,7 +436,7 @@ const CampusNavigator: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="flex-1 py-3 text-[11px] sm:text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent"
+                  className="flex-1 py-3 text-[11px] sm:text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors border-none bg-transparent"
                 >
                   Cancel
                 </button>

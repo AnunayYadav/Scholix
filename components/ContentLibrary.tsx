@@ -7,6 +7,7 @@ import NexusServer from '../services/nexusServer.ts';
 import PDFViewer from './PDFViewer.tsx';
 import NexusOriginals from './NexusOriginals.tsx';
 import NexusDropdown from './NexusDropdown.tsx';
+import { useUniversity } from '../hooks/useUniversity.tsx';
 import { showToast, showConfirm } from './Toast.tsx';
 import { slugify } from '../utils/slugify.ts';
 import {
@@ -35,7 +36,7 @@ import VerifiedBadge from './VerifiedBadge.tsx';
 const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' | 'category' | 'root', size?: string }) => {
 
   const colors = {
-    root: 'text-slate-400',
+    root: 'text-zinc-400',
     semester: 'text-orange-600',
     subject: 'text-orange-500',
     category: 'text-amber-600'
@@ -48,7 +49,7 @@ const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' |
 };
 
 const SkeletonCard = () => (
-  <div className="group p-5 rounded-[30px] border border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 relative overflow-hidden flex flex-col min-h-[140px]">
+  <div className="group p-5 rounded-[30px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 relative overflow-hidden flex flex-col min-h-[140px]">
     <div className="w-10 h-10 skeleton-pulse rounded-xl mb-4" />
     <div className="h-4 w-3/4 skeleton-pulse rounded-md mb-2" />
     <div className="h-3 w-1/2 skeleton-pulse rounded-md" />
@@ -62,6 +63,7 @@ interface ContentLibraryProps {
 }
 
 const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialView = 'browse', onAuthRequired }) => {
+  const { shortBrandName } = useUniversity();
   const [allFiles, setAllFiles] = useState<LibraryFile[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [viewMode, setViewMode] = useState<'browse' | 'my-uploads' | 'originals'>(initialView);
@@ -601,25 +603,25 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         <div className="space-y-6 animate-fade-in">
           <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight leading-none mb-1 flex items-center">
+              <h2 className="text-2xl font-bold text-zinc-800 dark:text-white tracking-tight leading-none mb-1 flex items-center">
                 Content <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 ml-1.5 mr-1.5">Library</span> Hub
                 <div className="relative group ml-2 mb-1">
-                  <button className="flex items-center justify-center text-slate-300 dark:text-white/20 hover:text-orange-500 dark:hover:text-orange-500 bg-transparent border-none transition-colors">
+                  <button className="flex items-center justify-center text-zinc-300 dark:text-white/20 hover:text-orange-500 dark:hover:text-orange-500 bg-transparent border-none transition-colors">
                     <svg viewBox="0 0 16 16" fill="currentColor" className="w-5 h-5">
                       <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
                       <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
                     </svg>
                   </button>
-                  <div className="absolute left-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-64 p-3 bg-white dark:bg-[#1a1a1a] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100]">
-                    <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium whitespace-normal">
+                  <div className="absolute left-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-64 p-3 bg-white dark:bg-[#1a1a1a] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100]">
+                    <p className="text-[10px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium whitespace-normal">
                       <span className="text-orange-500 font-bold block mb-1 uppercase tracking-wider text-[9px]">Disclaimer</span>
-                      Resources not explicitly marked as <strong className="text-slate-800 dark:text-white font-bold">Nexus</strong> (e.g. Nexus Originals, Nexus Official) are completely crowdsourced (WhatsApp, Telegram, etc.) and not owned by us.
+                      Resources not explicitly marked as <strong className="text-zinc-800 dark:text-white font-bold">{shortBrandName}</strong> (e.g. {shortBrandName} Originals, {shortBrandName} Official) are completely crowdsourced (WhatsApp, Telegram, etc.) and not owned by us.
                     </p>
                   </div>
                 </div>
               </h2>
               {!isAdminView && !searchQuery && viewMode === 'browse' && (
-                <nav className="mt-2 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-slate-400">
+                <nav className="mt-2 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-zinc-400">
                   <button onClick={() => navigateTo(null, null, null)} className="hover:text-orange-500 transition-colors border-none bg-transparent">Root</button>
                   {activeSemester && <><span className="opacity-30">/</span><button onClick={() => navigateTo(activeSemester, null, null)} className={`border-none bg-transparent ${!activeSubject ? 'text-orange-600' : 'hover:text-orange-500'}`}>{activeSemester.name}</button></>}
                   {activeSubject && <><span className="opacity-30">/</span><button onClick={() => navigateTo(activeSemester, activeSubject, null)} className={`border-none bg-transparent ${!activeCategory ? 'text-orange-600' : 'hover:text-orange-500'}`}>{activeSubject.name}</button></>}
@@ -630,14 +632,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             <div className="flex gap-2">
               {userProfile?.is_admin && (
                 <>
-                  <button onClick={toggleAdminView} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${isAdminView ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-[#0a0a0a] text-slate-400'}`} title={isAdminView ? "Exit Review Hub" : "Enter Review Hub"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></button>
-                  <button onClick={() => { setNewFolderName(''); setShowFolderModal(true); }} className="w-10 h-10 bg-slate-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center text-orange-600 hover:scale-110 active:scale-95 transition-all shadow-sm border-none" title="Create Folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg></button>
+                  <button onClick={toggleAdminView} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${isAdminView ? 'bg-orange-600 text-white shadow-lg' : 'bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400'}`} title={isAdminView ? "Exit Review Hub" : "Enter Review Hub"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></button>
+                  <button onClick={() => { setNewFolderName(''); setShowFolderModal(true); }} className="w-10 h-10 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center text-orange-600 hover:scale-110 active:scale-95 transition-all shadow-sm border-none" title="Create Folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg></button>
                 </>
               )}
               <button
                 onClick={() => {
                   if (!userProfile) {
-                    showToast("Please login to access Nexus Originals.", "info");
+                    showToast(`Please login to access ${shortBrandName} Originals.`, "info");
                     onAuthRequired?.();
                     return;
                   }
@@ -645,8 +647,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   navigateTo(null, null, null); 
                   setIsAdminView(false); 
                 }}
-                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none bg-slate-100 dark:bg-[#0a0a0a] text-slate-400 hover:text-orange-600"
-                title="Nexus Originals"
+                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400 hover:text-orange-600"
+                title={`${shortBrandName} Originals`}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
               </button>
@@ -661,7 +663,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   navigateTo(null, null, null); 
                   setIsAdminView(false); 
                 }} 
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'my-uploads' ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 dark:bg-[#0a0a0a] text-slate-400 hover:text-orange-600'}`} 
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'my-uploads' ? 'bg-orange-600 text-white shadow-lg' : 'bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400 hover:text-orange-600'}`} 
                 title={viewMode === 'my-uploads' ? "Exit Vault" : "My Vault"}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
@@ -696,7 +698,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               />
 
               <div className="relative flex-1">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
                 <input
                   type="text"
                   placeholder="Filter files..."
@@ -706,11 +708,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   autoCorrect="off"
                   autoComplete="off"
                   spellCheck="false"
-                  className="w-full pl-11 pr-4 h-12 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] sm:text-xs font-bold outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white"
+                  className="w-full pl-11 pr-4 h-12 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-2xl text-[11px] sm:text-xs font-bold outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white"
                 />
               </div>
             </div>
-            <button onClick={() => fetchFromSource(true)} className="w-12 h-12 flex items-center justify-center bg-slate-100 dark:bg-[#0a0a0a] rounded-xl text-slate-400 hover:text-orange-600 transition-colors shadow-sm border-none self-end md:self-auto" title="Refresh List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></button>
+            <button onClick={() => fetchFromSource(true)} className="w-12 h-12 flex items-center justify-center bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl text-zinc-400 hover:text-orange-600 transition-colors shadow-sm border-none self-end md:self-auto" title="Refresh List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></button>
           </div>
 
           {isLoading ? (
@@ -730,16 +732,16 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 >
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                     {currentFolders.map(folder => (
-                      <div key={folder.id} onDragOver={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(folder.id); }} onDragLeave={() => setDraggingOverId(null)} onDrop={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(null); const droppedFiles = e.dataTransfer.files; if (droppedFiles && droppedFiles.length > 0) { handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : ''); } }} onClick={() => { if (folder.type === 'semester') navigateTo(folder, null, null); else if (folder.type === 'subject') navigateTo(activeSemester, folder, null); else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder); }} className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''} ${draggingOverId === folder.id ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-orange-500/50 hover:shadow-lg'}`}>
+                      <div key={folder.id} onDragOver={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(folder.id); }} onDragLeave={() => setDraggingOverId(null)} onDrop={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(null); const droppedFiles = e.dataTransfer.files; if (droppedFiles && droppedFiles.length > 0) { handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : ''); } }} onClick={() => { if (folder.type === 'semester') navigateTo(folder, null, null); else if (folder.type === 'subject') navigateTo(activeSemester, folder, null); else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder); }} className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''} ${draggingOverId === folder.id ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-orange-500/50 hover:shadow-lg'}`}>
                         {userProfile?.is_admin && (
                           <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                            <button onClick={(e) => { e.stopPropagation(); setFolderToManage(folder); setNewFolderName(folder.name); setIsShining(folder.is_shining || false); setShowRenameModal(true); }} className="p-1.5 bg-slate-100 dark:bg-[#0a0a0a] rounded-lg text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
-                            <button onClick={(e) => handleDeleteFolder(folder, e)} className="p-1.5 bg-slate-100 dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red dark:hover:bg-slate-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+                            <button onClick={(e) => { e.stopPropagation(); setFolderToManage(folder); setNewFolderName(folder.name); setIsShining(folder.is_shining || false); setShowRenameModal(true); }} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-orange-600 hover:bg-orange-50 dark:hover:bg-zinc-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+                            <button onClick={(e) => handleDeleteFolder(folder, e)} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red dark:hover:bg-zinc-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
                           </div>
                         )}
                         <FolderIcon type={folder.type} size="w-10 h-10" />
-                        <h3 className="text-[11px] sm:text-xs md:text-base font-semibold text-slate-800 dark:text-white tracking-tight leading-tight mt-1">{folder.name}</h3>
-                        <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        <h3 className="text-[11px] sm:text-xs md:text-base font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight mt-1">{folder.name}</h3>
+                        <p className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500 mt-1">
                           {folderFileCounts[folder.id] || 0} File{folderFileCounts[folder.id] !== 1 ? 's' : ''}
                         </p>
                         <div className="absolute -right-2 -bottom-2 opacity-5 group-hover:scale-110 transition-transform"><FolderIcon type={folder.type} size="w-24 h-24" /></div>
@@ -790,7 +792,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                         onShowDetails={() => { setSelectedFile(file); setShowDetailsModal(true); }}
                       />
                     ))}
-                    {displayFiles.length === 0 && currentFolders.length === 0 && !isLoading && <div className="col-span-full py-20 text-center text-slate-400 text-[11px] sm:text-xs opacity-40">No files found.</div>}
+                    {displayFiles.length === 0 && currentFolders.length === 0 && !isLoading && <div className="col-span-full py-20 text-center text-zinc-400 text-[11px] sm:text-xs opacity-40">No files found.</div>}
                   </div>
                 </SortableContext>
                 {createPortal(
@@ -827,14 +829,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
             onClick={(e) => { if (e.target === e.currentTarget) handleCloseDetails(); }}>
             <div ref={modalRef} className={`nexus-modal w-full max-w-lg ${isClosingDetails ? 'closing' : ''}`}>
-              <header className="p-6 md:p-8 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#0a0a0a]/20 flex items-start justify-between">
+              <header className="p-6 md:p-8 border-b border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-[#0a0a0a]/20 flex items-start justify-between">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-500 border border-orange-600/20">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                     </div>
                   </div>
-                  <h3 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">{selectedFile.name}</h3>
+                  <h3 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900 dark:text-white leading-tight">{selectedFile.name}</h3>
                 </div>
                 <button onClick={handleCloseDetails} className="p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -850,15 +852,15 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     { label: 'File Size', val: selectedFile.size }
                   ].map((item, i) => (
                     <div key={i} className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                      <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 mb-1">{item.label}</p>
-                      <p className="text-[11px] sm:text-xs font-medium text-slate-800 dark:text-white">{item.val || 'N/A'}</p>
+                      <p className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500 mb-1">{item.label}</p>
+                      <p className="text-[11px] sm:text-xs font-medium text-zinc-800 dark:text-white">{item.val || 'N/A'}</p>
                     </div>
                   ))}
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="text-[11px] sm:text-xs font-medium text-slate-400">Description</h4>
-                  <p className="text-[11px] sm:text-xs font-medium text-slate-600 dark:text-slate-300 leading-relaxed italic bg-slate-50 dark:bg-[#0a0a0a]/5 p-6 rounded-3xl border border-slate-100 dark:border-white/5">
+                  <h4 className="text-[11px] sm:text-xs font-medium text-zinc-400">Description</h4>
+                  <p className="text-[11px] sm:text-xs font-medium text-zinc-600 dark:text-zinc-300 leading-relaxed italic bg-zinc-50 dark:bg-[#0a0a0a]/5 p-6 rounded-3xl border border-zinc-100 dark:border-white/5">
                     {selectedFile.description || "No description provided."}
                   </p>
                 </div>
@@ -878,13 +880,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-[11px] sm:text-xs font-medium text-slate-800 dark:text-white">{new Date(selectedFile.uploadDate).toLocaleDateString()}</p>
+                    <p className="text-[11px] sm:text-xs font-medium text-zinc-800 dark:text-white">{new Date(selectedFile.uploadDate).toLocaleDateString()}</p>
                   </div>
                 </div>
               </div>
 
-              <footer className="p-6 md:p-8 bg-slate-50 dark:bg-[#0a0a0a]/20 border-t border-slate-100 dark:border-white/5 flex gap-4">
-                <button onClick={handleCloseDetails} className="flex-1 py-3 text-[11px] sm:text-xs text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">Discard</button>
+              <footer className="p-6 md:p-8 bg-zinc-50 dark:bg-[#0a0a0a]/20 border-t border-zinc-100 dark:border-white/5 flex gap-4">
+                <button onClick={handleCloseDetails} className="flex-1 py-3 text-[11px] sm:text-xs text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors">Discard</button>
                 {selectedFile.status === 'approved' && (
                   <button onClick={() => { handleCloseDetails(); handleFileAccess(selectedFile); }} className="flex-[2] py-3 bg-orange-600 text-white rounded-xl font-semibold text-[11px] sm:text-xs shadow-xl active:scale-95 transition-all border-none">View Document ↗</button>
                 )}
@@ -901,24 +903,24 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
             onClick={(e) => { if (e.target === e.currentTarget) handleCloseFolder(); }}>
             <div ref={modalRef} className={`nexus-modal w-full max-w-sm ${isClosingFolder ? 'closing' : ''}`}>
-              <div className="bg-slate-50 dark:bg-[#0a0a0a]/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5"><h3 className="text-[11px] sm:text-xs font-semibold">New Folder</h3><button onClick={handleCloseFolder} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
+              <div className="bg-zinc-50 dark:bg-[#0a0a0a]/20 p-6 flex justify-between items-center border-b border-zinc-100 dark:border-white/5"><h3 className="text-[11px] sm:text-xs font-semibold">New Folder</h3><button onClick={handleCloseFolder} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
               <div className="p-6 space-y-4">
-                <input autoFocus placeholder="Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-[#0a0a0a]/60 p-4 rounded-xl font-bold border dark:border-white/10 text-[11px] sm:text-xs dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
+                <input autoFocus placeholder="Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#0a0a0a]/60 p-4 rounded-xl font-bold border dark:border-white/10 text-[11px] sm:text-xs dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
                 
-                <div className="flex items-center justify-between p-4 bg-slate-100 dark:bg-[#0a0a0a]/40 rounded-xl border border-transparent dark:border-white/5 transition-all">
+                <div className="flex items-center justify-between p-4 bg-zinc-100 dark:bg-[#0a0a0a]/40 rounded-xl border border-transparent dark:border-white/5 transition-all">
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isShining ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-slate-200 dark:bg-white/5 text-slate-400'}`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isShining ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-zinc-200 dark:bg-white/5 text-zinc-400'}`}>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-900 dark:text-white">Shining Effect</p>
-                      <p className="text-[8px] text-slate-400 font-medium">Adds a continuous shimmer anim</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 dark:text-white">Shining Effect</p>
+                      <p className="text-[8px] text-zinc-400 font-medium">Adds a continuous shimmer anim</p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => setIsShining(!isShining)}
-                    className={`w-10 h-6 rounded-full relative transition-all duration-300 border-none px-0 ${isShining ? 'bg-orange-500' : 'bg-slate-300 dark:bg-white/10'}`}
+                    className={`w-10 h-6 rounded-full relative transition-all duration-300 border-none px-0 ${isShining ? 'bg-orange-500' : 'bg-zinc-300 dark:bg-white/10'}`}
                   >
                     <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${isShining ? 'left-5 shadow-sm' : 'left-1'}`} />
                   </button>
@@ -938,29 +940,29 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
             onClick={(e) => { if (e.target === e.currentTarget) handleCloseRename(); }}>
             <div ref={modalRef} className={`nexus-modal w-full max-w-sm ${isClosingRename ? 'closing' : ''}`}>
-              <div className="bg-slate-50 dark:bg-[#0a0a0a]/20 p-6 flex justify-between items-center border-b border-slate-100 dark:border-white/5">
+              <div className="bg-zinc-50 dark:bg-[#0a0a0a]/20 p-6 flex justify-between items-center border-b border-zinc-100 dark:border-white/5">
                 <h3 className="text-[11px] sm:text-xs font-semibold">Rename Folder</h3>
                 <button onClick={handleCloseRename} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               </div>
               <div className="p-6 space-y-4">
-                <input autoFocus placeholder="New Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-slate-100 dark:bg-[#0a0a0a]/60 p-4 rounded-xl font-bold border dark:border-white/10 text-[11px] sm:text-xs dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
+                <input autoFocus placeholder="New Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#0a0a0a]/60 p-4 rounded-xl font-bold border dark:border-white/10 text-[11px] sm:text-xs dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
 
-                <div className="flex items-center justify-between p-4 bg-slate-100 dark:bg-[#0a0a0a]/40 rounded-xl border border-transparent dark:border-white/5 transition-all">
+                <div className="flex items-center justify-between p-4 bg-zinc-100 dark:bg-[#0a0a0a]/40 rounded-xl border border-transparent dark:border-white/5 transition-all">
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isShining ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-slate-200 dark:bg-white/5 text-slate-400'}`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isShining ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-zinc-200 dark:bg-white/5 text-zinc-400'}`}>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-900 dark:text-white">Shining Effect</p>
-                      <p className="text-[8px] text-slate-400 font-medium">Adds a continuous shimmer anim</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 dark:text-white">Shining Effect</p>
+                      <p className="text-[8px] text-zinc-400 font-medium">Adds a continuous shimmer anim</p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => setIsShining(!isShining)}
-                    className={`w-10 h-6 rounded-full relative transition-all duration-300 border-none px-0 ${isShining ? 'bg-orange-500' : 'bg-slate-300 dark:bg-white/10'}`}
+                    className={`w-10 h-6 rounded-full relative transition-all duration-300 border-none px-0 ${isShining ? 'bg-orange-500' : 'bg-zinc-300 dark:bg-white/10'}`}
                   >
                     <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${isShining ? 'left-5 shadow-sm' : 'left-1'}`} />
                   </button>
@@ -980,14 +982,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
             onClick={(e) => { if (e.target === e.currentTarget && !isProcessing) { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); } }}>
             <div ref={modalRef} className={`nexus-modal w-full ${showUploadModal ? 'max-w-4xl' : 'max-w-sm'} overflow-hidden ${(showUploadModal ? isClosingUpload : isClosingEdit) ? 'closing' : ''}`}>
-              <header className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#0a0a0a]/20 flex items-center justify-between">
+              <header className="p-6 border-b border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-[#0a0a0a]/20 flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-bold leading-none">{showUploadModal ? 'Contribute to Library' : 'Edit Metadata'}</h3>
-                  <p className="text-[11px] sm:text-xs text-slate-400 mt-2">
+                  <p className="text-[11px] sm:text-xs text-zinc-400 mt-2">
                     {showUploadModal ? `Batch Processing: ${pendingUploads.length} File${pendingUploads.length > 1 ? 's' : ''}` : 'Refine file parameters'}
                   </p>
                 </div>
-                <button onClick={() => { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); }} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors border-none bg-transparent">
+                <button onClick={() => { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); }} className="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors border-none bg-transparent">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               </header>
@@ -995,22 +997,22 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
               <div className={`flex flex-col md:flex-row flex-1 min-h-0 md:h-[60vh]`}>
                 {showUploadModal && (
-                  <div className="w-full md:w-64 border-r border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#0a0a0a]/10 overflow-y-auto no-scrollbar border-b md:border-b-0">
+                  <div className="w-full md:w-64 border-r border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-[#0a0a0a]/10 overflow-y-auto no-scrollbar border-b md:border-b-0">
                     <div className="p-4 space-y-2">
-                      <p className="text-xs text-slate-400 px-2 mb-3">Pending files</p>
+                      <p className="text-xs text-zinc-400 px-2 mb-3">Pending files</p>
                       {pendingUploads.map((up, idx) => (
                         <button
                           key={idx}
                           onClick={() => switchActiveUpload(idx)}
-                          className={`w-full text-left p-4 rounded-2xl transition-all border-none relative group ${activeUploadIndex === idx ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'hover:bg-orange-500/5 text-slate-500 hover:text-orange-500'}`}
+                          className={`w-full text-left p-4 rounded-2xl transition-all border-none relative group ${activeUploadIndex === idx ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'hover:bg-orange-500/5 text-zinc-500 hover:text-orange-500'}`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeUploadIndex === idx ? 'bg-white/20' : 'bg-slate-100 dark:bg-[#0a0a0a]'}`}>
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeUploadIndex === idx ? 'bg-white/20' : 'bg-zinc-100 dark:bg-[#0a0a0a]'}`}>
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                             </div>
                             <div className="min-w-0">
                               <p className="text-[11px] sm:text-xs font-medium truncate">{up.name || up.file.name}</p>
-                              <p className={`text-[8px] font-bold opacity-60 truncate ${activeUploadIndex === idx ? 'text-white' : 'text-slate-400'}`}>{(up.file.size / 1024 / 1024).toFixed(2)} MB</p>
+                              <p className={`text-[8px] font-bold opacity-60 truncate ${activeUploadIndex === idx ? 'text-white' : 'text-zinc-400'}`}>{(up.file.size / 1024 / 1024).toFixed(2)} MB</p>
                             </div>
                             {activeUploadIndex === idx && (
                               <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full" />
@@ -1056,7 +1058,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 custom-scrollbar bg-white dark:bg-[#0a0a0a]/20">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2 relative z-[95]">
-                      <label className="text-[11px] sm:text-xs text-slate-500 ml-1">Target Program</label>
+                      <label className="text-[11px] sm:text-xs text-zinc-500 ml-1">Target Program</label>
                       {!isCreatingNew.program ? (
                         <NexusDropdown
                           options={availablePrograms}
@@ -1069,7 +1071,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           renderCustomMenu={(close) => (
                             <>
                               {availablePrograms.map(opt => (
-                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, program: opt, semester: '', subject: '', type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.program === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, program: opt, semester: '', subject: '', type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.program === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-zinc-400 hover:text-orange-600 hover:bg-white/5'}`}>
                                   {opt}
                                   {metaForm.program === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
                                 </button>
@@ -1084,18 +1086,18 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       ) : (
                         <div className="flex gap-2">
                           <input autoFocus placeholder="New Program..." value={metaForm.program} onChange={e => setMetaForm({ ...metaForm, program: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
-                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, program: false }); setMetaForm({ ...metaForm, program: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, program: false }); setMetaForm({ ...metaForm, program: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-zinc-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         </div>
                       )}
                     </div>
 
                     <div className="space-y-2 relative z-[90]">
-                      <label className="text-[11px] sm:text-xs text-slate-500 ml-1">Document Title</label>
-                      <input value={metaForm.name} onChange={e => setMetaForm({ ...metaForm, name: e.target.value })} className="w-full bg-slate-100 dark:bg-[#0a0a0a]/40 p-4 rounded-2xl font-bold border border-transparent dark:border-white/5 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 text-[11px] sm:text-xs transition-all" />
+                      <label className="text-[11px] sm:text-xs text-zinc-500 ml-1">Document Title</label>
+                      <input value={metaForm.name} onChange={e => setMetaForm({ ...metaForm, name: e.target.value })} className="w-full bg-zinc-100 dark:bg-[#0a0a0a]/40 p-4 rounded-2xl font-bold border border-transparent dark:border-white/5 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 text-[11px] sm:text-xs transition-all" />
                     </div>
 
                     <div className="space-y-2 relative z-[80]">
-                      <label className="text-xs text-slate-500 ml-1">Semester</label>
+                      <label className="text-xs text-zinc-500 ml-1">Semester</label>
                       {!isCreatingNew.semester ? (
                         <NexusDropdown
                           options={modalSemesters}
@@ -1106,7 +1108,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           renderCustomMenu={(close) => (
                             <>
                               {modalSemesters.map(opt => (
-                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, semester: opt, subject: '', type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.semester === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, semester: opt, subject: '', type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.semester === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-zinc-400 hover:text-orange-600 hover:bg-white/5'}`}>
                                   {opt}
                                   {metaForm.semester === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
                                 </button>
@@ -1121,13 +1123,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       ) : (
                         <div className="flex gap-2">
                           <input autoFocus placeholder="New Sem..." value={metaForm.semester} onChange={e => setMetaForm({ ...metaForm, semester: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
-                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, semester: false }); setMetaForm({ ...metaForm, semester: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, semester: false }); setMetaForm({ ...metaForm, semester: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-zinc-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         </div>
                       )}
                     </div>
 
                     <div className="space-y-2 relative z-[75]">
-                      <label className="text-xs text-slate-500 ml-1">Subject</label>
+                      <label className="text-xs text-zinc-500 ml-1">Subject</label>
                       {!isCreatingNew.subject ? (
                         <NexusDropdown
                           options={modalSubjects}
@@ -1138,7 +1140,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           renderCustomMenu={(close) => (
                             <>
                               {modalSubjects.map(opt => (
-                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, subject: opt, type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.subject === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, subject: opt, type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.subject === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-zinc-400 hover:text-orange-600 hover:bg-white/5'}`}>
                                   {opt}
                                   {metaForm.subject === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
                                 </button>
@@ -1153,13 +1155,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       ) : (
                         <div className="flex gap-2">
                           <input autoFocus placeholder="New Subject..." value={metaForm.subject} onChange={e => setMetaForm({ ...metaForm, subject: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
-                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, subject: false }); setMetaForm({ ...metaForm, subject: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, subject: false }); setMetaForm({ ...metaForm, subject: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-zinc-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         </div>
                       )}
                     </div>
 
                     <div className="space-y-2 relative z-[70]">
-                      <label className="text-xs text-slate-500 ml-1">Category / Type</label>
+                      <label className="text-xs text-zinc-500 ml-1">Category / Type</label>
                       {!isCreatingNew.type ? (
                         <NexusDropdown
                           options={modalCategories}
@@ -1170,7 +1172,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           renderCustomMenu={(close) => (
                             <>
                               {modalCategories.map(opt => (
-                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, type: opt }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.type === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, type: opt }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.type === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-zinc-400 hover:text-orange-600 hover:bg-white/5'}`}>
                                   {opt}
                                   {metaForm.type === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
                                 </button>
@@ -1185,24 +1187,24 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       ) : (
                         <div className="flex gap-2">
                           <input autoFocus placeholder="New Category..." value={metaForm.type} onChange={e => setMetaForm({ ...metaForm, type: e.target.value })} className="flex-1 bg-white/5 p-4 rounded-2xl font-bold border border-orange-500/50 text-white outline-none focus:ring-2 focus:ring-orange-500 text-[10px]" />
-                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, type: false }); setMetaForm({ ...metaForm, type: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-slate-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, type: false }); setMetaForm({ ...metaForm, type: '' }); }} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-zinc-500 hover:text-white transition-colors border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         </div>
                       )}
                     </div>
 
                     <div className="space-y-2 relative z-[50] md:col-span-2">
-                      <label className="text-[11px] sm:text-xs text-slate-500 ml-1">Short Description</label>
-                      <textarea rows={2} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-slate-100 dark:bg-[#0a0a0a]/40 p-4 rounded-3xl font-medium border border-transparent dark:border-white/5 text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic text-[11px] sm:text-xs transition-all" placeholder="Tell us more about this file..." />
+                      <label className="text-[11px] sm:text-xs text-zinc-500 ml-1">Short Description</label>
+                      <textarea rows={2} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-zinc-100 dark:bg-[#0a0a0a]/40 p-4 rounded-3xl font-medium border border-transparent dark:border-white/5 text-zinc-700 dark:text-zinc-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic text-[11px] sm:text-xs transition-all" placeholder="Tell us more about this file..." />
                     </div>
                   </div>
                 </div>
               </div>
 
-              <footer className="p-6 md:p-8 bg-slate-50 dark:bg-[#0a0a0a]/20 border-t border-slate-100 dark:border-white/5 flex flex-col md:flex-row gap-4">
+              <footer className="p-6 md:p-8 bg-zinc-50 dark:bg-[#0a0a0a]/20 border-t border-zinc-100 dark:border-white/5 flex flex-col md:flex-row gap-4">
                 {showUploadModal && (
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-6 py-4 bg-slate-100 dark:bg-[#0a0a0a] text-slate-400 hover:text-orange-500 rounded-2xl font-medium text-[11px] sm:text-xs transition-all border-none"
+                    className="px-6 py-4 bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400 hover:text-orange-500 rounded-2xl font-medium text-[11px] sm:text-xs transition-all border-none"
                   >
                     Add More
                   </button>
@@ -1279,17 +1281,17 @@ const FileCard: React.FC<{
       ref={setNodeRef}
       style={style}
       onClick={onShowDetails}
-      className={`group p-4 rounded-[30px] border border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a] hover:border-orange-500 hover:shadow-xl transition-all relative overflow-hidden flex flex-col min-h-[140px] cursor-pointer ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
+      className={`group p-4 rounded-[30px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a] hover:border-orange-500 hover:shadow-xl transition-all relative overflow-hidden flex flex-col min-h-[140px] cursor-pointer ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
     >
       <div className="flex items-start justify-between mb-2">
-        <div className="w-9 h-9 bg-slate-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center group-hover:text-orange-500 transition-colors">
+        <div className="w-9 h-9 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center group-hover:text-orange-500 transition-colors">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
         </div>
         {isAdmin && (
           <div
             {...attributes}
             {...listeners}
-            className="p-2 -mr-2 text-slate-300 hover:text-orange-500 cursor-grab active:cursor-grabbing transition-colors"
+            className="p-2 -mr-2 text-zinc-300 hover:text-orange-500 cursor-grab active:cursor-grabbing transition-colors"
             onClick={(e) => e.stopPropagation()}
             title="Drag to reorder"
           >
@@ -1297,41 +1299,41 @@ const FileCard: React.FC<{
           </div>
         )}
       </div>
-      <h3 className="text-[11px] md:text-[13px] font-bold text-slate-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2 group-hover:text-orange-500 transition-colors">{file.name}</h3>
-      <div className="pt-3 mt-auto border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
-        <span className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500">{file.size}</span>
+      <h3 className="text-[11px] md:text-[13px] font-bold text-zinc-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2 group-hover:text-orange-500 transition-colors">{file.name}</h3>
+      <div className="pt-3 mt-auto border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
+        <span className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500">{file.size}</span>
         <div className="flex gap-1.5 peer">
           {isAdminMode ? (
             <div className="flex gap-1.5">
               {file.status !== 'approved' && (
-                <button onClick={(e) => { e.stopPropagation(); onApprove?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Approve">
+                <button onClick={(e) => { e.stopPropagation(); onApprove?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Approve">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><polyline points="20 6 9 17 4 12" /></svg>
                 </button>
               )}
-              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Edit Metadata">
+              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Edit Metadata">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
               </button>
-              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-blue-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-blue-500 hover:text-white transition-all border-none" title="View Document">
+              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-blue-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-blue-500 hover:text-white transition-all border-none" title="View Document">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
               </button>
               {file.status === 'approved' ? (
-                <button onClick={(e) => { e.stopPropagation(); onDemote?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Demote to Pending">
+                <button onClick={(e) => { e.stopPropagation(); onDemote?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Demote to Pending">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                 </button>
               ) : (
-                <button onClick={(e) => { e.stopPropagation(); onReject?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Reject & Remove">
+                <button onClick={(e) => { e.stopPropagation(); onReject?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Reject & Remove">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                 </button>
               )}
             </div>
           ) : isAdmin ? (
             <div className="flex gap-1.5">
-              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-orange-600 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-600 hover:text-white transition-all border-none" title="Edit Metadata"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
-              <button onClick={(e) => { e.stopPropagation(); onDelete?.(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
-              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-slate-100 dark:bg-[#0a0a0a] text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Access File"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
+              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-orange-600 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-600 hover:text-white transition-all border-none" title="Edit Metadata"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+              <button onClick={(e) => { e.stopPropagation(); onDelete?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Access File"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
             </div>
           ) : (
-            <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="bg-slate-100 dark:bg-[#0a0a0a] text-orange-600 px-4 py-1.5 rounded-xl font-medium text-[11px] sm:text-xs flex items-center gap-1.5 hover:bg-orange-600 hover:text-white transition-all shadow-md border-none">Access <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
+            <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="bg-zinc-100 dark:bg-[#0a0a0a] text-orange-600 px-4 py-1.5 rounded-xl font-medium text-[11px] sm:text-xs flex items-center gap-1.5 hover:bg-orange-600 hover:text-white transition-all shadow-md border-none">Access <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
           )}
         </div>
       </div>
@@ -1349,7 +1351,7 @@ const StaticFileCard: React.FC<{
   return (
     <div className="p-4 rounded-[30px] border border-orange-500 bg-white dark:bg-[#0a0a0a] flex flex-col min-h-[140px]">
       <div className="flex items-start justify-between mb-2">
-        <div className="w-9 h-9 bg-slate-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center text-orange-500">
+        <div className="w-9 h-9 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center text-orange-500">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
         </div>
         {isAdmin && (
@@ -1358,9 +1360,9 @@ const StaticFileCard: React.FC<{
           </div>
         )}
       </div>
-      <h3 className="text-[11px] md:text-[13px] font-bold text-slate-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2">{file.name}</h3>
-      <div className="pt-3 mt-auto border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
-        <span className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500">{file.size}</span>
+      <h3 className="text-[11px] md:text-[13px] font-bold text-zinc-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2">{file.name}</h3>
+      <div className="pt-3 mt-auto border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
+        <span className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500">{file.size}</span>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://lpunexus.vercel.app/sitemap.xml
+Sitemap: https://scholix.app/sitemap.xml

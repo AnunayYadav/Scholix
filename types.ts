@@ -20,7 +20,8 @@ export enum ModuleType {
   ADMIN_STATS = 'ADMIN_STATS',
   PRIVACY = 'PRIVACY',
   LOGIN = 'LOGIN',
-  SIGNUP = 'SIGNUP'
+  SIGNUP = 'SIGNUP',
+  TOOLS = 'TOOLS'
 }
 
 export interface MarketplaceItem {
@@ -105,6 +106,7 @@ export interface UserProfile {
   unlocked_frames?: string[];
   avatar_frame?: string;
   is_verified?: 'yes' | 'no';
+  university?: string;
 }
 
 export interface TimetableSlot {

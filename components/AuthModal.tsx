@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NexusServer from '../services/nexusServer.ts';
 import { UserProfile } from '../types.ts';
+import { useUniversity } from '../hooks/useUniversity.tsx';
 
 interface AuthModalProps {
   onClose: () => void;
@@ -12,7 +13,7 @@ interface AuthModalProps {
 }
 
 const getPasswordStrength = (password: string): { score: number; label: string; color: string } => {
-  if (!password) return { score: 0, label: '', color: 'bg-slate-200 dark:bg-white/10' };
+  if (!password) return { score: 0, label: '', color: 'bg-zinc-200 dark:bg-white/10' };
   let score = 0;
   if (password.length >= 6) score++;
   if (password.length >= 10) score++;
@@ -28,6 +29,7 @@ const getPasswordStrength = (password: string): { score: number; label: string; 
 };
 
 const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', userProfile }) => {
+  const { selectedUniversity, fullBrandName, studentTerm, shortBrandName } = useUniversity();
   const [mode, setMode] = useState<'login' | 'signup' | 'verify_email' | 'forgot_password'>(initialMode);
   const isLogin = mode === 'login';
   const [identifier, setIdentifier] = useState('');
@@ -189,7 +191,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
           const response = await fetch('/api/send-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email.toLowerCase().trim(), type: 'password_reset' })
+            body: JSON.stringify({ email: email.toLowerCase().trim(), type: 'password_reset', university: selectedUniversity })
           });
 
           const data = await response.json();
@@ -236,7 +238,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
           const response = await fetch('/api/send-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email.toLowerCase().trim(), username, type: 'signup' })
+            body: JSON.stringify({ email: email.toLowerCase().trim(), username, type: 'signup', university: selectedUniversity })
           });
 
           const data = await response.json();
@@ -255,7 +257,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
           const verifyData = await verifyResponse.json();
           if (!verifyResponse.ok) throw new Error(verifyData.error || "Verification failed. Check the code.");
 
-          const result = await NexusServer.signUp(email, password, username, regNo);
+          const result = await NexusServer.signUp(email, password, username, regNo, selectedUniversity);
           if (result.error) throw result.error;
 
           handleClose();
@@ -275,7 +277,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
             body: JSON.stringify({ 
               email: email.toLowerCase().trim(), 
               username: userProfile.username, 
-              type: isEmailChanged ? 'email_update' : 'verification' 
+              type: isEmailChanged ? 'email_update' : 'verification',
+              university: selectedUniversity
             })
           });
 
@@ -326,7 +329,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
       const response = await fetch('/api/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.toLowerCase().trim(), username })
+        body: JSON.stringify({ email: email.toLowerCase().trim(), username, university: selectedUniversity })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Failed to resend verification code.");
@@ -357,23 +360,24 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
       <div ref={modalRef} className={`nexus-modal w-full max-w-md mx-4 overflow-hidden ${isClosing ? 'closing' : ''} ${mode === 'verify_email' ? 'ring-2 ring-orange-500/20' : ''}`}>
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-600/10 blur-[80px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
 
-        <div className="bg-white dark:bg-[#0a0a0a] p-6 sm:p-8 md:p-10 text-center relative border-b border-slate-100 dark:border-white/5">
+        <div className="bg-white dark:bg-[#0a0a0a] p-6 sm:p-8 md:p-10 text-center relative border-b border-zinc-100 dark:border-white/5">
           {mode !== 'verify_email' && (
-            <button onClick={handleClose} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-orange-500 transition-colors border-none bg-transparent active:scale-95">
+            <button onClick={handleClose} className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-orange-500 transition-colors border-none bg-transparent active:scale-95">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
           )}
 
           {step !== 'otp' && (
-            <div className={`w-12 h-12 flex items-center justify-center mx-auto mb-4 transition-all duration-700 ${mode === 'verify_email' ? 'animate-pulse-glow hover:scale-110' : 'hover:scale-110 active:scale-95'}`}>
-              <img src="/apple-touch-icon.png" alt="LPU-Nexus Logo" className="w-full h-full object-contain pointer-events-none drop-shadow-[0_0_25px_rgba(234,88,12,0.4)]" />
+            <div className={`flex items-center justify-center mx-auto mb-4 transition-all duration-700 ${mode === 'verify_email' ? 'animate-pulse-glow hover:scale-110' : 'hover:scale-110 active:scale-95'}`}>
+              <img src="/Scholix_light.png" alt="Scholix Logo" className="h-12 w-auto object-contain dark:hidden" />
+              <img src="/Scholix_dark.png" alt="Scholix Logo" className="h-12 w-auto object-contain hidden dark:block" />
             </div>
           )}
 
-          <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none mb-2">
-            {mode === 'verify_email' ? 'Security Protocol' : mode === 'forgot_password' ? 'Password Recovery' : isLogin ? 'Welcome Back' : 'Join Nexus'}
+          <h3 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white leading-none mb-2">
+            {mode === 'verify_email' ? 'Security Protocol' : mode === 'forgot_password' ? 'Password Recovery' : isLogin ? 'Welcome Back' : `Join ${fullBrandName}`}
           </h3>
-          <p className="text-slate-500 dark:text-white/40 text-[11px] sm:text-xs font-bold flex items-center justify-center gap-2 uppercase tracking-[0.1em]">
+          <p className="text-zinc-500 dark:text-white/40 text-[11px] sm:text-xs font-bold flex items-center justify-center gap-2 uppercase tracking-[0.1em]">
             <span className={`w-1.5 h-1.5 rounded-full shadow-[0_0_12px_rgba(234,88,12,0.6)] ${mode === 'verify_email' ? 'bg-orange-500 animate-pulse' : 'bg-orange-600'}`} />
             {mode === 'verify_email' ? 'Identity verification mandated' : mode === 'forgot_password' ? 'Reset your access credentials' : isLogin ? 'Sign in to your account' : 'Apply for student access'}
           </p>
@@ -382,7 +386,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
         <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1 overflow-hidden">
           <div className="p-5 sm:p-6 md:p-8 space-y-5 sm:space-y-6 overflow-y-auto custom-scrollbar flex-1">
             {mode === 'verify_email' && step === 'form' && (
-              <div className="relative p-6 overflow-hidden rounded-2xl group transition-all duration-500 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(234,88,12,0.05)] border border-orange-500/10 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] mb-2">
+              <div className="relative p-6 overflow-hidden rounded-2xl group transition-all duration-500 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(234,88,12,0.05)] border border-orange-500/10 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02] mb-2">
                 <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-orange-400 to-red-600" />
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center flex-shrink-0">
@@ -390,8 +394,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                   </div>
                   <div>
                     <span className="text-[10px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-500 block mb-1">Authorization Required</span>
-                    <p className="text-xs text-slate-600 dark:text-white/60 font-medium leading-relaxed">
-                      For enhanced platform security, cadets must verify their registered email address to unlock core features.
+                    <p className="text-xs text-zinc-600 dark:text-white/60 font-medium leading-relaxed">
+                      For enhanced platform security, {studentTerm.toLowerCase()}s must verify their registered email address to unlock core features.
                     </p>
                   </div>
                 </div>
@@ -411,9 +415,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
               {isLogin ? (
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Email or Username</label>
+                    <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2.5 ml-1">Email or Username</label>
                     <div className="relative group">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-orange-600 transition-colors"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                       <input
                         type="text" required value={identifier} 
                         onChange={e => {
@@ -421,10 +425,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                           if (emailError) setEmailError(false);
                         }}
                         disabled={loading}
-                        className={`w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white disabled:opacity-50 ${
+                        className={`w-full bg-zinc-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white disabled:opacity-50 ${
                           emailError 
                             ? 'border-red-500/50 ring-4 ring-red-500/5' 
-                            : 'border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
+                            : 'border-zinc-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
                         }`}
                         placeholder="Enter email or username"
                       />
@@ -432,19 +436,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                   </div>
 
                   <div>
-                    <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Password</label>
+                    <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2.5 ml-1">Password</label>
                     <div className="relative group">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                       <input
                         type={showPassword ? "text" : "password"} required value={password} onChange={e => setPassword(e.target.value)}
                         disabled={loading}
-                        className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-12 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                        className="w-full bg-zinc-50 dark:bg-[#0a0a0a] pl-11 pr-12 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-zinc-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
                         placeholder="••••••••"
                       />
                       <button 
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-orange-500 transition-colors bg-transparent border-none"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-zinc-400 hover:text-orange-500 transition-colors bg-transparent border-none"
                       >
                         {showPassword ? (
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
@@ -462,7 +466,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                           setError(null);
                           setEmail(identifier.includes('@') ? identifier : '');
                         }}
-                        className="text-[10px] font-bold text-slate-400 hover:text-orange-500 transition-colors bg-transparent border-none p-0"
+                        className="text-[10px] font-bold text-zinc-400 hover:text-orange-500 transition-colors bg-transparent border-none p-0"
                       >
                         Forgot Password?
                       </button>
@@ -474,9 +478,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                   {step === 'form' ? (
                     <div className="animate-fade-in space-y-5">
                       <div>
-                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Recovery Email</label>
+                        <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2.5 ml-1">Recovery Email</label>
                         <div className="relative group">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-orange-600 transition-colors"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
                           <input
                             type="email" required value={email} 
                             onChange={e => {
@@ -484,10 +488,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                               if (emailError) setEmailError(false);
                             }}
                             disabled={loading}
-                            className={`w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white ${
+                            className={`w-full bg-zinc-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white ${
                               emailError 
                                 ? 'border-red-500/50 ring-4 ring-red-500/5' 
-                                : 'border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
+                                : 'border-zinc-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
                             }`}
                             placeholder="your@email.com"
                           />
@@ -497,7 +501,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                   ) : (
                     <div className="space-y-6 animate-fade-in">
                       <div className="text-center space-y-2">
-                        <p className="text-xs text-slate-400 font-medium">
+                        <p className="text-xs text-zinc-400 font-medium">
                           Enter the code sent to <span className="text-orange-500 font-bold">{email}</span> and your new password.
                         </p>
                       </div>
@@ -507,25 +511,25 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                           type="text" required value={otpValue} 
                           onChange={e => setOtpValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                           disabled={loading}
-                          className="w-full bg-slate-50 dark:bg-[#0a0a0a] px-4 py-4.5 rounded-2xl text-[24px] font-black tracking-[8px] text-center outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                          className="w-full bg-zinc-50 dark:bg-[#0a0a0a] px-4 py-4.5 rounded-2xl text-[24px] font-black tracking-[8px] text-center outline-none border border-zinc-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
                           placeholder="000000"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">New Secure Password</label>
+                        <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2.5 ml-1">New Secure Password</label>
                         <div className="relative group">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                           <input
                             type={showPassword ? "text" : "password"} required value={password} onChange={e => setPassword(e.target.value)}
                             disabled={loading}
-                            className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-12 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                            className="w-full bg-zinc-50 dark:bg-[#0a0a0a] pl-11 pr-12 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-zinc-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
                             placeholder="••••••••"
                           />
                           <button 
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-orange-500 transition-colors bg-transparent border-none"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-zinc-400 hover:text-orange-500 transition-colors bg-transparent border-none"
                           >
                             {showPassword ? (
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
@@ -547,7 +551,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                         </button>
                         <button 
                           type="button" onClick={() => { setStep('form'); setError(null); }}
-                          className="text-[11px] font-medium text-slate-400 hover:text-slate-600 transition-colors bg-transparent border-none"
+                          className="text-[11px] font-medium text-zinc-400 hover:text-zinc-600 transition-colors bg-transparent border-none"
                         >
                           Go back to email
                         </button>
@@ -561,7 +565,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                     <div className="animate-fade-in space-y-5">
                       <div>
                         <div className="flex justify-between items-end mb-2.5 ml-1">
-                          <label className="block text-[11px] sm:text-xs font-medium text-slate-400">Registered Email</label>
+                          <label className="block text-[11px] sm:text-xs font-medium text-zinc-400">Registered Email</label>
                           {!isEditingEmail && (
                             <button 
                               type="button" 
@@ -573,21 +577,21 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                           )}
                         </div>
                         <div className="relative group">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-orange-600 transition-colors"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
                           <input
                             type="email" required value={email} 
                             onChange={e => setEmail(e.target.value)}
                             disabled={loading || !isEditingEmail}
-                            className={`w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white ${!isEditingEmail ? 'opacity-70 grayscale-[0.5]' : ''} ${
+                            className={`w-full bg-zinc-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white ${!isEditingEmail ? 'opacity-70 grayscale-[0.5]' : ''} ${
                               emailError 
                                 ? 'border-red-500/50 ring-4 ring-red-500/5' 
-                                : 'border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
+                                : 'border-zinc-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
                             }`}
                             placeholder="your@email.com"
                           />
                         </div>
                         {isEditingEmail && (
-                          <p className="mt-3 text-[10px] text-slate-400 font-medium leading-relaxed italic ml-1">
+                          <p className="mt-3 text-[10px] text-zinc-400 font-medium leading-relaxed italic ml-1">
                             * Updating your email will replace your current registered email.
                           </p>
                         )}
@@ -604,25 +608,26 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                           </div>
                         </div>
                         <div className="text-center space-y-2">
-                          <h4 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Access Granted</h4>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium max-w-[240px] mx-auto leading-relaxed">
-                            Your identity has been authenticated. Core Nexus systems are now initializing.
+                          <h4 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">Access Granted</h4>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium max-w-[240px] mx-auto leading-relaxed">
+                            Your identity has been authenticated. Core {shortBrandName} systems are now initializing.
                           </p>
                         </div>
-                        <div className="w-48 h-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                        <div className="w-48 h-1 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
                           <div className="h-full bg-emerald-500 animate-progress-fast" />
                         </div>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest animate-pulse">Synchronizing Database...</p>
+                        <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest animate-pulse">Synchronizing Database...</p>
                       </div>
                     ) : (
                       <div className="space-y-6 animate-fade-in py-4 text-center">
-                      <div className="w-20 h-20 flex items-center justify-center mx-auto mb-8 transition-all duration-700 animate-pulse-glow">
-                        <img src="/apple-touch-icon.png" alt="Verification Logo" className="w-full h-full object-contain drop-shadow-[0_0_35px_rgba(234,88,12,0.5)]" />
+                      <div className="flex items-center justify-center mx-auto mb-8 transition-all duration-700 animate-pulse-glow">
+                        <img src="/Scholix_dark.png" alt="Verification Logo" className="h-14 w-auto object-contain dark:hidden" />
+                        <img src="/Scholix_light.png" alt="Verification Logo" className="h-14 w-auto object-contain hidden dark:block" />
                       </div>
                       
                       <div className="space-y-3">
                         <h4 className="text-2xl font-black dark:text-white tracking-tight">Identity Sync</h4>
-                        <p className="text-xs text-slate-400 max-w-[260px] mx-auto leading-relaxed font-medium">
+                        <p className="text-xs text-zinc-400 max-w-[260px] mx-auto leading-relaxed font-medium">
                           We've dispatched a secure access code to <span className="text-orange-500 font-bold block mt-1">{email}</span>
                         </p>
                       </div>
@@ -632,7 +637,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                           type="text" required value={otpValue} 
                           onChange={e => setOtpValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                           disabled={loading}
-                          className="w-full bg-slate-50/50 dark:bg-white/[0.02] px-4 py-6 rounded-[24px] text-[32px] font-black tracking-[0.4em] text-center outline-none border border-slate-200 dark:border-white/5 focus:border-orange-500/50 focus:ring-8 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50 shadow-inner"
+                          className="w-full bg-zinc-50/50 dark:bg-white/[0.02] px-4 py-6 rounded-[24px] text-[32px] font-black tracking-[0.4em] text-center outline-none border border-zinc-200 dark:border-white/5 focus:border-orange-500/50 focus:ring-8 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50 shadow-inner"
                           placeholder="000000"
                         />
                         <div className="absolute inset-0 rounded-[24px] pointer-events-none border border-orange-500/0 group-focus-within:border-orange-500/20 transition-all duration-500" />
@@ -649,7 +654,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                         </button>
                         <button 
                           type="button" onClick={() => { setStep('form'); setError(null); }}
-                          className="text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-all bg-transparent border-none opacity-60 hover:opacity-100"
+                          className="text-[11px] font-bold text-zinc-400 hover:text-zinc-600 transition-all bg-transparent border-none opacity-60 hover:opacity-100"
                         >
                           Change Registered Email
                         </button>
@@ -662,14 +667,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                   {step === 'form' ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-fade-in">
                       <div className="md:col-span-2">
-                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Unique Username</label>
+                        <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2.5 ml-1">Unique Username</label>
                         <div className="relative group">
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm group-focus-within:text-orange-600">@</span>
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-black text-sm group-focus-within:text-orange-600">@</span>
                           <input
                             type="text" required value={username} onChange={e => handleUsernameChange(e.target.value)}
                             disabled={loading}
-                            className={`w-full bg-slate-50 dark:bg-[#0a0a0a] pl-9 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white disabled:opacity-50 ${usernameStatus === 'available' ? 'border-emerald-500/50 ring-4 ring-emerald-500/5' :
-                              usernameStatus === 'taken' ? 'border-red-500/50 ring-4 ring-red-500/5' : 'border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
+                            className={`w-full bg-zinc-50 dark:bg-[#0a0a0a] pl-9 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white disabled:opacity-50 ${usernameStatus === 'available' ? 'border-emerald-500/50 ring-4 ring-emerald-500/5' :
+                              usernameStatus === 'taken' ? 'border-red-500/50 ring-4 ring-red-500/5' : 'border-zinc-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
                               }`}
                             placeholder="choose_a_tag"
                           />
@@ -682,9 +687,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                       </div>
 
                       <div>
-                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Email Address</label>
+                        <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2.5 ml-1">Email Address</label>
                         <div className="relative group">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-orange-600 transition-colors"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
                           <input
                             type="email" required value={email} 
                             onChange={e => {
@@ -692,10 +697,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                               if (emailError) setEmailError(false);
                             }}
                             disabled={loading}
-                            className={`w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white disabled:opacity-50 ${
+                            className={`w-full bg-zinc-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border transition-all dark:text-white disabled:opacity-50 ${
                               emailError 
                                 ? 'border-red-500/50 ring-4 ring-red-500/5' 
-                                : 'border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
+                                : 'border-zinc-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5'
                             }`}
                             placeholder="Enter your email"
                           />
@@ -703,32 +708,32 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                       </div>
 
                       <div>
-                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Reg Number</label>
+                        <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2.5 ml-1">Reg Number</label>
                         <div className="relative group">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><path d="M7 21v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4" /><circle cx="12" cy="11" r="3" /></svg>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><path d="M7 21v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4" /><circle cx="12" cy="11" r="3" /></svg>
                           <input
                             type="text" required value={regNo} onChange={e => setRegNo(e.target.value.replace(/[^0-9]/g, '').slice(0, 8))}
                             disabled={loading}
-                            className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                            className="w-full bg-zinc-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-zinc-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
                             placeholder="1240...."
                           />
                         </div>
                       </div>
 
                       <div className="md:col-span-2">
-                        <label className="block text-[11px] sm:text-xs font-medium text-slate-400 mb-2.5 ml-1">Secure Password</label>
+                        <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2.5 ml-1">Secure Password</label>
                         <div className="relative group">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                           <input
                             type={showPassword ? "text" : "password"} required value={password} onChange={e => setPassword(e.target.value)}
                             disabled={loading}
-                            className="w-full bg-slate-50 dark:bg-[#0a0a0a] pl-11 pr-12 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                            className="w-full bg-zinc-50 dark:bg-[#0a0a0a] pl-11 pr-12 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-zinc-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
                             placeholder="Min. 6 characters"
                           />
                           <button 
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-orange-500 transition-colors bg-transparent border-none"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-zinc-400 hover:text-orange-500 transition-colors bg-transparent border-none"
                           >
                             {showPassword ? (
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
@@ -744,7 +749,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                               {[1, 2, 3, 4, 5].map(i => (
                                 <div
                                   key={i}
-                                  className={`password-strength-bar flex-1 ${i <= passwordStrength.score ? passwordStrength.color : 'bg-slate-200 dark:bg-white/5'}`}
+                                  className={`password-strength-bar flex-1 ${i <= passwordStrength.score ? passwordStrength.color : 'bg-zinc-200 dark:bg-white/5'}`}
                                 />
                               ))}
                             </div>
@@ -760,13 +765,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                     </div>
                   ) : (
                     <div className="space-y-6 animate-fade-in py-4 text-center">
-                      <div className="w-20 h-20 flex items-center justify-center mx-auto mb-8 transition-all duration-700 animate-pulse-glow">
-                        <img src="/apple-touch-icon.png" alt="Verification Logo" className="w-full h-full object-contain drop-shadow-[0_0_35px_rgba(234,88,12,0.5)]" />
+                      <div className="flex items-center justify-center mx-auto mb-8 transition-all duration-700 animate-pulse-glow">
+                        <img src="/Scholix_dark.png" alt="Verification Logo" className="h-14 w-auto object-contain dark:hidden" />
+                        <img src="/Scholix_light.png" alt="Verification Logo" className="h-14 w-auto object-contain hidden dark:block" />
                       </div>
                       
                       <div className="space-y-3">
                         <h4 className="text-2xl font-black dark:text-white tracking-tight">Identity Sync</h4>
-                        <p className="text-xs text-slate-400 max-w-[260px] mx-auto leading-relaxed font-medium">
+                        <p className="text-xs text-zinc-400 max-w-[260px] mx-auto leading-relaxed font-medium">
                           We've dispatched a secure synchronization code to <span className="text-orange-500 font-bold block mt-1">{email}</span>
                         </p>
                       </div>
@@ -776,7 +782,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                           type="text" required value={otpValue} 
                           onChange={e => setOtpValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                           disabled={loading}
-                          className="w-full bg-slate-50 dark:bg-[#0a0a0a] px-4 py-5 rounded-2xl text-[28px] font-black tracking-[12px] text-center outline-none border border-slate-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
+                          className="w-full bg-zinc-50 dark:bg-[#0a0a0a] px-4 py-5 rounded-2xl text-[28px] font-black tracking-[12px] text-center outline-none border border-zinc-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
                           placeholder="000000"
                         />
                       </div>
@@ -792,7 +798,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                         </button>
                         <button 
                           type="button" onClick={() => { setStep('form'); setError(null); }}
-                          className="text-[11px] font-medium text-slate-400 hover:text-slate-600 transition-colors bg-transparent border-none"
+                          className="text-[11px] font-medium text-zinc-400 hover:text-zinc-600 transition-colors bg-transparent border-none"
                         >
                           Go back and edit details
                         </button>
@@ -832,7 +838,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                   setPassword(''); 
                   navigate(newMode === 'login' ? '/login' : '/signup', { replace: true });
                 }}
-                className="w-full text-[11px] sm:text-xs font-medium text-slate-400 hover:text-orange-500 transition-colors py-4 sm:py-6 bg-transparent border-none"
+                className="w-full text-[11px] sm:text-xs font-medium text-zinc-400 hover:text-orange-500 transition-colors py-4 sm:py-6 bg-transparent border-none"
               >
                 {isLogin ? "New here? Create an account" : mode === 'forgot_password' ? "Return to authentication" : "Have an account? Sign in"}
               </button>

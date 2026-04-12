@@ -58,19 +58,19 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
         whileHover={!isLocked && !isCompleted ? { y: -4, transition: { duration: 0.2 } } : {}}
         className={`relative overflow-hidden p-5 md:p-6 rounded-[28px] border transition-all ${
           isLocked
-            ? 'bg-slate-50 dark:bg-dark-950/30 border-slate-200 dark:border-white/5 opacity-60'
+            ? 'bg-zinc-50 dark:bg-dark-950/30 border-zinc-200 dark:border-white/5 opacity-60'
             : isCompleted
             ? 'bg-emerald-50/50 dark:bg-emerald-900/5 border-emerald-200 dark:border-emerald-500/20'
-            : 'bg-white dark:bg-white/[0.02] border-slate-200 dark:border-white/5 shadow-lg hover:shadow-xl hover:border-orange-500/20'
+            : 'bg-white dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 shadow-lg hover:shadow-xl hover:border-orange-500/20'
         }`}
       >
         {isLocked && (
           <div className="absolute inset-0 bg-white/50 dark:bg-dark-950/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
-            <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10">
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-slate-400">
+            <div className="flex items-center gap-2 px-4 py-2 bg-zinc-100 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/10">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-zinc-400">
                 <path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm3 8H9V7a3 3 0 0 1 6 0v3z" />
               </svg>
-              <span className="text-[10px] font-semibold text-slate-500 tracking-wider">Level {challenge.min_level} Required</span>
+              <span className="text-[10px] font-semibold text-zinc-500 tracking-wider">Level {challenge.min_level} Required</span>
             </div>
           </div>
         )}
@@ -81,10 +81,10 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
             <div className="flex items-center gap-3 min-w-0">
               <span className="text-2xl flex-shrink-0">{challenge.emoji}</span>
               <div className="min-w-0">
-                <h4 className="text-sm font-semibold text-slate-900 dark:text-white tracking-tight truncate">
+                <h4 className="text-sm font-semibold text-zinc-900 dark:text-white tracking-tight truncate">
                   {challenge.name}
                 </h4>
-                <p className="text-[11px] text-slate-500 font-medium mt-0.5 line-clamp-1">
+                <p className="text-[11px] text-zinc-500 font-medium mt-0.5 line-clamp-1">
                   {challenge.description}
                 </p>
               </div>
@@ -100,17 +100,17 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-0.5">
               {Array.from({ length: 3 }).map((_, i) => (
-                <svg key={i} viewBox="0 0 24 24" fill={i < challenge.difficulty ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className={`w-3.5 h-3.5 ${i < challenge.difficulty ? 'text-amber-500' : 'text-slate-300 dark:text-white/10'}`}>
+                <svg key={i} viewBox="0 0 24 24" fill={i < challenge.difficulty ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className={`w-3.5 h-3.5 ${i < challenge.difficulty ? 'text-amber-500' : 'text-zinc-300 dark:text-white/10'}`}>
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
                 </svg>
               ))}
             </div>
 
-            <span className="text-[10px] font-semibold text-slate-400 tabular-nums">
+            <span className="text-[10px] font-semibold text-zinc-400 tabular-nums">
               {challenge.question_count} Q • {challenge.time_limit_per_question}s each
             </span>
 
-            <span className="text-[10px] font-semibold text-slate-400 flex items-center gap-1">
+            <span className="text-[10px] font-semibold text-zinc-400 flex items-center gap-1">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
                 <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
               </svg>
@@ -156,16 +156,16 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="w-full max-w-md bg-white dark:bg-dark-950 rounded-[32px] shadow-2xl overflow-hidden border border-slate-200 dark:border-white/10"
+                className="w-full max-w-md bg-white dark:bg-dark-950 rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-white/10"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Header */}
                 <div className="p-8 pb-0 text-center space-y-3">
                   <span className="text-5xl">{challenge.emoji}</span>
-                  <h3 className="text-xl font-semibold text-slate-900 dark:text-white tracking-tight">
+                  <h3 className="text-xl font-semibold text-zinc-900 dark:text-white tracking-tight">
                     {challenge.name}
                   </h3>
-                  <p className="text-sm text-slate-500 font-medium">
+                  <p className="text-sm text-zinc-500 font-medium">
                     {challenge.description}
                   </p>
                 </div>
@@ -173,30 +173,30 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
                 {/* Details Grid */}
                 <div className="p-8 space-y-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 text-center">
-                      <p className="text-[9px] font-semibold text-slate-400 tracking-wider mb-1">Subject</p>
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{shortName}</p>
+                    <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 text-center">
+                      <p className="text-[9px] font-semibold text-zinc-400 tracking-wider mb-1">Subject</p>
+                      <p className="text-sm font-semibold text-zinc-900 dark:text-white">{shortName}</p>
                     </div>
-                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 text-center">
-                      <p className="text-[9px] font-semibold text-slate-400 tracking-wider mb-1">Questions</p>
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{challenge.question_count}</p>
+                    <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 text-center">
+                      <p className="text-[9px] font-semibold text-zinc-400 tracking-wider mb-1">Questions</p>
+                      <p className="text-sm font-semibold text-zinc-900 dark:text-white">{challenge.question_count}</p>
                     </div>
-                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 text-center">
-                      <p className="text-[9px] font-semibold text-slate-400 tracking-wider mb-1">Time Limit</p>
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{totalMinutes} min</p>
+                    <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 text-center">
+                      <p className="text-[9px] font-semibold text-zinc-400 tracking-wider mb-1">Time Limit</p>
+                      <p className="text-sm font-semibold text-zinc-900 dark:text-white">{totalMinutes} min</p>
                     </div>
-                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 text-center">
-                      <p className="text-[9px] font-semibold text-slate-400 tracking-wider mb-1">Per Question</p>
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{challenge.time_limit_per_question}s</p>
+                    <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 text-center">
+                      <p className="text-[9px] font-semibold text-zinc-400 tracking-wider mb-1">Per Question</p>
+                      <p className="text-sm font-semibold text-zinc-900 dark:text-white">{challenge.time_limit_per_question}s</p>
                     </div>
                     {challenge.units && challenge.units.length > 0 && (
-                      <div className="col-span-2 p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5">
-                        <p className="text-[9px] font-semibold text-slate-400 tracking-wider mb-1.5 text-center">Based on Units</p>
+                      <div className="col-span-2 p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5">
+                        <p className="text-[9px] font-semibold text-zinc-400 tracking-wider mb-1.5 text-center">Based on Units</p>
                         <div className="flex flex-wrap justify-center gap-x-2 gap-y-1">
                           {challenge.units.map((unit, i) => (
-                            <span key={unit} className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                            <span key={unit} className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
                               {unit}
-                              {i < challenge.units.length - 1 && <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-white/10" />}
+                              {i < challenge.units.length - 1 && <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-white/10" />}
                             </span>
                           ))}
                         </div>
@@ -207,10 +207,10 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
                   {/* Difficulty + XP */}
                   <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-semibold text-slate-400 tracking-wider">Difficulty</span>
+                      <span className="text-[10px] font-semibold text-zinc-400 tracking-wider">Difficulty</span>
                       <div className="flex items-center gap-0.5">
                         {Array.from({ length: 3 }).map((_, i) => (
-                          <svg key={i} viewBox="0 0 24 24" fill={i < challenge.difficulty ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className={`w-4 h-4 ${i < challenge.difficulty ? 'text-amber-500' : 'text-slate-300 dark:text-white/10'}`}>
+                          <svg key={i} viewBox="0 0 24 24" fill={i < challenge.difficulty ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className={`w-4 h-4 ${i < challenge.difficulty ? 'text-amber-500' : 'text-zinc-300 dark:text-white/10'}`}>
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
                           </svg>
                         ))}
@@ -223,7 +223,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
 
                   {/* Expires */}
                   <div className="text-center">
-                    <span className="text-[10px] font-semibold text-slate-400 flex items-center justify-center gap-1">
+                    <span className="text-[10px] font-semibold text-zinc-400 flex items-center justify-center gap-1">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
                         <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
                       </svg>
@@ -236,7 +236,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
                 <div className="px-8 pb-8 flex gap-3">
                   <button
                     onClick={() => setShowModal(false)}
-                    className="flex-1 py-3 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-400 rounded-2xl text-sm font-semibold transition-colors"
+                    className="flex-1 py-3 bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-600 dark:text-zinc-400 rounded-2xl text-sm font-semibold transition-colors"
                   >
                     Cancel
                   </button>

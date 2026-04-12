@@ -328,9 +328,9 @@ export const analyzeResume = async (resumeText: string, jdText: string, deepAnal
 /**
  * Module: Timetable Hub
  */
-export const extractTimetableFromImage = async (base64Image: string): Promise<DaySchedule[]> => {
+export const extractTimetableFromImage = async (base64Image: string, universityName: string = "the university"): Promise<DaySchedule[]> => {
   const prompt = `
-    Extract the LPU University timetable from this screenshot. 
+    Extract the ${universityName} timetable from this screenshot. 
     Identify the days (Monday to Saturday) and slots.
     Return a structured JSON array of DaySchedule objects.
   `;

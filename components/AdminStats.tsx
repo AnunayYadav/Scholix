@@ -399,7 +399,7 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                     
                     <button 
                         onClick={onClose} 
-                        className="group p-1.5 hover:bg-red-500/10 rounded-lg transition-all duration-300 text-slate-400 hover:text-red-500 border border-transparent hover:border-red-500/20"
+                        className="group p-1.5 hover:bg-red-500/10 rounded-lg transition-all duration-300 text-zinc-400 hover:text-red-500 border border-transparent hover:border-red-500/20"
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300"><path d="M18 6L6 18M6 6l12 12" /></svg>
                     </button>
@@ -451,7 +451,7 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                                     stroke="currentColor" 
                                     strokeWidth="0.5" 
                                     strokeDasharray="1,2" 
-                                    className="text-slate-200 dark:text-white/5" 
+                                    className="text-zinc-200 dark:text-white/5" 
                                 />
                             ))}
 
@@ -485,7 +485,7 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                             {[0, Math.floor((chartData.length - 1) / 2), chartData.length - 1].map((idx) => (
                                 <span 
                                     key={idx} 
-                                    className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter"
+                                    className="text-[8px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-tighter"
                                 >
                                     {new Date(chartData[idx].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                 </span>
@@ -499,11 +499,11 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
                                 style={{ left: `${(hoverIndex / (chartData.length - 1)) * 100}%` }}
                             >
                                 {/* Vertical Guideline */}
-                                <div className="absolute top-0 bottom-0 w-[1px] bg-slate-400/20 dark:bg-white/10 border-l border-dashed border-slate-300 dark:border-white/20" />
+                                <div className="absolute top-0 bottom-0 w-[1px] bg-zinc-400/20 dark:bg-white/10 border-l border-dashed border-zinc-300 dark:border-white/20" />
                                 
                                 {/* Indicator Dot */}
                                 <div 
-                                    className="absolute w-3 h-3 rounded-full border-2 border-white dark:border-slate-900 shadow-lg -translate-x-1/2"
+                                    className="absolute w-3 h-3 rounded-full border-2 border-white dark:border-zinc-900 shadow-lg -translate-x-1/2"
                                     style={{ 
                                         top: `${180 - (Math.max(5, (chartData[hoverIndex].count / Math.max(...chartData.map(c => c.count))) * 160))}px`,
                                         backgroundColor: color === 'orange' ? '#f97316' : color === 'blue' ? '#3b82f6' : color === 'emerald' ? '#10b981' : '#6366f1'
@@ -512,14 +512,14 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
 
                                 {/* Tooltip */}
                                 <div 
-                                    className={`absolute -translate-y-full -mt-4 bg-slate-900 dark:bg-white text-white dark:text-black py-2 px-3 rounded-xl text-[10px] font-bold shadow-2xl z-10 whitespace-nowrap ${hoverIndex > chartData.length / 2 ? '-translate-x-full ml-[-10px]' : '-translate-x-0 ml-[10px]'}`}
+                                    className={`absolute -translate-y-full -mt-4 bg-zinc-900 dark:bg-white text-white dark:text-black py-2 px-3 rounded-xl text-[10px] font-bold shadow-2xl z-10 whitespace-nowrap ${hoverIndex > chartData.length / 2 ? '-translate-x-full ml-[-10px]' : '-translate-x-0 ml-[10px]'}`}
                                     style={{ top: `${180 - (Math.max(5, (chartData[hoverIndex].count / Math.max(...chartData.map(c => c.count))) * 160))}px` }}
                                 >
                                     <div className="flex flex-col gap-0.5">
                                         <span className="opacity-60 text-[8px] uppercase tracking-wider">{new Date(chartData[hoverIndex].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                                         <span className="text-sm tracking-tight">{chartData[hoverIndex].count.toLocaleString()} {type}</span>
                                     </div>
-                                    <div className={`absolute bottom-[-4px] border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent ${hoverIndex > chartData.length / 2 ? 'right-[10px]' : 'left-[10px]'} border-t-slate-900 dark:border-t-white`} />
+                                    <div className={`absolute bottom-[-4px] border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent ${hoverIndex > chartData.length / 2 ? 'right-[10px]' : 'left-[10px]'} border-t-zinc-900 dark:border-t-white`} />
                                 </div>
                             </div>
                         )}
@@ -969,10 +969,10 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     {topPages.map((page: any, idx: number) => (
                                         <div key={idx} className="space-y-2">
                                             <div className="flex justify-between text-[10px] font-bold tracking-tight">
-                                                <span className="text-slate-500 font-mono">{page.path}</span>
-                                                <span className="text-slate-900 dark:text-white">{page.views.toLocaleString()}</span>
+                                                <span className="text-zinc-500 font-mono">{page.path}</span>
+                                                <span className="text-zinc-900 dark:text-white">{page.views.toLocaleString()}</span>
                                             </div>
-                                            <div className="h-2 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                                            <div className="h-2 w-full bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
                                                 <motion.div 
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${(page.views / (topPages[0]?.views || 1)) * 100}%` }}
@@ -1001,30 +1001,30 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                             </div>
                             <div className="h-[300px] overflow-y-auto no-scrollbar">
                                 <table className="w-full text-left border-collapse">
-                                    <thead className="sticky top-0 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md z-10 text-slate-500">
-                                        <tr className="border-b border-slate-100 dark:border-white/5">
+                                    <thead className="sticky top-0 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-md z-10 text-zinc-500">
+                                        <tr className="border-b border-zinc-100 dark:border-white/5">
                                             <th className="px-8 py-4 text-[10px] font-bold tracking-wider">Activity</th>
                                             <th className="px-8 py-4 text-[10px] font-bold tracking-wider">Total Times</th>
                                             <th className="px-8 py-4 text-[10px] font-bold tracking-wider text-right">Last Used</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                                    <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
                                         {data?.eventStats.map((event: any, idx: number) => (
-                                            <tr key={idx} className="group hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                                            <tr key={idx} className="group hover:bg-zinc-50 dark:hover:bg-white/[0.02] transition-colors">
                                                 <td className="px-8 py-5">
-                                                    <span className="text-xs font-bold text-slate-700 dark:text-white/80 tracking-tight group-hover:text-orange-600 transition-colors">
+                                                    <span className="text-xs font-bold text-zinc-700 dark:text-white/80 tracking-tight group-hover:text-orange-600 transition-colors">
                                                         {event.event_name.replace(/_/g, ' ')}
                                                     </span>
                                                 </td>
                                                 <td className="px-8 py-5">
                                                     <div className="flex items-center gap-3">
-                                                        <span className="text-lg font-black text-slate-900 dark:text-white">{event.count.toLocaleString()}</span>
-                                                        <div className="h-1 w-12 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                                                        <span className="text-lg font-black text-zinc-900 dark:text-white">{event.count.toLocaleString()}</span>
+                                                        <div className="h-1 w-12 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
                                                             <div className="h-full bg-orange-500" style={{ width: `${Math.min((event.count / 1000) * 100, 100)}%` }} />
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-8 py-5 text-right font-mono text-[10px] text-slate-500 uppercase">
+                                                <td className="px-8 py-5 text-right font-mono text-[10px] text-zinc-500 uppercase">
                                                     {new Date(event.last_triggered).toLocaleDateString()} at {new Date(event.last_triggered).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </td>
                                             </tr>
@@ -1078,16 +1078,16 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: idx * 0.05 }}
-                                        className="glass-panel p-6 rounded-[24px] border border-slate-200 dark:border-white/10 relative group bg-white/50 dark:bg-white/[0.02] hover:border-orange-500/30 transition-colors"
+                                        className="glass-panel p-6 rounded-[24px] border border-zinc-200 dark:border-white/10 relative group bg-white/50 dark:bg-white/[0.02] hover:border-orange-500/30 transition-colors"
                                     >
                                         <div className="flex justify-between items-start mb-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center font-bold text-xs border border-slate-200/50 dark:border-white/5 text-slate-600 dark:text-white/60">
+                                                <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center font-bold text-xs border border-zinc-200/50 dark:border-white/5 text-zinc-600 dark:text-white/60">
                                                     {report.reporter?.username?.[0] || '?'}
                                                 </div>
                                                 <div>
-                                                    <h4 className="text-[13px] font-semibold text-slate-800 dark:text-white tracking-tight">{report.reporter?.username || 'Guest'}</h4>
-                                                    <p className="text-[10px] text-slate-400 font-mono">{new Date(report.created_at).toLocaleDateString()}</p>
+                                                    <h4 className="text-[13px] font-semibold text-zinc-800 dark:text-white tracking-tight">{report.reporter?.username || 'Guest'}</h4>
+                                                    <p className="text-[10px] text-zinc-400 font-mono">{new Date(report.created_at).toLocaleDateString()}</p>
                                                 </div>
                                             </div>
                                             <span className={`px-3 py-1 rounded-full text-[10px] font-medium border ${
@@ -1141,10 +1141,10 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                     </motion.div>
                                 )) : (
                                     <div className="col-span-full py-20 text-center flex flex-col items-center gap-4">
-                                        <div className="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-white/[0.02] flex items-center justify-center text-slate-300 dark:text-white/10 scale-110">
+                                        <div className="w-16 h-16 rounded-3xl bg-zinc-50 dark:bg-white/[0.02] flex items-center justify-center text-zinc-300 dark:text-white/10 scale-110">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                         </div>
-                                        <p className="text-[13px] font-medium text-slate-400 tracking-tight italic">All systems clear. No pending reports.</p>
+                                        <p className="text-[13px] font-medium text-zinc-400 tracking-tight italic">All systems clear. No pending reports.</p>
                                     </div>
                                 )}
                             </motion.div>
@@ -1282,8 +1282,8 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                 <tr>
                                                                     <td colSpan={4} className="py-24 text-center">
                                                                         <div className="flex flex-col items-center gap-4">
-                                                                            <div className="w-12 h-12 border-4 border-slate-100 dark:border-white/5 border-t-orange-500 rounded-full animate-spin" />
-                                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] font-mono animate-pulse">Synchronizing Records...</p>
+                                                                            <div className="w-12 h-12 border-4 border-zinc-100 dark:border-white/5 border-t-orange-500 rounded-full animate-spin" />
+                                                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] font-mono animate-pulse">Synchronizing Records...</p>
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -1334,7 +1334,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                                         </tr>
                                                                         {selectedUserActivity?.profile?.id === user.id && (
                                                                             <tr>
-                                                                                <td colSpan={4} className="px-8 pb-10 pt-2 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/[0.01]">
+                                                                                <td colSpan={4} className="px-8 pb-10 pt-2 border-b border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-white/[0.01]">
                                                                                     <motion.div 
                                                                                         initial={{ opacity: 0, height: 0 }}
                                                                                         animate={{ opacity: 1, height: 'auto' }}
@@ -1545,7 +1545,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                         />
                                         <div className="space-y-3">
                                             <div className="flex justify-between items-center px-4">
-                                                <label className="text-[10px] font-bold text-slate-500 tracking-wider">Test Cases</label>
+                                                <label className="text-[10px] font-bold text-zinc-500 tracking-wider">Test Cases</label>
                                                 <button
                                                     type="button"
                                                     onClick={() => setNewQuestion({
@@ -1613,7 +1613,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
 
                                 {newQuestion.type === 'mcq' && (
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-bold text-slate-500 tracking-wider ml-4">Answer Options (Mark Correct)</label>
+                                        <label className="text-[10px] font-bold text-zinc-500 tracking-wider ml-4">Answer Options (Mark Correct)</label>
                                         {newQuestion.options.map((opt, idx) => (
                                             <div key={idx} className="flex gap-4 items-center group">
                                                 <input 
@@ -1626,7 +1626,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                                 <input 
                                                     type="text" 
                                                     placeholder={`Option ${idx + 1}`} 
-                                                    className="flex-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-3 text-xs font-bold transition-all group-hover:border-slate-400 dark:group-hover:border-white/20"
+                                                    className="flex-1 bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl px-6 py-3 text-xs font-bold transition-all group-hover:border-zinc-400 dark:group-hover:border-white/20"
                                                     value={opt}
                                                     onChange={e => {
                                                         const newOpts = [...newQuestion.options];
@@ -1672,11 +1672,11 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                                 </ul>
                             </div>
 
-                            <div className="glass-panel p-8 rounded-[40px] border border-slate-200 dark:border-white/10 shadow-xl">
-                                <h4 className="text-xs font-bold text-slate-900 dark:text-white tracking-widest mb-6">Question Details</h4>
+                            <div className="glass-panel p-8 rounded-[40px] border border-zinc-200 dark:border-white/10 shadow-xl">
+                                <h4 className="text-xs font-bold text-zinc-900 dark:text-white tracking-widest mb-6">Question Details</h4>
                                 <div className="space-y-5">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-slate-500 tracking-wider ml-1">Difficulty Level</label>
+                                        <label className="text-[10px] font-bold text-zinc-500 tracking-wider ml-1">Difficulty Level</label>
                                         <div className="grid grid-cols-3 gap-2">
                                             {['easy', 'medium', 'hard'].map(level => (
                                                 <button 

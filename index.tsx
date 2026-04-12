@@ -1,10 +1,10 @@
 
 /**
- * LPU-Nexus Environment Bootstrap
+ * Scholix Environment Bootstrap
  * This must run at the absolute top of the entry point to ensure
  * environment variables are available to all subsequently loaded modules.
  */
-(function initializeNexusGlobalEnv() {
+(function initializeScholixGlobalEnv() {
   const g = (typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : ({} as any));
 
   // Ensure standard process.env structure exists

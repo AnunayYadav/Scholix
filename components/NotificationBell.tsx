@@ -152,7 +152,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={handleToggle}
-                className="p-2.5 rounded-full bg-slate-100 dark:bg-[#0a0a0a] text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90 relative"
+                className="p-2.5 rounded-full bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-600 dark:text-zinc-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90 relative"
             >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -170,10 +170,10 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        className={`absolute right-[-10px] sm:right-0 mt-3 w-[280px] sm:w-[300px] bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 rounded-[28px] shadow-[0_32px_64px_rgba(0,0,0,0.15)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.6)] overflow-hidden py-3 z-[60] backdrop-blur-xl`}
+                        className={`absolute right-[-10px] sm:right-0 mt-3 w-[280px] sm:w-[300px] bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-[28px] shadow-[0_32px_64px_rgba(0,0,0,0.15)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.6)] overflow-hidden py-3 z-[60] backdrop-blur-xl`}
                     >
-                    <div className="px-5 py-3 border-b border-slate-100 dark:border-white/5 mb-2 flex items-center justify-between">
-                        <h3 className="text-[11px] font-bold text-slate-800 dark:text-white tracking-tight">Updates</h3>
+                    <div className="px-5 py-3 border-b border-zinc-100 dark:border-white/5 mb-2 flex items-center justify-between">
+                        <h3 className="text-[11px] font-bold text-zinc-800 dark:text-white tracking-tight">Updates</h3>
                         {unreadCount > 0 && (
                             <button
                                 onClick={markAllAsRead}
@@ -187,11 +187,11 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                     <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                         {allNotifications.length === 0 ? (
                             <div className="px-8 py-12 text-center">
-                                <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400 dark:text-white/10 mx-auto mb-4">
+                                <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-400 dark:text-white/10 mx-auto mb-4">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
                                 </div>
-                                <p className="text-[10px] font-bold text-slate-400 tracking-tight">No notifications</p>
-                                <p className="text-[10px] text-slate-400/60 mt-1">You're all caught up</p>
+                                <p className="text-[10px] font-bold text-zinc-400 tracking-tight">No notifications</p>
+                                <p className="text-[10px] text-zinc-400/60 mt-1">You're all caught up</p>
                             </div>
                         ) : (
                             allNotifications.map((item) => {
@@ -219,12 +219,12 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                                         <div className="flex flex-col gap-1 min-w-0">
                                             <div className="flex justify-between items-start gap-2">
                                                 <div className="flex flex-col min-w-0">
-                                                    <p className="font-bold text-slate-800 dark:text-white tracking-tight text-[10px] truncate">{item.title}</p>
+                                                    <p className="font-bold text-zinc-800 dark:text-white tracking-tight text-[10px] truncate">{item.title}</p>
                                                 </div>
                                                 {isUnread && <div className="w-2 h-2 rounded-full bg-orange-600 shrink-0 mt-1" />}
                                             </div>
-                                            <p className="text-[9px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{item.message}</p>
-                                            <p className="text-[9px] font-bold text-slate-400 mt-1 opacity-60">
+                                            <p className="text-[9px] text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">{item.message}</p>
+                                            <p className="text-[9px] font-bold text-zinc-400 mt-1 opacity-60">
                                                 {new Date(item.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
@@ -234,8 +234,8 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                         )}
                     </div>
 
-                    <div className="px-5 pt-3 mt-2 border-t border-slate-100 dark:border-white/5">
-                        <button className="w-full py-3 rounded-2xl bg-slate-100 dark:bg-white/5 text-[10px] font-medium text-slate-500 dark:text-white/40 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 transition-all border-none cursor-not-allowed">
+                    <div className="px-5 pt-3 mt-2 border-t border-zinc-100 dark:border-white/5">
+                        <button className="w-full py-3 rounded-2xl bg-zinc-100 dark:bg-white/5 text-[10px] font-medium text-zinc-500 dark:text-white/40 hover:text-orange-600 dark:hover:text-white hover:bg-orange-600/5 dark:hover:bg-white/5 transition-all border-none cursor-not-allowed">
                             View All History
                         </button>
                     </div>
@@ -258,7 +258,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-white dark:bg-[#0c0c0c] w-full max-w-sm rounded-[40px] border border-slate-200 dark:border-white/10 shadow-3xl overflow-hidden relative z-10"
+                            className="bg-white dark:bg-[#0c0c0c] w-full max-w-sm rounded-[40px] border border-zinc-200 dark:border-white/10 shadow-3xl overflow-hidden relative z-10"
                         >
                             <div className="p-8">
                                 <div className="flex justify-between items-start mb-6">
@@ -275,22 +275,22 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                                     </div>
                                     <button 
                                         onClick={() => setIsDetailModalOpen(false)}
-                                        className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 transition-colors border-none bg-transparent text-slate-400 group"
+                                        className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors border-none bg-transparent text-zinc-400 group"
                                     >
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 group-hover:rotate-90 transition-transform"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                     </button>
                                 </div>
                                 
-                                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight tracking-tight">
+                                <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2 leading-tight tracking-tight">
                                     {selectedNotification.title}
                                 </h2>
-                                <p className="text-[10px] font-bold text-slate-400 mb-6 flex items-center gap-2">
+                                <p className="text-[10px] font-bold text-zinc-400 mb-6 flex items-center gap-2">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                     {new Date(selectedNotification.created_at).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                 </p>
                                 
-                                <div className="bg-slate-50 dark:bg-white/5 rounded-[24px] p-6 mb-8 border border-slate-100 dark:border-white/5 max-h-[300px] overflow-y-auto no-scrollbar">
-                                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                                <div className="bg-zinc-50 dark:bg-white/5 rounded-[24px] p-6 mb-8 border border-zinc-100 dark:border-white/5 max-h-[300px] overflow-y-auto no-scrollbar">
+                                    <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed font-medium">
                                         {selectedNotification.message}
                                     </p>
                                 </div>
@@ -310,7 +310,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                                     )}
                                     <button 
                                         onClick={() => setIsDetailModalOpen(false)}
-                                        className={`w-full py-4 text-slate-500 dark:text-slate-400 font-bold text-xs rounded-2xl active:scale-95 transition-all border-none ${selectedNotification.link ? 'bg-transparent' : 'bg-slate-100 dark:bg-white/5'}`}
+                                        className={`w-full py-4 text-zinc-500 dark:text-zinc-400 font-bold text-xs rounded-2xl active:scale-95 transition-all border-none ${selectedNotification.link ? 'bg-transparent' : 'bg-zinc-100 dark:bg-white/5'}`}
                                     >
                                         Close Portal
                                     </button>

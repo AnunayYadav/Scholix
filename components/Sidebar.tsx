@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { ModuleType, UserProfile } from '../types';
 import NexusServer from '../services/nexusServer.ts';
 import { showToast } from './Toast.tsx';
+import { useUniversity } from '../hooks/useUniversity.tsx';
 
 interface SidebarProps {
   currentModule: ModuleType;
@@ -28,6 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [isHovered, setIsHovered] = useState(false);
 
   const feedbackModalRef = useRef<HTMLDivElement>(null);
+  const { selectedUniversity, universityInfo, fullBrandName, studentTerm } = useUniversity();
 
   useEffect(() => {
     if (showFeedbackModal) {
@@ -52,7 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     }, 250);
   };
 
-  const navItems = [
+  const allNavItems = [
     {
       id: ModuleType.DASHBOARD,
       label: 'Dashboard',
@@ -64,19 +66,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="m9 12 2 2 4-4" /></svg>
     },
     {
-      id: ModuleType.ATTENDANCE,
-      label: 'Attendance',
-      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-    },
-    {
-      id: ModuleType.CGPA,
-      label: 'CGPA Calc',
-      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="4" y="2" width="16" height="20" rx="2" /><line x1="8" y1="6" x2="16" y2="6" /><line x1="16" y1="14" x2="16" y2="18" /><path d="M16 10h.01" /><path d="M12 10h.01" /><path d="M8 10h.01" /><path d="M12 14h.01" /><path d="M8 14h.01" /><path d="M12 18h.01" /><path d="M8 18h.01" /></svg>
-    },
-    {
-      id: ModuleType.PLACEMENT,
-      label: 'Placement Prefect',
-      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
+      id: ModuleType.TOOLS,
+      label: 'Tools Hub',
+      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" /></svg>
     },
     {
       id: ModuleType.LIBRARY,
@@ -95,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: ModuleType.MARKETPLACE,
-      label: 'LPU Market',
+      label: 'Marketplace',
       icon: <svg viewBox="0 0 16 16" fill="currentColor" className="w-5 h-5"><path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.37 2.37 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0M1.5 8.5A.5.5 0 0 1 2 9v6h12V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5m2 .5a.5.5 0 0 1 .5.5V13h8V9.5a.5.5 0 0 1 1 0V13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5a.5.5 0 0 1 .5-.5" /></svg>
     },
     {
@@ -119,6 +111,17 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
     },
   ];
+
+  const navItems = universityInfo 
+    ? allNavItems.filter(item => {
+        if (item.id === ModuleType.TOOLS) {
+          return universityInfo.features.enabledModules.includes(ModuleType.ATTENDANCE) || 
+                 universityInfo.features.enabledModules.includes(ModuleType.CGPA) || 
+                 universityInfo.features.enabledModules.includes(ModuleType.PLACEMENT);
+        }
+        return universityInfo.features.enabledModules.includes(item.id);
+      })
+    : allNavItems;
 
   const submitFeedback = async () => {
     if (!feedbackText.trim() || isSubmitting) return;
@@ -151,7 +154,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           onClick={(e) => { if (e.target === e.currentTarget && !isSubmitting) handleClose(); }}
         >
           <div ref={feedbackModalRef} className={`nexus-modal w-full max-w-lg p-10 relative ${isClosing ? 'closing' : ''}`}>
-            <button onClick={handleClose} className="absolute top-8 right-8 p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90">
+            <button onClick={handleClose} className="absolute top-8 right-8 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
 
@@ -161,25 +164,25 @@ const Sidebar: React.FC<SidebarProps> = ({
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-10 h-10"><polyline points="20 6 9 17 4 12" /></svg>
                 </div>
                 <div>
-                  <h3 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-2">Success!</h3>
-                  <p className="text-slate-500 font-bold text-[11px] sm:text-xs uppercase tracking-widest">Your feedback has been received.</p>
+                  <h3 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight leading-none mb-2">Success!</h3>
+                  <p className="text-zinc-500 font-bold text-[11px] sm:text-xs uppercase tracking-widest">Your feedback has been received.</p>
                 </div>
               </div>
             ) : (
               <>
-                <div className="w-20 h-20 bg-orange-600/10 rounded-[32px] flex items-center justify-center mb-8 border border-orange-600/20">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-orange-600"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                <div className="w-20 h-20 bg-brand-primary/10 rounded-[32px] flex items-center justify-center mb-8 border border-brand-primary/20">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-brand-primary"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
                 </div>
 
-                <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight leading-none">Feedback</h3>
-                <p className="text-slate-500 text-xs mb-8">Found a bug or have a suggestion? Let us know.</p>
+                <h3 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2 tracking-tight leading-none">Feedback</h3>
+                <p className="text-zinc-500 text-xs mb-8">Found a bug or have a suggestion? Let us know.</p>
 
                 <div className="relative group">
                   <textarea
                     value={feedbackText}
                     onChange={(e) => setFeedbackText(e.target.value)}
                     disabled={isSubmitting}
-                    className="w-full h-40 p-6 rounded-[32px] bg-slate-50 dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 focus:ring-4 focus:ring-orange-600/10 text-slate-800 dark:text-slate-200 resize-none transition-all outline-none font-medium text-sm leading-relaxed shadow-inner"
+                    className="w-full h-40 p-6 rounded-[32px] bg-zinc-50 dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/10 text-zinc-800 dark:text-zinc-200 resize-none transition-all outline-none font-medium text-sm leading-relaxed shadow-inner"
                     placeholder="Tell us what's on your mind... we're all ears."
                   />
                 </div>
@@ -188,14 +191,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                   <button
                     onClick={() => setShowFeedbackModal(false)}
                     disabled={isSubmitting}
-                    className="flex-1 py-4 text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white font-bold text-sm border-none bg-transparent transition-colors"
+                    className="flex-1 py-4 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-sm border-none bg-transparent transition-colors"
                   >
                     Dismiss
                   </button>
                   <button
                     onClick={submitFeedback}
                     disabled={isSubmitting || !feedbackText.trim()}
-                    className="flex-[2] py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-[24px] font-bold text-sm shadow-xl shadow-orange-600/20 active:scale-95 transition-all flex items-center justify-center gap-3 border-none disabled:opacity-50"
+                    className="flex-[2] py-4 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-[24px] font-bold text-sm shadow-xl shadow-brand-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3 border-none disabled:opacity-50"
                   >
                     {isSubmitting ? (
                       <div className="w-4 h-4 border-3 border-white border-t-transparent rounded-full animate-spin" />
@@ -226,25 +229,37 @@ const Sidebar: React.FC<SidebarProps> = ({
         onMouseLeave={() => setIsHovered(false)}
         className={`
           fixed inset-y-0 left-0 z-[40] transform transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
-          bg-white dark:bg-[#0a0a0a] border-r border-slate-200 dark:border-white/5
+          bg-white dark:bg-[#0a0a0a] border-r border-zinc-200 dark:border-white/5
           ${isMobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0 md:w-20'}
           md:hover:w-64 md:sticky md:top-0 md:h-screen flex flex-col shadow-2xl md:shadow-none
         `}
       >
 
-        <div className="h-24 flex items-center border-b border-slate-200 dark:border-white/5 overflow-hidden flex-shrink-0">
+        <div className="h-24 flex items-center border-b border-zinc-200 dark:border-white/5 overflow-hidden flex-shrink-0">
           <div className={`flex items-center w-full transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${isHovered || isMobileMenuOpen ? 'pl-8' : 'pl-[22px]'}`}>
-            <img
-              src="/favicon.ico"
-              alt="LPU-Nexus Logo"
-              className="w-9 h-9 rounded-lg flex-shrink-0 active:scale-90 transition-transform cursor-pointer"
-              onClick={() => setModule(ModuleType.DASHBOARD)}
-            />
+            <div className="relative w-9 h-9 flex-shrink-0">
+              <img
+                src={universityInfo?.logo || "/Scholix_light.png"}
+                alt="Platform Logo"
+                className={`w-full h-full rounded-lg transition-transform cursor-pointer object-contain ${universityInfo?.logo ? '' : 'dark:hidden'}`}
+                onClick={() => setModule(ModuleType.DASHBOARD)}
+              />
+              {!universityInfo?.logo && (
+                <img
+                  src="/Scholix_dark.png"
+                  alt="Platform Logo"
+                  className="w-full h-full rounded-lg transition-transform cursor-pointer object-contain hidden dark:block"
+                  onClick={() => setModule(ModuleType.DASHBOARD)}
+                />
+              )}
+            </div>
             <div className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) flex flex-col overflow-hidden ${isHovered || isMobileMenuOpen ? 'max-w-[200px] opacity-100 ml-4' : 'max-w-0 opacity-0 ml-0'}`}>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent tracking-tight whitespace-nowrap">
-                LPU-Nexus
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent tracking-tight whitespace-nowrap">
+                {fullBrandName}
               </h1>
-              <p className="text-[9px] font-medium tracking-[0.2em] text-slate-400 dark:text-slate-600 whitespace-nowrap">Student Intelligence</p>
+              <p className="text-[9px] font-medium tracking-[0.2em] text-zinc-400 dark:text-zinc-600 whitespace-nowrap uppercase">
+                {selectedUniversity === 'none' ? 'University Hub' : `${selectedUniversity} edition`}
+              </p>
             </div>
           </div>
         </div>
@@ -259,8 +274,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               }}
               className={`w-full h-12 flex items-center rounded-2xl border-none text-left relative group transition-all duration-300
                 ${currentModule === item.id
-                  ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
-                  : 'text-slate-600 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'bg-gradient-to-r from-brand-primary to-brand-secondary text-white'
+                  : 'text-zinc-600 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-200'
                 }
               `}
             >
@@ -275,7 +290,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 
               {!isHovered && (
-                <div className="absolute left-full ml-4 px-4 py-2 bg-slate-950/90 dark:bg-white text-white dark:text-black text-[12px] font-bold tracking-tight rounded-xl opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-2xl backdrop-blur-md">
+                <div className="absolute left-full ml-4 px-4 py-2 bg-zinc-950/90 dark:bg-white text-white dark:text-black text-[12px] font-bold tracking-tight rounded-xl opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-2xl backdrop-blur-md">
                   {item.label}
                 </div>
               )}
@@ -283,18 +298,18 @@ const Sidebar: React.FC<SidebarProps> = ({
           ))}
         </nav>
 
-        <div className="p-4 border-t border-slate-200 dark:border-white/5 flex-shrink-0">
-          <button onClick={() => setShowFeedbackModal(true)} className="w-full h-12 flex items-center rounded-2xl border border-transparent hover:border-orange-500/20 hover:bg-orange-600/5 transition-all bg-transparent active:scale-95 group relative">
+        <div className="p-4 border-t border-zinc-200 dark:border-white/5 flex-shrink-0">
+          <button onClick={() => setShowFeedbackModal(true)} className="w-full h-12 flex items-center rounded-2xl border border-transparent hover:border-brand-primary/20 hover:bg-brand-primary/5 transition-all bg-transparent active:scale-95 group relative">
             <div className={`flex items-center w-full transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${isHovered || isMobileMenuOpen ? 'pl-4' : 'pl-3'}`}>
-              <span className="flex-shrink-0 text-slate-400 dark:text-slate-500 group-hover:text-orange-600 transition-colors">
+              <span className="flex-shrink-0 text-zinc-400 dark:text-zinc-500 group-hover:text-brand-primary transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 transition-transform group-hover:rotate-12"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
               </span>
-              <span className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) text-sm font-bold text-slate-400 dark:text-slate-500 group-hover:text-orange-600 whitespace-nowrap overflow-hidden ${isHovered || isMobileMenuOpen ? 'max-w-[200px] opacity-100 ml-4' : 'max-w-0 opacity-0 ml-0'}`}>
+              <span className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) text-sm font-bold text-zinc-400 dark:text-zinc-500 group-hover:text-brand-primary whitespace-nowrap overflow-hidden ${isHovered || isMobileMenuOpen ? 'max-w-[200px] opacity-100 ml-4' : 'max-w-0 opacity-0 ml-0'}`}>
                 Feedback
               </span>
             </div>
             {!isHovered && (
-              <div className="absolute left-full ml-4 px-4 py-2 bg-slate-950/90 dark:bg-white text-white dark:text-black text-[12px] font-bold tracking-tight rounded-xl opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-2xl backdrop-blur-md">
+              <div className="absolute left-full ml-4 px-4 py-2 bg-zinc-950/90 dark:bg-white text-white dark:text-black text-[12px] font-bold tracking-tight rounded-xl opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-2xl backdrop-blur-md">
                 Feedback
               </div>
             )}

@@ -6,6 +6,7 @@ import { generateSubjectOriginals } from '../services/geminiService.ts';
 import { extractTextFromPdf } from '../services/pdfUtils.ts';
 import { showToast } from './Toast.tsx';
 import { nexusOriginalsData as staticOriginals } from '../data/nexusOriginalsData.ts';
+import { useUniversity } from '../hooks/useUniversity.tsx';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 
@@ -43,6 +44,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
     activeProgram: initialProgram,
     onBack
 }) => {
+    const { shortBrandName } = useUniversity();
     const [allOriginals, setAllOriginals] = useState<NexusOriginal[]>([]);
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
@@ -232,7 +234,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
             }
             const generated = await generateSubjectOriginals(initialSubject, syllabusText);
             await NexusServer.upsertNexusOriginal(initialSubject, initialSemester, initialProgram, generated);
-            showToast("Nexus Originals generated successfully!", "success");
+            showToast(`${shortBrandName} Originals generated successfully!`, "success");
             loadAllData();
         } catch (e: any) {
             showToast("Generation failed: " + e.message, "error");
@@ -285,10 +287,10 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
     if (loading) return (
         <div className="animate-fade-in h-[60vh] flex flex-col items-center justify-center">
             <div className="flex flex-col items-center justify-center py-24">
-                <div className="w-12 h-12 bg-orange-600/10 rounded-full mb-4 flex items-center justify-center">
-                    <div className="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
+                <div className="w-12 h-12 bg-brand-primary/10 rounded-full mb-4 flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
                 </div>
-                <p className="text-xs font-bold text-slate-400 tracking-widest animate-pulse uppercase">Initializing Library...</p>
+                <p className="text-xs font-bold text-zinc-400 tracking-widest animate-pulse uppercase">Initializing Library...</p>
             </div>
         </div>
     );
@@ -299,11 +301,11 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
         return (
             <div key="catalog" className="space-y-6 animate-fade-in pb-20">
                 <header className="flex items-center gap-4">
-                    <button onClick={onBack} className="w-10 h-10 bg-slate-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center text-slate-400 hover:text-orange-600 transition-all border-none flex-shrink-0">
+                    <button onClick={onBack} className="w-10 h-10 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center text-zinc-400 hover:text-brand-primary transition-all border-none flex-shrink-0">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                     </button>
-                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight leading-none">
-                        Nexus <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Originals</span>
+                    <h2 className="text-2xl font-bold text-zinc-800 dark:text-white tracking-tight leading-none">
+                        {shortBrandName} <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Originals</span>
                     </h2>
                 </header>
 
@@ -312,22 +314,22 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                     {initialSubject !== 'Search Subject' && !activeSubjectData && userProfile?.is_admin && (
                         <div 
                             onClick={handleGenerate}
-                            className={`group relative cursor-pointer overflow-hidden rounded-[32px] border-2 border-dashed border-orange-500/30 bg-orange-500/5 hover:bg-orange-500/10 transition-all duration-500 flex flex-col items-center justify-center p-8 text-center min-h-[220px] ${generating ? 'pointer-events-none opacity-80' : ''}`}
+                            className={`group relative cursor-pointer overflow-hidden rounded-[32px] border-2 border-dashed border-brand-primary/30 bg-brand-primary/5 hover:bg-brand-primary/10 transition-all duration-500 flex flex-col items-center justify-center p-8 text-center min-h-[220px] ${generating ? 'pointer-events-none opacity-80' : ''}`}
                         >
                             {generating ? (
                                 <div className="flex flex-col items-center gap-4">
-                                    <div className="w-10 h-10 border-4 border-orange-600 border-t-transparent rounded-full animate-spin" />
-                                    <p className="text-sm font-bold text-orange-600 uppercase tracking-widest animate-pulse">Generating Content...</p>
-                                    <p className="text-[10px] text-slate-500">This may take 30-60s</p>
+                                    <div className="w-10 h-10 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
+                                    <p className="text-sm font-bold text-brand-primary uppercase tracking-widest animate-pulse">Generating Content...</p>
+                                    <p className="text-[10px] text-zinc-500">This may take 30-60s</p>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    <div className="w-16 h-16 rounded-full bg-orange-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-orange-600/30 group-hover:scale-110 transition-transform">
+                                    <div className="w-16 h-16 rounded-full bg-brand-primary text-white flex items-center justify-center mx-auto shadow-lg shadow-brand-primary/30 group-hover:scale-110 transition-transform">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-8 h-8"><path d="M12 5v14M5 12h14" /></svg>
                                     </div>
                                     <div className="space-y-1">
-                                        <h4 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Initialize Subject</h4>
-                                        <p className="text-[10px] text-slate-500 font-medium px-4">Create Nexus Originals (Notes, MCQs, Cards) for <span className="text-orange-600 font-bold">{initialSubject}</span></p>
+                                        <h4 className="text-sm font-black text-zinc-800 dark:text-white uppercase tracking-wider">Initialize Subject</h4>
+                                        <p className="text-[10px] text-zinc-500 font-medium px-4">Create {shortBrandName} Originals (Notes, MCQs, Cards) for <span className="text-brand-primary font-bold">{initialSubject}</span></p>
                                     </div>
                                 </div>
                             )}
@@ -338,43 +340,43 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                         <div
                             key={subject.id}
                             onClick={() => handleSubjectSelect(subject)}
-                            className="group relative cursor-pointer overflow-hidden rounded-[32px] border border-slate-200/60 dark:border-white/10 bg-white dark:bg-[#0a0a0a]/60 hover:border-orange-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-orange-600/10 active:scale-[0.98] flex flex-col h-full"
+                            className="group relative cursor-pointer overflow-hidden rounded-[32px] border border-zinc-200/60 dark:border-white/10 bg-white dark:bg-[#0a0a0a]/60 hover:border-brand-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-brand-primary/10 active:scale-[0.98] flex flex-col h-full"
                         >
                             {/* Decorative accent */}
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-500/10 to-transparent blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-brand-primary/10 to-transparent blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
 
                             <div className="p-7 flex flex-col h-full relative z-10">
                                 <div className="flex items-center justify-between mb-5">
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-orange-600 tracking-widest uppercase mb-1">Semester {subject.semester}</span>
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{subject.program}</span>
+                                        <span className="text-[10px] font-black text-brand-primary tracking-widest uppercase mb-1">Semester {subject.semester}</span>
+                                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{subject.program}</span>
                                     </div>
-                                    <div className="w-10 h-10 rounded-2xl bg-slate-50 dark:bg-white/5 flex items-center justify-center text-slate-400 group-hover:bg-orange-600 group-hover:text-white transition-all duration-500 shadow-sm group-hover:shadow-lg group-hover:shadow-orange-600/30">
+                                    <div className="w-10 h-10 rounded-2xl bg-zinc-50 dark:bg-white/5 flex items-center justify-center text-zinc-400 group-hover:bg-brand-primary group-hover:text-white transition-all duration-500 shadow-sm group-hover:shadow-lg group-hover:shadow-brand-primary/30">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                                     </div>
                                 </div>
 
-                                <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-snug mb-6 flex-grow">{subject.subject}</h3>
+                                <h3 className="text-lg font-bold text-zinc-900 dark:text-white leading-snug mb-6 flex-grow">{subject.subject}</h3>
 
-                                <div className="grid grid-cols-3 gap-2 pt-5 border-t border-slate-100 dark:border-white/5">
+                                <div className="grid grid-cols-3 gap-2 pt-5 border-t border-zinc-100 dark:border-white/5">
                                     <div className="text-center">
-                                        <p className="text-[14px] font-black text-slate-900 dark:text-white">{subject.content.notes.length}</p>
-                                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Units</p>
+                                        <p className="text-[14px] font-black text-zinc-900 dark:text-white">{subject.content.notes.length}</p>
+                                        <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter">Units</p>
                                     </div>
-                                    <div className="text-center border-x border-slate-100 dark:border-white/5">
-                                        <p className="text-[14px] font-black text-slate-900 dark:text-white">{subject.content.quizzes.length}</p>
-                                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">MCQs</p>
+                                    <div className="text-center border-x border-zinc-100 dark:border-white/5">
+                                        <p className="text-[14px] font-black text-zinc-900 dark:text-white">{subject.content.quizzes.length}</p>
+                                        <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter">MCQs</p>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-[14px] font-black text-slate-900 dark:text-white">{subject.content.flashcards.length}</p>
-                                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Cards</p>
+                                        <p className="text-[14px] font-black text-zinc-900 dark:text-white">{subject.content.flashcards.length}</p>
+                                        <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter">Cards</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     ))}
-                    <div className="p-6 rounded-2xl border-dashed border-2 border-slate-200 dark:border-white/5 flex flex-col items-center justify-center text-center opacity-50 min-h-[120px]">
-                        <p className="text-xs text-slate-400">More coming soon</p>
+                    <div className="p-6 rounded-2xl border-dashed border-2 border-zinc-200 dark:border-white/5 flex flex-col items-center justify-center text-center opacity-50 min-h-[120px]">
+                        <p className="text-xs text-zinc-400">More coming soon</p>
                     </div>
                 </div>
             </div>
@@ -387,27 +389,27 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
     if (viewMode === 'units' && activeSubjectData) {
         return (
             <div key="units" className="space-y-8 animate-fade-in pb-20">
-                <header className="relative py-8 px-6 rounded-[32px] overflow-hidden bg-white dark:bg-[#0a0d17] border border-slate-100 dark:border-white/5 shadow-xl shadow-slate-200/50 dark:shadow-2xl dark:shadow-none">
+                <header className="relative py-8 px-6 rounded-[32px] overflow-hidden bg-white dark:bg-[#0a0d17] border border-zinc-100 dark:border-white/5 shadow-xl shadow-zinc-200/50 dark:shadow-2xl dark:shadow-none">
                     {/* Immersive background decoration */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 dark:bg-orange-600/20 rounded-full blur-[100px] -mr-32 -mt-32" />
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-red-500/5 dark:bg-red-600/10 rounded-full blur-[80px] -ml-24 -mb-24" />
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/10 dark:bg-brand-primary/20 rounded-full blur-[100px] -mr-32 -mt-32" />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-brand-secondary/5 dark:bg-brand-secondary/10 rounded-full blur-[80px] -ml-24 -mb-24" />
 
                     <div className="relative z-10 flex flex-col gap-6">
-                        <button onClick={handleBackToCatalog} className="group flex items-center gap-2 text-[10px] font-black tracking-[0.2em] text-orange-600 dark:text-orange-500 uppercase transition-all bg-transparent border-none cursor-pointer">
+                        <button onClick={handleBackToCatalog} className="group flex items-center gap-2 text-[10px] font-black tracking-[0.2em] text-brand-primary dark:text-brand-primary uppercase transition-all bg-transparent border-none cursor-pointer">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                             Back to courses
                         </button>
 
                         <div className="space-y-2">
-                            <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
+                            <h2 className="text-3xl md:text-4xl font-black text-zinc-900 dark:text-white leading-tight tracking-tight">
                                 {activeSubjectData.subject.split(':').pop()?.trim()}
                             </h2>
                             <div className="flex items-center gap-4 text-xs font-bold tracking-wider">
-                                <span className="text-orange-600 dark:text-orange-500 bg-orange-500/10 px-2.5 py-1 rounded-lg border border-orange-500/20 uppercase">{activeSubjectData.subject.split(':')[0]}</span>
-                                <span className="text-slate-400">•</span>
-                                <span className="text-slate-400 uppercase">{activeSubjectData.ltp}</span>
-                                <span className="text-slate-400">•</span>
-                                <span className="text-slate-400 uppercase">SEMESTER {activeSubjectData.semester}</span>
+                                <span className="text-brand-primary dark:text-brand-primary bg-brand-primary/10 px-2.5 py-1 rounded-lg border border-brand-primary/20 uppercase">{activeSubjectData.subject.split(':')[0]}</span>
+                                <span className="text-zinc-400">•</span>
+                                <span className="text-zinc-400 uppercase">{activeSubjectData.ltp}</span>
+                                <span className="text-zinc-400">•</span>
+                                <span className="text-zinc-400 uppercase">SEMESTER {activeSubjectData.semester}</span>
                             </div>
                         </div>
                     </div>
@@ -420,29 +422,29 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                         return (
                             <div
                                 key={idx}
-                                className="group relative overflow-hidden p-6 rounded-[28px] border border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/60 hover:border-orange-500/30 transition-all duration-500 hover:shadow-xl flex flex-col gap-6"
+                                className="group relative overflow-hidden p-6 rounded-[28px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/60 hover:border-brand-primary/30 transition-all duration-500 hover:shadow-xl flex flex-col gap-6"
                             >
                                 {/* Subtle unit number background */}
-                                <div className="absolute -top-4 -right-4 text-8xl font-black text-slate-200/80 dark:text-white/[0.08] pointer-events-none group-hover:text-orange-500/[0.08] transition-colors">
+                                <div className="absolute -top-4 -right-4 text-8xl font-black text-zinc-200/80 dark:text-white/[0.08] pointer-events-none group-hover:text-brand-primary/[0.08] transition-colors">
                                     {unitNum}
                                 </div>
 
                                 <div className="relative z-10 space-y-3">
                                     <div className="flex items-center gap-2">
-                                        <div className="w-1.5 h-6 bg-orange-600 rounded-full" />
-                                        <span className="text-[10px] font-black text-orange-600 tracking-widest uppercase">
+                                        <div className="w-1.5 h-6 bg-brand-primary rounded-full" />
+                                        <span className="text-[10px] font-black text-brand-primary tracking-widest uppercase">
                                             Unit {unitNum}
                                         </span>
                                     </div>
-                                    <h3 className="text-sm font-bold text-slate-800 dark:text-white leading-snug line-clamp-2 min-h-[40px]">
+                                    <h3 className="text-sm font-bold text-zinc-800 dark:text-white leading-snug line-clamp-2 min-h-[40px]">
                                         {unit.title.split(':').pop()?.trim()}
                                     </h3>
                                 </div>
 
-                                <div className="relative z-10 grid grid-cols-3 gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
+                                <div className="relative z-10 grid grid-cols-3 gap-3 pt-4 border-t border-zinc-100 dark:border-white/5">
                                     <button
                                         onClick={() => handleOpenNotes(idx)}
-                                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-600/10 transition-all border-none bg-transparent cursor-pointer group/btn"
+                                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl text-zinc-400 hover:text-brand-primary hover:bg-brand-primary/10 transition-all border-none bg-transparent cursor-pointer group/btn"
                                     >
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 group-hover/btn:scale-110 transition-transform">
                                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
@@ -451,7 +453,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                                     </button>
                                     <button
                                         onClick={() => handleOpenQuiz(idx)}
-                                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-600/10 transition-all border-none bg-transparent cursor-pointer group/btn"
+                                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl text-zinc-400 hover:text-brand-primary hover:bg-brand-primary/10 transition-all border-none bg-transparent cursor-pointer group/btn"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-5 h-5 group-hover/btn:scale-110 transition-transform" viewBox="0 0 16 16">
                                             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
@@ -461,7 +463,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                                     </button>
                                     <button
                                         onClick={() => handleOpenFlashcards(idx)}
-                                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-600/10 transition-all border-none bg-transparent cursor-pointer group/btn"
+                                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl text-zinc-400 hover:text-brand-primary hover:bg-brand-primary/10 transition-all border-none bg-transparent cursor-pointer group/btn"
                                     >
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 group-hover/btn:scale-110 transition-transform">
                                             <rect x="2" y="4" width="20" height="16" rx="2" /><path d="M12 4v16" />
@@ -496,20 +498,20 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
             const headers = currentTable[0];
             const rows = currentTable.slice(2); // skip header separator
             const tbl = (
-                <div key={key} className="my-6 overflow-x-auto rounded-xl border border-slate-100 dark:border-white/5">
+                <div key={key} className="my-6 overflow-x-auto rounded-xl border border-zinc-100 dark:border-white/5">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="bg-slate-50 dark:bg-white/5">
+                            <tr className="bg-zinc-50 dark:bg-white/5">
                                 {headers.map((h, hi) => (
-                                    <th key={hi} className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 border-b border-slate-100 dark:border-white/5">{parseLine(h.trim())}</th>
+                                    <th key={hi} className="px-4 py-3 text-left text-xs font-semibold text-zinc-600 dark:text-zinc-300 border-b border-zinc-100 dark:border-white/5">{parseLine(h.trim())}</th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody>
                             {rows.map((row, ri) => (
-                                <tr key={ri} className="border-b border-slate-50 dark:border-white/5 last:border-0">
+                                <tr key={ri} className="border-b border-zinc-50 dark:border-white/5 last:border-0">
                                     {row.map((cell, ci) => (
-                                        <td key={ci} className="px-4 py-3 text-slate-600 dark:text-slate-300">{parseLine(cell.trim())}</td>
+                                        <td key={ci} className="px-4 py-3 text-zinc-600 dark:text-zinc-300">{parseLine(cell.trim())}</td>
                                     ))}
                                 </tr>
                             ))}
@@ -562,7 +564,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                     const math = currentBlockMath;
                     currentBlockMath = '';
                     return (
-                        <div key={i} className="my-6 py-5 px-6 bg-slate-50 dark:bg-[#0a0a0a]/50 border border-slate-100 dark:border-white/5 rounded-xl flex items-center justify-center overflow-x-auto">
+                        <div key={i} className="my-6 py-5 px-6 bg-zinc-50 dark:bg-[#0a0a0a]/50 border border-zinc-100 dark:border-white/5 rounded-xl flex items-center justify-center overflow-x-auto">
                             <BlockMath math={math} />
                         </div>
                     );
@@ -571,7 +573,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                     if (trimmedLine.length > 2 && trimmedLine.endsWith('$$')) {
                         isBlockMath = false;
                         return (
-                            <div key={i} className="my-6 py-5 px-6 bg-slate-50 dark:bg-[#0a0a0a]/50 border border-slate-100 dark:border-white/5 rounded-xl flex items-center justify-center overflow-x-auto">
+                            <div key={i} className="my-6 py-5 px-6 bg-zinc-50 dark:bg-[#0a0a0a]/50 border border-zinc-100 dark:border-white/5 rounded-xl flex items-center justify-center overflow-x-auto">
                                 <BlockMath math={trimmedLine.slice(2, -2)} />
                             </div>
                         );
@@ -602,7 +604,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                     h3Counter = 0;
                     number = `${h1Counter}. `;
                 }
-                return <h1 key={i} id={getSlug(text)} className={`text-xl font-bold text-slate-900 dark:text-white mb-4 pt-6 scroll-mt-[140px] ${isReallyFirst ? '' : 'mt-10 border-t border-slate-100 dark:border-white/5'}`}>{number}{parseLine(text)}</h1>;
+                return <h1 key={i} id={getSlug(text)} className={`text-xl font-bold text-zinc-900 dark:text-white mb-4 pt-6 scroll-mt-[140px] ${isReallyFirst ? '' : 'mt-10 border-t border-zinc-100 dark:border-white/5'}`}>{number}{parseLine(text)}</h1>;
             }
             if (trimmedLine.startsWith('## ')) {
                 const text = trimmedLine.replace('## ', '').trim();
@@ -611,7 +613,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                 h2Counter++;
                 h3Counter = 0;
                 const number = h1Counter > 0 ? `${h1Counter}.${h2Counter}. ` : `${h2Counter}. `;
-                return <h2 key={i} id={getSlug(text)} className="text-lg font-bold text-slate-800 dark:text-white mt-8 mb-3 scroll-mt-[140px]">{number}{parseLine(text)}</h2>;
+                return <h2 key={i} id={getSlug(text)} className="text-lg font-bold text-zinc-800 dark:text-white mt-8 mb-3 scroll-mt-[140px]">{number}{parseLine(text)}</h2>;
             }
             if (trimmedLine.startsWith('### ')) {
                 const text = trimmedLine.replace('### ', '').trim();
@@ -620,7 +622,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                 h3Counter++;
                 const prefix = h1Counter > 0 ? `${h1Counter}.${h2Counter}` : `${h2Counter}`;
                 const number = `${prefix}.${h3Counter}. `;
-                return <h3 key={i} id={getSlug(text)} className="text-base font-semibold text-slate-700 dark:text-slate-200 mt-6 mb-2 scroll-mt-[140px]">{number}{parseLine(text)}</h3>;
+                return <h3 key={i} id={getSlug(text)} className="text-base font-semibold text-zinc-700 dark:text-zinc-200 mt-6 mb-2 scroll-mt-[140px]">{number}{parseLine(text)}</h3>;
             }
 
             // Bullet points
@@ -630,7 +632,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                 if (tocMatch) {
                     return (
                         <div key={i} className="mb-2 ml-4">
-                            <a href={tocMatch[2]} className="text-slate-600 dark:text-slate-300 text-sm hover:text-orange-600 transition-colors">
+                            <a href={tocMatch[2]} className="text-zinc-600 dark:text-zinc-300 text-sm hover:text-brand-primary transition-colors">
                                 {tocMatch[1]}
                             </a>
                         </div>
@@ -643,9 +645,9 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                     const cleanKeyword = keyword.replace('**', '').trim();
                     return (
                         <div key={i} className="flex gap-2.5 mb-3 ml-1">
-                            <span className="text-orange-500 mt-2 text-[6px]">●</span>
-                            <div className="flex-1 text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-                                <strong className="text-slate-800 dark:text-white font-semibold">{cleanKeyword}:</strong> {parseLine(rest.join(':**'))}
+                            <span className="text-brand-primary mt-2 text-[6px]">●</span>
+                            <div className="flex-1 text-zinc-600 dark:text-zinc-300 text-sm leading-relaxed">
+                                <strong className="text-zinc-800 dark:text-white font-semibold">{cleanKeyword}:</strong> {parseLine(rest.join(':**'))}
                             </div>
                         </div>
                     );
@@ -653,8 +655,8 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
 
                 return (
                     <div key={i} className="flex gap-2.5 mb-2.5 ml-1">
-                        <span className="text-orange-500 mt-2 text-[6px]">●</span>
-                        <div className="flex-1 text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{parseLine(content)}</div>
+                        <span className="text-brand-primary mt-2 text-[6px]">●</span>
+                        <div className="flex-1 text-zinc-600 dark:text-zinc-300 text-sm leading-relaxed">{parseLine(content)}</div>
                     </div>
                 );
             }
@@ -664,8 +666,8 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
             if (numberedMatch) {
                 return (
                     <div key={i} className="flex gap-2.5 mb-2.5 ml-1">
-                        <span className="text-slate-400 text-sm font-medium mt-0.5 min-w-[18px]">{numberedMatch[1]}.</span>
-                        <div className="flex-1 text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{parseLine(numberedMatch[2])}</div>
+                        <span className="text-zinc-400 text-sm font-medium mt-0.5 min-w-[18px]">{numberedMatch[1]}.</span>
+                        <div className="flex-1 text-zinc-600 dark:text-zinc-300 text-sm leading-relaxed">{parseLine(numberedMatch[2])}</div>
                     </div>
                 );
             }
@@ -674,7 +676,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
             if (trimmedLine.startsWith('> ')) {
                 const text = trimmedLine.replace('> ', '');
                 return (
-                    <div key={i} className="p-4 bg-orange-50/50 dark:bg-orange-600/5 border-l-3 border-orange-500 rounded-r-lg italic my-4 text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+                    <div key={i} className="p-4 bg-orange-50/50 dark:bg-orange-600/5 border-l-3 border-orange-500 rounded-r-lg italic my-4 text-zinc-600 dark:text-zinc-300 text-sm leading-relaxed">
                         {parseLine(text)}
                     </div>
                 );
@@ -685,7 +687,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                 const match = trimmedLine.match(/^\[(.*)\]\((#.*)\)$/);
                 if (match) {
                     return (
-                        <a key={i} href={match[2]} className="block text-slate-600 dark:text-slate-300 text-sm hover:text-orange-600 transition-colors mb-2 ml-4">
+                        <a key={i} href={match[2]} className="block text-zinc-600 dark:text-zinc-300 text-sm hover:text-brand-primary transition-colors mb-2 ml-4">
                             {match[1]}
                         </a>
                     );
@@ -693,7 +695,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
             }
 
             // Regular paragraph
-            return <p key={i} className="mb-3 text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{parseLine(line)}</p>;
+            return <p key={i} className="mb-3 text-zinc-600 dark:text-zinc-300 text-sm leading-relaxed">{parseLine(line)}</p>;
         });
     };
 
@@ -756,7 +758,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                     <div className="absolute bottom-0 left-0 w-full h-[4px] z-[60] bg-transparent pointer-events-none overflow-hidden">
                         <div
                             ref={progressBarRef}
-                            className="h-full bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 transition-transform duration-75 ease-out origin-left will-change-transform shadow-[0_2px_10px_rgba(249,115,22,0.8)]"
+                            className="h-full bg-gradient-to-r from-brand-primary via-brand-primary to-brand-secondary transition-transform duration-75 ease-out origin-left will-change-transform shadow-[0_2px_10px_var(--brand-glow)]"
                             style={{ transform: 'scaleX(0)' }}
                         />
                     </div>,
@@ -767,17 +769,17 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                     <div className="space-y-3">
                         {/* Styled Breadcrumbs */}
                         <nav className="flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
-                            <button onClick={onBack} className="text-slate-400 hover:text-orange-500 transition-colors bg-transparent border-none cursor-pointer">Nexus</button>
-                            <span className="text-slate-300">/</span>
-                            <button onClick={handleBackToCatalog} className="text-slate-400 hover:text-orange-500 transition-colors bg-transparent border-none cursor-pointer">Semester {activeSubjectData.semester}</button>
-                            <span className="text-slate-300">/</span>
-                            <button onClick={handleBackToUnits} className="text-orange-500 bg-transparent border-none cursor-pointer">{subjectCode}</button>
-                            <span className="text-slate-300">/</span>
-                            <span className="text-slate-900 dark:text-white">Unit {unitNum}</span>
+                            <button onClick={onBack} className="text-zinc-400 hover:text-brand-primary transition-colors bg-transparent border-none cursor-pointer">{shortBrandName}</button>
+                            <span className="text-zinc-300">/</span>
+                            <button onClick={handleBackToCatalog} className="text-zinc-400 hover:text-brand-primary transition-colors bg-transparent border-none cursor-pointer">Semester {activeSubjectData.semester}</button>
+                            <span className="text-zinc-300">/</span>
+                            <button onClick={handleBackToUnits} className="text-brand-primary bg-transparent border-none cursor-pointer">{subjectCode}</button>
+                            <span className="text-zinc-300">/</span>
+                            <span className="text-zinc-900 dark:text-white">Unit {unitNum}</span>
                         </nav>
 
-                        <button onClick={handleBackToUnits} className="group flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all bg-transparent border-none cursor-pointer">
-                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-all">
+                        <button onClick={handleBackToUnits} className="group flex items-center gap-2 text-sm font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-all bg-transparent border-none cursor-pointer">
+                            <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white transition-all">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                             </div>
                             <span>Return to Index</span>
@@ -787,7 +789,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => { setViewMode('quiz'); }}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl text-xs font-bold shadow-lg shadow-orange-600/20 hover:shadow-orange-600/30 transition-all cursor-pointer border-none scale-100 active:scale-95"
+                            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-2xl text-xs font-bold shadow-lg shadow-brand-primary/20 hover:shadow-brand-primary/30 transition-all cursor-pointer border-none scale-100 active:scale-95"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-4 h-4" viewBox="0 0 16 16">
                                 <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
@@ -796,19 +798,19 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                             PRACTICE MCQ
                         </button>
 
-                        <div className="flex items-center p-1 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
+                        <div className="flex items-center p-1 bg-zinc-100 dark:bg-white/5 rounded-2xl border border-zinc-200 dark:border-white/10">
                             <button
                                 disabled={selectedUnitIdx === 0}
                                 onClick={() => { setSelectedUnitIdx(selectedUnitIdx - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-orange-600 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-30 transition-all border-none bg-transparent cursor-pointer"
+                                className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-500 hover:text-orange-600 hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30 transition-all border-none bg-transparent cursor-pointer"
                             >
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M15 18l-6-6 6-6" /></svg>
                             </button>
-                            <div className="w-[1px] h-4 bg-slate-200 dark:bg-white/10 mx-1" />
+                            <div className="w-[1px] h-4 bg-zinc-200 dark:bg-white/10 mx-1" />
                             <button
                                 disabled={selectedUnitIdx === totalUnits - 1}
                                 onClick={() => { setSelectedUnitIdx(selectedUnitIdx + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-orange-600 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-30 transition-all border-none bg-transparent cursor-pointer"
+                                className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-500 hover:text-orange-600 hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30 transition-all border-none bg-transparent cursor-pointer"
                             >
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M9 18l6-6-6-6" /></svg>
                             </button>
@@ -819,20 +821,20 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                 {/* Note content card */}
                 <main className="relative overflow-hidden group">
                     {/* Decorative Background Elements */}
-                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
-                    <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-brand-primary/5 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-brand-secondary/5 rounded-full blur-3xl pointer-events-none" />
 
-                    <div className="relative p-6 md:p-10 rounded-[32px] border border-slate-100 dark:border-white/5 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-xl shadow-2xl shadow-slate-200/50 dark:shadow-none">
+                    <div className="relative p-6 md:p-10 rounded-[32px] border border-zinc-100 dark:border-white/5 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-xl shadow-2xl shadow-zinc-200/50 dark:shadow-none">
                         {/* Title section */}
                         <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div className="space-y-2">
-                                <p className="text-[10px] font-bold text-orange-600 tracking-[0.2em] uppercase">Academic Original</p>
-                                <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-                                    Unit {unitNum} <span className="text-slate-300 dark:text-white/20 mx-2">/</span> Notes
+                                <p className="text-[10px] font-bold text-brand-primary tracking-[0.2em] uppercase">Academic Original</p>
+                                <h1 className="text-3xl md:text-4xl font-black text-zinc-900 dark:text-white tracking-tight leading-tight">
+                                    Unit {unitNum} <span className="text-zinc-300 dark:text-white/20 mx-2">/</span> Notes
                                 </h1>
-                                <div className="flex items-center gap-4 text-xs font-semibold text-slate-400">
-                                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 dark:bg-white/5 rounded-full">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                                <div className="flex items-center gap-4 text-xs font-semibold text-zinc-400">
+                                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-100 dark:bg-white/5 rounded-full">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
                                         <span>{subjectCode}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
@@ -844,24 +846,24 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                         </div>
 
                         {note.image && (
-                            <div className="w-full aspect-video rounded-xl overflow-hidden border border-slate-100 dark:border-white/10 mb-8">
+                            <div className="w-full aspect-video rounded-xl overflow-hidden border border-zinc-100 dark:border-white/10 mb-8">
                                 <img src={note.image} alt={note.title} className="w-full h-full object-cover" />
                             </div>
                         )}
 
                         {/* Table of Contents */}
                         {tocItems.length > 2 && (
-                            <details className="mb-8 border border-slate-100 dark:border-white/5 rounded-xl overflow-hidden group" open>
-                                <summary className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-white/5 cursor-pointer select-none text-sm font-semibold text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-slate-400"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
+                            <details className="mb-8 border border-zinc-100 dark:border-white/5 rounded-xl overflow-hidden group" open>
+                                <summary className="flex items-center gap-3 p-4 bg-zinc-50 dark:bg-white/5 cursor-pointer select-none text-sm font-semibold text-zinc-700 dark:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-zinc-400"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
                                     Table of Contents
                                 </summary>
-                                <div className="p-4 max-h-60 overflow-y-auto space-y-1.5 border-t border-slate-100 dark:border-white/5">
+                                <div className="p-4 max-h-60 overflow-y-auto space-y-1.5 border-t border-zinc-100 dark:border-white/5">
                                     {tocItems.map((item, ti) => (
                                         <a
                                             key={ti}
                                             href={`#${item.slug}`}
-                                            className={`block text-sm text-slate-500 dark:text-slate-400 hover:text-orange-600 transition-colors py-1 ${item.level === 2 ? 'ml-4' : item.level === 3 ? 'ml-8' : ''}`}
+                                            className={`block text-sm text-zinc-500 dark:text-zinc-400 hover:text-orange-600 transition-colors py-1 ${item.level === 2 ? 'ml-4' : item.level === 3 ? 'ml-8' : ''}`}
                                         >
                                             {item.number && `${item.number}. `}{item.text}
                                         </a>
@@ -876,7 +878,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                         </div>
 
                         {/* Footer */}
-                        <div className="pt-6 mt-8 border-t border-slate-100 dark:border-white/5 flex justify-between items-center text-xs text-slate-400">
+                        <div className="pt-6 mt-8 border-t border-zinc-100 dark:border-white/5 flex justify-between items-center text-xs text-zinc-400">
                             <span>End of Unit {unitNum}</span>
                             <button onClick={handleBackToUnits} className="text-orange-600 hover:underline border-none bg-transparent cursor-pointer text-xs">Back to Subject</button>
                         </div>
@@ -896,13 +898,13 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
         return (
             <div key={`quiz-${selectedUnitIdx}`} className="space-y-5 animate-fade-in pb-20">
                 <div className="flex items-center justify-between">
-                    <button onClick={handleBackToUnits} className="flex items-center gap-2 text-sm text-slate-500 hover:text-orange-600 transition-colors border-none bg-transparent cursor-pointer">
+                    <button onClick={handleBackToUnits} className="flex items-center gap-2 text-sm text-zinc-500 hover:text-orange-600 transition-colors border-none bg-transparent cursor-pointer">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                         Back to Subject
                     </button>
                     <button
                         onClick={() => handleOpenNotes(selectedUnitIdx)}
-                        className="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-600 dark:text-slate-300 hover:border-orange-500 hover:text-orange-600 transition-all bg-white dark:bg-[#0a0a0a]/40 cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2 border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-600 dark:text-zinc-300 hover:border-orange-500 hover:text-orange-600 transition-all bg-white dark:bg-[#0a0a0a]/40 cursor-pointer"
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
@@ -911,7 +913,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                     </button>
                 </div>
                 <div className="text-center mb-2">
-                    <h2 className="text-lg font-bold text-slate-800 dark:text-white">Unit {unitNum} – Practice MCQ</h2>
+                    <h2 className="text-lg font-bold text-zinc-800 dark:text-white">Unit {unitNum} – Practice MCQ</h2>
                 </div>
                 <UnitQuiz questions={unitQuizzes} unitNum={unitNum} />
             </div>
@@ -928,13 +930,13 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
         return (
             <div key={`flashcards-${selectedUnitIdx}`} className="space-y-5 animate-fade-in pb-20">
                 <div className="flex items-center justify-between">
-                    <button onClick={handleBackToUnits} className="flex items-center gap-2 text-sm text-slate-500 hover:text-orange-600 transition-colors border-none bg-transparent cursor-pointer">
+                    <button onClick={handleBackToUnits} className="flex items-center gap-2 text-sm text-zinc-500 hover:text-orange-600 transition-colors border-none bg-transparent cursor-pointer">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                         Back to Subject
                     </button>
                 </div>
                 <div className="text-center mb-2">
-                    <h2 className="text-lg font-bold text-slate-800 dark:text-white">Unit {unitNum} – Flashcards</h2>
+                    <h2 className="text-lg font-bold text-zinc-800 dark:text-white">Unit {unitNum} – Flashcards</h2>
                 </div>
                 <div className="flex items-center justify-center">
                     <FlashcardStack cards={unitFlashcards} />
@@ -957,8 +959,8 @@ const UnitQuiz: React.FC<{ questions: QuizQuestion[]; unitNum: number }> = ({ qu
 
     if (questions.length === 0) {
         return (
-            <div className="p-10 rounded-2xl border border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 text-center">
-                <p className="text-sm text-slate-400">No quiz questions available for this unit</p>
+            <div className="p-10 rounded-2xl border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 text-center">
+                <p className="text-sm text-zinc-400">No quiz questions available for this unit</p>
             </div>
         );
     }
@@ -995,15 +997,15 @@ const UnitQuiz: React.FC<{ questions: QuizQuestion[]; unitNum: number }> = ({ qu
     if (isComplete) {
         const percentage = Math.round((score / questions.length) * 100);
         return (
-            <div className="p-8 rounded-2xl border border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 text-center space-y-5 animate-fade-in">
+            <div className="p-8 rounded-2xl border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 text-center space-y-5 animate-fade-in">
                 <div className="w-20 h-20 rounded-2xl bg-orange-600/10 flex items-center justify-center mx-auto">
                     <span className="text-3xl font-bold text-orange-600">{percentage}%</span>
                 </div>
                 <div>
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-white">Quiz Complete!</h3>
-                    <p className="text-sm text-slate-500 mt-1">You scored {score} out of {questions.length}</p>
+                    <h3 className="text-lg font-bold text-zinc-800 dark:text-white">Quiz Complete!</h3>
+                    <p className="text-sm text-zinc-500 mt-1">You scored {score} out of {questions.length}</p>
                 </div>
-                <div className="w-full bg-slate-100 dark:bg-white/5 rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-zinc-100 dark:bg-white/5 rounded-full h-2 overflow-hidden">
                     <div className={`h-full rounded-full transition-all duration-700 ${percentage >= 70 ? 'bg-green-500' : percentage >= 40 ? 'bg-orange-500' : 'bg-red-500'}`} style={{ width: `${percentage}%` }} />
                 </div>
                 <button onClick={handleRestart} className="px-8 py-3 bg-orange-600 text-white rounded-xl font-semibold text-sm shadow-lg shadow-orange-600/20 active:scale-95 transition-all border-none hover:shadow-xl cursor-pointer">
@@ -1018,28 +1020,28 @@ const UnitQuiz: React.FC<{ questions: QuizQuestion[]; unitNum: number }> = ({ qu
     return (
         <div className="space-y-4 animate-fade-in">
             {/* Progress */}
-            <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="flex items-center justify-between text-xs text-zinc-400">
                 <span>Question {currentQ + 1} of {questions.length}</span>
                 <span>Score: {score}/{answered}</span>
             </div>
-            <div className="w-full bg-slate-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden">
-                <div className="h-full bg-orange-600 rounded-full transition-all duration-500" style={{ width: `${((currentQ + 1) / questions.length) * 100}%` }} />
+            <div className="w-full bg-zinc-100 dark:bg-white/5 rounded-full h-1.5 overflow-hidden">
+                <div className="h-full bg-brand-primary rounded-full transition-all duration-500" style={{ width: `${((currentQ + 1) / questions.length) * 100}%` }} />
             </div>
 
             {/* Question */}
-            <div className="p-6 rounded-2xl border border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 space-y-4">
-                <p className="text-base font-light text-slate-800 dark:text-white leading-relaxed">Q) {parseLine(q.question)}</p>
+            <div className="p-6 rounded-2xl border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 space-y-4">
+                <p className="text-base font-light text-zinc-800 dark:text-white leading-relaxed">Q) {parseLine(q.question)}</p>
 
                 <div className="space-y-2.5">
                     {q.options.map((option, idx) => {
-                        let optionStyle = 'border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-orange-500/50 text-slate-600 dark:text-slate-300';
+                        let optionStyle = 'border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-brand-primary/50 text-zinc-600 dark:text-zinc-300';
                         if (selectedAnswer !== null) {
                             if (idx === q.correctAnswer) {
                                 optionStyle = 'border-green-500 bg-green-50 dark:bg-green-600/10 text-green-700 dark:text-green-400';
                             } else if (idx === selectedAnswer && idx !== q.correctAnswer) {
                                 optionStyle = 'border-red-500 bg-red-50 dark:bg-red-600/10 text-red-700 dark:text-red-400';
                             } else {
-                                optionStyle = 'border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/20 text-slate-400 opacity-50';
+                                optionStyle = 'border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/20 text-zinc-400 opacity-50';
                             }
                         }
 
@@ -1081,8 +1083,8 @@ const FlashcardStack = ({ cards }: { cards: Flashcard[] }) => {
 
     if (cards.length === 0) {
         return (
-            <div className="p-10 rounded-2xl border border-slate-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 text-center w-full">
-                <p className="text-sm text-slate-400">No flashcards available for this unit</p>
+            <div className="p-10 rounded-2xl border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 text-center w-full">
+                <p className="text-sm text-zinc-400">No flashcards available for this unit</p>
             </div>
         );
     }
@@ -1096,12 +1098,12 @@ const FlashcardStack = ({ cards }: { cards: Flashcard[] }) => {
                 className="relative h-[360px] cursor-pointer group perspective-1000"
             >
                 <div className={`relative w-full h-full transition-all duration-700 preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
-                    <div className="absolute inset-0 backface-hidden flex flex-col items-center justify-center p-8 text-center rounded-2xl shadow-lg border border-slate-100 dark:border-white/10 bg-white dark:bg-[#0a0a0a]/60">
-                        <p className="text-xs text-orange-600 mb-4 font-medium">Concept</p>
-                        <h3 className="text-lg font-bold leading-tight text-slate-800 dark:text-white">{parseLine(card.front)}</h3>
-                        <div className="absolute bottom-6 text-xs text-slate-400">Tap to reveal</div>
+                    <div className="absolute inset-0 backface-hidden flex flex-col items-center justify-center p-8 text-center rounded-2xl shadow-lg border border-zinc-100 dark:border-white/10 bg-white dark:bg-[#0a0a0a]/60">
+                        <p className="text-xs text-brand-primary mb-4 font-medium">Concept</p>
+                        <h3 className="text-lg font-bold leading-tight text-zinc-800 dark:text-white">{parseLine(card.front)}</h3>
+                        <div className="absolute bottom-6 text-xs text-zinc-400">Tap to reveal</div>
                     </div>
-                    <div className="absolute inset-0 backface-hidden rotate-y-180 flex flex-col items-center justify-center p-8 text-center rounded-2xl shadow-lg bg-gradient-to-br from-orange-600 to-red-600 text-white border-none">
+                    <div className="absolute inset-0 backface-hidden rotate-y-180 flex flex-col items-center justify-center p-8 text-center rounded-2xl shadow-lg bg-gradient-to-br from-brand-primary to-brand-secondary text-white border-none">
                         <p className="text-xs text-white/60 mb-4 font-medium">Answer</p>
                         <div className="text-sm leading-relaxed">{parseLine(card.back)}</div>
                         <div className="absolute bottom-6 text-xs text-white/50">Tap to hide</div>
@@ -1113,17 +1115,17 @@ const FlashcardStack = ({ cards }: { cards: Flashcard[] }) => {
                 <button
                     disabled={idx === 0}
                     onClick={() => { setIdx(idx - 1); setIsFlipped(false); }}
-                    className="w-10 h-10 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:text-orange-600 disabled:opacity-30 transition-all active:scale-90 border border-slate-100 dark:border-white/5"
+                    className="w-10 h-10 bg-white dark:bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 hover:text-orange-600 disabled:opacity-30 transition-all active:scale-90 border border-zinc-100 dark:border-white/5"
                 >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M15 18l-6-6 6-6" /></svg>
                 </button>
-                <div className="text-xs text-slate-500">
+                <div className="text-xs text-zinc-500">
                     {idx + 1} / {cards.length}
                 </div>
                 <button
                     disabled={idx === cards.length - 1}
                     onClick={() => { setIdx(idx + 1); setIsFlipped(false); }}
-                    className="w-10 h-10 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:text-orange-600 disabled:opacity-30 transition-all active:scale-90 border border-slate-100 dark:border-white/5"
+                    className="w-10 h-10 bg-white dark:bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 hover:text-orange-600 disabled:opacity-30 transition-all active:scale-90 border border-zinc-100 dark:border-white/5"
                 >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M9 18l6-6-6-6" /></svg>
                 </button>
