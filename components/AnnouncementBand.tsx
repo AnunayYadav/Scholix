@@ -17,7 +17,7 @@ const AnnouncementBand: React.FC = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="relative bg-[#FF8A00] overflow-hidden z-[9999] shrink-0 border-b border-black/5 shadow-sm">
+    <div className="relative bg-[#FF9500] overflow-hidden z-[9999] shrink-0 border-b border-black/5 shadow-sm">
       <div className="relative max-w-7xl mx-auto px-4 py-2 flex items-center justify-center min-h-[38px]">
         <p className="text-[10px] sm:text-[12px] font-normal text-black tracking-[0.1em] text-center px-10 uppercase">
           LPU Nexus is now officially Scholix. Same tools, new identity.
