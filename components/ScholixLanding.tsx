@@ -28,13 +28,15 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
       return;
     }
     
+    const uniSlug = id === 'iitm_bs' ? 'iitm' : id;
+    
     setSelectedId(id);
     setIsExiting(true);
     
     // Match the 600ms performance-optimized transition
     setTimeout(() => {
       selectUniversity(id);
-      navigate('/');
+      navigate(`/${uniSlug}`);
     }, 600);
   };
 

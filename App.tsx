@@ -5,6 +5,7 @@ import ContentLibrary from './components/ContentLibrary.tsx';
 import CampusNavigator from './components/CampusNavigator.tsx';
 import HelpSection from './components/HelpSection.tsx';
 import FreshersKit from './components/FreshersKit.tsx';
+import SettingsHub from './components/SettingsHub.tsx';
 import ShareReport from './components/ShareReport.tsx';
 import ToolsHub from './components/ToolsHub.tsx';
 import AboutUs from './components/AboutUs.tsx';
@@ -24,6 +25,7 @@ import PrivacyPolicy from './components/PrivacyPolicy.tsx';
 import CookieBanner from './components/CookieBanner.tsx';
 import ScholixLanding from './components/ScholixLanding.tsx';
 import AnnouncementBand from './components/AnnouncementBand.tsx';
+import BottomNavbar from './components/BottomNavbar.tsx';
 import { UniversityProvider, useUniversity, UniversityId, UNIVERSITIES } from './hooks/useUniversity.tsx';
 
 import { ModuleType, UserProfile, TimetableData } from './types.ts';
@@ -38,59 +40,75 @@ import NotificationBell from './components/NotificationBell.tsx';
 import UniversalSearch from './components/UniversalSearch.tsx';
 import StudyHeartbeat from './components/StudyHeartbeat.tsx';
 
+const getUniSlug = (id: UniversityId): string => {
+  if (id === 'lpu') return 'lpu';
+  if (id === 'iitm_bs') return 'iitm';
+  return '';
+};
+
 const getModuleFromPath = (path: string): ModuleType => {
   const p = path.toLowerCase();
-  if (p === '/') return ModuleType.DASHBOARD;
-  if (p.includes('/share-cgpa')) return ModuleType.SHARE_CGPA;
-  if (p.includes('/attendance')) return ModuleType.TOOLS;
-  if (p.includes('/timetable')) return ModuleType.TIMETABLE;
-  if (p.includes('/quiz')) return ModuleType.QUIZ;
-  if (p.includes('/cgpa')) return ModuleType.TOOLS;
-  if (p.includes('/placement')) return ModuleType.TOOLS;
-  if (p.includes('/tools')) return ModuleType.TOOLS;
-  if (p.includes('/library')) return ModuleType.LIBRARY;
-  if (p.includes('/campus')) return ModuleType.CAMPUS;
-  if (p.includes('/freshers')) return ModuleType.FRESHERS;
-  if (p.includes('/help')) return ModuleType.HELP;
-  if (p.includes('/about')) return ModuleType.ABOUT;
-  if (p.includes('/profile')) return ModuleType.PROFILE;
-  if (p.includes('/marketplace')) return ModuleType.MARKETPLACE;
-  if (p.includes('/roommate')) return ModuleType.ROOMMATE;
-  if (p.includes('/emergency')) return ModuleType.EMERGENCY;
-  if (p.includes('/ai-tools')) return ModuleType.AI_TOOLS;
-  if (p.includes('/tools')) return ModuleType.TOOLS;
-  if (p.includes('/admin-stats')) return ModuleType.ADMIN_STATS;
-  if (p.includes('/privacy')) return ModuleType.PRIVACY;
-  if (p.includes('/login')) return ModuleType.LOGIN;
-  if (p.includes('/signup')) return ModuleType.SIGNUP;
+  const parts = p.split('/').filter(Boolean);
+  if (parts.length === 0) return ModuleType.DASHBOARD;
+  
+  // Check if first segment is a uni slug
+  const firstPart = parts[0];
+  const isUniSlug = ['lpu', 'iitm', 'iitm_bs'].includes(firstPart);
+  const normalizedPath = isUniSlug ? '/' + parts.slice(1).join('/') : p;
+
+  if (normalizedPath === '/' || normalizedPath === '') return ModuleType.DASHBOARD;
+  if (normalizedPath.includes('/share-cgpa')) return ModuleType.SHARE_CGPA;
+  if (normalizedPath.includes('/attendance')) return ModuleType.TOOLS;
+  if (normalizedPath.includes('/timetable')) return ModuleType.TIMETABLE;
+  if (normalizedPath.includes('/quiz')) return ModuleType.QUIZ;
+  if (normalizedPath.includes('/cgpa')) return ModuleType.TOOLS;
+  if (normalizedPath.includes('/placement')) return ModuleType.TOOLS;
+  if (normalizedPath.includes('/tools')) return ModuleType.TOOLS;
+  if (normalizedPath.includes('/library')) return ModuleType.LIBRARY;
+  if (normalizedPath.includes('/campus')) return ModuleType.CAMPUS;
+  if (normalizedPath.includes('/freshers')) return ModuleType.FRESHERS;
+  if (normalizedPath.includes('/help')) return ModuleType.HELP;
+  if (normalizedPath.includes('/about')) return ModuleType.ABOUT;
+  if (normalizedPath.includes('/profile')) return ModuleType.PROFILE;
+  if (normalizedPath.includes('/marketplace')) return ModuleType.MARKETPLACE;
+  if (normalizedPath.includes('/roommate')) return ModuleType.ROOMMATE;
+  if (normalizedPath.includes('/emergency')) return ModuleType.EMERGENCY;
+  if (normalizedPath.includes('/ai-tools')) return ModuleType.AI_TOOLS;
+  if (normalizedPath.includes('/admin-stats')) return ModuleType.ADMIN_STATS;
+  if (normalizedPath.includes('/privacy')) return ModuleType.PRIVACY;
+  if (normalizedPath.includes('/login')) return ModuleType.LOGIN;
+  if (normalizedPath.includes('/signup')) return ModuleType.SIGNUP;
   return ModuleType.DASHBOARD;
 };
 
-const getPathFromModule = (module: ModuleType): string => {
+const getPathFromModule = (module: ModuleType, uniKey: UniversityId = 'none'): string => {
+  const uniSlug = getUniSlug(uniKey);
+  const prefix = uniSlug ? `/${uniSlug}` : '';
+
   switch (module) {
-    case ModuleType.ATTENDANCE: return '/attendance';
-    case ModuleType.TIMETABLE: return '/timetable';
-    case ModuleType.QUIZ: return '/quiz';
-    case ModuleType.CGPA: return '/cgpa';
-    case ModuleType.PLACEMENT: return '/placement';
-    case ModuleType.LIBRARY: return '/library';
-    case ModuleType.CAMPUS: return '/campus';
-    case ModuleType.FRESHERS: return '/freshers';
-    case ModuleType.HELP: return '/help';
-    case ModuleType.ABOUT: return '/about';
-    case ModuleType.PROFILE: return '/profile';
-    case ModuleType.DASHBOARD: return '/';
-    case ModuleType.SHARE_CGPA: return '/share-cgpa';
-    case ModuleType.MARKETPLACE: return '/marketplace';
-    case ModuleType.ROOMMATE: return '/roommate';
-    case ModuleType.EMERGENCY: return '/emergency';
-    case ModuleType.AI_TOOLS: return '/ai-tools';
-    case ModuleType.TOOLS: return '/tools';
-    case ModuleType.ADMIN_STATS: return '/admin-stats';
-    case ModuleType.PRIVACY: return '/privacy';
-    case ModuleType.LOGIN: return '/login';
-    case ModuleType.SIGNUP: return '/signup';
-    default: return '/';
+    case ModuleType.ATTENDANCE: return `${prefix}/attendance`;
+    case ModuleType.TIMETABLE: return `${prefix}/timetable`;
+    case ModuleType.QUIZ: return `${prefix}/quiz`;
+    case ModuleType.CGPA: return `${prefix}/cgpa`;
+    case ModuleType.PLACEMENT: return `${prefix}/placement`;
+    case ModuleType.LIBRARY: return `${prefix}/library`;
+    case ModuleType.CAMPUS: return `${prefix}/campus`;
+    case ModuleType.FRESHERS: return `${prefix}/freshers`;
+    case ModuleType.HELP: return `${prefix}/help`;
+    case ModuleType.ABOUT: return `${prefix}/about`;
+    case ModuleType.PROFILE: return `${prefix}/profile`;
+    case ModuleType.DASHBOARD: return uniSlug ? `/${uniSlug}` : '/';
+    case ModuleType.SHARE_CGPA: return `/share-cgpa`;
+    case ModuleType.MARKETPLACE: return `${prefix}/marketplace`;
+    case ModuleType.ROOMMATE: return `${prefix}/roommate`;
+    case ModuleType.EMERGENCY: return `${prefix}/emergency`;
+    case ModuleType.AI_TOOLS: return `${prefix}/ai-tools`;
+    case ModuleType.TOOLS: return `${prefix}/tools`;
+    case ModuleType.ADMIN_STATS: return `${prefix}/admin-stats`;
+    case ModuleType.PRIVACY: return `/privacy`;
+    case ModuleType.LOGIN: return `/login`;
+    case ModuleType.SIGNUP: return `/signup`;
+    default: return uniSlug ? `/${uniSlug}` : '/';
   }
 };
 
@@ -197,124 +215,74 @@ const TodaysSchedule: React.FC = () => {
 
   const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
 
-  // Auto-scroll to current or next class
-  useEffect(() => {
-    if (dayData && dayData.slots.length > 0 && scrollContainerRef.current) {
-      const sortedSlots = [...dayData.slots].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
-      // First class that hasn't ended yet
-      const targetIndex = sortedSlots.findIndex(slot => currentMinutes < timeToMinutes(slot.endTime));
-
-      if (targetIndex !== -1) {
-        setTimeout(() => {
-          const container = scrollContainerRef.current;
-          if (container && container.children[targetIndex]) {
-            container.children[targetIndex].scrollIntoView({
-              behavior: 'smooth',
-              block: 'nearest',
-              inline: 'center'
-            });
-          }
-        }, 500); // Give it a moment to render
-      }
-    }
-  }, [dayData]);
-
   if (!dayData || dayData.slots.length === 0) {
     return (
-      <div className="max-w-6xl mx-auto px-6 mb-4 animate-fade-in">
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => navigate('/timetable')}
-            className="flex items-center gap-2 group/header border-none bg-transparent p-0 transition-opacity hover:opacity-80"
-          >
-            <h3 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 ml-1">Today's Schedule</h3>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-zinc-400 group-hover/header:translate-x-1 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-          </button>
+      <div className="max-w-6xl mx-auto px-6 mb-8 animate-fade-in">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Featured Timetable</h3>
+          <button onClick={() => navigate('/timetable')} className="text-[10px] font-bold text-brand-primary border-none bg-transparent">SYNC</button>
         </div>
-        <button
-          onClick={() => navigate('/timetable')}
-          className="w-full p-10 rounded-[32px] border border-dashed border-zinc-200 dark:border-white/10 flex flex-col items-center justify-center text-center space-y-4 bg-white/50 dark:bg-white/[0.02] hover:bg-zinc-100 dark:hover:bg-white/[0.05] transition-all group/empty border-none active:scale-[0.99]"
-        >
-          <div className="w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-400 group-hover/empty:scale-110 transition-transform">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
-          </div>
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">No schedule synced</p>
-            <p className="text-xs text-zinc-400/60 group-hover/empty:text-brand-primary transition-colors">Click here to add or sync your batch preset</p>
-          </div>
-        </button>
+        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+          {[1,2,3].map(i => (
+            <div key={i} className="flex-shrink-0 flex flex-col items-center space-y-2 opacity-30">
+              <div className="w-16 h-16 rounded-full border-2 border-dashed border-zinc-300 dark:border-white/20 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-white/5" />
+              </div>
+              <div className="w-12 h-2 bg-zinc-200 dark:bg-white/10 rounded-full" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 mb-4 animate-fade-in">
-      <div className="flex items-center justify-between mb-1">
-        <button
+    <div className="max-w-6xl mx-auto px-6 mb-10 animate-fade-in">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Featured Timetable</h3>
+        <button 
           onClick={() => navigate('/timetable')}
-          className="flex items-center gap-2 group/header border-none bg-transparent p-0 transition-opacity hover:opacity-80"
+          className="text-[10px] font-bold text-brand-primary border-none bg-transparent hover:opacity-80 transition-opacity"
         >
-          <h3 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 ml-1">Today's Schedule</h3>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-zinc-400 group-hover/header:translate-x-1 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          VIEW ALL
         </button>
-        <div className="flex flex-col items-end">
-          <span className="text-[11px] sm:text-xs font-medium text-brand-primary">{today}</span>
-          {timetable?.ownerName && (
-            <span className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500 truncate max-w-[150px]">
-              {timetable.ownerName}
-            </span>
-          )}
-        </div>
       </div>
 
-      <div ref={scrollContainerRef} className="flex gap-3 md:gap-6 overflow-x-auto pt-4 pb-12 px-5 -mx-6 no-scrollbar snap-x snap-mandatory">
+      <div ref={scrollContainerRef} className="flex gap-5 overflow-x-auto pb-4 px-1 -mx-6 no-scrollbar snap-x snap-mandatory">
+        <div className="flex-shrink-0 w-1 sm:hidden" /> {/* Spacer */}
         {dayData.slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)).map((slot) => {
           const start = timeToMinutes(slot.startTime);
           const end = timeToMinutes(slot.endTime);
           const isGoingOn = currentMinutes >= start && currentMinutes < end;
           const isUpcoming = currentMinutes < start;
-          const isPassed = currentMinutes >= end;
-
+          
           return (
             <button
               key={slot.id}
               onClick={() => navigate('/timetable')}
-              className={`flex-shrink-0 w-[175px] md:w-[260px] snap-center group relative overflow-hidden rounded-[24px] md:rounded-[32px] border bg-transparent p-0 text-left transition-all duration-500 active:scale-95 cursor-pointer ${isGoingOn ? 'border-transparent scale-[1.03] shadow-2xl z-10' : 'border-white/10 shadow-lg hover:scale-[1.02] opacity-80 hover:opacity-100'}`}
+              className="flex-shrink-0 flex flex-col items-center space-y-3 group border-none bg-transparent active:scale-90 transition-transform"
             >
-              <div className={`absolute inset-0 bg-brand-gradient transition-transform duration-700 ${isGoingOn ? 'scale-110' : 'group-hover:scale-110'}`} />
-              <div className="relative p-4 md:p-6 space-y-3 md:space-y-6">
-                <div className="flex justify-between items-start gap-2">
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-base md:text-2xl font-bold text-white tracking-tight leading-tight drop-shadow-md truncate">{slot.subject}</h4>
-                    <p className="text-[9px] md:text-xs font-semibold text-white/70 mt-0.5 truncate uppercase tracking-wider">{slot.room} • {slot.type}</p>
-                  </div>
-
-                  <div className={`shrink-0 px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[7px] md:text-[10px] font-bold tracking-tight backdrop-blur-md flex items-center gap-1 shadow-sm ${isGoingOn ? 'bg-white text-brand-primary' : 'bg-black/20 text-white'}`}>
-                    {isGoingOn && (
-                      <span className="flex h-1 w-1 md:h-1.5 md:w-1.5 relative">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-1 w-1 md:h-1.5 md:w-1.5 bg-current"></span>
-                      </span>
-                    )}
-                    <span>{isGoingOn ? 'Live' : isUpcoming ? 'Upcoming' : 'Done'}</span>
-                  </div>
-                </div>
-
-                <div className="pt-3 md:pt-6 border-t border-white/20 flex items-center justify-between">
-                  <div className="space-y-0.5 min-w-0">
-                    <p className="text-[9px] md:text-[10px] text-white/50 font-medium uppercase tracking-tighter">Schedule</p>
-                    <p className="text-[10px] md:text-sm font-bold text-white whitespace-nowrap tabular-nums">{slot.startTime} – {slot.endTime}</p>
-                  </div>
-                  {isGoingOn && (
-                    <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" className="w-3.5 h-3.5 md:w-5 md:h-5"><path d="M12 2v20M2 12h20" /></svg>
+              <div className={`relative p-[3px] rounded-full transition-all duration-500 ${isGoingOn ? 'bg-gradient-to-tr from-brand-primary via-brand-secondary to-brand-primary animate-pulse' : 'bg-zinc-200 dark:bg-white/10 group-hover:bg-brand-primary/50'}`}>
+                 <div className="absolute -inset-1 bg-brand-primary/20 blur-md rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white dark:bg-[#121212] p-[2px] relative z-10 overflow-hidden shadow-xl">
+                    <div className={`w-full h-full rounded-full flex flex-col items-center justify-center text-center px-1 overflow-hidden ${isGoingOn ? 'bg-brand-gradient text-white' : 'bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200'}`}>
+                      <span className="text-[7px] sm:text-[9px] font-black uppercase leading-none opacity-60 mb-1">{slot.type}</span>
+                      <span className="text-[10px] sm:text-xs font-bold leading-tight truncate w-full px-1">{slot.subject}</span>
                     </div>
-                  )}
-                </div>
+                 </div>
+              </div>
+              <div className="flex flex-col items-center text-center max-w-[70px] sm:max-w-[80px]">
+                <span className={`text-[10px] sm:text-xs font-bold leading-none mb-0.5 truncate w-full ${isGoingOn ? 'text-brand-primary' : 'text-zinc-600 dark:text-zinc-400'}`}>
+                  {slot.room}
+                </span>
+                <span className="text-[8px] sm:text-[9px] font-medium text-zinc-400 dark:text-zinc-500 tabular-nums">
+                  {slot.startTime}
+                </span>
               </div>
             </button>
           );
         })}
+        <div className="flex-shrink-0 w-1 sm:hidden" /> {/* Spacer */}
       </div>
     </div>
   );
@@ -423,34 +391,56 @@ const FeatureCard = React.memo(({ f, navigate }: { f: any, navigate: any }) => {
 const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ userProfile }) => {
   const navigate = useNavigate();
   const { shortBrandName, universityInfo } = useUniversity();
+  const [activeTab, setActiveTab] = useState('All');
 
   const allFeatures = [
-    { id: ModuleType.LIBRARY, name: 'Content Library', desc: 'Access 1000+ PYQs, notes and records.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /><path d="M8 8h10M8 12h10" /></svg>, path: '/library' },
-    { id: ModuleType.QUIZ, name: 'Quiz Taker', desc: 'Generate custom tests from your subjects.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="m9 12 2 2 4-4" /></svg>, path: '/quiz' },
-    { id: ModuleType.TIMETABLE, name: 'Timetable Hub', desc: 'Sync and manage your weekly schedule.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>, path: '/timetable' },
-    { id: ModuleType.CGPA, name: 'CGPA Calc', desc: 'Calculate and forecast your performance.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="4" y="2" width="16" height="20" rx="2" /><line x1="8" y1="6" x2="16" y2="6" /><line x1="16" y1="14" x2="16" y2="18" /><path d="M16 10h.01" /><path d="M12 10h.01" /><path d="M8 10h.01" /><path d="M12 14h.01" /><path d="M8 14h.01" /><path d="M12 18h.01" /><path d="M8 18h.01" /></svg>, path: '/tools?tab=cgpa' },
-    { id: ModuleType.ATTENDANCE, name: 'Attendance', desc: 'Track your attendance and safe-bunks.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>, path: '/tools?tab=attendance' },
-    { id: ModuleType.PLACEMENT, name: 'Placement Prefect', desc: 'Analyze resumes and prep for jobs.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>, path: '/tools?tab=placement' },
-    { id: ModuleType.CAMPUS, name: 'Campus Navigator', desc: 'Find blocks and rooms with ease.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>, path: '/campus' },
-    { id: ModuleType.FRESHERS, name: 'Freshmen Kit', desc: 'Essential guide for newcomers.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M4 20V10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" /><path d="M9 6V4a3 3 0 0 1 6 0v2" /><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5" /></svg>, path: '/freshers' },
-    { id: ModuleType.MARKETPLACE, name: `${shortBrandName} Market`, desc: 'Buy/Sell used books and items.', icon: <svg viewBox="0 0 16 16" fill="currentColor" className="w-6 h-6"><path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.37 2.37 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0M1.5 8.5A.5.5 0 0 1 2 9v6h12V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5m2 .5a.5.5 0 0 1 .5.5V13h8V9.5a.5.5 0 0 1 1 0V13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5a.5.5 0 0 1 .5-.5" /></svg>, path: '/marketplace' },
-    { id: ModuleType.ROOMMATE, name: 'Roommate Finder', desc: `Find your perfect ${shortBrandName} flatmate.`, icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>, path: '/roommate' },
-    { id: ModuleType.EMERGENCY, name: 'Rescue Line', desc: `Emergency ${shortBrandName} official contacts.`, icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>, path: '/emergency' },
-    { id: ModuleType.AI_TOOLS, name: 'AI Directory', desc: 'Curated AI tools for students.', icon: <svg viewBox="0 0 16 16" fill="currentColor" className="w-6 h-6"><path d="M14.949 6.547a3.94 3.94 0 0 0-.348-3.273 4.11 4.11 0 0 0-4.4-1.934A4.1 4.1 0 0 0 8.423.2 4.15 4.15 0 0 0 6.305.086a4.1 4.1 0 0 0-1.891.948 4.04 4.04 0 0 0-1.158 1.753 4.1 4.1 0 0 0-1.563.679A4 4 0 0 0 .554 4.72a3.99 3.99 0 0 0 .502 4.731 3.94 3.94 0 0 0 .346 3.274 4.11 4.11 0 0 0 4.402 1.933c.382.425.852.764 1.377.995.526.231 1.095.35 1.67.346 1.78.002 3.358-1.132 3.901-2.804a4.1 4.1 0 0 0 1.563-.68 4 4 0 0 0 1.14-1.253 3.99 3.99 0 0 0-.506-4.716m-6.097 8.406a3.05 3.05 0 0 1-1.945-.694l.096-.054 3.23-1.838a.53.53 0 0 0 .265-.455v-4.49l1.366.778q.02.011.025.035v3.722c-.003 1.653-1.361 2.992-3.037 2.996m-6.53-2.75a2.95 2.95 0 0 1-.36-2.01l.095.057L5.29 12.09a.53.53 0 0 0 .527 0l3.949-2.246v1.555a.05.05 0 0 1-.022.041L6.473 13.3c-1.454.826-3.311.335-4.15-1.098m-.85-6.94A3.02 3.02 0 0 1 3.07 3.949v3.785a.51.51 0 0 0 .262.451l3.93 2.237-1.366.779a.05.05 0 0 1-.048 0L2.585 9.342a2.98 2.98 0 0 1-1.113-4.094zm11.216 2.571L8.747 5.576l1.362-.776a.05.05 0 0 1 .048 0l3.265 1.86a3 3 0 0 1 1.173 1.207 2.96 2.96 0 0 1-.27 3.2 3.05 3.05 0 0 1-1.36.997V8.279a.52.52 0 0 0-.276-.445m1.36-2.015-.097-.057-3.226-1.855a.53.53 0 0 0-.53 0L6.249 6.153V4.598a.04.04 0 0 1 .019-.04L9.533 2.7a3.07 3.07 0 0 1 3.257.139c.474.325.843.778 1.066 1.303.223.526.289 1.103.191 1.664zM5.503 8.575 4.139 7.8a.05.05 0 0 1-.026-.037V4.049c0-.57.166-1.127.476-1.607s.752-.864 1.275-1.105a3.08 3.08 0 0 1 3.234.41l-.096.054-3.23 1.838a.53.53 0 0 0-.265.455zm.742-1.577 1.758-1 1.762 1v2l-1.755 1-1.762-1z" /></svg>, path: '/ai-tools' }
+    { id: ModuleType.LIBRARY, name: 'Content Library', desc: 'Access 1000+ PYQs, notes and records.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /><path d="M8 8h10M8 12h10" /></svg>, path: '/library', category: 'Study' },
+    { id: ModuleType.QUIZ, name: 'Quiz Taker', desc: 'Generate custom tests from your subjects.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="m9 12 2 2 4-4" /></svg>, path: '/quiz', category: 'Study' },
+    { id: ModuleType.TIMETABLE, name: 'Timetable Hub', desc: 'Sync and manage your weekly schedule.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>, path: '/timetable', category: 'Study' },
+    { id: ModuleType.CGPA, name: 'CGPA Calc', desc: 'Calculate and forecast your performance.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="4" y="2" width="16" height="20" rx="2" /><line x1="8" y1="6" x2="16" y2="6" /><line x1="16" y1="14" x2="16" y2="18" /><path d="M16 10h.01" /><path d="M12 10h.01" /><path d="M8 10h.01" /><path d="M12 14h.01" /><path d="M8 14h.01" /><path d="M12 18h.01" /><path d="M8 18h.01" /></svg>, path: '/tools?tab=cgpa', category: 'Tools' },
+    { id: ModuleType.ATTENDANCE, name: 'Attendance', desc: 'Track your attendance and safe-bunks.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>, path: '/tools?tab=attendance', category: 'Tools' },
+    { id: ModuleType.PLACEMENT, name: 'Placement Prefect', desc: 'Analyze resumes and prep for jobs.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>, path: '/tools?tab=placement', category: 'Tools' },
+    { id: ModuleType.CAMPUS, name: 'Campus Navigator', desc: 'Find blocks and rooms with ease.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>, path: '/campus', category: 'Campus' },
+    { id: ModuleType.FRESHERS, name: 'Freshmen Kit', desc: 'Essential guide for newcomers.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M4 20V10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" /><path d="M9 6V4a3 3 0 0 1 6 0v2" /><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5" /></svg>, path: '/freshers', category: 'Campus' },
+    { id: ModuleType.MARKETPLACE, name: `${shortBrandName} Market`, desc: 'Buy/Sell used books and items.', icon: <svg viewBox="0 0 16 16" fill="currentColor" className="w-6 h-6"><path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.37 2.37 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0M1.5 8.5A.5.5 0 0 1 2 9v6h12V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0-1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5m2 .5a.5.5 0 0 1 .5.5V13h8V9.5a.5.5 0 0 1 1 0V13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5a.5.5 0 0 1 .5-.5" /></svg>, path: '/marketplace', category: 'Social' },
+    { id: ModuleType.ROOMMATE, name: 'Roommate Finder', desc: `Find your perfect ${shortBrandName} flatmate.`, icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>, path: '/roommate', category: 'Social' },
+    { id: ModuleType.EMERGENCY, name: 'Rescue Line', desc: `Emergency ${shortBrandName} official contacts.`, icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>, path: '/emergency', category: 'Campus' },
+    { id: ModuleType.AI_TOOLS, name: 'AI Directory', desc: 'Curated AI tools for students.', icon: <svg viewBox="0 0 16 16" fill="currentColor" className="w-6 h-6"><path d="M14.949 6.547a3.94 3.94 0 0 0-.348-3.273 4.11 4.11 0 0 0-4.4-1.934A4.1 4.1 0 0 0 8.423.2 4.15 4.15 0 0 0 6.305.086a4.1 4.1 0 0 0-1.891.948 4.04 4.04 0 0 0-1.158 1.753 4.1 4.1 0 0 0-1.563.679A4 4 0 0 0 .554 4.72a3.99 3.99 0 0 0 .502 4.731 3.94 3.94 0 0 0 .346 3.274 4.11 4.11 0 0 0 4.402 1.933c.382.425.852.764 1.377.995.526.231 1.095.35 1.67.346 1.78.002 3.358-1.132 3.901-2.804a4.1 4.1 0 0 0 1.563-.68 4 4 0 0 0 1.14-1.253 3.99 3.99 0 0 0-.506-4.716m-6.097 8.406a3.05 3.05 0 0 1-1.945-.694l.096-.054 3.23-1.838a.53.53 0 0 0 .265-.455v-4.49l1.366.778q.02.011.025.035v3.722c-.003 1.653-1.361 2.992-3.037 2.996m-6.53-2.75a2.95 2.95 0 0 1-.36-2.01l.095.057L5.29 12.09a.53.53 0 0 0 .527 0l3.949-2.246v1.555a.05.05 0 0 1-.022.041L6.473 13.3c-1.454.826-3.311.335-4.15-1.098m-.85-6.94A3.02 3.02 0 0 1 3.07 3.949v3.785a.51.51 0 0 0 .262.451l3.93 2.237-1.366.779a.05.05 0 0 1-.048 0L2.585 9.342a2.98 2.98 0 0 1-1.113-4.094zm11.216 2.571L8.747 5.576l1.362-.776a.05.05 0 0 1 .048 0l3.265 1.86a3 3 0 0 1 1.173 1.207 2.96 2.96 0 0 1-.27 3.2 3.05 3.05 0 0 1-1.36.997V8.279a.52.52 0 0 0-.276-.445m1.36-2.015-.097-.057-3.226-1.855a.53.53 0 0 0-.53 0L6.249 6.153V4.598a.04.04 0 0 1 .019-.04L9.533 2.7a3.07 3.07 0 0 1 3.257.139c.474.325.843.778 1.066 1.303.223.526.289 1.103.191 1.664zM5.503 8.575 4.139 7.8a.05.05 0 0 1-.026-.037V4.049c0-.57.166-1.127.476-1.607s.752-.864 1.275-1.105a3.08 3.08 0 0 1 3.234.41l-.096.054-3.23 1.838a.53.53 0 0 0-.265.455zm.742-1.577 1.758-1 1.762 1v2l-1.755 1-1.762-1z" /></svg>, path: '/ai-tools', category: 'Tools' }
   ];
 
+  const categories = ['All', 'Study', 'Tools', 'Campus', 'Social'];
+
   const filteredFeatures = allFeatures.filter(f => {
-    if (!universityInfo) return true;
-    return universityInfo.features.enabledModules.includes(f.id);
+    const isEnabled = !universityInfo || universityInfo.features.enabledModules.includes(f.id);
+    const matchesCategory = activeTab === 'All' || f.category === activeTab;
+    return isEnabled && matchesCategory;
   });
 
   return (
-    <div className="w-full h-full pb-20 pt-0 animate-fade-in">
+    <div className="w-full h-full pb-32 pt-0 animate-fade-in relative z-0">
       <DashboardHero userProfile={userProfile} />
       <TodaysSchedule />
-      <div className="max-w-6xl mx-auto px-6 mb-6">
-        <h3 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 ml-1 mb-4">Categories</h3>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-16">
+      
+      <div className="max-w-6xl mx-auto px-6 mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Categories</h3>
+          <div className="h-[2px] flex-1 bg-zinc-100 dark:bg-white/5 ml-4" />
+        </div>
+
+        {/* Tab Switcher */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-6">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setActiveTab(cat)}
+              className={`flex-shrink-0 px-6 py-2.5 rounded-full text-xs font-bold transition-all border-none ${activeTab === cat ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-105' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:text-zinc-800 dark:hover:text-white'}`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-16">
           {filteredFeatures.map((f) => (
             <FeatureCard key={f.id} f={f} navigate={(path: string) => navigate(f.path || getPathFromModule(f.id))} />
           ))}
@@ -514,7 +504,7 @@ const AppContent: React.FC = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { fullBrandName, studentTerm } = useUniversity();
+  const { fullBrandName, studentTerm, shortBrandName } = useUniversity();
   const currentModule = getModuleFromPath(location.pathname);
 
   useEffect(() => {
@@ -538,41 +528,33 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     const pathParts = location.pathname.split('/').filter(Boolean);
+    const uniMap: Record<string, UniversityId> = {
+      'lpu': 'lpu',
+      'iitm': 'iitm_bs',
+      'iitm_bs': 'iitm_bs',
+      'scholix': 'none'
+    };
+
+    const globalPages = ['welcome', 'privacy', 'about', 'help', 'share-cgpa'];
+    const isGlobal = pathParts.length > 0 && globalPages.includes(pathParts[0]);
+
     if (pathParts.length > 0) {
       const firstPart = pathParts[0].toLowerCase();
-      const uniMap: Record<string, UniversityId> = {
-        'lpu': 'lpu',
-        'iitm': 'iitm_bs',
-        'iitm_bs': 'iitm_bs',
-        'scholix': 'none'
-      };
-
       if (uniMap[firstPart]) {
         const targetUniId = uniMap[firstPart];
-        const targetUniInfo = UNIVERSITIES.find(u => u.id === targetUniId);
-        
-        // Restriction check for direct URL shortcuts
-        if (targetUniInfo?.adminOnly && !userProfile?.is_admin) {
-          console.warn(`Access to ${targetUniId} is restricted to admins.`);
-          navigate('/welcome', { replace: true });
-          return;
-        }
-
         if (selectedUniversity !== targetUniId) {
           selectUniversity(targetUniId);
         }
-        const restOfPath = '/' + pathParts.slice(1).join('/');
-        navigate(restOfPath, { replace: true });
-        return;
+        return; 
       }
     }
 
-    if (selectedUniversity === 'none' && 
-        location.pathname !== '/welcome' && 
-        !location.pathname.startsWith('/share-cgpa') &&
-        !location.pathname.startsWith('/privacy') &&
-        !location.pathname.startsWith('/about') &&
-        !location.pathname.startsWith('/help')) {
+    if (selectedUniversity !== 'none' && !isGlobal && location.pathname !== '/welcome') {
+      const slug = getUniSlug(selectedUniversity);
+      if (slug) {
+        navigate(`/${slug}${location.pathname}`, { replace: true });
+      }
+    } else if (selectedUniversity === 'none' && !isGlobal && location.pathname !== '/welcome') {
       navigate('/welcome', { replace: true });
     }
   }, [selectedUniversity, location.pathname, navigate, selectUniversity]);
@@ -588,16 +570,7 @@ const AppContent: React.FC = () => {
       setAuthMode('verify_email');
       setShowAuthModal(true);
     }
-
-    // Restriction check for active university session
-    if (selectedUniversity !== 'none') {
-      const currentUniInfo = UNIVERSITIES.find(u => u.id === selectedUniversity);
-      if (currentUniInfo?.adminOnly && !userProfile?.is_admin) {
-        selectUniversity('none');
-        navigate('/welcome', { replace: true });
-      }
-    }
-  }, [userProfile, location.pathname, navigate, showAuthModal, selectedUniversity, selectUniversity]);
+  }, [userProfile, location.pathname, navigate, showAuthModal]);
 
   useEffect(() => {
     NexusServer.recordVisit();
@@ -607,12 +580,10 @@ const AppContent: React.FC = () => {
     const unsubscribeAuth = NexusServer.onAuthStateChange(async (user) => {
       if (user) {
         try {
-          // ensureProfile guarantees a record exists in 'profiles' table
           const profile = await NexusServer.ensureProfile(user);
           setUserProfile(profile);
         } catch (err) {
           console.error("Profile synchronization error:", err);
-          // Fallback to local profile if DB insert fails
           const metadata = user.user_metadata || {};
           setUserProfile({
             id: user.id,
@@ -637,11 +608,9 @@ const AppContent: React.FC = () => {
   }, [theme]);
 
   const navigateToModule = React.useCallback((module: ModuleType) => {
-    const path = getPathFromModule(module);
+    const path = getPathFromModule(module, selectedUniversity);
     navigate(path);
-  }, [navigate]);
-
-
+  }, [navigate, selectedUniversity]);
 
   const isWelcomePage = location.pathname === '/welcome';
 
@@ -657,6 +626,47 @@ const AppContent: React.FC = () => {
     );
   }
 
+  const FeatureRoutes = () => (
+    <Routes>
+      <Route path="/" element={<Dashboard userProfile={userProfile} />} />
+      <Route path="/placement" element={<FeatureGuard module={ModuleType.PLACEMENT}><Navigate to="/tools?tab=placement" replace /></FeatureGuard>} />
+      <Route path="/placement/:reportId" element={<PlacementRedirect />} />
+      <Route path="/attendance" element={<FeatureGuard module={ModuleType.ATTENDANCE}><Navigate to="/tools?tab=attendance" replace /></FeatureGuard>} />
+      <Route path="/cgpa" element={<FeatureGuard module={ModuleType.CGPA}><Navigate to="/tools?tab=cgpa" replace /></FeatureGuard>} />
+      <Route path="/tools" element={<ToolsHub userProfile={userProfile} />} />
+      <Route path="/timetable" element={<FeatureGuard module={ModuleType.TIMETABLE}><TimetableHub userProfile={userProfile} /></FeatureGuard>} />
+      <Route path="/quiz" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/quiz/:subjectName" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/quiz/:subjectName/:quizId" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/library" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/library/:program" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/library/:program/:semester" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/library/:program/:semester/:subject" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/library/:program/:semester/:subject/:category" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator /></FeatureGuard>} />
+      <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator /></FeatureGuard>} />
+      <Route path="/help" element={<HelpSection />} />
+      <Route path="/freshers" element={<FeatureGuard module={ModuleType.FRESHERS}><FreshersKit /></FeatureGuard>} />
+      <Route path="/share-cgpa" element={<ShareReport />} />
+      <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
+      <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
+      <Route path="/payment-success/:paymentId" element={<PaymentSuccess userProfile={userProfile} />} />
+      <Route path="/profile" element={<ProfileSection userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} />} />
+      <Route path="/marketplace" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
+      <Route path="/marketplace/:category" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
+      <Route path="/marketplace/item/:itemId" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
+      <Route path="/roommate" element={<FeatureGuard module={ModuleType.ROOMMATE}><RoommateFinder userProfile={userProfile} /></FeatureGuard>} />
+      <Route path="/emergency" element={<FeatureGuard module={ModuleType.EMERGENCY}><EmergencyContacts /></FeatureGuard>} />
+      <Route path="/ai-tools" element={<FeatureGuard module={ModuleType.AI_TOOLS}><AIToolsDirectory /></FeatureGuard>} />
+      <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/settings" element={<SettingsHub userProfile={userProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} />} />
+      <Route path="/login" element={<Dashboard userProfile={userProfile} />} />
+      <Route path="/signup" element={<Dashboard userProfile={userProfile} />} />
+      <Route path="*" element={<Dashboard userProfile={userProfile} />} />
+    </Routes>
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-[#0a0a0a] text-zinc-900 dark:text-zinc-200">
       <AnnouncementBand />
@@ -671,42 +681,53 @@ const AppContent: React.FC = () => {
         <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-white dark:bg-[#0a0a0a]">
           <BackgroundEffects />
 
-        <div id="app-navbar" className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-white/5 bg-white/90 dark:bg-[#0a0a0a] z-10 relative">
-          <div className="flex items-center">
-            <button
+        <header className="sticky top-0 h-16 bg-white/70 dark:bg-black/70 backdrop-blur-2xl border-b border-zinc-200/50 dark:border-white/5 flex items-center px-4 md:px-8 z-[100] transition-all duration-300">
+          <div className="flex items-center gap-1 md:gap-4 flex-1 md:flex-none">
+            <button 
               onClick={() => setIsMobileMenuOpen(true)}
-              className="md:hidden w-11 h-11 flex items-center justify-center rounded-xl text-zinc-700 dark:text-white mr-1 border-none active:scale-75 transition-all bg-transparent group"
+              className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-zinc-700 dark:text-zinc-400 mr-1 border-none active:scale-75 transition-all bg-zinc-100/50 dark:bg-white/5 group"
               aria-label="Open menu"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="w-8 h-8 transition-transform group-hover:scale-110" viewBox="0 0 16 16">
-                <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 transition-transform group-hover:scale-110">
+                <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="15" y2="6" /><line x1="3" y1="18" x2="18" y2="18" />
               </svg>
             </button>
-            <span className="hidden min-[400px]:inline-block md:hidden text-xl font-bold bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent tracking-tight cursor-pointer ml-1" onClick={() => navigate('/')}>{fullBrandName}</span>
+            <div className="flex-1 md:hidden flex justify-center">
+              <img 
+                src={theme === 'dark' ? '/Scholix_dark.png' : '/Scholix_light.png'} 
+                alt="Scholix" 
+                className="h-7 sm:h-8 md:h-9 object-contain cursor-pointer active:scale-95 transition-transform"
+                onClick={() => navigate('/')}
+              />
+            </div>
           </div>
 
-          <div className="flex-1 hidden md:flex ml-4">
+          <div className="flex-1 hidden md:flex ml-0 justify-start">
             <div className="w-full max-w-[480px]">
               <UniversalSearch />
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 ml-auto">
+          <div className="flex items-center space-x-2 ml-auto">
             <button 
               onClick={handleOpenMobileSearch}
-              className="md:hidden p-2.5 rounded-full bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90"
+              className="md:hidden p-2.5 rounded-full text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border-none active:scale-90"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
             </button>
             <NotificationBell userProfile={userProfile} />
-            <button onClick={toggleTheme} className="p-2.5 rounded-full bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90">
-              {theme === 'dark' ? (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
-              )}
-            </button>
-            <div className="relative">
+            <div className="hidden md:flex">
+                <button onClick={toggleTheme} className="p-2.5 rounded-full bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90">
+                  {theme === 'dark' ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+                  )}
+                </button>
+            </div>
+
+            {/* Desktop Profile Menu - Hidden on mobile as settings are in Bottom Navbar */}
+            <div className="hidden md:block relative ml-2">
               {userProfile ? (
                 <>
                   <button 
@@ -795,59 +816,19 @@ const AppContent: React.FC = () => {
                   )}
                 </>
               ) : (
-                    <button onClick={() => navigate('/login')} className="w-10 h-10 rounded-full border-none bg-zinc-100 dark:bg-[#0a0a0a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-95">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                    </button>
-                  )}
-                </div>
-              </div>
+                <button onClick={() => navigate('/login')} className="w-10 h-10 rounded-full border-none bg-zinc-100 dark:bg-[#0a0a0a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-95">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                </button>
+              )}
             </div>
-        <div id="main-content-area" className={`flex-1 overflow-y-auto relative scroll-smooth ${location.pathname === '/' ? 'p-0' : 'p-4 md:p-8'} bg-transparent`}>
-          <div className={`relative ${location.pathname === '/' ? 'w-full' : 'max-w-7xl mx-auto'}`}>
+          </div>
+        </header>
+        <div id="main-content-area" className={`flex-1 overflow-y-auto relative scroll-smooth ${location.pathname === '/' || location.pathname === '/lpu' || location.pathname === '/iitm' ? 'p-0' : 'p-4 md:p-8'} bg-transparent no-scrollbar`}>
+          <div className={`relative ${location.pathname === '/' || location.pathname === '/lpu' || location.pathname === '/iitm' ? 'w-full' : 'max-w-7xl mx-auto'}`}>
             <Routes>
-              <Route path="/welcome" element={<ScholixLanding />} />
-              <Route path="/" element={<Dashboard userProfile={userProfile} />} />
-
-              {/* University Shortcut Catchers */}
-              <Route path="/lpu/*" element={<Dashboard userProfile={userProfile} />} />
-              <Route path="/iitm/*" element={<Dashboard userProfile={userProfile} />} />
-              <Route path="/iitm_bs/*" element={<Dashboard userProfile={userProfile} />} />
-              <Route path="/scholix/*" element={<Dashboard userProfile={userProfile} />} />
-
-              <Route path="/placement" element={<FeatureGuard module={ModuleType.PLACEMENT}><Navigate to="/tools?tab=placement" replace /></FeatureGuard>} />
-              <Route path="/placement/:reportId" element={<PlacementRedirect />} />
-              <Route path="/attendance" element={<FeatureGuard module={ModuleType.ATTENDANCE}><Navigate to="/tools?tab=attendance" replace /></FeatureGuard>} />
-              <Route path="/cgpa" element={<FeatureGuard module={ModuleType.CGPA}><Navigate to="/tools?tab=cgpa" replace /></FeatureGuard>} />
-              <Route path="/tools" element={<ToolsHub userProfile={userProfile} />} />
-              <Route path="/timetable" element={<FeatureGuard module={ModuleType.TIMETABLE}><TimetableHub userProfile={userProfile} /></FeatureGuard>} />
-              <Route path="/quiz" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-              <Route path="/quiz/:subjectName" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-              <Route path="/quiz/:subjectName/:quizId" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-              <Route path="/library" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-              <Route path="/library/:program" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-              <Route path="/library/:program/:semester" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-              <Route path="/library/:program/:semester/:subject" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-              <Route path="/library/:program/:semester/:subject/:category" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-              <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator /></FeatureGuard>} />
-              <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator /></FeatureGuard>} />
-              <Route path="/help" element={<HelpSection />} />
-              <Route path="/freshers" element={<FeatureGuard module={ModuleType.FRESHERS}><FreshersKit /></FeatureGuard>} />
-              <Route path="/share-cgpa" element={<ShareReport />} />
-              <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
-              <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
-              <Route path="/payment-success/:paymentId" element={<PaymentSuccess userProfile={userProfile} />} />
-              <Route path="/profile" element={<ProfileSection userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={(m) => navigate(getPathFromModule(m))} />} />
-              <Route path="/marketplace" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
-              <Route path="/marketplace/:category" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
-              <Route path="/marketplace/item/:itemId" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
-              <Route path="/roommate" element={<FeatureGuard module={ModuleType.ROOMMATE}><RoommateFinder userProfile={userProfile} /></FeatureGuard>} />
-              <Route path="/emergency" element={<FeatureGuard module={ModuleType.EMERGENCY}><EmergencyContacts /></FeatureGuard>} />
-              <Route path="/ai-tools" element={<FeatureGuard module={ModuleType.AI_TOOLS}><AIToolsDirectory /></FeatureGuard>} />
-              <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="/login" element={<Dashboard userProfile={userProfile} />} />
-              <Route path="/signup" element={<Dashboard userProfile={userProfile} />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="/welcome" element={<ScholixLanding userProfile={userProfile} />} />
+              <Route path="/:uniKey/*" element={<FeatureRoutes />} />
+              <Route path="/*" element={<FeatureRoutes />} />
             </Routes>
           </div>
         </div>
@@ -891,6 +872,7 @@ const AppContent: React.FC = () => {
         )}
       </main>
     </div>
+    <BottomNavbar currentModule={currentModule} />
     {showAuthModal && <AuthModal onClose={handleAuthClose} initialMode={authMode} userProfile={userProfile || undefined} />}
       <CookieBanner />
       {userProfile && <StudyHeartbeat userId={userProfile.id} />}
