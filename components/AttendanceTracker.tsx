@@ -312,10 +312,10 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
         </div>
       </header>
 
-      <div className="glass-panel p-5 md:p-8 rounded-[32px] md:rounded-[40px] bg-white dark:bg-[#0a0a0a]/50 border border-zinc-200 dark:border-white/5 shadow-2xl relative z-0">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 items-end">
-          <div className="md:col-span-3">
-            <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2 ml-1">
+      <div className="glass-panel p-4 md:p-8 rounded-[24px] md:rounded-[40px] bg-white dark:bg-[#0a0a0a]/50 border border-zinc-200 dark:border-white/5 shadow-xl relative z-0">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-5 items-end">
+          <div className="col-span-2 md:col-span-3">
+            <label className="block text-[10px] md:text-xs font-medium text-zinc-400 mb-1 ml-1">
               Subject Name <span className="text-brand-secondary">*</span>
             </label>
             <input
@@ -326,48 +326,48 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                 setNewSub({ ...newSub, name: e.target.value });
                 if (showValidation) setShowValidation(false);
               }}
-              className={`w-full bg-zinc-100 dark:bg-[#0a0a0a] border rounded-2xl px-5 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none transition-all font-bold text-sm shadow-inner ${showValidation && !newSub.name.trim()
+              className={`w-full bg-zinc-100 dark:bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none transition-all font-bold text-xs md:text-sm shadow-inner ${showValidation && !newSub.name.trim()
                 ? 'border-brand-secondary ring-2 ring-brand-secondary/20'
                 : 'border-transparent focus:ring-2 focus:ring-brand-primary'
                 }`}
             />
           </div>
-          <div className="md:col-span-3">
-            <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2 ml-1">Present / Total</label>
+          <div className="col-span-2 md:col-span-3">
+            <label className="block text-[10px] md:text-xs font-medium text-zinc-400 mb-1 ml-1">Present / Total</label>
             <div className="flex items-center space-x-2">
               <input
                 type="number" placeholder="P" value={newSub.present}
                 onChange={(e) => setNewSub({ ...newSub, present: e.target.value })}
-                className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-3 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-sm text-center font-bold shadow-inner"
+                className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-xl md:rounded-2xl px-2 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
               />
               <span className="text-zinc-400 font-black">/</span>
               <input
                 type="number" placeholder="T" value={newSub.total}
                 onChange={(e) => setNewSub({ ...newSub, total: e.target.value })}
-                className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-3 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-sm text-center font-bold shadow-inner"
+                className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-xl md:rounded-2xl px-2 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
               />
             </div>
           </div>
-          <div className="md:col-span-2">
-            <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2 ml-1">Initial DL</label>
+          <div className="col-span-1 md:col-span-2">
+            <label className="block text-[10px] md:text-xs font-medium text-zinc-400 mb-1 ml-1">Initial DL</label>
             <input
               type="number" placeholder="0" value={newSub.dutyLeaves}
               onChange={(e) => setNewSub({ ...newSub, dutyLeaves: e.target.value })}
-              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-5 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-sm text-center font-bold shadow-inner"
+              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-xl md:rounded-2xl px-4 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
             />
           </div>
-          <div className="md:col-span-2">
-            <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2 ml-1">Goal %</label>
+          <div className="col-span-1 md:col-span-2">
+            <label className="block text-[10px] md:text-xs font-medium text-zinc-400 mb-1 ml-1">Goal %</label>
             <input
               type="number" placeholder="75" value={newSub.goal}
               onChange={(e) => setNewSub({ ...newSub, goal: e.target.value })}
-              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-5 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-sm text-center font-bold shadow-inner"
+              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-xl md:rounded-2xl px-4 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
             />
           </div>
-          <div className="md:col-span-2">
+          <div className="col-span-2 md:col-span-2">
             <button
               onClick={addSubject}
-              className="w-full bg-brand-primary hover:opacity-90 text-white py-3.5 md:py-[1.15rem] rounded-2xl font-bold text-[13px] tracking-tight transition-all shadow-xl shadow-brand-primary/20 active:scale-95 flex items-center justify-center whitespace-nowrap"
+              className="w-full bg-brand-primary hover:opacity-90 text-white py-3 md:py-[1.15rem] rounded-xl md:rounded-2xl font-bold text-xs md:text-[13px] tracking-tight transition-all shadow-xl shadow-brand-primary/20 active:scale-95 flex items-center justify-center whitespace-nowrap"
             >
               Track Subject
             </button>
@@ -405,7 +405,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                 {/* Top Section: Name and Percentage */}
                 <div className="flex justify-between items-start mb-2.5">
                   <div className="space-y-0.5">
-                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-zinc-800 dark:text-white tracking-tight truncate max-w-[70px] sm:max-w-none">
+                    <h3 className="text-sm sm:text-base md:text-xl font-semibold text-zinc-800 dark:text-white tracking-tight truncate max-w-[70px] sm:max-w-none">
                       {sub.name}
                     </h3>
                     <div className="flex items-center gap-2">
@@ -416,9 +416,9 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                   </div>
 
                   <div className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl ${accentBg} border border-transparent group-hover:border-current/10 transition-all`}>
-                    <span className={`${accentColor} text-base sm:text-lg md:text-xl font-bold tracking-tight`}>
+                    <span className={`${accentColor} text-sm sm:text-base md:text-xl font-semibold tracking-tight`}>
                       {percentage.toFixed(1)}
-                      <span className="text-[11px] sm:text-xs opacity-60 ml-0.5 font-semibold">%</span>
+                      <span className="text-[10px] sm:text-xs opacity-60 ml-0.5 font-medium">%</span>
                     </span>
                   </div>
                 </div>
