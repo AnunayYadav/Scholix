@@ -31,7 +31,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
         {React.cloneElement(icon, { className: "w-5 h-5" })}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[15px] font-bold text-zinc-800 dark:text-zinc-100 group-hover:text-brand-primary transition-colors">{label}</p>
+        <p className="text-[15px] font-semibold text-zinc-800 dark:text-zinc-100 group-hover:text-brand-primary transition-colors">{label}</p>
         {sublabel && <p className="text-xs text-zinc-400 dark:text-zinc-500 font-medium truncate">{sublabel}</p>}
       </div>
       <div className="flex items-center gap-3">
@@ -46,7 +46,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
 
   const Section = ({ title, children }: any) => (
     <div className="mb-8">
-      {title && <h3 className="px-1 text-[13px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3 ml-1">{title}</h3>}
+      {title && <h3 className="px-1 text-[13px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3 ml-1">{title}</h3>}
       <div className="bg-white/50 dark:bg-zinc-900/40 backdrop-blur-xl border border-zinc-200/50 dark:border-white/5 rounded-3xl overflow-hidden px-3 py-1 shadow-sm">
         <div className="divide-y divide-zinc-100 dark:divide-white/5">
           {children}
@@ -90,24 +90,24 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                   {userProfile.avatar_url ? (
                     <img src={userProfile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
                   ) : (
-                    <span className="text-2xl font-black text-brand-primary">{userProfile.username?.[0] || userProfile.email[0]}</span>
+                    <span className="text-2xl font-bold text-brand-primary">{userProfile.username?.[0] || userProfile.email[0]}</span>
                   )}
                 </div>
               </div>
               
               <div className="flex-1 min-w-0 z-10">
                 <div className="flex items-center gap-2 mb-1">
-                  <h2 className="text-xl md:text-2xl font-black text-zinc-900 dark:text-white tracking-tight truncate">
+                  <h2 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight truncate">
                     {userProfile.username || 'Student'}
                   </h2>
                   <VerifiedBadge isAdmin={userProfile.is_admin} size="w-5 h-5" />
                 </div>
-                <p className="text-sm text-zinc-500 dark:text-zinc-500 font-bold tracking-tight truncate border-b border-zinc-100 dark:border-white/5 pb-2 mb-3 inline-block">
+                <p className="text-xs text-zinc-500 dark:text-zinc-500 font-semibold tracking-tight truncate border-b border-zinc-100 dark:border-white/5 pb-2 mb-3 inline-block">
                   {userProfile.email}
                 </p>
                 
                 <div className="flex items-center">
-                  <div className="px-4 py-1.5 rounded-full bg-brand-primary text-white text-[10px] font-black tracking-widest uppercase shadow-lg shadow-brand-primary/30 flex items-center gap-2">
+                  <div className="px-4 py-1.5 rounded-full bg-brand-primary text-white text-[10px] font-bold tracking-widest uppercase shadow-lg shadow-brand-primary/30 flex items-center gap-2">
                     Profile Dashboard
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5"><path d="m9 18 6-6-6-6"/></svg>
                   </div>
@@ -125,10 +125,10 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
           </div>
           <div>
-            <h2 className="text-xl font-black text-zinc-900 dark:text-white uppercase tracking-wider">Join Scholix</h2>
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Join Scholix</h2>
             <p className="text-xs text-zinc-500 font-medium px-4">Sign in to sync your academic data and access premium university tools.</p>
           </div>
-          <div className="px-8 py-2.5 rounded-2xl bg-brand-primary text-white text-[11px] font-black tracking-[0.2em] uppercase shadow-xl shadow-brand-primary/20 mt-2">
+          <div className="px-8 py-2.5 rounded-2xl bg-brand-primary text-white text-[11px] font-bold tracking-[0.2em] uppercase shadow-xl shadow-brand-primary/20 mt-2">
             SIGN IN NOW
           </div>
         </div>
@@ -201,7 +201,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
       {userProfile && (
         <button
           onClick={onSignOut}
-          className="w-full bg-white dark:bg-zinc-900/40 border border-red-500/20 rounded-3xl py-4 flex items-center justify-center gap-3 text-red-500 font-bold active:bg-red-50 dark:active:bg-red-500/10 transition-colors shadow-sm mb-10"
+          className="w-full bg-white dark:bg-zinc-900/40 border border-red-500/20 rounded-3xl py-4 flex items-center justify-center gap-3 text-red-500 font-semibold active:bg-red-50 dark:active:bg-red-500/10 transition-colors shadow-sm mb-10"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           Log Out
@@ -209,7 +209,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
       )}
 
       <div className="text-center opacity-30">
-        <p className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 uppercase">Scholix Build 3.0.0 • Made with ❤️</p>
+        <p className="text-[10px] font-semibold tracking-[0.2em] text-zinc-500 uppercase">Scholix Build 3.0.0 • Made with ❤️</p>
       </div>
 
       <FeedbackModal 
