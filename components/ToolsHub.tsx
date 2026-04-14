@@ -14,7 +14,16 @@ interface ToolsHubProps {
 const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { universityInfo } = useUniversity();
+  const { selectedUniversity, universityInfo } = useUniversity();
+  
+  const getUniSlug = (id: string): string => {
+    if (id === 'lpu') return 'lpu';
+    if (id === 'iitm_bs') return 'iitm';
+    return '';
+  };
+
+  const uniSlug = getUniSlug(selectedUniversity);
+  const prefix = uniSlug ? `/${uniSlug}` : '';
   
   // Tabs: attendance, cgpa, placement
   const [activeTab, setActiveTab] = useState<'attendance' | 'cgpa' | 'placement'>('attendance');
@@ -40,7 +49,7 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
 
   const switchTab = (tab: 'attendance' | 'cgpa' | 'placement') => {
     setActiveTab(tab);
-    navigate(`/tools?tab=${tab}`, { replace: true });
+    navigate(`${prefix}/tools?tab=${tab}`, { replace: true });
   };
 
   const tabs = [
@@ -79,7 +88,7 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
             </p>
           </div>
           
-          <div className="flex items-center p-1 bg-zinc-100 dark:bg-white/5 rounded-2xl md:rounded-3xl border border-zinc-200 dark:border-white/5 shadow-inner">
+          <div className="flex items-center p-1 bg-zinc-100 dark:bg-white/5 rounded-2xl md:rounded-3xl border border-zinc-200 dark:border-white/5 shadow-inner overflow-x-auto no-scrollbar max-w-full">
             {visibleTabs.map(tab => (
               <button
                 key={tab.id}
@@ -93,7 +102,7 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
                 `}
               >
                 <span className={activeTab === tab.id ? 'text-brand-primary' : 'opacity-40'}>{tab.icon}</span>
-                <span className="hidden sm:inline">{tab.name}</span>
+                <span className="text-[10px] sm:text-xs whitespace-nowrap">{tab.name}</span>
               </button>
             ))}
           </div>

@@ -4,41 +4,61 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { showToast } from './Toast.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
+import MarketplaceHub from './MarketplaceHub.tsx';
+import RoommateFinder from './RoommateFinder.tsx';
+import type { UserProfile } from '../types';
 
-const IconMess = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 mr-2"><path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" /></svg>
+const IconMarket = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className || "w-5 h-5 mr-2"}>
+    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <path d="M16 10a4 4 0 01-8 0" />
+  </svg>
 );
 
-const IconMap = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 mr-2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>
+const IconRoommate = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className || "w-5 h-5 mr-2"}>
+    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 00-3-3.87" />
+    <path d="M16 3.13a4 4 0 010 7.75" />
+  </svg>
 );
 
-const IconBreakfast = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+const IconMess = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className || "w-5 h-5 mr-2"}><path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" /></svg>
+);
+
+const IconMap = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className || "w-5 h-5 mr-2"}><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>
+);
+
+const IconBreakfast = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className || "w-6 h-6"}>
     <path d="M11 17a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" /><path d="m15 15 6 6" /><path d="M11 8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z" />
   </svg>
 );
 
-const IconLunch = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+const IconLunch = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className || "w-6 h-6"}>
     <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" /><path d="M7 2v20" /><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
   </svg>
 );
 
-const IconSnacks = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+const IconSnacks = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className || "w-6 h-6"}>
     <path d="M17 8h1a4 4 0 1 1 0 8h-1" /><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" /><line x1="6" y1="2" x2="6" y2="4" /><line x1="10" y1="2" x2="10" y2="4" /><line x1="14" y1="2" x2="14" y2="4" />
   </svg>
 );
 
-const IconDinner = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+const IconDinner = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className || "w-6 h-6"}>
     <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><path d="M12 9v6" /><path d="M9 12h6" />
   </svg>
 );
 
-const IconAlert = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+const IconAlert = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className || "w-4 h-4 mr-2"}><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
 );
 
 const MealSkeleton = () => (
@@ -54,14 +74,21 @@ const MealSkeleton = () => (
 import { MESS_DATA, DAYS, type MealCategories } from '../data/messData';
 
 
-const CampusNavigator: React.FC = () => {
+const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile }) => {
   const { universityInfo } = useUniversity();
   const navigate = useNavigate();
-  const { tab: urlTab } = useParams();
-  const availableTabs = universityInfo?.features.campusTabs || ['mess', 'map'];
-  const [activeTab, setActiveTab] = useState<'mess' | 'map'>(() => {
-    if (urlTab && availableTabs.includes(urlTab as any)) return urlTab as any;
-    return availableTabs[0] || 'map';
+  const { uniKey, tab: urlTab } = useParams();
+  
+  // Combine university specific tabs with global campus features
+  const availableTabs = React.useMemo(() => [
+    ...(universityInfo?.features.campusTabs || ['mess', 'map']),
+    'market',
+    'roommate'
+  ], [universityInfo]);
+
+  const [activeTab, setActiveTab] = useState<'mess' | 'map' | 'market' | 'roommate' | ''>(() => {
+    if (urlTab && availableTabs.includes(urlTab)) return urlTab as any;
+    return '';
   });
 
   const [isInitializing, setIsInitializing] = useState(true);
@@ -70,8 +97,8 @@ const CampusNavigator: React.FC = () => {
 
   // Sync tab with available tabs when universityInfo changes
   useEffect(() => {
-    if (!availableTabs.includes(activeTab)) {
-      setActiveTab(availableTabs[0] || 'map');
+    if (activeTab !== '' && !availableTabs.includes(activeTab)) {
+      setActiveTab('');
     }
   }, [universityInfo]);
 
@@ -87,6 +114,7 @@ const CampusNavigator: React.FC = () => {
 
   const [currentWeek, setCurrentWeek] = useState<1 | 2>(weekCycle as 1 | 2);
   const [selectedDay, setSelectedDay] = useState<string>(actualToday);
+  const [activeFoodCategory, setActiveFoodCategory] = useState('all');
 
   // Modal & Floating Button State
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -103,16 +131,18 @@ const CampusNavigator: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Sync tab with URL
+  // Sync tab with URL parameter
   useEffect(() => {
-    if (urlTab && (urlTab === 'mess' || urlTab === 'map') && availableTabs.includes(urlTab as any)) {
-      setActiveTab(urlTab as any);
+    const validTab = urlTab && availableTabs.includes(urlTab) ? (urlTab as any) : '';
+    if (validTab !== activeTab) {
+      setActiveTab(validTab);
     }
   }, [urlTab, availableTabs]);
 
-  const handleTabChange = (tab: 'mess' | 'map') => {
-    setActiveTab(tab);
-    navigate(`/campus/${tab}`);
+  const handleTabChange = (tab: 'mess' | 'map' | 'market' | 'roommate' | '') => {
+    // Only navigate; the useEffect will sync the state
+    const prefix = uniKey ? `/${uniKey}/campus` : '/campus';
+    navigate(tab ? `${prefix}/${tab}` : prefix);
   };
 
   // Auto-scroll logic for mess report modal
@@ -197,162 +227,402 @@ const CampusNavigator: React.FC = () => {
     handleClose();
   };
 
-  const MealCard = ({ title, items, icon, colorClass }: { title: string, items: MealCategories, icon: React.ReactNode, colorClass: string }) => (
-    <details className="group glass-panel rounded-2xl overflow-hidden transition-all duration-300 shadow-sm border dark:border-white/5" open>
-      <summary className="flex items-center justify-between p-5 cursor-pointer select-none bg-white dark:bg-white/5 hover:bg-zinc-50 dark:hover:bg-white/10 transition-colors">
-        <div className="flex items-center space-x-4">
-          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${colorClass} bg-opacity-10 dark:bg-opacity-20`}>
-            {icon}
+  const MealCard = ({ title, items, icon, accentColor }: { title: string, items: MealCategories, icon: React.ReactNode, accentColor: string }) => {
+    return (
+      <div className="glass-panel group relative overflow-hidden rounded-[2.5rem] border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900/40 backdrop-blur-xl p-6 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
+        <div className="flex items-center justify-between mb-8 relative z-10">
+          <div className="flex items-center space-x-4">
+            <div className={`p-4 rounded-2xl transition-all duration-500 group-hover:scale-110 border border-zinc-200/50 dark:border-white/5 bg-zinc-50/50 dark:bg-white/5 ${accentColor}`}>
+              {React.cloneElement(icon as React.ReactElement, { className: "w-6 h-6" })}
+            </div>
+            <div>
+              <h4 className="font-bold uppercase tracking-[0.15em] text-xs leading-none text-zinc-900 dark:text-white/90">
+                {title}
+              </h4>
+            </div>
           </div>
-          <h4 className="font-bold text-zinc-800 dark:text-white uppercase tracking-widest text-[11px] sm:text-xs">{title}</h4>
         </div>
-        <span className="transform group-open:rotate-180 transition-transform text-zinc-400">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><polyline points="6 9 12 15 18 9" /></svg>
-        </span>
-      </summary>
-      <div className="px-8 py-4 text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed animate-fade-in space-y-4">
-        {Object.entries(items).map(([category, dishes]) => (
-          <div key={category} className="border-b border-zinc-100 dark:border-white/5 last:border-0 pb-3 last:pb-0">
-            <span className="font-black text-[11px] sm:text-xs uppercase tracking-widest text-zinc-400 block mb-1">{category}</span>
-            <span className="text-zinc-800 dark:text-zinc-200 font-bold block">{dishes}</span>
-          </div>
-        ))}
+
+        <div className="space-y-6 relative z-10 pl-1">
+          {Object.entries(items).map(([category, dishes]) => {
+            // Check if any part of the dish matches the selected nutrient category
+            const isMatch = matchesCategory(dishes, activeFoodCategory);
+            if (!isMatch && activeFoodCategory !== 'all') return null;
+
+            return (
+              <div key={category} className="group/item animate-fade-in">
+                <span className="font-bold text-[10px] uppercase tracking-widest block mb-1.5 text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">
+                  {category}
+                </span>
+                <div className="flex items-start gap-2">
+                  <span className="text-zinc-800 dark:text-zinc-200 font-semibold text-[15px] leading-snug transition-all group-hover/item:translate-x-1 duration-300">
+                    {dishes}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+          {activeFoodCategory !== 'all' && Object.values(items).every(d => !matchesCategory(d, activeFoodCategory)) && (
+            <div className="py-4 text-center">
+              <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest opacity-50">No matches found</span>
+            </div>
+          )}
+        </div>
       </div>
-    </details>
-  );
+    );
+  };
+
+  const FOOD_CATEGORIES = [
+    { id: 'all', label: 'Featured', icon: '✨' },
+    { id: 'protein', label: 'Protein Rich', icon: '💪' },
+    { id: 'carbs', label: 'Carbs / Energy', icon: '⚡' },
+    { id: 'salads', label: 'Salads & Greens', icon: '🥗' },
+    { id: 'fats', label: 'Fats & Sweets', icon: '🍯' },
+  ];
+
+  const matchesCategory = (dish: string, category: string) => {
+    if (category === 'all') return true;
+    const keywords: Record<string, string[]> = {
+      protein: ['paneer', 'soya', 'dal', 'sprouts', 'chana', 'rajma', 'matar', 'curd', 'raita', 'dahi', 'egg', 'pappu', 'sambhar', 'channa', 'parippu', 'gram', 'milk'],
+      carbs: ['rice', 'roti', 'prantha', 'poha', 'upma', 'potato', 'aloo', 'bread', 'pasta', 'kulcha', 'poori', 'vermicelli', 'noodles', 'sandwich', 'biryani', 'pulao', 'macaroni', 'pongal', 'bhel', 'fries', 'bun', 'tikki'],
+      salads: ['salad', 'cabbage', 'bhindi', 'carrot', 'beetroot', 'vegetable', 'veg', 'thoran', 'poriyal', 'fry', 'dum fry', 'kootu', 'ghia', 'arbi', 'baingan', 'tinda'],
+      fats: ['butter', 'ghee', 'oil', 'jamun', 'halwa', 'burfi', 'laddu', 'kheer', 'ice cream', 'custard', 'pongal', 'curry', 'makhni'] 
+    };
+    const target = keywords[category];
+    if (!target) return false;
+    return target.some(k => dish.toLowerCase().includes(k.toLowerCase()));
+  };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-10">
-      <header className="mb-4">
-        <h2 className="text-3xl font-bold text-zinc-800 dark:text-white mb-2 tracking-tighter">Campus <span className="text-transparent bg-clip-text bg-[var(--brand-gradient)]">Navigator</span></h2>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          Survival guide: {availableTabs.includes('mess') ? 'Boys Hostel Mess menu & ' : ''}Interactive Map.
-        </p>
+    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20 px-4 relative">
+      {/* Background Glow Effect */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-brand-primary/5 blur-[120px] rounded-full pointer-events-none -z-10" />
+      {/* Persistent Header for Hub & Sections */}
+      <header className="pt-2 flex items-center justify-between">
+        <div className="animate-fade-in">
+          <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">
+            {{
+              'mess': <>Mess <span className="text-orange-500">Menu</span></>,
+              'map': <>Campus <span className="text-emerald-500">Map</span></>,
+              'market': <>Nexus <span className="text-blue-500">Market</span></>,
+              'roommate': <>Roommate <span className="text-purple-500">Finder</span></>,
+              '': <>Campus <span className="text-brand-primary">Hub</span></>
+            }[activeTab] || <>Campus <span className="text-brand-primary">Hub</span></>}
+          </h2>
+        </div>
+
+        {activeTab && (
+          <button 
+            onClick={() => handleTabChange('')}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 font-bold text-[9px] uppercase tracking-[0.15em] hover:bg-brand-primary/10 hover:text-brand-primary transition-all border-none active:scale-95 group shadow-sm"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 transition-transform group-hover:-translate-x-0.5"><polyline points="15 18 9 12 15 6" /></svg>
+            Campus Hub
+          </button>
+        )}
       </header>
 
-      {availableTabs.length > 1 && (
-        <div className="flex flex-wrap gap-2 bg-zinc-200 dark:bg-white/5 p-1 rounded-2xl w-fit mb-8">
-          {availableTabs.includes('mess') && (
-            <button
-              onClick={() => handleTabChange('mess')}
-              className={`px-6 py-2.5 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center ${activeTab === 'mess' ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-white'}`}
-            >
-              <IconMess /> Mess Menu
-            </button>
-          )}
-          {availableTabs.includes('map') && (
-            <button
-              onClick={() => handleTabChange('map')}
-              className={`px-6 py-2.5 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center ${activeTab === 'map' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-white'}`}
-            >
-              <IconMap /> 3D Map
-            </button>
-          )}
-        </div>
-      )}
+      {/* Aesthetic Hub Cards */}
+      {!activeTab && (
+        <div className="space-y-12 pb-20">
+          <div key="hub" className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 animate-fade-in">
+            {(availableTabs as ('mess' | 'map' | 'market' | 'roommate')[]).map((tabId) => {
+              const isActive = activeTab === tabId;
+              const config = {
+                mess: {
+                  label: 'Mess Menu',
+                  desc: 'Food & Timing',
+                  icon: <IconMess />,
+                  bgColor: 'from-orange-500/20 via-orange-500/5 to-transparent',
+                  accentColor: 'text-orange-500',
+                  gradient: 'radial-gradient(circle at center, rgba(249, 115, 22, 0.15), transparent 70%)'
+                },
+                map: {
+                  label: '3D Map',
+                  desc: 'Virtual Tour',
+                  icon: <IconMap />,
+                  bgColor: 'from-emerald-500/20 via-emerald-500/5 to-transparent',
+                  accentColor: 'text-emerald-500',
+                  gradient: 'radial-gradient(circle at center, rgba(16, 185, 129, 0.15), transparent 70%)'
+                },
+                market: {
+                  label: 'Nexus Market',
+                  desc: 'Buy & Sell',
+                  icon: <IconMarket />,
+                  bgColor: 'from-blue-500/20 via-blue-500/5 to-transparent',
+                  accentColor: 'text-blue-500',
+                  gradient: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.15), transparent 70%)'
+                },
+                roommate: {
+                  label: 'Roommate',
+                  desc: 'Find Peers',
+                  icon: <IconRoommate />,
+                  bgColor: 'from-purple-500/20 via-purple-500/5 to-transparent',
+                  accentColor: 'text-purple-500',
+                  gradient: 'radial-gradient(circle at center, rgba(168, 85, 247, 0.15), transparent 70%)'
+                }
+              }[tabId];
 
-      {activeTab === 'mess' && (
-        <div className="space-y-6 animate-fade-in">
-          <div className="flex justify-center space-x-3 mb-6">
-            <button
-              onClick={() => setCurrentWeek(1)}
-              className={`px-5 py-2 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all border ${currentWeek === 1 ? 'bg-orange-600/10 border-orange-600 text-orange-600' : 'border-zinc-300 dark:border-white/10 text-zinc-500'}`}
-            >
-              Week 1
-            </button>
-            <button
-              onClick={() => setCurrentWeek(2)}
-              className={`px-5 py-2 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all border ${currentWeek === 2 ? 'bg-orange-600/10 border-orange-600 text-orange-600' : 'border-zinc-300 dark:border-white/10 text-zinc-500'}`}
-            >
-              Week 2
-            </button>
-          </div>
-
-          <div
-            ref={scrollContainerRef}
-            className="flex overflow-x-auto pb-4 pt-6 space-x-3 no-scrollbar snap-x px-1"
-          >
-            {DAYS.map((day) => {
-              const isSelected = selectedDay === day;
-              const isToday = (day === actualToday);
+              if (!config) return null;
 
               return (
                 <button
-                  key={day}
-                  data-day={day}
-                  onClick={() => setSelectedDay(day)}
-                  className={`
-                    flex-none snap-center flex flex-col items-center justify-center w-24 h-32 rounded-3xl border transition-all duration-300 relative
-                    ${isSelected
-                      ? 'bg-orange-600 border-orange-700 text-white shadow-2xl shadow-orange-600/30 transform scale-105'
-                      : 'bg-white dark:bg-white/5 border-zinc-200 dark:border-white/5 text-zinc-500 hover:border-orange-500/50'
-                    }
-                  `}
+                  key={tabId}
+                  onClick={() => handleTabChange(tabId)}
+                  className={`relative flex flex-col items-start p-5 sm:p-6 rounded-[2.5rem] border transition-all duration-500 text-left group overflow-hidden active:scale-95 border-zinc-200/50 dark:border-white/10 bg-white dark:bg-zinc-900/50 hover:border-brand-primary/30 hover:shadow-2xl hover:-translate-y-1.5`}
                 >
-                  {isToday && (
-                    <span className={`absolute -top-3 px-3 py-1 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-widest shadow-xl ${isSelected ? 'bg-white text-orange-600' : 'bg-orange-600 text-white'}`}>
-                      Today
+                  {/* Custom Glow Background */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${config.bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
+                  <div className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-700" style={{ background: config.gradient }} />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.01)_130%)] dark:bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.1)_140%)] pointer-events-none" />
+
+                  <div className={`relative p-3 sm:p-4 rounded-2xl mb-4 transition-all duration-500 bg-white dark:bg-zinc-800 lg:dark:bg-white/5 text-zinc-400 group-hover:${config.accentColor} shadow-sm group-hover:shadow-lg group-hover:scale-110`}>
+                    {React.cloneElement(config.icon as React.ReactElement, { className: 'w-5 h-5 sm:w-6 sm:h-6' })}
+                  </div>
+                  
+                  <div className="relative">
+                    <span className={`block text-[11px] sm:text-[12px] font-bold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors duration-500`}>
+                      {config.label}
                     </span>
-                  )}
-                  <span className="text-[11px] sm:text-xs font-black uppercase tracking-widest mb-2 opacity-80">{day.slice(0, 3)}</span>
-                  <span className="text-3xl font-black tracking-tighter">{day.slice(0, 1)}</span>
+                    <span className={`block text-[10px] sm:text-[11px] font-medium mt-1 text-zinc-500 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors duration-500`}>
+                      {config.desc}
+                    </span>
+                  </div>
                 </button>
               );
             })}
           </div>
 
-          {isInitializing ? (
-            <div className="space-y-4">
-              <MealSkeleton />
-              <MealSkeleton />
-              <MealSkeleton />
-              <MealSkeleton />
-            </div>
-          ) : selectedMeals ? (
-            <div className="space-y-4 animate-fade-in">
-              <div className="flex items-center justify-between mb-4 px-2">
-                <h3 className="text-xl font-black text-zinc-800 dark:text-white tracking-tighter uppercase">{selectedDay} Menu</h3>
-                <span className="text-[11px] sm:text-xs text-zinc-500 font-black uppercase tracking-widest">W{currentWeek} Cycle</span>
+          <div className="space-y-8 animate-fade-in-up">
+            <div className="flex items-center justify-between px-2">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pink-500 via-red-500 to-yellow-500 p-[2px]">
+                  <div className="w-full h-full rounded-[14px] bg-white dark:bg-zinc-900 flex items-center justify-center">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-pink-600"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-zinc-900 dark:text-white tracking-tight">University <span className="text-pink-600">Buzz</span></h3>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live from @unilpu
+                  </p>
+                </div>
               </div>
-
-              <MealCard title="Breakfast" items={selectedMeals.breakfast} icon={<IconBreakfast />} colorClass="text-yellow-500" />
-              <MealCard title="Lunch" items={selectedMeals.lunch} icon={<IconLunch />} colorClass="text-orange-600" />
-              <MealCard title="Snacks" items={selectedMeals.snacks} icon={<IconSnacks />} colorClass="text-red-500" />
-              <MealCard title="Dinner" items={selectedMeals.dinner} icon={<IconDinner />} colorClass="text-indigo-500" />
+              <a href="https://instagram.com/unilpu" target="_blank" rel="noreferrer" className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-pink-600 transition-colors">See all posts</a>
             </div>
-          ) : (
-            <div className="text-center py-20 text-zinc-500">
-              <p className="font-bold">Menu not available.</p>
-            </div>
-          )}
 
-          <div className="pt-10 flex justify-center pb-20">
-            <button
-              onClick={() => setIsReportModalOpen(true)}
-              className="flex items-center px-6 py-3 bg-zinc-100 dark:bg-white/5 hover:bg-orange-500/10 hover:text-orange-600 border border-transparent dark:border-white/5 hover:border-orange-500/30 rounded-2xl transition-all group"
-            >
-              <IconAlert />
-              <span className="text-[11px] sm:text-xs font-black uppercase tracking-widest">Report Issue / Outdated Data</span>
-            </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
+              {[
+                {
+                  title: "One World 2026",
+                  desc: "Recap: Over 4,000 students from 33 countries united for LPU's grandest cultural fest. A true celebration of diversity!",
+                  tag: "Event",
+                  time: "2h ago",
+                  color: "from-pink-500/10 to-transparent",
+                  accent: "text-pink-500",
+                  image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&q=80&w=800"
+                },
+                {
+                  title: "LPUNEST Phase 3",
+                  desc: "Registration is closing soon! Ensure your spot and scholarship before April 15. Apply now via the official portal.",
+                  tag: "Urgent",
+                  time: "5h ago",
+                  color: "from-orange-500/10 to-transparent",
+                  accent: "text-orange-500",
+                  image: "https://images.unsplash.com/photo-1434031216315-9257e8055663?auto=format&fit=crop&q=80&w=800"
+                },
+                {
+                  title: "Alumni Homecoming",
+                  desc: "Heartwarming scenes at the campus as our global community returned for Alumni Meet 2026. Welcome back, seniors!",
+                  tag: "Community",
+                  time: "1d ago",
+                  color: "from-blue-500/10 to-transparent",
+                  accent: "text-blue-500",
+                  image: "https://images.unsplash.com/photo-1523580494863-6f30312246d5?auto=format&fit=crop&q=80&w=800"
+                }
+              ].map((post, i) => (
+                <div key={i} className="glass-panel overflow-hidden rounded-[2.5rem] border border-zinc-200 dark:border-white/5 bg-white dark:bg-zinc-900/40 group hover:border-pink-500/30 transition-all duration-500 hover:shadow-2xl hoverShadow-pink-500/5 hover:-translate-y-2">
+                  <div className="p-4 flex items-center justify-between border-b border-zinc-100 dark:border-white/5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-pink-500 to-yellow-500 p-[1.5px]">
+                        <div className="w-full h-full rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center p-0.5">
+                          <img src="https://ui-avatars.com/api/?name=LPU&background=f06&color=fff" className="w-full h-full rounded-full" alt="LPU" />
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-black tracking-tight text-zinc-900 dark:text-white capitalize">unilpu</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-zinc-400">{post.time}</span>
+                  </div>
+                  <div className="relative h-56 overflow-hidden">
+                    <img src={post.image} alt={post.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                  </div>
+                  <div className="p-6 space-y-3">
+                    <div className="flex items-center gap-2">
+                       <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest bg-pink-500/10 text-pink-600 border border-pink-500/20`}>{post.tag}</span>
+                       <h4 className="font-black text-zinc-900 dark:text-white tracking-tight text-sm">{post.title}</h4>
+                    </div>
+                    <p className="text-[12px] text-zinc-500 dark:text-zinc-400 leading-relaxed line-clamp-2 font-medium">
+                      {post.desc}
+                    </p>
+                    <div className="pt-2 flex items-center justify-between">
+                      <div className="flex items-center gap-4 text-zinc-400">
+                        <div className="flex items-center gap-1.5 hover:text-pink-500 transition-colors cursor-pointer">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                          <span className="text-[10px] font-black">1.2k</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 hover:text-blue-500 transition-colors cursor-pointer">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                          <span className="text-[10px] font-black">48</span>
+                        </div>
+                      </div>
+                      <button className="text-[10px] font-black text-pink-600 uppercase tracking-widest hover:underline decoration-2 underline-offset-4 bg-transparent border-none p-0">View Post</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {activeTab === 'map' && (
-        <div className="glass-panel p-1 rounded-3xl h-[650px] overflow-hidden shadow-2xl relative animate-fade-in border dark:border-white/5 bg-black">
-          {universityInfo?.campusMapUrl ? (
-            <iframe
-              src={universityInfo.campusMapUrl}
-              className="w-full h-full rounded-2xl transition-all duration-700"
-              frameBorder="0"
-              allowFullScreen
-              title={`${universityInfo.shortName} Campus Map`}
-            />
-          ) : (
-            <div className="w-full h-full flex flex-center items-center justify-center text-zinc-500 font-bold uppercase tracking-widest">
-               Map Protocol Pending...
+      {/* Sub-tab Content Area */}
+      {activeTab && (
+        <div key={activeTab} className="w-full">
+          {activeTab === 'mess' && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Mess Menu Content */}
+              <div className="flex justify-center space-x-3 mb-6">
+                <button
+                  onClick={() => setCurrentWeek(1)}
+                  className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${currentWeek === 1 ? 'bg-brand-primary text-white border-brand-primary shadow-md shadow-brand-primary/20' : 'bg-transparent border-zinc-200 dark:border-white/10 text-zinc-500'}`}
+                >
+                  Week 1
+                </button>
+                <button
+                  onClick={() => setCurrentWeek(2)}
+                  className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${currentWeek === 2 ? 'bg-brand-primary text-white border-brand-primary shadow-md shadow-brand-primary/20' : 'bg-transparent border-zinc-200 dark:border-white/10 text-zinc-500'}`}
+                >
+                  Week 2
+                </button>
+              </div>
+
+              <div
+                ref={scrollContainerRef}
+                className="flex overflow-x-auto pb-4 pt-2 -mx-4 px-4 space-x-3 no-scrollbar snap-x"
+              >
+                {DAYS.map((day) => {
+                  const isSelected = selectedDay === day;
+                  const isToday = (day === actualToday && currentWeek === weekCycle);
+
+                  return (
+                    <button
+                      key={day}
+                      data-day={day}
+                      onClick={() => setSelectedDay(day)}
+                      className={`
+                        flex-none snap-center flex flex-col items-center justify-center w-20 h-24 rounded-[2.5rem] border transition-all duration-500 relative overflow-hidden group/day
+                        ${isSelected
+                          ? 'bg-brand-primary border-brand-primary text-white shadow-2xl scale-[1.05] shadow-brand-primary/30'
+                          : 'bg-white/80 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-500 hover:border-zinc-300 dark:hover:border-white/20'
+                        }
+                      `}
+                    >
+                      {/* Subtle inner glow for selected day */}
+                      {isSelected && (
+                        <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+                      )}
+                      {isToday && (
+                        <div className="absolute top-2.5 left-1/2 -translate-x-1/2 z-10">
+                          <div className={`px-2 py-0.5 rounded-full text-[6px] font-black uppercase tracking-[0.15em] border transition-all duration-500 ${
+                            isSelected 
+                              ? 'bg-white text-brand-primary border-white shadow-sm' 
+                              : 'bg-brand-primary text-white border-brand-primary shadow-lg animate-pulse-gentle'
+                          }`}>
+                            Today
+                          </div>
+                        </div>
+                      )}
+                      <div className={`flex flex-col items-center justify-center transition-all duration-500 ${isToday ? 'mt-4' : ''}`}>
+                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] mb-1 transition-opacity ${isSelected ? 'opacity-90' : 'opacity-40'}`}>{day.slice(0, 3)}</span>
+                        <span className="text-2xl font-black tracking-tight">{day.slice(0,1)}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex items-center space-x-2 overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
+                {FOOD_CATEGORIES.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveFoodCategory(cat.id)}
+                    className={`
+                      flex-none px-4 py-2.5 rounded-2xl border transition-all duration-300 flex items-center space-x-2
+                      ${activeFoodCategory === cat.id 
+                        ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white shadow-lg' 
+                        : 'bg-white dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-500 hover:border-zinc-300 dark:hover:border-white/20'
+                      }
+                    `}
+                  >
+                    <span className="text-xs">{cat.icon}</span>
+                    <span className={`text-[11px] font-semibold tracking-tight capitalize ${activeFoodCategory === cat.id ? 'text-white dark:text-zinc-900' : 'text-zinc-600 dark:text-zinc-400'}`}>
+                      {cat.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {isInitializing ? (
+                <div className="space-y-4">
+                  <MealSkeleton />
+                  <MealSkeleton />
+                  <MealSkeleton />
+                </div>
+              ) : selectedMeals ? (
+                <div className="space-y-4 animate-fade-in">
+                  <div className="flex items-center justify-between mb-4 px-2">
+                    <h3 className="text-xl font-bold text-zinc-800 dark:text-white tracking-tight uppercase">{selectedDay} Menu</h3>
+                    <span className="text-[11px] sm:text-xs text-zinc-500 font-bold uppercase tracking-widest">W{currentWeek} Cycle</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-10">
+                    <MealCard title="Breakfast" items={selectedMeals.breakfast} icon={<IconBreakfast />} accentColor="text-orange-500" />
+                    <MealCard title="Lunch" items={selectedMeals.lunch} icon={<IconLunch />} accentColor="text-orange-500" />
+                    <MealCard title="Snacks" items={selectedMeals.snacks} icon={<IconSnacks />} accentColor="text-orange-500" />
+                    <MealCard title="Dinner" items={selectedMeals.dinner} icon={<IconDinner />} accentColor="text-orange-500" />
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-20 text-zinc-500">
+                  <p className="font-bold">Menu not available.</p>
+                </div>
+              )}
+
+              <div className="pt-10 flex justify-center pb-20">
+                <button
+                  onClick={() => setIsReportModalOpen(true)}
+                  className="flex items-center px-6 py-3 bg-zinc-100 dark:bg-white/5 hover:bg-orange-500/10 hover:text-orange-600 border border-transparent dark:border-white/5 hover:border-orange-500/30 rounded-2xl transition-all group"
+                >
+                  <IconAlert />
+                  <span className="text-[11px] sm:text-xs font-black uppercase tracking-widest">Report Issue / Outdated Data</span>
+                </button>
+              </div>
             </div>
           )}
+
+          {activeTab === 'map' && (
+            <div className="glass-panel p-1 rounded-3xl h-[600px] overflow-hidden shadow-2xl relative animate-fade-in border dark:border-white/5 bg-black">
+              {universityInfo?.campusMapUrl ? (
+                <iframe src={universityInfo.campusMapUrl} className="w-full h-full rounded-2xl" frameBorder="0" allowFullScreen title="Map" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-zinc-500 uppercase tracking-widest">Map Protocol Pending...</div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'market' && <MarketplaceHub userProfile={userProfile} />}
+          {activeTab === 'roommate' && <RoommateFinder userProfile={userProfile} />}
         </div>
       )}
 

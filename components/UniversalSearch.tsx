@@ -27,7 +27,7 @@ interface UniversalSearchProps {
 
 const UniversalSearch: React.FC<UniversalSearchProps> = ({ 
   className = '', 
-  placeholder = 'Search Nexus...', 
+  placeholder = 'Search Scholix...', 
   autoFocus = false, 
   isInline = false,
   resultsPortalRef
@@ -354,7 +354,7 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
         </div>
         
         {!(isInline || resultsPortalRef) && (
-          <div className="px-5 py-2.5 bg-zinc-50/50 dark:bg-black/40 border-t border-zinc-200 dark:border-white/5 flex items-center justify-between">
+          <div className="px-5 py-2.5 bg-zinc-50/50 dark:bg-[#0a0a0a]/40 border-t border-zinc-200 dark:border-white/5 flex items-center justify-between">
             <div className="flex gap-3">
               <span className="text-[9px] font-medium text-zinc-400 dark:text-white/20 tracking-widest cursor-default">ESC TO CLOSE</span>
             </div>

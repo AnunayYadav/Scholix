@@ -228,10 +228,11 @@ const Sidebar: React.FC<SidebarProps> = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={`
-          fixed inset-y-0 left-0 z-[40] transform transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
+          fixed inset-y-0 left-0 z-[45] md:relative md:translate-x-0 transform flex-shrink-0 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
           bg-white dark:bg-[#0a0a0a] border-r border-zinc-200 dark:border-white/5
-          ${isMobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0 md:w-20'}
-          md:hover:w-64 md:sticky md:top-0 md:h-screen flex flex-col shadow-2xl md:shadow-none
+          ${isMobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0'}
+          ${isHovered || isMobileMenuOpen ? 'w-64' : 'md:w-20'}
+          flex flex-col shadow-2xl md:shadow-none h-full
         `}
       >
 

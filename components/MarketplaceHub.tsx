@@ -207,51 +207,10 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     });
 
     return (
-        <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-10 pb-32 overflow-hidden">
-            <header className="space-y-6 mb-8">
-                {/* Top Row: Title and Main Actions */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div className="space-y-1 text-left">
-                        <h2 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white tracking-tighter leading-none">
-                            {universityName} <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Market</span>
-                        </h2>
-                        <p className="text-[11px] sm:text-xs font-bold text-zinc-400 tracking-wider ml-1">Buy, Sell & Trade within the {communityName}</p>
-                    </div>
-
-                    <div className="flex items-center gap-3 w-full md:w-auto">
-                        <button
-                            onClick={() => navigate('/roommate')}
-                            className="flex-1 md:flex-none p-3.5 rounded-2xl bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/5 text-zinc-400 hover:text-brand-primary transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2"
-                            title="Find Roommates"
-                        >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                            <span className="text-[11px] sm:text-xs font-medium whitespace-nowrap">Roommates</span>
-                        </button>
-                        <button
-                            onClick={() => setShowUserOnly(!showUserOnly)}
-                            className={`p-3.5 rounded-2xl transition-all border shadow-sm cursor-pointer ${showUserOnly
-                                ? 'bg-brand-primary/10 border-brand-primary/50 text-brand-primary'
-                                : 'bg-white dark:bg-[#0a0a0a] border-zinc-200 dark:border-white/5 text-zinc-400'
-                                }`}
-                            title="My Listings"
-                        >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                        </button>
-                        <button
-                            onClick={() => {
-                                if (!userProfile) showToast("Please sign in to list items", "info");
-                                else setShowSellModal(true);
-                            }}
-                            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-zinc-900 dark:bg-white text-white dark:text-black px-6 py-4 rounded-2xl font-bold text-[11px] sm:text-xs tracking-wider hover:scale-[1.02] active:scale-95 transition-all shadow-xl hover:shadow-2xl border-none cursor-pointer"
-                        >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                            Post Ad
-                        </button>
-                    </div>
-                </div>
-
-                {/* Bottom Row: Filter Bar */}
-                <div className="flex items-center bg-white dark:bg-[#0a0a0a] p-1.5 rounded-2xl border border-zinc-200 dark:border-white/5 shadow-sm overflow-x-auto no-scrollbar w-full md:w-max mx-auto md:mx-0">
+        <div className="animate-fade-in">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 pt-4">
+                {/* Filter Bar */}
+                <div className="flex items-center bg-white dark:bg-[#0a0a0a] p-1.5 rounded-2xl border border-zinc-200 dark:border-white/5 shadow-sm overflow-x-auto no-scrollbar w-full md:w-max order-2 md:order-1">
                     {categories.map(c => (
                         <button
                             key={c}
@@ -264,6 +223,29 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                             {c}
                         </button>
                     ))}
+                </div>
+
+                <div className="flex items-center gap-3 w-full md:w-auto order-1 md:order-2">
+                    <button
+                        onClick={() => setShowUserOnly(!showUserOnly)}
+                        className={`p-3.5 rounded-2xl transition-all border shadow-sm cursor-pointer ${showUserOnly
+                            ? 'bg-brand-primary/10 border-brand-primary/50 text-brand-primary'
+                            : 'bg-white dark:bg-[#0a0a0a] border-zinc-200 dark:border-white/5 text-zinc-400'
+                            }`}
+                        title="My Listings"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (!userProfile) showToast("Please sign in to list items", "info");
+                            else setShowSellModal(true);
+                        }}
+                        className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-zinc-900 dark:bg-white text-white dark:text-black px-6 py-4 rounded-2xl font-bold text-[11px] sm:text-xs tracking-wider hover:scale-[1.02] active:scale-95 transition-all shadow-xl hover:shadow-2xl border-none cursor-pointer"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                        Post Ad
+                    </button>
                 </div>
             </header>
 

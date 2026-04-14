@@ -165,7 +165,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
         <SettingItem 
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>}
           label="Send Feedback"
-          onClick={() => {}}
+          onClick={() => window.open('mailto:scholix.connect@gmail.com?subject=Scholix%20Feedback', '_blank')}
           color="text-pink-500"
         />
       </Section>
@@ -181,7 +181,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
       )}
 
       <div className="text-center opacity-30">
-        <p className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 uppercase">Nexus Build 2.5a • Made with ❤️</p>
+        <p className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 uppercase">Scholix Build 3.0.0 • Made with ❤️</p>
       </div>
     </div>
   );

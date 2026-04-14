@@ -219,8 +219,11 @@ const TodaysSchedule: React.FC = () => {
     return (
       <div className="max-w-6xl mx-auto px-6 mb-8 animate-fade-in">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Featured Timetable</h3>
-          <button onClick={() => navigate('/timetable')} className="text-[10px] font-bold text-brand-primary border-none bg-transparent">SYNC</button>
+          <div className="flex items-center flex-1">
+            <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Featured Timetable</h3>
+            <div className="h-[2px] flex-1 bg-zinc-100 dark:bg-white/5 ml-4" />
+          </div>
+          <button onClick={() => navigate('/timetable')} className="text-[10px] font-bold text-brand-primary border-none bg-transparent ml-4">SYNC</button>
         </div>
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
           {[1,2,3].map(i => (
@@ -239,10 +242,13 @@ const TodaysSchedule: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-6 mb-10 animate-fade-in">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Featured Timetable</h3>
+        <div className="flex items-center flex-1">
+          <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Featured Timetable</h3>
+          <div className="h-[2px] flex-1 bg-zinc-100 dark:bg-white/5 ml-4" />
+        </div>
         <button 
           onClick={() => navigate('/timetable')}
-          className="text-[10px] font-bold text-brand-primary border-none bg-transparent hover:opacity-80 transition-opacity"
+          className="text-[10px] font-bold text-brand-primary border-none bg-transparent hover:opacity-80 transition-opacity ml-4"
         >
           VIEW ALL
         </button>
@@ -428,12 +434,18 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-6">
+        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-6 px-1">
           {categories.map(cat => (
             <button
               key={cat}
               onClick={() => setActiveTab(cat)}
-              className={`flex-shrink-0 px-6 py-2.5 rounded-full text-xs font-bold transition-all border-none ${activeTab === cat ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-105' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:text-zinc-800 dark:hover:text-white'}`}
+              className={`
+                flex-shrink-0 px-7 py-3 rounded-2xl text-[13px] font-black tracking-wide transition-all duration-300 border 
+                ${activeTab === cat 
+                  ? 'bg-brand-primary text-white border-transparent shadow-[0_10px_25px_-5px_var(--brand-glow)] scale-105' 
+                  : 'bg-white dark:bg-white/[0.03] text-zinc-500 dark:text-zinc-500 border-zinc-200 dark:border-white/5 hover:border-brand-primary/30 hover:text-brand-primary dark:hover:text-white'
+                }
+              `}
             >
               {cat}
             </button>
@@ -552,9 +564,13 @@ const AppContent: React.FC = () => {
     if (selectedUniversity !== 'none' && !isGlobal && location.pathname !== '/welcome') {
       const slug = getUniSlug(selectedUniversity);
       if (slug) {
-        navigate(`/${slug}${location.pathname}`, { replace: true });
+        // Only redirect if the current path doesn't already start with the correct slug
+        const currentPathParts = location.pathname.split('/').filter(Boolean);
+        if (currentPathParts[0] !== slug) {
+          navigate(`/${slug}${location.pathname === '/' ? '' : location.pathname}`, { replace: true });
+        }
       }
-    } else if (selectedUniversity === 'none' && !isGlobal && location.pathname !== '/welcome') {
+    } else if (selectedUniversity === 'none' && !isGlobal && !['/', '/welcome', '/login', '/signup'].includes(location.pathname)) {
       navigate('/welcome', { replace: true });
     }
   }, [selectedUniversity, location.pathname, navigate, selectUniversity]);
@@ -643,8 +659,8 @@ const AppContent: React.FC = () => {
       <Route path="/library/:program/:semester" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
       <Route path="/library/:program/:semester/:subject" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
       <Route path="/library/:program/:semester/:subject/:category" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator /></FeatureGuard>} />
-      <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator /></FeatureGuard>} />
+      <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
+      <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
       <Route path="/help" element={<HelpSection />} />
       <Route path="/freshers" element={<FeatureGuard module={ModuleType.FRESHERS}><FreshersKit /></FeatureGuard>} />
       <Route path="/share-cgpa" element={<ShareReport />} />
@@ -681,7 +697,7 @@ const AppContent: React.FC = () => {
         <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-white dark:bg-[#0a0a0a]">
           <BackgroundEffects />
 
-        <header className="sticky top-0 h-16 bg-white/70 dark:bg-black/70 backdrop-blur-2xl border-b border-zinc-200/50 dark:border-white/5 flex items-center px-4 md:px-8 z-[100] transition-all duration-300">
+        <header className="sticky top-0 h-16 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-2xl border-b border-zinc-200/50 dark:border-white/5 flex items-center px-4 md:px-8 z-[100] transition-all duration-300">
           <div className="flex items-center gap-1 md:gap-4 flex-1 md:flex-none">
             <button 
               onClick={() => setIsMobileMenuOpen(true)}
