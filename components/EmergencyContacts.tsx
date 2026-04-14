@@ -159,14 +159,14 @@ const EmergencyContacts: React.FC = () => {
                                 className={`w-full bg-white dark:bg-white/[0.03] p-4 md:p-6 rounded-2xl md:rounded-[32px] border border-zinc-200 dark:border-white/10 flex items-center justify-between gap-4 transition-all group active:scale-[0.99] ${isExpanded ? 'ring-2 ring-brand-primary/10 border-brand-primary/20' : ''}`}
                             >
                                 <div className="flex items-center gap-4 md:gap-5 text-left min-w-0">
-                                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shadow-md transition-transform group-hover:scale-105 shrink-0 ${category === 'Hostel' ? 'bg-orange-600 text-white' :
-                                        category === 'Doctor' ? 'bg-red-600 text-white' :
+                                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shadow-md transition-transform group-hover:scale-105 shrink-0 ${category === 'Hostel' ? 'bg-brand-primary text-white' :
+                                        category === 'Doctor' ? 'bg-brand-secondary text-white' :
                                             category === 'Nursing' ? 'bg-blue-600 text-white' :
                                                 category === 'Counseling' ? 'bg-purple-600 text-white' :
                                                     category === 'Hospital' ? 'bg-cyan-600 text-white' :
                                                         category === 'Facility' ? 'bg-zinc-700 text-white' :
                                                             category === 'Women Support' ? 'bg-rose-600 text-white' :
-                                                                category === 'Fire & Safety' ? 'bg-red-700 text-white' :
+                                                                category === 'Fire & Safety' ? 'bg-brand-primary text-white' :
                                                                     category === 'Accounts' ? 'bg-amber-600 text-white' :
                                                                         category === 'Student Relations' ? 'bg-emerald-600 text-white' :
                                                                             'bg-zinc-600 text-white'
@@ -202,7 +202,7 @@ const EmergencyContacts: React.FC = () => {
                             {isExpanded && (
                                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4 animate-slide-up pb-2">
                                     {categoryItems.map((item) => (
-                                        <div key={item.id} className="group p-4 md:p-6 bg-white dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 rounded-2xl md:rounded-[32px] hover:border-orange-500/30 hover:shadow-xl transition-all flex flex-col justify-between overflow-hidden">
+                                        <div key={item.id} className="group p-4 md:p-6 bg-white dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 rounded-2xl md:rounded-[32px] hover:border-brand-primary/30 hover:shadow-xl transition-all flex flex-col justify-between overflow-hidden">
                                             <div className="space-y-4">
                                                 <div className="flex justify-between items-start gap-2">
                                                     <div className="min-w-0 text-left">
@@ -257,7 +257,7 @@ const EmergencyContacts: React.FC = () => {
             <div className="bg-white dark:bg-white/[0.03] rounded-[32px] md:rounded-[48px] p-6 md:p-10 border border-zinc-200 dark:border-white/10 shadow-xl space-y-8 md:space-y-10">
                 <div className="flex flex-col md:flex-row justify-between items-start gap-6 border-b border-zinc-100 dark:border-white/5 pb-8">
                     <div className="space-y-3">
-                        <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-red-600/10 text-red-600 rounded-full text-[11px] sm:text-xs font-medium text-left">
+                        <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-brand-primary/10 text-brand-primary rounded-full text-[11px] sm:text-xs font-medium text-left">
                             Official Directory
                         </div>
                         <h3 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white tracking-tighter leading-none text-left">Uni Health Centre</h3>
@@ -330,14 +330,14 @@ const EmergencyContacts: React.FC = () => {
 
                     {/* Emergency Card */}
                     <div className="space-y-3 text-left">
-                        <div className="w-10 h-10 rounded-xl bg-red-600/10 text-red-600 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-xl bg-brand-primary/10 text-brand-primary flex items-center justify-center">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                         </div>
                         <div className="space-y-2">
                             <h4 className="text-[15px] md:text-[17px] font-bold text-zinc-900 dark:text-white tracking-tighter uppercase">Emergency Support</h4>
                             <ul className="space-y-1 text-[11px] sm:text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider leading-relaxed">
                                 <li>6 Active Ambulances</li>
-                                <li className="text-red-500">Free for Seriously Ill</li>
+                                <li className="text-brand-primary">Free for Seriously Ill</li>
                                 <li>24x7 Emergency Support</li>
                                 <li>Referrals: JAL, PHG, LDH</li>
                                 <li>Immediate Response Team</li>

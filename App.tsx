@@ -78,6 +78,7 @@ const getModuleFromPath = (path: string): ModuleType => {
   if (normalizedPath.includes('/privacy')) return ModuleType.PRIVACY;
   if (normalizedPath.includes('/login')) return ModuleType.LOGIN;
   if (normalizedPath.includes('/signup')) return ModuleType.SIGNUP;
+  if (normalizedPath.includes('/settings')) return ModuleType.SETTINGS;
   return ModuleType.DASHBOARD;
 };
 
@@ -108,6 +109,7 @@ const getPathFromModule = (module: ModuleType, uniKey: UniversityId = 'none'): s
     case ModuleType.PRIVACY: return `/privacy`;
     case ModuleType.LOGIN: return `/login`;
     case ModuleType.SIGNUP: return `/signup`;
+    case ModuleType.SETTINGS: return `${prefix}/settings`;
     default: return uniSlug ? `/${uniSlug}` : '/';
   }
 };
@@ -406,9 +408,9 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
     { id: ModuleType.CGPA, name: 'CGPA Calc', desc: 'Calculate and forecast your performance.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="4" y="2" width="16" height="20" rx="2" /><line x1="8" y1="6" x2="16" y2="6" /><line x1="16" y1="14" x2="16" y2="18" /><path d="M16 10h.01" /><path d="M12 10h.01" /><path d="M8 10h.01" /><path d="M12 14h.01" /><path d="M8 14h.01" /><path d="M12 18h.01" /><path d="M8 18h.01" /></svg>, path: '/tools?tab=cgpa', category: 'Tools' },
     { id: ModuleType.ATTENDANCE, name: 'Attendance', desc: 'Track your attendance and safe-bunks.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>, path: '/tools?tab=attendance', category: 'Tools' },
     { id: ModuleType.PLACEMENT, name: 'Placement Prefect', desc: 'Analyze resumes and prep for jobs.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>, path: '/tools?tab=placement', category: 'Tools' },
-    { id: ModuleType.CAMPUS, name: 'Campus Navigator', desc: 'Find blocks and rooms with ease.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>, path: '/campus', category: 'Campus' },
+    { id: ModuleType.CAMPUS, name: 'Campus Hub', desc: 'Find blocks and rooms with ease.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>, path: '/campus', category: 'Campus' },
     { id: ModuleType.FRESHERS, name: 'Freshmen Kit', desc: 'Essential guide for newcomers.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M4 20V10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" /><path d="M9 6V4a3 3 0 0 1 6 0v2" /><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5" /></svg>, path: '/freshers', category: 'Campus' },
-    { id: ModuleType.MARKETPLACE, name: `${shortBrandName} Market`, desc: 'Buy/Sell used books and items.', icon: <svg viewBox="0 0 16 16" fill="currentColor" className="w-6 h-6"><path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.37 2.37 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0M1.5 8.5A.5.5 0 0 1 2 9v6h12V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0-1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5m2 .5a.5.5 0 0 1 .5.5V13h8V9.5a.5.5 0 0 1 1 0V13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5a.5.5 0 0 1 .5-.5" /></svg>, path: '/marketplace', category: 'Social' },
+
     { id: ModuleType.ROOMMATE, name: 'Roommate Finder', desc: `Find your perfect ${shortBrandName} flatmate.`, icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>, path: '/roommate', category: 'Social' },
     { id: ModuleType.EMERGENCY, name: 'Rescue Line', desc: `Emergency ${shortBrandName} official contacts.`, icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>, path: '/emergency', category: 'Campus' },
     { id: ModuleType.AI_TOOLS, name: 'AI Directory', desc: 'Curated AI tools for students.', icon: <svg viewBox="0 0 16 16" fill="currentColor" className="w-6 h-6"><path d="M14.949 6.547a3.94 3.94 0 0 0-.348-3.273 4.11 4.11 0 0 0-4.4-1.934A4.1 4.1 0 0 0 8.423.2 4.15 4.15 0 0 0 6.305.086a4.1 4.1 0 0 0-1.891.948 4.04 4.04 0 0 0-1.158 1.753 4.1 4.1 0 0 0-1.563.679A4 4 0 0 0 .554 4.72a3.99 3.99 0 0 0 .502 4.731 3.94 3.94 0 0 0 .346 3.274 4.11 4.11 0 0 0 4.402 1.933c.382.425.852.764 1.377.995.526.231 1.095.35 1.67.346 1.78.002 3.358-1.132 3.901-2.804a4.1 4.1 0 0 0 1.563-.68 4 4 0 0 0 1.14-1.253 3.99 3.99 0 0 0-.506-4.716m-6.097 8.406a3.05 3.05 0 0 1-1.945-.694l.096-.054 3.23-1.838a.53.53 0 0 0 .265-.455v-4.49l1.366.778q.02.011.025.035v3.722c-.003 1.653-1.361 2.992-3.037 2.996m-6.53-2.75a2.95 2.95 0 0 1-.36-2.01l.095.057L5.29 12.09a.53.53 0 0 0 .527 0l3.949-2.246v1.555a.05.05 0 0 1-.022.041L6.473 13.3c-1.454.826-3.311.335-4.15-1.098m-.85-6.94A3.02 3.02 0 0 1 3.07 3.949v3.785a.51.51 0 0 0 .262.451l3.93 2.237-1.366.779a.05.05 0 0 1-.048 0L2.585 9.342a2.98 2.98 0 0 1-1.113-4.094zm11.216 2.571L8.747 5.576l1.362-.776a.05.05 0 0 1 .048 0l3.265 1.86a3 3 0 0 1 1.173 1.207 2.96 2.96 0 0 1-.27 3.2 3.05 3.05 0 0 1-1.36.997V8.279a.52.52 0 0 0-.276-.445m1.36-2.015-.097-.057-3.226-1.855a.53.53 0 0 0-.53 0L6.249 6.153V4.598a.04.04 0 0 1 .019-.04L9.533 2.7a3.07 3.07 0 0 1 3.257.139c.474.325.843.778 1.066 1.303.223.526.289 1.103.191 1.664zM5.503 8.575 4.139 7.8a.05.05 0 0 1-.026-.037V4.049c0-.57.166-1.127.476-1.607s.752-.864 1.275-1.105a3.08 3.08 0 0 1 3.234.41l-.096.054-3.23 1.838a.53.53 0 0 0-.265.455zm.742-1.577 1.758-1 1.762 1v2l-1.755 1-1.762-1z" /></svg>, path: '/ai-tools', category: 'Tools' }
@@ -564,10 +566,9 @@ const AppContent: React.FC = () => {
     if (selectedUniversity !== 'none' && !isGlobal && location.pathname !== '/welcome') {
       const slug = getUniSlug(selectedUniversity);
       if (slug) {
-        // Only redirect if the current path doesn't already start with the correct slug
         const currentPathParts = location.pathname.split('/').filter(Boolean);
         if (currentPathParts[0] !== slug) {
-          navigate(`/${slug}${location.pathname === '/' ? '' : location.pathname}`, { replace: true });
+          navigate(`/${slug}${location.pathname === '/' ? '' : location.pathname}${location.search}`, { replace: true });
         }
       }
     } else if (selectedUniversity === 'none' && !isGlobal && !['/', '/welcome', '/login', '/signup'].includes(location.pathname)) {
@@ -684,9 +685,9 @@ const AppContent: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-[#0a0a0a] text-zinc-900 dark:text-zinc-200">
+    <div className="flex flex-col h-screen overflow-hidden bg-white dark:bg-[#0a0a0a] text-zinc-900 dark:text-zinc-200">
       <AnnouncementBand />
-      <div className="flex flex-1 h-[calc(100vh-theme(spacing.10))] overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
         <Sidebar
           currentModule={currentModule}
           setModule={navigateToModule}
@@ -810,22 +811,13 @@ const AppContent: React.FC = () => {
                           </button>
                         )}
                         <button
-                          onClick={() => { navigate('/profile'); handleProfileClose(); }}
+                          onClick={() => { navigate('/settings'); handleProfileClose(); }}
                           className="w-full text-left px-5 py-2.5 text-xs font-semibold text-zinc-700 dark:text-white/80 hover:text-brand-primary dark:hover:text-white hover:bg-brand-primary/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
                         >
                           <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-brand-primary/20 transition-colors">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                           </div>
-                          View Profile
-                        </button>
-                        <button
-                          onClick={async () => { await NexusServer.signOut(); navigate('/'); handleProfileClose(); }}
-                          className="w-full text-left px-5 py-2.5 text-xs font-semibold text-red-500 hover:bg-red-500/10 border-none bg-transparent flex items-center gap-3 transition-all"
-                        >
-                          <div className="w-8 h-8 rounded-full bg-red-500/5 flex items-center justify-center text-red-500">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
-                          </div>
-                          Log out
+                          Settings
                         </button>
                       </div>
                     </>

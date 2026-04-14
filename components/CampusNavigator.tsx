@@ -302,12 +302,12 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
         <div className="animate-fade-in">
           <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">
             {{
-              'mess': <>Mess <span className="text-orange-500">Menu</span></>,
-              'map': <>Campus <span className="text-emerald-500">Map</span></>,
-              'market': <>Nexus <span className="text-blue-500">Market</span></>,
-              'roommate': <>Roommate <span className="text-purple-500">Finder</span></>,
-              '': <>Campus <span className="text-brand-primary">Hub</span></>
-            }[activeTab] || <>Campus <span className="text-brand-primary">Hub</span></>}
+            'mess': <>Mess <span className="text-brand-primary">Menu</span></>,
+            'map': <>Campus <span className="text-brand-secondary">Map</span></>,
+            'market': <>Nexus <span className="text-blue-500">Market</span></>,
+            'roommate': <>Roommate <span className="text-purple-500">Finder</span></>,
+            '': <>Campus <span className="text-brand-primary">Hub</span></>
+          }[activeTab] || <>Campus <span className="text-brand-primary">Hub</span></>}
           </h2>
         </div>
 
@@ -333,9 +333,9 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                   label: 'Mess Menu',
                   desc: 'Food & Timing',
                   icon: <IconMess />,
-                  bgColor: 'from-orange-500/20 via-orange-500/5 to-transparent',
-                  accentColor: 'text-orange-500',
-                  gradient: 'radial-gradient(circle at center, rgba(249, 115, 22, 0.15), transparent 70%)'
+                  bgColor: 'from-brand-primary/20 via-brand-primary/5 to-transparent',
+                  accentColor: 'text-brand-primary',
+                  gradient: 'radial-gradient(circle at center, var(--brand-glow), transparent 70%)'
                 },
                 map: {
                   label: '3D Map',
@@ -393,96 +393,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
             })}
           </div>
 
-          <div className="space-y-8 animate-fade-in-up">
-            <div className="flex items-center justify-between px-2">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pink-500 via-red-500 to-yellow-500 p-[2px]">
-                  <div className="w-full h-full rounded-[14px] bg-white dark:bg-zinc-900 flex items-center justify-center">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-pink-600"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-zinc-900 dark:text-white tracking-tight">University <span className="text-pink-600">Buzz</span></h3>
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live from @unilpu
-                  </p>
-                </div>
-              </div>
-              <a href="https://instagram.com/unilpu" target="_blank" rel="noreferrer" className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-pink-600 transition-colors">See all posts</a>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
-              {[
-                {
-                  title: "One World 2026",
-                  desc: "Recap: Over 4,000 students from 33 countries united for LPU's grandest cultural fest. A true celebration of diversity!",
-                  tag: "Event",
-                  time: "2h ago",
-                  color: "from-pink-500/10 to-transparent",
-                  accent: "text-pink-500",
-                  image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&q=80&w=800"
-                },
-                {
-                  title: "LPUNEST Phase 3",
-                  desc: "Registration is closing soon! Ensure your spot and scholarship before April 15. Apply now via the official portal.",
-                  tag: "Urgent",
-                  time: "5h ago",
-                  color: "from-orange-500/10 to-transparent",
-                  accent: "text-orange-500",
-                  image: "https://images.unsplash.com/photo-1434031216315-9257e8055663?auto=format&fit=crop&q=80&w=800"
-                },
-                {
-                  title: "Alumni Homecoming",
-                  desc: "Heartwarming scenes at the campus as our global community returned for Alumni Meet 2026. Welcome back, seniors!",
-                  tag: "Community",
-                  time: "1d ago",
-                  color: "from-blue-500/10 to-transparent",
-                  accent: "text-blue-500",
-                  image: "https://images.unsplash.com/photo-1523580494863-6f30312246d5?auto=format&fit=crop&q=80&w=800"
-                }
-              ].map((post, i) => (
-                <div key={i} className="glass-panel overflow-hidden rounded-[2.5rem] border border-zinc-200 dark:border-white/5 bg-white dark:bg-zinc-900/40 group hover:border-pink-500/30 transition-all duration-500 hover:shadow-2xl hoverShadow-pink-500/5 hover:-translate-y-2">
-                  <div className="p-4 flex items-center justify-between border-b border-zinc-100 dark:border-white/5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-pink-500 to-yellow-500 p-[1.5px]">
-                        <div className="w-full h-full rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center p-0.5">
-                          <img src="https://ui-avatars.com/api/?name=LPU&background=f06&color=fff" className="w-full h-full rounded-full" alt="LPU" />
-                        </div>
-                      </div>
-                      <span className="text-[11px] font-black tracking-tight text-zinc-900 dark:text-white capitalize">unilpu</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-zinc-400">{post.time}</span>
-                  </div>
-                  <div className="relative h-56 overflow-hidden">
-                    <img src={post.image} alt={post.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                  </div>
-                  <div className="p-6 space-y-3">
-                    <div className="flex items-center gap-2">
-                       <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest bg-pink-500/10 text-pink-600 border border-pink-500/20`}>{post.tag}</span>
-                       <h4 className="font-black text-zinc-900 dark:text-white tracking-tight text-sm">{post.title}</h4>
-                    </div>
-                    <p className="text-[12px] text-zinc-500 dark:text-zinc-400 leading-relaxed line-clamp-2 font-medium">
-                      {post.desc}
-                    </p>
-                    <div className="pt-2 flex items-center justify-between">
-                      <div className="flex items-center gap-4 text-zinc-400">
-                        <div className="flex items-center gap-1.5 hover:text-pink-500 transition-colors cursor-pointer">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                          <span className="text-[10px] font-black">1.2k</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 hover:text-blue-500 transition-colors cursor-pointer">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                          <span className="text-[10px] font-black">48</span>
-                        </div>
-                      </div>
-                      <button className="text-[10px] font-black text-pink-600 uppercase tracking-widest hover:underline decoration-2 underline-offset-4 bg-transparent border-none p-0">View Post</button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       )}
 
@@ -587,10 +498,10 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-10">
-                    <MealCard title="Breakfast" items={selectedMeals.breakfast} icon={<IconBreakfast />} accentColor="text-orange-500" />
-                    <MealCard title="Lunch" items={selectedMeals.lunch} icon={<IconLunch />} accentColor="text-orange-500" />
-                    <MealCard title="Snacks" items={selectedMeals.snacks} icon={<IconSnacks />} accentColor="text-orange-500" />
-                    <MealCard title="Dinner" items={selectedMeals.dinner} icon={<IconDinner />} accentColor="text-orange-500" />
+                    <MealCard title="Breakfast" items={selectedMeals.breakfast} icon={<IconBreakfast />} accentColor="text-brand-primary" />
+                    <MealCard title="Lunch" items={selectedMeals.lunch} icon={<IconLunch />} accentColor="text-brand-primary" />
+                    <MealCard title="Snacks" items={selectedMeals.snacks} icon={<IconSnacks />} accentColor="text-brand-primary" />
+                    <MealCard title="Dinner" items={selectedMeals.dinner} icon={<IconDinner />} accentColor="text-brand-primary" />
                   </div>
                 </div>
               ) : (
@@ -602,7 +513,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
               <div className="pt-10 flex justify-center pb-20">
                 <button
                   onClick={() => setIsReportModalOpen(true)}
-                  className="flex items-center px-6 py-3 bg-zinc-100 dark:bg-white/5 hover:bg-orange-500/10 hover:text-orange-600 border border-transparent dark:border-white/5 hover:border-orange-500/30 rounded-2xl transition-all group"
+                  className="flex items-center px-6 py-3 bg-zinc-100 dark:bg-white/5 hover:bg-brand-primary/10 hover:text-brand-primary border border-transparent dark:border-white/5 hover:border-brand-primary/30 rounded-2xl transition-all group"
                 >
                   <IconAlert />
                   <span className="text-[11px] sm:text-xs font-black uppercase tracking-widest">Report Issue / Outdated Data</span>
@@ -712,7 +623,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                 </button>
                 <button
                   type="submit"
-                  className="flex-[2] py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-black text-[11px] sm:text-xs uppercase tracking-widest transition-all shadow-xl shadow-orange-600/20 active:scale-[0.98] border-none"
+                  className="flex-[2] py-3 bg-brand-primary hover:opacity-90 text-white rounded-xl font-black text-[11px] sm:text-xs uppercase tracking-widest transition-all shadow-xl shadow-brand-primary/20 active:scale-[0.98] border-none"
                 >
                   Submit Report
                 </button>

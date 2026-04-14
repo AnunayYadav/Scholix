@@ -309,7 +309,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                     <p className="text-sm font-medium dark:text-white">{h.label}</p>
                     <p className="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase mt-1">{new Date(h.created_at).toLocaleDateString()}</p>
                   </div>
-                  <button onClick={(e) => deleteHistory(h.id, e)} className="p-2 text-red-500/20 hover:text-red-500 border-none bg-transparent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+                  <button onClick={(e) => deleteHistory(h.id, e)} className="p-2 text-brand-secondary opacity-20 hover:opacity-100 border-none bg-transparent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
                 </div>
               ))}
             </div>
@@ -395,22 +395,22 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                         />
                       )}
                     </div>
-                    <button onClick={() => removeCourse(c.id)} className="p-3 text-red-500/20 hover:text-red-500 border-none bg-transparent mt-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+                    <button onClick={() => removeCourse(c.id)} className="p-3 text-brand-secondary opacity-20 hover:opacity-100 border-none bg-transparent mt-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
                   </div>
                 </div>
               ))}</div>
             )}
           </div>
 
-          <div className="glass-panel p-10 rounded-[56px] space-y-10 shadow-2xl border border-blue-500/20 bg-blue-500/[0.03]">
+          <div className="glass-panel p-10 rounded-[56px] space-y-10 shadow-2xl border border-brand-primary/20 bg-brand-primary/[0.03]">
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h3 className="text-[11px] sm:text-xs font-medium text-blue-600 dark:text-blue-400">Degree target</h3>
+                <h3 className="text-[11px] sm:text-xs font-medium text-brand-primary">Degree target</h3>
                 <p className="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-widest mt-1">Forecast individual semester performance</p>
               </div>
               <div className="relative">
-                <input type="number" step="0.1" max="10" value={targetCGPA} onChange={(e) => setTargetCGPA(e.target.value)} className="w-28 bg-white dark:bg-[#0a0a0a]/60 border border-blue-500/30 rounded-2xl px-4 py-3 text-base text-center font-bold text-blue-600 outline-none focus:ring-4 focus:ring-blue-500/10" placeholder="9.0" />
-                <span className="absolute -top-2 -right-2 w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center text-white text-[11px] sm:text-xs font-black">!</span>
+                <input type="number" step="0.1" max="10" value={targetCGPA} onChange={(e) => setTargetCGPA(e.target.value)} className="w-28 bg-white dark:bg-[#0a0a0a]/60 border border-brand-primary/30 rounded-2xl px-4 py-3 text-base text-center font-bold text-brand-primary outline-none focus:ring-4 focus:ring-brand-primary/10" placeholder="9.0" />
+                <span className="absolute -top-2 -right-2 w-4 h-4 bg-brand-primary rounded-full flex items-center justify-center text-white text-[11px] sm:text-xs font-black">!</span>
               </div>
             </header>
 
@@ -425,7 +425,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                         <button onClick={() => adjustSemTarget(item.sem, -0.1)} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-brand-primary hover:text-white transition-all border-none">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 sm:w-3.5 sm:h-3.5"><path d="M5 12h14" /></svg>
                         </button>
-                        <span className={`text-xl sm:text-2xl font-bold tracking-tight ${item.isManual ? 'text-brand-primary' : 'text-blue-600'}`}>{item.sgpa.toFixed(1)}</span>
+                        <span className={`text-xl sm:text-2xl font-bold tracking-tight ${item.isManual ? 'text-brand-primary' : 'text-brand-primary'}`}>{item.sgpa.toFixed(1)}</span>
                         <button onClick={() => adjustSemTarget(item.sem, 0.1)} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-brand-primary hover:text-white transition-all border-none">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 sm:w-3.5 sm:h-3.5"><path d="M12 5v14M5 12h14" /></svg>
                         </button>
@@ -445,14 +445,14 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                   ))}
                 </div>
 
-                <div className={`p-6 rounded-[32px] border flex items-center gap-4 ${roadmapData.summary.isImpossible ? 'bg-red-500/10 border-red-500/20' : 'bg-blue-600/5 border-blue-600/10'}`}>
-                  <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center flex-shrink-0 font-black text-xs ${roadmapData.summary.isImpossible ? 'bg-red-500' : 'bg-blue-600'}`}>
+                <div className={`p-6 rounded-[32px] border flex items-center gap-4 ${roadmapData.summary.isImpossible ? 'bg-brand-secondary/10 border-brand-secondary/20' : 'bg-brand-primary/5 border-brand-primary/10'}`}>
+                  <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center flex-shrink-0 font-black text-xs ${roadmapData.summary.isImpossible ? 'bg-brand-secondary' : 'bg-brand-primary'}`}>
                     {roadmapData.summary.isImpossible ? '!' : 'i'}
                   </div>
                   <p className="text-[11px] sm:text-xs font-bold text-zinc-600 dark:text-zinc-300 leading-relaxed">
                     {roadmapData.summary.isImpossible
                       ? "Target mathematically unreachable. Reduce manual locks or lower target CGPA."
-                      : <>Auto-balancing: Remaining unlocked semesters now require an average of <strong className="text-blue-600">{roadmapData.summary.avgNeeded.toFixed(2)} SGPA</strong> to maintain your <strong className="text-blue-600">{targetCGPA}</strong> goal.</>
+                      : <>Auto-balancing: Remaining unlocked semesters now require an average of <strong className="text-brand-primary">{roadmapData.summary.avgNeeded.toFixed(2)} SGPA</strong> to maintain your <strong className="text-brand-primary">{targetCGPA}</strong> goal.</>
                     }
                   </p>
                 </div>

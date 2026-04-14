@@ -267,7 +267,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
       <header className={`flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6 ${hideHeader ? 'mb-4' : ''}`}>
         {!hideHeader ? (
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white mb-2 tracking-tight">Attendance <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Tracker</span></h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white mb-2 tracking-tight">Attendance <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Tracker</span></h2>
             <p className="text-zinc-500 dark:text-zinc-400 text-xs md:text-sm font-medium tracking-tight">Keep track of your classes and attendance.</p>
           </div>
         ) : <div />}
@@ -276,7 +276,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
           {subjects.length > 0 && (
             <div className="relative">
               {wipingAll ? (
-                <div className="flex items-center bg-red-600 rounded-xl overflow-hidden shadow-lg animate-fade-in">
+                <div className="flex items-center bg-brand-secondary rounded-xl overflow-hidden shadow-lg animate-fade-in">
                   <button
                     onClick={() => setWipingAll(false)}
                     className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] font-bold text-white/70 hover:text-white"
@@ -285,7 +285,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                   </button>
                   <button
                     onClick={executeClearAll}
-                    className="px-3 md:px-4 py-1.5 md:py-2 bg-white text-red-600 font-black text-[10px] uppercase tracking-widest hover:bg-red-50"
+                    className="px-3 md:px-4 py-1.5 md:py-2 bg-white text-brand-secondary font-black text-[10px] uppercase tracking-widest hover:bg-zinc-50"
                   >
                     Wipe?
                   </button>
@@ -293,7 +293,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               ) : (
                 <button
                   onClick={(e) => { e.stopPropagation(); setWipingAll(true); }}
-                  className="flex items-center space-x-1.5 px-3 md:px-4 py-2 md:py-2.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl text-[10px] md:text-xs font-bold text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                  className="flex items-center space-x-1.5 px-3 md:px-4 py-2 md:py-2.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl text-[10px] md:text-xs font-bold text-brand-secondary hover:bg-brand-secondary hover:text-white transition-all shadow-sm"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 md:w-3.5 h-3 md:h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
                   <span>Clear All</span>
@@ -304,7 +304,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
 
           <button
             onClick={() => setShowArchived(!showArchived)}
-            className={`flex items-center space-x-1.5 px-3 md:px-4 py-2 md:py-2.5 rounded-xl text-[10px] md:text-xs font-bold transition-all shadow-sm ${showArchived ? 'bg-orange-600 text-white' : 'bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-600 dark:text-zinc-400'}`}
+            className={`flex items-center space-x-1.5 px-3 md:px-4 py-2 md:py-2.5 rounded-xl text-[10px] md:text-xs font-bold transition-all shadow-sm ${showArchived ? 'bg-brand-primary text-white' : 'bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-600 dark:text-zinc-400'}`}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 md:w-3.5 h-3 md:h-3.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
             <span>{showArchived ? 'Active' : 'Archived'}</span>
@@ -316,7 +316,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 items-end">
           <div className="md:col-span-3">
             <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2 ml-1">
-              Subject Name <span className="text-red-500">*</span>
+              Subject Name <span className="text-brand-secondary">*</span>
             </label>
             <input
               type="text"
@@ -327,8 +327,8 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                 if (showValidation) setShowValidation(false);
               }}
               className={`w-full bg-zinc-100 dark:bg-[#0a0a0a] border rounded-2xl px-5 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none transition-all font-bold text-sm shadow-inner ${showValidation && !newSub.name.trim()
-                ? 'border-red-500 ring-2 ring-red-500/20'
-                : 'border-transparent focus:ring-2 focus:ring-orange-600'
+                ? 'border-brand-secondary ring-2 ring-brand-secondary/20'
+                : 'border-transparent focus:ring-2 focus:ring-brand-primary'
                 }`}
             />
           </div>
@@ -338,13 +338,13 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               <input
                 type="number" placeholder="P" value={newSub.present}
                 onChange={(e) => setNewSub({ ...newSub, present: e.target.value })}
-                className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-3 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all text-sm text-center font-bold shadow-inner"
+                className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-3 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-sm text-center font-bold shadow-inner"
               />
               <span className="text-zinc-400 font-black">/</span>
               <input
                 type="number" placeholder="T" value={newSub.total}
                 onChange={(e) => setNewSub({ ...newSub, total: e.target.value })}
-                className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-3 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all text-sm text-center font-bold shadow-inner"
+                className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-3 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-sm text-center font-bold shadow-inner"
               />
             </div>
           </div>
@@ -353,7 +353,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
             <input
               type="number" placeholder="0" value={newSub.dutyLeaves}
               onChange={(e) => setNewSub({ ...newSub, dutyLeaves: e.target.value })}
-              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-5 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all text-sm text-center font-bold shadow-inner"
+              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-5 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-sm text-center font-bold shadow-inner"
             />
           </div>
           <div className="md:col-span-2">
@@ -361,13 +361,13 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
             <input
               type="number" placeholder="75" value={newSub.goal}
               onChange={(e) => setNewSub({ ...newSub, goal: e.target.value })}
-              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-5 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all text-sm text-center font-bold shadow-inner"
+              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-2xl px-5 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-sm text-center font-bold shadow-inner"
             />
           </div>
           <div className="md:col-span-2">
             <button
               onClick={addSubject}
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3.5 md:py-[1.15rem] rounded-2xl font-bold text-[13px] tracking-tight transition-all shadow-xl shadow-orange-600/20 active:scale-95 flex items-center justify-center whitespace-nowrap"
+              className="w-full bg-brand-primary hover:opacity-90 text-white py-3.5 md:py-[1.15rem] rounded-2xl font-bold text-[13px] tracking-tight transition-all shadow-xl shadow-brand-primary/20 active:scale-95 flex items-center justify-center whitespace-nowrap"
             >
               Track Subject
             </button>
@@ -387,8 +387,8 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
           {filteredSubjects.map((sub) => {
             const { percentage, needed, skippable, goal } = calculateStats(sub);
             const isBelowGoal = percentage < goal;
-            const accentColor = isBelowGoal ? 'text-red-500' : 'text-emerald-500';
-            const accentBg = isBelowGoal ? 'bg-red-500/10' : 'bg-emerald-500/10';
+            const accentColor = isBelowGoal ? 'text-brand-secondary' : 'text-emerald-500';
+            const accentBg = isBelowGoal ? 'bg-brand-secondary/10' : 'bg-emerald-500/10';
             const hasHistory = history.some(h => h.id === sub.id);
             const isDeleting = deletingId === sub.id;
 
@@ -399,7 +399,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                   glass-panel p-3 sm:p-4 md:p-5 rounded-[20px] md:rounded-[28px] border transition-all duration-500 group relative overflow-hidden flex flex-col
                   border-zinc-200 dark:border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]
                   bg-white/80 dark:bg-[#0a0a0a]/60 backdrop-blur-xl
-                  ${isDeleting ? 'ring-4 ring-red-500/20 border-red-500 scale-[0.98]' : ''}
+                  ${isDeleting ? 'ring-4 ring-brand-secondary/20 border-brand-secondary scale-[0.98]' : ''}
                 `}
               >
                 {/* Top Section: Name and Percentage */}
@@ -427,19 +427,19 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                 <div className="mb-4">
                   <div className="flex justify-between items-center mb-1.5 px-0.5">
                     <p className="text-[11px] sm:text-xs font-semibold text-zinc-400">Progress</p>
-                    <p className="text-[11px] sm:text-xs font-semibold text-orange-600">Goal: {sub.goal}%</p>
+                    <p className="text-[11px] sm:text-xs font-semibold text-brand-primary">Goal: {sub.goal}%</p>
                   </div>
                   <div className="h-1.5 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden relative">
                     {/* Goal Marker */}
                     <div
-                      className="absolute top-0 bottom-0 w-0.5 bg-orange-500/30 z-20 backdrop-blur-md"
+                      className="absolute top-0 bottom-0 w-0.5 bg-brand-primary/30 z-20 backdrop-blur-md"
                       style={{ left: `${goal}%` }}
                     />
 
                     <div
                       className={`h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${!isBelowGoal
                         ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
-                        : 'bg-gradient-to-r from-red-600 to-rose-500'
+                        : 'bg-brand-gradient opacity-80'
                         }`}
                       style={{ width: `${percentage}%` }}
                     >
@@ -460,7 +460,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                     </button>
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'duty', e)}
-                      className="group/btn h-8 bg-orange-100/50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-full font-semibold text-[11px] sm:text-xs hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center justify-center gap-1.5 border border-orange-200/50 dark:border-orange-500/20 px-2 shadow-sm"
+                      className="group/btn h-8 bg-brand-primary/10 text-brand-primary rounded-full font-semibold text-[11px] sm:text-xs hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center justify-center gap-1.5 border border-brand-primary/20 px-2 shadow-sm"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                       DL
@@ -479,9 +479,9 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                 <div className="mt-auto flex items-center justify-between pt-4 border-t border-zinc-100 dark:border-white/5">
                   <div className={`
                     px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold flex items-center gap-2
-                    ${isBelowGoal ? 'bg-red-500/5 text-red-500' : 'bg-emerald-500/5 text-emerald-500'}
+                    ${isBelowGoal ? 'bg-brand-secondary/5 text-brand-secondary' : 'bg-emerald-500/5 text-emerald-500'}
                   `}>
-                    <div className={`w-1.5 h-1.5 rounded-full ${isBelowGoal ? 'bg-red-500' : 'bg-emerald-500'} animate-pulse`} />
+                    <div className={`w-1.5 h-1.5 rounded-full ${isBelowGoal ? 'bg-brand-secondary' : 'bg-emerald-500'} animate-pulse`} />
                     {isBelowGoal ? (
                       <span>Needs {needed >= 999 ? '∞' : needed} more</span>
                     ) : (
@@ -500,7 +500,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                         </button>
                         <button
                           onClick={executeDelete}
-                          className="px-2 py-1.5 bg-red-600 text-[11px] sm:text-xs font-medium text-white rounded-lg shadow-md hover:bg-red-700 transition-colors border-none"
+                          className="px-2 py-1.5 bg-brand-secondary text-[11px] sm:text-xs font-medium text-white rounded-lg shadow-md hover:opacity-90 transition-colors border-none"
                         >
                           Del
                         </button>
@@ -510,20 +510,20 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                         {hasHistory && (
                           <button
                             onClick={(e) => undoSubjectLastAction(sub.id, e)}
-                            className="p-1.5 text-zinc-400 hover:text-orange-500 transition-all border-none bg-transparent"
+                            className="p-1.5 text-zinc-400 hover:text-brand-primary transition-all border-none bg-transparent"
                           >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 10h10a5 5 0 0 1 0 10H11" /><polyline points="8 5 3 10 8 15" /></svg>
                           </button>
                         )}
                         <button
                           onClick={(e) => handleEdit(sub, e)}
-                          className="p-1.5 text-zinc-400 hover:text-orange-500 transition-all border-none bg-transparent"
+                          className="p-1.5 text-zinc-400 hover:text-brand-primary transition-all border-none bg-transparent"
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                         </button>
                         <button
                           onClick={(e) => confirmDelete(sub.id, e)}
-                          className="p-1.5 text-zinc-400 hover:text-red-500 transition-all border-none bg-transparent"
+                          className="p-1.5 text-zinc-400 hover:text-brand-secondary transition-all border-none bg-transparent"
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
                         </button>
@@ -568,7 +568,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                   type="text"
                   value={editingSubject.name}
                   onChange={(e) => setEditingSubject({ ...editingSubject, name: e.target.value })}
-                  className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white"
+                  className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-brand-primary shadow-inner dark:text-white"
                 />
               </div>
 
@@ -579,7 +579,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                     type="number"
                     value={editingSubject.present}
                     onChange={(e) => setEditingSubject({ ...editingSubject, present: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white text-center"
+                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-brand-primary shadow-inner dark:text-white text-center"
                   />
                 </div>
                 <div>
@@ -588,7 +588,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                     type="number"
                     value={editingSubject.total}
                     onChange={(e) => setEditingSubject({ ...editingSubject, total: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white text-center"
+                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-brand-primary shadow-inner dark:text-white text-center"
                   />
                 </div>
               </div>
@@ -600,7 +600,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                     type="number"
                     value={editingSubject.dutyLeaves || 0}
                     onChange={(e) => setEditingSubject({ ...editingSubject, dutyLeaves: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white text-center"
+                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-brand-primary shadow-inner dark:text-white text-center"
                   />
                 </div>
                 <div>
@@ -609,7 +609,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                     type="number"
                     value={editingSubject.goal}
                     onChange={(e) => setEditingSubject({ ...editingSubject, goal: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-orange-500 shadow-inner dark:text-white text-center"
+                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-brand-primary shadow-inner dark:text-white text-center"
                   />
                 </div>
               </div>
@@ -625,7 +625,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                 <button
                   type="button"
                   onClick={saveEdit}
-                  className="flex-[2] bg-orange-600 text-white py-3.5 md:py-4 rounded-xl md:rounded-2xl font-black text-[11px] sm:text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none"
+                  className="flex-[2] bg-brand-primary text-white py-3.5 md:py-4 rounded-xl md:rounded-2xl font-black text-[11px] sm:text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none"
                 >
                   Save Changes
                 </button>

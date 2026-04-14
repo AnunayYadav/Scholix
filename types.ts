@@ -21,7 +21,8 @@ export enum ModuleType {
   PRIVACY = 'PRIVACY',
   LOGIN = 'LOGIN',
   SIGNUP = 'SIGNUP',
-  TOOLS = 'TOOLS'
+  TOOLS = 'TOOLS',
+  SETTINGS = 'SETTINGS'
 }
 
 export interface MarketplaceItem {

@@ -676,7 +676,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
             if (trimmedLine.startsWith('> ')) {
                 const text = trimmedLine.replace('> ', '');
                 return (
-                    <div key={i} className="p-4 bg-orange-50/50 dark:bg-orange-600/5 border-l-3 border-orange-500 rounded-r-lg italic my-4 text-zinc-600 dark:text-zinc-300 text-sm leading-relaxed">
+                    <div key={i} className="p-4 bg-brand-primary/5 dark:bg-brand-primary/10 border-l-3 border-brand-primary rounded-r-lg italic my-4 text-zinc-600 dark:text-zinc-300 text-sm leading-relaxed">
                         {parseLine(text)}
                     </div>
                 );
@@ -802,7 +802,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                             <button
                                 disabled={selectedUnitIdx === 0}
                                 onClick={() => { setSelectedUnitIdx(selectedUnitIdx - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-500 hover:text-orange-600 hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30 transition-all border-none bg-transparent cursor-pointer"
+                                className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-500 hover:text-brand-primary hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30 transition-all border-none bg-transparent cursor-pointer"
                             >
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M15 18l-6-6 6-6" /></svg>
                             </button>
@@ -810,7 +810,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                             <button
                                 disabled={selectedUnitIdx === totalUnits - 1}
                                 onClick={() => { setSelectedUnitIdx(selectedUnitIdx + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-500 hover:text-orange-600 hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30 transition-all border-none bg-transparent cursor-pointer"
+                                className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-500 hover:text-brand-primary hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30 transition-all border-none bg-transparent cursor-pointer"
                             >
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M9 18l6-6-6-6" /></svg>
                             </button>
@@ -863,7 +863,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                                         <a
                                             key={ti}
                                             href={`#${item.slug}`}
-                                            className={`block text-sm text-zinc-500 dark:text-zinc-400 hover:text-orange-600 transition-colors py-1 ${item.level === 2 ? 'ml-4' : item.level === 3 ? 'ml-8' : ''}`}
+                                            className={`block text-sm text-zinc-500 dark:text-zinc-400 hover:text-brand-primary transition-colors py-1 ${item.level === 2 ? 'ml-4' : item.level === 3 ? 'ml-8' : ''}`}
                                         >
                                             {item.number && `${item.number}. `}{item.text}
                                         </a>
@@ -880,7 +880,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                         {/* Footer */}
                         <div className="pt-6 mt-8 border-t border-zinc-100 dark:border-white/5 flex justify-between items-center text-xs text-zinc-400">
                             <span>End of Unit {unitNum}</span>
-                            <button onClick={handleBackToUnits} className="text-orange-600 hover:underline border-none bg-transparent cursor-pointer text-xs">Back to Subject</button>
+                            <button onClick={handleBackToUnits} className="text-brand-primary hover:underline border-none bg-transparent cursor-pointer text-xs">Back to Subject</button>
                         </div>
                     </div>
                 </main>
@@ -898,13 +898,13 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
         return (
             <div key={`quiz-${selectedUnitIdx}`} className="space-y-5 animate-fade-in pb-20">
                 <div className="flex items-center justify-between">
-                    <button onClick={handleBackToUnits} className="flex items-center gap-2 text-sm text-zinc-500 hover:text-orange-600 transition-colors border-none bg-transparent cursor-pointer">
+                    <button onClick={handleBackToUnits} className="flex items-center gap-2 text-sm text-zinc-500 hover:text-brand-primary transition-colors border-none bg-transparent cursor-pointer">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                         Back to Subject
                     </button>
                     <button
                         onClick={() => handleOpenNotes(selectedUnitIdx)}
-                        className="flex items-center gap-2 px-4 py-2 border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-600 dark:text-zinc-300 hover:border-orange-500 hover:text-orange-600 transition-all bg-white dark:bg-[#0a0a0a]/40 cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2 border border-zinc-200 dark:border-white/10 rounded-xl text-sm text-zinc-600 dark:text-zinc-300 hover:border-brand-primary hover:text-brand-primary transition-all bg-white dark:bg-[#0a0a0a]/40 cursor-pointer"
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
@@ -930,7 +930,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
         return (
             <div key={`flashcards-${selectedUnitIdx}`} className="space-y-5 animate-fade-in pb-20">
                 <div className="flex items-center justify-between">
-                    <button onClick={handleBackToUnits} className="flex items-center gap-2 text-sm text-zinc-500 hover:text-orange-600 transition-colors border-none bg-transparent cursor-pointer">
+                    <button onClick={handleBackToUnits} className="flex items-center gap-2 text-sm text-zinc-500 hover:text-brand-primary transition-colors border-none bg-transparent cursor-pointer">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                         Back to Subject
                     </button>
@@ -998,8 +998,8 @@ const UnitQuiz: React.FC<{ questions: QuizQuestion[]; unitNum: number }> = ({ qu
         const percentage = Math.round((score / questions.length) * 100);
         return (
             <div className="p-8 rounded-2xl border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 text-center space-y-5 animate-fade-in">
-                <div className="w-20 h-20 rounded-2xl bg-orange-600/10 flex items-center justify-center mx-auto">
-                    <span className="text-3xl font-bold text-orange-600">{percentage}%</span>
+                <div className="w-20 h-20 rounded-2xl bg-brand-primary/10 flex items-center justify-center mx-auto">
+                    <span className="text-3xl font-bold text-brand-primary">{percentage}%</span>
                 </div>
                 <div>
                     <h3 className="text-lg font-bold text-zinc-800 dark:text-white">Quiz Complete!</h3>
@@ -1008,7 +1008,7 @@ const UnitQuiz: React.FC<{ questions: QuizQuestion[]; unitNum: number }> = ({ qu
                 <div className="w-full bg-zinc-100 dark:bg-white/5 rounded-full h-2 overflow-hidden">
                     <div className={`h-full rounded-full transition-all duration-700 ${percentage >= 70 ? 'bg-green-500' : percentage >= 40 ? 'bg-orange-500' : 'bg-red-500'}`} style={{ width: `${percentage}%` }} />
                 </div>
-                <button onClick={handleRestart} className="px-8 py-3 bg-orange-600 text-white rounded-xl font-semibold text-sm shadow-lg shadow-orange-600/20 active:scale-95 transition-all border-none hover:shadow-xl cursor-pointer">
+                <button onClick={handleRestart} className="px-8 py-3 bg-brand-primary text-white rounded-xl font-semibold text-sm shadow-lg shadow-brand-primary/20 active:scale-95 transition-all border-none hover:shadow-xl cursor-pointer">
                     Retry Quiz
                 </button>
             </div>
@@ -1067,7 +1067,7 @@ const UnitQuiz: React.FC<{ questions: QuizQuestion[]; unitNum: number }> = ({ qu
                 )}
 
                 {selectedAnswer !== null && (
-                    <button onClick={handleNext} className="w-full py-3 bg-orange-600 text-white rounded-xl font-semibold text-sm shadow-lg shadow-orange-600/20 active:scale-95 transition-all border-none hover:shadow-xl cursor-pointer">
+                    <button onClick={handleNext} className="w-full py-3 bg-brand-primary text-white rounded-xl font-semibold text-sm shadow-lg shadow-brand-primary/20 active:scale-95 transition-all border-none hover:shadow-xl cursor-pointer">
                         {currentQ < questions.length - 1 ? 'Next Question →' : 'View Results'}
                     </button>
                 )}
@@ -1115,7 +1115,7 @@ const FlashcardStack = ({ cards }: { cards: Flashcard[] }) => {
                 <button
                     disabled={idx === 0}
                     onClick={() => { setIdx(idx - 1); setIsFlipped(false); }}
-                    className="w-10 h-10 bg-white dark:bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 hover:text-orange-600 disabled:opacity-30 transition-all active:scale-90 border border-zinc-100 dark:border-white/5"
+                    className="w-10 h-10 bg-white dark:bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 hover:text-brand-primary disabled:opacity-30 transition-all active:scale-90 border border-zinc-100 dark:border-white/5"
                 >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M15 18l-6-6 6-6" /></svg>
                 </button>
@@ -1125,7 +1125,7 @@ const FlashcardStack = ({ cards }: { cards: Flashcard[] }) => {
                 <button
                     disabled={idx === cards.length - 1}
                     onClick={() => { setIdx(idx + 1); setIsFlipped(false); }}
-                    className="w-10 h-10 bg-white dark:bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 hover:text-orange-600 disabled:opacity-30 transition-all active:scale-90 border border-zinc-100 dark:border-white/5"
+                    className="w-10 h-10 bg-white dark:bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 hover:text-brand-primary disabled:opacity-30 transition-all active:scale-90 border border-zinc-100 dark:border-white/5"
                 >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M9 18l6-6-6-6" /></svg>
                 </button>
