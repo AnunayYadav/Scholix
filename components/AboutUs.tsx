@@ -39,11 +39,11 @@ const StatCounter: React.FC<{ target: number; label: string; subLabel: string; a
 
   return (
     <div className="space-y-1">
-      <p className={`text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] ${accentColor} opacity-80`}>{label}</p>
-      <h4 className="text-4xl lg:text-5xl font-black text-zinc-800 dark:text-white tracking-tighter leading-none">
+      <p className={`text-[11px] font-bold uppercase tracking-[0.2em] ${accentColor} opacity-80`}>{label}</p>
+      <h4 className="text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-white tracking-tighter leading-none">
         {count.toLocaleString()}{(!label.includes('Global') && !isAdmin) ? '' : '+'}
       </h4>
-      <p className="text-[11px] sm:text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mt-2">{subLabel}</p>
+      <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em] mt-2">{subLabel}</p>
     </div>
   );
 };
@@ -98,18 +98,18 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
     <div className="max-w-4xl mx-auto space-y-12 animate-fade-in pb-24 px-4 md:px-0">
       {/* About Us - Hero Header */}
       <section className="text-center space-y-4 pt-12 pb-6">
-        <h2 className="text-4xl md:text-6xl font-black text-zinc-900 dark:text-white tracking-tighter leading-none mb-2">
-          About <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Us</span>
+        <h2 className="text-3xl md:text-5xl font-bold text-zinc-900 dark:text-white tracking-tight leading-none mb-2">
+          About <span className="text-brand-primary">Us</span>
         </h2>
         <div className="flex flex-col items-center gap-4">
-          <div className="h-1 w-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-full" />
-          <p className="text-zinc-500 dark:text-zinc-400 text-[10px] md:text-xs font-black uppercase tracking-[0.5em] lg:tracking-[0.8em]">The AI-Powered Student Community</p>
+          <div className="h-1 w-12 bg-brand-primary rounded-full group-hover:w-16 transition-all" />
+          <p className="text-zinc-500 dark:text-zinc-400 text-[10px] md:text-xs font-semibold uppercase tracking-[0.4em]">The AI-Powered Student Community</p>
         </div>
       </section>
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="glass-panel p-8 rounded-[40px] border border-zinc-200 dark:border-white/5 space-y-4">
-          <h3 className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest border-b border-zinc-100 dark:border-white/5 pb-4">The Mission</h3>
+        <div className="glass-panel p-8 rounded-[32px] border border-zinc-200 dark:border-white/5 space-y-4 transition-all hover:border-brand-primary/20">
+          <h3 className="text-[11px] font-bold text-brand-primary uppercase tracking-widest border-b border-zinc-100 dark:border-white/5 pb-4">The Mission</h3>
           <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium">
             Scholix was born from a simple observation: campus life is complex. Between tracking attendance, calculating CGPA, and preparing for placements, students are often overwhelmed.
             <br /><br />
@@ -117,8 +117,8 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
           </p>
         </div>
 
-        <div className="glass-panel p-8 rounded-[40px] border border-zinc-200 dark:border-white/5 space-y-4">
-          <h3 className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest border-b border-zinc-100 dark:border-white/5 pb-4">Key Innovation</h3>
+        <div className="glass-panel p-8 rounded-[32px] border border-zinc-200 dark:border-white/5 space-y-4 transition-all hover:border-brand-primary/20">
+          <h3 className="text-[11px] font-bold text-brand-primary uppercase tracking-widest border-b border-zinc-100 dark:border-white/5 pb-4">Key Innovation</h3>
           <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium">
             By integrating <strong>Google's Gemini AI</strong>, we provide tools that don't just calculate numbers but offer strategic insights.
             From "Placement Prefect" to "Global Gateway", Scholix is designed to be your academic advantage.
@@ -127,11 +127,11 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
       </section>
 
       {/* Credit & Heritage Section */}
-      <section className="p-10 md:p-16 rounded-[60px] bg-white/[0.03] dark:bg-[#0a0a0a]/20 backdrop-blur-3xl text-zinc-800 dark:text-white shadow-[0_32px_128px_rgba(0,0,0,0.5)] border border-white/10 relative overflow-hidden transition-all duration-700 group">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(249,115,22,0.05)_0%,transparent_70%)] pointer-events-none" />
+      <section className="p-10 md:p-16 rounded-[48px] bg-white dark:bg-[#0a0a0a] text-zinc-800 dark:text-white shadow-sm border border-zinc-200 dark:border-white/10 relative overflow-hidden transition-all duration-700">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(249,115,22,0.03)_0%,transparent_70%)] pointer-events-none" />
         {/* Abstract Background Decor */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-600/10 blur-[120px] rounded-full -mr-32 -mt-32"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/5 blur-[100px] rounded-full -ml-32 -mb-32"></div>
+        <div className="absolute top-0 right-0 w-80 h-80 bg-brand-primary/5 blur-[100px] rounded-full -mr-32 -mt-32"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-secondary/5 blur-[80px] rounded-full -ml-32 -mb-32"></div>
 
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Main Content (Left) */}

@@ -106,76 +106,81 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className }) =
   const presetAmounts = [50, 100, 200, 500];
 
   return (
-    <div className={`relative overflow-hidden p-5 sm:p-10 md:p-14 rounded-[32px] sm:rounded-[48px] bg-white/5 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 ${className}`}>
-      {/* Background Decor */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 blur-[80px] rounded-full -mr-32 -mt-32"></div>
-      <div className="absolute bottom-0 left-0 w-48 h-48 bg-red-500/5 blur-[60px] rounded-full -ml-24 -mb-24"></div>
+    <div className={`relative overflow-hidden p-8 sm:p-12 rounded-[24px] bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/5 shadow-sm ${className}`}>
+      {/* Refined Background Gradients */}
+      <div className="absolute -top-24 -right-24 w-80 h-80 bg-brand-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-brand-secondary/5 blur-[100px] rounded-full pointer-events-none"></div>
 
-      <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-14">
-        {/* Left Side: Info */}
-        <div className="flex-1 space-y-6 text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-orange-500"><path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" /></svg>
-            <span className="text-[10px] font-black uppercase tracking-widest text-orange-600">Buy me a coffee</span>
-          </div>
-
-          <h3 className="text-2xl sm:text-4xl font-black text-zinc-800 dark:text-white tracking-tight leading-tight">
-            Support <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Scholix</span>
+      <div className="relative z-10 flex flex-col md:flex-row items-center gap-10 md:gap-16 max-w-5xl mx-auto">
+        {/* Modern Header - Left side on laptop */}
+        <div className="flex-1 text-center md:text-left space-y-4">
+          <h3 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+            Support <span className="text-brand-primary">Scholix</span>
           </h3>
-
-          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed max-w-sm mx-auto md:mx-0">
-            Maintaining servers and developing AI features costs money. If Scholix helped you, consider supporting its growth.
+          <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium max-w-sm mx-auto md:mx-0">
+            Join the community in supporting the growth and maintenance of Scholix. Your contributions help us keep the servers running and develop new AI features.
           </p>
         </div>
 
-        {/* Right Side: Action */}
-        <div className="w-full md:w-auto shrink-0 space-y-6 bg-white/10 dark:bg-white/[0.03] backdrop-blur-xl p-5 sm:p-7 rounded-[32px] border border-white/10 shadow-2xl">
-          <div className="grid grid-cols-2 gap-2.5">
+        {/* Action Card - Right side on laptop */}
+        <div className="w-full md:w-[400px] shrink-0 space-y-6 bg-zinc-50/50 dark:bg-white/[0.02] p-6 sm:p-8 rounded-[32px] border border-zinc-200 dark:border-white/5 backdrop-blur-sm shadow-xl dark:shadow-2xl">
+          <div className="grid grid-cols-2 gap-3">
             {presetAmounts.map((amt) => (
               <button
                 key={amt}
                 disabled={loading}
                 onClick={() => { setAmount(amt); setCustomAmount(''); }}
-                className={`px-4 py-3 rounded-2xl text-sm font-bold transition-all border ${amount === amt && !customAmount ? 'bg-orange-500 text-white border-orange-400 shadow-[0_8px_20px_rgba(249,115,22,0.3)]' : 'bg-transparent text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-white/10 hover:border-orange-500/50'}`}
+                className={`relative py-3.5 rounded-xl text-sm font-semibold transition-all border ${amount === amt && !customAmount 
+                  ? 'bg-brand-primary/10 text-brand-primary border-brand-primary/30 ring-1 ring-brand-primary/20' 
+                  : 'bg-white dark:bg-white/[0.03] text-zinc-600 dark:text-zinc-400 border-zinc-100 dark:border-white/5 hover:bg-zinc-100 dark:hover:bg-white/10 shadow-sm'}`}
               >
                 ₹{amt}
               </button>
             ))}
           </div>
 
-          <div className="relative">
+          <div className="relative group">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-medium text-lg">₹</div>
             <input
               type="number"
               placeholder="Custom Amount"
               value={customAmount}
               onChange={(e) => {
-                setCustomAmount(e.target.value);
-                if (e.target.value) setAmount(Number(e.target.value));
+                const val = e.target.value;
+                setCustomAmount(val);
+                if (val) setAmount(Number(val));
               }}
-              className="w-full px-5 py-4 rounded-2xl bg-zinc-50 dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 text-sm font-bold text-zinc-800 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all no-spinner"
+              className="w-full pl-9 pr-16 py-4 rounded-xl bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 text-sm font-semibold text-zinc-900 dark:text-zinc-100 shadow-sm placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-brand-primary focus:border-brand-primary transition-all no-spinner"
             />
-            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 font-black">INR</span>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 font-bold tracking-widest uppercase opacity-60">
+              INR
+            </div>
           </div>
 
           <button
             onClick={() => handlePayment(amount)}
             disabled={loading || amount < 1}
-            className={`w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-orange-500/20 ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-orange-500/40 hover:-translate-y-1'}`}
+            className={`group w-full py-4 rounded-xl bg-brand-primary text-white font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-brand-primary/10 ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-brand-primary/90 hover:shadow-brand-primary/20'}`}
           >
             {loading ? (
-              <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="w-4 h-4"><path d="M12 2v20M2 12h20" /></svg>
+              <>
+                <span>Secure Checkout</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M5 12h14m-7-7 7 7-7 7" /></svg>
+              </>
             )}
-            {loading ? 'Processing...' : 'Support Scholix'}
           </button>
 
-          <p className="text-[9px] text-center text-zinc-400 font-bold uppercase tracking-widest opacity-60">
-            Securely processed via Razorpay
-          </p>
+          {/* Secure Footer */}
+          <div className="flex flex-col items-center gap-4 pt-2">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 group transition-all">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3 text-emerald-500"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+                Protected by Razorpay
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

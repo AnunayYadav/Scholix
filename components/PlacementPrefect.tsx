@@ -367,10 +367,10 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`p-4 rounded-[32px] border text-left transition-all h-full flex flex-col justify-between group ${isActive ? 'bg-brand-primary border-brand-primary shadow-xl shadow-brand-primary/20 text-white scale-[1.02]' : 'bg-white dark:bg-[#0a0a0a] border-zinc-100 dark:border-white/10 text-zinc-500 hover:border-brand-primary/30'}`}
+                className={`p-3.5 rounded-2xl border text-left transition-all h-full flex flex-col justify-between group ${isActive ? 'bg-brand-primary border-brand-primary shadow-lg shadow-brand-primary/20 text-white scale-[1.02]' : 'bg-white dark:bg-[#0a0a0a] border-zinc-100 dark:border-white/10 text-zinc-500 hover:border-brand-primary/30'}`}
               >
-                <p className={`text-xl font-bold ${isActive ? 'text-white' : 'text-zinc-900 dark:text-white group-hover:text-brand-primary'}`}>{catData.score}%</p>
-                <p className={`text-[8px] font-semibold leading-tight ${isActive ? 'text-white/80' : 'text-zinc-400'}`}>{cat.label}</p>
+                <p className={`text-lg font-semibold ${isActive ? 'text-white' : 'text-zinc-900 dark:text-white group-hover:text-brand-primary'}`}>{catData.score}%</p>
+                <p className={`text-[9px] font-medium leading-tight tracking-tight mt-1 ${isActive ? 'text-white/80' : 'text-zinc-400'}`}>{cat.label}</p>
               </button>
             );
           })}

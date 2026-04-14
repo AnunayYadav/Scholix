@@ -370,12 +370,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
           {step !== 'otp' && (
             <div className="flex items-center justify-center gap-3 mb-6">
               <div className="relative">
-                <div className="absolute inset-0 bg-orange-500/20 blur-xl rounded-full" />
-                <img src="/Scholix_logo.png" alt="" className="relative w-10 h-10 object-contain" />
-              </div>
-              <div className="text-left">
-                <h2 className="text-xl font-black text-zinc-900 dark:text-white tracking-tight leading-none">Scholix</h2>
-                <p className="text-[10px] font-bold text-orange-500 uppercase tracking-widest mt-1">Nexus Journey</p>
+                <div className="absolute inset-0 bg-orange-500/20 blur-2xl rounded-full" />
+                <img src="/apple-touch-icon.png" alt="Scholix" className="relative w-14 h-14 object-contain rounded-xl shadow-2xl" />
               </div>
             </div>
           )}
@@ -627,8 +623,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                     ) : (
                       <div className="space-y-6 animate-fade-in py-4 text-center">
                       <div className="flex items-center justify-center mx-auto mb-8 transition-all duration-700 animate-pulse-glow">
-                        <img src="/Scholix_dark.png" alt="Verification Logo" className="h-14 w-auto object-contain dark:hidden" />
-                        <img src="/Scholix_light.png" alt="Verification Logo" className="h-14 w-auto object-contain hidden dark:block" />
+                        <img src="/apple-touch-icon.png" alt="Verification Logo" className="h-14 w-14 object-contain rounded-xl shadow-xl" />
                       </div>
                       
                       <div className="space-y-3">
@@ -772,8 +767,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                   ) : (
                     <div className="space-y-6 animate-fade-in py-4 text-center">
                       <div className="flex items-center justify-center mx-auto mb-8 transition-all duration-700 animate-pulse-glow">
-                        <img src="/Scholix_dark.png" alt="Verification Logo" className="h-14 w-auto object-contain dark:hidden" />
-                        <img src="/Scholix_light.png" alt="Verification Logo" className="h-14 w-auto object-contain hidden dark:block" />
+                        <img src="/apple-touch-icon.png" alt="Verification Logo" className="h-14 w-14 object-contain rounded-xl shadow-xl" />
                       </div>
                       
                       <div className="space-y-3">
