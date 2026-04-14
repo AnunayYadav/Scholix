@@ -97,22 +97,21 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
   return (
     <div className="max-w-4xl mx-auto space-y-12 animate-fade-in pb-24 px-4 md:px-0">
       {/* About Us - Hero Header */}
-      <section className="text-center space-y-6 pt-8">
-        <div className="flex items-center justify-center mb-4">
-          <img src="/Scholix_light.png" alt="Scholix Logo" className="h-16 md:h-20 w-auto object-contain dark:hidden" />
-          <img src="/Scholix_dark.png" alt="Scholix Logo" className="h-16 md:h-20 w-auto object-contain hidden dark:block" />
-        </div>
-        <h2 className="text-3xl md:text-5xl font-black text-zinc-900 dark:text-white tracking-tighter leading-none">
+      <section className="text-center space-y-4 pt-12 pb-6">
+        <h2 className="text-4xl md:text-6xl font-black text-zinc-900 dark:text-white tracking-tighter leading-none mb-2">
           About <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Us</span>
         </h2>
-        <p className="text-zinc-500 dark:text-zinc-400 text-xs md:text-sm font-bold uppercase tracking-[0.4em]">The AI-Powered Student Community</p>
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-1 w-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-full" />
+          <p className="text-zinc-500 dark:text-zinc-400 text-[10px] md:text-xs font-black uppercase tracking-[0.5em] lg:tracking-[0.8em]">The AI-Powered Student Community</p>
+        </div>
       </section>
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="glass-panel p-8 rounded-[40px] border border-zinc-200 dark:border-white/5 space-y-4">
           <h3 className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest border-b border-zinc-100 dark:border-white/5 pb-4">The Mission</h3>
           <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium">
-            {fullBrandName} was born from a simple observation: campus life is complex. Between tracking attendance, calculating CGPA, and preparing for placements, students are often overwhelmed.
+            Scholix was born from a simple observation: campus life is complex. Between tracking attendance, calculating CGPA, and preparing for placements, students are often overwhelmed.
             <br /><br />
             Our mission is to consolidate these fragmented experiences into a single, high-performance platform powered by cutting-edge AI.
           </p>
@@ -122,7 +121,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
           <h3 className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest border-b border-zinc-100 dark:border-white/5 pb-4">Key Innovation</h3>
           <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium">
             By integrating <strong>Google's Gemini AI</strong>, we provide tools that don't just calculate numbers but offer strategic insights.
-            From "Placement Prefect" to "Global Gateway", {shortBrandName} is designed to be your academic advantage.
+            From "Placement Prefect" to "Global Gateway", Scholix is designed to be your academic advantage.
           </p>
         </div>
       </section>
@@ -165,7 +164,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
 
             <div className="flex flex-wrap gap-3 pt-6">
               {[
-                { label: 'WA Help', icon: <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 .004 5.412.001 12.04c0 2.123.542 4.198 1.585 6.03l-1.585 6.187 6.326-1.66A11.826 11.826 0 0012.05 24.122c6.635 0 12.047-5.412 12.05-12.046a11.83 11.83 0 00-3.517-8.477z" />, url: `https://wa.me/918935031251?text=Hi!%20I%20need%20help%20with%20${shortBrandName}.` },
+                { label: 'WA Help', icon: <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 .004 5.412.001 12.04c0 2.123.542 4.198 1.585 6.03l-1.585 6.187 6.326-1.66A11.826 11.826 0 0012.05 24.122c6.635 0 12.047-5.412 12.05-12.046a11.83 11.83 0 00-3.517-8.477z" />, url: `https://wa.me/918935031251?text=Hi!%20I%20need%20help%20with%20Scholix.` },
                 { label: 'Email', icon: <><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></>, url: 'https://mail.google.com/mail/?view=cm&fs=1&to=anunayarvind@gmail.com' },
                 { label: 'Insta', icon: <><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></>, url: 'https://www.instagram.com/anunay07' },
                 { label: 'LinkedIn', icon: <><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></>, url: 'https://www.linkedin.com/in/anunayyadav/' },
@@ -211,7 +210,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
               <>
                 <StatCounter
                   target={stats?.registered || 0}
-                  label={`${universityShortName} Students`}
+                  label="Scholix Students"
                   subLabel="Registered Website Users"
                   accentColor="text-orange-500"
                   isVisible={isSectionVisible}
@@ -244,7 +243,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
       <footer className="text-center pt-8">
 
         <p className="text-[11px] sm:text-xs font-medium text-zinc-400 opacity-50">
-          {fullBrandName} v1.3.0 • Independent Student Project
+          Scholix v1.3.0 • Independent Student Project
         </p>
       </footer>
     </div>

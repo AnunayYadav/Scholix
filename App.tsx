@@ -106,9 +106,9 @@ const getPathFromModule = (module: ModuleType, uniKey: UniversityId = 'none'): s
     case ModuleType.AI_TOOLS: return `${prefix}/ai-tools`;
     case ModuleType.TOOLS: return `${prefix}/tools`;
     case ModuleType.ADMIN_STATS: return `${prefix}/admin-stats`;
-    case ModuleType.PRIVACY: return `/privacy`;
-    case ModuleType.LOGIN: return `/login`;
-    case ModuleType.SIGNUP: return `/signup`;
+    case ModuleType.PRIVACY: return `${prefix}/privacy`;
+    case ModuleType.LOGIN: return `${prefix}/login`;
+    case ModuleType.SIGNUP: return `${prefix}/signup`;
     case ModuleType.SETTINGS: return `${prefix}/settings`;
     default: return uniSlug ? `/${uniSlug}` : '/';
   }
@@ -476,7 +476,6 @@ const AppContent: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup' | 'verify_email'>('login');
-  const [isClosingAuth, setIsClosingAuth] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isClosingProfile, setIsClosingProfile] = useState(false);
   const [isMobileSearchActive, setIsMobileSearchActive] = useState(false);
@@ -516,15 +515,11 @@ const AppContent: React.FC = () => {
   };
 
   const handleAuthClose = () => {
-    setIsClosingAuth(true);
-    setTimeout(() => {
-      setShowAuthModal(false);
-      setIsClosingAuth(false);
-      if (location.pathname === '/login' || location.pathname === '/signup') {
-        const lastModulePath = localStorage.getItem('last_active_path') || '/';
-        navigate(lastModulePath !== location.pathname ? lastModulePath : '/', { replace: true });
-      }
-    }, 400); // AuthModal animation is 0.4s
+    setShowAuthModal(false);
+    if (location.pathname === '/login' || location.pathname === '/signup') {
+      const lastModulePath = localStorage.getItem('last_active_path') || '/';
+      navigate(lastModulePath !== location.pathname ? lastModulePath : '/', { replace: true });
+    }
   };
 
   const location = useLocation();
@@ -678,9 +673,9 @@ const AppContent: React.FC = () => {
         <header className="sticky top-0 h-16 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-2xl border-b border-zinc-200/50 dark:border-white/5 flex items-center px-4 md:px-8 z-[100] transition-all duration-300">
           <div className="flex items-center gap-1 md:gap-4 flex-1 md:flex-none">
             <button 
-              onClick={() => setIsMobileMenuOpen(true)}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-zinc-700 dark:text-zinc-400 mr-1 border-none active:scale-75 transition-all bg-zinc-100/50 dark:bg-white/5 group"
-              aria-label="Open menu"
+              aria-label="Toggle menu"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 transition-transform group-hover:scale-110">
                 <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="15" y2="6" /><line x1="3" y1="18" x2="18" y2="18" />
@@ -814,6 +809,9 @@ const AppContent: React.FC = () => {
           <div className={`relative ${location.pathname === '/' || location.pathname === '/lpu' || location.pathname === '/iitm' ? 'w-full' : 'max-w-7xl mx-auto'}`}>
             <Routes>
               <Route path="/welcome" element={<ScholixLanding userProfile={userProfile} />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
+              <Route path="/help" element={<HelpSection />} />
               <Route path="/:uniKey/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} />} />
               <Route path="/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} />} />
             </Routes>
@@ -918,7 +916,7 @@ const FeatureRoutes: React.FC<{
       <Route path="/ai-tools" element={<FeatureGuard module={ModuleType.AI_TOOLS}><AIToolsDirectory /></FeatureGuard>} />
       <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
-      <Route path="/settings" element={<SettingsHub userProfile={userProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} />} />
+      <Route path="/settings" element={<SettingsHub userProfile={userProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} />} />
       <Route path="/login" element={<Dashboard userProfile={userProfile} />} />
       <Route path="/signup" element={<Dashboard userProfile={userProfile} />} />
       <Route path="*" element={<Dashboard userProfile={userProfile} />} />

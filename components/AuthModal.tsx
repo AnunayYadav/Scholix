@@ -360,7 +360,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
       <div ref={modalRef} className={`nexus-modal w-full max-w-md mx-4 overflow-hidden ${isClosing ? 'closing' : ''} ${mode === 'verify_email' ? 'ring-2 ring-orange-500/20' : ''}`}>
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-600/10 blur-[80px] rounded-full pointer-events-none group-focus-within:bg-orange-600/20 transition-colors" />
 
-        <div className="bg-white dark:bg-[#0a0a0a] p-6 sm:p-8 md:p-10 text-center relative border-b border-zinc-100 dark:border-white/5">
+        <div className="bg-white dark:bg-[#0a0a0a] p-6 sm:p-8 text-center relative border-b border-zinc-100 dark:border-white/5">
           {mode !== 'verify_email' && (
             <button onClick={handleClose} className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-orange-500 transition-colors border-none bg-transparent active:scale-95">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -368,18 +368,24 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
           )}
 
           {step !== 'otp' && (
-            <div className={`flex items-center justify-center mx-auto mb-4 transition-all duration-700 ${mode === 'verify_email' ? 'animate-pulse-glow hover:scale-110' : 'hover:scale-110 active:scale-95'}`}>
-              <img src="/Scholix_light.png" alt="Scholix Logo" className="h-12 w-auto object-contain dark:hidden" />
-              <img src="/Scholix_dark.png" alt="Scholix Logo" className="h-12 w-auto object-contain hidden dark:block" />
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="relative">
+                <div className="absolute inset-0 bg-orange-500/20 blur-xl rounded-full" />
+                <img src="/Scholix_logo.png" alt="" className="relative w-10 h-10 object-contain" />
+              </div>
+              <div className="text-left">
+                <h2 className="text-xl font-black text-zinc-900 dark:text-white tracking-tight leading-none">Scholix</h2>
+                <p className="text-[10px] font-bold text-orange-500 uppercase tracking-widest mt-1">Nexus Journey</p>
+              </div>
             </div>
           )}
 
-          <h3 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white leading-none mb-2">
-            {mode === 'verify_email' ? 'Security Protocol' : mode === 'forgot_password' ? 'Password Recovery' : isLogin ? 'Welcome Back' : `Join ${fullBrandName}`}
+          <h3 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white leading-none mb-3">
+            {mode === 'verify_email' ? 'Verify Identity' : mode === 'forgot_password' ? 'Reset Password' : isLogin ? 'Sign In' : `Create Account`}
           </h3>
-          <p className="text-zinc-500 dark:text-white/40 text-[11px] sm:text-xs font-bold flex items-center justify-center gap-2 uppercase tracking-[0.1em]">
-            <span className={`w-1.5 h-1.5 rounded-full shadow-[0_0_12px_rgba(234,88,12,0.6)] ${mode === 'verify_email' ? 'bg-orange-500 animate-pulse' : 'bg-orange-600'}`} />
-            {mode === 'verify_email' ? 'Identity verification mandated' : mode === 'forgot_password' ? 'Reset your access credentials' : isLogin ? 'Sign in to your account' : 'Apply for student access'}
+          <p className="text-zinc-500 dark:text-zinc-400 text-[11px] font-bold flex items-center justify-center gap-2 uppercase tracking-[0.12em]">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(234,88,12,0.4)]" />
+            {mode === 'verify_email' ? 'Authorization Required' : mode === 'forgot_password' ? 'Account Recovery' : isLogin ? 'Access your dashboard' : 'Join the student network'}
           </p>
         </div>
 
@@ -813,16 +819,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
           <div className="p-5 sm:p-6 md:p-8 pt-0 md:pt-2">
             <button
               type="submit" disabled={loading || (mode === 'signup' && usernameStatus === 'taken')}
-              className={`w-full bg-gradient-to-r from-orange-500 to-red-600 shadow-[0_10px_30px_-10px_rgba(234,88,12,0.4)] hover:shadow-[0_20px_40px_-5px_rgba(234,88,12,0.5)] hover:scale-[1.02] text-white py-5 rounded-3xl font-black text-sm tracking-widest uppercase active:scale-95 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-3 border-none ring-1 ring-white/10`}
+              className="w-full bg-gradient-to-br from-orange-500 to-red-600 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-0.5 text-white py-3 rounded-2xl font-black text-[11px] tracking-[0.15em] uppercase active:scale-[0.98] transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 border-none"
             >
               {loading ? (
-                <div className="w-5 h-5 border-3 border-white/50 border-t-white rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <span className="flex items-center gap-2">
-                  {mode === 'verify_email' ? (step === 'form' ? 'Initialize Verification' : 'Finalize Identity Sync') : 
-                   mode === 'forgot_password' ? (step === 'form' ? 'Request Recovery Code' : 'Update Credentials') :
-                   isLogin ? 'Authenticate' : (step === 'form' ? 'Request Access Code' : 'Verify & Join Protocol')}
-                  {!loading && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M5 12h14M12 5l7 7-7 7" /></svg>}
+                  {mode === 'verify_email' ? 'Verify' : 
+                   mode === 'forgot_password' ? 'Reset' :
+                   isLogin ? 'Sign In' : 'Join Now'}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                 </span>
               )}
             </button>

@@ -5,6 +5,7 @@ import { ModuleType, UserProfile } from '../types';
 import NexusServer from '../services/nexusServer.ts';
 import { showToast } from './Toast.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
+import FeedbackModal from './FeedbackModal.tsx';
 
 interface SidebarProps {
   currentModule: ModuleType;
@@ -22,37 +23,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   userProfile,
 }) => {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [feedbackText, setFeedbackText] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const feedbackModalRef = useRef<HTMLDivElement>(null);
   const { selectedUniversity, universityInfo, fullBrandName, studentTerm } = useUniversity();
 
-  useEffect(() => {
-    if (showFeedbackModal) {
-      document.body.classList.add('modal-open');
-      feedbackModalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      const handleEsc = (e: KeyboardEvent) => {
-        if (e.key === 'Escape' && !isSubmitting) handleClose();
-      };
-      window.addEventListener('keydown', handleEsc);
-      return () => {
-        document.body.classList.remove('modal-open');
-        window.removeEventListener('keydown', handleEsc);
-      };
-    }
-  }, [showFeedbackModal, isSubmitting]);
-
-  const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setShowFeedbackModal(false);
-      setIsClosing(false);
-    }, 250);
-  };
 
   const allNavItems = [
     {
@@ -114,23 +88,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       })
     : allNavItems;
 
-  const submitFeedback = async () => {
-    if (!feedbackText.trim() || isSubmitting) return;
-    setIsSubmitting(true);
-    try {
-      await NexusServer.submitFeedback(feedbackText, userProfile?.id, userProfile?.email);
-      setSubmitSuccess(true);
-      setFeedbackText("");
-      setTimeout(() => {
-        setSubmitSuccess(false);
-        handleClose();
-      }, 2000);
-    } catch (e: any) {
-      showToast(`Oops! Something went wrong: ${e.message}`, 'error');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <>
@@ -138,78 +95,16 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="overlay md:hidden" onClick={toggleMobileMenu} />
       )}
 
-      {showFeedbackModal && createPortal(
-        <div
-          className={`modal-overlay ${isClosing ? 'closing' : ''}`}
-          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
-          onClick={(e) => { if (e.target === e.currentTarget && !isSubmitting) handleClose(); }}
-        >
-          <div ref={feedbackModalRef} className={`nexus-modal w-full max-w-lg p-10 relative ${isClosing ? 'closing' : ''}`}>
-            <button onClick={handleClose} className="absolute top-8 right-8 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
-            </button>
-
-            {submitSuccess ? (
-              <div className="text-center py-12 space-y-6 animate-fade-in">
-                <div className="w-20 h-20 bg-green-500/10 rounded-[32px] flex items-center justify-center mx-auto text-green-500 border border-green-500/20">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-10 h-10"><polyline points="20 6 9 17 4 12" /></svg>
-                </div>
-                <div>
-                  <h3 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight leading-none mb-2">Success!</h3>
-                  <p className="text-zinc-500 font-bold text-[11px] sm:text-xs uppercase tracking-widest">Your feedback has been received.</p>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="w-20 h-20 bg-brand-primary/10 rounded-[32px] flex items-center justify-center mb-8 border border-brand-primary/20">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-brand-primary"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-                </div>
-
-                <h3 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2 tracking-tight leading-none">Feedback</h3>
-                <p className="text-zinc-500 text-xs mb-8">Found a bug or have a suggestion? Let us know.</p>
-
-                <div className="relative group">
-                  <textarea
-                    value={feedbackText}
-                    onChange={(e) => setFeedbackText(e.target.value)}
-                    disabled={isSubmitting}
-                    className="w-full h-40 p-6 rounded-[32px] bg-zinc-50 dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/10 text-zinc-800 dark:text-zinc-200 resize-none transition-all outline-none font-medium text-sm leading-relaxed shadow-inner"
-                    placeholder="Tell us what's on your mind... we're all ears."
-                  />
-                </div>
-
-                <div className="flex gap-4 mt-8">
-                  <button
-                    onClick={() => setShowFeedbackModal(false)}
-                    disabled={isSubmitting}
-                    className="flex-1 py-4 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-sm border-none bg-transparent transition-colors"
-                  >
-                    Dismiss
-                  </button>
-                  <button
-                    onClick={submitFeedback}
-                    disabled={isSubmitting || !feedbackText.trim()}
-                    className="flex-[2] py-4 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-[24px] font-bold text-sm shadow-xl shadow-brand-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3 border-none disabled:opacity-50"
-                  >
-                    {isSubmitting ? (
-                      <div className="w-4 h-4 border-3 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><line x1="22" y1="2" x2="11" y2="13" /><polyline points="22 2 15 22 11 13 2 9 22 2" /></svg>
-                    )}
-                    <span>{isSubmitting ? 'Sending...' : 'Submit Feedback'}</span>
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>,
-        document.getElementById('modal-root') || document.body
-      )}
+      <FeedbackModal 
+        isOpen={showFeedbackModal} 
+        onClose={() => setShowFeedbackModal(false)} 
+        userProfile={userProfile} 
+      />
 
       {/* Mobile sidebar backdrop */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-[30] bg-[#0a0a0a]/20 dark:bg-[#0a0a0a]/40 md:hidden transition-opacity duration-500 animate-fade-in"
+          className="fixed inset-0 z-[400] bg-[#0a0a0a]/20 dark:bg-[#0a0a0a]/40 md:hidden transition-opacity duration-500 animate-fade-in"
           style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
           onClick={toggleMobileMenu}
         />
@@ -219,7 +114,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={`
-          fixed inset-y-0 left-0 z-[45] md:sticky md:top-0 md:translate-x-0 transform flex-shrink-0 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
+          fixed inset-y-0 left-0 z-[410] md:z-[40] md:sticky md:top-0 md:translate-x-0 transform flex-shrink-0 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
           bg-white dark:bg-[#0a0a0a] border-r border-zinc-200 dark:border-white/5
           ${isMobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0'}
           ${isHovered || isMobileMenuOpen ? 'w-64' : 'md:w-20'}
