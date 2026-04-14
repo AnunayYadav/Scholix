@@ -6,6 +6,7 @@ import NexusServer from '../services/nexusServer.ts';
 import VerifiedBadge from './VerifiedBadge.tsx';
 import { getFrameConfig } from '../data/frameConfigs.ts';
 import FeedbackModal from './FeedbackModal.tsx';
+import { useUniversity } from '../hooks/useUniversity.tsx';
 
 interface SettingsHubProps {
   userProfile: UserProfile | null;
@@ -17,6 +18,7 @@ interface SettingsHubProps {
 
 const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme, toggleTheme, navigateToModule }) => {
   const navigate = useNavigate();
+  const { fullBrandName, selectUniversity } = useUniversity();
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   
   const frameConfig = getFrameConfig(userProfile?.avatar_frame || '');
@@ -144,6 +146,16 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
           color="text-blue-500"
         />
         <SettingItem 
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>}
+          label="Change University"
+          sublabel={`Current: ${fullBrandName}`}
+          onClick={() => {
+            selectUniversity('none');
+            navigate('/welcome');
+          }}
+          color="text-amber-500"
+        />
+        <SettingItem 
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>}
           label="Privacy Policy"
           onClick={() => navigateToModule ? navigateToModule(ModuleType.PRIVACY) : navigate('/privacy')}
@@ -166,12 +178,6 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
             <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all shadow-sm ${theme === 'dark' ? 'left-6' : 'left-1'}`} />
           </button>
         </div>
-        <SettingItem 
-          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>}
-          label="Notifications"
-          onClick={() => {}}
-          color="text-red-500"
-        />
       </Section>
 
       <Section title="Support & About">
