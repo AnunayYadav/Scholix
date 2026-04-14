@@ -481,6 +481,7 @@ const AppContent: React.FC = () => {
   const [isClosingProfile, setIsClosingProfile] = useState(false);
   const [isMobileSearchActive, setIsMobileSearchActive] = useState(false);
   const [isClosingMobileSearch, setIsClosingMobileSearch] = useState(false);
+  const [authIsReady, setAuthIsReady] = useState(false);
   const searchResultsRef = useRef<HTMLDivElement>(null);
 
   const handleOpenMobileSearch = () => {
@@ -504,6 +505,16 @@ const AppContent: React.FC = () => {
     }, 250);
   };
 
+  const openAuth = () => {
+    setAuthMode('login');
+    setShowAuthModal(true);
+  };
+
+  const openSignup = () => {
+    setAuthMode('signup');
+    setShowAuthModal(true);
+  };
+
   const handleAuthClose = () => {
     setIsClosingAuth(true);
     setTimeout(() => {
@@ -518,7 +529,7 @@ const AppContent: React.FC = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { fullBrandName, studentTerm, shortBrandName } = useUniversity();
+  const { fullBrandName, studentTerm, shortBrandName, selectedUniversity, selectUniversity } = useUniversity();
   const currentModule = getModuleFromPath(location.pathname);
 
   useEffect(() => {
@@ -526,19 +537,23 @@ const AppContent: React.FC = () => {
     if (location.pathname !== '/login' && location.pathname !== '/signup') {
       localStorage.setItem('last_active_path', location.pathname);
     }
-    
-    if (location.pathname === '/login') {
-      setAuthMode('login');
-      setShowAuthModal(true);
-    } else if (location.pathname === '/signup') {
-      setAuthMode('signup');
-      setShowAuthModal(true);
-    } else {
-      setShowAuthModal(false);
-    }
   }, [location.pathname]);
 
-  const { selectedUniversity, selectUniversity } = useUniversity();
+  // Auth modal path sync
+  useEffect(() => {
+    const path = location.pathname;
+    const isAuthPath = path.endsWith('/login') || path.endsWith('/signup');
+    
+    if (path.endsWith('/login')) {
+      setAuthMode('login');
+      setShowAuthModal(true);
+    } else if (path.endsWith('/signup')) {
+      setAuthMode('signup');
+      setShowAuthModal(true);
+    } else if (userProfile && userProfile?.is_verified !== 'no' && !isAuthPath && path !== '/welcome') {
+      setShowAuthModal(false);
+    }
+  }, [location.pathname, userProfile]);
 
   useEffect(() => {
     const pathParts = location.pathname.split('/').filter(Boolean);
@@ -579,11 +594,12 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     if (userProfile && (location.pathname === '/login' || location.pathname === '/signup')) {
       const lastPath = localStorage.getItem('last_active_path') || '/';
-      navigate(lastPath !== location.pathname ? lastPath : '/', { replace: true });
+      const target = lastPath !== location.pathname ? lastPath : '/';
+      navigate(target, { replace: true });
     }
     
     // Mandatory verification check
-    if (userProfile && (userProfile.is_verified === 'no' || !userProfile.is_verified) && !showAuthModal) {
+    if (userProfile && (userProfile.is_verified === 'no' || !userProfile.is_verified) && !showAuthModal && location.pathname !== '/welcome') {
       setAuthMode('verify_email');
       setShowAuthModal(true);
     }
@@ -594,27 +610,28 @@ const AppContent: React.FC = () => {
     const savedTheme = (localStorage.getItem('theme') as 'light' | 'dark') || 'dark';
     setTheme(savedTheme);
     document.documentElement.classList.toggle('dark', savedTheme === 'dark');
-    const unsubscribeAuth = NexusServer.onAuthStateChange(async (user) => {
+    
+    // Initial check to see if we have a session
+    NexusServer.getSession().then(({ data: { session } }) => {
+      if (!session) setAuthIsReady(true);
+    });
+
+    const unsubscribe = NexusServer.onAuthStateChange(async (user) => {
       if (user) {
-        try {
-          const profile = await NexusServer.ensureProfile(user);
-          setUserProfile(profile);
-        } catch (err) {
-          console.error("Profile synchronization error:", err);
-          const metadata = user.user_metadata || {};
-          setUserProfile({
-            id: user.id,
-            email: user.email!,
-            is_admin: false,
-            username: metadata.username || user.email?.split('@')[0],
-            registration_number: metadata.registration_number
-          } as UserProfile);
-        }
+        const profile = await NexusServer.getProfile(user.id);
+        setUserProfile(prev => {
+          if (JSON.stringify(prev) === JSON.stringify(profile)) return prev;
+          return profile;
+        });
       } else {
         setUserProfile(null);
       }
+      setAuthIsReady(true);
     });
-    return () => unsubscribeAuth();
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const toggleTheme = React.useCallback(() => {
@@ -643,46 +660,6 @@ const AppContent: React.FC = () => {
     );
   }
 
-  const FeatureRoutes = () => (
-    <Routes>
-      <Route path="/" element={<Dashboard userProfile={userProfile} />} />
-      <Route path="/placement" element={<FeatureGuard module={ModuleType.PLACEMENT}><Navigate to="/tools?tab=placement" replace /></FeatureGuard>} />
-      <Route path="/placement/:reportId" element={<PlacementRedirect />} />
-      <Route path="/attendance" element={<FeatureGuard module={ModuleType.ATTENDANCE}><Navigate to="/tools?tab=attendance" replace /></FeatureGuard>} />
-      <Route path="/cgpa" element={<FeatureGuard module={ModuleType.CGPA}><Navigate to="/tools?tab=cgpa" replace /></FeatureGuard>} />
-      <Route path="/tools" element={<ToolsHub userProfile={userProfile} />} />
-      <Route path="/timetable" element={<FeatureGuard module={ModuleType.TIMETABLE}><TimetableHub userProfile={userProfile} /></FeatureGuard>} />
-      <Route path="/quiz" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/quiz/:subjectName" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/quiz/:subjectName/:quizId" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/library" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/library/:program" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/library/:program/:semester" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/library/:program/:semester/:subject" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/library/:program/:semester/:subject/:category" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
-      <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
-      <Route path="/help" element={<HelpSection />} />
-      <Route path="/freshers" element={<FeatureGuard module={ModuleType.FRESHERS}><FreshersKit /></FeatureGuard>} />
-      <Route path="/share-cgpa" element={<ShareReport />} />
-      <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
-      <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
-      <Route path="/payment-success/:paymentId" element={<PaymentSuccess userProfile={userProfile} />} />
-      <Route path="/profile" element={<ProfileSection userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} />} />
-      <Route path="/marketplace" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
-      <Route path="/marketplace/:category" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
-      <Route path="/marketplace/item/:itemId" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
-      <Route path="/roommate" element={<FeatureGuard module={ModuleType.ROOMMATE}><RoommateFinder userProfile={userProfile} /></FeatureGuard>} />
-      <Route path="/emergency" element={<FeatureGuard module={ModuleType.EMERGENCY}><EmergencyContacts /></FeatureGuard>} />
-      <Route path="/ai-tools" element={<FeatureGuard module={ModuleType.AI_TOOLS}><AIToolsDirectory /></FeatureGuard>} />
-      <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
-      <Route path="/privacy" element={<PrivacyPolicy />} />
-      <Route path="/settings" element={<SettingsHub userProfile={userProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} />} />
-      <Route path="/login" element={<Dashboard userProfile={userProfile} />} />
-      <Route path="/signup" element={<Dashboard userProfile={userProfile} />} />
-      <Route path="*" element={<Dashboard userProfile={userProfile} />} />
-    </Routes>
-  );
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white dark:bg-[#0a0a0a] text-zinc-900 dark:text-zinc-200">
@@ -745,7 +722,9 @@ const AppContent: React.FC = () => {
 
             {/* Desktop Profile Menu - Hidden on mobile as settings are in Bottom Navbar */}
             <div className="hidden md:block relative ml-2">
-              {userProfile ? (
+              {!authIsReady ? (
+                <div className="w-11 h-11 rounded-full bg-zinc-100 dark:bg-white/5 animate-pulse" />
+              ) : userProfile ? (
                 <>
                   <button 
                     onClick={() => isProfileMenuOpen ? handleProfileClose() : setIsProfileMenuOpen(true)} 
@@ -824,7 +803,7 @@ const AppContent: React.FC = () => {
                   )}
                 </>
               ) : (
-                <button onClick={() => navigate('/login')} className="w-10 h-10 rounded-full border-none bg-zinc-100 dark:bg-[#0a0a0a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-95">
+                <button onClick={openAuth} className="w-10 h-10 rounded-full border-none bg-zinc-100 dark:bg-[#0a0a0a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-95">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                 </button>
               )}
@@ -835,8 +814,8 @@ const AppContent: React.FC = () => {
           <div className={`relative ${location.pathname === '/' || location.pathname === '/lpu' || location.pathname === '/iitm' ? 'w-full' : 'max-w-7xl mx-auto'}`}>
             <Routes>
               <Route path="/welcome" element={<ScholixLanding userProfile={userProfile} />} />
-              <Route path="/:uniKey/*" element={<FeatureRoutes />} />
-              <Route path="/*" element={<FeatureRoutes />} />
+              <Route path="/:uniKey/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} />} />
+              <Route path="/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} />} />
             </Routes>
           </div>
         </div>
@@ -888,6 +867,62 @@ const AppContent: React.FC = () => {
       <SpeedInsights />
       <ToastContainer />
     </div>
+  );
+};
+
+const FeatureRoutes: React.FC<{ 
+  userProfile: UserProfile | null, 
+  setUserProfile: React.Dispatch<React.SetStateAction<UserProfile | null>>,
+  navigateToModule: (module: ModuleType) => void,
+  theme: string, 
+  toggleTheme: () => void 
+}> = ({ userProfile, setUserProfile, navigateToModule, theme, toggleTheme }) => {
+  const { selectedUniversity } = useUniversity();
+  const navigate = useNavigate();
+
+  return (
+    <Routes>
+      <Route path="/" element={<Dashboard userProfile={userProfile} />} />
+      <Route path="/library" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/library/:program" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/library/:program/:semester" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/library/:program/:semester/:subject" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/library/:program/:semester/:subject/:category" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      
+      <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
+      <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
+      
+      <Route path="/about" element={<FeatureGuard module={ModuleType.ABOUT}><AboutUs userProfile={userProfile} /></FeatureGuard>} />
+      <Route path="/help" element={<FeatureGuard module={ModuleType.HELP}><HelpSection /></FeatureGuard>} />
+      <Route path="/freshers" element={<FeatureGuard module={ModuleType.FRESHERS}><FreshersKit /></FeatureGuard>} />
+      <Route path="/tools" element={<ToolsHub userProfile={userProfile} />} />
+      <Route path="/share-cgpa" element={<ShareReport />} />
+      <Route path="/placement" element={<FeatureGuard module={ModuleType.PLACEMENT}><Navigate to="/tools?tab=placement" replace /></FeatureGuard>} />
+      <Route path="/placement/:reportId" element={<PlacementRedirect />} />
+      <Route path="/attendance" element={<FeatureGuard module={ModuleType.ATTENDANCE}><Navigate to="/tools?tab=attendance" replace /></FeatureGuard>} />
+      <Route path="/cgpa" element={<FeatureGuard module={ModuleType.CGPA}><Navigate to="/tools?tab=cgpa" replace /></FeatureGuard>} />
+      
+      <Route path="/profile" element={<FeatureGuard module={ModuleType.PROFILE}><ProfileSection userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} /></FeatureGuard>} />
+      <Route path="/timetable" element={<FeatureGuard module={ModuleType.TIMETABLE}><TimetableHub userProfile={userProfile} /></FeatureGuard>} />
+      
+      <Route path="/quiz" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/quiz/:subjectName" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/quiz/:subjectName/:quizId" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      
+      <Route path="/marketplace" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
+      <Route path="/marketplace/:category" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
+      <Route path="/marketplace/item/:itemId" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
+      
+      <Route path="/roommate" element={<FeatureGuard module={ModuleType.ROOMMATE}><RoommateFinder userProfile={userProfile} /></FeatureGuard>} />
+      <Route path="/emergency" element={<FeatureGuard module={ModuleType.EMERGENCY}><EmergencyContacts /></FeatureGuard>} />
+      <Route path="/ai-tools" element={<FeatureGuard module={ModuleType.AI_TOOLS}><AIToolsDirectory /></FeatureGuard>} />
+      <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/settings" element={<SettingsHub userProfile={userProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} />} />
+      <Route path="/login" element={<Dashboard userProfile={userProfile} />} />
+      <Route path="/signup" element={<Dashboard userProfile={userProfile} />} />
+      <Route path="*" element={<Dashboard userProfile={userProfile} />} />
+    </Routes>
   );
 };
 

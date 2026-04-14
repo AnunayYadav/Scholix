@@ -143,14 +143,14 @@ export const UniversityProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const { full: fullBrandName, short: shortBrandName, student: studentTerm } = getNaming();
 
   return (
-    <UniversityContext.Provider value={{ 
+    <UniversityContext.Provider value={React.useMemo(() => ({ 
       selectedUniversity, 
       selectUniversity, 
       universityInfo,
       fullBrandName,
       shortBrandName,
       studentTerm
-    }}>
+    }), [selectedUniversity, universityInfo, fullBrandName, shortBrandName, studentTerm])}>
       {children}
     </UniversityContext.Provider>
   );
