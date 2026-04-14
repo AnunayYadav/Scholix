@@ -58,7 +58,7 @@ interface AboutUsProps {
 const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
   const { fullBrandName, shortBrandName, universityInfo } = useUniversity();
   const universityShortName = universityInfo?.shortName || 'University';
-  
+
   const [stats, setStats] = useState<{ registered: number; visitors: number; totalViews: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSectionVisible, setIsSectionVisible] = useState(false);

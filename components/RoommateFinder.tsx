@@ -117,17 +117,18 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                 <div className="flex items-center gap-3 w-full md:w-auto ml-auto">
                     <button
                         onClick={() => { if (!userProfile) showToast("Sign in required.", "info"); else setShowUserOnly(!showUserOnly); }}
-                        className={`px-6 py-3 rounded-xl font-bold text-[11px] sm:text-xs tracking-wider transition-all border-none cursor-pointer flex items-center justify-center gap-2 ${showUserOnly ? 'bg-orange-600 text-white' : 'bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-white'}`}
+                        className={`px-6 py-3 rounded-xl font-semibold text-[11px] sm:text-xs tracking-wider transition-all border-none cursor-pointer flex items-center justify-center gap-2 ${showUserOnly ? 'bg-orange-600 text-white' : 'bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-white'}`}
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                         {showUserOnly ? 'All Requests' : 'My Requests'}
                     </button>
                     <button
                         onClick={() => { if (!userProfile) showToast("Sign in required.", "info"); else setShowPostModal(true); }}
-                        className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-bold text-[11px] sm:text-xs tracking-wider shadow-xl shadow-orange-600/10 hover:scale-105 active:scale-95 transition-all border-none cursor-pointer"
+                        className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-semibold text-[11px] sm:text-xs tracking-wider shadow-xl shadow-orange-600/10 hover:scale-105 active:scale-95 transition-all border-none cursor-pointer"
                     >
                         Post Request
                     </button>
+
                 </div>
             </header>
 
@@ -166,16 +167,18 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                                 </div>
                             )}
 
-                            <div className="w-10 h-10 rounded-[18px] bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white text-base font-black shadow-lg shrink-0">
+                            <div className="w-10 h-10 rounded-[18px] bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white text-base font-bold shadow-lg shrink-0">
                                 {req.user_username?.[0]?.toUpperCase() || 'V'}
                             </div>
+
 
                             <div className="flex-1 space-y-1.5 text-left min-w-0">
                                 <div className="flex flex-wrap items-center gap-2">
                                     <div className="flex items-center gap-1.5">
-                                        <h4 className="text-[16px] font-bold text-zinc-900 dark:text-white tracking-tight leading-tight">{req.user_username || 'Anonymous Verto'}</h4>
+                                        <h4 className="text-[16px] font-semibold text-zinc-900 dark:text-white tracking-tight leading-tight">{req.user_username || 'Anonymous Verto'}</h4>
                                         <VerifiedBadge isAdmin={req.user_is_admin} size="w-4 h-4" />
                                     </div>
+
                                     <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-500 rounded text-[11px] sm:text-xs font-medium">{req.status}</span>
                                 </div>
                                 <p className="text-[11px] sm:text-xs font-medium text-zinc-500 dark:text-zinc-400 leading-tight italic line-clamp-1">"{req.preferences}"</p>
@@ -207,26 +210,27 @@ const RoommateFinder: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
                     <div className={`nexus-modal w-full max-w-md p-6 ${isClosing ? 'closing' : ''}`}>
                         <button onClick={handleClose} className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-1 tracking-tighter">{editingRequest ? 'Edit Request' : 'Find Roommate'}</h3>
-                        <p className="text-[11px] sm:text-xs font-bold text-zinc-400 tracking-wider mb-6">Tell us what you're looking for.</p>
+                        <p className="text-[11px] sm:text-xs font-semibold text-zinc-400 tracking-wider mb-6">Tell us what you're looking for.</p>
 
                         <form onSubmit={handleSubmit} className="space-y-4 text-left">
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-1 ml-1">Preferred Location</label>
-                                    <input type="text" required value={newRequest.location} onChange={e => setNewRequest({ ...newRequest, location: e.target.value })} className="w-full bg-zinc-50 dark:bg-white/5 px-4 py-3 rounded-xl text-[11px] sm:text-xs font-bold border border-zinc-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-zinc-800 dark:text-white" placeholder="e.g. Law Gate" />
+                                    <input type="text" required value={newRequest.location} onChange={e => setNewRequest({ ...newRequest, location: e.target.value })} className="w-full bg-zinc-50 dark:bg-white/5 px-4 py-3 rounded-xl text-[11px] sm:text-xs font-medium border border-zinc-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-zinc-800 dark:text-white" placeholder="e.g. Law Gate" />
                                 </div>
                                 <div>
                                     <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-1 ml-1">Budget Range</label>
-                                    <input type="text" required value={newRequest.budget} onChange={e => setNewRequest({ ...newRequest, budget: e.target.value })} className="w-full bg-zinc-50 dark:bg-white/5 px-4 py-3 rounded-xl text-[11px] sm:text-xs font-bold border border-zinc-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-zinc-800 dark:text-white" placeholder="e.g. 5k-7k" />
+                                    <input type="text" required value={newRequest.budget} onChange={e => setNewRequest({ ...newRequest, budget: e.target.value })} className="w-full bg-zinc-50 dark:bg-white/5 px-4 py-3 rounded-xl text-[11px] sm:text-xs font-medium border border-zinc-200 dark:border-white/10 outline-none focus:border-orange-500/50 text-zinc-800 dark:text-white" placeholder="e.g. 5k-7k" />
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-1 ml-1">Lifestyle Preferences</label>
-                                <textarea required value={newRequest.preferences} onChange={e => setNewRequest({ ...newRequest, preferences: e.target.value })} className="w-full bg-zinc-50 dark:bg-white/5 px-4 py-3 rounded-xl text-[11px] sm:text-xs font-bold border border-zinc-200 dark:border-white/10 outline-none focus:border-orange-500/50 min-h-[80px] text-zinc-800 dark:text-white" placeholder="e.g. Non-smoker, Vegan, Late sleeper..." />
+                                <textarea required value={newRequest.preferences} onChange={e => setNewRequest({ ...newRequest, preferences: e.target.value })} className="w-full bg-zinc-50 dark:bg-white/5 px-4 py-3 rounded-xl text-[11px] sm:text-xs font-medium border border-zinc-200 dark:border-white/10 outline-none focus:border-orange-500/50 min-h-[80px] text-zinc-800 dark:text-white" placeholder="e.g. Non-smoker, Vegan, Late sleeper..." />
                             </div>
-                            <button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-black text-[11px] sm:text-xs uppercase tracking-[0.2em] shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none cursor-pointer">
+                            <button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl font-bold text-[11px] sm:text-xs uppercase tracking-[0.2em] shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none cursor-pointer">
                                 {editingRequest ? 'Save Changes' : 'Post Request'}
                             </button>
+
                         </form>
                     </div>
                 </div>,
