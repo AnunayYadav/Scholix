@@ -566,6 +566,17 @@ const AppContent: React.FC = () => {
       const firstPart = pathParts[0].toLowerCase();
       if (uniMap[firstPart]) {
         const targetUniId = uniMap[firstPart];
+        const targetUni = UNIVERSITIES.find(u => u.id === targetUniId);
+        
+        if (targetUni?.adminOnly) {
+          if (!authIsReady) return; // Wait for session load before matching this route
+          if (!userProfile || !userProfile.is_admin) {
+            if (selectedUniversity !== 'none') selectUniversity('none');
+            navigate('/welcome', { replace: true });
+            return;
+          }
+        }
+
         if (selectedUniversity !== targetUniId) {
           selectUniversity(targetUniId);
         }
@@ -584,7 +595,7 @@ const AppContent: React.FC = () => {
     } else if (selectedUniversity === 'none' && !isGlobal && !['/welcome', '/login', '/signup'].includes(location.pathname)) {
       navigate('/welcome', { replace: true });
     }
-  }, [selectedUniversity, location.pathname, navigate, selectUniversity]);
+  }, [selectedUniversity, location.pathname, navigate, selectUniversity, authIsReady, userProfile]);
 
   useEffect(() => {
     if (userProfile && (location.pathname === '/login' || location.pathname === '/signup')) {
@@ -600,12 +611,6 @@ const AppContent: React.FC = () => {
     }
   }, [userProfile, location.pathname, navigate, showAuthModal]);
 
-  useEffect(() => {
-    if (authIsReady && universityInfo?.adminOnly && (!userProfile || !userProfile.is_admin) && location.pathname !== '/welcome') {
-      selectUniversity('none');
-      navigate('/welcome', { replace: true });
-    }
-  }, [authIsReady, universityInfo, userProfile, location.pathname, navigate, selectUniversity]);
 
   useEffect(() => {
     NexusServer.recordVisit();
