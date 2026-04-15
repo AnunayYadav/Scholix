@@ -8,7 +8,7 @@ interface PaymentSuccessProps {
 }
 
 const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
-  const { university } = useUniversity();
+  const { universityInfo, fullBrandName, shortBrandName } = useUniversity();
   const location = useLocation();
   const navigate = useNavigate();
   const [details, setDetails] = useState<any>(null);
@@ -108,7 +108,7 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
           <div className="hidden print:flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center text-white font-black text-xl">N</div>
             <div className="text-left">
-              <h1 className="text-xl font-black tracking-tighter text-zinc-900">{university.brand_name.toUpperCase()}</h1>
+              <h1 className="text-xl font-black tracking-tighter text-zinc-900">{fullBrandName.toUpperCase()}</h1>
               <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">Official Transaction Receipt</p>
             </div>
           </div>
@@ -125,7 +125,7 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
             <h2 className="text-4xl sm:text-5xl font-black text-zinc-900 dark:text-white tracking-tighter leading-none">
               Thank <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 print:text-orange-600">You!</span>
             </h2>
-            <p className="text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-[0.3em] text-[10px] sm:text-xs">Your support keeps {university.name} growing</p>
+            <p className="text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-[0.3em] text-[10px] sm:text-xs">Your support keeps {fullBrandName} growing</p>
           </div>
 
           {/* Receipt Card */}
@@ -163,7 +163,7 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
 
             <div className="pt-4 border-t border-zinc-200 dark:border-white/5 print:border-zinc-200">
               <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium italic print:text-zinc-600">
-                This is a computer-generated receipt for your contribution to {university.brand_name}. 
+                This is a computer-generated receipt for your contribution to {fullBrandName}. 
                 Thank you for being part of the community.
               </p>
             </div>

@@ -559,7 +559,7 @@ const AppContent: React.FC = () => {
       'scholix': 'none'
     };
 
-    const globalPages = ['welcome', 'privacy', 'about', 'help', 'share-cgpa'];
+    const globalPages = ['welcome', 'privacy', 'about', 'help', 'share-cgpa', 'payment-success'];
     const isGlobal = pathParts.length > 0 && globalPages.includes(pathParts[0]);
 
     if (pathParts.length > 0) {
@@ -581,7 +581,7 @@ const AppContent: React.FC = () => {
           navigate(`/${slug}${location.pathname === '/' ? '' : location.pathname}${location.search}`, { replace: true });
         }
       }
-    } else if (selectedUniversity === 'none' && !isGlobal && !['/', '/welcome', '/login', '/signup'].includes(location.pathname)) {
+    } else if (selectedUniversity === 'none' && !isGlobal && !['/welcome', '/login', '/signup'].includes(location.pathname)) {
       navigate('/welcome', { replace: true });
     }
   }, [selectedUniversity, location.pathname, navigate, selectUniversity]);
@@ -915,6 +915,7 @@ const FeatureRoutes: React.FC<{
       <Route path="/emergency" element={<FeatureGuard module={ModuleType.EMERGENCY}><EmergencyContacts /></FeatureGuard>} />
       <Route path="/ai-tools" element={<FeatureGuard module={ModuleType.AI_TOOLS}><AIToolsDirectory /></FeatureGuard>} />
       <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
+      <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/settings" element={<SettingsHub userProfile={userProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} />} />
       <Route path="/login" element={<Dashboard userProfile={userProfile} />} />
