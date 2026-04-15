@@ -1623,6 +1623,71 @@ class NexusServer {
       return [];
     }
   }
+
+  /**
+   * Save a payment transaction to the database
+   */
+  static async saveTransaction(params: {
+    paymentId: string;
+    orderId: string;
+    signature: string;
+    amount: number;
+    receiptReference: string;
+    userId?: string | null;
+    userEmail?: string | null;
+    userUsername?: string | null;
+  }): Promise<void> {
+    const client = getSupabase();
+    if (!client) {
+      console.warn('Supabase not configured — transaction not saved.');
+      return;
+    }
+
+    try {
+      const { error } = await client.from('transactions').insert([{
+        payment_id: params.paymentId,
+        order_id: params.orderId,
+        signature: params.signature,
+        amount: Number(params.amount),
+        receipt_reference: params.receiptReference,
+        user_id: params.userId || null,
+        user_email: params.userEmail || null,
+        user_username: params.userUsername || null,
+        currency: 'INR',
+        status: 'success',
+      }]);
+
+      if (error) {
+        console.error('Save Transaction Error:', error);
+        throw error;
+      }
+
+      console.log('Transaction saved successfully:', params.paymentId);
+    } catch (e) {
+      console.error('Transaction save exception:', e);
+      // Don't throw — we don't want a DB failure to break the user flow
+    }
+  }
+
+  /**
+   * Fetch all transactions (admin use)
+   */
+  static async fetchTransactions(limit: number = 50): Promise<any[]> {
+    const client = getSupabase();
+    if (!client) return [];
+
+    const { data, error } = await client
+      .from('transactions')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('Fetch Transactions Error:', error);
+      return [];
+    }
+    return data || [];
+  }
 }
 
 export default NexusServer;

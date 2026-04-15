@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserProfile } from '../types.ts';
 import { useUniversity } from '../hooks/useUniversity.tsx';
+import NexusServer from '../services/nexusServer.ts';
 
 interface BuyMeACoffeeProps {
   userProfile?: UserProfile | null;
@@ -66,14 +67,33 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className }) =
           setIsProcessing(false);
           setLoading(false);
           
+          const paymentId = response.razorpay_payment_id;
+          const orderId = response.razorpay_order_id;
+          const signature = response.razorpay_signature;
+          const receiptReference = `SCX-${paymentId.slice(-8).toUpperCase()}`;
+          const paymentDate = new Date().toISOString();
+
+          // Save transaction to Supabase (fire-and-forget — don't block navigation)
+          NexusServer.saveTransaction({
+            paymentId,
+            orderId,
+            signature,
+            amount: selectedAmount,
+            receiptReference,
+            userId: userProfile?.id || null,
+            userEmail: userProfile?.email || null,
+            userUsername: userProfile?.username || null,
+          }).catch(err => console.error('Background transaction save failed:', err));
+
           // Redirect to success page with data
           navigate('/payment-success', { 
             state: { 
-              paymentId: response.razorpay_payment_id,
-              orderId: response.razorpay_order_id,
-              signature: response.razorpay_signature,
+              paymentId,
+              orderId,
+              signature,
               amount: selectedAmount,
-              date: new Date().toISOString()
+              date: paymentDate,
+              receiptReference,
             } 
           });
         },
