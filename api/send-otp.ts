@@ -11,12 +11,10 @@ export default async function handler(req: any, res: any) {
   }
 
   // Dynamic Branding Configuration
-  const isLPU = university === 'lpu';
-  const brandName = isLPU ? 'LPU Nexus' : 'Scholix';
-  const shortBrandName = isLPU ? 'Nexus' : 'Scholix';
+  const brandName = 'Scholix';
+  const shortBrandName = 'Scholix';
   const brandLogo = 'https://scholix.app/apple-touch-icon.png';
-  const brandColor = '#ea580c'; // Keep the signature orange for consistency, or customize per university
-  const brandAccent = isLPU ? 'LPU Community' : 'Student Community';
+  const brandColor = '#ea580c'; // signature brand color
 
   const brevoApiKey = process.env.BREVO_API_KEY;
   const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || 'security@scholix.app';
@@ -55,7 +53,7 @@ export default async function handler(req: any, res: any) {
       if (!userData || userData.length === 0) {
         const errorMsg = type === 'login' 
           ? `No account found with this email. Please join ${shortBrandName} first.` 
-          : `Recovery protocol failed: This email is not registered in the ${shortBrandName} database.`;
+          : `Recovery failed: This email is not registered in the ${shortBrandName} database.`;
         return res.status(404).json({ error: errorMsg });
       }
     } else if (type === 'signup') {
@@ -92,7 +90,7 @@ export default async function handler(req: any, res: any) {
         if (secondsElapsed < 60) {
           const waitSeconds = Math.ceil(60 - secondsElapsed);
           return res.status(429).json({ 
-            error: `Transmission cooling down. Please wait ${waitSeconds}s before requesting a new code.` 
+            error: `Please wait ${waitSeconds}s before requesting a new code.` 
           });
         }
       }
@@ -131,33 +129,33 @@ export default async function handler(req: any, res: any) {
 
     if (type === 'login') {
       emailTemplate = `
-        <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Access Protocol</h1>
+        <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Login Code</h1>
         <p style="color: #64748b; font-size: 14px; margin-bottom: 32px; line-height: 1.6;">
-          Welcome back, cadet. Your secure access code for ${shortBrandName} is listed below. Use it to finalize your session synchronization.
+          Welcome back! Your secure login code for ${shortBrandName} is listed below. Use it to access your account.
         </p>
       `;
       emailSubject = `${otp} is your ${shortBrandName} Login Code`;
     } else if (type === 'email_update') {
       emailTemplate = `
-        <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Security Update</h1>
+        <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Verify New Email</h1>
         <p style="color: #64748b; font-size: 14px; margin-bottom: 32px; line-height: 1.6;">
-          Cadet, you are updating your primary communication channel. Use the code below to verify your new email address.
+          You are updating your email address. Use the code below to verify your new email address.
         </p>
       `;
       emailSubject = `${otp} is your ${shortBrandName} Security Code`;
     } else if (type === 'password_reset') {
       emailTemplate = `
-        <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Password Reset Protocol</h1>
+        <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Reset Password</h1>
         <p style="color: #64748b; font-size: 14px; margin-bottom: 32px; line-height: 1.6;">
-          Cadet, a password reset has been requested for your ${shortBrandName} account. Use the secure code below to authorize this change. If you didn't request this, ignore this transmission.
+          A password reset has been requested for your ${shortBrandName} account. Use the secure code below to authorize this change. If you didn't request this, you can safely ignore this email.
         </p>
       `;
       emailSubject = `${otp} is your ${shortBrandName} Reset Code`;
     } else {
       emailTemplate = `
-        <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Verification Protocol</h1>
+        <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Verification Code</h1>
         <p style="color: #64748b; font-size: 14px; margin-bottom: 32px; line-height: 1.6;">
-          Greetings, cadet. To complete your student join protocol, please use the following access code.
+          Welcome to ${shortBrandName}! To complete your registration, please use the following verification code.
         </p>
       `;
     }
@@ -197,11 +195,11 @@ export default async function handler(req: any, res: any) {
                 </div>
                 
                 <p style="color: #94a3b8; font-size: 12px; margin-top: 32px; text-align: center;">
-                  Valid for 10 minutes. If you didn't request this, ignore this transmission.
+                  Valid for 10 minutes. If you didn't request this, please ignore this email.
                 </p>
                 
                 <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #f1f5f9; text-align: center;">
-                  <p style="color: #94a3b8; font-size: 11px; margin: 0;">&copy; 2026 ${shortBrandName} Protocol. All Rights Reserved.</p>
+                  <p style="color: #94a3b8; font-size: 11px; margin: 0;">&copy; 2026 ${shortBrandName}. All Rights Reserved.</p>
                 </div>
               </div>
             </body>
@@ -220,6 +218,6 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ success: true, messageId: emailData.messageId });
   } catch (error: any) {
     console.error('OTP Execution Error:', error);
-    return res.status(500).json({ error: error.message || 'Internal transmission error.' });
+    return res.status(500).json({ error: error.message || 'Internal server error.' });
   }
 }
