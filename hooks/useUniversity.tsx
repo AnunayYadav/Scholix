@@ -63,6 +63,7 @@ export const UNIVERSITIES: University[] = [
     name: 'Indian Institute of Technology BS Degree', 
     shortName: 'IITM', 
     comingSoon: false, 
+    adminOnly: true,
     campusMapUrl: 'https://www.iitm.ac.in/it-at-iitm-bs/campus-map',
     logo: '/IIT_Madras_Logo.png',
     theme: {

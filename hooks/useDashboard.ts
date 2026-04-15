@@ -2,6 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { useQuizDashboardStore, FeaturedQuiz, ActiveChallenge } from '../stores/quizStore';
 import NexusServer from '../services/nexusServer';
 import { QuizQuestion } from '../types';
+import { SYLLABUS_DATA } from '../data/syllabusData';
 
 // ═══════════════════════════════════════
 // Deterministic Seeded Random — same result for all users on same date
@@ -197,7 +198,10 @@ async function generateFeaturedQuiz(): Promise<FeaturedQuiz | null> {
   const seed = hashStr(`featured_v3_${today}`);
   const rng = seededRandom(seed);
 
-  const subjects = await NexusServer.fetchSubjectNames();
+  const dbSubjects = await NexusServer.fetchSubjectNames();
+  const syllabusSubjects = Object.keys(SYLLABUS_DATA);
+  const subjects = Array.from(new Set([...syllabusSubjects, ...dbSubjects])).sort();
+
   if (!subjects || subjects.length === 0) return null;
 
   // Using a larger multiplier (e.g. 7) ensures we jump around more and don't just stay with 
@@ -266,7 +270,11 @@ async function generateActiveChallenges(): Promise<ActiveChallenge[]> {
   // We check for the last 7 days to find active challenges released on Mon, Wed, Fri
   const releaseDays = [1, 3, 5]; // Mon, Wed, Fri
   const challenges: ActiveChallenge[] = [];
-  const subjects = await NexusServer.fetchSubjectNames();
+  
+  const dbSubjects = await NexusServer.fetchSubjectNames();
+  const syllabusSubjects = Object.keys(SYLLABUS_DATA);
+  const subjects = Array.from(new Set([...syllabusSubjects, ...dbSubjects])).sort();
+  
   if (subjects.length === 0) return [];
 
   // Iterate back up to 7 days
@@ -287,15 +295,34 @@ async function generateActiveChallenges(): Promise<ActiveChallenge[]> {
       // Rotate subjects based on checkDate + release index to ensure wide coverage
       // We use a different offset for each release day to avoid picking the same 3 subjects every week
       const dayOffset = dayOfYear(checkDateStr);
+      const usedSubjectsOnDay = new Set<string>();
       
       for (let cIdx = 0; cIdx < numOnThisDay; cIdx++) {
-        // Pick subject using rotation logic
-        const subjectIdx = (dayOffset * 3 + cIdx) % subjects.length;
-        const subject = subjects[subjectIdx];
-        
         const cSeed = hashStr(`c_v3_${checkDateStr}_${cIdx}`);
         const cRng = seededRandom(cSeed);
         
+        let validSubject: string | null = null;
+        let pool: QuizQuestion[] = [];
+        let subjectCode = '';
+        
+        const startSubjectIdx = (dayOffset * 3 + cIdx) % subjects.length;
+        
+        for (let offset = 0; offset < subjects.length; offset++) {
+            const tryIdx = (startSubjectIdx + offset) % subjects.length;
+            const chosenSubject = subjects[tryIdx];
+            if (usedSubjectsOnDay.has(chosenSubject)) continue;
+            
+            subjectCode = (chosenSubject || '').split(':')[0].trim();
+            pool = await NexusServer.fetchQuestions(subjectCode);
+            if (pool.length >= 5) {
+                validSubject = chosenSubject;
+                break;
+            }
+        }
+        
+        if (!validSubject) continue;
+        usedSubjectsOnDay.add(validSubject);
+
         // Expiry: Exactly 3 to 5 days as requested
         const durationDays = Math.floor(cRng() * 3) + 3; // 3, 4, or 5
         const randomHours = Math.floor(cRng() * 24);
@@ -308,19 +335,14 @@ async function generateActiveChallenges(): Promise<ActiveChallenge[]> {
         // If today is before expiry, it's active
         if (currentFullDate.getTime() < expiryDate.getTime()) {
            const template = CHALLENGE_TEMPLATES[cIdx % CHALLENGE_TEMPLATES.length];
-           const subjectCode = (subject || '').split(':')[0].trim();
            const emoji = CHALLENGE_EMOJIS_MAP[subjectCode] || seededPick(Object.values(CHALLENGE_EMOJIS_MAP), cRng);
-
-           // Check pool
-           const pool: QuizQuestion[] = await NexusServer.fetchQuestions(subjectCode);
-           if (pool.length < 5) continue;
 
            challenges.push({
              id: `challenge_${checkDateStr}_${cIdx}`,
-             name: generateDynamicName(subject, cRng),
+             name: generateDynamicName(validSubject, cRng),
              description: template.desc,
              emoji,
-             subject,
+             subject: validSubject,
              difficulty: Math.floor(cRng() * 3) + 1,
              question_count: Math.min(template.count, pool.length),
              time_limit_per_question: template.timePerQ,
