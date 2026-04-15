@@ -140,7 +140,7 @@ const LeaderboardSection: React.FC<LeaderboardProps> = ({ currentUserId }) => {
                                                         <div className={`w-full h-full rounded-2xl flex items-center justify-center text-xs font-bold transition-all group-hover:scale-105
                                                             ${idx === 0 ? 'bg-gradient-to-br from-amber-300 via-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/20' : 
                                                               idx === 1 ? 'bg-gradient-to-br from-zinc-200 via-zinc-400 to-zinc-500 text-white shadow-lg shadow-zinc-400/20' : 
-                                                              idx === 2 ? 'bg-gradient-to-br from-orange-600 via-orange-800 to-orange-900 text-white shadow-lg shadow-orange-900/20' : 
+                                                              idx === 2 ? 'bg-gradient-to-br from-orange-500 via-orange-800 to-orange-900 text-white shadow-lg shadow-orange-900/20' : 
                                                               'text-zinc-400 dark:text-zinc-600 group-hover:text-zinc-900 dark:group-hover:text-white'}
                                                         `}>
                                                             {idx + 1}

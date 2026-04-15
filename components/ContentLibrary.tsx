@@ -37,9 +37,9 @@ const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' |
 
   const colors = {
     root: 'text-zinc-400',
-    semester: 'text-orange-600',
+    semester: 'text-orange-500',
     subject: 'text-orange-500',
-    category: 'text-amber-600'
+    category: 'text-orange-500'
   };
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`${size} ${colors[type]} mb-2 transition-colors`}>
@@ -63,7 +63,7 @@ interface ContentLibraryProps {
 }
 
 const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialView = 'browse', onAuthRequired }) => {
-  const { shortBrandName } = useUniversity();
+  const { shortBrandName, uniSlug } = useUniversity();
   const [allFiles, setAllFiles] = useState<LibraryFile[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [viewMode, setViewMode] = useState<'browse' | 'my-uploads' | 'originals'>(initialView);
@@ -74,6 +74,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   const { program, semester, subject, category } = useParams();
   const navigate = useNavigate();
+  const routePrefix = uniSlug ? `/${uniSlug}` : '';
+
 
   const [activeSemester, setActiveSemester] = useState<Folder | null>(null);
   const [activeSubject, setActiveSubject] = useState<Folder | null>(null);
@@ -457,7 +459,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [isCreatingNew, setIsCreatingNew] = useState({ program: false, semester: false, subject: false, type: false });
 
   const navigateTo = (sem: Folder | null, subj: Folder | null, cat: Folder | null) => {
-    let path = `/library/${slugify(selectedProgram)}`;
+    let path = `${routePrefix}/library/${slugify(selectedProgram)}`;
     if (sem) {
       path += `/${slugify(sem.name)}`;
       if (subj) {
@@ -566,7 +568,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     }
     setViewMode('browse');
     setSearchQuery('');
-    navigate(`/library/${slugify(userProfile?.program || availablePrograms[0])}`);
+    navigate(`${routePrefix}/library/${slugify(userProfile?.program || availablePrograms[0])}`);
   };
 
   const handleFileAccess = async (file: LibraryFile) => {
@@ -604,7 +606,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
           <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold text-zinc-800 dark:text-white tracking-tight leading-none mb-1 flex items-center">
-                Content <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 ml-1.5 mr-1.5">Library</span> Hub
+                Content <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Library</span> Hub
                 <div className="relative group ml-2 mb-1">
                   <button className="flex items-center justify-center text-zinc-300 dark:text-white/20 hover:text-orange-500 dark:hover:text-orange-500 bg-transparent border-none transition-colors">
                     <svg viewBox="0 0 16 16" fill="currentColor" className="w-5 h-5">
@@ -614,7 +616,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   </button>
                   <div className="absolute left-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-64 p-3 bg-white dark:bg-[#1a1a1a] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100]">
                     <p className="text-[10px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium whitespace-normal">
-                      <span className="text-orange-500 font-bold block mb-1 uppercase tracking-wider text-[9px]">Disclaimer</span>
+                      <span style={{ color: 'var(--brand-primary)' }} className="font-bold block mb-1 uppercase tracking-wider text-[9px]">Disclaimer</span>
                       Resources not explicitly marked as <strong className="text-zinc-800 dark:text-white font-bold">{shortBrandName}</strong> (e.g. {shortBrandName} Originals, {shortBrandName} Official) are completely crowdsourced (WhatsApp, Telegram, etc.) and not owned by us.
                     </p>
                   </div>
@@ -623,17 +625,17 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               {!isAdminView && !searchQuery && viewMode === 'browse' && (
                 <nav className="mt-2 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-zinc-400">
                   <button onClick={() => navigateTo(null, null, null)} className="hover:text-orange-500 transition-colors border-none bg-transparent">Root</button>
-                  {activeSemester && <><span className="opacity-30">/</span><button onClick={() => navigateTo(activeSemester, null, null)} className={`border-none bg-transparent ${!activeSubject ? 'text-orange-600' : 'hover:text-orange-500'}`}>{activeSemester.name}</button></>}
-                  {activeSubject && <><span className="opacity-30">/</span><button onClick={() => navigateTo(activeSemester, activeSubject, null)} className={`border-none bg-transparent ${!activeCategory ? 'text-orange-600' : 'hover:text-orange-500'}`}>{activeSubject.name}</button></>}
-                  {activeCategory && <><span className="opacity-30">/</span><span className="text-orange-600">{activeCategory.name}</span></>}
+                  {activeSemester && <><span className="opacity-30">/</span><button onClick={() => navigateTo(activeSemester, null, null)} className={`border-none bg-transparent ${!activeSubject ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSemester.name}</button></>}
+                  {activeSubject && <><span className="opacity-30">/</span><button onClick={() => navigateTo(activeSemester, activeSubject, null)} className={`border-none bg-transparent ${!activeCategory ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSubject.name}</button></>}
+                  {activeCategory && <><span className="opacity-30">/</span><span className="text-orange-500">{activeCategory.name}</span></>}
                 </nav>
               )}
             </div>
             <div className="flex gap-2">
               {userProfile?.is_admin && (
                 <>
-                  <button onClick={toggleAdminView} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${isAdminView ? 'bg-orange-600 text-white shadow-lg' : 'bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400'}`} title={isAdminView ? "Exit Review Hub" : "Enter Review Hub"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></button>
-                  <button onClick={() => { setNewFolderName(''); setShowFolderModal(true); }} className="w-10 h-10 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center text-orange-600 hover:scale-110 active:scale-95 transition-all shadow-sm border-none" title="Create Folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg></button>
+                  <button onClick={toggleAdminView} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${isAdminView ? 'bg-orange-500 text-white shadow-lg' : 'bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400'}`} title={isAdminView ? "Exit Review Hub" : "Enter Review Hub"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></button>
+                  <button onClick={() => { setNewFolderName(''); setShowFolderModal(true); }} className="w-10 h-10 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center text-orange-500 hover:scale-110 active:scale-95 transition-all shadow-sm border-none" title="Create Folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg></button>
                 </>
               )}
               <button
@@ -647,7 +649,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   navigateTo(null, null, null); 
                   setIsAdminView(false); 
                 }}
-                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400 hover:text-orange-600"
+                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400 hover:text-orange-500"
                 title={`${shortBrandName} Originals`}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
@@ -663,7 +665,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   navigateTo(null, null, null); 
                   setIsAdminView(false); 
                 }} 
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'my-uploads' ? 'bg-orange-600 text-white shadow-lg' : 'bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400 hover:text-orange-600'}`} 
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'my-uploads' ? 'bg-orange-500 text-white shadow-lg' : 'bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400 hover:text-orange-500'}`} 
                 title={viewMode === 'my-uploads' ? "Exit Vault" : "My Vault"}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
@@ -677,7 +679,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     } 
                     fileInputRef.current?.click(); 
                   }} 
-                  className="px-5 py-2 bg-orange-600 text-white rounded-xl font-bold text-[11px] sm:text-xs shadow-lg shadow-orange-600/20 border-none hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                  className="px-5 py-2 bg-orange-500 text-white rounded-xl font-bold text-[11px] sm:text-xs shadow-lg shadow-orange-500/20 border-none hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
                   Contribute {pendingUploads.length > 0 && `(${pendingUploads.length})`}
@@ -691,7 +693,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 options={availablePrograms}
                 value={selectedProgram}
                 onChange={(val) => {
-                  navigate(`/library/${slugify(val)}`);
+                  navigate(`${routePrefix}/library/${slugify(val)}`);
                 }}
                 className="flex-shrink-0"
                 buttonClassName="!h-12 !py-0 !rounded-2xl"
@@ -712,7 +714,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 />
               </div>
             </div>
-            <button onClick={() => fetchFromSource(true)} className="w-12 h-12 flex items-center justify-center bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl text-zinc-400 hover:text-orange-600 transition-colors shadow-sm border-none self-end md:self-auto" title="Refresh List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></button>
+            <button onClick={() => fetchFromSource(true)} className="w-12 h-12 flex items-center justify-center bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl text-zinc-400 hover:text-orange-500 transition-colors shadow-sm border-none self-end md:self-auto" title="Refresh List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></button>
           </div>
 
           {isLoading ? (
@@ -735,7 +737,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       <div key={folder.id} onDragOver={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(folder.id); }} onDragLeave={() => setDraggingOverId(null)} onDrop={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(null); const droppedFiles = e.dataTransfer.files; if (droppedFiles && droppedFiles.length > 0) { handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : ''); } }} onClick={() => { if (folder.type === 'semester') navigateTo(folder, null, null); else if (folder.type === 'subject') navigateTo(activeSemester, folder, null); else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder); }} className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''} ${draggingOverId === folder.id ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-orange-500/50 hover:shadow-lg'}`}>
                         {userProfile?.is_admin && (
                           <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                            <button onClick={(e) => { e.stopPropagation(); setFolderToManage(folder); setNewFolderName(folder.name); setIsShining(folder.is_shining || false); setShowRenameModal(true); }} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-orange-600 hover:bg-orange-50 dark:hover:bg-zinc-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+                            <button onClick={(e) => { e.stopPropagation(); setFolderToManage(folder); setNewFolderName(folder.name); setIsShining(folder.is_shining || false); setShowRenameModal(true); }} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-orange-500 hover:bg-orange-50 dark:hover:bg-zinc-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
                             <button onClick={(e) => handleDeleteFolder(folder, e)} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red dark:hover:bg-zinc-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
                           </div>
                         )}
@@ -832,7 +834,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               <header className="p-6 md:p-8 border-b border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-[#0a0a0a]/20 flex items-start justify-between">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-500 border border-orange-600/20">
+                    <div className="w-8 h-8 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-500/20">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                     </div>
                   </div>
@@ -865,13 +867,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between p-6 bg-orange-600/5 border border-orange-600/20 rounded-3xl">
+                <div className="flex items-center justify-between p-6 bg-orange-500/5 border border-orange-500/20 rounded-3xl">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center font-bold text-[11px] sm:text-xs">
+                    <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center font-bold text-[11px] sm:text-xs">
                       {selectedFile.uploader_username?.[0] || 'V'}
                     </div>
                     <div>
-                      <p className="text-[11px] sm:text-xs text-orange-600">Uploader</p>
+                      <p className="text-[11px] sm:text-xs text-orange-500">Uploader</p>
                       <div className="flex items-center gap-1.5">
                         <p className="text-[11px] sm:text-xs font-medium">@{selectedFile.uploader_username}</p>
                         <VerifiedBadge isAdmin={selectedFile.uploader_is_admin} size="w-3.5 h-3.5" />
@@ -888,7 +890,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               <footer className="p-6 md:p-8 bg-zinc-50 dark:bg-[#0a0a0a]/20 border-t border-zinc-100 dark:border-white/5 flex gap-4">
                 <button onClick={handleCloseDetails} className="flex-1 py-3 text-[11px] sm:text-xs text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors">Discard</button>
                 {selectedFile.status === 'approved' && (
-                  <button onClick={() => { handleCloseDetails(); handleFileAccess(selectedFile); }} className="flex-[2] py-3 bg-orange-600 text-white rounded-xl font-semibold text-[11px] sm:text-xs shadow-xl active:scale-95 transition-all border-none">View Document ↗</button>
+                  <button onClick={() => { handleCloseDetails(); handleFileAccess(selectedFile); }} className="flex-[2] py-3 bg-orange-500 text-white rounded-xl font-semibold text-[11px] sm:text-xs shadow-xl active:scale-95 transition-all border-none">View Document ↗</button>
                 )}
               </footer>
             </div>
@@ -926,7 +928,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   </button>
                 </div>
 
-                <button onClick={handleCreateFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-semibold text-[11px] sm:text-xs shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Saving...' : 'Create Folder'}</button>
+                <button onClick={handleCreateFolder} disabled={isProcessing} className="w-full bg-orange-500 text-white py-4 rounded-xl font-semibold text-[11px] sm:text-xs shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Saving...' : 'Create Folder'}</button>
               </div>
             </div>
           </div>,
@@ -968,7 +970,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   </button>
                 </div>
 
-                <button onClick={handleRenameFolder} disabled={isProcessing} className="w-full bg-orange-600 text-white py-4 rounded-xl font-semibold text-[11px] sm:text-xs shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Updating...' : 'Save Changes'}</button>
+                <button onClick={handleRenameFolder} disabled={isProcessing} className="w-full bg-orange-500 text-white py-4 rounded-xl font-semibold text-[11px] sm:text-xs shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Updating...' : 'Save Changes'}</button>
               </div>
             </div>
           </div>,
@@ -1212,7 +1214,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 <button
                   onClick={showUploadModal ? handleUpload : handleEditSubmission}
                   disabled={isProcessing || !metaForm.name || !metaForm.semester || !metaForm.subject || (showUploadModal && pendingUploads.some(u => !u.name || !u.semester || !u.subject))}
-                  className="flex-1 bg-orange-600 text-white py-4 rounded-[24px] font-semibold text-[11px] sm:text-xs shadow-[0_20px_50px_rgba(234,88,12,0.3)] hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all border-none"
+                  className="flex-1 bg-orange-500 text-white py-4 rounded-[24px] font-semibold text-[11px] sm:text-xs shadow-[0_20px_50px_rgba(234,88,12,0.3)] hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all border-none"
                 >
                   {isProcessing ? 'Processing Batch...' : showUploadModal ? `Upload ${pendingUploads.length} Item${pendingUploads.length > 1 ? 's' : ''}` : 'Update Record'}
                 </button>
@@ -1328,12 +1330,12 @@ const FileCard: React.FC<{
             </div>
           ) : isAdmin ? (
             <div className="flex gap-1.5">
-              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-orange-600 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-600 hover:text-white transition-all border-none" title="Edit Metadata"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Edit Metadata"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
               <button onClick={(e) => { e.stopPropagation(); onDelete?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
               <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Access File"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
             </div>
           ) : (
-            <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="bg-zinc-100 dark:bg-[#0a0a0a] text-orange-600 px-4 py-1.5 rounded-xl font-medium text-[11px] sm:text-xs flex items-center gap-1.5 hover:bg-orange-600 hover:text-white transition-all shadow-md border-none">Access <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
+            <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 px-4 py-1.5 rounded-xl font-medium text-[11px] sm:text-xs flex items-center gap-1.5 hover:bg-orange-500 hover:text-white transition-all shadow-md border-none">Access <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
           )}
         </div>
       </div>

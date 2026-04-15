@@ -59,7 +59,7 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="4"
-                    className="w-3 h-3 text-orange-600 transition-transform duration-300"
+                    className="w-3 h-3 text-orange-500 transition-transform duration-300"
                     style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
                 >
                     <path d="m6 9 6 6 6-6" />
@@ -79,8 +79,8 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
                                         setIsOpen(false);
                                     }}
                                     className={`w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-semibold transition-all flex items-center justify-between group border-none ${value === option
-                                        ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
-                                        : 'text-zinc-600 dark:text-zinc-400 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-orange-600'
+                                        ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                                        : 'text-zinc-600 dark:text-zinc-400 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-orange-500'
                                         }`}
                                 >
                                     {option}

@@ -65,7 +65,7 @@ const FeaturedQuizCard: React.FC<FeaturedQuizCardProps> = ({
           <div className="flex-1 min-w-0 space-y-4">
             {/* Top label */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-orange-500/10 text-orange-600 text-[10px] font-semibold tracking-wider">
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-orange-500/10 text-orange-500 text-[10px] font-semibold tracking-wider">
                 <span className="text-sm">⭐</span> Daily Featured
               </span>
               <span className={`px-2.5 py-1 rounded-lg border text-[10px] font-semibold tracking-wider ${difficultyConfig.color}`}>

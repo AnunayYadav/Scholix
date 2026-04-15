@@ -23,7 +23,7 @@ const HistorySection: React.FC = () => {
           </div>
           <button
             onClick={() => setDashboardView('dashboard')}
-            className="px-6 py-2.5 bg-orange-500 text-white rounded-2xl text-xs font-semibold hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
+            className="px-6 py-2.5 bg-orange-500 text-white rounded-2xl text-xs font-semibold hover:bg-orange-500 transition-all shadow-lg shadow-orange-500/20"
           >
             Launch Quiz Dashboard
           </button>
@@ -40,7 +40,7 @@ const HistorySection: React.FC = () => {
               className="glass-panel p-6 rounded-[40px] text-left hover:border-orange-500/30 transition-all group"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 rounded-2xl bg-orange-600/10 text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                <div className="p-3 rounded-2xl bg-orange-500/10 text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-colors">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="w-5 h-5"><path d="M18 6 6 18M6 6l12 12" /></svg>
                 </div>
                 <div className="text-right">
@@ -52,7 +52,7 @@ const HistorySection: React.FC = () => {
               <div className="h-px bg-zinc-100 dark:bg-white/5 w-full mb-4 opacity-50" />
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-bold text-zinc-900 dark:text-white group-hover:text-orange-600 transition-colors truncate">
+                  <h4 className="text-sm font-bold text-zinc-900 dark:text-white group-hover:text-orange-500 transition-colors truncate">
                     {q.name || q.subject}
                   </h4>
                   <div className="flex items-center gap-2 mt-0.5">
@@ -65,7 +65,7 @@ const HistorySection: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 text-orange-600">
+                <div className="flex items-center gap-1.5 text-orange-500">
                   <span className="text-[10px] font-semibold tracking-wider">Review</span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>

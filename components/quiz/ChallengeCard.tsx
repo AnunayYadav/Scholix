@@ -91,7 +91,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
             </div>
 
             {/* XP badge */}
-            <div className="flex-shrink-0 px-2.5 py-1 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400">
+            <div className="flex-shrink-0 px-2.5 py-1 rounded-lg bg-orange-500/10 text-orange-500 dark:text-orange-400">
               <span className="text-[10px] font-semibold tabular-nums">{challenge.xp_reward} XP</span>
             </div>
           </div>

@@ -96,6 +96,7 @@ interface UniversityContextType {
   fullBrandName: string;
   shortBrandName: string;
   studentTerm: string;
+  uniSlug: string;
 }
 
 const UniversityContext = createContext<UniversityContextType | undefined>(undefined);
@@ -112,6 +113,12 @@ export const UniversityProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const universityInfo = UNIVERSITIES.find(u => u.id === selectedUniversity) || null;
+
+  const uniSlug = React.useMemo(() => {
+    if (selectedUniversity === 'lpu') return 'lpu';
+    if (selectedUniversity === 'iitm_bs') return 'iitm';
+    return '';
+  }, [selectedUniversity]);
 
   // Sync theme to CSS variables
   useEffect(() => {
@@ -149,8 +156,9 @@ export const UniversityProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       universityInfo,
       fullBrandName,
       shortBrandName,
-      studentTerm
-    }), [selectedUniversity, universityInfo, fullBrandName, shortBrandName, studentTerm])}>
+      studentTerm,
+      uniSlug
+    }), [selectedUniversity, universityInfo, fullBrandName, shortBrandName, studentTerm, uniSlug])}>
       {children}
     </UniversityContext.Provider>
   );

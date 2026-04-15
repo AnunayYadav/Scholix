@@ -222,10 +222,12 @@ const RewardItemCard: React.FC<{
 };
 
 const QuizTaker: React.FC<{ userProfile: UserProfile | null, onAuthRequired?: () => void }> = ({ userProfile, onAuthRequired }) => {
-  const { fullBrandName, shortBrandName, selectedUniversity } = useUniversity();
+  const { fullBrandName, shortBrandName, selectedUniversity, uniSlug } = useUniversity();
   const isLPU = selectedUniversity === 'lpu';
   const { subjectName, quizId } = useParams();
   const navigate = useNavigate();
+  const routePrefix = uniSlug ? `/${uniSlug}` : '';
+
 
   // ═══════════ Dashboard State ═══════════
   const [showCustomQuizBuilder, setShowCustomQuizBuilder] = useState(false);
@@ -811,11 +813,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     if (sub) {
       // If we are already in a quiz for this subject, maybe we don't want to reset? 
       // But if we're picking a new subject from the setup screen, we reset.
-      navigate(`/quiz/${slugify(sub.name)}`);
+      navigate(`${routePrefix}/quiz/${slugify(sub.name)}`);
       setQuizQuestions([]);
       setQuizIdInState(null);
     } else {
-      navigate('/quiz');
+      navigate(`${routePrefix}/quiz`);
       setQuizQuestions([]);
       setQuizIdInState(null);
     }
@@ -922,7 +924,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     setShowCustomQuizBuilder(false);
     setActiveQuizType('custom');
     setActiveChallengeId(null);
-    navigate('/quiz');
+    navigate(`${routePrefix}/quiz`);
   };
 
   // ═══════════ Featured Quiz Start ═══════════
@@ -960,7 +962,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     setTimeSpentByQuestion({});
     const newQuizId = featuredQuiz.id; // Using static day-based ID
     setQuizIdInState(newQuizId);
-    navigate(`/quiz/featured/${newQuizId}`);
+    navigate(`${routePrefix}/quiz/featured/${newQuizId}`);
   }, [featuredQuiz, featuredCompleted]);
 
   // ═══════════ Challenge Start ═══════════
@@ -1010,7 +1012,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     setTimeSpentByQuestion({});
     const newQuizId = challenge.id; // Using static window-based ID
     setQuizIdInState(newQuizId);
-    navigate(`/quiz/challenge/${newQuizId}`);
+    navigate(`${routePrefix}/quiz/challenge/${newQuizId}`);
     } catch (err) {
       console.error(err);
       showToast('Error starting challenge!', 'error');
@@ -1265,7 +1267,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       questionCount: enriched.length,
       difficulty: selectedDifficulties 
     });
-    navigate(`/quiz/${slugify(selectedSubject!.name)}/${newQuizId}`);
+    navigate(`${routePrefix}/quiz/${slugify(selectedSubject!.name)}/${newQuizId}`);
 
     setLoading(false);
     setCurrentQuestionIdx(0);
@@ -1424,7 +1426,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   <button
                     disabled={!reportReason.trim() || isReporting}
                     onClick={submitReport}
-                    className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-600 hover:shadow-xl hover:shadow-orange-500/20 text-white rounded-2xl text-sm font-bold shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2 border-none"
+                    className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:shadow-xl hover:shadow-orange-500/20 text-white rounded-2xl text-sm font-bold shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2 border-none"
                   >
                     {isReporting ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -1615,7 +1617,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
   if (initializing) return (
     <div className="h-[60vh] flex flex-col items-center justify-center space-y-6 animate-fade-in">
-      <div className="w-12 h-12 border-4 border-orange-500/10 border-t-orange-600 rounded-full animate-spin" />
+      <div className="w-12 h-12 border-4 border-orange-500/10 border-t-orange-500 rounded-full animate-spin" />
       <p className="text-sm font-medium text-zinc-500">Setting up your subjects...</p>
       {renderModals()}
     </div>
@@ -1625,7 +1627,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     <div className="h-[70vh] flex flex-col items-center justify-center space-y-10 animate-fade-in">
       <div className="relative">
         <div className="w-24 h-24 border-8 border-orange-500/10 rounded-full" />
-        <div className="absolute inset-0 w-24 h-24 border-8 border-orange-600 border-t-transparent rounded-full animate-spin" />
+        <div className="absolute inset-0 w-24 h-24 border-8 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
       <div className="text-center space-y-2">
         <h3 className="text-2xl font-semibold text-zinc-800 dark:text-white">Starting Quiz</h3>
@@ -1701,7 +1703,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             <div className="glass-panel p-10 md:p-12 rounded-[48px] shadow-2xl bg-white/80 dark:bg-dark-900/50 border-zinc-200 dark:border-white/5 relative">
               <div className="space-y-10">
                 <div className="flex items-center flex-wrap gap-3">
-                  <span className="bg-orange-600/10 dark:bg-orange-600/20 text-orange-600 dark:text-orange-500 px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest">Question {sectionInfo.mapping[currentQuestionIdx]}</span>
+                  <span className="bg-orange-500/10 dark:bg-orange-500/20 text-orange-500 dark:text-orange-500 px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest">Question {sectionInfo.mapping[currentQuestionIdx]}</span>
                   <span className="bg-zinc-100 dark:bg-dark-800 text-zinc-600 dark:text-zinc-400 px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest">Unit {q.unit}</span>
                   {q.difficulty && (
                     <span className={`px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest ${
@@ -1846,7 +1848,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                          <button
                            onClick={() => runCode(true)}
                            disabled={isExecuting || (currentLanguage === 'python' && !pyodide)}
-                           className="px-8 py-2.5 bg-orange-600 text-white rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-orange-500 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-orange-600/20"
+                           className="px-8 py-2.5 bg-orange-500 text-white rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-orange-500 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-orange-500/20"
                          >
                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></svg>
                            Submit Code
@@ -1987,13 +1989,13 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       isPracticeMode ? (
                         <button
                           onClick={handleShowExplanation}
-                          className="w-full py-10 rounded-[32px] border-2 border-dashed border-white/10 bg-white/[0.02] text-zinc-500 font-bold hover:border-orange-500/30 hover:text-orange-600 transition-all flex flex-col items-center gap-4 group"
+                          className="w-full py-10 rounded-[32px] border-2 border-dashed border-white/10 bg-white/[0.02] text-zinc-500 font-bold hover:border-orange-500/30 hover:text-orange-500 transition-all flex flex-col items-center gap-4 group"
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 opacity-20 group-hover:opacity-100 transition-opacity"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
                           <span className="text-xs font-semibold">View Model Answer</span>
                         </button>
                       ) : (
-                        <div className="p-10 rounded-[32px] border border-orange-500/10 bg-orange-600/[0.02] flex flex-col items-center gap-4 text-center">
+                        <div className="p-10 rounded-[32px] border border-orange-500/10 bg-orange-500/[0.02] flex flex-col items-center gap-4 text-center">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-orange-500/30"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                           <div>
                             <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Test Mode Active</p>
@@ -2021,7 +2023,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       let style = "bg-zinc-50 dark:bg-white/[0.03] border-zinc-200 dark:border-white/5 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/[0.05] hover:border-zinc-300 dark:hover:border-white/10";
                       if (isCorrect) style = "bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.1)]";
                       else if (isWrong) style = "bg-red-500/10 border-red-500 text-red-600 dark:text-red-500";
-                      else if (isSelected) style = "bg-orange-600/10 border-orange-500 text-orange-600 dark:text-orange-500";
+                      else if (isSelected) style = "bg-orange-500/10 border-orange-500 text-orange-500 dark:text-orange-500";
 
                       return (
                         <button
@@ -2041,9 +2043,9 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     })}
 
                     {isShowingExplanation && (
-                      <div className="p-8 mt-6 bg-orange-600/[0.03] dark:bg-orange-600/5 border border-orange-500/20 dark:border-orange-600/10 rounded-[32px] animate-in fade-in slide-in-from-top-4 duration-500">
-                        <p className="text-[10px] font-semibold text-orange-600 uppercase tracking-widest mb-3">Expert Insights</p>
-                        <div className="text-base font-medium text-zinc-600 dark:text-zinc-400 leading-relaxed italic border-l-2 border-orange-500/30 dark:border-orange-600/30 pl-6">{parseText(q.explanation)}</div>
+                      <div className="p-8 mt-6 bg-orange-500/[0.03] dark:bg-orange-500/5 border border-orange-500/20 dark:border-orange-500/10 rounded-[32px] animate-in fade-in slide-in-from-top-4 duration-500">
+                        <p className="text-[10px] font-semibold text-orange-500 uppercase tracking-widest mb-3">Expert Insights</p>
+                        <div className="text-base font-medium text-zinc-600 dark:text-zinc-400 leading-relaxed italic border-l-2 border-orange-500/30 dark:border-orange-500/30 pl-6">{parseText(q.explanation)}</div>
                       </div>
                     )}
                   </div>
@@ -2082,7 +2084,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     
                     <button
                       onClick={nextQuestion}
-                      className="flex items-center gap-2 px-8 py-2.5 bg-orange-600 text-white rounded-xl text-xs font-semibold shadow-lg shadow-orange-600/20 active:scale-95 transition-all hover:bg-orange-500"
+                      className="flex items-center gap-2 px-8 py-2.5 bg-orange-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-orange-500/20 active:scale-95 transition-all hover:bg-orange-500"
                     >
                       {currentQuestionIdx === quizQuestions.length - 1 ? 'Finish Test' : 'Next'}
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M9 18l6-6-6-6" /></svg>
@@ -2100,7 +2102,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               {/* Section 1: Objective */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <div className={`w-1 h-4 rounded-full ${(!isSubjectiveSection && !isCodingSection) ? 'bg-orange-600 shadow-[0_0_8px_#ea580c]' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
+                  <div className={`w-1 h-4 rounded-full ${(!isSubjectiveSection && !isCodingSection) ? 'bg-orange-500 shadow-[0_0_8px_#ea580c]' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
                   <span className={`text-[13px] font-semibold uppercase tracking-widest ${(!isSubjectiveSection && !isCodingSection) ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-600'}`}>Section 1: Objective</span>
                 </div>
                 <div className="grid grid-cols-5 gap-2.5">
@@ -2140,7 +2142,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               {hasSubjective && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
-                    <div className={`w-1 h-4 rounded-full ${isSubjectiveSection ? 'bg-orange-600 shadow-[0_0_8px_#ea580c]' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
+                    <div className={`w-1 h-4 rounded-full ${isSubjectiveSection ? 'bg-orange-500 shadow-[0_0_8px_#ea580c]' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
                     <span className={`text-[13px] font-semibold uppercase tracking-widest ${isSubjectiveSection ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-600'}`}>Section 2: Subjective</span>
                   </div>
                   <div className="grid grid-cols-5 gap-2.5">
@@ -2181,7 +2183,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               {hasCoding && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
-                    <div className={`w-1 h-4 rounded-full ${isCodingSection ? 'bg-orange-600 shadow-[0_0_8px_#ea580c]' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
+                    <div className={`w-1 h-4 rounded-full ${isCodingSection ? 'bg-orange-500 shadow-[0_0_8px_#ea580c]' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
                     <span className={`text-[13px] font-semibold uppercase tracking-widest ${isCodingSection ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-600'}`}>Section 3: Coding</span>
                   </div>
                   <div className="grid grid-cols-5 gap-2.5">
@@ -2304,7 +2306,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       uncommon: 'bg-blue-50 border-blue-200 dark:bg-blue-500/5 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 shadow-lg shadow-blue-500/5',
       rare: 'bg-emerald-50 border-emerald-200 dark:bg-emerald-500/5 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 shadow-lg shadow-emerald-500/5',
       epic: 'bg-indigo-50 border-indigo-200 dark:bg-indigo-500/5 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 shadow-xl shadow-indigo-500/10',
-      legendary: 'bg-orange-50 border-orange-200 dark:bg-orange-500/5 dark:border-orange-500/20 text-orange-600 dark:text-orange-400 shadow-2xl shadow-orange-500/15'
+      legendary: 'bg-orange-50 border-orange-200 dark:bg-orange-500/5 dark:border-orange-500/20 text-orange-500 dark:text-orange-400 shadow-2xl shadow-orange-500/15'
     };
 
     const activeMilestones = allMilestones
@@ -2339,7 +2341,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           case 'zap': return 'text-yellow-400';
           case 'sword': return 'text-zinc-500';
           case 'perfect': return 'text-emerald-500';
-          case 'fire': return 'text-orange-600';
+          case 'fire': return 'text-orange-500';
           case 'crown': return 'text-amber-500';
           case 'shield': return 'text-blue-600';
           case 'throne': return 'text-amber-600';
@@ -2536,12 +2538,12 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           {/* Centered Results Header */}
           <div className="text-center space-y-6">
             <div className="relative inline-block">
-               <div className="absolute inset-0 bg-orange-600/10 blur-[40px] rounded-full animate-pulse" />
+               <div className="absolute inset-0 bg-orange-500/10 blur-[40px] rounded-full animate-pulse" />
                <div className="relative w-14 h-14 mx-auto bg-transparent flex items-center justify-center shadow-lg">
-                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-orange-600">
+                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-orange-500">
                    <path d="M6 9l6 6 6-6" className="transform rotate-180 origin-center" /><path d="M12 15V3" className="transform rotate-180 origin-center" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" className="transform rotate-180 origin-center" />
                  </svg>
-                 <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-orange-600 rounded-full flex items-center justify-center">
+                 <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-2.5 h-2.5 text-white"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
                  </div>
                </div>
@@ -2549,7 +2551,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
             <div className="space-y-3">
               <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
-                <span className="text-orange-600">{percentage}%</span> <span className="text-zinc-300">/</span> <span className="text-zinc-900 dark:text-white">
+                <span className="text-orange-500">{percentage}%</span> <span className="text-zinc-300">/</span> <span className="text-zinc-900 dark:text-white">
                   {percentage >= 90 ? 'Outstanding!' : percentage >= 80 ? 'Great job!' : percentage >= 60 ? 'Good Effort!' : 'Keep Pushing!'}
                 </span>
               </h1>
@@ -2588,7 +2590,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             </div>
 
             <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
-              <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-600 mb-3 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+              <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 mb-3 group-hover:bg-orange-500 group-hover:text-white transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               </div>
               <span className="text-[10px] font-semibold text-zinc-400 tracking-wider mb-1">Time Taken</span>
@@ -2600,7 +2602,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           <div className="flex flex-col items-center gap-6">
             <button 
               onClick={() => document.getElementById('question-review-section')?.scrollIntoView({ behavior: 'smooth' })}
-              className="w-full max-w-lg py-5 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl font-bold text-base shadow-lg shadow-orange-600/20 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
+              className="w-full max-w-lg py-5 bg-orange-500 hover:bg-orange-700 text-white rounded-2xl font-bold text-base shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
             >
               <span>Review Results</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -2611,14 +2613,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 onClick={handleGenerate}
                 className="flex-1 py-4 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl font-bold text-xs text-zinc-600 dark:text-zinc-400 transition-all flex items-center justify-center gap-2 group border-none"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-400 dark:text-zinc-500 group-hover:text-orange-600 transition-colors"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-400 dark:text-zinc-500 group-hover:text-orange-500 transition-colors"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
                 Retake Quiz
               </button>
               <button 
                 onClick={handleBackToDashboard}
                 className="flex-1 py-4 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl font-bold text-xs text-zinc-600 dark:text-zinc-400 transition-all flex items-center justify-center gap-2 group border-none"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-400 dark:text-zinc-500 group-hover:text-orange-600 transition-colors"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-400 dark:text-zinc-500 group-hover:text-orange-500 transition-colors"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></svg>
                 Dashboard
               </button>
             </div>
@@ -2692,7 +2694,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               const isStruggle = timeSpent > avgTimePerQuestion * struggleMultiplier;
               
               const statusColorOptions = isSubjective 
-                ? 'bg-orange-50/50 border-orange-200 dark:bg-orange-500/5 dark:border-orange-500/20 text-orange-600 dark:text-orange-400' 
+                ? 'bg-orange-50/50 border-orange-200 dark:bg-orange-500/5 dark:border-orange-500/20 text-orange-500 dark:text-orange-400' 
                 : isCorrect 
                   ? 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-500/5 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400' 
                   : 'bg-red-50/50 border-red-200 dark:bg-red-500/5 dark:border-red-500/20 text-red-600 dark:text-red-400';
@@ -2880,7 +2882,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
         {/* Header */}
         <header className="text-center space-y-3 pt-2">
-          <h2 className="text-2xl md:text-4xl font-semibold text-zinc-900 dark:text-white tracking-tighter leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Taker</span></h2>
+          <h2 className="text-2xl md:text-4xl font-semibold text-zinc-900 dark:text-white tracking-tighter leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600">Taker</span></h2>
           <p className="text-zinc-500 font-medium text-xs">Your personal assessment dashboard</p>
         </header>
 
@@ -2931,7 +2933,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
             <div className="flex justify-between items-start">
               <div className="space-y-1">
-                <p className="text-[10px] font-black text-orange-600/90 uppercase tracking-widest leading-none">Level {level.level}</p>
+                <p className="text-[10px] font-black text-orange-500/90 uppercase tracking-widest leading-none">Level {level.level}</p>
                 <h3 className="text-4xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter leading-none">{level.title}</h3>
               </div>
               <div className="w-14 h-14 rounded-[18px] bg-orange-500/5 dark:bg-orange-500/10 flex items-center justify-center text-2xl">
@@ -2943,7 +2945,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               <div className="flex items-baseline gap-2">
                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Total XP</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-orange-600 tabular-nums leading-none">
+                  <span className="text-3xl font-black text-orange-500 tabular-nums leading-none">
                     {totalXP}
                   </span>
                   <span className="text-[11px] font-bold text-zinc-400">XP</span>
@@ -2958,7 +2960,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     whileInView={{ width: `${level.progress}%` }}
                     transition={{ duration: 1.5, ease: "circOut" }}
                     viewport={{ once: true }}
-                    className="h-full bg-orange-600 rounded-full"
+                    className="h-full bg-orange-500 rounded-full"
                   />
                 </div>
                 {level.nextLevel && (
@@ -2994,7 +2996,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Day Streak</p>
               
               <div className="px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 mb-4">
-                <p className="text-[9px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest leading-none">Best: {longestStreak}</p>
+                <p className="text-[9px] font-black text-orange-500 dark:text-orange-400 uppercase tracking-widest leading-none">Best: {longestStreak}</p>
               </div>
             </div>
 
@@ -3005,8 +3007,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   const isCompleted = day?.completed;
                   return (
                     <div key={i} className="flex flex-col items-center gap-2 flex-1">
-                      <span className={`text-[8px] font-bold ${isCompleted ? 'text-orange-600' : 'text-zinc-400'}`}>{label}</span>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isCompleted ? 'bg-orange-600 border-orange-600 shadow-lg shadow-orange-600/20' : 'border-zinc-100 dark:border-white/5'}`}>
+                      <span className={`text-[8px] font-bold ${isCompleted ? 'text-orange-500' : 'text-zinc-400'}`}>{label}</span>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isCompleted ? 'bg-orange-500 border-orange-500 shadow-lg shadow-orange-500/20' : 'border-zinc-100 dark:border-white/5'}`}>
                         {isCompleted && (
                           <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" className="w-3 h-3">
                             <polyline points="20 6 9 17 4 12" strokeLinecap="round" strokeLinejoin="round" />
@@ -3056,23 +3058,23 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       <div className="text-left space-y-1">
                         <h2 className="text-3xl md:text-4xl font-black flex items-center gap-3">
                           <span className="text-zinc-800 dark:text-white uppercase tracking-tighter">{shortBrandName}</span>
-                          <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-400 uppercase tracking-tighter">Journey</span>
+                          <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-400 uppercase tracking-tighter">Journey</span>
                         </h2>
                         <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium max-w-lg leading-relaxed">
                           Track your academic progress, level up, and unlock exclusive rewards.
                         </p>
                       </div>
 
-                      <div className="p-3 md:p-4 rounded-[24px] bg-gradient-to-br from-orange-500/[0.08] to-orange-600/[0.08] border border-orange-500/15 backdrop-blur-md relative overflow-hidden group">
+                      <div className="p-3 md:p-4 rounded-[24px] bg-gradient-to-br from-orange-500/[0.08] to-orange-500/[0.08] border border-orange-500/15 backdrop-blur-md relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-3 opacity-20 transform translate-x-1 translate-y--1 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-12 h-12 text-orange-500"><circle cx="12" cy="8" r="7" /><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" /></svg>
                         </div>
                         <div className="flex items-center gap-5 relative z-10">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-600 to-orange-500 flex items-center justify-center text-xl shadow-lg shadow-orange-600/20">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-500 flex items-center justify-center text-xl shadow-lg shadow-orange-500/20">
                             🏆
                           </div>
                           <div className="text-left">
-                            <p className="text-[10px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-0.5 whitespace-nowrap">Account Rank</p>
+                            <p className="text-[10px] font-black text-orange-500 dark:text-orange-400 uppercase tracking-widest mb-0.5 whitespace-nowrap">Account Rank</p>
                             <div className="flex items-baseline gap-1.5 leading-none">
                               <span className="text-xl font-black text-zinc-800 dark:text-white">{userQuizProfile.total_xp}</span>
                               <span className="text-[9px] font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">Total XP</span>
@@ -3112,7 +3114,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                     initial={{ width: 0 }}
                                     animate={{ width: `${connectorProgress * 100}%` }}
                                     transition={{ duration: 1, ease: "easeOut" }}
-                                    className="h-full bg-gradient-to-r from-orange-600 to-orange-400 shadow-[0_0_10px_rgba(249,115,22,0.5)]"
+                                    className="h-full bg-gradient-to-r from-orange-500 to-orange-400 shadow-[0_0_10px_rgba(249,115,22,0.5)]"
                                   />
                                 </div>
                               )}
@@ -3135,7 +3137,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                     <div className="flex items-center gap-3">
                                       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black transition-all duration-500 ${
                                         isRewardUnlocked 
-                                          ? 'bg-gradient-to-br from-orange-600 to-orange-500 text-white shadow-xl shadow-orange-600/30 ring-4 ring-orange-500/10 rotate-3 group-hover/card:rotate-0' 
+                                          ? 'bg-gradient-to-br from-orange-500 to-orange-500 text-white shadow-xl shadow-orange-500/30 ring-4 ring-orange-500/10 rotate-3 group-hover/card:rotate-0' 
                                           : 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-600 border border-zinc-300 dark:border-white/10'
                                       }`}>
                                         {tier.level}
@@ -3300,7 +3302,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             </motion.button>
           )}
           <div>
-            <h2 className="text-3xl md:text-5xl font-bold text-zinc-900 dark:text-white tracking-tight leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">taker</span></h2>
+            <h2 className="text-3xl md:text-5xl font-bold text-zinc-900 dark:text-white tracking-tight leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600">taker</span></h2>
             <p className="text-zinc-500 font-semibold text-[11px] tracking-wider mt-1 opacity-60">Comprehensive Assessment</p>
           </div>
         </div>
@@ -3331,7 +3333,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center gap-4"
             >
-              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm shadow-lg transition-all duration-500 ${selectedSubject ? 'bg-emerald-500 text-white rotate-[360deg]' : 'bg-gradient-to-br from-orange-500 to-red-600 text-white'}`}>
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm shadow-lg transition-all duration-500 ${selectedSubject ? 'bg-emerald-500 text-white rotate-[360deg]' : 'bg-gradient-to-br from-orange-500 to-orange-600 text-white'}`}>
                 {selectedSubject ? '✓' : '1'}
               </div>
               <div>
@@ -3352,7 +3354,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   onClick={() => { handleSubjectChange(s); setSelectedUnits([]); }}
                   className={`relative p-5 rounded-[24px] border text-left transition-all group overflow-hidden ${
                     selectedSubject?.id === s.id 
-                      ? 'bg-gradient-to-r from-orange-500 to-red-600 border-transparent text-white shadow-xl shadow-orange-500/20' 
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 border-transparent text-white shadow-xl shadow-orange-500/20' 
                       : 'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 text-zinc-600 dark:text-zinc-400 hover:border-orange-500/30 hover:bg-white dark:hover:bg-white/[0.04]'
                     }`}
                 >
@@ -3387,7 +3389,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               animate={selectedSubject ? { opacity: 1, x: 0 } : { opacity: 0.5, x: -10 }}
               className="flex items-center gap-4"
             >
-              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-semibold text-sm shadow-lg transition-all duration-500 ${selectedUnits.length > 0 && selectedDifficulties.length > 0 ? 'bg-emerald-500 text-white rotate-[360deg]' : 'bg-gradient-to-br from-orange-500 to-red-600 text-white'}`}>
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-semibold text-sm shadow-lg transition-all duration-500 ${selectedUnits.length > 0 && selectedDifficulties.length > 0 ? 'bg-emerald-500 text-white rotate-[360deg]' : 'bg-gradient-to-br from-orange-500 to-orange-600 text-white'}`}>
                 {selectedUnits.length > 0 && selectedDifficulties.length > 0 ? '✓' : '2'}
               </div>
               <div>
@@ -3423,7 +3425,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     <span className={`text-3xl font-semibold tracking-tighter mb-1 transition-all duration-300 ${isSelected ? 'text-orange-500 scale-110 drop-shadow-[0_0_8px_rgba(249,115,22,0.3)]' : 'text-zinc-200 dark:text-zinc-800 group-hover:text-zinc-300 dark:group-hover:text-zinc-700'}`}>
                       0{u}
                     </span>
-                    <span className={`text-[10px] font-semibold tracking-wider transition-colors ${isSelected ? 'text-orange-600' : 'text-zinc-400 dark:text-zinc-500'}`}>
+                    <span className={`text-[10px] font-semibold tracking-wider transition-colors ${isSelected ? 'text-orange-500' : 'text-zinc-400 dark:text-zinc-500'}`}>
                       Unit {u}
                     </span>
                   </motion.button>
@@ -3478,7 +3480,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               >
                 <div className="space-y-10">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg">3</div>
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg">3</div>
                     <div>
                       <label className="text-sm font-semibold text-zinc-900 dark:text-white tracking-tight">Final configuration</label>
                       <p className="text-[10px] text-zinc-500 font-semibold tracking-wide opacity-60">Step 3: Final Configuration</p>
@@ -3495,7 +3497,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                               const count = subjectQuestions.filter(q => q.type === 'mcq' && selectedUnits.includes(q.unit)).length;
                               setNumMCQ(count || 100);
                             }}
-                            className="text-[9px] font-bold text-orange-500 hover:text-orange-600 uppercase tracking-tighter"
+                            className="text-[9px] font-bold text-orange-500 hover:text-orange-500 uppercase tracking-tighter"
                           >
                             Set Max
                           </button>
@@ -3664,7 +3666,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                       onClick={handleGenerate}
                       className="group relative px-6 py-2.5 rounded-[20px] overflow-hidden"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-orange-600 via-red-600 to-orange-600 bg-[length:200%_auto] animate-gradient-x" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 bg-[length:200%_auto] animate-gradient-x" />
                       <div className="relative flex items-center gap-3">
                         <div className="w-6 h-6 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center">
                           <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3 h-3 group-hover:translate-x-0.5 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
@@ -3672,7 +3674,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         <span className="text-sm font-semibold text-white drop-shadow-lg">{loading ? 'Processing...' : 'Start Quiz'}</span>
                       </div>
                       {/* Outer Glow */}
-                      <div className="absolute inset-0 bg-orange-600/30 blur-3xl group-hover:bg-orange-600/50 transition-all -z-10" />
+                      <div className="absolute inset-0 bg-orange-500/30 blur-3xl group-hover:bg-orange-500/50 transition-all -z-10" />
                     </motion.button>
                   </div>
                 </div>

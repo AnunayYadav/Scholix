@@ -87,7 +87,7 @@ const UserCard: React.FC<UserCardProps> = ({
                   {levelInfo.icon} {levelInfo.title}
                 </span>
                 {/* Horizontal Streak for Mobile */}
-                <span className="inline-flex md:hidden items-center gap-1 px-2 py-0.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[10px] font-bold whitespace-nowrap">
+                <span className="inline-flex md:hidden items-center gap-1 px-2 py-0.5 rounded-lg bg-orange-500/10 text-orange-500 dark:text-orange-400 text-[10px] font-bold whitespace-nowrap">
                   🔥{isStreakAtRisk && '⌛'} {currentStreak}
                 </span>
               </div>

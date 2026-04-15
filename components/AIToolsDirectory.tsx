@@ -207,7 +207,7 @@ const AIToolsDirectory: React.FC = () => {
             <header className="text-center space-y-4 relative">
                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 bg-orange-500/10 blur-[80px] rounded-full" />
                 <h2 className="text-3xl md:text-5xl font-semibold text-zinc-800 dark:text-white tracking-tight leading-none">
-                    AI <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600 font-bold">Forge</span>
+                    AI <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 font-bold">Forge</span>
                 </h2>
                 <div className="flex flex-col items-center justify-center gap-3">
                     <div className="flex items-center gap-2">
@@ -218,7 +218,7 @@ const AIToolsDirectory: React.FC = () => {
                         <div className="h-[1px] w-8 md:w-16 bg-zinc-200 dark:bg-white/10" />
                     </div>
                     <p className="text-[10px] sm:text-xs font-semibold text-zinc-400 dark:text-white/30 uppercase tracking-[0.4em] mt-2">
-                        Discovery of <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500 font-bold">500+</span> Premium AI Solutions
+                        Discovery of <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 font-bold">500+</span> Premium AI Solutions
                     </p>
                 </div>
 
@@ -234,7 +234,7 @@ const AIToolsDirectory: React.FC = () => {
                             placeholder="Ignite your search..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-14 pr-24 h-[58px] bg-white dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 rounded-[24px] text-[13px] md:text-[14px] font-medium outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500/40 transition-all dark:text-white shadow-2xl shadow-black/5"
+                            className="w-full pl-14 pr-24 h-[58px] bg-white dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 rounded-[24px] text-[13px] md:text-[14px] font-medium outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500/40 transition-all dark:text-white shadow-2xl shadow-black/5"
                         />
                         <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
                             <kbd className="hidden md:flex h-6 px-1.5 items-center justify-center rounded-md bg-zinc-100 dark:bg-white/10 text-[11px] sm:text-xs font-black text-zinc-400 dark:text-zinc-500">CMD</kbd>
@@ -262,8 +262,8 @@ const AIToolsDirectory: React.FC = () => {
                                         key={cat}
                                         onClick={() => { setFilter(cat); close(); }}
                                         className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-xs font-bold transition-all cursor-pointer border-none ${filter === cat
-                                            ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
-                                            : 'text-zinc-500 dark:text-zinc-400 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-orange-600'
+                                            ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+                                            : 'text-zinc-500 dark:text-zinc-400 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-orange-500'
                                             }`}
                                     >
                                         <span className="flex items-center gap-3">
@@ -352,8 +352,8 @@ const AIToolsDirectory: React.FC = () => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className={`relative z-10 mt-6 group/btn h-12 flex items-center justify-center gap-2 rounded-[18px] text-[11px] font-semibold uppercase transition-all duration-300 no-underline shadow-lg active:scale-95 ${tool.isHero
-                                    ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-orange-500/25 hover:-translate-y-0.5'
-                                    : 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white dark:hover:text-white'
+                                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-orange-500/25 hover:-translate-y-0.5'
+                                    : 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-orange-500 dark:hover:bg-orange-500 hover:text-white dark:hover:text-white'
                                     }`}
                             >
                                 Forge Ahead
@@ -375,9 +375,9 @@ const AIToolsDirectory: React.FC = () => {
             {filteredTools.length > visibleCount && (
                 <div ref={loaderRef} className="py-20 flex justify-center">
                     <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-orange-600 animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <div className="w-2 h-2 rounded-full bg-orange-600 animate-bounce" style={{ animationDelay: '200ms' }} />
-                        <div className="w-2 h-2 rounded-full bg-orange-600 animate-bounce" style={{ animationDelay: '400ms' }} />
+                        <div className="w-2 h-2 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="w-2 h-2 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '200ms' }} />
+                        <div className="w-2 h-2 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '400ms' }} />
                     </div>
                 </div>
             )}
