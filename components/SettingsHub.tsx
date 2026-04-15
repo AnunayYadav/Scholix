@@ -182,6 +182,13 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
 
       <Section title="Support & About">
         <SettingItem 
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>}
+          label="Download Android App"
+          sublabel="Get the Scholix APK"
+          onClick={() => window.open('https://www.upload-apk.com/en/55AMymCBR1Oy798', '_blank')}
+          color="text-green-500"
+        />
+        <SettingItem 
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>}
           label="Help Center"
           sublabel="FAQs, Support & Student Community"
