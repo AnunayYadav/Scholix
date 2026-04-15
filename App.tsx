@@ -812,6 +812,7 @@ const AppContent: React.FC = () => {
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
               <Route path="/help" element={<HelpSection />} />
+              <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
               <Route path="/:uniKey/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} />} />
               <Route path="/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} />} />
             </Routes>
