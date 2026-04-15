@@ -83,26 +83,66 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
             color-adjust: exact !important;
           }
           html, body {
-            background: #fff !important;
-            background-color: #fff !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
           }
           body * { visibility: hidden; }
           .ps-wrapper, .ps-wrapper * { visibility: visible !important; }
           .ps-wrapper {
             position: absolute !important; left: 0 !important; top: 0 !important;
             width: 100% !important; padding: 0 !important; margin: 0 !important; max-width: none !important;
-            background: #fff !important;
+            background: #ffffff !important;
+          }
+
+          /* Kill ALL dark mode backgrounds */
+          .ps-card,
+          .ps-card div,
+          .ps-card span,
+          .ps-card p,
+          .ps-card h2,
+          .ps-card button {
+            background-color: transparent !important;
           }
           .ps-card {
             border-radius: 0 !important; box-shadow: none !important;
-            border: none !important; background: #fff !important;
+            border: none !important; background: #ffffff !important;
+            background-color: #ffffff !important;
           }
+
+          /* Re-apply light-mode backgrounds for specific sections */
+          .ps-detail-cell {
+            background: #fafafa !important;
+            background-color: #fafafa !important;
+            border-color: #f4f4f5 !important;
+          }
+          .ps-amount-box {
+            background: rgba(255, 237, 213, 0.5) !important;
+            border-color: #fed7aa !important;
+          }
+          .ps-status-bar {
+            background: rgba(209, 250, 229, 0.5) !important;
+            border-color: #a7f3d0 !important;
+          }
+          .ps-status-badge {
+            background: rgba(209, 250, 229, 0.6) !important;
+            border-color: #6ee7b7 !important;
+          }
+          .ps-details-card {
+            background: #fafafa !important;
+            background-color: #fafafa !important;
+            border-color: #e4e4e7 !important;
+          }
+          .ps-receipt-ref {
+            background: rgba(255, 237, 213, 0.4) !important;
+            border-color: #fed7aa !important;
+          }
+
           .no-print { display: none !important; }
           .print-show { display: flex !important; }
 
           /* Force all text to dark in print */
           .ps-card, .ps-card * { color: #18181b !important; }
-          /* Then re-apply specific colors */
+          /* Re-apply accent colors */
           .ps-text-orange { color: #f97316 !important; }
           .ps-text-green { color: #059669 !important; }
           .ps-text-muted { color: #71717a !important; }
@@ -184,7 +224,7 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
 
             {/* AMOUNT */}
             <div className="fade-up-2 w-full max-w-xs mx-auto">
-              <div className="relative p-5 sm:p-6 rounded-[20px] overflow-hidden bg-orange-50 dark:bg-orange-500/10 border-[1.5px] border-orange-200 dark:border-orange-500/20">
+              <div className="ps-amount-box relative p-5 sm:p-6 rounded-[20px] overflow-hidden bg-orange-50 dark:bg-orange-500/10 border-[1.5px] border-orange-200 dark:border-orange-500/20">
                 <p className="ps-text-orange text-[9px] font-black uppercase tracking-[0.3em] mb-1 text-orange-500">Amount Contributed</p>
                 <p className="text-4xl sm:text-5xl font-black tracking-tighter text-zinc-900 dark:text-white">₹{details.amount}</p>
                 <p className="ps-text-light text-[9px] font-bold text-zinc-400 mt-1 uppercase tracking-wider">Indian Rupees</p>
@@ -192,17 +232,17 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
             </div>
 
             {/* DETAILS CARD */}
-            <div className="w-full fade-up-3 rounded-[20px] overflow-hidden border-[1.5px] border-zinc-200 dark:border-zinc-700/60 bg-zinc-50 dark:bg-zinc-800/50">
+            <div className="ps-details-card w-full fade-up-3 rounded-[20px] overflow-hidden border-[1.5px] border-zinc-200 dark:border-zinc-700/60 bg-zinc-50 dark:bg-zinc-800/50">
               
               {/* Status */}
-              <div className="flex items-center justify-between px-5 sm:px-6 py-3.5 bg-emerald-50 dark:bg-emerald-500/10 border-b-[1.5px] border-emerald-200 dark:border-emerald-500/20" style={{ WebkitPrintColorAdjust: 'exact' } as any}>
+              <div className="ps-status-bar flex items-center justify-between px-5 sm:px-6 py-3.5 bg-emerald-50 dark:bg-emerald-500/10 border-b-[1.5px] border-emerald-200 dark:border-emerald-500/20" style={{ WebkitPrintColorAdjust: 'exact' } as any}>
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #34d399, #059669)', WebkitPrintColorAdjust: 'exact' } as any}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3 h-3"><polyline points="20 6 9 17 4 12" /></svg>
                   </div>
                   <span className="ps-text-green text-[9px] font-black uppercase tracking-[0.15em] text-emerald-600 dark:text-emerald-400">Payment Verified</span>
                 </div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/15 border border-emerald-300 dark:border-emerald-500/25" style={{ WebkitPrintColorAdjust: 'exact' } as any}>
+                <span className="ps-status-badge inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/15 border border-emerald-300 dark:border-emerald-500/25" style={{ WebkitPrintColorAdjust: 'exact' } as any}>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" style={{ WebkitPrintColorAdjust: 'exact' } as any}></span>
                   <span className="ps-text-green text-[9px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Confirmed</span>
                 </span>
@@ -211,15 +251,15 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
               {/* Grid */}
               <div className="p-5 sm:p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700/50">
+                  <div className="ps-detail-cell p-3.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700/50">
                     <p className="ps-text-light text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 mb-1.5">Payment ID</p>
                     <p className="truncate font-bold text-[13px] font-mono text-zinc-800 dark:text-zinc-200">{details.paymentId}</p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700/50">
+                  <div className="ps-detail-cell p-3.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700/50">
                     <p className="ps-text-light text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 mb-1.5">Order ID</p>
                     <p className="truncate font-bold text-[13px] font-mono text-zinc-800 dark:text-zinc-200">{details.orderId}</p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700/50">
+                  <div className="ps-detail-cell p-3.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700/50">
                     <p className="ps-text-light text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 mb-1.5">Contributor</p>
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[10px] font-black" style={{ background: 'linear-gradient(135deg, #f97316, #ef4444)', color: 'white', WebkitPrintColorAdjust: 'exact' } as any}>
@@ -228,14 +268,14 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
                       <p className="font-bold text-[13px] text-zinc-800 dark:text-zinc-200">{userProfile?.username || 'Community Supporter'}</p>
                     </div>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700/50">
+                  <div className="ps-detail-cell p-3.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700/50">
                     <p className="ps-text-light text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 mb-1.5">Date & Time</p>
                     <p className="font-bold text-[13px] text-zinc-800 dark:text-zinc-200">{new Date(details.date).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</p>
                   </div>
                 </div>
 
                 {/* Receipt Ref */}
-                <div className="flex items-center gap-3 mt-4 p-3.5 rounded-xl bg-orange-50 dark:bg-orange-500/10 border-[1.5px] border-orange-200 dark:border-orange-500/15" style={{ WebkitPrintColorAdjust: 'exact' } as any}>
+                <div className="ps-receipt-ref flex items-center gap-3 mt-4 p-3.5 rounded-xl bg-orange-50 dark:bg-orange-500/10 border-[1.5px] border-orange-200 dark:border-orange-500/15" style={{ WebkitPrintColorAdjust: 'exact' } as any}>
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #f97316, #ef4444)', WebkitPrintColorAdjust: 'exact' } as any}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-5 h-5">
                       <path d="M4 7V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3" /><polyline points="14 2 14 8 20 8" /><path d="M4 15h9" /><path d="M9 11l4 4-4 4" />
