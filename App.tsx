@@ -524,7 +524,7 @@ const AppContent: React.FC = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { fullBrandName, studentTerm, shortBrandName, selectedUniversity, selectUniversity } = useUniversity();
+  const { fullBrandName, studentTerm, shortBrandName, selectedUniversity, selectUniversity, universityInfo } = useUniversity();
   const currentModule = getModuleFromPath(location.pathname);
 
   useEffect(() => {
@@ -599,6 +599,13 @@ const AppContent: React.FC = () => {
       setShowAuthModal(true);
     }
   }, [userProfile, location.pathname, navigate, showAuthModal]);
+
+  useEffect(() => {
+    if (authIsReady && universityInfo?.adminOnly && (!userProfile || !userProfile.is_admin) && location.pathname !== '/welcome') {
+      selectUniversity('none');
+      navigate('/welcome', { replace: true });
+    }
+  }, [authIsReady, universityInfo, userProfile, location.pathname, navigate, selectUniversity]);
 
   useEffect(() => {
     NexusServer.recordVisit();
