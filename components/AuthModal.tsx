@@ -720,16 +720,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                         <div className="relative group">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><path d="M7 21v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4" /><circle cx="12" cy="11" r="3" /></svg>
                           <input
-                            type="text" required value={regNo} 
-                            onChange={e => {
-                              const val = e.target.value;
-                              const isLPU = selectedUniversity === 'lpu' || email.toLowerCase().endsWith('@lpu.in');
-                              if (isLPU) {
-                                setRegNo(val.replace(/[^0-9]/g, '').slice(0, 8));
-                              } else {
-                                setRegNo(val.slice(0, 20)); // Allow 20 chars for other unis
-                              }
-                            }}
+                            type="text" required value={regNo} onChange={e => setRegNo(e.target.value.replace(/[^0-9]/g, '').slice(0, 8))}
                             disabled={loading}
                             className="w-full bg-zinc-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-zinc-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
                             placeholder="1240...."
