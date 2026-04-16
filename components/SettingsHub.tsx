@@ -66,7 +66,8 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
         <motion.div 
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => navigate('/profile')}
+          onClick={() => navigateToModule?.(ModuleType.PROFILE)}
+
           className="relative group p-1 mb-10"
         >
           <div className="absolute -inset-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-[36px] blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500" />
@@ -122,7 +123,8 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
         </motion.div>
       ) : (
         <div 
-          onClick={() => navigate('/login')}
+          onClick={() => navigateToModule?.(ModuleType.LOGIN)}
+
           className="bg-white dark:bg-zinc-900/40 border border-dashed border-zinc-300 dark:border-white/10 rounded-[32px] p-8 mb-10 flex flex-col items-center text-center gap-4 active:scale-95 transition-all cursor-pointer"
         >
           <div className="w-16 h-16 rounded-3xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-400 scale-110">
@@ -144,7 +146,8 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}
           label="Profile Information"
           sublabel="Edit username, bio, and academic info"
-          onClick={() => navigate('/profile')}
+          onClick={() => navigateToModule?.(ModuleType.PROFILE)}
+
           color="text-blue-500"
         />
         <SettingItem 
@@ -160,7 +163,8 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
         <SettingItem 
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>}
           label="Privacy Policy"
-          onClick={() => navigateToModule ? navigateToModule(ModuleType.PRIVACY) : navigate('/privacy')}
+          onClick={() => navigateToModule?.(ModuleType.PRIVACY)}
+
           color="text-emerald-500"
         />
       </Section>
@@ -194,7 +198,8 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>}
           label="Help Center"
           sublabel="FAQs, Support & Student Community"
-          onClick={() => navigateToModule ? navigateToModule(ModuleType.HELP) : navigate('/help')}
+          onClick={() => navigateToModule?.(ModuleType.HELP)}
+
           color="text-purple-500"
         />
         <SettingItem 
@@ -208,7 +213,8 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>}
           label="About Us"
           sublabel="Meet the minds behind Scholix"
-          onClick={() => navigateToModule ? navigateToModule(ModuleType.ABOUT) : navigate('/about')}
+          onClick={() => navigateToModule?.(ModuleType.ABOUT)}
+
           color="text-indigo-500"
         />
         <SettingItem 

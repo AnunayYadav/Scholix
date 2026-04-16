@@ -215,10 +215,25 @@ export const analyzeResume = async (resumeText: string, jdText: string, deepAnal
     TARGET CONTEXT (JD/TRENDS): ${jdText}
     RESUME CONTENT: ${resumeText}
 
+    CRITICAL RECRUITER LOGIC:
+    - Act as a Tier-1 Tech Recruiter (Google/Netflix/Meta level). Be EXTREMELY STRICT.
+    - If a resume lacks quantified impact (e.g., specific numbers, %, dollars), penalize the "Impact & Results" score heavily.
+    - Consistency Check: If they claim a skill but provide no project/work evidence, it's a "Bad" fragment.
+    - Formatting: Check for density, whitespace, and font consistency.
+
     REQUIREMENTS:
     ${depthInstruction}
-    1. PROVIDE FEEDBACK FOR: keywordAnalysis, jobFit, achievements, formatting, language, and branding.
-    2. ANNOTATE FULL CONTENT: Fragments for 'good', 'bad', 'neutral' with reason and suggestion.
+    1. CATEGORY BREAKDOWN: For each category (keywordAnalysis, jobFit, achievements, formatting, language, branding), provide:
+       - score (0-100)
+       - details (A 2-3 sentence overview)
+       - strengths (Array of specific positive points) 
+       - weaknesses (Array of specific items to improve)
+       - found (Keywords found)
+       - missing (Keywords missing)
+    2. ANNOTATED FULL CONTENT: You MUST provide an array of fragments that TOGETHER reconstruct the EXACT RAW TEXT of the resume provided. 
+       - Every single character of the resume must be included in one of the fragments. 
+       - Map each fragment to 'good', 'bad', or 'neutral'. 
+       - 'good' or 'bad' fragments MUST have a 'reason' and 'suggestion'.
 
     Output a JSON object.
   `;
@@ -227,22 +242,13 @@ export const analyzeResume = async (resumeText: string, jdText: string, deepAnal
     type: Type.OBJECT,
     properties: {
       score: { type: Type.INTEGER },
-      description: { type: Type.STRING },
+      details: { type: Type.STRING },
+      strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
+      weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } },
       found: { type: Type.ARRAY, items: { type: Type.STRING } },
-      missing: { type: Type.ARRAY, items: { type: Type.STRING } },
-      missingKeywordsExtended: {
-        type: Type.ARRAY,
-        items: {
-          type: Type.OBJECT,
-          properties: {
-            name: { type: Type.STRING },
-            example: { type: Type.STRING },
-            importance: { type: Type.STRING }
-          }
-        }
-      }
+      missing: { type: Type.ARRAY, items: { type: Type.STRING } }
     },
-    required: ["score", "description", "found", "missing"]
+    required: ["score", "details", "strengths", "weaknesses", "found", "missing"]
   };
 
   const schema = {
@@ -250,21 +256,13 @@ export const analyzeResume = async (resumeText: string, jdText: string, deepAnal
     properties: {
       totalScore: { type: Type.INTEGER },
       meaningScore: { type: Type.INTEGER },
-      keywordQuality: {
-        type: Type.OBJECT,
-        properties: {
-          contextual: { type: Type.INTEGER },
-          weak: { type: Type.INTEGER },
-          stuffed: { type: Type.INTEGER }
-        }
-      },
       annotatedContent: {
         type: Type.ARRAY,
         items: {
           type: Type.OBJECT,
           properties: {
             text: { type: Type.STRING },
-            type: { type: Type.STRING },
+            type: { type: Type.STRING, enum: ["good", "bad", "neutral"] },
             reason: { type: Type.STRING },
             suggestion: { type: Type.STRING }
           },
@@ -276,9 +274,10 @@ export const analyzeResume = async (resumeText: string, jdText: string, deepAnal
         items: {
           type: Type.OBJECT,
           properties: {
-            type: { type: Type.STRING },
+            type: { type: Type.STRING, enum: ["critical", "warning", "info"] },
             message: { type: Type.STRING }
-          }
+          },
+          required: ["type", "message"]
         }
       },
       categories: {
@@ -293,9 +292,9 @@ export const analyzeResume = async (resumeText: string, jdText: string, deepAnal
         },
         required: ["keywordAnalysis", "jobFit", "achievements", "formatting", "language", "branding"]
       },
-      summary: { type: Type.STRING }
+      summary: { type: Type.STRING, description: "Professional executive summary of the resume's match for the JD." }
     },
-    required: ["totalScore", "meaningScore", "keywordQuality", "annotatedContent", "flags", "categories", "summary"]
+    required: ["totalScore", "meaningScore", "annotatedContent", "flags", "categories", "summary"]
   };
 
   const data = await callGeminiProxy("ANALYZE_RESUME", { prompt, schema, deep: deepAnalysis });
@@ -303,10 +302,11 @@ export const analyzeResume = async (resumeText: string, jdText: string, deepAnal
 
   const normalizeCategory = (cat: any) => ({
     score: cat?.score ?? 0,
-    description: cat?.description || 'Analytical module completed.',
-    found: Array.isArray(cat?.found) && cat.found.length > 0 ? cat.found : ['Sufficient skills detected.'],
-    missing: Array.isArray(cat?.missing) && cat.missing.length > 0 ? cat.missing : ['No critical gaps detected.'],
-    missingKeywordsExtended: cat?.missingKeywordsExtended || []
+    details: cat?.details || 'Module analysis completed with base metrics.',
+    strengths: Array.isArray(cat?.strengths) ? cat.strengths : [],
+    weaknesses: Array.isArray(cat?.weaknesses) ? cat.weaknesses : [],
+    found: Array.isArray(cat?.found) ? cat.found : [],
+    missing: Array.isArray(cat?.missing) ? cat.missing : []
   });
 
   const categories = {

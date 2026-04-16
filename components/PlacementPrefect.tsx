@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { extractTextFromPdf } from '../services/pdfUtils';
 import NexusServer from '../services/nexusServer.ts';
 import { analyzeResume } from '../services/geminiService';
@@ -96,7 +96,7 @@ const ScoreAura = ({ score, label }: { score: number; label: string }) => {
 
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-20">
         <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">{label}</p>
-        <p className="text-7xl font-bold tracking-tight text-zinc-900 dark:text-white">{score}%</p>
+        <p className="text-6xl font-black tracking-tighter text-zinc-900 dark:text-white">{score}%</p>
       </div>
     </div>
   );
@@ -131,7 +131,9 @@ interface SavedReport extends ResumeAnalysisResult {
 
 const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHeader, reportIdOverride }) => {
   const { reportId: routeReportId } = useParams();
-  const reportId = reportIdOverride || routeReportId;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlId = searchParams.get('id');
+  const reportId = reportIdOverride || routeReportId || urlId;
   const navigate = useNavigate();
   const [resumeText, setResumeText] = useState<string>('');
   const [jdText, setJdText] = useState<string>('');
@@ -213,7 +215,8 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
         NexusServer.saveRecord(userProfile.id, 'placement_analysis', `Analyzed resume against: ${selectedRoleId || 'Custom JD'}`, { score: data.totalScore, role: selectedRoleId });
       }
       // Reset URL to base placement tool when new analysis is done to clear any old report ID
-      navigate(`${prefix}/tools?tab=placement`, { replace: true });
+      // Soft URL reset to clear report ID without page refresh or context loss
+      setSearchParams({ tab: 'placement' }, { replace: true });
     } catch (err: any) {
       setError(err.message || "Analysis failed. Please try again later.");
     } finally {
@@ -326,7 +329,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             <button 
               onClick={() => {
                 setResult(null);
-                navigate(`${prefix}/tools?tab=placement`, { replace: true });
+                setSearchParams({ tab: 'placement' }, { replace: true });
               }} 
               className="px-4 py-2 bg-brand-primary text-white rounded-xl font-bold text-[8px] tracking-widest active:scale-95 transition-all border-none"
             >
@@ -340,7 +343,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
 
           <div className="flex-1 space-y-6">
 
-            <p className="text-lg md:text-xl font-medium text-zinc-800 dark:text-white leading-relaxed opacity-90">"{result.summary}"</p>
+            <p className="text-sm md:text-base font-medium text-zinc-800 dark:text-white leading-relaxed opacity-90 italic">"{result.summary}"</p>
             <div className="h-px bg-zinc-100 dark:bg-white/5 w-full" />
             <div className="space-y-3">
               {result.flags.map((flag, idx) => (
@@ -386,6 +389,81 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
               </button>
             );
           })}
+        </div>
+
+        {/* Detailed Category Breakdown Section */}
+        <div className="glass-panel p-8 md:p-10 rounded-[56px] shadow-2xl animate-fade-in border dark:border-white/5 bg-white dark:bg-[#0a0a0a]">
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="w-full md:w-1/3 space-y-6">
+              <div className="p-6 rounded-[32px] bg-brand-primary/5 border border-brand-primary/20">
+                <p className="text-[10px] font-black uppercase tracking-widest text-brand-primary mb-2">Category Score</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-black text-zinc-900 dark:text-white">{result.categories?.[activeCategory]?.score || 0}%</span>
+                  <span className="text-xs font-bold text-zinc-400">match</span>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h4 className="text-sm font-bold text-zinc-800 dark:text-white px-2">Key Findings</h4>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed px-2">
+                  {result.categories?.[activeCategory]?.details || "Evaluating specific metrics for this category..."}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 px-2 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Strengths
+                </h4>
+                <div className="space-y-2">
+                  {(result.categories?.[activeCategory]?.strengths || []).map((s, i) => (
+                    <div key={i} className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
+                      {s}
+                    </div>
+                  ))}
+                  {(!result.categories?.[activeCategory]?.strengths?.length) && <p className="text-[11px] text-zinc-400 px-2 italic">Looking for positives...</p>}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-brand-primary px-2 flex items-center gap-2">
+                   <div className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+                   Gaps to Fix
+                </h4>
+                <div className="space-y-2">
+                  {(result.categories?.[activeCategory]?.weaknesses || []).map((w, i) => (
+                    <div key={i} className="p-4 rounded-2xl bg-brand-primary/5 border border-brand-primary/10 text-[11px] font-medium text-brand-primary">
+                      {w}
+                    </div>
+                  ))}
+                  {(!result.categories?.[activeCategory]?.weaknesses?.length) && <p className="text-[11px] text-zinc-400 px-2 italic">Standard quality maintained.</p>}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {(result.categories?.[activeCategory]?.found?.length > 0 || result.categories?.[activeCategory]?.missing?.length > 0) && (
+            <div className="mt-10 pt-8 border-t border-zinc-100 dark:border-white/5 grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-3">
+                <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest px-2">Keywords Found</p>
+                <div className="flex flex-wrap gap-2">
+                  {result.categories?.[activeCategory]?.found.map((k, i) => (
+                    <span key={i} className="px-3 py-1 rounded-full bg-zinc-100 dark:bg-white/5 text-[9px] font-bold text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/10">{k}</span>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-3">
+                <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest px-2">Missing & High Impact</p>
+                <div className="flex flex-wrap gap-2">
+                  {result.categories?.[activeCategory]?.missing.map((k, i) => (
+                    <span key={i} className="px-3 py-1 rounded-full bg-brand-primary/10 text-[9px] font-bold text-brand-primary border border-brand-primary/20">{k}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -491,7 +569,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             {savedReports.map((report, idx) => (
               <button
                 key={idx}
-                onClick={() => navigate(`/placement/${idx}`)}
+                onClick={() => setSearchParams({ tab: 'placement', id: idx.toString() })}
                 className="group p-6 rounded-[32px] bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-white/5 text-left hover:border-brand-primary/30 transition-all flex items-center justify-between shadow-sm active:scale-[0.98]"
               >
                 <div className="space-y-1">

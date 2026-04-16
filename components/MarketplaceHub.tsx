@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+
 import { slugify } from '../utils/slugify';
 import { MarketplaceItem, UserProfile } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
@@ -11,9 +12,15 @@ import { useUniversity } from '../hooks/useUniversity.tsx';
 
 const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile }) => {
     const navigate = useNavigate();
-    const { fullBrandName, studentTerm, universityName, communityName } = useUniversity();
-
     const { category: urlCategory, itemId: urlItemId } = useParams();
+    const { pathname } = useLocation();
+    const { uniSlug, fullBrandName, studentTerm, universityName, communityName } = useUniversity();
+    
+    // Determine base route for navigation to be mount-point agnostic
+    const baseRoute = pathname.includes('/campus/market') 
+        ? `/${uniSlug}/campus/market` 
+        : `/${uniSlug}/marketplace`;
+
     const [items, setItems] = useState<MarketplaceItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState(urlCategory || 'All');
@@ -41,10 +48,11 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             setSelectedItem(null);
             setIsClosingDetail(false);
             if (filter === 'All') {
-                navigate('/marketplace');
+                navigate(baseRoute);
             } else {
-                navigate(`/marketplace/${slugify(filter)}`);
+                navigate(`${baseRoute}/${slugify(filter)}`);
             }
+
         }, 250);
     };
 
@@ -90,10 +98,11 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     const handleFilterChange = (newCategory: string) => {
         setFilter(newCategory);
         if (newCategory === 'All') {
-            navigate('/marketplace');
+            navigate(baseRoute);
         } else {
-            navigate(`/marketplace/${slugify(newCategory)}`);
+            navigate(`${baseRoute}/${slugify(newCategory)}`);
         }
+
     };
 
     const fetchItems = async () => {
@@ -273,7 +282,8 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
             ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-8 mt-4 px-2 md:px-0">
                     {filteredItems.map(item => (
-                        <div key={item.id} onClick={() => { setSelectedItem(item); navigate(`/marketplace/item/${item.id}`); }} className="group p-3 md:p-4 bg-white dark:bg-[#0a0a0a] rounded-[32px] md:rounded-[42px] border border-zinc-200 dark:border-white/5 hover:border-brand-primary/30 shadow-sm hover:shadow-2xl hover:shadow-brand-primary/5 transition-all duration-500 flex flex-col relative overflow-hidden cursor-pointer">
+                        <div key={item.id} onClick={() => { setSelectedItem(item); navigate(`${baseRoute}/item/${item.id}`); }} className="group p-3 md:p-4 bg-white dark:bg-[#0a0a0a] rounded-[32px] md:rounded-[42px] border border-zinc-200 dark:border-white/5 hover:border-brand-primary/30 shadow-sm hover:shadow-2xl hover:shadow-brand-primary/5 transition-all duration-500 flex flex-col relative overflow-hidden cursor-pointer">
+
                             {/* Tags Overlay */}
                             <div className="absolute top-5 left-5 flex flex-col gap-2 z-30 transform -translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
                                 {item.seller_id === userProfile?.id && (
