@@ -324,7 +324,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
       <header className="pt-2 flex items-center justify-between">
         <div className="animate-fade-in">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-1 ml-0.5">
-            {userProfile ? `Welcome, ${userProfile.full_name.split(' ')[0]}` : 'Exploration Mode'}
+            {userProfile ? `Welcome, ${userProfile.full_name?.split(' ')[0] || 'User'}` : 'Exploration Mode'}
           </p>
           <h2 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
             {{
