@@ -63,6 +63,30 @@ const getSupabase = () => {
 class NexusServer {
   static isConfigured(): boolean { return !!getSupabase(); }
 
+  // Temporary store for registration data to survive until profile sync
+  // This is a failsafe for when metadata is not immediately available from Supabase
+  private static registrationCache: Map<string, { username: string, regNo: string, university: string }> = new Map();
+
+  static setRegistrationCache(email: string, data: { username: string, regNo: string, university: string }) {
+    this.registrationCache.set(email.toLowerCase().trim(), data);
+    // Also keep in localStorage for persistence across redirects
+    try {
+      localStorage.setItem(`nexus_reg_cache_${email.toLowerCase().trim()}`, JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  static getRegistrationCache(email: string) {
+    const key = email.toLowerCase().trim();
+    let data = this.registrationCache.get(key);
+    if (!data) {
+      try {
+        const stored = localStorage.getItem(`nexus_reg_cache_${key}`);
+        if (stored) data = JSON.parse(stored);
+      } catch (e) {}
+    }
+    return data;
+  }
+
   /**
    * Timetable: Community Presets
    */
@@ -617,6 +641,10 @@ class NexusServer {
     const cleanRegNo = isLPU 
       ? sanitizeInput(regNo.replace(/[^0-9]/g, ''), 8) 
       : sanitizeInput(regNo.trim(), 20);
+
+    // Save to failsafe cache BEFORE signup
+    this.setRegistrationCache(cleanEmail, { username: cleanUsername, regNo: cleanRegNo, university: university || 'none' });
+
     const result = await client.auth.signUp({
       email: cleanEmail,
       password: pass,
@@ -633,10 +661,11 @@ class NexusServer {
 
     // If signup is successful
     if (!result.error && result.data?.user) {
+      if (import.meta.env.DEV) console.log("[NexusServer] SignUp success, creating profile for:", result.data.user.id);
       try {
         // Create full profile immediately to avoid race conditions with ensureProfile
         // We do this even if session is null, as we have the user ID
-        await client.from('profiles').upsert({
+        const { error: profileError } = await client.from('profiles').upsert({
           id: result.data.user.id,
           email: cleanEmail,
           username: cleanUsername,
@@ -652,8 +681,14 @@ class NexusServer {
           last_active_date: new Date().toISOString(),
           xp_history: []
         }, { onConflict: 'id' });
+        
+        if (profileError) {
+          console.warn("[NexusServer] Initial profile upsert failed (likely RLS), ensureProfile will handle this on login:", profileError);
+        } else {
+          if (import.meta.env.DEV) console.log("[NexusServer] Initial profile created successfully.");
+        }
       } catch (e) {
-        console.warn("Manual profile sync failed:", e);
+        console.warn("[NexusServer] Manual profile sync failed:", e);
       }
     }
 
@@ -703,8 +738,25 @@ class NexusServer {
     const client = getSupabase();
     if (!client) throw new Error("Registry offline.");
 
-    const { data: existing } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
-    const metadata = user.user_metadata || (user as any).raw_user_meta_data || {};
+    // Get fresh user data including latest metadata
+    const { data: { user: freshUser } } = await client.auth.getUser();
+    const activeUser = freshUser || user;
+    const metadata = activeUser.user_metadata || (activeUser as any).raw_user_meta_data || {};
+    
+    // Check failsafe registration cache
+    const regCache = this.getRegistrationCache(activeUser.email || '');
+    
+    // Merge metadata with cache fallbacks
+    const safeUsername = metadata.username || metadata.user_name || metadata.full_name || regCache?.username;
+    const safeRegNo = metadata.registration_number || metadata.regNo || metadata.registrationNumber || regCache?.regNo;
+    const safeUniversity = metadata.university || regCache?.university;
+
+    if (import.meta.env.DEV) console.log(`[NexusServer] ensureProfile for ${activeUser.id}, email: ${activeUser.email}, safeData:`, { safeUsername, safeRegNo });
+
+    // Short delay to allow database triggers to complete if this is a fresh registration
+    await new Promise(r => setTimeout(r, 800));
+
+    const { data: existing } = await client.from('profiles').select('*').eq('id', activeUser.id).maybeSingle();
     
     // Robustly check multiple possible locations and formats for verification status
     const isVerifiedInMeta = 
@@ -713,7 +765,7 @@ class NexusServer {
       metadata.isVerified === 'yes' || 
       metadata.isVerified === true ||
       metadata.verification_status === 'verified' ||
-      user.app_metadata?.is_verified === true;
+      activeUser.app_metadata?.is_verified === true;
 
     if (existing) {
       const updates: any = {};
@@ -726,26 +778,26 @@ class NexusServer {
       }
 
       // Sync missing username
-      if ((!existing.username || existing.username.startsWith('verto_')) && metadata.username) {
-        updates.username = metadata.username;
+      if ((!existing.username || existing.username.startsWith('verto_')) && safeUsername) {
+        updates.username = safeUsername;
         needsUpdate = true;
       }
 
       // Sync missing registration number
-      if (!existing.registration_number && metadata.registration_number) {
-        updates.registration_number = metadata.registration_number;
+      if (!existing.registration_number && safeRegNo) {
+        updates.registration_number = safeRegNo;
         needsUpdate = true;
       }
 
       // Sync university
-      if ((!existing.university || existing.university === 'none') && metadata.university && metadata.university !== 'none') {
-        updates.university = metadata.university;
+      if ((!existing.university || existing.university === 'none') && safeUniversity && safeUniversity !== 'none') {
+        updates.university = safeUniversity;
         needsUpdate = true;
       }
 
       if (needsUpdate) {
-        if (import.meta.env.DEV) console.log(`[NexusServer] Syncing profile ${user.id} from metadata:`, updates);
-        const { data: updated, error: updateError } = await client.from('profiles').update(updates).eq('id', user.id).select().single();
+        console.log(`[NexusServer] FORCE SYNCING profile ${activeUser.id}:`, updates);
+        const { data: updated, error: updateError } = await client.from('profiles').update(updates).eq('id', activeUser.id).select().single();
         if (updateError) {
           console.error('[NexusServer] Profile sync error:', updateError);
         }
@@ -754,11 +806,11 @@ class NexusServer {
       return existing;
     }
 
-    const newProfile = {
-      id: user.id,
-      email: user.email!,
-      username: metadata.username || user.email?.split('@')[0] || `verto_${user.id.slice(0, 5)}`,
-      registration_number: metadata.registration_number || null,
+    const newProfile: any = {
+      id: activeUser.id,
+      email: activeUser.email!,
+      username: safeUsername || activeUser.email?.split('@')[0] || `verto_${activeUser.id.slice(0, 5)}`,
+      registration_number: safeRegNo || null,
       is_admin: false,
       total_xp: 0,
       level: 1,
@@ -768,7 +820,7 @@ class NexusServer {
       last_active_date: new Date().toISOString(),
       xp_history: [],
       is_verified: isVerifiedInMeta ? 'yes' : 'no',
-      university: metadata.university || 'none'
+      university: safeUniversity || 'none'
     };
 
     const { data: created, error } = await client.from('profiles')
