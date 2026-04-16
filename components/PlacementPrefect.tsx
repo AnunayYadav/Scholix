@@ -146,6 +146,8 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
   const [activeCategory, setActiveCategory] = useState<CategoryID>('keywordAnalysis');
   const [savedReports, setSavedReports] = useState<SavedReport[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [currentRecordId, setCurrentRecordId] = useState<string | null>(null);
+  const [shareLoading, setShareLoading] = useState(false);
   const { uniSlug } = useUniversity();
   const prefix = uniSlug && uniSlug !== 'none' ? `/${uniSlug}` : '';
 
@@ -160,6 +162,21 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const sid = searchParams.get('sid');
+    if (sid) {
+      setLoading(true);
+      NexusServer.fetchRecordById(sid).then(record => {
+        if (record && record.type === 'placement_analysis' && record.content) {
+          setResult(record.content);
+          setFileName(record.label || 'Shared Report');
+          setCurrentRecordId(sid);
+        } else {
+          showToast("Shared report not found.", "error");
+        }
+      }).finally(() => setLoading(false));
+      return;
+    }
+
     const saved = localStorage.getItem('nexus_resume_reports');
     if (saved) {
       const reports = JSON.parse(saved);
@@ -171,10 +188,11 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
         if (!isNaN(idx) && reports[idx]) {
           setResult(reports[idx]);
           setFileName(reports[idx].label || '');
+          setCurrentRecordId(null); // Clear DB ID when loading from local history
         }
       }
     }
-  }, [reportId]);
+  }, [reportId, searchParams]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -210,9 +228,19 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
     try {
       const data = await analyzeResume(resumeText, jdText, deepAnalysis);
       setResult(data);
-      // Tracking
-      if (userProfile?.id) {
-        NexusServer.saveRecord(userProfile.id, 'placement_analysis', `Analyzed resume against: ${selectedRoleId || 'Custom JD'}`, { score: data.totalScore, role: selectedRoleId });
+      // Tracking & Persistence for Sharing
+      try {
+        const savedRecord = await NexusServer.saveRecord(
+          userProfile?.id || null, 
+          'placement_analysis', 
+          `Resume Analysis: ${fileName || 'Untitled'}`, 
+          data
+        );
+        if (savedRecord?.id) {
+          setCurrentRecordId(savedRecord.id);
+        }
+      } catch (saveErr) {
+        console.error("Failed to persist analysis for sharing", saveErr);
       }
       // Reset URL to base placement tool when new analysis is done to clear any old report ID
       // Soft URL reset to clear report ID without page refresh or context loss
@@ -234,6 +262,41 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
     setSavedReports(updated);
     localStorage.setItem('nexus_resume_reports', JSON.stringify(updated));
     showToast("Review saved to your history.", "success");
+  };
+
+  const handleShareReport = async () => {
+    if (!result) return;
+    
+    setShareLoading(true);
+    try {
+      let recordId = currentRecordId;
+      
+      // If we don't have an ID (e.g. loaded from local history), save it now
+      if (!recordId) {
+        const savedRecord = await NexusServer.saveRecord(
+          userProfile?.id || null,
+          'placement_analysis',
+          `Resume Analysis: ${fileName || 'Shared'}`,
+          result
+        );
+        if (savedRecord?.id) {
+          recordId = savedRecord.id;
+          setCurrentRecordId(recordId);
+        }
+      }
+      
+      if (recordId) {
+        const shareUrl = `${window.location.origin}${window.location.pathname}?tab=placement&sid=${recordId}`;
+        await navigator.clipboard.writeText(shareUrl);
+        showToast("Share link copied to clipboard!", "success");
+      } else {
+        showToast("Could not generate share link.", "error");
+      }
+    } catch (err) {
+      showToast("Sharing failed.", "error");
+    } finally {
+      setShareLoading(false);
+    }
   };
 
   const handleDeleteReport = async (idx: number, e: React.MouseEvent) => {
@@ -323,8 +386,20 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             </div>
           ) : <div />}
           <div className="flex flex-wrap gap-2 ml-auto md:ml-0">
+            <button 
+              onClick={handleShareReport} 
+              disabled={shareLoading}
+              className="px-4 py-2 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-white rounded-xl font-bold text-[8px] tracking-widest transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+            >
+              {shareLoading ? (
+                <div className="w-3 h-3 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+              )}
+              Share Feedback
+            </button>
             <button onClick={handleSaveReport} className="px-4 py-2 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-white rounded-xl font-bold text-[8px] tracking-widest transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm">
-              Save Review
+              Save History
             </button>
             <button 
               onClick={() => {

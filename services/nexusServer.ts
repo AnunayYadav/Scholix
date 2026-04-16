@@ -916,13 +916,23 @@ class NexusServer {
     return [];
   }
 
-  static async saveRecord(uid: string | null, type: string, label: string, content: any) {
+  static async fetchRecordById(id: string): Promise<any | null> {
     const client = getSupabase();
-    if (!client) return;
+    if (!client) return null;
+    const { data, error } = await client.from('user_history').select('*').eq('id', id).maybeSingle();
+    if (error) {
+      console.error(`Fetch Record Error (${id}):`, error);
+      return null;
+    }
+    return data;
+  }
 
-    const session_id = this.getAnonSessionId();
+  static async saveRecord(uid: string | null, type: string, label: string, content: any): Promise<any | null> {
+    const client = getSupabase();
+    if (!client) return null;
 
-    // If uid is provided, use it. Otherwise user_id is null and we rely on session_id.
+    const session_id = this.getAnonSessionId ? this.getAnonSessionId() : null;
+
     const record: any = {
       user_id: uid || null,
       session_id: session_id,
@@ -932,12 +942,15 @@ class NexusServer {
     };
 
     try {
-      const { error } = await client.from('user_history').insert([record]);
+      const { data, error } = await client.from('user_history').insert([record]).select().single();
       if (error) {
         console.error('Save Record Error:', error);
+        return null;
       }
+      return data;
     } catch (e) {
       console.error('Save Record Exception:', e);
+      return null;
     }
   }
 
