@@ -611,7 +611,12 @@ class NexusServer {
     }
     const cleanUsername = sanitizeInput(username.toLowerCase().trim(), 15);
     const cleanEmail = sanitizeInput(email.trim(), 100);
-    const cleanRegNo = sanitizeInput(regNo.replace(/[^0-9]/g, ''), 8);
+    
+    // For LPU, registration number is strictly 8 digits. For others, allow letters/longer formats.
+    const isLPU = university === 'lpu' || email.toLowerCase().endsWith('@lpu.in');
+    const cleanRegNo = isLPU 
+      ? sanitizeInput(regNo.replace(/[^0-9]/g, ''), 8) 
+      : sanitizeInput(regNo.trim(), 20);
     const result = await client.auth.signUp({
       email: cleanEmail,
       password: pass,
@@ -711,12 +716,44 @@ class NexusServer {
       user.app_metadata?.is_verified === true;
 
     if (existing) {
+      const updates: any = {};
+      let needsUpdate = false;
+
+      // Sync verification status
       if ((!existing.is_verified || existing.is_verified === 'no') && isVerifiedInMeta) {
-        const { data: updated } = await client.from('profiles').update({ is_verified: 'yes' }).eq('id', user.id).select().single();
+        updates.is_verified = 'yes';
+        needsUpdate = true;
+      }
+
+      // Sync missing username
+      if ((!existing.username || existing.username.startsWith('verto_')) && metadata.username) {
+        updates.username = metadata.username;
+        needsUpdate = true;
+      }
+
+      // Sync missing registration number
+      if (!existing.registration_number && metadata.registration_number) {
+        updates.registration_number = metadata.registration_number;
+        needsUpdate = true;
+      }
+
+      // Sync university
+      if ((!existing.university || existing.university === 'none') && metadata.university && metadata.university !== 'none') {
+        updates.university = metadata.university;
+        needsUpdate = true;
+      }
+
+      if (needsUpdate) {
+        if (import.meta.env.DEV) console.log(`[NexusServer] Syncing profile ${user.id} from metadata:`, updates);
+        const { data: updated, error: updateError } = await client.from('profiles').update(updates).eq('id', user.id).select().single();
+        if (updateError) {
+          console.error('[NexusServer] Profile sync error:', updateError);
+        }
         if (updated) return updated;
       }
       return existing;
     }
+
     const newProfile = {
       id: user.id,
       email: user.email!,
@@ -728,18 +765,18 @@ class NexusServer {
       level_title: 'Beginner',
       current_streak: 0,
       longest_streak: 0,
-      last_active_date: null,
+      last_active_date: new Date().toISOString(),
       xp_history: [],
       is_verified: isVerifiedInMeta ? 'yes' : 'no',
       university: metadata.university || 'none'
     };
 
-    const { data, error } = await client.from('profiles')
+    const { data: created, error } = await client.from('profiles')
       .upsert(newProfile, { onConflict: 'id' })
       .select()
       .single();
     if (error) throw error;
-    return data;
+    return created;
   }
 
   static async collectReward(userId: string, frameId: string) {
