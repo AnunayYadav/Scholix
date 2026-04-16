@@ -56,7 +56,7 @@ const callGeminiProxy = async (action: string, payload: any, retries = 2, delay 
         switch (action) {
           case "ANALYZE_RESUME": {
             const response = await ai.models.generateContent({
-              model: "gemini-3.1-flash-lite-preview",
+              model: "gemini-3.1-flash-lite",
               contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
               config: {
                 responseMimeType: "application/json",
@@ -70,7 +70,7 @@ const callGeminiProxy = async (action: string, payload: any, retries = 2, delay 
 
           case "GENERATE_QUIZ": {
             const response = await ai.models.generateContent({
-              model: "gemini-3.1-flash-lite-preview",
+              model: "gemini-3.1-flash-lite",
               contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
               config: {
                 responseMimeType: "application/json",
@@ -84,7 +84,7 @@ const callGeminiProxy = async (action: string, payload: any, retries = 2, delay 
 
           case "EXTRACT_TIMETABLE": {
             const response = await ai.models.generateContent({
-              model: "gemini-3.1-flash-lite-preview",
+              model: "gemini-3.1-flash-lite",
               contents: [{
                 role: 'user',
                 parts: [
@@ -104,7 +104,7 @@ const callGeminiProxy = async (action: string, payload: any, retries = 2, delay 
 
           case "GENERATE_SUBJECT_ORIGINALS": {
             const response = await ai.models.generateContent({
-              model: "gemini-3.1-flash-lite-preview",
+              model: "gemini-3.1-flash-lite",
               contents: [{ role: 'user', parts: [{ text: payload.prompt.substring(0, 30000) }] }],
               config: {
                 responseMimeType: "application/json",
