@@ -539,13 +539,15 @@ const AppContent: React.FC = () => {
     const path = location.pathname;
     const isAuthPath = path.endsWith('/login') || path.endsWith('/signup');
     
-    if (path.endsWith('/login')) {
+    // Only show login/signup modal if user is NOT logged in
+    if (path.endsWith('/login') && !userProfile) {
       setAuthMode('login');
       setShowAuthModal(true);
-    } else if (path.endsWith('/signup')) {
+    } else if (path.endsWith('/signup') && !userProfile) {
       setAuthMode('signup');
       setShowAuthModal(true);
-    } else if (userProfile && userProfile?.is_verified !== 'no' && !isAuthPath && path !== '/welcome') {
+    } else if (userProfile && userProfile?.is_verified !== 'no' && isAuthPath) {
+      // Auto-close if we're on login/signup path but already have a profile
       setShowAuthModal(false);
     }
   }, [location.pathname, userProfile]);
@@ -598,9 +600,12 @@ const AppContent: React.FC = () => {
   }, [selectedUniversity, location.pathname, navigate, selectUniversity, authIsReady, userProfile]);
 
   useEffect(() => {
-    if (userProfile && (location.pathname === '/login' || location.pathname === '/signup')) {
+    const path = location.pathname;
+    const isAuthPath = path.endsWith('/login') || path.endsWith('/signup');
+
+    if (userProfile && isAuthPath) {
       const lastPath = localStorage.getItem('last_active_path') || '/';
-      const target = lastPath !== location.pathname ? lastPath : '/';
+      const target = !lastPath.endsWith('/login') && !lastPath.endsWith('/signup') ? lastPath : '/';
       navigate(target, { replace: true });
     }
     
