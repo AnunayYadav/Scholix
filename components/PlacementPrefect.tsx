@@ -6,6 +6,7 @@ import NexusServer from '../services/nexusServer.ts';
 import { analyzeResume } from '../services/geminiService';
 import { ResumeAnalysisResult, UserProfile, AnnotatedFragment } from '../types';
 import { showToast, showConfirm } from './Toast.tsx';
+import { useUniversity } from '../hooks/useUniversity.tsx';
 
 const IconFile = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-12 h-12 mx-auto mb-2 opacity-40">
@@ -143,6 +144,8 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
   const [activeCategory, setActiveCategory] = useState<CategoryID>('keywordAnalysis');
   const [savedReports, setSavedReports] = useState<SavedReport[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { uniSlug } = useUniversity();
+  const prefix = uniSlug && uniSlug !== 'none' ? `/${uniSlug}` : '';
 
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [renamingIdx, setRenamingIdx] = useState<number | null>(null);
@@ -180,6 +183,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
         const text = await extractTextFromPdf(file);
         setResumeText(text);
         setFileName(file.name);
+        showToast("Resume uploaded successfully.", "success");
       } catch (err) {
         setError("Could not read the PDF file. Please ensure it is a valid document.");
       } finally {
@@ -208,8 +212,8 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
       if (userProfile?.id) {
         NexusServer.saveRecord(userProfile.id, 'placement_analysis', `Analyzed resume against: ${selectedRoleId || 'Custom JD'}`, { score: data.totalScore, role: selectedRoleId });
       }
-      // Reset URL to base placement when new analysis is done
-      navigate('/placement');
+      // Reset URL to base placement tool when new analysis is done to clear any old report ID
+      navigate(`${prefix}/tools?tab=placement`, { replace: true });
     } catch (err: any) {
       setError(err.message || "Analysis failed. Please try again later.");
     } finally {
@@ -319,7 +323,15 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             <button onClick={handleSaveReport} className="px-4 py-2 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-white rounded-xl font-bold text-[8px] tracking-widest transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm">
               Save Review
             </button>
-            <button onClick={() => setResult(null)} className="px-4 py-2 bg-brand-primary text-white rounded-xl font-bold text-[8px] tracking-widest active:scale-95 transition-all border-none">Try New Resume</button>
+            <button 
+              onClick={() => {
+                setResult(null);
+                navigate(`${prefix}/tools?tab=placement`, { replace: true });
+              }} 
+              className="px-4 py-2 bg-brand-primary text-white rounded-xl font-bold text-[8px] tracking-widest active:scale-95 transition-all border-none"
+            >
+              Try New Resume
+            </button>
           </div>
         </header>
 
