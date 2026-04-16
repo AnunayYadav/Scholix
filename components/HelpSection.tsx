@@ -63,7 +63,7 @@ const HelpSection: React.FC = () => {
         questions: [
           { q: "Is my personal data securely stored?", a: `Yes. ${fullBrandName} employs enterprise-grade security protocols. We never share your registration details, metrics, or academic records with third parties without your direct authorization.` },
           { q: "What happens if I lose access to my account?", a: "You can securely reset your password from the login screen. Ensure you have access to your registered student email address, as secure recovery links are exclusively dispatched there." },
-          { q: "How can I report a bug or request a new feature?", a: "We love student feedback! You can reach out directly via our WhatsApp support lifeline linked at the bottom of this page. We review every request and ship weekly updates." }
+          { q: "How can I report a bug or request a new feature?", a: "We love student feedback! You can reach out directly via the feedback modal or email us at anunayarvind@gmail.com. We review every request and ship weekly updates." }
         ]
       }
     ];
@@ -199,15 +199,16 @@ const HelpSection: React.FC = () => {
         <h3 className="text-white text-2xl font-black mb-4 relative z-10 uppercase tracking-tight">Still have questions?</h3>
         <p className="text-zinc-400 mb-8 max-w-md mx-auto relative z-10 text-sm font-medium">Our student support team is ready to help you navigate through your campus journey.</p>
         <a
-          href={`https://wa.me/918935031251?text=Hi!%20I%20need%20some%20help%20with%20${fullBrandName}.`}
+          href="https://mail.google.com/mail/?view=cm&fs=1&to=anunayarvind@gmail.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center space-x-3 bg-white text-black px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#25D366] hover:text-white hover:scale-105 active:scale-95 transition-all shadow-xl relative z-10"
+          className="inline-flex items-center space-x-3 bg-white text-black px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-primary hover:text-white hover:scale-105 active:scale-95 transition-all shadow-xl relative z-10"
         >
-          <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 .004 5.412.001 12.04c0 2.123.542 4.198 1.585 6.03l-1.585 6.187 6.326-1.66A11.826 11.826 0 0012.05 24.122c6.635 0 12.047-5.412 12.05-12.046a11.83 11.83 0 00-3.517-8.477z" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
           </svg>
-          <span>WhatsApp for Help</span>
+          <span>Email for Help</span>
         </a>
       </div>
     </div>
