@@ -625,7 +625,7 @@ const AppContent: React.FC = () => {
 
     const unsubscribe = NexusServer.onAuthStateChange(async (user) => {
       if (user) {
-        const profile = await NexusServer.getProfile(user.id);
+        const profile = await NexusServer.ensureProfile(user);
         setUserProfile(prev => {
           if (JSON.stringify(prev) === JSON.stringify(profile)) return prev;
           return profile;

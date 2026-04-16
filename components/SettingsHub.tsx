@@ -6,6 +6,7 @@ import NexusServer from '../services/nexusServer.ts';
 import VerifiedBadge from './VerifiedBadge.tsx';
 import { getFrameConfig } from '../data/frameConfigs.ts';
 import FeedbackModal from './FeedbackModal.tsx';
+import ChatSupportModal from './ChatSupportModal.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 
 interface SettingsHubProps {
@@ -20,6 +21,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
   const navigate = useNavigate();
   const { fullBrandName, selectUniversity } = useUniversity();
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
   
   const frameConfig = getFrameConfig(userProfile?.avatar_frame || '');
 
@@ -196,6 +198,13 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
           color="text-purple-500"
         />
         <SettingItem 
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-10.6 8.38 8.38 0 0 1 3.8.9L21 3z"/></svg>}
+          label="Chat Support"
+          sublabel="Instant automated assistance"
+          onClick={() => setShowChatModal(true)}
+          color="text-cyan-500"
+        />
+        <SettingItem 
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>}
           label="About Us"
           sublabel="Meet the minds behind Scholix"
@@ -229,6 +238,12 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
         isOpen={showFeedbackModal} 
         onClose={() => setShowFeedbackModal(false)} 
         userProfile={userProfile} 
+      />
+
+      <ChatSupportModal
+        isOpen={showChatModal}
+        onClose={() => setShowChatModal(false)}
+        onOpenFeedback={() => setShowFeedbackModal(true)}
       />
     </div>
   );
