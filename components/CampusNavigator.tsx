@@ -326,15 +326,15 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-1 ml-0.5">
             {userProfile ? `Welcome, ${userProfile.full_name?.split(' ')[0] || 'User'}` : 'Exploration Mode'}
           </p>
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
             {{
-            'mess': <>Mess <span className="text-brand-primary">Menu</span></>,
-            'map': <>Campus <span className="text-brand-secondary">Map</span></>,
+            'mess': <>{universityInfo?.shortName || ''} Mess <span className="text-brand-primary">Menu</span></>,
+            'map': <>{universityInfo?.shortName || ''} Campus <span className="text-brand-secondary">Map</span></>,
             'market': <>Nexus <span className="text-blue-500">Market</span></>,
             'roommate': <>Roommate <span className="text-purple-500">Finder</span></>,
-            '': <>Campus <span className="text-brand-primary">Hub</span></>
-          }[activeTab] || <>Campus <span className="text-brand-primary">Hub</span></>}
-          </h2>
+            '': <>{universityInfo?.shortName || ''} Campus <span className="text-brand-primary">Hub</span></>
+          }[activeTab] || <>{universityInfo?.shortName || ''} Campus <span className="text-brand-primary">Hub</span></>}
+          </h1>
         </div>
 
         {activeTab && (

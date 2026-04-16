@@ -2,132 +2,157 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://scholix.app/</loc>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
-  
-  <!-- Core Services -->
   <url>
-    <loc>https://scholix.app/attendance</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/cgpa</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/placement</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://scholix.app/welcome</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
+  <!-- LPU Specific Routes -->
   <url>
-    <loc>https://scholix.app/library</loc>
+    <loc>https://scholix.app/lpu</loc>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://scholix.app/campus</loc>
+    <loc>https://scholix.app/lpu/library</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/quiz</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/campus</loc>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/campus/mess</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/campus/map</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/campus/mess</loc>
+    <loc>https://scholix.app/lpu/campus/market</loc>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/campus/map</loc>
+    <loc>https://scholix.app/lpu/placement</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/attendance</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/cgpa</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/timetable</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/freshers</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/ai-tools</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/marketplace</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/roommate</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/emergency</loc>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
+
+  <!-- IIT Madras (IITM) Specific Routes -->
   <url>
-    <loc>https://scholix.app/freshers</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/timetable</loc>
+    <loc>https://scholix.app/iitm</loc>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/emergency</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/ai-tools</loc>
-    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scholix.app/roommate</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Marketplace Categories -->
-  <url>
-    <loc>https://scholix.app/marketplace</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/marketplace/Books</loc>
+    <loc>https://scholix.app/iitm/library</loc>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/marketplace/Electronics</loc>
+    <loc>https://scholix.app/iitm/quiz</loc>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/marketplace/Cycles</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/marketplace/Hostel%20Essentials</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <!-- Quiz Sections -->
-  <url>
-    <loc>https://scholix.app/quiz</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url><loc>https://scholix.app/quiz/CHE110</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://scholix.app/quiz/CSE101</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://scholix.app/quiz/CSE121</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://scholix.app/quiz/CSE320</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://scholix.app/quiz/CSE326</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://scholix.app/quiz/INT108</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://scholix.app/quiz/INT306</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://scholix.app/quiz/MTH166</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://scholix.app/quiz/PHY110</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://scholix.app/quiz/ECE249</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://scholix.app/quiz/PEL125</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://scholix.app/quiz/PEL130</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-
-  <!-- Legal & Info -->
-  <url>
-    <loc>https://scholix.app/help</loc>
+    <loc>https://scholix.app/iitm/timetable</loc>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
+
+  <!-- Global Feature Routes -->
   <url>
     <loc>https://scholix.app/about</loc>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/help</loc>
+    <lastmod>2026-04-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://scholix.app/privacy</loc>
+    <lastmod>2026-04-16</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.4</priority>
   </url>
 </urlset>

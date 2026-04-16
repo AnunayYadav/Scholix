@@ -28,6 +28,7 @@ import AnnouncementBand from './components/AnnouncementBand.tsx';
 import BottomNavbar from './components/BottomNavbar.tsx';
 import { UniversityProvider, useUniversity, UniversityId, UNIVERSITIES } from './hooks/useUniversity.tsx';
 
+import SEOHelmet from './components/SEOHelmet.tsx';
 import { ModuleType, UserProfile, TimetableData } from './types.ts';
 
 import NexusServer from './services/nexusServer.ts';
@@ -536,6 +537,8 @@ const AppContent: React.FC = () => {
 
   // Auth modal path sync
   useEffect(() => {
+    if (!authIsReady) return; // Wait for auth state to be confirmed before showing modals
+
     const path = location.pathname;
     const isAuthPath = path.endsWith('/login') || path.endsWith('/signup');
     
@@ -550,7 +553,7 @@ const AppContent: React.FC = () => {
       // Auto-close if we're on login/signup path but already have a profile
       setShowAuthModal(false);
     }
-  }, [location.pathname, userProfile]);
+  }, [location.pathname, userProfile, authIsReady]);
 
   useEffect(() => {
     const pathParts = location.pathname.split('/').filter(Boolean);
@@ -628,27 +631,23 @@ const AppContent: React.FC = () => {
   }, [userProfile, location.pathname, navigate, showAuthModal]);
 
 
+  // Combined Session & Auth State Handling
   useEffect(() => {
     NexusServer.recordVisit();
     const savedTheme = (localStorage.getItem('theme') as 'light' | 'dark') || 'dark';
     setTheme(savedTheme);
     document.documentElement.classList.toggle('dark', savedTheme === 'dark');
-    
-    // Initial check to see if we have a session
-    NexusServer.getSession().then(({ data: { session } }) => {
-      if (!session) setAuthIsReady(true);
-    });
 
+    // Subscribe to auth changes
     const unsubscribe = NexusServer.onAuthStateChange(async (user) => {
       if (user) {
+        // Fetch profile but don't block authIsReady
         const profile = await NexusServer.ensureProfile(user);
-        setUserProfile(prev => {
-          if (JSON.stringify(prev) === JSON.stringify(profile)) return prev;
-          return profile;
-        });
+        setUserProfile(profile);
       } else {
         setUserProfile(null);
       }
+      // Critical: Set authIsReady only after we've confirmed the session state from Supabase
       setAuthIsReady(true);
     });
 
@@ -686,6 +685,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white dark:bg-[#0a0a0a] text-zinc-900 dark:text-zinc-200">
+      <SEOHelmet currentModule={currentModule} />
       <AnnouncementBand />
       <div className="flex flex-1 overflow-hidden relative">
         <Sidebar

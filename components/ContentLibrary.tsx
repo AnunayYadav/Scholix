@@ -605,8 +605,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         <div className="space-y-6 animate-fade-in">
           <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-zinc-800 dark:text-white tracking-tight leading-none mb-1 flex items-center">
-                Content <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Library</span> Hub
+              <h1 className="text-2xl font-bold text-zinc-800 dark:text-white tracking-tight leading-none mb-1 flex items-center">
+                {activeSubject ? (
+                  <>{activeSubject.name} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Notes</span></>
+                ) : activeSemester ? (
+                  <>{activeSemester.name} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Hub</span></>
+                ) : (
+                  <>Content <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Library</span> Hub</>
+                )}
                 <div className="relative group ml-2 mb-1">
                   <button className="flex items-center justify-center text-zinc-300 dark:text-white/20 hover:text-orange-500 dark:hover:text-orange-500 bg-transparent border-none transition-colors">
                     <svg viewBox="0 0 16 16" fill="currentColor" className="w-5 h-5">
@@ -621,7 +627,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     </p>
                   </div>
                 </div>
-              </h2>
+              </h1>
               {!isAdminView && !searchQuery && viewMode === 'browse' && (
                 <nav className="mt-2 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-zinc-400">
                   <button onClick={() => navigateTo(null, null, null)} className="hover:text-orange-500 transition-colors border-none bg-transparent">Root</button>
