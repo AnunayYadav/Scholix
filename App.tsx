@@ -605,7 +605,18 @@ const AppContent: React.FC = () => {
     }
     
     // Mandatory verification check
-    if (userProfile && (userProfile.is_verified === 'no' || !userProfile.is_verified) && !showAuthModal && location.pathname !== '/welcome' && !localStorage.getItem('just_signed_up')) {
+    const justSignedUp = localStorage.getItem('just_signed_up');
+    let isWithinGracePeriod = false;
+    if (justSignedUp) {
+      const signupTime = parseInt(justSignedUp);
+      if (Date.now() - signupTime < 30000) { // 30 second grace period
+        isWithinGracePeriod = true;
+      } else {
+        localStorage.removeItem('just_signed_up');
+      }
+    }
+
+    if (userProfile && (userProfile.is_verified === 'no' || !userProfile.is_verified) && !showAuthModal && location.pathname !== '/welcome' && !isWithinGracePeriod) {
       setAuthMode('verify_email');
       setShowAuthModal(true);
     }

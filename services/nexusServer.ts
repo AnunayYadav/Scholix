@@ -626,10 +626,11 @@ class NexusServer {
       }
     });
 
-    // If signup is successful and we have a session (immediate login enabled)
-    if (!result.error && result.data?.user && result.data.session) {
+    // If signup is successful
+    if (!result.error && result.data?.user) {
       try {
         // Create full profile immediately to avoid race conditions with ensureProfile
+        // We do this even if session is null, as we have the user ID
         await client.from('profiles').upsert({
           id: result.data.user.id,
           email: cleanEmail,
@@ -699,7 +700,15 @@ class NexusServer {
 
     const { data: existing } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
     const metadata = user.user_metadata || (user as any).raw_user_meta_data || {};
-    const isVerifiedInMeta = metadata.is_verified === 'yes' || metadata.is_verified === true || metadata.isVerified === 'yes' || metadata.isVerified === true;
+    
+    // Robustly check multiple possible locations and formats for verification status
+    const isVerifiedInMeta = 
+      metadata.is_verified === 'yes' || 
+      metadata.is_verified === true || 
+      metadata.isVerified === 'yes' || 
+      metadata.isVerified === true ||
+      metadata.verification_status === 'verified' ||
+      user.app_metadata?.is_verified === true;
 
     if (existing) {
       if ((!existing.is_verified || existing.is_verified === 'no') && isVerifiedInMeta) {
