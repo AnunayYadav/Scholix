@@ -605,7 +605,7 @@ const AppContent: React.FC = () => {
     }
     
     // Mandatory verification check
-    if (userProfile && (userProfile.is_verified === 'no' || !userProfile.is_verified) && !showAuthModal && location.pathname !== '/welcome') {
+    if (userProfile && (userProfile.is_verified === 'no' || !userProfile.is_verified) && !showAuthModal && location.pathname !== '/welcome' && !localStorage.getItem('just_signed_up')) {
       setAuthMode('verify_email');
       setShowAuthModal(true);
     }

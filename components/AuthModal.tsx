@@ -260,6 +260,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
           const result = await NexusServer.signUp(email, password, username, regNo, selectedUniversity);
           if (result.error) throw result.error;
 
+          // Set a temporary flag to prevent the App from showing the verification modal instantly
+          // during the short window where the profile might still be syncing
+          localStorage.setItem('just_signed_up', 'true');
+          setTimeout(() => localStorage.removeItem('just_signed_up'), 10000);
+
           handleClose();
         }
       } else if (mode === 'verify_email' && userProfile) {

@@ -629,12 +629,23 @@ class NexusServer {
     // If signup is successful and we have a session (immediate login enabled)
     if (!result.error && result.data?.user && result.data.session) {
       try {
-        await client.from('profiles').update({
+        // Create full profile immediately to avoid race conditions with ensureProfile
+        await client.from('profiles').upsert({
+          id: result.data.user.id,
+          email: cleanEmail,
           username: cleanUsername,
           registration_number: cleanRegNo,
           is_verified: 'yes',
-          university: university || 'none'
-        }).eq('id', result.data.user.id);
+          university: university || 'none',
+          is_admin: false,
+          total_xp: 0,
+          level: 1,
+          level_title: 'Beginner',
+          current_streak: 0,
+          longest_streak: 0,
+          last_active_date: new Date().toISOString(),
+          xp_history: []
+        }, { onConflict: 'id' });
       } catch (e) {
         console.warn("Manual profile sync failed:", e);
       }
@@ -687,10 +698,11 @@ class NexusServer {
     if (!client) throw new Error("Registry offline.");
 
     const { data: existing } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
-    const metadata = user.user_metadata || {};
+    const metadata = user.user_metadata || (user as any).raw_user_meta_data || {};
+    const isVerifiedInMeta = metadata.is_verified === 'yes' || metadata.is_verified === true || metadata.isVerified === 'yes' || metadata.isVerified === true;
 
     if (existing) {
-      if ((!existing.is_verified || existing.is_verified === 'no') && metadata.is_verified === 'yes') {
+      if ((!existing.is_verified || existing.is_verified === 'no') && isVerifiedInMeta) {
         const { data: updated } = await client.from('profiles').update({ is_verified: 'yes' }).eq('id', user.id).select().single();
         if (updated) return updated;
       }
@@ -709,7 +721,7 @@ class NexusServer {
       longest_streak: 0,
       last_active_date: null,
       xp_history: [],
-      is_verified: metadata.is_verified || 'no',
+      is_verified: isVerifiedInMeta ? 'yes' : 'no',
       university: metadata.university || 'none'
     };
 
