@@ -11,16 +11,18 @@ interface LeaderboardEntry {
 
 interface LeaderboardProps {
   currentUserId?: string | null;
+  refreshTrigger?: number;
 }
 
-const LeaderboardSection: React.FC<LeaderboardProps> = ({ currentUserId }) => {
+const LeaderboardSection: React.FC<LeaderboardProps> = ({ currentUserId, refreshTrigger }) => {
     const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [isExpanded, setIsExpanded] = useState(false);
 
     useEffect(() => {
         const fetchLeaderboard = async () => {
-            setLoading(true);
+            // Only show loading on initial fetch
+            if (leaderboard.length === 0) setLoading(true);
             try {
                 const data = await NexusServer.getStudyLeaderboard();
                 setLeaderboard(data);
@@ -30,8 +32,24 @@ const LeaderboardSection: React.FC<LeaderboardProps> = ({ currentUserId }) => {
                 setLoading(false);
             }
         };
+
         fetchLeaderboard();
-    }, []);
+    }, [refreshTrigger]);
+
+    // Refresh when expanded to ensure latest data
+    useEffect(() => {
+        if (isExpanded) {
+            const fetchLeaderboard = async () => {
+                try {
+                    const data = await NexusServer.getStudyLeaderboard();
+                    setLeaderboard(data);
+                } catch (error) {
+                    console.error("Failed to refresh leaderboard:", error);
+                }
+            };
+            fetchLeaderboard();
+        }
+    }, [isExpanded]);
 
     const formatTime = (seconds: number) => {
         const hrs = Math.floor(seconds / 3600);
@@ -91,6 +109,28 @@ const LeaderboardSection: React.FC<LeaderboardProps> = ({ currentUserId }) => {
                     </div>
                     
                     <div className="flex items-center gap-3">
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                const fetchLeaderboard = async () => {
+                                    try {
+                                        const data = await NexusServer.getStudyLeaderboard();
+                                        setLeaderboard(data);
+                                    } catch (error) {
+                                        console.error("Failed to fetch leaderboard:", error);
+                                    }
+                                };
+                                fetchLeaderboard();
+                            }}
+                            className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-orange-500 hover:bg-orange-500/10 transition-all shadow-sm group/refresh"
+                            title="Refresh Leaderboard"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 group-hover/refresh:rotate-180 transition-transform duration-500">
+                                <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8" />
+                                <path d="M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16" />
+                            </svg>
+                        </button>
+
                         <span className="text-[10px] font-bold text-zinc-400 group-hover:text-orange-500 transition-colors uppercase tracking-widest hidden sm:inline-block">
                             {isExpanded ? 'Collapse' : 'View Full'}
                         </span>
