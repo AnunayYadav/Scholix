@@ -125,28 +125,6 @@ const AdminAnnouncements: React.FC = () => {
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Title</label>
-                            <input
-                                type="text"
-                                value={form.title}
-                                onChange={e => setForm({ ...form, title: e.target.value })}
-                                className="w-full bg-neutral-100 dark:bg-black/20 border border-neutral-200 dark:border-white/5 rounded-2xl px-5 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
-                                placeholder="Enter a catchy title..."
-                                required
-                            />
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Description (Optional)</label>
-                            <textarea
-                                value={form.description}
-                                onChange={e => setForm({ ...form, description: e.target.value })}
-                                className="w-full bg-neutral-100 dark:bg-black/20 border border-neutral-200 dark:border-white/5 rounded-2xl px-5 py-3 text-sm font-medium h-24 resize-none focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
-                                placeholder="Additional details..."
-                            />
-                        </div>
-
-                        <div className="space-y-1.5">
                             <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Redirect Link (Optional)</label>
                             <input
                                 type="url"
