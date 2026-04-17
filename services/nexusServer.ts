@@ -609,9 +609,9 @@ class NexusServer {
     if (!rateLimiter.check(`auth_signup_${email.toLowerCase().trim()}`, 3, 120000)) {
       throw new Error("Too many signup attempts. Please wait a moment and try again.");
     }
-    const cleanUsername = sanitizeInput(username.toLowerCase().trim(), 15);
+    const cleanUsername = sanitizeInput(username.toLowerCase().trim(), 20);
     const cleanEmail = sanitizeInput(email.trim(), 100);
-    const cleanRegNo = sanitizeInput(regNo.replace(/[^0-9]/g, ''), 8);
+    const cleanRegNo = sanitizeInput(regNo.trim(), 15);
     const result = await client.auth.signUp({
       email: cleanEmail,
       password: pass,
@@ -701,7 +701,6 @@ class NexusServer {
     const { data: existing } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
     const metadata = user.user_metadata || (user as any).raw_user_meta_data || {};
     
-    // Robustly check multiple possible locations and formats for verification status
     const isVerifiedInMeta = 
       metadata.is_verified === 'yes' || 
       metadata.is_verified === true || 
@@ -711,12 +710,24 @@ class NexusServer {
       user.app_metadata?.is_verified === true;
 
     if (existing) {
-      if ((!existing.is_verified || existing.is_verified === 'no') && isVerifiedInMeta) {
-        const { data: updated } = await client.from('profiles').update({ is_verified: 'yes' }).eq('id', user.id).select().single();
+      const needsVerificationUpdate = (!existing.is_verified || existing.is_verified === 'no') && isVerifiedInMeta;
+      const needsInfoUpdate = (!existing.username && metadata.username) || 
+                             (!existing.registration_number && metadata.registration_number) ||
+                             (!existing.university && metadata.university);
+
+      if (needsVerificationUpdate || needsInfoUpdate) {
+        const updateData: any = {};
+        if (needsVerificationUpdate) updateData.is_verified = 'yes';
+        if (!existing.username && metadata.username) updateData.username = metadata.username;
+        if (!existing.registration_number && metadata.registration_number) updateData.registration_number = metadata.registration_number;
+        if (!existing.university && metadata.university) updateData.university = metadata.university;
+
+        const { data: updated } = await client.from('profiles').update(updateData).eq('id', user.id).select().single();
         if (updated) return updated;
       }
       return existing;
     }
+
     const newProfile = {
       id: user.id,
       email: user.email!,
@@ -725,11 +736,10 @@ class NexusServer {
       is_admin: false,
       total_xp: 0,
       level: 1,
-      level_title: 'Beginner',
       current_streak: 0,
       longest_streak: 0,
-      last_active_date: null,
-      xp_history: [],
+      is_public: true,
+      last_active_date: new Date().toISOString(),
       is_verified: isVerifiedInMeta ? 'yes' : 'no',
       university: metadata.university || 'none'
     };

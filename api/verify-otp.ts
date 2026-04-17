@@ -130,9 +130,19 @@ export default async function handler(req: any, res: any) {
        return res.status(404).json({ error: 'Profile record not found to update.' });
     }
 
-    // 5. Handle auth email update
-    if (type === 'email_update' && userId) {
+    // 5.5. Update Auth User Account & Metadata to keep it in sync
+    if (userId) {
       try {
+        const updatePayload: any = { 
+          user_metadata: { is_verified: 'yes' } 
+        };
+
+        if (type === 'email_update') {
+          updatePayload.email = email.toLowerCase().trim();
+          updatePayload.email_confirm = true;
+          updatePayload.user_metadata.email_verified = true;
+        }
+
         await fetch(`${supabaseUrl}/auth/v1/admin/users/${userId}`, {
           method: 'PUT',
           headers: {
@@ -140,10 +150,11 @@ export default async function handler(req: any, res: any) {
             'Authorization': `Bearer ${supabaseServiceKey}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ email: email.toLowerCase().trim(), email_confirm: true })
+          body: JSON.stringify(updatePayload)
         });
+        console.log(`Updated auth account/metadata for user: ${userId}`);
       } catch (e) {
-        console.error('Auth email update failed:', e);
+        console.error('Auth update failed:', e);
       }
     }
 
