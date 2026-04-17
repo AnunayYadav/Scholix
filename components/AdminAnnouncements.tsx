@@ -10,12 +10,17 @@ const AdminAnnouncements: React.FC = () => {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+    const getLocalISOString = (date: Date) => {
+        const offset = date.getTimezoneOffset() * 60000;
+        return new Date(date.getTime( ) - offset).toISOString().slice(0, 16);
+    };
+
     const [form, setForm] = useState({
         title: '',
         description: '',
         link_url: '',
-        start_at: new Date().toISOString().slice(0, 16),
-        end_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+        start_at: getLocalISOString(new Date()),
+        end_at: getLocalISOString(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)),
         is_active: true
     });
 
