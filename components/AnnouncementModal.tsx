@@ -86,7 +86,7 @@ const AnnouncementModal: React.FC = () => {
                         </div>
 
                         {/* Bottom Utility Bar (Don't Show Again) */}
-                        <div className="mt-6 flex items-center gap-3 select-none">
+                        <div className="mt-4 flex items-center justify-center">
                             <label className="flex items-center gap-2 cursor-pointer group">
                                 <div className="relative flex items-center justify-center">
                                     <input 
@@ -95,22 +95,13 @@ const AnnouncementModal: React.FC = () => {
                                         checked={dontShowAgain}
                                         onChange={(e) => setDontShowAgain(e.target.checked)}
                                     />
-                                    <div className="w-5 h-5 border-2 border-white/20 rounded-md peer-checked:bg-orange-500 peer-checked:border-orange-500 transition-all group-hover:border-white/40" />
-                                    <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M20 6L9 17l-5-5" /></svg>
+                                    <div className="w-4 h-4 border border-white/20 rounded-sm peer-checked:bg-orange-500 peer-checked:border-orange-500 transition-all group-hover:border-white/40" />
+                                    <svg className="absolute w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M20 6L9 17l-5-5" /></svg>
                                 </div>
-                                <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest group-hover:text-white transition-colors">
+                                <span className="text-[10px] text-neutral-500 font-medium tracking-tight group-hover:text-neutral-300 transition-colors">
                                     Don't show this again
                                 </span>
                             </label>
-                            
-                            <div className="w-px h-3 bg-white/10 mx-1" />
-                            
-                            <button 
-                                onClick={handleClose}
-                                className="text-xs font-bold text-white/40 uppercase tracking-widest hover:text-white transition-colors"
-                            >
-                                Dismiss
-                            </button>
                         </div>
                     </motion.div>
                 </div>
