@@ -130,19 +130,9 @@ export default async function handler(req: any, res: any) {
        return res.status(404).json({ error: 'Profile record not found to update.' });
     }
 
-    // 5.5. Update Auth User Account & Metadata to keep it in sync
-    if (userId) {
+    // 5. Handle auth email update
+    if (type === 'email_update' && userId) {
       try {
-        const updatePayload: any = { 
-          user_metadata: { is_verified: 'yes' } 
-        };
-
-        if (type === 'email_update') {
-          updatePayload.email = email.toLowerCase().trim();
-          updatePayload.email_confirm = true;
-          updatePayload.user_metadata.email_verified = true;
-        }
-
         await fetch(`${supabaseUrl}/auth/v1/admin/users/${userId}`, {
           method: 'PUT',
           headers: {
@@ -150,11 +140,10 @@ export default async function handler(req: any, res: any) {
             'Authorization': `Bearer ${supabaseServiceKey}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(updatePayload)
+          body: JSON.stringify({ email: email.toLowerCase().trim(), email_confirm: true })
         });
-        console.log(`Updated auth account/metadata for user: ${userId}`);
       } catch (e) {
-        console.error('Auth update failed:', e);
+        console.error('Auth email update failed:', e);
       }
     }
 
@@ -169,6 +158,8 @@ export default async function handler(req: any, res: any) {
 
     // 7. Session generation for login/signup
     if (type === 'login' || type === 'signup') {
+      const { username, registration_number, university } = req.body || {};
+      
       const authResponse = await fetch(`${supabaseUrl}/auth/v1/admin/generate_link`, {
         method: 'POST',
         headers: {
@@ -179,6 +170,12 @@ export default async function handler(req: any, res: any) {
         body: JSON.stringify({
           type: 'magiclink',
           email: email.toLowerCase().trim(),
+          data: type === 'signup' ? {
+            username,
+            registration_number,
+            university: university || 'none',
+            is_verified: 'yes'
+          } : {}
         })
       });
 

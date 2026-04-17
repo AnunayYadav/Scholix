@@ -230,7 +230,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
             setEmailError(true);
             throw new Error("Please enter a valid email address.");
           }
-          if (!regNo.trim()) throw new Error("Registration number is required.");
+          if (regNo.replace(/[^0-9]/g, '').length !== 8) throw new Error("Registration number must be exactly 8 digits.");
           if (username.length < 3) throw new Error("Username must be at least 3 characters.");
           if (usernameStatus === 'taken') throw new Error("This username is already claimed.");
           if (password.length < 6) throw new Error("Password must be at least 6 characters.");
@@ -251,7 +251,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
           const verifyResponse = await fetch('/api/verify-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email.toLowerCase().trim(), otp: otpValue, type: 'signup' })
+            body: JSON.stringify({ 
+              email: email.toLowerCase().trim(), 
+              otp: otpValue, 
+              type: 'signup',
+              username,
+              registration_number: regNo,
+              university: selectedUniversity
+            })
           });
 
           const verifyData = await verifyResponse.json();
@@ -353,7 +360,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
 
   const handleUsernameChange = (val: string) => {
     const clean = val.toLowerCase().replace(/[^a-z0-9_]/g, '');
-    if (clean.length <= 20) setUsername(clean);
+    if (clean.length <= 15) setUsername(clean);
   };
 
   const passwordStrength = getPasswordStrength(password);
@@ -720,10 +727,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, initialMode = 'login', u
                         <div className="relative group">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-orange-600 transition-colors"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><path d="M7 21v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4" /><circle cx="12" cy="11" r="3" /></svg>
                           <input
-                            type="text" required value={regNo} onChange={e => setRegNo(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 15))}
+                            type="text" required value={regNo} onChange={e => setRegNo(e.target.value.replace(/[^0-9]/g, '').slice(0, 8))}
                             disabled={loading}
                             className="w-full bg-zinc-50 dark:bg-[#0a0a0a] pl-11 pr-4 py-4.5 rounded-2xl text-[13px] font-bold outline-none border border-zinc-200 dark:border-white/10 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-600/5 dark:text-white transition-all disabled:opacity-50"
-                            placeholder="Enter Registration No."
+                            placeholder="1240...."
                           />
                         </div>
                       </div>

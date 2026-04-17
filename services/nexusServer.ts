@@ -605,13 +605,19 @@ class NexusServer {
   static async signUp(email: string, pass: string, username: string, regNo: string, university: string) {
     const client = getSupabase();
     if (!client) throw new Error("Registry is offline.");
+    
     // Rate limiting: 3 signup attempts per 2 minutes per email
     if (!rateLimiter.check(`auth_signup_${email.toLowerCase().trim()}`, 3, 120000)) {
       throw new Error("Too many signup attempts. Please wait a moment and try again.");
     }
-    const cleanUsername = sanitizeInput(username.toLowerCase().trim(), 20);
+
+    const cleanUsername = sanitizeInput(username.toLowerCase().trim(), 15);
     const cleanEmail = sanitizeInput(email.trim(), 100);
-    const cleanRegNo = sanitizeInput(regNo.trim(), 15);
+    // Restoration of strict LPU requirement: 8 digits, numeric only.
+    const cleanRegNo = sanitizeInput(regNo.replace(/[^0-9]/g, ''), 8);
+
+    console.log(`[NexusServer] Attempting signUp for ${cleanEmail} (User: ${cleanUsername}, RegNo: ${cleanRegNo})`);
+
     const result = await client.auth.signUp({
       email: cleanEmail,
       password: pass,
@@ -626,12 +632,32 @@ class NexusServer {
       }
     });
 
-    // If signup is successful
-    if (!result.error && result.data?.user) {
+    if (result.error) {
+      console.warn(`[NexusServer] auth.signUp error: ${result.error.message}`);
+      
+      // If user already exists, we might still want to try and update their profile
+      if (result.error.message.toLowerCase().includes('already registered')) {
+         console.log(`[NexusServer] User already exists, attempting recovery login/profile sync`);
+         // Try to sign in to get the session/user ID
+         const loginRes = await client.auth.signInWithPassword({ email: cleanEmail, password: pass });
+         if (!loginRes.error && loginRes.data.user) {
+            console.log(`[NexusServer] Recovery login successful, checking profile`);
+            await this.ensureProfile(loginRes.data.user, { 
+              username: cleanUsername, 
+              registration_number: cleanRegNo,
+              university: university || 'none'
+            });
+            return loginRes;
+         }
+      }
+      return result;
+    }
+
+    if (result.data?.user) {
+      console.log(`[NexusServer] auth.signUp success for ID: ${result.data.user.id}`);
       try {
         // Create full profile immediately to avoid race conditions with ensureProfile
-        // We do this even if session is null, as we have the user ID
-        await client.from('profiles').upsert({
+        const profileData = {
           id: result.data.user.id,
           email: cleanEmail,
           username: cleanUsername,
@@ -646,9 +672,13 @@ class NexusServer {
           longest_streak: 0,
           last_active_date: new Date().toISOString(),
           xp_history: []
-        }, { onConflict: 'id' });
+        };
+        
+        console.log(`[NexusServer] Performing initial profile upsert:`, profileData);
+        const { error: upsertError } = await client.from('profiles').upsert(profileData, { onConflict: 'id' });
+        if (upsertError) console.error("[NexusServer] Initial profile upsert failed:", upsertError);
       } catch (e) {
-        console.warn("Manual profile sync failed:", e);
+        console.warn("[NexusServer] Manual profile sync catch failed:", e);
       }
     }
 
@@ -694,13 +724,28 @@ class NexusServer {
     return data;
   }
 
-  static async ensureProfile(user: User): Promise<UserProfile> {
+  static async ensureProfile(user: User, overrides?: { username?: string, registration_number?: string, university?: string }): Promise<UserProfile> {
     const client = getSupabase();
     if (!client) throw new Error("Registry offline.");
 
+    console.log(`[NexusServer] EnsuredProfile check for ${user.id} (${user.email})`);
+
     const { data: existing } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
-    const metadata = user.user_metadata || (user as any).raw_user_meta_data || {};
     
+    // Aggregate metadata from multiple sources (Supabase stores it differently based on flow)
+    const metadata = {
+      ...(user as any).raw_user_meta_data,
+      ...user.user_metadata,
+      ...overrides
+    };
+    
+    console.log(`[NexusServer] Resolved Metadata:`, { 
+      has_username: !!metadata.username, 
+      has_registration_number: !!metadata.registration_number,
+      has_overrides: !!overrides 
+    });
+    
+    // Robustly check multiple possible locations and formats for verification status
     const isVerifiedInMeta = 
       metadata.is_verified === 'yes' || 
       metadata.is_verified === true || 
@@ -710,24 +755,36 @@ class NexusServer {
       user.app_metadata?.is_verified === true;
 
     if (existing) {
-      const needsVerificationUpdate = (!existing.is_verified || existing.is_verified === 'no') && isVerifiedInMeta;
-      const needsInfoUpdate = (!existing.username && metadata.username) || 
-                             (!existing.registration_number && metadata.registration_number) ||
-                             (!existing.university && metadata.university);
+      console.log(`[NexusServer] Existing profile found for ${user.id}`);
+      let needsUpdate = false;
+      const updates: any = {};
 
-      if (needsVerificationUpdate || needsInfoUpdate) {
-        const updateData: any = {};
-        if (needsVerificationUpdate) updateData.is_verified = 'yes';
-        if (!existing.username && metadata.username) updateData.username = metadata.username;
-        if (!existing.registration_number && metadata.registration_number) updateData.registration_number = metadata.registration_number;
-        if (!existing.university && metadata.university) updateData.university = metadata.university;
+      if ((!existing.is_verified || existing.is_verified === 'no') && isVerifiedInMeta) {
+        updates.is_verified = 'yes';
+        needsUpdate = true;
+      }
 
-        const { data: updated } = await client.from('profiles').update(updateData).eq('id', user.id).select().single();
+      // If existing profile has a fallback username but metadata has a better one, update it
+      if ((!existing.username || existing.username.startsWith('verto_')) && metadata.username) {
+        updates.username = metadata.username;
+        needsUpdate = true;
+      }
+      
+      if (!existing.registration_number && metadata.registration_number) {
+        updates.registration_number = metadata.registration_number;
+        needsUpdate = true;
+      }
+
+      if (needsUpdate) {
+        console.log(`[NexusServer] Updating existing profile with missing data:`, updates);
+        const { data: updated, error: updateError } = await client.from('profiles').update(updates).eq('id', user.id).select().single();
+        if (updateError) console.error("[NexusServer] Profile sync update error:", updateError);
         if (updated) return updated;
       }
       return existing;
     }
-
+    
+    console.log(`[NexusServer] No profile found, creating new one for ${user.id}`);
     const newProfile = {
       id: user.id,
       email: user.email!,
@@ -736,10 +793,11 @@ class NexusServer {
       is_admin: false,
       total_xp: 0,
       level: 1,
+      level_title: 'Beginner',
       current_streak: 0,
       longest_streak: 0,
-      is_public: true,
-      last_active_date: new Date().toISOString(),
+      last_active_date: new Date().toISOString(), // changed from null to now
+      xp_history: [],
       is_verified: isVerifiedInMeta ? 'yes' : 'no',
       university: metadata.university || 'none'
     };
@@ -748,7 +806,12 @@ class NexusServer {
       .upsert(newProfile, { onConflict: 'id' })
       .select()
       .single();
-    if (error) throw error;
+      
+    if (error) {
+      console.error("[NexusServer] Profile creation error:", error);
+      throw error;
+    }
+    console.log(`[NexusServer] Profile created successfully for ${user.id}`);
     return data;
   }
 
