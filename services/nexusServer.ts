@@ -625,8 +625,7 @@ class NexusServer {
         data: { 
           username: cleanUsername, 
           registration_number: cleanRegNo, 
-          is_verified: 'yes',
-          university: university || 'none'
+          is_verified: 'yes'
         },
         emailRedirectTo: window.location.origin
       }
@@ -644,8 +643,7 @@ class NexusServer {
             console.log(`[NexusServer] Recovery login successful, checking profile`);
             await this.ensureProfile(loginRes.data.user, { 
               username: cleanUsername, 
-              registration_number: cleanRegNo,
-              university: university || 'none'
+              registration_number: cleanRegNo
             });
             return loginRes;
          }
@@ -656,29 +654,41 @@ class NexusServer {
     if (result.data?.user) {
       console.log(`[NexusServer] auth.signUp success for ID: ${result.data.user.id}`);
       try {
-        // Create full profile immediately to avoid race conditions with ensureProfile
-        const profileData = {
+        // Create full profile immediately to avoid race conditions
+        // We use a safe upsert: if some columns don't exist (400 error), we fall back to a minimal profile
+        const fullProfile = {
           id: result.data.user.id,
           email: cleanEmail,
           username: cleanUsername,
           registration_number: cleanRegNo,
           is_verified: 'yes',
-          university: university || 'none',
           is_admin: false,
           total_xp: 0,
           level: 1,
           level_title: 'Beginner',
           current_streak: 0,
           longest_streak: 0,
-          last_active_date: new Date().toISOString(),
-          xp_history: []
+          last_active_date: new Date().toISOString().split('T')[0]
         };
         
-        console.log(`[NexusServer] Performing initial profile upsert:`, profileData);
-        const { error: upsertError } = await client.from('profiles').upsert(profileData, { onConflict: 'id' });
-        if (upsertError) console.error("[NexusServer] Initial profile upsert failed:", upsertError);
+        console.log(`[NexusServer] Attempting full profile upsert...`);
+        const { error: fullError } = await client.from('profiles').upsert(fullProfile, { onConflict: 'id' });
+        
+        if (fullError && (fullError.code === 'PGRST204' || fullError.message.includes('column'))) {
+          console.warn(`[NexusServer] Full profile failed (likely missing columns), falling back to minimal profile...`);
+          const minimalProfile = {
+            id: result.data.user.id,
+            email: cleanEmail,
+            username: cleanUsername,
+            registration_number: cleanRegNo
+          };
+          const { error: minError } = await client.from('profiles').upsert(minimalProfile, { onConflict: 'id' });
+          if (minError) console.error("[NexusServer] Minimal profile fallback also failed:", minError);
+        } else if (fullError) {
+          console.error("[NexusServer] Initial profile upsert failed with non-schema error:", fullError);
+        }
       } catch (e) {
-        console.warn("[NexusServer] Manual profile sync catch failed:", e);
+        console.warn("[NexusServer] Signup sync catch-all error:", e);
       }
     }
 
@@ -724,7 +734,7 @@ class NexusServer {
     return data;
   }
 
-  static async ensureProfile(user: User, overrides?: { username?: string, registration_number?: string, university?: string }): Promise<UserProfile> {
+  static async ensureProfile(user: User, overrides?: { username?: string, registration_number?: string }): Promise<UserProfile> {
     const client = getSupabase();
     if (!client) throw new Error("Registry offline.");
 
@@ -796,16 +806,27 @@ class NexusServer {
       level_title: 'Beginner',
       current_streak: 0,
       longest_streak: 0,
-      last_active_date: new Date().toISOString(), // changed from null to now
-      xp_history: [],
-      is_verified: isVerifiedInMeta ? 'yes' : 'no',
-      university: metadata.university || 'none'
+      last_active_date: new Date().toISOString().split('T')[0], 
+      is_verified: isVerifiedInMeta ? 'yes' : 'no'
     };
 
-    const { data, error } = await client.from('profiles')
+    let { data, error } = await client.from('profiles')
       .upsert(newProfile, { onConflict: 'id' })
       .select()
-      .single();
+      .maybeSingle();
+
+    if (error && (error.code === 'PGRST204' || error.message.includes('column'))) {
+      console.warn(`[NexusServer] ensureProfile failed (missing columns), trying minimal...`);
+      const minimalNewProfile = {
+        id: user.id,
+        email: user.email!,
+        username: newProfile.username,
+        registration_number: newProfile.registration_number
+      };
+      const fallback = await client.from('profiles').upsert(minimalNewProfile, { onConflict: 'id' }).select().maybeSingle();
+      data = fallback.data;
+      error = fallback.error;
+    }
       
     if (error) {
       console.error("[NexusServer] Profile creation error:", error);

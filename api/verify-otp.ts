@@ -173,7 +173,6 @@ export default async function handler(req: any, res: any) {
           data: type === 'signup' ? {
             username,
             registration_number,
-            university: university || 'none',
             is_verified: 'yes'
           } : {}
         })
