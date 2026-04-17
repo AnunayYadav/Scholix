@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import NexusServer from '../services/nexusServer';
 import { UserProfile, QuizQuestion } from '../types';
+import AdminAnnouncements from './AdminAnnouncements';
 
 interface AdminStatsProps {
     userProfile: UserProfile | null;
@@ -551,7 +552,7 @@ const DetailedDataView: React.FC<{ type: string; value: string | number; sub: st
 }
 
 const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
-    const [activeTab, setActiveTab] = useState<'monitor' | 'reports' | 'constructor' | 'inbound'>('monitor');
+    const [activeTab, setActiveTab] = useState<'monitor' | 'reports' | 'constructor' | 'inbound' | 'announcements'>('monitor');
     const [data, setData] = useState<any>(null);
     const [reports, setReports] = useState<any[]>([]);
     const [feedback, setFeedback] = useState<any[]>([]);
@@ -871,6 +872,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                         { id: 'monitor', label: 'Overview' },
                         { id: 'reports', label: 'Reports' },
                         { id: 'constructor', label: 'Editor' },
+                        { id: 'announcements', label: 'Banners' },
                         { id: 'inbound', label: 'Feedbacks' }
                     ].map(tab => (
                         <button
@@ -1823,6 +1825,9 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                             </div>
                         )}
                     </motion.div>
+                )}
+                {activeTab === 'announcements' && (
+                    <AdminAnnouncements />
                 )}
             </AnimatePresence>
 

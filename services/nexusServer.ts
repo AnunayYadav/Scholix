@@ -1816,6 +1816,77 @@ class NexusServer {
     }
     return data || [];
   }
+
+  /**
+   * App Announcements Methods
+   */
+  static async fetchActiveAppAnnouncements(): Promise<any[]> {
+    const client = getSupabase();
+    if (!client) return [];
+    const now = new Date().toISOString();
+    const { data, error } = await client
+      .from('app_announcements')
+      .select('*')
+      .eq('is_active', true)
+      .lte('start_at', now)
+      .gte('end_at', now)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Fetch Active Announcements Error:', error);
+      return [];
+    }
+    return data || [];
+  }
+
+  static async fetchAllAppAnnouncements(): Promise<any[]> {
+    const client = getSupabase();
+    if (!client) return [];
+    const { data, error } = await client
+      .from('app_announcements')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Fetch All Announcements Error:', error);
+      return [];
+    }
+    return data || [];
+  }
+
+  static async createAppAnnouncement(announcement: any, file?: File) {
+    const client = getSupabase();
+    if (!client) return;
+
+    let imageUrl = announcement.image_url;
+    if (file) {
+      const path = `announcements/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await client.storage.from('nexus-documents').upload(path, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = client.storage.from('nexus-documents').getPublicUrl(path);
+      imageUrl = publicUrl;
+    }
+
+    const { error } = await client.from('app_announcements').insert([{
+      ...announcement,
+      image_url: imageUrl
+    }]);
+    if (error) throw error;
+  }
+
+  static async updateAppAnnouncement(id: string, updates: any) {
+    const client = getSupabase();
+    if (!client) return;
+    const { error } = await client.from('app_announcements').update(updates).eq('id', id);
+    if (error) throw error;
+  }
+
+  static async deleteAppAnnouncement(id: string) {
+    const client = getSupabase();
+    if (!client) return;
+    const { error } = await client.from('app_announcements').delete().eq('id', id);
+    if (error) throw error;
+  }
 }
 
 export default NexusServer;

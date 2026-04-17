@@ -270,6 +270,18 @@ export interface NexusNotification {
   created_at: string;
 }
 
+export interface Announcement {
+  id: string;
+  created_at: string;
+  image_url: string;
+  link_url?: string;
+  start_at: string;
+  end_at: string;
+  is_active: boolean;
+  title?: string;
+  description?: string;
+}
+
 declare global {
   interface Window {
     pdfjsLib: any;
