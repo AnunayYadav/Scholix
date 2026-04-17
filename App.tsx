@@ -25,6 +25,7 @@ import PrivacyPolicy from './components/PrivacyPolicy.tsx';
 import CookieBanner from './components/CookieBanner.tsx';
 import ScholixLanding from './components/ScholixLanding.tsx';
 import AnnouncementBand from './components/AnnouncementBand.tsx';
+import AnnouncementModal from './components/AnnouncementModal.tsx';
 import BottomNavbar from './components/BottomNavbar.tsx';
 import { UniversityProvider, useUniversity, UniversityId, UNIVERSITIES } from './hooks/useUniversity.tsx';
 
@@ -676,6 +677,7 @@ const AppContent: React.FC = () => {
         <AnnouncementBand />
         <ScholixLanding userProfile={userProfile} />
         <ToastContainer />
+        <AnnouncementModal />
         <Analytics />
         <SpeedInsights />
       </>
@@ -893,6 +895,7 @@ const AppContent: React.FC = () => {
       <Analytics />
       <SpeedInsights />
       <ToastContainer />
+      <AnnouncementModal />
     </div>
   );
 };

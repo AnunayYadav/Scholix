@@ -112,8 +112,8 @@ const AdminAnnouncements: React.FC = () => {
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M12 19V5M5 12h14" /></svg>
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold text-neutral-900 dark:text-white tracking-tight">Post New Announcement</h3>
-                        <p className="text-xs text-neutral-500 font-medium">Create a dynamic banner for all users</p>
+                        <h3 className="text-xl font-bold text-neutral-900 dark:text-white tracking-tight">Splash Popup Admin</h3>
+                        <p className="text-xs text-neutral-500 font-medium">Create a high-impact game-style popup for all users</p>
                     </div>
                 </div>
 

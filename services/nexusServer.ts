@@ -1823,13 +1823,17 @@ class NexusServer {
   static async fetchActiveAppAnnouncements(): Promise<any[]> {
     const client = getSupabase();
     if (!client) return [];
-    const now = new Date().toISOString();
+    // Use a 5-minute buffer to account for clock drift between client and server
+    const now = new Date();
+    const bufferNow = new Date(now.getTime() + 5 * 60 * 1000).toISOString(); // 5 min in future for lte
+    const bufferPast = new Date(now.getTime() - 5 * 60 * 1000).toISOString(); // 5 min in past for gte
+
     const { data, error } = await client
       .from('app_announcements')
       .select('*')
       .eq('is_active', true)
-      .lte('start_at', now)
-      .gte('end_at', now)
+      .lte('start_at', bufferNow)
+      .gte('end_at', bufferPast)
       .order('created_at', { ascending: false });
     
     if (error) {
