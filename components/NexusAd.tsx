@@ -32,13 +32,22 @@ const NexusAd: React.FC<NexusAdProps> = ({
     }
 
     // Monitor the ad element for content
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (adRef.current && (adRef.current.innerHTML.includes('iframe') || adRef.current.getAttribute('data-ad-status') === 'filled')) {
-          setIsLoaded(true);
-          observer.disconnect();
-        }
-      });
+    const observer = new MutationObserver(() => {
+      if (!adRef.current) return;
+      
+      const status = adRef.current.getAttribute('data-ad-status');
+      const adsStatus = adRef.current.getAttribute('data-adsbygoogle-status');
+      const hasIframe = adRef.current.querySelector('iframe');
+      
+      // If the ad is filled or has an iframe, show it
+      if (status === 'filled' || hasIframe) {
+        setIsLoaded(true);
+        observer.disconnect();
+      } 
+      // If the ad is explicitly unfilled, ensure it stays hidden
+      else if (status === 'unfilled') {
+        setIsLoaded(false);
+      }
     });
 
     if (adRef.current) {
@@ -48,12 +57,25 @@ const NexusAd: React.FC<NexusAdProps> = ({
         subtree: true 
       });
       
-      // Fallback: check after 3 seconds if it filled but didn't trigger observer correctly
-      const timer = setTimeout(() => {
-        if (adRef.current && (adRef.current.offsetHeight > 0 || adRef.current.innerHTML.includes('iframe'))) {
+      // Fallback check: Sometimes status changes without triggering observer if already done
+      const initialCheck = () => {
+        if (!adRef.current) return;
+        if (adRef.current.getAttribute('data-ad-status') === 'filled' || adRef.current.querySelector('iframe')) {
           setIsLoaded(true);
         }
-      }, 3000);
+      };
+      
+      initialCheck();
+
+      // Longer fallback for slow mobile networks
+      const timer = setTimeout(() => {
+        if (adRef.current) {
+          const status = adRef.current.getAttribute('data-ad-status');
+          if (status === 'filled' || adRef.current.querySelector('iframe')) {
+            setIsLoaded(true);
+          }
+        }
+      }, 5000);
 
       return () => {
         observer.disconnect();
@@ -64,7 +86,11 @@ const NexusAd: React.FC<NexusAdProps> = ({
 
   return (
     <div 
-      className={`nexus-ad-container my-6 w-full flex flex-col items-center transition-all duration-700 ${className} ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none h-0 overflow-hidden my-0'}`}
+      className={`nexus-ad-container w-full flex flex-col items-center transition-all duration-700 ${className} ${
+        isLoaded 
+          ? 'opacity-100 translate-y-0 my-6' 
+          : 'opacity-0 -translate-y-4 pointer-events-none h-0 max-h-0 overflow-hidden my-0 invisible'
+      }`}
     >
       {!hideLabel && (
         <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-2">
