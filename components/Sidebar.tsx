@@ -194,19 +194,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <div className="p-4 border-t border-zinc-200 dark:border-white/5 flex-shrink-0 bg-white dark:bg-[#0a0a0a] z-[50] relative">
           {/* Sidebar Ad - Replaced Feedback Button */}
-          {(isHovered || isMobileMenuOpen) ? (
+          {(isHovered || isMobileMenuOpen) && (
             <div className="opacity-70 hover:opacity-100 transition-opacity overflow-hidden rounded-xl">
               <NexusAd 
                 slot="2912081909" 
                 format="fluid" 
                 hideLabel 
                 className="!my-0" 
-                style={{ minHeight: '60px' }}
               />
-            </div>
-          ) : (
-            <div className="w-full h-12 flex items-center justify-center">
-               <div className="w-6 h-6 rounded-full bg-zinc-100 dark:bg-white/5 animate-pulse" />
             </div>
           )}
         </div>
