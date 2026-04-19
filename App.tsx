@@ -713,10 +713,10 @@ const AppContent: React.FC = () => {
 
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-white dark:bg-[#0a0a0a] text-zinc-900 dark:text-zinc-200">
+    <div className="flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden bg-white dark:bg-[#0a0a0a] text-zinc-900 dark:text-zinc-200 fixed inset-0">
       <SEOHelmet currentModule={currentModule} />
       <AnnouncementBand />
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="flex flex-1 overflow-hidden relative min-h-0">
         <Sidebar
           currentModule={currentModule}
           setModule={navigateToModule}
@@ -724,7 +724,7 @@ const AppContent: React.FC = () => {
           toggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           userProfile={userProfile}
         />
-        <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-white dark:bg-[#0a0a0a]">
+        <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative bg-white dark:bg-[#0a0a0a]">
           <BackgroundEffects />
 
         <header className="sticky top-0 h-16 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-2xl border-b border-zinc-200/50 dark:border-white/5 flex items-center px-4 md:px-8 z-[100] transition-all duration-300">
