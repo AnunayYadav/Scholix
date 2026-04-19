@@ -435,7 +435,7 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
       
       {/* Strategic Dashboard Ad */}
       <div className="max-w-6xl mx-auto px-6">
-        <NexusAd slot="2912081909" format="auto" hideLabel />
+        <NexusAd slot="2912081909" format="rectangle" hideLabel />
       </div>
       
       <div className="max-w-6xl mx-auto px-6 mb-12">

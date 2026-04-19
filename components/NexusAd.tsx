@@ -46,11 +46,20 @@ const NexusAd: React.FC<NexusAdProps> = ({
   useEffect(() => {
     if (!shouldLoad) return;
 
+    // Timeout fallback: if not loaded in 5s, hide it forever
+    const failoverTimeout = setTimeout(() => {
+      if (!isLoaded) {
+        setIsLoaded(false);
+        setShouldLoad(false); // Stop trying
+      }
+    }, 5000);
+
     try {
       // @ts-ignore
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (e) {
       console.error('AdSense failed to load:', e);
+      setIsLoaded(false);
     }
 
     const observer = new MutationObserver(() => {
@@ -59,16 +68,17 @@ const NexusAd: React.FC<NexusAdProps> = ({
       const status = adRef.current.getAttribute('data-ad-status');
       const iframe = adRef.current.querySelector('iframe');
       
-      // Strict check: 'filled' is the only guaranteed successful status
       if (status === 'filled') {
         setIsLoaded(true);
+        clearTimeout(failoverTimeout);
         observer.disconnect();
       } else if (iframe && iframe.offsetHeight > 100) { 
-        // Increased threshold to 100px to ensure it's a real ad and not a tiny placeholder
         setIsLoaded(true);
+        clearTimeout(failoverTimeout);
         observer.disconnect();
       } else if (status === 'unfilled') {
         setIsLoaded(false);
+        clearTimeout(failoverTimeout);
         observer.disconnect();
       }
     });
@@ -80,15 +90,17 @@ const NexusAd: React.FC<NexusAdProps> = ({
         subtree: true 
       });
       
-      // Initial check for cached ads or early loads
       const status = adRef.current.getAttribute('data-ad-status');
       const iframe = adRef.current.querySelector('iframe');
       if (status === 'filled' || (iframe && iframe.offsetHeight > 100)) {
         setIsLoaded(true);
+        clearTimeout(failoverTimeout);
       }
 
-      // Cleanup
-      return () => observer.disconnect();
+      return () => {
+        observer.disconnect();
+        clearTimeout(failoverTimeout);
+      };
     }
   }, [shouldLoad]);
 
@@ -98,9 +110,10 @@ const NexusAd: React.FC<NexusAdProps> = ({
       className={`nexus-ad-container w-full flex flex-col items-center transition-all duration-700 ${className} ${
         isLoaded 
           ? 'opacity-100 translate-y-0 my-6' 
-          : 'opacity-0 h-0 max-h-0 overflow-hidden my-0 invisible pointer-events-none'
+          : 'hidden opacity-0 h-0 my-0 invisible pointer-events-none'
       }`}
       style={{
+        display: isLoaded ? 'flex' : 'none',
         margin: isLoaded ? undefined : '0'
       }}
     >
@@ -117,7 +130,8 @@ const NexusAd: React.FC<NexusAdProps> = ({
         }`}
         style={{ 
           ...style,
-          maxHeight: className.includes('sidebar') ? '320px' : '400px', // Responsive cap
+          maxHeight: className.includes('sidebar') ? '320px' : '300px', // Slightly reduced height
+          display: isLoaded ? 'flex' : 'none'
         }}
       >
         {shouldLoad && (
@@ -125,7 +139,7 @@ const NexusAd: React.FC<NexusAdProps> = ({
             ref={adRef}
             className="adsbygoogle"
             style={{ 
-              display: 'block', 
+              display: isLoaded ? 'block' : 'none', 
               width: '100%', 
               textAlign: 'center',
               minWidth: '250px',
