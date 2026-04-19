@@ -191,14 +191,20 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white dark:from-[#0a0a0a] to-transparent z-20 pointer-events-none opacity-0 group-hover/nav:opacity-100 transition-opacity" />
         </div>
 
-        {/* Sidebar Vertical Ad - Only shown when expanded */}
-        {(isHovered || isMobileMenuOpen) && (
-          <div className="px-4 py-2 opacity-70 hover:opacity-100 transition-opacity">
-            <NexusAd slot="SIDEBAR_AD_SLOT_HERE" format="rectangle" hideLabel />
-          </div>
-        )}
 
         <div className="p-4 border-t border-zinc-200 dark:border-white/5 flex-shrink-0 bg-white dark:bg-[#0a0a0a] z-[50] relative">
+          {/* Small Sidebar Ad */}
+          {(isHovered || isMobileMenuOpen) && (
+            <div className="mb-4 opacity-70 hover:opacity-100 transition-opacity overflow-hidden rounded-xl">
+              <NexusAd 
+                slot="2912081909" 
+                format="fluid" 
+                hideLabel 
+                className="!my-0" 
+                style={{ minHeight: '60px' }}
+              />
+            </div>
+          )}
 
           <button onClick={() => setShowFeedbackModal(true)} className="w-full h-12 flex items-center rounded-2xl border border-transparent hover:border-brand-primary/20 hover:bg-brand-primary/5 transition-all bg-transparent active:scale-95 group relative">
             <div className={`flex items-center w-full transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${isHovered || isMobileMenuOpen ? 'pl-4' : 'pl-3'}`}>

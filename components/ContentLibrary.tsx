@@ -831,7 +831,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               </DndContext>
 
               {/* Library Banner Ad - Moved below folders */}
-              <NexusAd slot="LIBRARY_BANNER_AD_SLOT_HERE" format="fluid" className="mt-12 mb-8" />
+              <NexusAd slot="2912081909" format="fluid" className="mt-12 mb-8" hideLabel />
             </div>
           )}
         </div>
