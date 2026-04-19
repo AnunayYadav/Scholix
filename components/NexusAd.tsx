@@ -98,8 +98,11 @@ const NexusAd: React.FC<NexusAdProps> = ({
       className={`nexus-ad-container w-full flex flex-col items-center transition-all duration-700 ${className} ${
         isLoaded 
           ? 'opacity-100 translate-y-0 my-6' 
-          : 'opacity-0 h-0 max-h-0 overflow-hidden my-0 invisible'
+          : 'opacity-0 h-0 max-h-0 overflow-hidden my-0 invisible pointer-events-none'
       }`}
+      style={{
+        margin: isLoaded ? undefined : '0'
+      }}
     >
       {!hideLabel && isLoaded && (
         <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-2">
@@ -114,7 +117,7 @@ const NexusAd: React.FC<NexusAdProps> = ({
         }`}
         style={{ 
           ...style,
-          maxHeight: '450px', // Cap the height to prevent "too big" ads
+          maxHeight: className.includes('sidebar') ? '320px' : '400px', // Responsive cap
         }}
       >
         {shouldLoad && (
@@ -125,6 +128,7 @@ const NexusAd: React.FC<NexusAdProps> = ({
               display: 'block', 
               width: '100%', 
               textAlign: 'center',
+              minWidth: '250px',
               minHeight: isLoaded ? '100px' : '0' 
             }}
             data-ad-client="ca-pub-9873621266746230"

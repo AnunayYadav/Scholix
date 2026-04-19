@@ -6,7 +6,6 @@ import NexusServer from '../services/nexusServer.ts';
 import { showToast } from './Toast.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import FeedbackModal from './FeedbackModal.tsx';
-import NexusAd from './NexusAd.tsx';
 
 
 interface SidebarProps {
@@ -116,7 +115,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={`
-          fixed inset-y-0 left-0 z-[410] md:z-[40] transform flex-shrink-0 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
+          fixed inset-y-0 left-0 z-[410] md:z-[40] md:relative md:translate-x-0 transform flex-shrink-0 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
           bg-white dark:bg-[#0a0a0a] border-r border-zinc-200 dark:border-white/5
           ${isMobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0'}
           ${isHovered || isMobileMenuOpen ? 'w-64' : 'md:w-20'}
@@ -193,17 +192,19 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 
         <div className="p-4 border-t border-zinc-200 dark:border-white/5 flex-shrink-0 bg-white dark:bg-[#0a0a0a] z-[50] relative">
-          {/* Sidebar Ad - Replaced Feedback Button */}
-          {(isHovered || isMobileMenuOpen) && (
-            <div className="opacity-70 hover:opacity-100 transition-opacity overflow-hidden rounded-xl">
-              <NexusAd 
-                slot="2912081909" 
-                format="fluid" 
-                hideLabel 
-                className="!my-0" 
-              />
+          <button
+            onClick={() => setShowFeedbackModal(true)}
+            className="w-full h-12 flex items-center rounded-2xl border-none text-left relative group transition-all duration-300 text-zinc-600 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-200"
+          >
+            <div className={`flex items-center w-full transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${isHovered || isMobileMenuOpen ? 'pl-4' : 'pl-3'}`}>
+              <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center transition-transform group-hover:scale-110">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+              </span>
+              <span className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) whitespace-nowrap font-bold text-sm tracking-tight overflow-hidden ${isHovered || isMobileMenuOpen ? 'max-w-[200px] opacity-100 ml-4' : 'max-w-0 opacity-0 ml-0'}`}>
+                Support
+              </span>
             </div>
-          )}
+          </button>
         </div>
       </aside>
     </>
