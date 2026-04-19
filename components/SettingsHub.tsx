@@ -7,6 +7,7 @@ import VerifiedBadge from './VerifiedBadge.tsx';
 import { getFrameConfig } from '../data/frameConfigs.ts';
 import FeedbackModal from './FeedbackModal.tsx';
 import ChatSupportModal from './ChatSupportModal.tsx';
+import SocialModal from './SocialModal.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 
 interface SettingsHubProps {
@@ -22,6 +23,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
   const { fullBrandName, selectUniversity } = useUniversity();
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
+  const [showSocialModal, setShowSocialModal] = useState(false);
   
   const frameConfig = getFrameConfig(userProfile?.avatar_frame || '');
 
@@ -225,6 +227,13 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
           color="text-indigo-500"
         />
         <SettingItem 
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>}
+          label="Social Handles"
+          sublabel="Follow us on WhatsApp & Instagram"
+          onClick={() => setShowSocialModal(true)}
+          color="text-brand-primary"
+        />
+        <SettingItem 
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>}
           label="Send Feedback"
           sublabel="Help us improve your experience"
@@ -257,6 +266,11 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
         isOpen={showChatModal}
         onClose={() => setShowChatModal(false)}
         onOpenFeedback={() => setShowFeedbackModal(true)}
+      />
+
+      <SocialModal
+        isOpen={showSocialModal}
+        onClose={() => setShowSocialModal(false)}
       />
     </div>
   );
