@@ -166,13 +166,6 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
           }}
           color="text-amber-500"
         />
-        <SettingItem 
-          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>}
-          label="Privacy Policy"
-          onClick={() => navigateToModule?.(ModuleType.PRIVACY)}
-
-          color="text-emerald-500"
-        />
         {userProfile && (
           <>
             <SettingItem 
@@ -210,7 +203,31 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
         </div>
       </Section>
 
-      <Section title="Support & About">
+      <Section title="Assistance & Privacy">
+        <SettingItem 
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>}
+          label="Help Center"
+          sublabel="FAQs, Support & Student Community"
+          onClick={() => navigateToModule?.(ModuleType.HELP)}
+          color="text-purple-500"
+        />
+        <SettingItem 
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 1 1-.9-3.8 8.5 8.5 0 0 1 .9 3.8z"/><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/></svg>}
+          label="Chat Support"
+          sublabel="Instant automated assistance"
+          onClick={() => setShowChatModal(true)}
+          color="text-cyan-500"
+        />
+        <SettingItem 
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>}
+          label="Privacy Policy"
+          sublabel="Our commitment to your data security"
+          onClick={() => navigateToModule?.(ModuleType.PRIVACY)}
+          color="text-emerald-500"
+        />
+      </Section>
+
+      <Section title="Scholix Hub">
         <SettingItem 
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>}
           label="Download Android App"
@@ -226,26 +243,10 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
           color="text-green-500"
         />
         <SettingItem 
-          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>}
-          label="Help Center"
-          sublabel="FAQs, Support & Student Community"
-          onClick={() => navigateToModule?.(ModuleType.HELP)}
-
-          color="text-purple-500"
-        />
-        <SettingItem 
-          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-10.6 8.38 8.38 0 0 1 3.8.9L21 3z"/></svg>}
-          label="Chat Support"
-          sublabel="Instant automated assistance"
-          onClick={() => setShowChatModal(true)}
-          color="text-cyan-500"
-        />
-        <SettingItem 
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>}
           label="About Us"
           sublabel="Meet the minds behind Scholix"
           onClick={() => navigateToModule?.(ModuleType.ABOUT)}
-
           color="text-indigo-500"
         />
         <SettingItem 
