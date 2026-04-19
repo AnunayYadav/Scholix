@@ -27,7 +27,9 @@ import ScholixLanding from './components/ScholixLanding.tsx';
 import AnnouncementBand from './components/AnnouncementBand.tsx';
 import AnnouncementModal from './components/AnnouncementModal.tsx';
 import BottomNavbar from './components/BottomNavbar.tsx';
+import NexusAd from './components/NexusAd.tsx';
 import { UniversityProvider, useUniversity, UniversityId, UNIVERSITIES } from './hooks/useUniversity.tsx';
+
 
 import SEOHelmet from './components/SEOHelmet.tsx';
 import { ModuleType, UserProfile, TimetableData } from './types.ts';
@@ -431,7 +433,13 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
       <DashboardHero userProfile={userProfile} />
       <TodaysSchedule />
       
+      {/* Strategic Dashboard Ad */}
+      <div className="max-w-6xl mx-auto px-6">
+        <NexusAd slot="DASHBOARD_AD_SLOT_HERE" format="auto" />
+      </div>
+      
       <div className="max-w-6xl mx-auto px-6 mb-12">
+
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Categories</h3>
           <div className="h-[2px] flex-1 bg-zinc-100 dark:bg-white/5 ml-4" />

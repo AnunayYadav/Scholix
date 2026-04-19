@@ -10,6 +10,8 @@ import NexusDropdown from './NexusDropdown.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import { showToast, showConfirm } from './Toast.tsx';
 import { slugify } from '../utils/slugify.ts';
+import NexusAd from './NexusAd.tsx';
+
 import {
   DndContext,
   closestCenter,
@@ -727,7 +729,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">{Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}</div>
           ) : (
             <div className="relative">
+              {/* Library Banner Ad */}
+              <NexusAd slot="LIBRARY_BANNER_AD_SLOT_HERE" format="fluid" className="!my-0 mb-8" />
+              
               <DndContext
+
                 sensors={sensors}
                 collisionDetection={closestCenter}
                 onDragStart={handleDragStart}
