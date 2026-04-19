@@ -315,22 +315,22 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="relative w-full max-w-lg bg-white dark:bg-[#0a0a0a] rounded-[40px] border border-zinc-200 dark:border-white/10 shadow-2xl p-10 overflow-hidden"
+                className="relative w-full max-w-sm bg-white dark:bg-[#0a0a0a] rounded-[32px] border border-zinc-200 dark:border-white/10 shadow-2xl p-8 overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
                 <button 
                   onClick={() => setShowPasswordModal(false)} 
-                  className="absolute top-8 right-8 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90 cursor-pointer outline-none"
+                  className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90 cursor-pointer outline-none"
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
 
-                <div className="w-20 h-20 bg-brand-primary/10 rounded-[32px] flex items-center justify-center mb-8 border border-brand-primary/20">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-brand-primary"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <div className="w-14 h-14 bg-brand-primary/10 rounded-2xl flex items-center justify-center mb-6 border border-brand-primary/20">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7 text-brand-primary"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 </div>
 
-                <h3 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2 tracking-tight leading-none">Settings Security</h3>
-                <p className="text-zinc-500 text-xs mb-8">Update your encryption. Use at least 8 characters.</p>
+                <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1.5 tracking-tight leading-none">Settings Security</h3>
+                <p className="text-zinc-500 text-[11px] font-medium mb-6">Update your encryption. Use at least 6 characters.</p>
                 
                 <div className="relative group">
                   <input 
@@ -339,15 +339,15 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     disabled={isUpdating}
-                    className="w-full p-6 rounded-[32px] bg-zinc-50 dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/10 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
+                    className="w-full p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/5 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
                   />
                 </div>
 
-                <div className="flex gap-4 mt-8">
+                <div className="flex gap-4 mt-6">
                   <button 
                     onClick={() => setShowPasswordModal(false)}
                     disabled={isUpdating}
-                    className="flex-1 py-4 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-sm border-none bg-transparent transition-colors cursor-pointer outline-none"
+                    className="flex-1 py-3.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-[13px] border-none bg-transparent transition-colors cursor-pointer outline-none"
                   >
                     Dismiss
                   </button>
@@ -370,12 +370,12 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                       }
                     }}
                     disabled={isUpdating || !newPassword}
-                    className="flex-[2] py-4 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-[24px] font-bold text-sm shadow-xl shadow-brand-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3 border-none disabled:opacity-50 cursor-pointer outline-none"
+                    className="flex-[2] py-3.5 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-xl font-bold text-[13px] shadow-lg shadow-brand-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2.5 border-none disabled:opacity-50 cursor-pointer outline-none"
                   >
                     {isUpdating ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="12" r="3"/></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="12" r="3"/></svg>
                     )}
                     <span>{isUpdating ? "Securing..." : "Update Password"}</span>
                   </button>
@@ -404,25 +404,25 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="relative w-full max-w-lg bg-white dark:bg-[#0a0a0a] rounded-[40px] border border-red-500/10 shadow-2xl p-10 overflow-hidden"
+                className="relative w-full max-w-sm bg-white dark:bg-[#0a0a0a] rounded-[32px] border border-red-500/10 shadow-2xl p-8 overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
                 <button 
                   onClick={() => setShowDeleteModal(false)} 
-                  className="absolute top-8 right-8 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90 cursor-pointer outline-none"
+                  className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90 cursor-pointer outline-none"
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
 
-                <div className="w-20 h-20 bg-red-500/10 rounded-[32px] flex items-center justify-center mb-8 border border-red-500/20">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-red-500"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <div className="w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center mb-6 border border-red-500/20">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7 text-red-500"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 </div>
 
-                <h3 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2 tracking-tight leading-none">Delete Account?</h3>
-                <p className="text-zinc-500 text-xs mb-8">This action is permanent and cannot be reversed. You will lose all your data.</p>
+                <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1.5 tracking-tight leading-none">Delete Account?</h3>
+                <p className="text-zinc-500 text-[11px] font-medium mb-6">This action is permanent and cannot be reversed.</p>
 
-                <div className="bg-red-500/5 rounded-3xl p-6 mb-8 border border-red-500/10">
-                  <p className="text-sm text-red-600 dark:text-red-400 font-medium leading-relaxed">
+                <div className="bg-red-500/5 rounded-2xl p-5 mb-6 border border-red-500/10">
+                  <p className="text-[12px] text-red-600 dark:text-red-400 font-medium leading-relaxed">
                     By confirming, your profile, study history, and saved data will be wiped from our servers immediately.
                   </p>
                 </div>
@@ -431,7 +431,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                   <button 
                     onClick={() => setShowDeleteModal(false)}
                     disabled={isUpdating}
-                    className="flex-1 py-4 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-sm border-none bg-transparent transition-colors cursor-pointer outline-none"
+                    className="flex-1 py-3.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-[13px] border-none bg-transparent transition-colors cursor-pointer outline-none"
                   >
                     Keep Account
                   </button>
@@ -450,12 +450,12 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                       }
                     }}
                     disabled={isUpdating}
-                    className="flex-[2] py-4 bg-red-500 hover:bg-red-600 text-white rounded-[24px] font-bold text-sm shadow-xl shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-3 border-none disabled:opacity-50 cursor-pointer outline-none"
+                    className="flex-[2] py-3.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold text-[13px] shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-2.5 border-none disabled:opacity-50 cursor-pointer outline-none"
                   >
                     {isUpdating ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     )}
                     <span>{isUpdating ? "Deleting..." : "Delete Forever"}</span>
                   </button>
