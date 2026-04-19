@@ -701,9 +701,22 @@ class NexusServer {
     await client.auth.signOut();
   }
 
-  static async updatePassword(newPassword: string) {
+  static async updatePassword(newPassword: string, oldPassword?: string) {
     const client = getSupabase();
     if (!client) throw new Error("Supabase not configured.");
+    
+    // If oldPassword is provided, verify it first by trying a silent re-auth
+    if (oldPassword) {
+      const { data: { user } } = await client.auth.getUser();
+      if (user?.email) {
+        const { error: signInError } = await client.auth.signInWithPassword({
+          email: user.email,
+          password: oldPassword,
+        });
+        if (signInError) throw new Error("Verification failed: Current password is incorrect.");
+      }
+    }
+
     const { error } = await client.auth.updateUser({ password: newPassword });
     if (error) throw error;
   }

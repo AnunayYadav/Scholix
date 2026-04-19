@@ -29,6 +29,9 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [deleteStep, setDeleteStep] = useState(1);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   
   const frameConfig = getFrameConfig(userProfile?.avatar_frame || '');
@@ -307,7 +310,13 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={() => !isUpdating && setShowPasswordModal(false)}
+                onClick={() => {
+                  if (!isUpdating) {
+                    setShowPasswordModal(false);
+                    setCurrentPassword('');
+                    setNewPassword('');
+                  }
+                }}
                 className="absolute inset-0 bg-black/40 backdrop-blur-xl" 
                 style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
               />
@@ -319,7 +328,11 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                 onClick={(e) => e.stopPropagation()}
               >
                 <button 
-                  onClick={() => setShowPasswordModal(false)} 
+                  onClick={() => {
+                    setShowPasswordModal(false);
+                    setCurrentPassword('');
+                    setNewPassword('');
+                  }} 
                   className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90 cursor-pointer outline-none"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -332,20 +345,36 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                 <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1.5 tracking-tight leading-none">Settings Security</h3>
                 <p className="text-zinc-500 text-[11px] font-medium mb-6">Update your encryption. Use at least 6 characters.</p>
                 
-                <div className="relative group">
-                  <input 
-                    type="password"
-                    placeholder="Enter new secure password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    disabled={isUpdating}
-                    className="w-full p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/5 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
-                  />
+                <div className="space-y-4">
+                  <div className="relative group">
+                    <input 
+                      type="password"
+                      placeholder="Current password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      disabled={isUpdating}
+                      className="w-full p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/5 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
+                    />
+                  </div>
+                  <div className="relative group">
+                    <input 
+                      type="password"
+                      placeholder="New secure password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      disabled={isUpdating}
+                      className="w-full p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/5 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex gap-4 mt-6">
                   <button 
-                    onClick={() => setShowPasswordModal(false)}
+                    onClick={() => {
+                      setShowPasswordModal(false);
+                      setCurrentPassword('');
+                      setNewPassword('');
+                    }}
                     disabled={isUpdating}
                     className="flex-1 py-3.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-[13px] border-none bg-transparent transition-colors cursor-pointer outline-none"
                   >
@@ -353,15 +382,20 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                   </button>
                   <button 
                     onClick={async () => {
+                      if (!currentPassword) {
+                        showToast("Please enter current password", "info");
+                        return;
+                      }
                       if (!newPassword || newPassword.length < 6) {
-                        showToast("Password must be at least 6 characters", "info");
+                        showToast("New password must be at least 6 characters", "info");
                         return;
                       }
                       setIsUpdating(true);
                       try {
-                        await NexusServer.updatePassword(newPassword);
+                        await NexusServer.updatePassword(newPassword, currentPassword);
                         setShowPasswordModal(false);
                         setNewPassword('');
+                        setCurrentPassword('');
                         showToast("Password updated successfully!", "success");
                       } catch (e: any) {
                         showToast(e.message || "Failed to update password", "error");
@@ -369,7 +403,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                         setIsUpdating(false);
                       }
                     }}
-                    disabled={isUpdating || !newPassword}
+                    disabled={isUpdating || !newPassword || !currentPassword}
                     className="flex-[2] py-3.5 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-xl font-bold text-[13px] shadow-lg shadow-brand-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2.5 border-none disabled:opacity-50 cursor-pointer outline-none"
                   >
                     {isUpdating ? (
@@ -396,7 +430,13 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={() => !isUpdating && setShowDeleteModal(false)}
+                onClick={() => {
+                  if (!isUpdating) {
+                    setShowDeleteModal(false);
+                    setDeleteStep(1);
+                    setDeleteConfirmation('');
+                  }
+                }}
                 className="absolute inset-0 bg-black/40 backdrop-blur-xl" 
                 style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
               />
@@ -408,7 +448,11 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                 onClick={(e) => e.stopPropagation()}
               >
                 <button 
-                  onClick={() => setShowDeleteModal(false)} 
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setDeleteStep(1);
+                    setDeleteConfirmation('');
+                  }} 
                   className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90 cursor-pointer outline-none"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -423,20 +467,50 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
 
                 <div className="bg-red-500/5 rounded-2xl p-5 mb-6 border border-red-500/10">
                   <p className="text-[12px] text-red-600 dark:text-red-400 font-medium leading-relaxed">
-                    By confirming, your profile, study history, and saved data will be wiped from our servers immediately.
+                    {deleteStep === 1 
+                      ? "By confirming, your profile, study history, and saved data will be wiped from our servers immediately."
+                      : "Final confirmation required. This action cannot be undone."}
                   </p>
                 </div>
 
+                {deleteStep === 2 && (
+                  <div className="mb-6 animate-fade-in">
+                    <p className="text-[10px] text-zinc-500 mb-2 font-bold uppercase tracking-wider">Type 'delete my account' to confirm</p>
+                    <input 
+                      type="text"
+                      placeholder="Match the phrase exactly"
+                      value={deleteConfirmation}
+                      onChange={(e) => setDeleteConfirmation(e.target.value)}
+                      disabled={isUpdating}
+                      className="w-full p-3.5 rounded-2xl bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 focus:border-red-500 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
+                    />
+                  </div>
+                )}
+
                 <div className="flex gap-4">
                   <button 
-                    onClick={() => setShowDeleteModal(false)}
+                    onClick={() => {
+                      setShowDeleteModal(false);
+                      setDeleteStep(1);
+                      setDeleteConfirmation('');
+                    }}
                     disabled={isUpdating}
                     className="flex-1 py-3.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-[13px] border-none bg-transparent transition-colors cursor-pointer outline-none"
                   >
-                    Keep Account
+                    Cancel
                   </button>
                   <button 
                     onClick={async () => {
+                      if (deleteStep === 1) {
+                        setDeleteStep(2);
+                        return;
+                      }
+
+                      if (deleteConfirmation !== 'delete my account') {
+                        showToast("Phrase doesn't match", "info");
+                        return;
+                      }
+
                       if (!userProfile) return;
                       setIsUpdating(true);
                       try {
@@ -449,7 +523,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                         setIsUpdating(false);
                       }
                     }}
-                    disabled={isUpdating}
+                    disabled={isUpdating || (deleteStep === 2 && deleteConfirmation !== 'delete my account')}
                     className="flex-[2] py-3.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold text-[13px] shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-2.5 border-none disabled:opacity-50 cursor-pointer outline-none"
                   >
                     {isUpdating ? (
@@ -457,7 +531,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                     ) : (
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     )}
-                    <span>{isUpdating ? "Deleting..." : "Delete Forever"}</span>
+                    <span>{isUpdating ? (deleteStep === 1 ? "Preparing..." : "Deleting...") : (deleteStep === 1 ? "Delete Forever" : "Confirm Deletion")}</span>
                   </button>
                 </div>
               </motion.div>
