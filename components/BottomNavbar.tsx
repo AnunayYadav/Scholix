@@ -25,8 +25,9 @@ const BottomNavbar: React.FC<BottomNavbarProps> = ({ currentModule }) => {
   const navItems = [
     {
       id: 'home',
+      label: 'Home',
       icon: (active: boolean) => (
-        <svg viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke={active ? "none" : "currentColor"} strokeWidth={active ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <svg viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke={active ? "none" : "currentColor"} strokeWidth={active ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
           <path
             fillRule="evenodd"
             clipRule="evenodd"
@@ -39,8 +40,9 @@ const BottomNavbar: React.FC<BottomNavbarProps> = ({ currentModule }) => {
     },
     {
       id: 'academics',
+      label: 'Library',
       icon: (active: boolean) => (
-        <svg viewBox="0 0 16 16" fill="currentColor" stroke="none" className="w-6 h-6">
+        <svg viewBox="0 0 16 16" fill="currentColor" stroke="none" className="w-5 h-5">
           <path d="M5 0h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2 2 2 0 0 1-2 2H3a2 2 0 0 1-2-2h1a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H3a2 2 0 0 1-2-2h8a2 2 0 0 1 2 2v9a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1H3a2 2 0 0 1 2-2" />
           <path d="M1 6v-.5a.5.5 0 0 1 1 0V6h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V9h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 2.5v.5H.5a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1H2v-.5a.5.5 0 0 0-1 0" />
         </svg>
@@ -50,8 +52,9 @@ const BottomNavbar: React.FC<BottomNavbarProps> = ({ currentModule }) => {
     },
     {
       id: 'tools',
+      label: 'Tools',
       icon: (active: boolean) => (
-        <svg viewBox="0 0 16 16" fill="currentColor" stroke="none" className="w-6 h-6">
+        <svg viewBox="0 0 16 16" fill="currentColor" stroke="none" className="w-5 h-5">
           <path d="M1 0 0 1l2.2 3.081a1 1 0 0 0 .815.419h.07a1 1 0 0 1 .708.293l2.675 2.675-2.617 2.654A3.003 3.003 0 0 0 0 13a3 3 0 1 0 5.878-.851l2.654-2.617.968.968-.305.914a1 1 0 0 0 .242 1.023l3.27 3.27a.997.997 0 0 0 1.414 0l1.586-1.586a.997.997 0 0 0 0-1.414l-3.27-3.27a1 1 0 0 0-1.023-.242L10.5 9.5l-.96-.96 2.68-2.643A3.005 3.005 0 0 0 16 3q0-.405-.102-.777l-2.14 2.141L12 4l-.364-1.757L13.777.102a3 3 0 0 0-3.675 3.68L7.462 6.46 4.793 3.793a1 1 0 0 1-.293-.707v-.071a1 1 0 0 0-.419-.814zm9.646 10.646a.5.5 0 0 1 .708 0l2.914 2.915a.5.5 0 0 1-.707.707l-2.915-2.914a.5.5 0 0 1 0-.708M3 11l.471.242.529.026.287.445.445.287.026.529L5 13l-.242.471-.026.529-.445.287-.287.445-.529.026L3 15l-.471-.242L2 14.732l-.287-.445L1.268 14l-.026-.529L1 13l.242-.471.026-.529.445-.287.287-.445.529-.026z" />
         </svg>
       ),
@@ -60,8 +63,9 @@ const BottomNavbar: React.FC<BottomNavbarProps> = ({ currentModule }) => {
     },
     {
       id: 'campus',
+      label: 'Campus',
       icon: (active: boolean) => (
-        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" className="w-6 h-6">
+        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" className="w-5 h-5">
           {/* Panel 1 (Left) */}
           <path
             d="M1 6L8 2V18L1 22V6Z"
@@ -93,8 +97,9 @@ const BottomNavbar: React.FC<BottomNavbarProps> = ({ currentModule }) => {
     },
     {
       id: 'settings',
+      label: 'Settings',
       icon: (active: boolean) => (
-        <svg viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke={active ? "none" : "currentColor"} strokeWidth={active ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <svg viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke={active ? "none" : "currentColor"} strokeWidth={active ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
           <path
             fillRule="evenodd"
             clipRule="evenodd"
@@ -109,7 +114,7 @@ const BottomNavbar: React.FC<BottomNavbarProps> = ({ currentModule }) => {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] w-full">
-      <div className="bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-3xl border-t border-zinc-200/50 dark:border-white/10 rounded-t-[24px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.4)] flex items-center h-[72px] px-4 relative overflow-hidden pb-safe">
+      <div className="bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-3xl border-t border-zinc-200/50 dark:border-white/10 rounded-t-[24px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.4)] flex items-center h-[80px] px-4 relative overflow-hidden pb-safe">
         {navItems.map((item) => (
           <button
             key={item.id}
@@ -120,10 +125,13 @@ const BottomNavbar: React.FC<BottomNavbarProps> = ({ currentModule }) => {
             <div className={`absolute top-0 w-12 h-1.5 rounded-b-[6px] bg-brand-primary transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) transform ${item.active ? 'translate-y-0 opacity-100 scale-x-100' : '-translate-y-full opacity-0 scale-x-50'
               }`} />
 
-            <div className={`flex flex-col items-center justify-center transition-all duration-300 ${item.active ? 'scale-110' : 'scale-100 active:scale-95'}`}>
+            <div className={`flex flex-col items-center justify-center transition-all duration-300 ${item.active ? 'scale-105' : 'scale-100 active:scale-95'}`}>
               <div className={`${item.active ? 'text-brand-primary drop-shadow-[0_0_8px_rgba(249,115,22,0.2)]' : 'text-zinc-400 dark:text-zinc-600 group-hover:text-zinc-500 dark:group-hover:text-zinc-400'}`}>
                 {item.icon(item.active)}
               </div>
+              <span className={`text-[10px] font-bold mt-1.5 transition-colors duration-300 ${item.active ? 'text-brand-primary' : 'text-zinc-400 dark:text-zinc-600'}`}>
+                {item.label}
+              </span>
             </div>
           </button>
         ))}
