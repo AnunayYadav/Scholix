@@ -6,6 +6,7 @@ import { showToast } from './Toast.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import MarketplaceHub from './MarketplaceHub.tsx';
 import RoommateFinder from './RoommateFinder.tsx';
+import NexusAd from './NexusAd.tsx';
 import type { UserProfile } from '../types';
 
 const IconMarket = ({ className }: { className?: string }) => (
@@ -422,6 +423,11 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
           </div>
 
 
+
+          {/* Hub Section Ad */}
+          <div className="pt-2">
+            <NexusAd slot="2912081909" format="horizontal" hideLabel />
+          </div>
 
           {/* Student Toolkit Section */}
           <div className="space-y-6 pt-4 pb-12">

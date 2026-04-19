@@ -6,6 +6,7 @@ import CGPACalculator from './CGPACalculator';
 import PlacementPrefect from './PlacementPrefect';
 import { UserProfile, ModuleType } from '../types';
 import { useUniversity } from '../hooks/useUniversity';
+import NexusAd from './NexusAd';
 
 interface ToolsHubProps {
   userProfile: UserProfile | null;
@@ -107,6 +108,11 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Tools Hub Ad */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-0">
+        <NexusAd slot="2912081909" format="horizontal" hideLabel />
       </div>
 
       <div className="relative">
