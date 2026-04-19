@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
@@ -30,9 +30,92 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
+  const [isForgotMode, setIsForgotMode] = useState(false);
+  const [forgotStep, setForgotStep] = useState<'email' | 'otp'>('email');
+  const [otpValue, setOtpValue] = useState('');
+  const [resendTimer, setResendTimer] = useState(0);
   const [deleteStep, setDeleteStep] = useState(1);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [modalError, setModalError] = useState<string | null>(null);
+  
+  // Resend Timer Logic
+  useEffect(() => {
+    let interval: any;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
+  const handleSendRecoveryOTP = async () => {
+    if (!userProfile?.email) return;
+    setIsUpdating(true);
+    setModalError(null);
+    try {
+      const response = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: userProfile.email.toLowerCase().trim(), 
+          type: 'password_reset', 
+          university: userProfile?.university || 'LPU' 
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to dispatch recovery code.");
+      setForgotStep('otp');
+      setResendTimer(60);
+      showToast("Recovery code sent to your email", "success");
+    } catch (err: any) {
+      setModalError(err.message);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    setModalError(null);
+    if (otpValue.length !== 6) {
+      setModalError("Enter 6-digit recovery code");
+      return;
+    }
+    if (!newPassword || newPassword.length < 6) {
+      setModalError("New password must be at least 6 characters");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const resetResponse = await fetch('/api/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: userProfile?.email.toLowerCase().trim(), 
+          otp: otpValue, 
+          newPassword: newPassword 
+        })
+      });
+
+      const resetData = await resetResponse.json();
+      if (!resetResponse.ok) throw new Error(resetData.error || "Reset failed.");
+      
+      setShowPasswordModal(false);
+      setNewPassword('');
+      setOtpValue('');
+      setIsForgotMode(false);
+      showToast("Password reset successfully!", "success");
+    } catch (err: any) {
+      setModalError(err.message);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+
   
   const frameConfig = getFrameConfig(userProfile?.avatar_frame || '');
 
@@ -315,6 +398,10 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                     setShowPasswordModal(false);
                     setCurrentPassword('');
                     setNewPassword('');
+                    setIsForgotMode(false);
+                    setForgotStep('email');
+                    setOtpValue('');
+                    setModalError(null);
                   }
                 }}
                 className="absolute inset-0 bg-black/40 backdrop-blur-xl" 
@@ -332,6 +419,10 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                     setShowPasswordModal(false);
                     setCurrentPassword('');
                     setNewPassword('');
+                    setIsForgotMode(false);
+                    setForgotStep('email');
+                    setOtpValue('');
+                    setModalError(null);
                   }} 
                   className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90 cursor-pointer outline-none"
                 >
@@ -343,77 +434,207 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                 </div>
 
                 <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1.5 tracking-tight leading-none">Settings Security</h3>
-                <p className="text-zinc-500 text-[11px] font-medium mb-6">Update your encryption. Use at least 6 characters.</p>
-                
-                <div className="space-y-4">
-                  <div className="relative group">
-                    <input 
-                      type="password"
-                      placeholder="Current password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      disabled={isUpdating}
-                      className="w-full p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/5 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
-                    />
-                  </div>
-                  <div className="relative group">
-                    <input 
-                      type="password"
-                      placeholder="New secure password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      disabled={isUpdating}
-                      className="w-full p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/5 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
-                    />
-                  </div>
-                </div>
+                <p className="text-zinc-500 text-[11px] font-medium mb-4">Update your encryption. Use at least 6 characters.</p>
 
-                <div className="flex gap-4 mt-6">
-                  <button 
-                    onClick={() => {
-                      setShowPasswordModal(false);
-                      setCurrentPassword('');
-                      setNewPassword('');
-                    }}
-                    disabled={isUpdating}
-                    className="flex-1 py-3.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-[13px] border-none bg-transparent transition-colors cursor-pointer outline-none"
+                {modalError && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-4 p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-start gap-2.5"
                   >
-                    Dismiss
-                  </button>
-                  <button 
-                    onClick={async () => {
-                      if (!currentPassword) {
-                        showToast("Please enter current password", "info");
-                        return;
-                      }
-                      if (!newPassword || newPassword.length < 6) {
-                        showToast("New password must be at least 6 characters", "info");
-                        return;
-                      }
-                      setIsUpdating(true);
-                      try {
-                        await NexusServer.updatePassword(newPassword, currentPassword);
-                        setShowPasswordModal(false);
-                        setNewPassword('');
-                        setCurrentPassword('');
-                        showToast("Password updated successfully!", "success");
-                      } catch (e: any) {
-                        showToast(e.message || "Failed to update password", "error");
-                      } finally {
-                        setIsUpdating(false);
-                      }
-                    }}
-                    disabled={isUpdating || !newPassword || !currentPassword}
-                    className="flex-[2] py-3.5 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-xl font-bold text-[13px] shadow-lg shadow-brand-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2.5 border-none disabled:opacity-50 cursor-pointer outline-none"
-                  >
-                    {isUpdating ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="12" r="3"/></svg>
-                    )}
-                    <span>{isUpdating ? "Securing..." : "Update Password"}</span>
-                  </button>
-                </div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-red-500 mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <p className="text-[11px] font-bold text-red-500 leading-tight">{modalError}</p>
+                  </motion.div>
+                )}
+                
+                {isForgotMode ? (
+                  forgotStep === 'email' ? (
+                    <div className="text-center animate-fade-in">
+                      <p className="text-zinc-500 dark:text-zinc-400 text-xs mb-6 font-medium leading-relaxed">
+                        We'll send a 6-digit recovery code to your registered email <br/>
+                        <span className="text-brand-primary font-bold">{userProfile?.email}</span>
+                      </p>
+                      <button 
+                        onClick={handleSendRecoveryOTP}
+                        disabled={isUpdating}
+                        className="w-full py-4 rounded-2xl bg-brand-primary text-white font-black text-sm shadow-lg shadow-brand-primary/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50"
+                      >
+                        {isUpdating ? "Sending Code..." : "Send Recovery Code"}
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setIsForgotMode(false);
+                          setModalError(null);
+                        }}
+                        className="mt-4 text-[11px] font-bold text-zinc-400 hover:text-zinc-600 transition-colors bg-transparent border-none"
+                      >
+                        Back to password login
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 animate-fade-in">
+                      <div className="text-center mb-6">
+                        <p className="text-xs text-zinc-400 font-medium">
+                          Enter the code sent to your email and your new password.
+                        </p>
+                      </div>
+                      <div className="relative group">
+                        <input 
+                          type="text"
+                          placeholder="000000"
+                          value={otpValue}
+                          maxLength={6}
+                          onChange={(e) => {
+                            setOtpValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 6));
+                            if (modalError) setModalError(null);
+                          }}
+                          disabled={isUpdating}
+                          className="w-full p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-center tracking-[12px] text-lg font-black text-zinc-800 dark:text-zinc-200"
+                        />
+                      </div>
+                      <div className="relative group">
+                        <input 
+                          type="password"
+                          placeholder="New secure password"
+                          value={newPassword}
+                          onChange={(e) => {
+                            setNewPassword(e.target.value);
+                            if (modalError) setModalError(null);
+                          }}
+                          disabled={isUpdating}
+                          className="w-full p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/5 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-3 pt-2">
+                        <button 
+                          onClick={handleSendRecoveryOTP}
+                          disabled={isUpdating || resendTimer > 0}
+                          className="text-[11px] font-bold text-brand-primary hover:text-brand-primary/80 transition-colors bg-transparent border-none disabled:opacity-50"
+                        >
+                          {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Didn't receive the code? Resend"}
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setForgotStep('email');
+                            setModalError(null);
+                          }}
+                          className="text-[11px] font-medium text-zinc-400 hover:text-zinc-600 transition-colors bg-transparent border-none"
+                        >
+                          Change recovery email
+                        </button>
+                      </div>
+                    </div>
+                  )
+                ) : (
+                  <>
+                    <div className="space-y-4">
+                      <div className="relative group">
+                        <input 
+                          type="password"
+                          placeholder="Current password"
+                          value={currentPassword}
+                          onChange={(e) => {
+                            setCurrentPassword(e.target.value);
+                            if (modalError) setModalError(null);
+                          }}
+                          disabled={isUpdating}
+                          className="w-full p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/5 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
+                        />
+                      </div>
+                      <div className="flex justify-end -mt-1 mb-1">
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setIsForgotMode(true);
+                            setModalError(null);
+                          }}
+                          className="text-[10px] font-bold text-zinc-400 hover:text-brand-primary transition-colors bg-transparent border-none p-0 cursor-pointer"
+                        >
+                          Forgot Password?
+                        </button>
+                      </div>
+                      <div className="relative group">
+                        <input 
+                          type="password"
+                          placeholder="New secure password"
+                          value={newPassword}
+                          onChange={(e) => {
+                            setNewPassword(e.target.value);
+                            if (modalError) setModalError(null);
+                          }}
+                          disabled={isUpdating}
+                          className="w-full p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/5 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 mt-6">
+                      <button 
+                        onClick={() => {
+                          setShowPasswordModal(false);
+                          setCurrentPassword('');
+                          setNewPassword('');
+                        }}
+                        disabled={isUpdating}
+                        className="flex-1 py-3.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-[13px] border-none bg-transparent transition-colors cursor-pointer outline-none"
+                      >
+                        Dismiss
+                      </button>
+                      <button 
+                        onClick={async () => {
+                          if (!currentPassword) {
+                            setModalError("Please enter current password");
+                            return;
+                          }
+                          if (!newPassword || newPassword.length < 6) {
+                            setModalError("New password must be at least 6 characters");
+                            return;
+                          }
+                          setIsUpdating(true);
+                          setModalError(null);
+                          try {
+                            await NexusServer.updatePassword(newPassword, currentPassword);
+                            setShowPasswordModal(false);
+                            setNewPassword('');
+                            setCurrentPassword('');
+                            showToast("Password updated successfully!", "success");
+                          } catch (e: any) {
+                            setModalError(e.message || "Failed to update password");
+                          } finally {
+                            setIsUpdating(false);
+                          }
+                        }}
+                        disabled={isUpdating}
+                        className="flex-[1.5] py-3.5 rounded-2xl bg-brand-primary text-white font-black text-sm shadow-lg shadow-brand-primary/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {isUpdating ? (
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                            Update Password
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {isForgotMode && forgotStep === 'otp' && (
+                  <div className="mt-6">
+                    <button 
+                      onClick={handleResetPassword}
+                      disabled={isUpdating}
+                      className="w-full py-3.5 rounded-2xl bg-brand-primary text-white font-black text-sm shadow-lg shadow-brand-primary/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {isUpdating ? (
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        "Confirm New Password"
+                      )}
+                    </button>
+                  </div>
+                )}
               </motion.div>
             </div>
           )}
@@ -463,7 +684,18 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                 </div>
 
                 <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1.5 tracking-tight leading-none">Delete Account?</h3>
-                <p className="text-zinc-500 text-[11px] font-medium mb-6">This action is permanent and cannot be reversed.</p>
+                <p className="text-zinc-500 text-[11px] font-medium mb-4">This action is permanent and cannot be reversed.</p>
+
+                {modalError && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-4 p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-start gap-2.5"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-red-500 mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <p className="text-[11px] font-bold text-red-500 leading-tight">{modalError}</p>
+                  </motion.div>
+                )}
 
                 <div className="bg-red-500/5 rounded-2xl p-5 mb-6 border border-red-500/10">
                   <p className="text-[12px] text-red-600 dark:text-red-400 font-medium leading-relaxed">
@@ -475,12 +707,15 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
 
                 {deleteStep === 2 && (
                   <div className="mb-6 animate-fade-in">
-                    <p className="text-[10px] text-zinc-500 mb-2 font-bold uppercase tracking-wider">Type 'delete my account' to confirm</p>
+                    <p className="text-[10px] text-zinc-500 mb-2 font-bold text-center">Type 'delete my account' to confirm</p>
                     <input 
                       type="text"
                       placeholder="Match the phrase exactly"
                       value={deleteConfirmation}
-                      onChange={(e) => setDeleteConfirmation(e.target.value)}
+                      onChange={(e) => {
+                        setDeleteConfirmation(e.target.value);
+                        if (modalError) setModalError(null);
+                      }}
                       disabled={isUpdating}
                       className="w-full p-3.5 rounded-2xl bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 focus:border-red-500 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
                     />
@@ -493,6 +728,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                       setShowDeleteModal(false);
                       setDeleteStep(1);
                       setDeleteConfirmation('');
+                      setModalError(null);
                     }}
                     disabled={isUpdating}
                     className="flex-1 py-3.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-[13px] border-none bg-transparent transition-colors cursor-pointer outline-none"
@@ -503,22 +739,24 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                     onClick={async () => {
                       if (deleteStep === 1) {
                         setDeleteStep(2);
+                        setModalError(null);
                         return;
                       }
 
                       if (deleteConfirmation !== 'delete my account') {
-                        showToast("Phrase doesn't match", "info");
+                        setModalError("Phrase doesn't match");
                         return;
                       }
 
                       if (!userProfile) return;
                       setIsUpdating(true);
+                      setModalError(null);
                       try {
                         await NexusServer.deleteAccount(userProfile.id);
                         showToast("Account deleted. Farewell!", "info");
                         onSignOut();
                       } catch (e: any) {
-                        showToast(e.message || "Deletion failed", "error");
+                        setModalError(e.message || "Deletion failed");
                       } finally {
                         setIsUpdating(false);
                       }
