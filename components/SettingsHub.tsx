@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { UserProfile, ModuleType } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import VerifiedBadge from './VerifiedBadge.tsx';
@@ -9,6 +10,7 @@ import FeedbackModal from './FeedbackModal.tsx';
 import ChatSupportModal from './ChatSupportModal.tsx';
 import SocialModal from './SocialModal.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
+import { showToast } from './Toast.tsx';
 
 interface SettingsHubProps {
   userProfile: UserProfile | null;
@@ -297,132 +299,173 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
       />
 
       {/* Change Password Modal */}
-      <AnimatePresence>
-        {showPasswordModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => !isUpdating && setShowPasswordModal(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[32px] overflow-hidden shadow-2xl border border-zinc-200 dark:border-white/10"
-            >
-              <div className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-brand-primary/10 flex items-center justify-center text-brand-primary mb-6">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                </div>
-                <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">Change Password</h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">Enter your new password below. Make sure it's secure.</p>
-                
-                <input 
-                  type="password"
-                  placeholder="New Password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  disabled={isUpdating}
-                  className="w-full bg-zinc-100 dark:bg-white/5 border-none rounded-2xl px-5 py-4 text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-primary transition-all mb-6"
-                />
+      {createPortal(
+        <AnimatePresence>
+          {showPasswordModal && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden pointer-events-auto">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => !isUpdating && setShowPasswordModal(false)}
+                className="absolute inset-0 bg-black/40 backdrop-blur-xl" 
+                style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+              />
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-lg bg-white dark:bg-[#0a0a0a] rounded-[40px] border border-zinc-200 dark:border-white/10 shadow-2xl p-10 overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button 
+                  onClick={() => setShowPasswordModal(false)} 
+                  className="absolute top-8 right-8 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90 cursor-pointer outline-none"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
 
-                <div className="flex gap-3">
+                <div className="w-20 h-20 bg-brand-primary/10 rounded-[32px] flex items-center justify-center mb-8 border border-brand-primary/20">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-brand-primary"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+
+                <h3 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2 tracking-tight leading-none">Settings Security</h3>
+                <p className="text-zinc-500 text-xs mb-8">Update your encryption. Use at least 8 characters.</p>
+                
+                <div className="relative group">
+                  <input 
+                    type="password"
+                    placeholder="Enter new secure password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    disabled={isUpdating}
+                    className="w-full p-6 rounded-[32px] bg-zinc-50 dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/10 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
+                  />
+                </div>
+
+                <div className="flex gap-4 mt-8">
                   <button 
                     onClick={() => setShowPasswordModal(false)}
                     disabled={isUpdating}
-                    className="flex-1 py-4 rounded-2xl font-semibold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                    className="flex-1 py-4 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-sm border-none bg-transparent transition-colors cursor-pointer outline-none"
                   >
-                    Cancel
+                    Dismiss
                   </button>
                   <button 
                     onClick={async () => {
-                      if (!newPassword) return;
+                      if (!newPassword || newPassword.length < 6) {
+                        showToast("Password must be at least 6 characters", "info");
+                        return;
+                      }
                       setIsUpdating(true);
                       try {
                         await NexusServer.updatePassword(newPassword);
                         setShowPasswordModal(false);
                         setNewPassword('');
-                        alert("Password updated successfully!");
+                        showToast("Password updated successfully!", "success");
                       } catch (e: any) {
-                        alert(e.message || "Failed to update password");
+                        showToast(e.message || "Failed to update password", "error");
                       } finally {
                         setIsUpdating(false);
                       }
                     }}
                     disabled={isUpdating || !newPassword}
-                    className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] shadow-lg shadow-brand-primary/30 disabled:opacity-50"
+                    className="flex-[2] py-4 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-[24px] font-bold text-sm shadow-xl shadow-brand-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3 border-none disabled:opacity-50 cursor-pointer outline-none"
                   >
-                    {isUpdating ? "Updating..." : "Update"}
+                    {isUpdating ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="12" r="3"/></svg>
+                    )}
+                    <span>{isUpdating ? "Securing..." : "Update Password"}</span>
                   </button>
                 </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.getElementById('modal-root') || document.body
+      )}
 
       {/* Delete Account Modal */}
-      <AnimatePresence>
-        {showDeleteModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => !isUpdating && setShowDeleteModal(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[32px] overflow-hidden shadow-2xl border border-red-500/10"
-            >
-              <div className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 mb-6">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                </div>
-                <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">Delete Account?</h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6 font-medium leading-relaxed">
-                  This action is permanent. All your study data, history, and profile will be wiped out. You cannot undo this.
-                </p>
+      {createPortal(
+        <AnimatePresence>
+          {showDeleteModal && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden pointer-events-auto">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => !isUpdating && setShowDeleteModal(false)}
+                className="absolute inset-0 bg-black/40 backdrop-blur-xl" 
+                style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+              />
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-lg bg-white dark:bg-[#0a0a0a] rounded-[40px] border border-red-500/10 shadow-2xl p-10 overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button 
+                  onClick={() => setShowDeleteModal(false)} 
+                  className="absolute top-8 right-8 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90 cursor-pointer outline-none"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
 
-                <div className="flex flex-col gap-3">
+                <div className="w-20 h-20 bg-red-500/10 rounded-[32px] flex items-center justify-center mb-8 border border-red-500/20">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-red-500"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </div>
+
+                <h3 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2 tracking-tight leading-none">Delete Account?</h3>
+                <p className="text-zinc-500 text-xs mb-8">This action is permanent and cannot be reversed. You will lose all your data.</p>
+
+                <div className="bg-red-500/5 rounded-3xl p-6 mb-8 border border-red-500/10">
+                  <p className="text-sm text-red-600 dark:text-red-400 font-medium leading-relaxed">
+                    By confirming, your profile, study history, and saved data will be wiped from our servers immediately.
+                  </p>
+                </div>
+
+                <div className="flex gap-4">
+                  <button 
+                    onClick={() => setShowDeleteModal(false)}
+                    disabled={isUpdating}
+                    className="flex-1 py-4 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-sm border-none bg-transparent transition-colors cursor-pointer outline-none"
+                  >
+                    Keep Account
+                  </button>
                   <button 
                     onClick={async () => {
                       if (!userProfile) return;
                       setIsUpdating(true);
                       try {
                         await NexusServer.deleteAccount(userProfile.id);
-                        onSignOut(); // This will navigate to login/home
+                        showToast("Account deleted. Farewell!", "info");
+                        onSignOut();
                       } catch (e: any) {
-                        alert(e.message || "Deletion failed");
+                        showToast(e.message || "Deletion failed", "error");
                       } finally {
                         setIsUpdating(false);
-                        setShowDeleteModal(false);
                       }
                     }}
                     disabled={isUpdating}
-                    className="w-full py-4 bg-red-500 text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] shadow-lg shadow-red-500/20 disabled:opacity-50"
+                    className="flex-[2] py-4 bg-red-500 hover:bg-red-600 text-white rounded-[24px] font-bold text-sm shadow-xl shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-3 border-none disabled:opacity-50 cursor-pointer outline-none"
                   >
-                    {isUpdating ? "Deleting..." : "Permanently Delete"}
-                  </button>
-                  <button 
-                    onClick={() => setShowDeleteModal(false)}
-                    disabled={isUpdating}
-                    className="w-full py-4 rounded-2xl font-semibold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
-                  >
-                    Cancel
+                    {isUpdating ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    )}
+                    <span>{isUpdating ? "Deleting..." : "Delete Forever"}</span>
                   </button>
                 </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.getElementById('modal-root') || document.body
+      )}
     </div>
   );
 };
