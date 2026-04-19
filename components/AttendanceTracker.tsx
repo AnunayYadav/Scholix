@@ -3,8 +3,6 @@ import { createPortal } from 'react-dom';
 import NexusServer from '../services/nexusServer.ts';
 import { UserProfile } from '../types.ts';
 
-import { showToast } from './Toast.tsx';
-
 interface Subject {
   id: string;
   name: string;
@@ -83,101 +81,6 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
     }, 250);
   };
 
-  const handleCloseSync = () => {
-    setIsClosingSync(true);
-    setTimeout(() => {
-      setIsSyncModalOpen(false);
-      setIsClosingSync(false);
-    }, 250);
-  };
-
-  const handleUMSInit = async () => {
-    if (!umsUsername) {
-      showToast("Please enter your Registration Number.", "info");
-      return;
-    }
-
-    setIsSyncing(true);
-    setSyncStatus("Initializing UMS Connection...");
-
-    try {
-      const response = await fetch('/api/ums/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'init' })
-      });
-
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Initialization failed");
-
-      setCaptchaImage(result.captchaImage);
-      setSyncHiddenFields(result.hiddenFields);
-      setSyncCookies(result.cookies);
-      setCaptchaInputName(result.captchaInputName);
-      setSyncStep(1);
-    } catch (err: any) {
-      showToast(err.message || "Failed to reach UMS portal.", "error");
-    } finally {
-      setIsSyncing(false);
-      setSyncStatus('');
-    }
-  };
-
-  const handleUMSSync = async () => {
-    if (!umsPassword || !captchaCode) {
-      showToast("Please enter Password & Captcha.", "info");
-      return;
-    }
-
-    setIsSyncing(true);
-    setSyncStep(2);
-    setSyncStatus('Authenticating & Syncing...');
-
-    try {
-      const response = await fetch('/api/ums/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          action: 'sync',
-          username: umsUsername, 
-          password: umsPassword,
-          captchaCode,
-          hiddenFields: syncHiddenFields,
-          cookies: syncCookies,
-          captchaInputName
-        })
-      });
-
-      const result = await response.json();
-      if (!response.ok) {
-        if (result.error === 'Invalid Captcha') {
-          showToast("Incorrect Captcha. Try again.", "error");
-          setCaptchaCode('');
-          handleUMSInit();
-          return;
-        }
-        throw new Error(result.error || 'Sync failed');
-      }
-
-      const { attendance } = result.data;
-      
-      setSubjects(attendance);
-      localStorage.setItem('nexus_attendance', JSON.stringify(attendance));
-
-      handleCloseSync();
-      setUmsPassword('');
-      setCaptchaCode('');
-      setSyncStep(0);
-      showToast('Attendance synced successfully!', 'success');
-    } catch (err: any) {
-      showToast(err.message || 'Failed to sync with UMS.', 'error');
-      setSyncStep(0);
-    } finally {
-      setIsSyncing(false);
-      setSyncStatus('');
-    }
-  };
-
   const [wipingAll, setWipingAll] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -188,22 +91,6 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
     dutyLeaves: '0',
     goal: '75'
   });
-
-  // UMS Sync State
-  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
-  const [isClosingSync, setIsClosingSync] = useState(false);
-  const [umsUsername, setUmsUsername] = useState('');
-  const [umsPassword, setUmsPassword] = useState('');
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncStatus, setSyncStatus] = useState('');
-
-  // UMS Sync Multi-step states
-  const [syncStep, setSyncStep] = useState<0 | 1 | 2>(0);
-  const [captchaImage, setCaptchaImage] = useState<string | null>(null);
-  const [captchaCode, setCaptchaCode] = useState('');
-  const [syncHiddenFields, setSyncHiddenFields] = useState<any>(null);
-  const [syncCookies, setSyncCookies] = useState<string | null>(null);
-  const [captchaInputName, setCaptchaInputName] = useState<string>('');
 
   const editModalRef = useRef<HTMLDivElement>(null);
 
@@ -233,7 +120,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
     const goal = parseInt(newSub.goal) || 75;
 
     setSubjects(prev => [...prev, {
-      id: Math.random().toString(36).substring(2, 11),
+      id: Math.random().toString(36).substr(2, 9),
       name: newSub.name,
       present: Math.min(present, total),
       total: total,
@@ -414,14 +301,6 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               )}
             </div>
           )}
-
-          <button
-            onClick={() => setIsSyncModalOpen(true)}
-            className="flex items-center space-x-1.5 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-red-600 rounded-xl text-[10px] md:text-xs font-black text-white transition-all shadow-lg shadow-orange-600/20 active:scale-95"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 md:w-3.5 h-3 md:h-3.5"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16" /></svg>
-            <span>Sync with UMS</span>
-          </button>
 
           <button
             onClick={() => setShowArchived(!showArchived)}
@@ -756,125 +635,6 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
         </div>,
         document.getElementById('modal-root') || document.body
       )}
-
-      {isSyncModalOpen && createPortal(
-        <div 
-          className={`modal-overlay modal-overlay-fade ${isClosingSync ? 'closing' : ''}`}
-          style={{ backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}
-          onClick={(e) => { if(e.target === e.currentTarget && !isSyncing) handleCloseSync(); }}
-        >
-          <div className={`nexus-modal w-full max-w-sm overflow-hidden ${isClosingSync ? 'closing' : ''}`}>
-            <div className="p-8 text-center bg-gradient-to-b from-orange-600/10 to-transparent border-b border-zinc-100 dark:border-white/5 relative">
-              <button 
-                onClick={handleCloseSync}
-                className="absolute top-6 right-6 text-zinc-400 hover:text-orange-600 transition-colors border-none bg-transparent"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12"/></svg>
-              </button>
-              <div className="w-14 h-14 bg-orange-600 rounded-[22px] flex items-center justify-center mx-auto mb-4 shadow-xl shadow-orange-600/30">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" className="w-7 h-7"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-              </div>
-              <h3 className="text-2xl font-black tracking-tight uppercase">UMS Sync</h3>
-              <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">Direct Data Import</p>
-            </div>
-
-            <div className="p-8 space-y-6">
-              {isSyncing ? (
-                <div className="py-12 text-center space-y-6">
-                  <div className="w-12 h-12 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-[10px] font-black uppercase tracking-widest text-orange-600 animate-pulse">{syncStatus}</p>
-                </div>
-              ) : (
-                <>
-                  <div className="p-4 rounded-2xl bg-orange-500/5 border border-orange-500/20 text-[10px] text-orange-600 font-medium mb-2 leading-relaxed">
-                    ⚡ <b>Secure Sync:</b> We fetch data directly from UMS. Your credentials are never stored.
-                  </div>
-
-                  {syncStep === 0 && (
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Registration No.</label>
-                        <input
-                          type="text"
-                          value={umsUsername}
-                          onChange={e => setUmsUsername(e.target.value)}
-                          placeholder="e.g. 12200000"
-                          className="w-full bg-white dark:bg-[#0c0c0c] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all"
-                        />
-                      </div>
-                      <button 
-                        onClick={handleUMSInit} 
-                        disabled={isSyncing}
-                        className="w-full py-4 bg-orange-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-orange-600/20 hover:scale-[1.02] active:scale-95 transition-all border-none"
-                      >
-                        {isSyncing ? "Connecting..." : "Continue"}
-                      </button>
-                    </div>
-                  )}
-
-                  {syncStep === 1 && (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">UMS Password</label>
-                        <input
-                          type="password"
-                          value={umsPassword}
-                          onChange={e => setUmsPassword(e.target.value)}
-                          placeholder="Enter Password"
-                          className="w-full bg-white dark:bg-[#0c0c0c] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1 text-center block">Solve Captcha</label>
-                        {captchaImage && (
-                          <div className="flex flex-col items-center gap-3">
-                            <div className="p-3 bg-white rounded-xl shadow-sm border border-zinc-100">
-                              <img src={captchaImage} alt="Captcha" className="h-12 w-auto object-contain" />
-                            </div>
-                            <input
-                              type="text"
-                              value={captchaCode}
-                              onChange={e => setCaptchaCode(e.target.value)}
-                              placeholder="Type the 4 codes above"
-                              className="w-full bg-white dark:bg-[#0c0c0c] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-zinc-800 dark:text-white text-center outline-none focus:ring-2 focus:ring-orange-600 transition-all font-black"
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex gap-3">
-                        <button 
-                          onClick={() => setSyncStep(0)} 
-                          className="flex-1 py-4 text-zinc-500 font-bold text-[10px] uppercase border-none bg-transparent"
-                        >
-                          Back
-                        </button>
-                        <button 
-                          onClick={handleUMSSync} 
-                          disabled={isSyncing}
-                          className="flex-[2] py-4 bg-orange-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-orange-600/20 hover:scale-[1.02] active:scale-95 transition-all border-none"
-                        >
-                          {isSyncing ? "Syncing..." : "Verify & Sync"}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {syncStep === 2 && (
-                    <div className="py-10 text-center space-y-4">
-                      <div className="w-10 h-10 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto" />
-                      <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em]">{syncStatus}</p>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-        </div>,
-        document.getElementById('modal-root') || document.body
-      )}
-
     </div>
   );
 };

@@ -237,6 +237,7 @@ export function useXP(userId: string | null) {
             total_xp: newTotalXP,
             level: newLevel.level,
             level_title: newLevel.title,
+            xp_history: result.updatedHistory!,
             ...updatedFrameState
           }).catch(console.error);
         });
@@ -261,6 +262,7 @@ export function useXP(userId: string | null) {
         import('../services/nexusServer').then(({ default: NexusServer }) => {
           NexusServer.updateProfile(userId, {
             total_xp: newTotalXP,
+            xp_history: result.updatedHistory!
           }).catch(console.error);
         });
       }
