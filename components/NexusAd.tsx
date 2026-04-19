@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 interface NexusAdProps {
   slot: string;
   format?: 'auto' | 'fluid' | 'rectangle';
+  layout?: 'in-article' | 'display' | 'fluid';
   responsive?: 'true' | 'false';
   className?: string;
   style?: React.CSSProperties;
@@ -13,6 +14,7 @@ interface NexusAdProps {
 const NexusAd: React.FC<NexusAdProps> = ({ 
   slot, 
   format = 'auto', 
+  layout,
   responsive = 'true', 
   className = '',
   style = {},
@@ -37,10 +39,11 @@ const NexusAd: React.FC<NexusAdProps> = ({
       <div className="w-full overflow-hidden flex justify-center bg-zinc-50 dark:bg-zinc-900/30 rounded-2xl border border-zinc-200 dark:border-white/5 min-h-[100px]" style={style}>
         <ins
           className="adsbygoogle"
-          style={{ display: 'block', width: '100%' }}
+          style={{ display: 'block', width: '100%', textAlign: 'center' }}
           data-ad-client="ca-pub-9873621266746230"
           data-ad-slot={slot}
           data-ad-format={format}
+          data-ad-layout={layout}
           data-full-width-responsive={responsive}
         />
       </div>

@@ -4,6 +4,7 @@ import { AITool } from '../types';
 import NexusDropdown from './NexusDropdown';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import { aiTools } from '../data/aiToolsData';
+import NexusAd from './NexusAd';
 
 const AIToolsDirectory: React.FC = () => {
     const { shortBrandName } = useUniversity();
@@ -285,6 +286,11 @@ const AIToolsDirectory: React.FC = () => {
                     />
                 </div>
             </header>
+
+            {/* In-Article Ad Component */}
+            <div className="max-w-5xl mx-auto w-full">
+                <NexusAd slot="7296989983" layout="in-article" format="fluid" hideLabel />
+            </div>
 
             {/* Tools Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
