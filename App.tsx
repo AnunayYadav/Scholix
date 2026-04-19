@@ -470,6 +470,11 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
           ))}
         </div>
 
+        {/* Dynamic Ad between Grid and Support Section */}
+        <div className="mb-16">
+          <NexusAd slot="2912081909" format="horizontal" hideLabel />
+        </div>
+
         <BuyMeACoffee userProfile={userProfile} />
       </div>
     </div>
