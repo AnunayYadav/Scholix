@@ -616,7 +616,7 @@ class NexusServer {
     // Restoration of strict LPU requirement: 8 digits, numeric only.
     const cleanRegNo = sanitizeInput(regNo.replace(/[^0-9]/g, ''), 8);
 
-    console.log(`[NexusServer] Attempting signUp for ${cleanEmail} (User: ${cleanUsername}, RegNo: ${cleanRegNo})`);
+
 
     const result = await client.auth.signUp({
       email: cleanEmail,
@@ -632,15 +632,15 @@ class NexusServer {
     });
 
     if (result.error) {
-      console.warn(`[NexusServer] auth.signUp error: ${result.error.message}`);
+
       
       // If user already exists, we might still want to try and update their profile
       if (result.error.message.toLowerCase().includes('already registered')) {
-         console.log(`[NexusServer] User already exists, attempting recovery login/profile sync`);
+
          // Try to sign in to get the session/user ID
          const loginRes = await client.auth.signInWithPassword({ email: cleanEmail, password: pass });
          if (!loginRes.error && loginRes.data.user) {
-            console.log(`[NexusServer] Recovery login successful, checking profile`);
+
             await this.ensureProfile(loginRes.data.user, { 
               username: cleanUsername, 
               registration_number: cleanRegNo
@@ -652,7 +652,7 @@ class NexusServer {
     }
 
     if (result.data?.user) {
-      console.log(`[NexusServer] auth.signUp success for ID: ${result.data.user.id}`);
+
       try {
         // Create full profile immediately to avoid race conditions
         // We use a safe upsert: if some columns don't exist (400 error), we fall back to a minimal profile
@@ -671,11 +671,11 @@ class NexusServer {
           last_active_date: new Date().toISOString().split('T')[0]
         };
         
-        console.log(`[NexusServer] Attempting full profile upsert...`);
+
         const { error: fullError } = await client.from('profiles').upsert(fullProfile, { onConflict: 'id' });
         
         if (fullError && (fullError.code === 'PGRST204' || fullError.message.includes('column'))) {
-          console.warn(`[NexusServer] Full profile failed (likely missing columns), falling back to minimal profile...`);
+
           const minimalProfile = {
             id: result.data.user.id,
             email: cleanEmail,
@@ -738,7 +738,7 @@ class NexusServer {
     const client = getSupabase();
     if (!client) throw new Error("Registry offline.");
 
-    console.log(`[NexusServer] EnsuredProfile check for ${user.id} (${user.email})`);
+
 
     const { data: existing } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
     
@@ -749,11 +749,7 @@ class NexusServer {
       ...overrides
     };
     
-    console.log(`[NexusServer] Resolved Metadata:`, { 
-      has_username: !!metadata.username, 
-      has_registration_number: !!metadata.registration_number,
-      has_overrides: !!overrides 
-    });
+
     
     // Robustly check multiple possible locations and formats for verification status
     const isVerifiedInMeta = 
@@ -765,7 +761,7 @@ class NexusServer {
       user.app_metadata?.is_verified === true;
 
     if (existing) {
-      console.log(`[NexusServer] Existing profile found for ${user.id}`);
+
       let needsUpdate = false;
       const updates: any = {};
 
@@ -786,7 +782,7 @@ class NexusServer {
       }
 
       if (needsUpdate) {
-        console.log(`[NexusServer] Updating existing profile with missing data:`, updates);
+        // Silent update for profile consistency
         const { data: updated, error: updateError } = await client.from('profiles').update(updates).eq('id', user.id).select().single();
         if (updateError) console.error("[NexusServer] Profile sync update error:", updateError);
         if (updated) return updated;
@@ -794,7 +790,7 @@ class NexusServer {
       return existing;
     }
     
-    console.log(`[NexusServer] No profile found, creating new one for ${user.id}`);
+
     const newProfile = {
       id: user.id,
       email: user.email!,

@@ -484,6 +484,7 @@ const AppContent: React.FC = () => {
   const [isClosingMobileSearch, setIsClosingMobileSearch] = useState(false);
   const [authIsReady, setAuthIsReady] = useState(false);
   const searchResultsRef = useRef<HTMLDivElement>(null);
+  const lastHandledUserRef = useRef<string | null>(null);
 
   const handleOpenMobileSearch = () => {
     setIsClosingMobileSearch(false);
@@ -642,13 +643,26 @@ const AppContent: React.FC = () => {
     // Subscribe to auth changes
     const unsubscribe = NexusServer.onAuthStateChange(async (user) => {
       if (user) {
-        // Fetch profile but don't block authIsReady
-        const profile = await NexusServer.ensureProfile(user);
-        setUserProfile(profile);
+        // Skip redundant profile sync if we already handled this user ID
+        if (lastHandledUserRef.current === user.id && userProfile) {
+          setAuthIsReady(true);
+          return;
+        }
+        
+        lastHandledUserRef.current = user.id;
+        try {
+          const profile = await NexusServer.ensureProfile(user);
+          setUserProfile(profile);
+        } catch (e) {
+          console.error("Profile sync failure:", e);
+          // If profile sync fails, we still allow the app to be 'ready' with user=null 
+          // or we can keep it unready. Usually better to let user interact if possible.
+          lastHandledUserRef.current = null;
+        }
       } else {
+        lastHandledUserRef.current = null;
         setUserProfile(null);
       }
-      // Critical: Set authIsReady only after we've confirmed the session state from Supabase
       setAuthIsReady(true);
     });
 
