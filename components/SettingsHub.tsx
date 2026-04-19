@@ -24,6 +24,10 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
   const [showSocialModal, setShowSocialModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
   
   const frameConfig = getFrameConfig(userProfile?.avatar_frame || '');
 
@@ -169,6 +173,24 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
 
           color="text-emerald-500"
         />
+        {userProfile && (
+          <>
+            <SettingItem 
+              icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>}
+              label="Change Password"
+              sublabel="Update your security credentials"
+              onClick={() => setShowPasswordModal(true)}
+              color="text-zinc-500"
+            />
+            <SettingItem 
+              icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>}
+              label="Delete Account"
+              sublabel="Permanently remove your account"
+              onClick={() => setShowDeleteModal(true)}
+              color="text-red-500"
+            />
+          </>
+        )}
       </Section>
 
       <Section title="Preferences">
@@ -272,6 +294,134 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
         isOpen={showSocialModal}
         onClose={() => setShowSocialModal(false)}
       />
+
+      {/* Change Password Modal */}
+      <AnimatePresence>
+        {showPasswordModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isUpdating && setShowPasswordModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[32px] overflow-hidden shadow-2xl border border-zinc-200 dark:border-white/10"
+            >
+              <div className="p-8">
+                <div className="w-14 h-14 rounded-2xl bg-brand-primary/10 flex items-center justify-center text-brand-primary mb-6">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">Change Password</h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">Enter your new password below. Make sure it's secure.</p>
+                
+                <input 
+                  type="password"
+                  placeholder="New Password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  disabled={isUpdating}
+                  className="w-full bg-zinc-100 dark:bg-white/5 border-none rounded-2xl px-5 py-4 text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-primary transition-all mb-6"
+                />
+
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => setShowPasswordModal(false)}
+                    disabled={isUpdating}
+                    className="flex-1 py-4 rounded-2xl font-semibold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={async () => {
+                      if (!newPassword) return;
+                      setIsUpdating(true);
+                      try {
+                        await NexusServer.updatePassword(newPassword);
+                        setShowPasswordModal(false);
+                        setNewPassword('');
+                        alert("Password updated successfully!");
+                      } catch (e: any) {
+                        alert(e.message || "Failed to update password");
+                      } finally {
+                        setIsUpdating(false);
+                      }
+                    }}
+                    disabled={isUpdating || !newPassword}
+                    className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] shadow-lg shadow-brand-primary/30 disabled:opacity-50"
+                  >
+                    {isUpdating ? "Updating..." : "Update"}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Account Modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isUpdating && setShowDeleteModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[32px] overflow-hidden shadow-2xl border border-red-500/10"
+            >
+              <div className="p-8">
+                <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 mb-6">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </div>
+                <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">Delete Account?</h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6 font-medium leading-relaxed">
+                  This action is permanent. All your study data, history, and profile will be wiped out. You cannot undo this.
+                </p>
+
+                <div className="flex flex-col gap-3">
+                  <button 
+                    onClick={async () => {
+                      if (!userProfile) return;
+                      setIsUpdating(true);
+                      try {
+                        await NexusServer.deleteAccount(userProfile.id);
+                        onSignOut(); // This will navigate to login/home
+                      } catch (e: any) {
+                        alert(e.message || "Deletion failed");
+                      } finally {
+                        setIsUpdating(false);
+                        setShowDeleteModal(false);
+                      }
+                    }}
+                    disabled={isUpdating}
+                    className="w-full py-4 bg-red-500 text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] shadow-lg shadow-red-500/20 disabled:opacity-50"
+                  >
+                    {isUpdating ? "Deleting..." : "Permanently Delete"}
+                  </button>
+                  <button 
+                    onClick={() => setShowDeleteModal(false)}
+                    disabled={isUpdating}
+                    className="w-full py-4 rounded-2xl font-semibold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

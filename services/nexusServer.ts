@@ -701,6 +701,29 @@ class NexusServer {
     await client.auth.signOut();
   }
 
+  static async updatePassword(newPassword: string) {
+    const client = getSupabase();
+    if (!client) throw new Error("Supabase not configured.");
+    const { error } = await client.auth.updateUser({ password: newPassword });
+    if (error) throw error;
+  }
+
+  static async deleteAccount(userId: string) {
+    const client = getSupabase();
+    if (!client) throw new Error("Supabase not configured.");
+    
+    // Delete profile first
+    const { error: profileError } = await client
+      .from('profiles')
+      .delete()
+      .eq('id', userId);
+    
+    if (profileError) console.error("Profile deletion failed:", profileError);
+
+    // Logout
+    await client.auth.signOut();
+  }
+
   static async getSession() {
     const client = getSupabase();
     if (!client) return { data: { session: null }, error: new Error("Offline") };
