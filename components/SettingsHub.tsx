@@ -433,8 +433,8 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7 text-brand-primary"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 </div>
 
-                <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1.5 tracking-tight leading-none">Settings Security</h3>
-                <p className="text-zinc-500 text-[11px] font-medium mb-4">Update your encryption. Use at least 6 characters.</p>
+                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-1 tracking-tight leading-none">Security Settings</h3>
+                <p className="text-zinc-500 text-[12px] font-medium mb-5">Update your credentials. At least 6 characters.</p>
 
                 {modalError && (
                   <motion.div 
@@ -457,7 +457,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                       <button 
                         onClick={handleSendRecoveryOTP}
                         disabled={isUpdating}
-                        className="w-full py-4 rounded-2xl bg-brand-primary text-white font-black text-sm shadow-lg shadow-brand-primary/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50"
+                        className="w-full py-3.5 rounded-2xl bg-brand-primary text-white font-bold text-[13px] shadow-lg shadow-brand-primary/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50"
                       >
                         {isUpdating ? "Sending Code..." : "Send Recovery Code"}
                       </button>
@@ -605,7 +605,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                           }
                         }}
                         disabled={isUpdating}
-                        className="flex-[1.5] py-3.5 rounded-2xl bg-brand-primary text-white font-black text-sm shadow-lg shadow-brand-primary/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="flex-[1.5] py-3.5 rounded-2xl bg-brand-primary text-white font-bold text-[13px] shadow-lg shadow-brand-primary/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                       >
                         {isUpdating ? (
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -625,7 +625,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                     <button 
                       onClick={handleResetPassword}
                       disabled={isUpdating}
-                      className="w-full py-3.5 rounded-2xl bg-brand-primary text-white font-black text-sm shadow-lg shadow-brand-primary/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="w-full py-3.5 rounded-2xl bg-brand-primary text-white font-bold text-[13px] shadow-lg shadow-brand-primary/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {isUpdating ? (
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -633,6 +633,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                         "Confirm New Password"
                       )}
                     </button>
+
                   </div>
                 )}
               </motion.div>
@@ -683,8 +684,8 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7 text-red-500"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 </div>
 
-                <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1.5 tracking-tight leading-none">Delete Account?</h3>
-                <p className="text-zinc-500 text-[11px] font-medium mb-4">This action is permanent and cannot be reversed.</p>
+                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-1 tracking-tight leading-none">Delete Account?</h3>
+                <p className="text-zinc-500 text-[12px] font-medium mb-5">This action is permanent and cannot be reversed.</p>
 
                 {modalError && (
                   <motion.div 
@@ -707,17 +708,17 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
 
                 {deleteStep === 2 && (
                   <div className="mb-6 animate-fade-in">
-                    <p className="text-[10px] text-zinc-500 mb-2 font-bold text-center">Type 'delete my account' to confirm</p>
+                    <p className="text-[10px] text-zinc-500 mb-2 font-bold text-center">Type <span className="text-red-500">'delete my account'</span> to confirm</p>
                     <input 
                       type="text"
-                      placeholder="Match the phrase exactly"
+                      placeholder="Match the phrase"
                       value={deleteConfirmation}
                       onChange={(e) => {
                         setDeleteConfirmation(e.target.value);
                         if (modalError) setModalError(null);
                       }}
                       disabled={isUpdating}
-                      className="w-full p-3.5 rounded-2xl bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 focus:border-red-500 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
+                      className="w-full p-3.5 rounded-2xl bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 focus:border-red-500 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner text-center"
                     />
                   </div>
                 )}
@@ -743,7 +744,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                         return;
                       }
 
-                      if (deleteConfirmation !== 'delete my account') {
+                      if (deleteConfirmation.toLowerCase().trim() !== 'delete my account') {
                         setModalError("Phrase doesn't match");
                         return;
                       }
@@ -761,8 +762,8 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                         setIsUpdating(false);
                       }
                     }}
-                    disabled={isUpdating || (deleteStep === 2 && deleteConfirmation !== 'delete my account')}
-                    className="flex-[2] py-3.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold text-[13px] shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-2.5 border-none disabled:opacity-50 cursor-pointer outline-none"
+                    disabled={isUpdating || (deleteStep === 2 && deleteConfirmation.toLowerCase().trim() !== 'delete my account')}
+                    className="flex-[2] py-3.5 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-bold text-[13px] shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-2.5 border-none disabled:opacity-50 cursor-pointer outline-none"
                   >
                     {isUpdating ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

@@ -725,17 +725,28 @@ class NexusServer {
     const client = getSupabase();
     if (!client) throw new Error("Supabase not configured.");
     
-    // Delete profile first
-    const { error: profileError } = await client
-      .from('profiles')
-      .delete()
-      .eq('id', userId);
-    
-    if (profileError) console.error("Profile deletion failed:", profileError);
+    // Get current session for authentication
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) throw new Error("No active session found. Please re-login.");
 
-    // Logout
+    const response = await fetch('/api/delete-account', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({ userId })
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to permanently delete account.");
+    }
+
+    // Logout locally
     await client.auth.signOut();
   }
+
 
   static async getSession() {
     const client = getSupabase();
