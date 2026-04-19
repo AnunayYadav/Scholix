@@ -228,9 +228,6 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
   const [syncHiddenFields, setSyncHiddenFields] = useState<any>(null);
   const [syncCookies, setSyncCookies] = useState<string | null>(null);
   const [captchaInputName, setCaptchaInputName] = useState<string>('');
-  const [userFieldName, setUserFieldName] = useState<string>('');
-  const [passFieldName, setPassFieldName] = useState<string>('');
-  const [loginBtnName, setLoginBtnName] = useState<string>('');
 
   const handleCloseUpload = () => {
     setIsClosingUpload(true);
@@ -419,9 +416,6 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       setSyncHiddenFields(result.hiddenFields);
       setSyncCookies(result.cookies);
       setCaptchaInputName(result.captchaInputName);
-      setUserFieldName(result.userFieldName);
-      setPassFieldName(result.passFieldName);
-      setLoginBtnName(result.loginBtnName);
       setSyncStep(1);
     } catch (err: any) {
       showToast(err.message || "Failed to reach UMS portal.", "error");
@@ -452,10 +446,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
           captchaCode,
           hiddenFields: syncHiddenFields,
           cookies: syncCookies,
-          captchaInputName,
-          userFieldName,
-          passFieldName,
-          loginBtnName
+          captchaInputName
         })
       });
 

@@ -114,9 +114,6 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
       setSyncHiddenFields(result.hiddenFields);
       setSyncCookies(result.cookies);
       setCaptchaInputName(result.captchaInputName);
-      setUserFieldName(result.userFieldName);
-      setPassFieldName(result.passFieldName);
-      setLoginBtnName(result.loginBtnName);
       setSyncStep(1);
     } catch (err: any) {
       showToast(err.message || "Failed to reach UMS portal.", "error");
@@ -147,10 +144,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
           captchaCode,
           hiddenFields: syncHiddenFields,
           cookies: syncCookies,
-          captchaInputName,
-          userFieldName,
-          passFieldName,
-          loginBtnName
+          captchaInputName
         })
       });
 
@@ -210,9 +204,6 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
   const [syncHiddenFields, setSyncHiddenFields] = useState<any>(null);
   const [syncCookies, setSyncCookies] = useState<string | null>(null);
   const [captchaInputName, setCaptchaInputName] = useState<string>('');
-  const [userFieldName, setUserFieldName] = useState<string>('');
-  const [passFieldName, setPassFieldName] = useState<string>('');
-  const [loginBtnName, setLoginBtnName] = useState<string>('');
 
   const editModalRef = useRef<HTMLDivElement>(null);
 
