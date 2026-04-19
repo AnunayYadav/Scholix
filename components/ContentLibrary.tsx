@@ -729,9 +729,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">{Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}</div>
           ) : (
             <div className="relative">
-              {/* Library Banner Ad */}
-              <NexusAd slot="LIBRARY_BANNER_AD_SLOT_HERE" format="fluid" className="!my-0 mb-8" />
-              
               <DndContext
 
                 sensors={sensors}
@@ -832,6 +829,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   document.body
                 )}
               </DndContext>
+
+              {/* Library Banner Ad - Moved below folders */}
+              <NexusAd slot="LIBRARY_BANNER_AD_SLOT_HERE" format="fluid" className="mt-12 mb-8" />
             </div>
           )}
         </div>

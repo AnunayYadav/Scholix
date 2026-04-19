@@ -194,7 +194,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Sidebar Vertical Ad - Only shown when expanded */}
         {(isHovered || isMobileMenuOpen) && (
           <div className="px-4 py-2 opacity-70 hover:opacity-100 transition-opacity">
-            <NexusAd slot="SIDEBAR_AD_SLOT_HERE" format="rectangle" />
+            <NexusAd slot="SIDEBAR_AD_SLOT_HERE" format="rectangle" hideLabel />
           </div>
         )}
 

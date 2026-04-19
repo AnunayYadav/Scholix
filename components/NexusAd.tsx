@@ -7,6 +7,7 @@ interface NexusAdProps {
   responsive?: 'true' | 'false';
   className?: string;
   style?: React.CSSProperties;
+  hideLabel?: boolean;
 }
 
 const NexusAd: React.FC<NexusAdProps> = ({ 
@@ -14,7 +15,8 @@ const NexusAd: React.FC<NexusAdProps> = ({
   format = 'auto', 
   responsive = 'true', 
   className = '',
-  style = {}
+  style = {},
+  hideLabel = false
 }) => {
   useEffect(() => {
     try {
@@ -27,9 +29,11 @@ const NexusAd: React.FC<NexusAdProps> = ({
 
   return (
     <div className={`nexus-ad-container my-6 w-full flex flex-col items-center ${className}`}>
-      <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-2">
-        Sponsored
-      </span>
+      {!hideLabel && (
+        <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-2">
+          Sponsored
+        </span>
+      )}
       <div className="w-full overflow-hidden flex justify-center bg-zinc-50 dark:bg-zinc-900/30 rounded-2xl border border-zinc-200 dark:border-white/5 min-h-[100px]" style={style}>
         <ins
           className="adsbygoogle"
