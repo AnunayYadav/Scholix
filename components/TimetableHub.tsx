@@ -7,6 +7,7 @@ import { extractTimetableFromImage } from '../services/geminiService.ts';
 import NexusDropdown from './NexusDropdown.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import { showToast, showConfirm } from './Toast.tsx';
+import NexusAd from './NexusAd.tsx';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -678,6 +679,9 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
         </div>
       </header>
 
+      {/* Top Banner Ad */}
+      <NexusAd slot="2912081909" format="horizontal" hideLabel className="!my-2" />
+
       <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar">
         {DAYS.map(day => (
           <button key={day} onClick={() => setActiveDay(day)} className={`flex-shrink-0 px-8 py-4 rounded-3xl text-[11px] sm:text-xs font-medium transition-all border-none ${activeDay === day ? 'bg-orange-600 text-white shadow-2xl scale-105' : 'bg-white/5 text-zinc-500 hover:text-white'}`}>{day}</button>
@@ -757,6 +761,9 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
               </div>
             </div>
           )}
+          
+          {/* Article Ad at the bottom of main schedule */}
+          <NexusAd slot="7296989983" layout="in-article" format="fluid" hideLabel />
         </div>
 
         <div className="lg:col-span-4 space-y-8">

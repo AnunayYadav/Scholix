@@ -128,6 +128,15 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
           )}
         </div>
       </div>
+
+      {/* Footer Ad */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-0 mt-10">
+        <NexusAd 
+          slot="7296989983" 
+          layout="in-article" 
+          format="fluid" 
+        />
+      </div>
     </div>
   );
 };
