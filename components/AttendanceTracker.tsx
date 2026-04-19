@@ -114,6 +114,9 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
       setSyncHiddenFields(result.hiddenFields);
       setSyncCookies(result.cookies);
       setCaptchaInputName(result.captchaInputName);
+      setUserFieldName(result.userFieldName);
+      setPassFieldName(result.passFieldName);
+      setLoginBtnName(result.loginBtnName);
       setSyncStep(1);
     } catch (err: any) {
       showToast(err.message || "Failed to reach UMS portal.", "error");
@@ -144,7 +147,10 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
           captchaCode,
           hiddenFields: syncHiddenFields,
           cookies: syncCookies,
-          captchaInputName
+          captchaInputName,
+          userFieldName,
+          passFieldName,
+          loginBtnName
         })
       });
 
@@ -204,6 +210,9 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
   const [syncHiddenFields, setSyncHiddenFields] = useState<any>(null);
   const [syncCookies, setSyncCookies] = useState<string | null>(null);
   const [captchaInputName, setCaptchaInputName] = useState<string>('');
+  const [userFieldName, setUserFieldName] = useState<string>('');
+  const [passFieldName, setPassFieldName] = useState<string>('');
+  const [loginBtnName, setLoginBtnName] = useState<string>('');
 
   const editModalRef = useRef<HTMLDivElement>(null);
 
@@ -786,88 +795,89 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                 </div>
               ) : (
                 <>
-              <div className="p-4 rounded-2xl bg-orange-500/5 border border-orange-500/20 text-[10px] text-orange-600 font-medium mb-2 leading-relaxed">
-                ⚡ <b>Secure Sync:</b> We fetch data directly from UMS. Your credentials are never stored.
-              </div>
-
-              {syncStep === 0 && (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Registration No.</label>
-                    <input
-                      type="text"
-                      value={umsUsername}
-                      onChange={e => setUmsUsername(e.target.value)}
-                      placeholder="e.g. 12200000"
-                      className="w-full bg-white dark:bg-[#0c0c0c] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all"
-                    />
-                  </div>
-                  <button 
-                    onClick={handleUMSInit} 
-                    disabled={isSyncing}
-                    className="w-full py-4 bg-orange-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-orange-600/20 hover:scale-[1.02] active:scale-95 transition-all border-none"
-                  >
-                    {isSyncing ? "Connecting..." : "Continue"}
-                  </button>
-                </div>
-              )}
-
-              {syncStep === 1 && (
-                <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">UMS Password</label>
-                    <input
-                      type="password"
-                      value={umsPassword}
-                      onChange={e => setUmsPassword(e.target.value)}
-                      placeholder="Enter Password"
-                      className="w-full bg-white dark:bg-[#0c0c0c] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all"
-                    />
+                  <div className="p-4 rounded-2xl bg-orange-500/5 border border-orange-500/20 text-[10px] text-orange-600 font-medium mb-2 leading-relaxed">
+                    ⚡ <b>Secure Sync:</b> We fetch data directly from UMS. Your credentials are never stored.
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1 text-center block">Solve Captcha</label>
-                    {captchaImage && (
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="p-3 bg-white rounded-xl shadow-sm border border-zinc-100">
-                          <img src={captchaImage} alt="Captcha" className="h-12 w-auto object-contain" />
-                        </div>
+                  {syncStep === 0 && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Registration No.</label>
                         <input
                           type="text"
-                          value={captchaCode}
-                          onChange={e => setCaptchaCode(e.target.value)}
-                          placeholder="Type the 4 codes above"
-                          className="w-full bg-white dark:bg-[#0c0c0c] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-zinc-800 dark:text-white text-center outline-none focus:ring-2 focus:ring-orange-600 transition-all font-black"
+                          value={umsUsername}
+                          onChange={e => setUmsUsername(e.target.value)}
+                          placeholder="e.g. 12200000"
+                          className="w-full bg-white dark:bg-[#0c0c0c] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all"
                         />
                       </div>
-                    )}
-                  </div>
+                      <button 
+                        onClick={handleUMSInit} 
+                        disabled={isSyncing}
+                        className="w-full py-4 bg-orange-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-orange-600/20 hover:scale-[1.02] active:scale-95 transition-all border-none"
+                      >
+                        {isSyncing ? "Connecting..." : "Continue"}
+                      </button>
+                    </div>
+                  )}
 
-                  <div className="flex gap-3">
-                    <button 
-                      onClick={() => setSyncStep(0)} 
-                      className="flex-1 py-4 text-zinc-500 font-bold text-[10px] uppercase border none bg-transparent"
-                    >
-                      Back
-                    </button>
-                    <button 
-                      onClick={handleUMSSync} 
-                      disabled={isSyncing}
-                      className="flex-[2] py-4 bg-orange-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-orange-600/20 hover:scale-[1.02] active:scale-95 transition-all border-none"
-                    >
-                      {isSyncing ? "Syncing..." : "Verify & Sync"}
-                    </button>
-                  </div>
-                </div>
-              )}
+                  {syncStep === 1 && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">UMS Password</label>
+                        <input
+                          type="password"
+                          value={umsPassword}
+                          onChange={e => setUmsPassword(e.target.value)}
+                          placeholder="Enter Password"
+                          className="w-full bg-white dark:bg-[#0c0c0c] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all"
+                        />
+                      </div>
 
-              {syncStep === 2 && (
-                <div className="py-10 text-center space-y-4">
-                  <div className="w-10 h-10 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto" />
-                </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1 text-center block">Solve Captcha</label>
+                        {captchaImage && (
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="p-3 bg-white rounded-xl shadow-sm border border-zinc-100">
+                              <img src={captchaImage} alt="Captcha" className="h-12 w-auto object-contain" />
+                            </div>
+                            <input
+                              type="text"
+                              value={captchaCode}
+                              onChange={e => setCaptchaCode(e.target.value)}
+                              placeholder="Type the 4 codes above"
+                              className="w-full bg-white dark:bg-[#0c0c0c] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-zinc-800 dark:text-white text-center outline-none focus:ring-2 focus:ring-orange-600 transition-all font-black"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button 
+                          onClick={() => setSyncStep(0)} 
+                          className="flex-1 py-4 text-zinc-500 font-bold text-[10px] uppercase border-none bg-transparent"
+                        >
+                          Back
+                        </button>
+                        <button 
+                          onClick={handleUMSSync} 
+                          disabled={isSyncing}
+                          className="flex-[2] py-4 bg-orange-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-orange-600/20 hover:scale-[1.02] active:scale-95 transition-all border-none"
+                        >
+                          {isSyncing ? "Syncing..." : "Verify & Sync"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {syncStep === 2 && (
+                    <div className="py-10 text-center space-y-4">
+                      <div className="w-10 h-10 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto" />
+                      <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em]">{syncStatus}</p>
+                    </div>
+                  )}
+                </>
               )}
-            </>
-          )}
             </div>
           </div>
         </div>,

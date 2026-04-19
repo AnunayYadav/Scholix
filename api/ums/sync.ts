@@ -2,18 +2,19 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import qs from 'qs';
-import { TimetableData, DaySchedule } from '../../types';
+import { DaySchedule } from '../../types';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { action, username, password, captchaCode, hiddenFields, cookies, captchaInputName } = req.body;
+  const { action, username, password, captchaCode, hiddenFields, cookies, captchaInputName, userFieldName, passFieldName, loginBtnName } = req.body;
 
   const client = axios.create({
     baseURL: 'https://ums.lpu.in/lpuums/',
     timeout: 30000,
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
     },
     maxRedirects: 5,
   });
@@ -21,23 +22,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // ACTION: INIT
   if (action === 'init') {
     try {
-      const loginPageRes = await client.get('/');
+      // Explicitly hit Loginnew.aspx as per inspection
+      const loginPageRes = await client.get('Loginnew.aspx');
       const $login = cheerio.load(loginPageRes.data);
 
       const fields = {
         __VIEWSTATE: String($login('#__VIEWSTATE').val() || ''),
         __VIEWSTATEGENERATOR: String($login('#__VIEWSTATEGENERATOR').val() || ''),
         __EVENTVALIDATION: String($login('#__EVENTVALIDATION').val() || ''),
+        __EVENTTARGET: '',
+        __EVENTARGUMENT: '',
       };
+
+      // Detect dynamic input names
+      const foundUserField = $login('input[name*="txtU"], input[id*="txtU"]').attr('name') || 'txtU';
+      const foundPassField = $login('input[type="password"]').attr('name') || 'TxtpwdAutoId_8767';
+      const foundLoginBtn = $login('input[id*="iBtnLogin"], input[name*="iBtnLogin"]').attr('name') || 'iBtnLogins150203125';
 
       // Find Captcha image and input name
       const captchaImg = $login('img[id*="Captcha"], img[src*="Captcha"]').first();
       let captchaUrl = captchaImg.attr('src') || '';
       
-      // The input is usually the nearest text field or one with 'CaptchaCode' in its ID
-      let foundInputName = $login('input[id*="CaptchaCode"]').attr('name') || 
-                           $login('input[id*="Captha"]').attr('name') || 
-                           'TxtCapthaAutoId_9879'; // Fallback
+      let foundCaptchaInput = $login('input[id*="CaptchaCode"]').attr('name') || 
+                              $login('input[name*="CaptchaCode"]').attr('name') ||
+                              'CaptchaCodeTextBox';
 
       if (captchaUrl && !captchaUrl.startsWith('http')) {
         captchaUrl = new URL(captchaUrl, 'https://ums.lpu.in/lpuums/').href;
@@ -59,9 +67,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         captchaImage: captchaBase64,
         hiddenFields: fields,
         cookies: currentCookies,
-        captchaInputName: foundInputName
+        captchaInputName: foundCaptchaInput,
+        userFieldName: foundUserField,
+        passFieldName: foundPassField,
+        loginBtnName: foundLoginBtn
       });
     } catch (error: any) {
+      console.error('Init Error:', error.message);
       return res.status(500).json({ error: 'Failed to reach UMS', details: error.message });
     }
   }
@@ -75,38 +87,50 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       const payload: any = {
         ...hiddenFields,
-        __EVENTTARGET: '',
-        __EVENTARGUMENT: '',
-        txtUserName: username,
-        txtPassword: password,
-        btnLogin: 'Login',
-        ddlStartPage: 'StudentDashboard.aspx'
       };
 
-      // Add captcha with the detected name
-      payload[captchaInputName || 'TxtCapthaAutoId_9879'] = captchaCode;
+      // Map dynamic fields
+      payload[userFieldName || 'txtU'] = username;
+      payload[passFieldName || 'TxtpwdAutoId_8767'] = password;
+      payload[captchaInputName || 'CaptchaCodeTextBox'] = captchaCode;
+      
+      // The login button must be sent as well
+      payload[loginBtnName || 'iBtnLogins150203125'] = 'Login';
+      
+      // Some versions might need this
+      payload['ddlStartPage'] = 'StudentDashboard.aspx';
 
-      const loginPostRes = await client.post('Login.aspx', qs.stringify(payload), {
+      const loginPostRes = await client.post('Loginnew.aspx', qs.stringify(payload), {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Cookie': cookies,
+          'Referer': 'https://ums.lpu.in/lpuums/Loginnew.aspx'
         },
       });
 
-      if (loginPostRes.data.includes('Invalid User Name or Password') || loginPostRes.data.includes('Invalid Captcha')) {
-        return res.status(401).json({ error: loginPostRes.data.includes('Captcha') ? 'Invalid Captcha' : 'Invalid Credentials' });
+      if (loginPostRes.data.includes('Invalid User Name or Password') || 
+          loginPostRes.data.includes('Invalid Captcha') || 
+          loginPostRes.data.includes('Incorrect Captcha')) {
+        return res.status(401).json({ 
+          error: (loginPostRes.data.includes('Captcha') || loginPostRes.data.includes('Captcha')) ? 'Invalid Captcha' : 'Invalid Credentials' 
+        });
       }
 
       const nextCookies = loginPostRes.headers['set-cookie']?.join('; ') || cookies;
 
-      // Verify login success
-      const dashboardRes = await client.get('StudentDashboard.aspx', { headers: { Cookie: nextCookies } });
-      if (!dashboardRes.data.includes('lblStudentName')) {
+      // Verify login success - Check if we are on dashboard or if we can fetch it
+      let dashboardPage = loginPostRes.data;
+      if (!dashboardPage.includes('lblStudentName')) {
+        const dashboardRes = await client.get('StudentDashboard.aspx', { headers: { Cookie: nextCookies } });
+        dashboardPage = dashboardRes.data;
+      }
+
+      if (!dashboardPage.includes('lblStudentName')) {
         return res.status(401).json({ error: 'Session expired or login failed' });
       }
 
-      const $dash = cheerio.load(dashboardRes.data);
-      const studentName = $dash('#lblStudentName').text().trim();
+      const $dash = cheerio.load(dashboardPage);
+      const studentName = $dash('#lblStudentName').text().trim() || 'Student';
       
       // Parse Attendance
       const attendance: any[] = [];
@@ -163,6 +187,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       });
     } catch (e: any) {
+      console.error('Sync Error:', e.message);
       return res.status(500).json({ error: 'Sync error', details: e.message });
     }
   }
