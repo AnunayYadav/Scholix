@@ -178,17 +178,17 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
             <div className="space-y-4">
               <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 dark:text-zinc-500">Institutional</h4>
               <a 
-                href="mailto:scholix.connect@gmail.com"
+                href="mailto:anunayarvind@gmail.com"
                 className="block text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-colors"
               >
                 Partnerships
               </a>
               <a 
-                href="mailto:scholix.connect@gmail.com"
+                href="mailto:anunayarvind@gmail.com"
                 className="block text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-colors"
                 title="Enquiry Email"
               >
-                scholix.connect@gmail.com
+                anunayarvind@gmail.com
               </a>
             </div>
 
