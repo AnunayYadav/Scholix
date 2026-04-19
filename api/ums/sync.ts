@@ -5,15 +5,9 @@ import qs from 'qs';
 import { TimetableData, DaySchedule } from '../../types';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password are required' });
-  }
+  const { action, username, password, captchaCode, hiddenFields, cookies, captchaInputName } = req.body;
 
   const client = axios.create({
     baseURL: 'https://ums.lpu.in/lpuums/',
@@ -24,153 +18,154 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     maxRedirects: 5,
   });
 
-  try {
-    // 1. Get Login Page to extract hidden ASP.NET fields
-    const loginPageRes = await client.get('Login.aspx');
-    const $login = cheerio.load(loginPageRes.data);
-    
-    const hiddenFields = {
-      __VIEWSTATE: String($login('#__VIEWSTATE').val() || ''),
-      __VIEWSTATEGENERATOR: String($login('#__VIEWSTATEGENERATOR').val() || ''),
-      __EVENTVALIDATION: String($login('#__EVENTVALIDATION').val() || ''),
-      __EVENTTARGET: '',
-      __EVENTARGUMENT: '',
-      txtUserName: username,
-      txtPassword: password,
-      ddlStartPage: 'StudentDashboard.aspx',
-      btnLogin: 'Login'
-    };
+  // ACTION: INIT
+  if (action === 'init') {
+    try {
+      const loginPageRes = await client.get('/');
+      const $login = cheerio.load(loginPageRes.data);
 
-    // 2. Perform Login
-    const loginPostRes = await client.post('Login.aspx', qs.stringify(hiddenFields), {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Cookie': loginPageRes.headers['set-cookie']?.join('; ') || '',
-      },
-    });
+      const fields = {
+        __VIEWSTATE: String($login('#__VIEWSTATE').val() || ''),
+        __VIEWSTATEGENERATOR: String($login('#__VIEWSTATEGENERATOR').val() || ''),
+        __EVENTVALIDATION: String($login('#__EVENTVALIDATION').val() || ''),
+      };
 
-    const cookies = loginPostRes.headers['set-cookie']?.join('; ') || loginPageRes.headers['set-cookie']?.join('; ') || '';
+      // Find Captcha image and input name
+      const captchaImg = $login('img[id*="Captcha"], img[src*="Captcha"]').first();
+      let captchaUrl = captchaImg.attr('src') || '';
+      
+      // The input is usually the nearest text field or one with 'CaptchaCode' in its ID
+      let foundInputName = $login('input[id*="CaptchaCode"]').attr('name') || 
+                           $login('input[id*="Captha"]').attr('name') || 
+                           'TxtCapthaAutoId_9879'; // Fallback
 
-    // 3. Check if login was successful (usually redirects to StudentDashboard.aspx)
-    if (loginPostRes.data.includes('Invalid User Name or Password')) {
-      return res.status(401).json({ error: 'Invalid UMS credentials' });
+      if (captchaUrl && !captchaUrl.startsWith('http')) {
+        captchaUrl = new URL(captchaUrl, 'https://ums.lpu.in/lpuums/').href;
+      }
+
+      const currentCookies = loginPageRes.headers['set-cookie']?.join('; ') || '';
+
+      let captchaBase64 = '';
+      if (captchaUrl) {
+        const captchaRes = await client.get(captchaUrl, {
+          responseType: 'arraybuffer',
+          headers: { Cookie: currentCookies }
+        });
+        captchaBase64 = `data:image/png;base64,${Buffer.from(captchaRes.data).toString('base64')}`;
+      }
+
+      return res.status(200).json({
+        success: true,
+        captchaImage: captchaBase64,
+        hiddenFields: fields,
+        cookies: currentCookies,
+        captchaInputName: foundInputName
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: 'Failed to reach UMS', details: error.message });
+    }
+  }
+
+  // ACTION: SYNC
+  if (action === 'sync') {
+    if (!username || !password || !captchaCode || !hiddenFields || !cookies) {
+      return res.status(400).json({ error: 'Missing sync data' });
     }
 
-    // 4. Fetch Attendance from Dashboard
-    const dashboardRes = await client.get('StudentDashboard.aspx', {
-      headers: { Cookie: cookies }
-    });
-    
-    const $dash = cheerio.load(dashboardRes.data);
-    const attendance: any[] = [];
-    
-    // Attempting to parse the attendance summary table
-    $dash('#AttSummary tr:not(:first-child)').each((_, el) => {
-      const cols = $dash(el).find('td');
-      if (cols.length >= 7) {
-        const name = $dash(cols[1]).text().trim();
-        const attendanceData = $dash(cols[7]).text().trim();
-        
-        let present = 0;
-        let total = 0;
-        
-        const match = attendanceData.match(/(\d+)\/(\d+)/);
-        if (match) {
-          present = parseInt(match[1]);
-          total = parseInt(match[2]);
-        } else {
-          const pctText = $dash(cols[8]).text().trim();
-          const pct = parseFloat(pctText) || 0;
-          present = Math.round((pct / 100) * 10);
-          total = 10;
-        }
+    try {
+      const payload: any = {
+        ...hiddenFields,
+        __EVENTTARGET: '',
+        __EVENTARGUMENT: '',
+        txtUserName: username,
+        txtPassword: password,
+        btnLogin: 'Login',
+        ddlStartPage: 'StudentDashboard.aspx'
+      };
 
-        if (name) {
-          attendance.push({
-            id: Math.random().toString(36).substring(2, 11),
-            name: name,
-            present,
-            total,
-            goal: 75
-          });
-        }
+      // Add captcha with the detected name
+      payload[captchaInputName || 'TxtCapthaAutoId_9879'] = captchaCode;
+
+      const loginPostRes = await client.post('Login.aspx', qs.stringify(payload), {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Cookie': cookies,
+        },
+      });
+
+      if (loginPostRes.data.includes('Invalid User Name or Password') || loginPostRes.data.includes('Invalid Captcha')) {
+        return res.status(401).json({ error: loginPostRes.data.includes('Captcha') ? 'Invalid Captcha' : 'Invalid Credentials' });
       }
-    });
 
-    // 5. Fetch Timetable
-    const timetableRes = await client.get('Reports/frmStudentTimeTable.aspx', {
-      headers: { Cookie: cookies }
-    });
-    
-    const $tt = cheerio.load(timetableRes.data);
-    const schedule: DaySchedule[] = [
-      { day: 'Monday', slots: [] },
-      { day: 'Tuesday', slots: [] },
-      { day: 'Wednesday', slots: [] },
-      { day: 'Thursday', slots: [] },
-      { day: 'Friday', slots: [] },
-      { day: 'Saturday', slots: [] },
-    ];
+      const nextCookies = loginPostRes.headers['set-cookie']?.join('; ') || cookies;
 
-    $tt('table.Gridview-Class tr:not(:first-child)').each((_, row) => {
-      const timeCell = $tt(row).find('td').first().text().trim();
-      const timeMatch = timeCell.match(/(\d+:\d+\s+[AP]M)\s*-\s*(\d+:\d+\s+[AP]M)/);
+      // Verify login success
+      const dashboardRes = await client.get('StudentDashboard.aspx', { headers: { Cookie: nextCookies } });
+      if (!dashboardRes.data.includes('lblStudentName')) {
+        return res.status(401).json({ error: 'Session expired or login failed' });
+      }
+
+      const $dash = cheerio.load(dashboardRes.data);
+      const studentName = $dash('#lblStudentName').text().trim();
       
-      if (timeMatch) {
-        const startTime = timeMatch[1];
-        const endTime = timeMatch[2];
+      // Parse Attendance
+      const attendance: any[] = [];
+      $dash('#AttSummary tr:not(:first-child)').each((_, el) => {
+        const cols = $dash(el).find('td');
+        if (cols.length >= 7) {
+          const match = $dash(cols[7]).text().trim().match(/(\d+)\/(\d+)/);
+          if (match) {
+            attendance.push({
+              id: Math.random().toString(36).substring(2, 11),
+              name: $dash(cols[1]).text().trim(),
+              present: parseInt(match[1]),
+              total: parseInt(match[2]),
+              goal: 75
+            });
+          }
+        }
+      });
 
-        $tt(row).find('td:not(:first-child)').each((colIndex, col) => {
-          const content = $tt(col).text().trim();
-          if (content && content.length > 5) {
-            const lines = content.split('\n').map(l => l.trim()).filter(l => l);
-            const subject = lines[0] || 'Unknown';
-            const room = lines[1]?.replace(/[()]/g, '') || 'N/A';
+      // Parse Timetable
+      const timetableRes = await client.get('Reports/frmStudentTimeTable.aspx', { headers: { Cookie: nextCookies } });
+      const $tt = cheerio.load(timetableRes.data);
+      const schedule: DaySchedule[] = Array.from({ length: 6 }, (_, i) => ({ 
+        day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][i], 
+        slots: [] 
+      }));
 
-            if (schedule[colIndex]) {
+      $tt('table.Gridview-Class tr:not(:first-child)').each((_, row) => {
+        const timeCell = $tt(row).find('td').first().text().trim();
+        const timeMatch = timeCell.match(/(\d+:\d+\s+[AP]M)\s*-\s*(\d+:\d+\s+[AP]M)/);
+        if (timeMatch) {
+          $tt(row).find('td:not(:first-child)').each((colIndex, col) => {
+            const lines = $tt(col).text().trim().split('\n').map(l => l.trim()).filter(l => l);
+            if (lines.length > 0 && schedule[colIndex]) {
               schedule[colIndex].slots.push({
                 id: Math.random().toString(36).substring(2, 11),
-                subject,
-                room,
-                startTime,
-                endTime,
+                subject: lines[0],
+                room: lines[1]?.replace(/[()]/g, '') || 'N/A',
+                startTime: timeMatch[1],
+                endTime: timeMatch[2],
                 type: 'class'
               });
             }
-          }
-        });
-      }
-    });
+          });
+        }
+      });
 
-    const rawStudentName = $dash('#lblStudentName').text().trim() || 'Verto Student';
-    const formattedName = rawStudentName.split(' ')
-      .map(n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase())
-      .join(' ');
-
-    const timetable: TimetableData = {
-      ownerName: formattedName,
-      ownerId: username,
-      schedule
-    };
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        profile: {
-          name: formattedName,
-          regNo: username,
-        },
-        attendance,
-        timetable
-      }
-    });
-
-  } catch (error: any) {
-    console.error('UMS Sync Error:', error.message);
-    return res.status(500).json({ 
-      error: 'Failed to connect to UMS. Please try again later.',
-      details: error.message 
-    });
+      return res.status(200).json({
+        success: true,
+        data: {
+          profile: { name: studentName, regNo: username },
+          attendance,
+          timetable: { ownerName: studentName, ownerId: username, schedule }
+        }
+      });
+    } catch (e: any) {
+      return res.status(500).json({ error: 'Sync error', details: e.message });
+    }
   }
-}
 
+  return res.status(400).json({ error: 'Invalid action' });
+}

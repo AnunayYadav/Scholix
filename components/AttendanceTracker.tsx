@@ -864,9 +864,10 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               {syncStep === 2 && (
                 <div className="py-10 text-center space-y-4">
                   <div className="w-10 h-10 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em]">{syncStatus}</p>
                 </div>
               )}
+            </>
+          )}
             </div>
           </div>
         </div>,
