@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import NexusServer from '../services/nexusServer.ts';
 import { UserProfile } from '../types.ts';
 
+import { showToast } from './Toast.tsx';
+
 interface Subject {
   id: string;
   name: string;
@@ -81,6 +83,48 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
     }, 250);
   };
 
+  const handleCloseSync = () => {
+    setIsClosingSync(true);
+    setTimeout(() => {
+      setIsSyncModalOpen(false);
+      setIsClosingSync(false);
+    }, 250);
+  };
+
+  const handleUMSSync = async () => {
+    if (!umsUsername || !umsPassword) return;
+    setIsSyncing(true);
+    setSyncStatus('Connecting to UMS...');
+
+    try {
+      const response = await fetch('/api/ums/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: umsUsername, password: umsPassword })
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Sync failed');
+
+      const { attendance } = result.data;
+      
+      // Update subjects state
+      setSubjects(attendance);
+      localStorage.setItem('nexus_attendance', JSON.stringify(attendance));
+
+      // Close modal
+      handleCloseSync();
+      // Reset credentials for security
+      setUmsPassword('');
+      showToast('Attendance synced successfully!', 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Failed to sync with UMS.', 'error');
+    } finally {
+      setIsSyncing(false);
+      setSyncStatus('');
+    }
+  };
+
   const [wipingAll, setWipingAll] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -91,6 +135,14 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
     dutyLeaves: '0',
     goal: '75'
   });
+
+  // UMS Sync State
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const [isClosingSync, setIsClosingSync] = useState(false);
+  const [umsUsername, setUmsUsername] = useState('');
+  const [umsPassword, setUmsPassword] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState('');
 
   const editModalRef = useRef<HTMLDivElement>(null);
 
@@ -120,7 +172,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
     const goal = parseInt(newSub.goal) || 75;
 
     setSubjects(prev => [...prev, {
-      id: Math.random().toString(36).substr(2, 9),
+      id: Math.random().toString(36).substring(2, 11),
       name: newSub.name,
       present: Math.min(present, total),
       total: total,
@@ -301,6 +353,14 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               )}
             </div>
           )}
+
+          <button
+            onClick={() => setIsSyncModalOpen(true)}
+            className="flex items-center space-x-1.5 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-orange-600 to-red-600 rounded-xl text-[10px] md:text-xs font-black text-white transition-all shadow-lg shadow-orange-600/20 active:scale-95"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 md:w-3.5 h-3 md:h-3.5"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16" /></svg>
+            <span>Sync with UMS</span>
+          </button>
 
           <button
             onClick={() => setShowArchived(!showArchived)}
@@ -635,6 +695,76 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
         </div>,
         document.getElementById('modal-root') || document.body
       )}
+
+      {isSyncModalOpen && createPortal(
+        <div 
+          className={`modal-overlay modal-overlay-fade ${isClosingSync ? 'closing' : ''}`}
+          style={{ backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}
+          onClick={(e) => { if(e.target === e.currentTarget && !isSyncing) handleCloseSync(); }}
+        >
+          <div className={`nexus-modal w-full max-w-sm overflow-hidden ${isClosingSync ? 'closing' : ''}`}>
+            <div className="p-8 text-center bg-gradient-to-b from-orange-600/10 to-transparent border-b border-zinc-100 dark:border-white/5 relative">
+              <button 
+                onClick={handleCloseSync}
+                className="absolute top-6 right-6 text-zinc-400 hover:text-orange-600 transition-colors border-none bg-transparent"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+              <div className="w-14 h-14 bg-orange-600 rounded-[22px] flex items-center justify-center mx-auto mb-4 shadow-xl shadow-orange-600/30">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" className="w-7 h-7"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+              </div>
+              <h3 className="text-2xl font-black tracking-tight uppercase">UMS Sync</h3>
+              <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">Direct Data Import</p>
+            </div>
+
+            <div className="p-8 space-y-6">
+              {isSyncing ? (
+                <div className="py-12 text-center space-y-6">
+                  <div className="w-12 h-12 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto" />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-orange-600 animate-pulse">{syncStatus}</p>
+                </div>
+              ) : (
+                <>
+                  <div className="p-4 rounded-2xl bg-orange-500/5 border border-orange-500/10 text-[10px] text-orange-600 font-bold leading-relaxed mb-2">
+                    ⚡ <b>Privacy:</b> Your credentials are only used once to fetch data and are never saved on our servers.
+                  </div>
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Reg Number</label>
+                      <input 
+                        type="text" 
+                        value={umsUsername}
+                        onChange={e => setUmsUsername(e.target.value)}
+                        placeholder="Registration No."
+                        className="w-full bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/10 transition-all placeholder:text-zinc-300 dark:placeholder:text-white/10" 
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">UMS Password</label>
+                      <input 
+                        type="password" 
+                        value={umsPassword}
+                        onChange={e => setUmsPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/10 transition-all placeholder:text-zinc-300 dark:placeholder:text-white/10" 
+                      />
+                    </div>
+                  </div>
+                  <button 
+                    onClick={handleUMSSync}
+                    disabled={!umsUsername || !umsPassword}
+                    className="w-full py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none disabled:opacity-50 disabled:grayscale disabled:scale-100"
+                  >
+                    Authorize & Sync
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.getElementById('modal-root') || document.body
+      )}
+
     </div>
   );
 };

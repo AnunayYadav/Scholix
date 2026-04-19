@@ -210,6 +210,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
   const [myTimetable, setMyTimetable] = useState<TimetableData | null>(null);
   const [friendTimetables, setFriendTimetables] = useState<TimetableData[]>([]);
   const [selectedEntityId, setSelectedEntityId] = useState<string>('me');
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [isClosingUpload, setIsClosingUpload] = useState(false);
@@ -250,9 +251,14 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
   const [isProcessingAI, setIsProcessingAI] = useState(false);
   const [processingStatus, setProcessingStatus] = useState('');
   const [targetForAction, setTargetForAction] = useState<'me' | 'friend'>('me');
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [uploadMethod, setUploadMethod] = useState<'ums' | 'manual'>('ums');
+  const [rawData, setRawData] = useState<any>(null);
   const [rawPastedText, setRawPastedText] = useState('');
+
+  // UMS Sync State
+  const [syncTab, setSyncTab] = useState<'ums' | 'upload' | 'paste'>('ums');
+  const [umsUsername, setUmsUsername] = useState('');
+  const [umsPassword, setUmsPassword] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
   const [manualEntry, setManualEntry] = useState({ name: '', semester: 1 });
 
   const [pendingTimetable, setPendingTimetable] = useState<DaySchedule[] | null>(null);
@@ -379,6 +385,49 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     }
   };
 
+  const handleUMSSync = async () => {
+    if (!umsUsername || !umsPassword) {
+      showToast("Please enter your UMS credentials.", "info");
+      return;
+    }
+
+    setIsSyncing(true);
+    setProcessingStatus("Connecting to UMS...");
+
+    try {
+      const response = await fetch('/api/ums/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: umsUsername, password: umsPassword })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Sync failed");
+      }
+
+      const { timetable, attendance } = result.data;
+
+      // Update Timetable
+      setPendingTimetable(timetable.schedule);
+      
+      // Update Attendance if we are on "me" target
+      if (targetForAction === 'me') {
+        localStorage.setItem('nexus_attendance', JSON.stringify(attendance));
+      }
+
+      showToast("Direct Sync Successful!", "success");
+      handleCloseUpload();
+      setShowMetadataModal(true);
+    } catch (err: any) {
+      showToast(err.message || "Failed to sync with UMS. Check credentials or portal status.", "error");
+    } finally {
+      setIsSyncing(false);
+      setProcessingStatus('');
+    }
+  };
+
   const submitMetadata = async () => {
     const { section, branch, year, semester } = metadata;
     if (!section || !branch || !year || !semester) {
@@ -411,7 +460,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     if (!pendingTimetable) return;
 
     const generatedName = `${section} - ${branch} ${year} Year Sem ${semester}`;
-    const newId = `friend-${Math.random().toString(36).substr(2, 9)}`;
+    const newId = `friend-${Math.random().toString(36).substring(2, 11)}`;
     const data: TimetableData = {
       ownerId: targetForAction === 'me' ? (userProfile?.id || 'local-me') : newId,
       ownerName: generatedName,
@@ -538,7 +587,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     }
 
     const data: TimetableData = {
-      ownerId: targetId || (targetForAction === 'me' ? (userProfile?.id || 'local-me') : `friend-${Math.random().toString(36).substr(2, 9)}`),
+      ownerId: targetId || (targetForAction === 'me' ? (userProfile?.id || 'local-me') : `friend-${Math.random().toString(36).substring(2, 11)}`),
       ownerName: targetForAction === 'me' || targetId ? (batch.name) : (batch.name || `${batch.section} ${batch.branch}`),
       schedule: batch.schedule,
       section: batch.section,
@@ -565,7 +614,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
   };
 
   const handleAddEmptyConnection = () => {
-    const newId = `friend-${Math.random().toString(36).substr(2, 9)}`;
+    const newId = `friend-${Math.random().toString(36).substring(2, 11)}`;
     const newFriend: TimetableData = {
       ownerId: newId,
       ownerName: 'New Connection',
@@ -693,7 +742,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
           {(!activeTimetable || !activeTimetable.schedule || activeTimetable.schedule.length === 0) ? (
             <div className="glass-panel p-16 rounded-[48px] border-4 border-dashed border-zinc-200 dark:border-white/5 flex flex-col items-center justify-center text-center bg-zinc-100 dark:bg-[#0a0a0a]">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-20 h-20 mb-6"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
-              <h3 className="text-xl font-mediumer">No Schedule Data</h3>
+              <h3 className="text-xl font-medium">No Schedule Data</h3>
               <p className="text-[11px] sm:text-xs font-bold mt-2">Use a Batch Preset or Upload screenshots for {activeTimetable?.ownerName || (selectedEntityId === 'me' ? 'your profile' : 'this friend')}.</p>
             </div>
           ) : (
@@ -972,25 +1021,69 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
               <p className="text-zinc-500 text-[11px] sm:text-xs font-black mt-2 uppercase tracking-widest">Connect screenshots for {targetForAction === 'me' ? (myTimetable?.ownerName || 'Profile') : 'Identity'}</p>
             </div>
             <div className="p-8 space-y-6">
-              {isProcessingAI ? (
+              {(isProcessingAI || isSyncing) ? (
                 <div className="py-10 text-center space-y-6">
                   <div className="w-12 h-12 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-[10px] font-medium tracking-0.2em text-orange-600 animate-pulse">{processingStatus}</p>
+                  <p className="text-[10px] font-medium tracking-0.2em text-orange-600 animate-pulse uppercase">{processingStatus}</p>
                 </div>
               ) : (
                 <>
-                  <div className="space-y-4">
-                    <label className="block text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">Paste UMS Content</label>
-                    <textarea
-                      value={rawPastedText}
-                      className="w-full h-40 bg-white dark:bg-[#0c0c0c] border-2 border-zinc-100 dark:border-white/5 rounded-3xl p-6 text-[11px] sm:text-xs font-medium focus:border-orange-500/50 transition-all outline-none resize-none"
-                      placeholder="Select and Copy everything from your UMS Timetable page (Ctrl+A, Ctrl+C) and paste it here..."
-                    />
+                  <div className="flex bg-zinc-100 dark:bg-white/5 p-1 rounded-2xl mb-4">
+                    <button onClick={() => setSyncTab('ums')} className={`flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all border-none ${syncTab === 'ums' ? 'bg-white dark:bg-white/10 text-orange-600 shadow-sm' : 'text-zinc-500'}`}>Direct Sync</button>
+                    <button onClick={() => setSyncTab('upload')} className={`flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all border-none ${syncTab === 'upload' ? 'bg-white dark:bg-white/10 text-orange-600 shadow-sm' : 'text-zinc-500'}`}>Images</button>
+                    <button onClick={() => setSyncTab('paste')} className={`flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all border-none ${syncTab === 'paste' ? 'bg-white dark:bg-white/10 text-orange-600 shadow-sm' : 'text-zinc-500'}`}>Paste</button>
                   </div>
-                  <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-white/10 rounded-[32px] p-12 text-center hover:border-orange-500/50 transition-all cursor-pointer bg-white/[0.02] group">
-                    <p className="text-[11px] sm:text-xs font-medium text-zinc-500 group-hover:text-white transition-colors">Select Images</p>
-                    <p className="text-[11px] sm:text-xs font-bold uppercase text-zinc-600 mt-2">Upload multiple images for a full week</p>
-                  </div>
+
+                  {syncTab === 'ums' && (
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20 text-[10px] text-blue-600 font-medium mb-2 leading-relaxed">
+                        ⚡ <b>Privacy Note:</b> Your credentials are only used for this one-time fetch and are never stored on our servers.
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Reg Number</label>
+                        <input
+                          type="text"
+                          value={umsUsername}
+                          onChange={e => setUmsUsername(e.target.value)}
+                          placeholder="Registration No."
+                          className="w-full bg-white dark:bg-[#0c0c0c] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">UMS Password</label>
+                        <input
+                          type="password"
+                          value={umsPassword}
+                          onChange={e => setUmsPassword(e.target.value)}
+                          placeholder="Password"
+                          className="w-full bg-white dark:bg-[#0c0c0c] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600 transition-all"
+                        />
+                      </div>
+                      <button onClick={handleUMSSync} className="w-full py-4 bg-orange-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-orange-600/20 hover:scale-[1.02] active:scale-95 transition-all border-none mt-2">
+                        Fetch from UMS
+                      </button>
+                    </div>
+                  )}
+
+                  {syncTab === 'paste' && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                      <label className="block text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">Paste UMS Content</label>
+                      <textarea
+                        value={rawPastedText}
+                        onChange={e => setRawPastedText(e.target.value)}
+                        className="w-full h-40 bg-white dark:bg-[#0c0c0c] border-2 border-zinc-100 dark:border-white/5 rounded-3xl p-6 text-[11px] sm:text-xs font-medium focus:border-orange-500/50 transition-all outline-none resize-none"
+                        placeholder="Select and Copy everything from your UMS Timetable page (Ctrl+A, Ctrl+C) and paste it here..."
+                      />
+                    </div>
+                  )}
+
+                  {syncTab === 'upload' && (
+                    <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-zinc-200 dark:border-white/10 rounded-[32px] p-12 text-center hover:border-orange-500/30 transition-all cursor-pointer bg-white dark:bg-white/[0.02] group animate-in fade-in slide-in-from-bottom-4 duration-300">
+                      <p className="text-[11px] sm:text-xs font-medium text-zinc-500 group-hover:text-orange-500 transition-colors">Select Images</p>
+                      <p className="text-[11px] sm:text-xs font-bold uppercase text-zinc-600 mt-2">Upload multiple images for a full week</p>
+                    </div>
+                  )}
+
                   <input
                     type="file"
                     ref={fileInputRef}
