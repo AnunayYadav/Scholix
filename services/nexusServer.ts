@@ -956,25 +956,64 @@ class NexusServer {
     }
   }
 
-  static async renameFolder(id: string, name: string, is_shining?: boolean) {
+  static async renameFolder(folder: Folder, newName: string, is_shining?: boolean, allFolders: Folder[] = []) {
     const client = getSupabase();
     if (!client) return;
     
-    const updateData: any = { name };
+    const { id, name: oldName, type, parent_id, program } = folder;
+    const updateData: any = { name: newName };
     if (is_shining !== undefined) updateData.is_shining = is_shining;
     
-    // Attempt with is_shining (if specified) first
-    const { error: firstError } = await client.from('folders').update(updateData).eq('id', id);
+    // 1. Rename the folder itself
+    const { error: renameError } = await client.from('folders').update(updateData).eq('id', id);
     
-    if (firstError) {
-      if (firstError.message.includes('column "is_shining" does not exist') || firstError.code === '42703' || firstError.message.includes('column "is_shining" of relation "folders" does not exist')) {
+    if (renameError) {
+      if (renameError.message.includes('column "is_shining" does not exist') || renameError.code === '42703' || renameError.message.includes('column "is_shining" of relation "folders" does not exist')) {
         console.warn("Retrying folder rename without 'is_shining' due to missing column.");
-        const { error: secondError } = await client.from('folders').update({ name }).eq('id', id);
+        const { error: secondError } = await client.from('folders').update({ name: newName }).eq('id', id);
         if (secondError) throw new Error(secondError.message);
       } else {
-        console.error("Rename Folder Error:", firstError);
-        throw new Error(firstError.message);
+        console.error("Rename Folder Error:", renameError);
+        throw new Error(renameError.message);
       }
+    }
+    
+    // 2. Cascade update to documents (files)
+    // We update files whose metadata matches the old folder structure to keep them linked
+    try {
+      if (type === 'semester') {
+        // If a semester is renamed, update ALL files identifying with the old semester name
+        await client.from('documents')
+          .update({ semester: newName })
+          .eq('semester', oldName)
+          .eq('program', program);
+      } else if (type === 'subject') {
+        // If a subject is renamed, update files in that specific subject under its parent semester
+        const parentSem = allFolders.find(f => f.id === parent_id);
+        if (parentSem) {
+          await client.from('documents')
+            .update({ subject: newName })
+            .eq('semester', parentSem.name)
+            .eq('subject', oldName)
+            .eq('program', program);
+        }
+      } else if (type === 'category') {
+        // If a category (type) is renamed, update files with that specific type/subject/semester triad
+        const parentSub = allFolders.find(f => f.id === parent_id);
+        if (parentSub) {
+          const grandParentSem = allFolders.find(f => f.id === parentSub.parent_id);
+          if (grandParentSem) {
+            await client.from('documents')
+              .update({ type: newName })
+              .eq('semester', grandParentSem.name)
+              .eq('subject', parentSub.name)
+              .eq('type', oldName)
+              .eq('program', program);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("Folder rename file sync partial failure:", err);
     }
   }
 

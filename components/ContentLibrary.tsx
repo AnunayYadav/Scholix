@@ -539,7 +539,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     if (!folderToManage || !newFolderName.trim() || !userProfile?.is_admin) return;
     setIsProcessing(true);
     try {
-      await NexusServer.renameFolder(folderToManage.id, newFolderName, isShining);
+      await NexusServer.renameFolder(folderToManage, newFolderName.trim(), isShining, folders);
       setNewFolderName('');
       setIsShining(false);
       setFolderToManage(null);
