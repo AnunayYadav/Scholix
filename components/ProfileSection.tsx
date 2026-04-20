@@ -204,12 +204,17 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
           )}
         </div>
 
-        <div className="mt-6 text-center space-y-1">
+        <div className="mt-6 text-center space-y-2">
           <div className="flex items-center justify-center gap-2">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">{userProfile.username || 'Student'}</h2>
-            <VerifiedBadge isAdmin={userProfile.is_admin} size="w-5 h-5" />
+            <h2 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tighter">{userProfile.username || 'Student'}</h2>
+            <VerifiedBadge isAdmin={userProfile.is_admin} size="w-6 h-6" />
           </div>
-          <p className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400">{userProfile.email}</p>
+          <p className="text-[13px] font-bold text-zinc-400 dark:text-zinc-500 tracking-wide uppercase">{userProfile.email}</p>
+          <div className="pt-2 flex justify-center">
+            <div className="px-5 py-1.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-[10px] font-black text-zinc-500 dark:text-zinc-400 tracking-[0.2em] uppercase shadow-sm">
+              Student Identity
+            </div>
+          </div>
         </div>
       </header>
 
@@ -240,7 +245,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
             type="text" 
             value={form.program} 
             onChange={(e) => setForm({...form, program: e.target.value})}
-            className="w-full bg-transparent border-none outline-none text-right sm:text-left text-[14px] font-semibold text-zinc-900 dark:text-brand-primary placeholder:text-zinc-300"
+            className="w-full bg-transparent border-none outline-none text-right sm:text-left text-[14px] font-bold text-zinc-900 dark:text-brand-primary placeholder:text-zinc-300 dark:placeholder:text-zinc-700 transition-colors focus:text-brand-primary"
             placeholder="e.g. B.Tech Computer Science"
           />
         </EditRow>
@@ -253,7 +258,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
             type="text" 
             value={form.batch} 
             onChange={(e) => setForm({...form, batch: e.target.value})}
-            className="w-full bg-transparent border-none outline-none text-right sm:text-left text-[14px] font-semibold text-zinc-900 dark:text-brand-primary placeholder:text-zinc-300"
+            className="w-full bg-transparent border-none outline-none text-right sm:text-left text-[14px] font-bold text-zinc-900 dark:text-brand-primary placeholder:text-zinc-300 dark:placeholder:text-zinc-700 transition-colors focus:text-brand-primary"
             placeholder="2024-2028"
           />
         </EditRow>
@@ -266,7 +271,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
             type="text" 
             value={form.registration_number} 
             onChange={(e) => setForm({...form, registration_number: e.target.value.replace(/[^0-9]/g, '').slice(0, 10)})}
-            className="w-full bg-transparent border-none outline-none text-right sm:text-left text-[14px] font-semibold text-zinc-900 dark:text-brand-primary placeholder:text-zinc-300"
+            className="w-full bg-transparent border-none outline-none text-right sm:text-left text-[14px] font-bold text-zinc-900 dark:text-brand-primary placeholder:text-zinc-300 dark:placeholder:text-zinc-700 transition-colors focus:text-brand-primary"
             placeholder="12345678"
           />
         </EditRow>
