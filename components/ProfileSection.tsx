@@ -178,8 +178,8 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                   alt="Frame"
                   className="w-full h-full object-contain"
                   style={{ 
-                    transform: `scale(${frameConfig.scale || 1.3}) translateY(${frameConfig.translateY || '0%'})`,
-                    filter: 'drop-shadow(0 0 12px rgba(0,0,0,0.2))'
+                    transform: `scale(${frameConfig.scale ? frameConfig.scale * 1.15 : 1.4}) translateY(${frameConfig.translateY || '0%'})`,
+                    filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
                   }}
                 />
               )}
@@ -187,10 +187,10 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
 
             {/* Avatar Image Layer */}
             <div 
-              className="relative w-full h-full rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center z-10 border-[3px] border-white dark:border-zinc-800 shadow-2xl transition-all duration-300 overflow-hidden"
+              className={`relative w-full h-full rounded-full flex items-center justify-center z-10 transition-all duration-300 ${!userProfile?.avatar_frame ? 'bg-white dark:bg-zinc-800 border-[3px] border-white dark:border-zinc-800 shadow-2xl' : ''}`}
               style={{ padding: userProfile?.avatar_frame ? frameConfig.padding : '2px' }}
             >
-              <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-zinc-100 dark:bg-zinc-900">
+              <div className={`w-full h-full rounded-full overflow-hidden flex items-center justify-center transition-all ${userProfile?.avatar_frame ? 'ring-2 ring-white/10 shadow-lg' : 'bg-zinc-100 dark:bg-zinc-900'}`}>
                 {userProfile.avatar_url ? (
                   <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover rounded-full" />
                 ) : (
