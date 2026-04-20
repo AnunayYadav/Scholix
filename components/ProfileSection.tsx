@@ -164,10 +164,12 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
       {/* Header Profile Card */}
       <header className="flex flex-col items-center mb-10 relative">
         <div className="relative group">
-          <div className="relative w-32 h-32 md:w-36 md:h-36 shrink-0 transition-transform duration-500 group-hover:scale-[1.02]">
-            <div className="absolute -inset-2 bg-gradient-to-tr from-brand-primary to-brand-secondary rounded-full blur-xl opacity-20 group-hover:opacity-40 animate-pulse" />
+          <div className="relative w-36 h-36 md:w-40 md:h-40 shrink-0 transition-transform duration-500 group-hover:scale-[1.02]">
+            {/* Ambient Glow */}
+            <div className="absolute -inset-4 bg-gradient-to-tr from-brand-primary/30 to-brand-secondary/30 rounded-full blur-2xl opacity-40 group-hover:opacity-60 animate-pulse transition-opacity" />
             
-            <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center scale-110">
+            {/* Frame Layer */}
+            <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
               {userProfile?.avatar_frame && (
                 <motion.img 
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -175,24 +177,33 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                   src={`/Nexus-Journey/${userProfile.avatar_frame}`}
                   alt="Frame"
                   className="w-full h-full object-contain"
-                  style={{ transform: `scale(${frameConfig.navbarScale || 1.1}) translateY(${frameConfig.translateY || '0%'})` }}
+                  style={{ 
+                    transform: `scale(${frameConfig.scale || 1.3}) translateY(${frameConfig.translateY || '0%'})`,
+                    filter: 'drop-shadow(0 0 12px rgba(0,0,0,0.2))'
+                  }}
                 />
               )}
             </div>
 
-            <div className="relative w-full h-full rounded-full overflow-hidden bg-brand-primary/5 dark:bg-white/5 flex items-center justify-center p-[2px] z-10 border-2 border-white dark:border-zinc-800 shadow-xl">
-              {userProfile.avatar_url ? (
-                <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover rounded-full" />
-              ) : (
-                <span className="text-3xl font-bold text-brand-primary">{userProfile.username?.[0]?.toUpperCase() || userProfile.email[0].toUpperCase()}</span>
-              )}
+            {/* Avatar Image Layer */}
+            <div 
+              className="relative w-full h-full rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center z-10 border-[3px] border-white dark:border-zinc-800 shadow-2xl transition-all duration-300 overflow-hidden"
+              style={{ padding: userProfile?.avatar_frame ? frameConfig.padding : '2px' }}
+            >
+              <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-zinc-100 dark:bg-zinc-900">
+                {userProfile.avatar_url ? (
+                  <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover rounded-full" />
+                ) : (
+                  <span className="text-4xl font-black text-brand-primary opacity-40">{userProfile.username?.[0]?.toUpperCase() || userProfile.email[0].toUpperCase()}</span>
+                )}
+              </div>
             </div>
 
             <button 
               onClick={() => fileInputRef.current?.click()}
-              className="absolute bottom-0 right-0 w-10 h-10 bg-white dark:bg-zinc-800 rounded-full border border-zinc-200 dark:border-white/10 flex items-center justify-center shadow-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors z-30 active:scale-90"
+              className="absolute bottom-1 right-1 w-11 h-11 bg-white dark:bg-zinc-800 rounded-full border border-zinc-200 dark:border-white/10 flex items-center justify-center shadow-xl hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-all z-30 active:scale-90 hover:scale-110"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-zinc-600 dark:text-zinc-300"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5.5 h-5.5 text-zinc-600 dark:text-zinc-300"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
             </button>
             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
           </div>
@@ -333,9 +344,9 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                     setUserProfile({ ...userProfile, avatar_frame: frame });
                     updateUserQuizProfile({ avatar_frame: frame });
                   }}
-                  className={`aspect-square rounded-2xl flex items-center justify-center cursor-pointer transition-all border-2 ${isActive ? 'border-brand-primary bg-brand-primary/5' : 'border-zinc-100 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 opacity-70 hover:opacity-100'}`}
+                  className={`aspect-square rounded-[24px] flex items-center justify-center cursor-pointer transition-all border-2 ${isActive ? 'border-brand-primary bg-brand-primary/5' : 'border-zinc-100 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 opacity-70 hover:opacity-100'}`}
                 >
-                  <img src={`/Nexus-Journey/${frame}`} alt="Frame" className="w-14 h-14 object-contain" />
+                  <img src={`/Nexus-Journey/${frame}`} alt="Frame" className="w-16 h-16 object-contain" />
                 </motion.div>
               );
             })}
