@@ -2,16 +2,16 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { UserProfile, ModuleType } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
-
 import VerifiedBadge from './VerifiedBadge.tsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useXP } from '../hooks/useXP.ts';
 import { useStreak } from '../hooks/useStreak.ts';
-import { useQuizDashboardStore, getLevelInfo } from '../stores/quizStore.ts';
+import { useQuizDashboardStore } from '../stores/quizStore.ts';
 import { getFrameConfig } from '../data/frameConfigs.ts';
+import { useUniversity } from '../hooks/useUniversity.tsx';
+import { showToast } from './Toast.tsx';
 
 interface ProfileSectionProps {
-
   userProfile: UserProfile | null;
   setUserProfile: (p: UserProfile | null) => void;
   navigateToModule: (m: ModuleType) => void;
@@ -19,6 +19,8 @@ interface ProfileSectionProps {
 
 const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserProfile, navigateToModule }) => {
   const { updateUserQuizProfile } = useQuizDashboardStore();
+  const { brandColor } = useUniversity();
+  
   const [form, setForm] = useState({
     username: userProfile?.username || '',
     program: userProfile?.program || '',
@@ -30,15 +32,11 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [changeHistory, setChangeHistory] = useState<any[]>([]);
-  const [recentAttempts, setRecentAttempts] = useState<any[]>([]);
-  const [isLoadingAttempts, setIsLoadingAttempts] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const userId = userProfile?.id || null;
   const { totalXP, level: levelInfo } = useXP(userId);
-  const { currentStreak, longestStreak, streakCalendar } = useStreak(userId);
   const frameConfig = getFrameConfig(userProfile?.avatar_frame || '');
 
   useEffect(() => {
@@ -52,22 +50,8 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
         is_public: userProfile.is_public || false
       });
       fetchHistory();
-      fetchRecentAttempts();
     }
   }, [userProfile]);
-
-  const fetchRecentAttempts = async () => {
-    if (!userProfile) return;
-    setIsLoadingAttempts(true);
-    try {
-      const attempts = await NexusServer.fetchUserQuizAttempts(userProfile.id);
-      setRecentAttempts(attempts.slice(0, 3));
-    } catch (e) {
-      console.error('Failed to fetch recent attempts:', e);
-    } finally {
-      setIsLoadingAttempts(false);
-    }
-  };
 
   const fetchHistory = async () => {
     if (!userProfile) return;
@@ -88,7 +72,6 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
   const handleUpdate = async () => {
     if (!userProfile) return;
     setIsUpdating(true);
-    setMessage(null);
     try {
       if (form.username !== userProfile.username && recentChanges.length >= 2) {
         throw new Error("Username change limit reached (2/14 days).");
@@ -107,20 +90,17 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
         await NexusServer.saveRecord(userProfile.id, 'username_change', `Changed to ${form.username}`, { username: form.username });
       }
 
-      setMessage({ text: "Profile updated.", type: 'success' });
+      showToast("Profile settings updated successfully", "success");
       fetchHistory();
-      setTimeout(() => setMessage(null), 3000);
     } catch (e: any) {
       console.error('Update Error:', e);
       let errorMsg = 'Failed to update profile.';
-
       if (e.message?.includes('unique_registration_number') || e.code === '23505') {
-        errorMsg = 'This Registration Number is already in use by another student.';
+        errorMsg = 'Registration Number already in use.';
       } else if (e.message) {
         errorMsg = e.message;
       }
-
-      setMessage({ type: 'error', text: errorMsg });
+      showToast(errorMsg, "error");
     } finally {
       setIsUpdating(false);
     }
@@ -134,267 +114,266 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
     try {
       const url = await NexusServer.uploadAvatar(userProfile.id, file);
       setUserProfile({ ...userProfile, avatar_url: url });
-      setMessage({ text: "Profile picture updated.", type: 'success' });
+      showToast("Profile image updated", "success");
     } catch (err: any) {
-      setMessage({ text: "Upload failed: " + err.message, type: 'error' });
+      showToast("Upload failed: " + err.message, "error");
     } finally {
       setIsUploading(false);
     }
   };
 
-  if (!userProfile) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-        <div className="w-24 h-24 bg-red-500/10 rounded-[32px] flex items-center justify-center mb-8 border border-red-500/20">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-12 h-12 text-red-500"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+  if (!userProfile) return null;
+
+  const Section = ({ title, children, footer }: { title?: string; children: React.ReactNode; footer?: string }) => (
+    <div className="mb-8 last:mb-0">
+      {title && <h3 className="px-1 text-[13px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3 ml-2">{title}</h3>}
+      <div className="bg-white/60 dark:bg-zinc-950/40 backdrop-blur-2xl border border-zinc-200/50 dark:border-white/5 rounded-[32px] overflow-hidden px-4 py-1 shadow-sm transition-all duration-300">
+        <div className="divide-y divide-zinc-100/80 dark:divide-white/5">
+          {children}
         </div>
-        <h2 className="text-3xl font-bold text-zinc-800 dark:text-white tracking-tight mb-2">Access Denied</h2>
-        <p className="text-zinc-500 text-sm mb-10 max-w-xs">Authentication token missing or expired. Please sign in to manage your Nexus profile.</p>
-        <button onClick={() => navigateToModule(ModuleType.DASHBOARD)} className="bg-zinc-900 dark:bg-white text-white dark:text-black px-12 py-5 rounded-[24px] font-bold text-xs tracking-wide active:scale-95 transition-all shadow-2xl border-none">Return to Dashboard</button>
       </div>
-    );
-  }
+      {footer && <p className="px-6 mt-3 text-[11px] font-medium text-zinc-400 dark:text-zinc-500 leading-relaxed">{footer}</p>}
+    </div>
+  );
+
+  const EditRow = ({ label, icon, children, color = "text-zinc-500", showChevron = false }: { label: string; icon: React.ReactNode; children: React.ReactNode; color?: string; showChevron?: boolean }) => (
+    <div className="w-full flex items-center gap-4 py-4 px-1 bg-transparent group/row transition-all duration-200">
+      <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${color} bg-current/10 shrink-0 shadow-sm transition-transform group-hover/row:scale-105 duration-300`}>
+        {React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5" })}
+      </div>
+      <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4">
+        <p className="text-[14px] font-bold text-zinc-700 dark:text-zinc-200">{label}</p>
+        <div className="flex-1 sm:max-w-[60%] lg:max-w-[70%] relative">
+          {children}
+        </div>
+      </div>
+      {showChevron && (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-700"><path d="m9 18 6-6-6-6"/></svg>
+      )}
+    </div>
+  );
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12 animate-fade-in pb-32 px-4 relative">
-      {/* Background Aesthetic Glows */}
-      <div className="absolute -top-40 -left-40 w-80 h-80 bg-orange-600/10 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute top-1/2 -right-40 w-80 h-80 bg-red-600/5 blur-[120px] rounded-full pointer-events-none" />
+    <div className="max-w-2xl mx-auto px-4 pt-8 pb-32 animate-fade-in no-scrollbar relative">
+      {/* Background Aesthetic */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-brand-primary/5 blur-[120px]" />
+        <div className="absolute bottom-[20%] right-[-5%] w-[30%] h-[30%] rounded-full bg-brand-secondary/5 blur-[100px]" />
+      </div>
 
-      <header className="flex flex-col items-center text-center relative z-10">
+      {/* Header Profile Card */}
+      <header className="flex flex-col items-center mb-10 relative">
         <div className="relative group">
-          <div className="relative w-40 h-40 flex items-center justify-center transition-all duration-500 hover:scale-[1.02]">
-            {/* Live Preview of Frame + Avatar */}
-            <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
+          <div className="relative w-32 h-32 md:w-36 md:h-36 shrink-0 transition-transform duration-500 group-hover:scale-[1.02]">
+            <div className="absolute -inset-2 bg-gradient-to-tr from-brand-primary to-brand-secondary rounded-full blur-xl opacity-20 group-hover:opacity-40 animate-pulse" />
+            
+            <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center scale-110">
               {userProfile?.avatar_frame && (
-                <img 
+                <motion.img 
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   src={`/Nexus-Journey/${userProfile.avatar_frame}`}
                   alt="Frame"
                   className="w-full h-full object-contain"
-                  style={{ transform: `scale(${frameConfig.scale}) translateY(${frameConfig.translateY || '0%'})` }}
+                  style={{ transform: `scale(${frameConfig.navbarScale || 1.1}) translateY(${frameConfig.translateY || '0%'})` }}
                 />
               )}
             </div>
-            
-            <div 
-              className="w-full h-full rounded-full overflow-hidden flex items-center justify-center relative bg-zinc-100 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/5"
-              style={{ padding: frameConfig.padding }}
-            >
+
+            <div className="relative w-full h-full rounded-full overflow-hidden bg-brand-primary/5 dark:bg-white/5 flex items-center justify-center p-[2px] z-10 border-2 border-white dark:border-zinc-800 shadow-xl">
               {userProfile.avatar_url ? (
-                <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover rounded-full" />
               ) : (
-                <span className="text-orange-600 text-5xl font-light">
-                  {userProfile.username?.[0]?.toUpperCase() || userProfile.email[0].toUpperCase()}
-                </span>
+                <span className="text-3xl font-bold text-brand-primary">{userProfile.username?.[0]?.toUpperCase() || userProfile.email[0].toUpperCase()}</span>
               )}
             </div>
 
-            {/* Change Photo Overlay */}
             <button 
               onClick={() => fileInputRef.current?.click()}
-              className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px] rounded-full z-30 border-none cursor-pointer"
+              className="absolute bottom-0 right-0 w-10 h-10 bg-white dark:bg-zinc-800 rounded-full border border-zinc-200 dark:border-white/10 flex items-center justify-center shadow-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors z-30 active:scale-90"
             >
-              <div className="flex flex-col items-center gap-1">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-6 h-6"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
-                <span className="text-[10px] text-white font-medium">Update Photo</span>
-              </div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-zinc-600 dark:text-zinc-300"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
             </button>
-            
-            {isUploading && (
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-40 rounded-full backdrop-blur-sm">
-                <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-              </div>
-            )}
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
           </div>
-          <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
+          
+          {isUploading && (
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-40 rounded-full backdrop-blur-sm">
+              <div className="w-6 h-6 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
         </div>
 
-        <div className="mt-8 space-y-2">
-          <h2 className="text-3xl md:text-4xl font-semibold text-zinc-800 dark:text-white tracking-tight flex items-center justify-center gap-2">
-            {userProfile.username || 'Anonymous User'}
-            <VerifiedBadge isAdmin={userProfile.is_admin} size="w-6 h-6" />
-          </h2>
-          <p className="text-zinc-500 text-sm font-medium opacity-80">
-            {userProfile.email}
-          </p>
+        <div className="mt-6 text-center space-y-1">
+          <div className="flex items-center justify-center gap-2">
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">{userProfile.username || 'Student'}</h2>
+            <VerifiedBadge isAdmin={userProfile.is_admin} size="w-5 h-5" />
+          </div>
+          <p className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400">{userProfile.email}</p>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Form Settings */}
-        <div className="lg:col-span-12 space-y-8">
-          <div className="glass-panel p-8 md:p-10 rounded-[32px] border border-zinc-200 dark:border-white/5 bg-white/50 dark:bg-black/20 backdrop-blur-xl">
-            <div className="flex items-center justify-between mb-10 pb-6 border-b border-zinc-100 dark:border-white/5">
-              <div>
-                <h3 className="text-lg font-semibold text-zinc-800 dark:text-white leading-tight">General Info</h3>
-                <p className="text-xs text-zinc-500 font-medium">Manage your public presence</p>
-              </div>
-              <div className="flex items-center gap-4 bg-zinc-50 dark:bg-white/[0.03] p-2 pr-4 rounded-2xl border border-zinc-100 dark:border-white/5">
-                <button
-                  onClick={() => setForm({ ...form, is_public: !form.is_public })}
-                  className={`relative w-10 h-5 rounded-full transition-all border-none outline-none ${form.is_public ? 'bg-orange-500' : 'bg-zinc-300 dark:bg-white/10'}`}
-                >
-                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all shadow-sm ${form.is_public ? 'left-6' : 'left-1'}`} />
-                </button>
-                <span className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400">{form.is_public ? 'Public Profile' : 'Private Profile'}</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-[11px] font-semibold text-zinc-400 mb-2 ml-1 tracking-wider opacity-60">Username</label>
-                  <div className="relative group">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 text-sm transition-colors group-focus-within:text-orange-500">@</span>
-                    <input
-                      type="text" value={form.username}
-                      onChange={(e) => setForm({ ...form, username: e.target.value })}
-                      className="w-full bg-zinc-50/50 dark:bg-white/[0.02] pl-10 pr-4 py-4 rounded-2xl text-sm font-medium border border-zinc-100 dark:border-white/5 focus:border-orange-500/30 focus:ring-1 focus:ring-orange-500/10 outline-none text-zinc-800 dark:text-white transition-all"
-                      placeholder="username"
-                    />
-                  </div>
-                  <p className="mt-2 text-[10px] text-zinc-400 font-medium ml-1">Changed {recentChanges.length}/2 times recently</p>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-semibold text-zinc-400 mb-2 ml-1 tracking-wider opacity-60">Program</label>
-                  <input
-                    type="text" value={form.program}
-                    onChange={(e) => setForm({ ...form, program: e.target.value })}
-                    className="w-full bg-zinc-50/50 dark:bg-white/[0.02] px-4 py-4 rounded-2xl text-sm font-medium border border-zinc-100 dark:border-white/5 focus:border-orange-500/30 outline-none text-zinc-800 dark:text-white transition-all"
-                    placeholder="e.g. B.Tech Computer Science"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-zinc-400 mb-2 ml-1 tracking-wider opacity-60">Reg. Number</label>
-                    <input
-                      type="text" value={form.registration_number}
-                      onChange={(e) => setForm({ ...form, registration_number: e.target.value.replace(/[^0-9]/g, '').slice(0, 8) })}
-                      className="w-full bg-zinc-50/50 dark:bg-white/[0.02] px-4 py-4 rounded-2xl text-sm font-medium border border-zinc-100 dark:border-white/5 focus:border-orange-500/30 outline-none text-zinc-800 dark:text-white transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-zinc-400 mb-2 ml-1 tracking-wider opacity-60">Batch</label>
-                    <input
-                      type="text" value={form.batch}
-                      onChange={(e) => setForm({ ...form, batch: e.target.value })}
-                      className="w-full bg-zinc-50/50 dark:bg-white/[0.02] px-4 py-4 rounded-2xl text-sm font-medium border border-zinc-100 dark:border-white/5 focus:border-orange-500/30 outline-none text-zinc-800 dark:text-white transition-all"
-                      placeholder="2024-28"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-semibold text-zinc-400 mb-2 ml-1 tracking-wider opacity-60">Bio</label>
-                  <textarea
-                    value={form.bio}
-                    onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                    className="w-full bg-zinc-50/50 dark:bg-white/[0.02] px-4 py-4 rounded-2xl text-sm font-medium border border-zinc-100 dark:border-white/5 focus:border-orange-500/30 outline-none text-zinc-800 dark:text-white transition-all h-[116px] resize-none"
-                    placeholder="Briefly describe yourself..."
-                  />
-                </div>
-              </div>
-            </div>
-
-            {message && (
-              <div className={`mt-8 p-4 rounded-2xl text-xs font-medium text-center border animate-fade-in ${message.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
-                {message.text}
-              </div>
-            )}
-
-            <button
-              onClick={handleUpdate} disabled={isUpdating}
-              className="w-full mt-10 bg-zinc-900 dark:bg-white text-white dark:text-black py-4 rounded-2xl font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 border-none flex items-center justify-center gap-2"
-            >
-              {isUpdating && <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />}
-              {isUpdating ? 'Saving Changes...' : 'Save Profile'}
-            </button>
+      {/* Settings Sections */}
+      <Section title="Academic Info">
+        <EditRow 
+          label="Username" 
+          color="text-blue-500"
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-zinc-400 font-medium">@</span>
+            <input 
+              type="text" 
+              value={form.username} 
+              onChange={(e) => setForm({...form, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')})}
+              className="w-full bg-transparent border-none outline-none text-right sm:text-left text-[14px] font-bold text-zinc-900 dark:text-brand-primary placeholder:text-zinc-300 dark:placeholder:text-zinc-700 focus:text-brand-primary transition-colors"
+              placeholder="username"
+            />
           </div>
+        </EditRow>
+        <EditRow 
+          label="Course / Program" 
+          color="text-indigo-500"
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>}
+        >
+          <input 
+            type="text" 
+            value={form.program} 
+            onChange={(e) => setForm({...form, program: e.target.value})}
+            className="w-full bg-transparent border-none outline-none text-right sm:text-left text-[14px] font-semibold text-zinc-900 dark:text-brand-primary placeholder:text-zinc-300"
+            placeholder="e.g. B.Tech Computer Science"
+          />
+        </EditRow>
+        <EditRow 
+          label="Batch" 
+          color="text-amber-500"
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>}
+        >
+          <input 
+            type="text" 
+            value={form.batch} 
+            onChange={(e) => setForm({...form, batch: e.target.value})}
+            className="w-full bg-transparent border-none outline-none text-right sm:text-left text-[14px] font-semibold text-zinc-900 dark:text-brand-primary placeholder:text-zinc-300"
+            placeholder="2024-2028"
+          />
+        </EditRow>
+        <EditRow 
+          label="Registration No." 
+          color="text-emerald-500"
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>}
+        >
+          <input 
+            type="text" 
+            value={form.registration_number} 
+            onChange={(e) => setForm({...form, registration_number: e.target.value.replace(/[^0-9]/g, '').slice(0, 10)})}
+            className="w-full bg-transparent border-none outline-none text-right sm:text-left text-[14px] font-semibold text-zinc-900 dark:text-brand-primary placeholder:text-zinc-300"
+            placeholder="12345678"
+          />
+        </EditRow>
+      </Section>
 
-          {/* ═══════════ Avatar Frame Selection ═══════════ */}
-          <div className="glass-panel p-8 md:p-10 rounded-[32px] border border-zinc-200 dark:border-white/5 bg-white/50 dark:bg-black/20 backdrop-blur-xl">
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-zinc-800 dark:text-white leading-tight">Profile Frames</h3>
-              <p className="text-xs text-zinc-500 font-medium">Select a frame to showcase your progress</p>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
-              {/* None Option */}
-              <div 
-                onClick={() => {
-                  if (!userProfile?.id) return;
-                  NexusServer.updateProfile(userProfile.id, { avatar_frame: '' });
-                  setUserProfile({ ...userProfile, avatar_frame: '' });
-                  updateUserQuizProfile({ avatar_frame: '' });
-                }}
-                className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 relative group ${!userProfile?.avatar_frame ? 'border-orange-500 bg-orange-500/[0.03]' : 'border-zinc-100 dark:border-white/5 hover:border-zinc-200 dark:hover:border-white/10'}`}
-              >
-                <div className="w-16 h-16 rounded-full border-2 border-dotted border-zinc-200 dark:border-white/10 flex items-center justify-center text-[10px] font-bold text-zinc-300 dark:text-zinc-600">None</div>
-                <span className="text-[10px] font-semibold text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">Default</span>
-              </div>
-
-              {/* Unlocked Frames */}
-              {(userProfile.unlocked_frames || []).map(frame => {
-                const isActive = userProfile.avatar_frame === frame;
-                const frameTitle = frame.replace('.png', '');
-                
-                return (
-                  <div 
-                    key={frame}
-                    onClick={() => {
-                      if (!userProfile?.id) return;
-                      NexusServer.updateProfile(userProfile.id, { avatar_frame: frame });
-                      setUserProfile({ ...userProfile, avatar_frame: frame });
-                      updateUserQuizProfile({ avatar_frame: frame });
-                    }}
-                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 relative group ${isActive ? 'border-orange-500 bg-orange-500/[0.03]' : 'border-zinc-100 dark:border-white/5 hover:border-zinc-200 dark:hover:border-white/10'}`}
-                  >
-                    <div className="relative w-16 h-16 flex items-center justify-center">
-                      <img src={`/Nexus-Journey/${frame}`} alt={frameTitle} className="w-full h-full object-contain z-10" />
-                      <div className="absolute inset-2 rounded-full bg-zinc-50 dark:bg-white/[0.02]" />
-                    </div>
-                    <span className={`text-[10px] font-semibold transition-colors ${isActive ? 'text-orange-500' : 'text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300'}`}>{frameTitle}</span>
-                    {isActive && <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-orange-500 shadow-sm" />}
-                  </div>
-                );
-              })}
-
-              {/* Locked Hint */}
-              {(!userProfile.unlocked_frames || userProfile.unlocked_frames.length === 0) && (
-                <div className="col-span-full py-12 text-center bg-zinc-50/50 dark:bg-white/[0.01] rounded-2xl border border-zinc-100 dark:border-white/5">
-                  <div className="mb-4 flex flex-col items-center">
-                    <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center mb-3">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-zinc-400"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                    </div>
-                    <p className="text-xs font-semibold text-zinc-400">Locked Frames</p>
-                    <p className="text-[10px] text-zinc-500 mt-1 max-w-[200px] mx-auto">Explore the learning journey to unlock unique profile frames</p>
-                  </div>
-                  <button 
-                    onClick={() => navigateToModule(ModuleType.QUIZ)}
-                    className="px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-xl transition-all active:scale-[0.98]"
-                  >
-                    Start Journey
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+      <Section title="About Me">
+        <div className="py-2 px-1">
+          <textarea
+            value={form.bio}
+            onChange={(e) => setForm({ ...form, bio: e.target.value })}
+            className="w-full bg-transparent border-none outline-none text-[14px] font-medium text-zinc-800 dark:text-zinc-200 leading-relaxed min-h-[120px] resize-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700 focus:ring-0"
+            placeholder="Tell us about yourself, your goals, or your interests..."
+          />
         </div>
+      </Section>
+
+      <Section title="Privacy & Discovery" footer="When public, other students can find your profile and see your achievements.">
+        <div className="w-full flex items-center justify-between py-3.5 px-1 bg-transparent group">
+          <div className="flex items-center gap-4">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-purple-500 bg-purple-500/10 shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <p className="text-[14px] font-semibold text-zinc-700 dark:text-zinc-200">Public Profile</p>
+          </div>
+          <button 
+            onClick={() => setForm({ ...form, is_public: !form.is_public })}
+            className={`relative w-12 h-6.5 rounded-full transition-all duration-300 border-none outline-none overflow-hidden ${form.is_public ? 'bg-brand-primary shadow-lg shadow-brand-primary/30' : 'bg-zinc-300 dark:bg-white/10'}`}
+          >
+            <div className={`absolute top-1 w-4.5 h-4.5 bg-white rounded-full transition-all duration-300 shadow-sm ${form.is_public ? 'left-6.5' : 'left-1'}`} />
+          </button>
+        </div>
+      </Section>
+
+      <Section title="Unlocked Frames">
+        <div className="py-6 px-1">
+          <div className="grid grid-cols-4 sm:grid-cols-5 gap-4">
+            {/* None Option */}
+            <motion.div 
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                NexusServer.updateProfile(userProfile.id, { avatar_frame: '' });
+                setUserProfile({ ...userProfile, avatar_frame: '' });
+                updateUserQuizProfile({ avatar_frame: '' });
+              }}
+              className={`aspect-square rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all border-2 ${!userProfile?.avatar_frame ? 'border-brand-primary bg-brand-primary/5' : 'border-zinc-100 dark:border-white/5 grayscale opacity-40 hover:grayscale-0 hover:opacity-100'}`}
+            >
+              <div className="w-10 h-10 rounded-full border-2 border-dotted border-zinc-200 dark:border-white/10 flex items-center justify-center text-[8px] font-bold text-zinc-300">None</div>
+            </motion.div>
+
+            {/* Unlocked */}
+            {(userProfile.unlocked_frames || []).map(frame => {
+              const isActive = userProfile.avatar_frame === frame;
+              return (
+                <motion.div 
+                  key={frame}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    NexusServer.updateProfile(userProfile.id, { avatar_frame: frame });
+                    setUserProfile({ ...userProfile, avatar_frame: frame });
+                    updateUserQuizProfile({ avatar_frame: frame });
+                  }}
+                  className={`aspect-square rounded-2xl flex items-center justify-center cursor-pointer transition-all border-2 ${isActive ? 'border-brand-primary bg-brand-primary/5' : 'border-zinc-100 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 opacity-70 hover:opacity-100'}`}
+                >
+                  <img src={`/Nexus-Journey/${frame}`} alt="Frame" className="w-14 h-14 object-contain" />
+                </motion.div>
+              );
+            })}
+          </div>
+          
+          {(!userProfile.unlocked_frames || userProfile.unlocked_frames.length === 0) && (
+            <div className="mt-4 p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.02] border border-dashed border-zinc-200 dark:border-white/10 text-center">
+              <p className="text-[11px] font-medium text-zinc-400">No frames unlocked yet. Complete quizzes to earn them!</p>
+              <button 
+                onClick={() => navigateToModule(ModuleType.QUIZ)}
+                className="mt-2 text-[10px] font-bold text-brand-primary uppercase tracking-wider"
+              >
+                Go to Learning Journey
+              </button>
+            </div>
+          )}
+        </div>
+      </Section>
+
+      <div className="mt-12 space-y-4">
+        <button
+          onClick={handleUpdate}
+          disabled={isUpdating}
+          className="w-full bg-brand-primary text-white py-4 rounded-[24px] font-bold text-[15px] shadow-xl shadow-brand-primary/25 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 border-none"
+        >
+          {isUpdating ? (
+            <div className="w-5 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            "Update Profile Settings"
+          )}
+        </button>
+
+        <button
+          onClick={async () => { await NexusServer.signOut(); window.location.reload(); }}
+          className="w-full bg-zinc-950/5 dark:bg-white/5 border border-transparent rounded-[28px] py-4.5 flex items-center justify-center gap-3 text-red-500 font-bold text-[14px] active:scale-[0.98] active:bg-red-500/10 transition-all duration-200 shadow-sm"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out of Nexus
+        </button>
       </div>
 
-      <div className="flex flex-col items-center pt-8">
-        <button
-          onClick={async () => { await NexusServer.signOut(); navigateToModule(ModuleType.DASHBOARD); }}
-          className="group px-8 py-3 text-red-500/60 hover:text-red-500 font-semibold text-xs transition-all flex items-center justify-center gap-2 border border-red-500/10 hover:border-red-500/30 rounded-2xl bg-white/5"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
-          Log out
-        </button>
-        <p className="mt-8 text-[10px] font-medium text-zinc-300 dark:text-zinc-700 opacity-40 tracking-wider">Build 2.5a</p>
+      <div className="mt-12 text-center opacity-30">
+        <p className="text-[10px] font-semibold tracking-[0.2em] text-zinc-500 uppercase">Nexus Profile Build 3.0.0</p>
       </div>
     </div>
   );

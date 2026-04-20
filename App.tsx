@@ -43,6 +43,8 @@ import { ToastContainer } from './components/Toast.tsx';
 import NotificationBell from './components/NotificationBell.tsx';
 import UniversalSearch from './components/UniversalSearch.tsx';
 import StudyHeartbeat from './components/StudyHeartbeat.tsx';
+import { useOnlineStatus } from './hooks/useOnlineStatus.ts';
+import OfflineOverlay from './components/OfflineOverlay.tsx';
 
 const getUniSlug = (id: UniversityId): string => {
   if (id === 'lpu') return 'lpu';
@@ -498,6 +500,7 @@ const AppContent: React.FC = () => {
   const [authIsReady, setAuthIsReady] = useState(false);
   const searchResultsRef = useRef<HTMLDivElement>(null);
   const lastHandledUserRef = useRef<string | null>(null);
+  const isOnline = useOnlineStatus();
 
   const handleOpenMobileSearch = () => {
     setIsClosingMobileSearch(false);
@@ -923,6 +926,7 @@ const AppContent: React.FC = () => {
       <SpeedInsights />
       <ToastContainer />
       <AnnouncementModal />
+      <OfflineOverlay isOffline={!isOnline} />
     </div>
   );
 };
