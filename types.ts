@@ -137,7 +137,29 @@ export interface ResumeCategoryDetail {
   description: string;
   found: string[];
   missing: string[];
+  details?: string;
+  strengths?: string[];
+  weaknesses?: string[];
   missingKeywordsExtended?: { name: string; example: string; importance: string }[];
+}
+
+export interface ImprovementSuggestion {
+  category: string;
+  original: string;
+  improved: string;
+  impact: 'High' | 'Medium' | 'Low';
+  reason: string;
+}
+
+export interface QuantifiableOpportunity {
+  opportunity: string;
+  suggestion: string;
+  metric: string;
+}
+
+export interface SkillCategory {
+  category: string;
+  skills: { name: string; found: boolean; level?: 'Mandatory' | 'Desired' | 'Optional' }[];
 }
 
 export interface AnnotatedFragment {
@@ -150,12 +172,39 @@ export interface AnnotatedFragment {
 export interface ResumeAnalysisResult {
   totalScore: number;
   meaningScore: number;
+  stats: {
+    errors: number;
+    improvements: number;
+    passed: number;
+  };
   keywordQuality: {
     contextual: number;
     weak: number;
     stuffed: number;
   };
   annotatedContent: AnnotatedFragment[];
+  detailedScores: {
+    keywordMatch: number;
+    skillsAlignment: number;
+    experienceRelevance: number;
+    formattingQuality: number;
+    overallImpact: number;
+  };
+  improvementSuggestions: ImprovementSuggestion[];
+  passedChecks?: {
+    category: string;
+    checkName: string;
+    insight: string;
+  }[];
+  quantifiableOpportunities: QuantifiableOpportunity[];
+  skillDiversity: SkillCategory[];
+  radarData: {
+    qualification: number;
+    experience: number;
+    role: number;
+    domainDiversity: number;
+    retention: number;
+  };
   categories: {
     keywordAnalysis: ResumeCategoryDetail;
     jobFit: ResumeCategoryDetail;
@@ -169,6 +218,19 @@ export interface ResumeAnalysisResult {
     message: string;
   }[];
   summary: string;
+  actionPlan: {
+    title: string;
+    tasks: {
+      action: 'Build' | 'Practice' | 'Add' | 'Refactor';
+      task: string;
+      description: string;
+    }[];
+  };
+  simulation: {
+    currentShortlistChance: number;
+    projectedShortlistChance: number;
+    explanation: string;
+  };
   analysisDate: number;
 }
 

@@ -4,12 +4,20 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { extractTextFromPdf } from '../services/pdfUtils';
 import NexusServer from '../services/nexusServer.ts';
 import { analyzeResume } from '../services/geminiService';
-import { ResumeAnalysisResult, UserProfile, AnnotatedFragment } from '../types';
+import { ResumeAnalysisResult, UserProfile, AnnotatedFragment, SkillCategory, ImprovementSuggestion } from '../types';
 import { showToast, showConfirm } from './Toast.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
+import { 
+  ResponsiveContainer, 
+  RadarChart, 
+  PolarGrid, 
+  PolarAngleAxis, 
+  Radar, 
+  Tooltip as RechartsTooltip 
+} from 'recharts';
 
 const IconFile = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-12 h-12 mx-auto mb-2 opacity-40">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10 mx-auto mb-2 opacity-30 text-zinc-400">
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
   </svg>
 );
@@ -18,32 +26,38 @@ const INDUSTRY_ROLES = [
   { 
     id: 'swe', 
     name: 'Software Engineer', 
-    jd: 'We are looking for a Software Engineer to join our core engineering team. You will be responsible for designing, developing, and maintaining scalable software solutions. You should have strong fundamentals in data structures, algorithms, and system design. Experience with languages like Java, Python, or C++, and proficiency with version control systems (Git) is essential. You will participate in code reviews, write unit tests, and collaborate with cross-functional teams to deliver high-quality features.' 
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><path d="m18 16 4-4-4-4M6 8l-4 4 4 4M14.5 4l-5 16"/></svg>,
+    jd: 'We are looking for a Software Engineer...' 
   },
   { 
     id: 'frontend', 
     name: 'Frontend Developer', 
-    jd: 'Join us as a Frontend Developer to create stunning and performant user interfaces. You will work closely with designers and product managers to translate complex requirements into fluid web experiences. Expertise in React.js, TypeScript, and modern CSS frameworks like Tailwind CSS is required. You should have a deep understanding of web performance optimization, state management (Zustand/Redux), and server-side rendering with Next.js. Familiarity with accessibility standards and cross-browser compatibility testing is a plus.' 
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.01M9 8h.01M12 8h.01"/></svg>,
+    jd: 'Join us as a Frontend Developer...' 
   },
   { 
     id: 'backend', 
     name: 'Backend Developer', 
-    jd: "We're seeking a Backend Developer to build robust and scalable server-side systems. Your role involves designing microservices, managing SQL and NoSQL databases, and ensuring the security and performance of our APIs. Proficiency in Node.js and experience with cloud platforms (AWS/Azure/GCP) is crucial. You should be familiar with message brokers like Kafka/Redis and understand containerization using Docker/Kubernetes. A strong focus on API security and architectural best practices is expected." 
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><line x1="6" x2="6" y1="6" y2="6"/><line x1="6" x2="6" y1="18" y2="18"/></svg>,
+    jd: "We're seeking a Backend Developer..." 
   },
   { 
     id: 'ai', 
     name: 'AI/ML Engineer', 
-    jd: 'As an AI/ML Engineer, you will develop and productionize machine learning models. You\'ll work with large datasets to build RAG-based systems, fine-tune LLMs, and optimize data pipelines. Mastery of Python and deep learning frameworks (PyTorch/TensorFlow) is mandatory. You should have experience with vector databases (Pinecone/Milvus) and stay updated with the latest advancements in Generative AI. Knowledge of model deployment and monitoring in production environments is highly valued.' 
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><path d="M12 2v10l8-8M12 12V22M12 12H2M12 12h10"/></svg>,
+    jd: 'As an AI/ML Engineer...' 
   },
   { 
     id: 'data', 
     name: 'Data Scientist', 
-    jd: 'We are looking for a Data Scientist to extract actionable insights from complex data. You will build predictive models, perform statistical analysis, and create compelling data visualizations to drive business decisions. Proficiency in SQL and data science libraries like Scikit-learn, Pandas, and NumPy is required. You should have experience with business intelligence tools and be able to communicate technical findings to non-technical stakeholders effectively. A strong background in machine learning and experiment design is essential.' 
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><path d="M3 3v18h18M7 16l4-4 4 4 6-6"/></svg>,
+    jd: 'We are looking for a Data Scientist...' 
   },
   { 
     id: 'pm', 
     name: 'Product Manager', 
-    jd: 'Join our team as a Product Manager to lead the product lifecycle from conception to launch. You\'ll define product strategy, create detailed roadmaps, and manage stakeholders across the organization. Success in this role requires experience with Agile/Scrum methodologies, writing user stories, and performing market analysis. You\'ll work closely with engineering and design teams to prioritize features that deliver maximum user value. Strong analytical skills and a data-driven approach to product growth are key.' 
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><circle cx="12" cy="12" r="4"/></svg>,
+    jd: 'Join our team as a Product Manager...' 
   }
 ];
 
@@ -64,43 +78,169 @@ interface PlacementPrefectProps {
   reportIdOverride?: string;
 }
 
-const ScoreAura = ({ score, label }: { score: number; label: string }) => {
-  const circumference = 2 * Math.PI * 90;
-  const offset = circumference - (score / 100) * circumference;
+interface ScoreAuraProps {
+  score: number;
+  label?: string;
+  size?: number;
+}
+
+const ScoreAura: React.FC<ScoreAuraProps> = ({ score, size = 180 }) => {
+  const [animatedAngle, setAnimatedAngle] = useState(0);
+  const [displayScore, setDisplayScore] = useState(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimatedAngle((score / 100) * 180);
+      
+      let start = 0;
+      const duration = 1500;
+      const increment = score / (duration / 16);
+      const counter = setInterval(() => {
+        start += increment;
+        if (start >= score) {
+          setDisplayScore(score);
+          clearInterval(counter);
+        } else {
+          setDisplayScore(Math.floor(start));
+        }
+      }, 16);
+      return () => clearInterval(counter);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [score]);
+
+  const getStatus = (s: number) => {
+    if (s >= 90) return "AMAZING";
+    if (s >= 75) return "GOOD";
+    if (s >= 60) return "FAIR";
+    if (s >= 40) return "AVERAGE";
+    return "POOR";
+  };
+
+  const getStatusColor = (s: number) => {
+    if (s >= 90) return "text-emerald-500";
+    if (s >= 75) return "text-emerald-400";
+    if (s >= 60) return "text-yellow-400";
+    if (s >= 40) return "text-orange-500";
+    return "text-red-500";
+  };
 
   return (
-    <div className="relative flex flex-col items-center group">
-      <div className={`absolute inset-0 bg-orange-600/10 blur-[60px] rounded-full transition-all duration-1000 ${score > 70 ? 'opacity-100 scale-110' : 'opacity-40 scale-100'}`} />
+    <div className="relative flex flex-col items-center justify-center shrink-0" style={{ width: size, height: size }}>
+      <svg className="w-full h-full overflow-visible" viewBox="0 0 200 180">
+        {/* Background Track */}
+        <path 
+           d="M 35 80 A 65 65 0 0 1 165 80" 
+           fill="none" 
+           stroke="currentColor" 
+           strokeWidth="16" 
+           className="text-zinc-100 dark:text-white/[0.03]"
+        />
 
-      <svg height="300" width="300" className="transform -rotate-90 relative z-10">
-        <circle
-          cx="150" cy="150" r="90"
-          stroke="currentColor" strokeWidth="12" fill="transparent"
-          className="text-zinc-100 dark:text-white/5"
-        />
-        <circle
-          cx="150" cy="150" r="90"
-          stroke="url(#scoreGradient)" strokeWidth="12" fill="transparent"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          className="transition-all duration-[2500ms] ease-out shadow-[0_0_12px_var(--brand-glow)]"
-        />
-        <defs>
-          <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="var(--brand-primary)" />
-            <stop offset="100%" stopColor="var(--brand-secondary)" />
-          </linearGradient>
-        </defs>
+        {/* Actionable Segments - No Gaps, Butt Caps */}
+        <g fill="none" strokeWidth="16" strokeLinecap="butt" className="transition-opacity duration-500">
+          {/* Using slightly overlapping arcs to prevent 1px aliasing gaps */}
+          <path d="M 35.05 80 A 65 65 0 0 1 54.14 34.14" stroke="#ef4444" style={{ opacity: score >= 1 ? 1 : 0.15 }} />
+          <path d="M 54.04 34.04 A 65 65 0 0 1 100 15" stroke="#f97316" style={{ opacity: score >= 25 ? 1 : 0.15 }} />
+          <path d="M 100 15 A 65 65 0 0 1 145.96 34.04" stroke="#eab308" style={{ opacity: score >= 50 ? 1 : 0.15 }} />
+          <path d="M 145.86 34.14 A 65 65 0 0 1 164.95 80" stroke="#10b981" style={{ opacity: score >= 75 ? 1 : 0.15 }} />
+        </g>
+
+        <text x="32" y="98" textAnchor="middle" className="fill-zinc-400 text-[8px] font-bold font-mono opacity-50">0</text>
+        <text x="168" y="98" textAnchor="middle" className="fill-zinc-400 text-[8px] font-bold font-mono opacity-50">100</text>
+
+        {/* Needle - Restored and Refined */}
+        <g transform={`rotate(${animatedAngle}, 100, 80)`} className="transition-transform duration-[1500ms] ease-out">
+          <circle cx="100" cy="80" r="7" className="fill-zinc-900 dark:fill-zinc-100" />
+          <path d="M 100 77 L 40 80 L 100 83 Z" fill="currentColor" className="text-zinc-600 dark:text-zinc-400" />
+          <path d="M 100 79 L 45 80 L 100 81 Z" fill="white" className="opacity-40" />
+          <circle cx="100" cy="80" r="3" className="fill-zinc-100 dark:fill-zinc-900" />
+        </g>
+
+        {/* Score Display */}
+        <g transform="translate(100, 135)">
+          <text x="0" y="0" textAnchor="middle" className="fill-zinc-900 dark:fill-white text-5xl font-black tracking-tighter filter drop-shadow-md">
+            {displayScore}
+          </text>
+          <text x="0" y="24" textAnchor="middle" className={`font-black text-[10px] uppercase tracking-[0.3em] ${getStatusColor(score).replace('text-', 'fill-')}`}>
+            {getStatus(score)}
+          </text>
+        </g>
       </svg>
-
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-20">
-        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">{label}</p>
-        <p className="text-6xl font-black tracking-tighter text-zinc-900 dark:text-white">{score}%</p>
-      </div>
     </div>
   );
 };
+
+/* Added custom animation for X-Ray Scanner */
+const ScanlineStyles = () => (
+  <style dangerouslySetInnerHTML={{ __html: `
+    @keyframes scanline {
+      0% { transform: translateY(-100%); opacity: 0; }
+      10% { opacity: 0.5; }
+      90% { opacity: 0.5; }
+      100% { transform: translateY(600px); opacity: 0; }
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(249, 115, 22, 0.2);
+    }
+  `}} />
+);
+
+const MetricBar: React.FC<{ label: string; score: number }> = ({ label, score }) => (
+  <div className="space-y-1.5 flex-1 w-full">
+    <div className="flex justify-between items-center px-0.5">
+      <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{label}</span>
+      <span className="text-[10px] font-black text-zinc-600 dark:text-zinc-300">{score}%</span>
+    </div>
+    <div className="h-[3px] w-full bg-zinc-100 dark:bg-white/[0.03] rounded-full overflow-hidden shadow-inner">
+      <div 
+        className="h-full bg-gradient-to-r from-brand-primary/80 to-brand-secondary/80 rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(var(--brand-primary-rgb),0.3)]"
+        style={{ width: `${score}%` }}
+      />
+    </div>
+  </div>
+);
+
+const ComparisonCard: React.FC<{ suggestion: ImprovementSuggestion }> = ({ suggestion }) => (
+  <div className="glass-panel p-5 md:p-6 rounded-[24px] border dark:border-white/5 bg-white dark:bg-[#0a0a0a] space-y-4 transition-all hover:border-brand-primary/20 duration-300">
+    <div className="flex items-center justify-between">
+      <span className="px-2.5 py-1 rounded-full bg-brand-primary/[0.03] text-[9px] font-medium uppercase tracking-wider text-brand-primary/80 border border-brand-primary/10">
+        {suggestion.category || 'Improvement'}
+      </span>
+    </div>
+    <div className="space-y-4">
+      <div className="space-y-1.5">
+        <label className="text-[9px] font-medium text-red-500/80 uppercase tracking-widest ml-1">Current Gap</label>
+        <div className="p-4 rounded-xl bg-red-500/[0.02] border border-red-500/5 text-xs text-zinc-500 dark:text-zinc-400 italic leading-relaxed">
+          "{suggestion.original}"
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        <label className="text-[9px] font-medium text-emerald-500/80 uppercase tracking-widest ml-1">AI Recommendation</label>
+        <div className="p-4 rounded-xl bg-emerald-500/[0.02] border border-emerald-500/5 text-xs font-medium text-zinc-800 dark:text-zinc-200 leading-relaxed">
+          {suggestion.improved}
+        </div>
+      </div>
+    </div>
+    <div className="pt-4 border-t border-zinc-50 dark:border-white/5">
+      <p className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed">
+        <span className="font-semibold text-brand-primary uppercase text-[9px] tracking-widest mr-2">Rationale:</span>
+        {suggestion.reason}
+      </p>
+    </div>
+  </div>
+);
 
 interface FragmentProps {
   fragment: AnnotatedFragment;
@@ -108,15 +248,15 @@ interface FragmentProps {
 }
 
 const FragmentHighlight: React.FC<FragmentProps> = ({ fragment, onHover }) => {
-  if (fragment.type === 'neutral') return <span className="text-zinc-400 dark:text-zinc-500 whitespace-pre-wrap">{fragment.text}</span>;
+  if (fragment.type === 'neutral') return <span className="text-zinc-400/80 whitespace-pre-wrap">{fragment.text}</span>;
 
   const colorClass = fragment.type === 'good'
-    ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-    : 'text-red-700 dark:text-red-400 bg-red-500/10 border-red-500/20';
+    ? 'text-emerald-400 bg-emerald-500/5 border-emerald-500/20'
+    : 'text-red-400 bg-red-500/5 border-red-500/20';
 
   return (
     <span
-      className={`inline px-0.5 rounded-md border-b-2 cursor-pointer transition-colors duration-200 whitespace-pre-wrap ${colorClass}`}
+      className={`inline px-0.5 py-px rounded-sm border-b ring-1 ring-inset ring-transparent hover:ring-current hover:bg-white/5 transition-all duration-300 cursor-default whitespace-pre-wrap ${colorClass}`}
       onMouseEnter={(e) => onHover(fragment, e.currentTarget)}
       onMouseLeave={() => onHover(null, null)}
     >
@@ -335,17 +475,17 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
     return (
       <div className="h-[70vh] flex flex-col items-center justify-center space-y-10 animate-fade-in">
         <div className="relative">
-          <div className="w-24 h-24 border-8 border-brand-primary/10 rounded-full" />
-          <div className="absolute inset-0 w-24 h-24 border-8 border-brand-primary border-t-transparent rounded-full animate-spin" />
+          <div className="w-20 h-20 border-[3px] border-brand-primary/10 rounded-full" />
+          <div className="absolute inset-0 w-20 h-20 border-[3px] border-brand-primary border-t-transparent rounded-full animate-spin" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-brand-primary animate-pulse">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-brand-primary animate-pulse">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
           </div>
         </div>
         <div className="text-center space-y-2">
-          <h3 className="text-2xl font-medium text-zinc-800 dark:text-white">Analyzing Resume</h3>
-          <p className="text-xs font-semibold text-zinc-500 tracking-widest animate-pulse">Checking your content...</p>
+          <h3 className="text-xl font-medium text-zinc-800 dark:text-white">Analyzing Resume</h3>
+          <p className="text-[10px] font-medium text-zinc-500 tracking-wider animate-pulse">Checking your content...</p>
         </div>
       </div>
     );
@@ -354,34 +494,13 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
   if (result) {
     return (
       <div ref={reportRef} className="max-w-6xl mx-auto space-y-10 animate-fade-in pb-20 px-4 md:px-0 relative">
-
-        {hoveredFragment && (
-          <div
-            className={`absolute z-[1000] p-5 bg-black border border-white/20 rounded-2xl shadow-2xl pointer-events-none transform -translate-x-1/2 w-[300px] ${tooltipPos.flipped ? '' : '-translate-y-full'}`}
-            style={{ left: tooltipPos.x, top: tooltipPos.y }}
-          >
-            <div className="space-y-4">
-              <div>
-                <p className="text-[9px] font-medium text-brand-primary mb-1.5 flex items-center gap-2">Feedback</p>
-                <p className="text-[11px] font-bold text-white leading-relaxed">{hoveredFragment.reason || "Good point."}</p>
-              </div>
-              {hoveredFragment.suggestion && (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/20">
-                <div className="w-1.5 h-1.5 rounded-full bg-brand-primary animate-pulse" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-brand-primary">Resume Linked</span>
-              </div>
-              )}
-            </div>
-            <div className={`absolute left-1/2 -translate-x-1/2 border-[8px] border-transparent ${tooltipPos.flipped ? 'bottom-full border-b-black' : 'top-full border-t-black'}`} />
-          </div>
-        )}
-
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <ScanlineStyles />
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-1">
           {!hideHeader ? (
             <div>
-              <h2 className="text-3xl font-bold text-zinc-800 dark:text-white tracking-tight mb-1">Resume Feedback</h2>
-              <p className="text-zinc-500 font-semibold tracking-widest text-[9px] flex items-center gap-2">
-                File: {fileName}
+              <h2 className="text-2xl md:text-3xl font-semibold text-zinc-900 dark:text-white tracking-tight mb-1">Resume Diagnostic</h2>
+              <p className="text-zinc-500 font-medium tracking-wide text-[11px] flex items-center gap-2">
+                Scanning <span className="text-zinc-400 font-mono italic">{fileName || 'Untitled'}</span>
               </p>
             </div>
           ) : <div />}
@@ -389,16 +508,17 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             <button 
               onClick={handleShareReport} 
               disabled={shareLoading}
-              className="px-4 py-2 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-white rounded-xl font-bold text-[8px] tracking-widest transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+              className="px-4 py-2 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-xl font-semibold text-[11px] tracking-wide transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm disabled:opacity-50"
             >
               {shareLoading ? (
-                <div className="w-3 h-3 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
+                <div className="w-3.5 h-3.5 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
               ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
               )}
-              Share Report
+              Share
             </button>
-            <button onClick={handleSaveReport} className="px-4 py-2 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-white rounded-xl font-bold text-[8px] tracking-widest transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm">
+            <button onClick={handleSaveReport} className="px-4 py-2 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-xl font-semibold text-[11px] tracking-wide transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
               Save History
             </button>
             <button 
@@ -406,150 +526,668 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                 setResult(null);
                 setSearchParams({ tab: 'placement' }, { replace: true });
               }} 
-              className="px-4 py-2 bg-brand-primary text-white rounded-xl font-bold text-[8px] tracking-widest active:scale-95 transition-all border-none"
+              className="px-5 py-2 bg-brand-primary text-white rounded-xl font-semibold text-[11px] tracking-wide active:scale-95 transition-all border-none shadow-lg shadow-brand-primary/20"
             >
-              Try New Resume
+              Analyze New
             </button>
           </div>
         </header>
 
-        <div className="glass-panel p-8 md:p-10 rounded-[56px] shadow-2xl flex flex-col md:flex-row items-center gap-10 relative overflow-hidden">
-          <ScoreAura score={result.totalScore} label="Resume Score" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Main Score & Stats Dashboard */}
+          <div className="glass-panel p-6 md:p-8 rounded-[28px] flex flex-col gap-8 bg-white dark:bg-[#0a0a0a] border dark:border-white/5 shadow-xl shadow-zinc-200/50 dark:shadow-none">
+            {/* Top row: Meter and Detailed Scores */}
+            <div className="flex flex-col md:flex-row items-center gap-10">
+              <ScoreAura score={result.totalScore} size={220} />
 
-          <div className="flex-1 space-y-6">
+              <div className="flex-1 w-full space-y-4 px-1">
+                <MetricBar label="Keywords" score={result.detailedScores?.keywordMatch || 0} />
+                <MetricBar label="Skills Alignment" score={result.detailedScores?.skillsAlignment || 0} />
+                <MetricBar label="Experience" score={result.detailedScores?.experienceRelevance || 0} />
+                <MetricBar label="Formatting" score={result.detailedScores?.formattingQuality || 0} />
+                <MetricBar label="Overall Impact" score={result.detailedScores?.overallImpact || 0} />
+              </div>
+            </div>
 
-            <p className="text-sm md:text-base font-medium text-zinc-800 dark:text-white leading-relaxed opacity-90 italic">"{result.summary}"</p>
-            <div className="h-px bg-zinc-100 dark:bg-white/5 w-full" />
-            <div className="space-y-3">
-              {result.flags.map((flag, idx) => (
-                <div key={idx} className={`p-4 rounded-2xl border flex items-start gap-3 ${flag.type === 'critical' ? 'bg-brand-primary/10 border-brand-primary/20 text-brand-primary' : flag.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'}`}>
-                  <p className="text-[11px] font-medium leading-tight">{flag.message}</p>
+            {/* Bottom row: Full-width Banners */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+              <div className="flex flex-col items-center justify-center p-4 rounded-3xl bg-red-500/10 border border-red-500/20 text-center group/stat transition-all hover:bg-red-500/15">
+                <div className="mb-2 w-8 h-8 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div className="space-y-0.5">
+                  <span className="text-sm font-black text-red-500">{result.stats?.errors || 0} Critical Errors</span>
+                  <p className="text-[9px] text-red-500/60 font-bold uppercase tracking-wider">Requires fix</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center justify-center p-4 rounded-3xl bg-orange-500/10 border border-orange-500/20 text-center group/stat transition-all hover:bg-orange-500/15">
+                <div className="mb-2 w-8 h-8 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <div className="space-y-0.5">
+                  <span className="text-sm font-black text-orange-500">{result.stats?.improvements || 0} Improvements</span>
+                  <p className="text-[9px] text-orange-500/60 font-bold uppercase tracking-wider">Strategic edge</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center justify-center p-4 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 text-center group/stat transition-all hover:bg-emerald-500/15">
+                <div className="mb-2 w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div className="space-y-0.5">
+                  <span className="text-sm font-black text-emerald-500">{result.stats?.passed || 0} Indicators</span>
+                  <p className="text-[9px] text-emerald-500/60 font-bold uppercase tracking-wider">Valid checks</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Skill Radar Graph */}
+          <div className="glass-panel p-6 rounded-[28px] bg-white dark:bg-[#0a0a0a] border dark:border-white/5 flex flex-col h-full shadow-xl shadow-zinc-200/50 dark:shadow-none">
+            <div className="flex items-start justify-between mb-2 px-2">
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight">Competency Radar</h3>
+                <p className="text-[9px] font-medium text-zinc-400 uppercase tracking-widest">Industry Benchmarking</p>
+              </div>
+              
+              {/* Legend Box matching user image style */}
+              <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-white/5 space-y-1.5 min-w-[140px]">
+                <p className="text-[9px] font-black text-zinc-800 dark:text-zinc-200 uppercase tracking-wider mb-1">Skill Radar Graph</p>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-sm bg-blue-500" />
+                  <span className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400">Ideal Candidate Pool</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-sm bg-orange-500" />
+                  <span className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400">Average Candidate Pool</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
+                  <span className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400">You</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex-1 min-h-[300px] relative">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={[
+                  { subject: 'Qualification', you: result.radarData?.qualification || 0, fullMark: 100, avg: 65, ideal: 95 },
+                  { subject: 'Retention', you: result.radarData?.retention || 0, fullMark: 100, avg: 55, ideal: 85 },
+                  { subject: 'Domain Diversity', you: result.radarData?.domainDiversity || 0, fullMark: 100, avg: 60, ideal: 90 },
+                  { subject: 'Professional', you: result.radarData?.roleAlignment || 0, fullMark: 100, avg: 70, ideal: 92 },
+                  { subject: 'Experience', you: result.radarData?.experience || 0, fullMark: 100, avg: 50, ideal: 88 }
+                ]}>
+                  <PolarGrid stroke="rgba(113, 113, 122, 0.2)" />
+                  <PolarAngleAxis 
+                    dataKey="subject" 
+                    tick={{ fill: '#71717a', fontSize: 10, fontWeight: 700 }} 
+                  />
+                  
+                  {/* Ideal Candidate Pool - Blue */}
+                  <Radar
+                    name="Ideal Candidate Pool"
+                    dataKey="ideal"
+                    stroke="#3b82f6"
+                    strokeWidth={1.5}
+                    fill="#3b82f6"
+                    fillOpacity={0.25}
+                    dot={{ r: 2, fill: '#3b82f6', strokeWidth: 0 }}
+                  />
+                  
+                  {/* Average Candidate Pool - Orange */}
+                  <Radar
+                    name="Average Candidate Pool"
+                    dataKey="avg"
+                    stroke="#f97316"
+                    strokeWidth={1.5}
+                    fill="#f97316"
+                    fillOpacity={0.25}
+                    dot={{ r: 2, fill: '#f97316', strokeWidth: 0 }}
+                  />
+                  
+                  {/* You - Green */}
+                  <Radar
+                    name="You"
+                    dataKey="you"
+                    stroke="#10b981"
+                    strokeWidth={2.5}
+                    fill="#10b981"
+                    fillOpacity={0.4}
+                    dot={{ r: 3, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
+                  />
+                  
+                  <RechartsTooltip 
+                    contentStyle={{ borderRadius: '16px', border: 'none', backgroundColor: '#18181b', color: '#fff', fontSize: '10px' }}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Shortlist Simulation */}
+        <section className="space-y-6 pt-5">
+          <div className="px-1 flex items-end justify-between">
+            <div className="space-y-1">
+              <h3 className="text-xl md:text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">Hiring Probablity Simulation</h3>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] opacity-75">Predictive AI shortlisting analysis</p>
+            </div>
+            <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Growth Potential</span>
+            </div>
+          </div>
+
+          <div className="glass-panel p-6 md:p-8 rounded-[32px] bg-white dark:bg-[#0a0a0a] border dark:border-white/5 shadow-xl relative overflow-hidden group">
+            {/* Ambient Background Glow */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 rounded-full blur-[90px] -translate-y-1/2 translate-x-1/4 group-hover:bg-brand-primary/10 transition-colors duration-700" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-secondary/5 rounded-full blur-[90px] translate-y-1/2 -translate-x-1/4" />
+            
+            <div className="relative flex flex-col gap-8">
+              <div className="flex flex-col md:flex-row items-stretch justify-between gap-6 md:gap-4">
+                {/* Current State Card */}
+                <div className="flex-1 p-5 rounded-2xl bg-zinc-50/50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">As of Today</span>
+                    <span className="text-xl font-black text-zinc-400">{result.simulation.currentShortlistChance}%</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-end">
+                      <span className="text-[10px] font-bold text-zinc-500">Shortlist Chance</span>
+                      <span className="text-[8px] font-medium text-zinc-400">Baseline</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-zinc-200 dark:bg-white/5 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-zinc-400 dark:bg-zinc-600 rounded-full transition-all duration-1000 ease-out" 
+                        style={{ width: `${result.simulation.currentShortlistChance}%` }} 
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Bridge Element */}
+                <div className="flex-none flex items-center justify-center py-2 md:py-0">
+                  <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 border border-brand-primary/20 shadow-lg shadow-brand-primary/10 z-10">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-brand-primary"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                  </div>
+                  {/* Subtle connecting line for desktop only */}
+                  <div className="hidden md:block absolute left-1/2 top-1/2 -translate-y-1/2 w-[80%] h-[1px] bg-gradient-to-r from-transparent via-brand-primary/20 to-transparent -z-0" />
+                </div>
+
+                {/* Projected State Card */}
+                <div className="flex-1 p-5 rounded-2xl bg-brand-primary/[0.03] dark:bg-brand-primary/[0.05] border border-brand-primary/10 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] font-black text-brand-primary uppercase tracking-widest">Optimized Target</span>
+                    <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-br from-brand-primary to-brand-secondary">
+                      {result.simulation.projectedShortlistChance}%
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-end">
+                      <span className="text-[10px] font-bold text-brand-primary/80">Success Probability</span>
+                      <span className="text-[8px] font-black text-emerald-500 uppercase tracking-tighter">+{(result.simulation.projectedShortlistChance - result.simulation.currentShortlistChance)}% Increase</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-brand-primary/10 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(var(--brand-primary-rgb),0.4)]" 
+                        style={{ width: `${result.simulation.projectedShortlistChance}%` }} 
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-zinc-50/80 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 w-full">
+                 <div className="flex gap-4">
+                    <div className="flex-none p-2 h-fit rounded-xl bg-zinc-200 dark:bg-white/5 text-brand-primary">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Prediction Model Feedback</p>
+                      <p className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400 leading-relaxed italic">
+                        "{result.simulation.explanation}"
+                      </p>
+                    </div>
+                 </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Strategic Action Plan */}
+        <section className="space-y-6 pt-5">
+          <div className="px-1">
+            <h3 className="text-xl md:text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">Strategic Action Plan</h3>
+            <p className="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-[0.2em] opacity-75">Precision tasks to maximize your potential</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {result.actionPlan.tasks.map((task, idx) => {
+              const types = {
+                Build: { 
+                  color: "text-blue-500", 
+                  bg: "bg-blue-500/10", 
+                  border: "border-blue-500/20",
+                  badge: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+                  icon: (
+                    <>
+                      <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="1.5" />
+                      <path d="M12 8v8M8 12h8" strokeWidth="1.5" />
+                    </>
+                  )
+                },
+                Practice: { 
+                  color: "text-purple-500", 
+                  bg: "bg-purple-500/10", 
+                  border: "border-purple-500/20",
+                  badge: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+                  icon: (
+                    <>
+                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" strokeWidth="1.5" />
+                      <polyline points="14 2 14 8 20 8" strokeWidth="1.5" />
+                      <path d="M10 13l2 2 4-4" strokeWidth="1.5" />
+                    </>
+                  )
+                },
+                Add: { 
+                  color: "text-emerald-500", 
+                  bg: "bg-emerald-500/10", 
+                  border: "border-emerald-500/20",
+                  badge: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+                  icon: (
+                    <>
+                      <circle cx="12" cy="12" r="9" strokeWidth="1.5" />
+                      <line x1="12" y1="8" x2="12" y2="16" strokeWidth="1.5" />
+                      <line x1="8" y1="12" x2="16" y2="12" strokeWidth="1.5" />
+                    </>
+                  )
+                },
+                Refactor: { 
+                  color: "text-orange-500", 
+                  bg: "bg-orange-500/10", 
+                  border: "border-orange-500/20",
+                  badge: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+                  icon: (
+                    <>
+                      <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" strokeWidth="1.5" />
+                      <polyline points="21 3 21 8 16 8" strokeWidth="1.5" />
+                    </>
+                  )
+                }
+              };
+
+              const config = types[task.action as keyof typeof types];
+
+              return (
+                <div key={idx} className="glass-panel p-4 md:p-5 rounded-[28px] border dark:border-white/5 bg-white dark:bg-[#0a0a0a] flex items-start gap-4 hover:border-brand-primary/30 transition-all duration-300 group shadow-sm hover:shadow-lg hover:shadow-brand-primary/5">
+                  <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border ${config.bg} ${config.border} ${config.color} group-hover:scale-105 transition-transform duration-300 shadow-inner`}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+                      {config.icon}
+                    </svg>
+                  </div>
+                  <div className="space-y-1.5 flex-1 py-0.5">
+                    <div className="flex items-center justify-between">
+                       <span className={`px-2 py-0.5 rounded-full border text-[7px] font-black uppercase tracking-widest ${config.badge}`}>
+                         {task.action}
+                       </span>
+                    </div>
+                    <h4 className="text-[13px] font-black text-zinc-900 dark:text-white leading-tight group-hover:text-brand-primary transition-colors pr-2">{task.task}</h4>
+                    <p className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-[95%]">{task.description}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Executive Summary */}
+        <div className="p-6 rounded-[24px] bg-gradient-to-br from-brand-primary/[0.02] to-brand-secondary/[0.02] border border-brand-primary/10 flex items-start gap-5">
+            <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center shrink-0">
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-brand-primary"><path d="M12 2v20M2 12h20" className="rotate-45" /><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></svg>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[9px] font-semibold text-brand-primary/70 tracking-widest uppercase">Recruiter Verdict</p>
+              <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 leading-relaxed italic">
+                "{result.summary}"
+              </p>
+            </div>
+        </div>
+
+        {/* Deep Dive Section - What's Wrong vs What's Right */}
+        <section className="space-y-6 pt-5">
+          <div className="flex flex-col md:flex-row md:items-end justify-between px-2 gap-4">
+            <div>
+              <h3 className="text-xl md:text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">Deep Dive Improvements</h3>
+              <p className="text-[11px] font-medium text-zinc-400 mt-1 tracking-wide uppercase tracking-widest">Actionable suggestions to improve your ATS score</p>
+            </div>
+            <div className="flex gap-4 mb-1">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Gaps</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Optimized</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            {result.improvementSuggestions?.map((suggestion, idx) => (
+              <ComparisonCard key={idx} suggestion={suggestion} />
+            ))}
+            {(!result.improvementSuggestions?.length) && (
+              <div className="p-12 text-center rounded-[40px] bg-zinc-50 dark:bg-white/[0.02] border-2 border-dashed border-zinc-200 dark:border-white/5">
+                <p className="text-zinc-400 font-medium text-xs uppercase tracking-widest">No major improvements needed</p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Success Indicators - What You Did Right */}
+        {result.passedChecks && result.passedChecks.length > 0 && (
+          <section className="space-y-6 pt-10">
+            <div className="px-2">
+              <h3 className="text-xl md:text-2xl font-semibold text-emerald-600 dark:text-emerald-400 tracking-tight">Success Indicators</h3>
+              <p className="text-[11px] font-medium text-zinc-400 mt-1 uppercase tracking-widest">Key strengths identified by our ATS engine</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {result.passedChecks.map((check, idx) => (
+                <div key={idx} className="glass-panel p-5 rounded-[24px] border dark:border-white/10 bg-white dark:bg-[#0a0a0a] shadow-sm hover:border-emerald-500/20 transition-all duration-300">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/5 flex items-center justify-center text-emerald-500 shrink-0">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
+                        <path d="m9 12 2 2 4-4" />
+                        <circle cx="12" cy="12" r="10" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-bold text-emerald-500/70 uppercase tracking-widest mb-1">{check.category}</p>
+                      <h4 className="text-sm font-semibold text-zinc-900 dark:text-white leading-tight">{check.checkName}</h4>
+                      <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 mt-2 leading-relaxed">
+                        {check.insight}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
-        </div>
+          </section>
+        )}
 
-        <div className="glass-panel p-6 md:p-8 rounded-[56px] shadow-2xl space-y-6 animate-fade-in relative overflow-visible">
-          <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-zinc-100 dark:border-white/5 pb-8">
-            <div>
-              <h3 className="text-2xl font-mediumer text-zinc-800 dark:text-white">Content Check</h3>
-              <p className="text-[9px] font-bold text-brand-primary tracking-widest mt-1.5">Hover over sections for feedback</p>
+        {/* Skill Diversity Matrix */}
+        <section className="space-y-6 pt-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between px-2 gap-4">
+            <div className="space-y-1">
+              <h3 className="text-xl md:text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">Skill Diversity Matrix</h3>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] opacity-75">Categorized mapping against industry trends</p>
             </div>
-          </header>
-
-          <div className="relative overflow-visible">
-            <div className="max-h-[600px] overflow-y-auto custom-scrollbar p-6 md:p-8 bg-black rounded-[40px] border border-white/5 shadow-inner">
-              <div className="text-sm md:text-base text-zinc-300 font-medium leading-relaxed whitespace-pre-wrap font-mono">
-                {result.annotatedContent.map((fragment, i) => (
-                  <FragmentHighlight key={i} fragment={fragment} onHover={handleFragmentHover} />
-                ))}
+            
+            {/* Legend for Skill Matrix */}
+            <div className="flex flex-wrap gap-2.5 items-center bg-zinc-50 dark:bg-zinc-900/40 p-2.5 rounded-2xl border border-zinc-100 dark:border-white/5 shadow-inner">
+              <div className="flex items-center gap-1.5 px-1.5">
+                <div className="w-2 h-2 rounded-full bg-brand-primary shadow-sm shadow-brand-primary/20" />
+                <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Mandatory</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-1.5">
+                <div className="w-2 h-2 rounded-full bg-sky-500 shadow-sm shadow-sky-500/20" />
+                <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Desired</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-1.5">
+                <div className="w-2 h-2 rounded-full bg-zinc-400 shadow-sm shadow-zinc-400/20" />
+                <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Other</span>
+              </div>
+              <div className="h-3 w-[1px] bg-zinc-200 dark:bg-white/10 mx-0.5" />
+              <div className="flex items-center gap-1.5 px-2 py-1.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 flex items-center justify-center">
+                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-1 h-1 text-white"><polyline points="20 6 9 17 4 12" /></svg>
+                </div>
+                <span className="text-[8px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.05em]">Your Mastery</span>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {CATEGORIES.map((cat) => {
-            const catData = result.categories?.[cat.id] || { score: 0 };
-            const isActive = activeCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`p-3.5 rounded-2xl border text-left transition-all h-full flex flex-col justify-between group ${isActive ? 'bg-brand-primary border-brand-primary shadow-lg shadow-brand-primary/20 text-white scale-[1.02]' : 'bg-white dark:bg-[#0a0a0a] border-zinc-100 dark:border-white/10 text-zinc-500 hover:border-brand-primary/30'}`}
-              >
-                <p className={`text-lg font-semibold ${isActive ? 'text-white' : 'text-zinc-900 dark:text-white group-hover:text-brand-primary'}`}>{catData.score}%</p>
-                <p className={`text-[9px] font-medium leading-tight tracking-tight mt-1 ${isActive ? 'text-white/80' : 'text-zinc-400'}`}>{cat.label}</p>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Detailed Category Breakdown Section */}
-        <div className="glass-panel p-8 md:p-10 rounded-[56px] shadow-2xl animate-fade-in border dark:border-white/5 bg-white dark:bg-[#0a0a0a]">
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="w-full md:w-1/3 space-y-6">
-              <div className="p-6 rounded-[32px] bg-brand-primary/5 border border-brand-primary/20">
-                <p className="text-[10px] font-black uppercase tracking-widest text-brand-primary mb-2">Category Score</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-black text-zinc-900 dark:text-white">{result.categories?.[activeCategory]?.score || 0}%</span>
-                  <span className="text-xs font-bold text-zinc-400">match</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {result.skillDiversity?.map((cat, idx) => (
+              <div key={idx} className="glass-panel p-5 rounded-[28px] border dark:border-white/5 space-y-4 flex flex-col h-full bg-white dark:bg-[#0a0a0a] shadow-sm hover:border-brand-primary/20 transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <h4 className="text-[9px] font-black uppercase text-zinc-400 dark:text-zinc-500 tracking-[0.15em] mb-0.5">{cat.category}</h4>
+                    <span className="text-[11px] font-bold text-zinc-900 dark:text-white">Proficiency Map</span>
+                  </div>
+                  <div className="px-2 py-0.5 rounded-lg bg-zinc-100 dark:bg-white/5 text-[9px] font-black text-zinc-600 dark:text-zinc-400">
+                    {cat.skills.filter(s => s.found).length}/{cat.skills.length}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 flex-1 items-start content-start">
+                  {cat.skills.map((skill, sIdx) => {
+                    const isMandatory = skill.level === 'Mandatory';
+                    const isDesired = skill.level === 'Desired';
+                    const isFound = skill.found;
+                    
+                    let variantStyles = "bg-zinc-50 dark:bg-zinc-900/40 border-zinc-200 dark:border-white/5 text-zinc-500";
+                    let accentColor = "bg-zinc-300 dark:bg-zinc-700";
+                    
+                    if (isMandatory) {
+                      variantStyles = "bg-brand-primary/5 border-brand-primary/20 text-brand-primary";
+                      accentColor = "bg-brand-primary";
+                    } else if (isDesired) {
+                      variantStyles = "bg-sky-500/5 border-sky-500/20 text-sky-500";
+                      accentColor = "bg-sky-500";
+                    }
+                    
+                    return (
+                      <div 
+                        key={sIdx}
+                        className={`group/skill relative px-2.5 py-1.5 rounded-xl text-[9px] font-black transition-all border select-none flex items-center gap-2 ${variantStyles} ${isFound 
+                          ? 'ring-1 ring-emerald-500/30 !border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
+                          : 'opacity-70 grayscale-[0.5]'}`}
+                      >
+                        {isFound ? (
+                          <div className="flex-none p-0.5 rounded-full bg-emerald-500 text-white shadow-sm">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-1.5 h-1.5"><polyline points="20 6 9 17 4 12" /></svg>
+                          </div>
+                        ) : (
+                          <div className={`w-1.5 h-1.5 rounded-full flex-none shadow-sm ${accentColor} ${isMandatory ? 'animate-pulse' : ''}`} />
+                        )}
+                        <span className="truncate">{skill.name}</span>
+                        
+                        {/* Hover Tooltip for Level */}
+                        {!isFound && (
+                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-900 text-white text-[8px] rounded opacity-0 group-hover/skill:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 font-bold uppercase tracking-widest border border-white/10">
+                            Missing {skill.level} Skill
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Annotated Resume X-Ray */}
+        <section className="space-y-6 pt-10">
+          <div className="px-2 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div className="space-y-1">
+              <h3 className="text-xl md:text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">Annotated Resume X-Ray</h3>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] opacity-75">Full reconstruction with deep recruiter insights</p>
+            </div>
+            
+            <div className="flex gap-4 mb-1 self-start md:self-auto bg-zinc-50 dark:bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-100 dark:border-white/5">
+               <div className="flex items-center gap-2">
+                 <div className="w-3 h-[2px] bg-emerald-500 rounded-full" />
+                 <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Optimized</span>
+               </div>
+               <div className="flex items-center gap-2">
+                 <div className="w-3 h-[2px] bg-red-500 rounded-full" />
+                 <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Recruiter Flag</span>
+               </div>
+            </div>
+          </div>
+          
+          <div className="relative group/xray" ref={reportRef}>
+            {/* High-Tech Container */}
+            <div className="glass-panel p-4 md:p-10 rounded-[28px] md:rounded-[40px] bg-[#0c0c0c] border border-white/5 shadow-2xl relative overflow-hidden ring-1 ring-white/5">
+              {/* Scanline Effect - Subtle and Premium */}
+              <div className="absolute inset-x-0 h-[80px] bg-gradient-to-b from-transparent via-brand-primary/5 to-transparent top-0 animate-[scanline_10s_linear_infinite] pointer-events-none z-10 opacity-30" />
               
-              <div className="space-y-4">
-                <h4 className="text-sm font-bold text-zinc-800 dark:text-white px-2">Key Findings</h4>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed px-2">
-                  {result.categories?.[activeCategory]?.details || "Evaluating specific metrics for this category..."}
-                </p>
+              {/* Decorative Corner Ornaments */}
+              <div className="absolute top-4 left-4 w-4 h-4 border-t border-l border-white/10" />
+              <div className="absolute top-4 right-4 w-4 h-4 border-t border-r border-white/10" />
+              <div className="absolute bottom-4 left-4 w-4 h-4 border-b border-l border-white/10" />
+              <div className="absolute bottom-4 right-4 w-4 h-4 border-b border-r border-white/10" />
+
+              <div className="max-h-[600px] overflow-y-auto custom-scrollbar pr-4 relative z-20">
+                <div className="text-[12px] md:text-[13px] text-zinc-600 font-medium leading-relaxed whitespace-pre-wrap font-mono tracking-tight">
+                  {result.annotatedContent.map((fragment, i) => (
+                    <FragmentHighlight key={i} fragment={fragment} onHover={handleFragmentHover} />
+                  ))}
+                </div>
               </div>
             </div>
-
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 px-2 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  Strengths
-                </h4>
-                <div className="space-y-2">
-                  {(result.categories?.[activeCategory]?.strengths || []).map((s, i) => (
-                    <div key={i} className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
-                      {s}
+            
+            {/* Tooltip implementation for hover insights - Moved outside overflow-hidden */}
+            {hoveredFragment && hoveredFragment.type !== 'neutral' && (
+              <div 
+                className="absolute z-[9999] pointer-events-none transition-all duration-200"
+                style={{ 
+                  left: `${tooltipPos.x}px`, 
+                  top: `${tooltipPos.y}px`,
+                  transform: `translate(-50%, ${tooltipPos.flipped ? '0%' : '-100%'})`
+                }}
+              >
+                <div className={`p-4 rounded-2xl shadow-2xl border flex flex-col gap-2.5 w-72 md:w-80 animate-in fade-in zoom-in duration-200 shadow-brand-primary/10 ${hoveredFragment.type === 'good' ? 'bg-[#0f1711] border-emerald-500/30' : 'bg-[#1a0f0f] border-red-500/30'}`}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-1.5 h-1.5 rounded-full ${hoveredFragment.type === 'good' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                      <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${hoveredFragment.type === 'good' ? 'text-emerald-500' : 'text-red-500'}`}>
+                        {hoveredFragment.type === 'good' ? 'Best Practice' : 'Critical Flag'}
+                      </span>
                     </div>
-                  ))}
-                  {(!result.categories?.[activeCategory]?.strengths?.length) && <p className="text-[11px] text-zinc-400 px-2 italic">Looking for positives...</p>}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`w-3 h-3 ${hoveredFragment.type === 'good' ? 'text-emerald-500' : 'text-red-500'}`}>
+                      {hoveredFragment.type === 'good' ? <path d="m5 12 5 5L20 7" /> : <path d="m21 21-18-18m18 0L3 21" />}
+                    </svg>
+                  </div>
+                  
+                  <p className="text-[11px] font-bold text-zinc-100 leading-tight">
+                    {hoveredFragment.reason}
+                  </p>
+                  
+                  {hoveredFragment.suggestion && (
+                    <div className={`mt-1 p-3 rounded-xl border ${hoveredFragment.type === 'good' ? 'bg-emerald-500/5 border-emerald-500/10' : 'bg-red-500/5 border-red-500/10'}`}>
+                      <p className="text-[8px] font-black opacity-50 uppercase tracking-widest mb-1 shadow-sm">AI Recommendation</p>
+                      <p className="text-[10px] font-medium text-zinc-300 leading-relaxed italic">
+                        {hoveredFragment.suggestion}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            </div>
+            
+            {/* Tech Status Bar */}
+            <div className="mt-4 flex items-center justify-between px-2">
+               <div className="flex items-center gap-4">
+                 <div className="flex items-center gap-1.5">
+                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                   <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Neural Link Active</span>
+                 </div>
+                 <div className="flex items-center gap-1.5">
+                   <div className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
+                   <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">ATS Engine v4.2</span>
+                 </div>
+               </div>
+               <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Hover highlighted text for deep insights</p>
+             </div>
+         </section>
+
+        {/* Category breakdown remains for deeper tabs if needed, but redesigned */}
+        <div className="pt-10 space-y-8">
+           <div className="flex items-center gap-4 px-4 overflow-x-auto no-scrollbar py-2">
+            {CATEGORIES.map((cat) => {
+              const catData = result.categories?.[cat.id] || { score: 0 };
+              const isActive = activeCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`px-6 py-3 rounded-full border whitespace-nowrap transition-all flex items-center gap-3 shrink-0 ${isActive ? 'bg-brand-primary border-brand-primary text-white shadow-lg' : 'bg-white dark:bg-white/5 border-zinc-100 dark:border-white/10 text-zinc-500 hover:border-brand-primary/30'}`}
+                >
+                  <span className={`text-xs font-black ${isActive ? 'text-white' : 'text-zinc-900 dark:text-white'}`}>{catData.score}%</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">{cat.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="glass-panel p-8 md:p-10 rounded-[48px] shadow-2xl animate-fade-in border dark:border-white/5 bg-white dark:bg-[#0a0a0a]">
+            <div className="flex flex-col md:flex-row gap-8">
+              <div className="w-full md:w-1/3 space-y-6">
+                <div className="p-6 rounded-[32px] bg-brand-primary/5 border border-brand-primary/10">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-brand-primary mb-2">Diagnostic Score</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-5xl font-black text-zinc-900 dark:text-white">{result.categories?.[activeCategory]?.score || 0}%</span>
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Accuracy</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-4 px-2">
+                  <h4 className="text-[11px] font-black uppercase tracking-widest text-zinc-800 dark:text-white">Analysis Overview</h4>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
+                    {result.categories?.[activeCategory]?.details || "Evaluating specific metrics for this category..."}
+                  </p>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-brand-primary px-2 flex items-center gap-2">
-                   <div className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
-                   Gaps to Fix
-                </h4>
-                <div className="space-y-2">
-                  {(result.categories?.[activeCategory]?.weaknesses || []).map((w, i) => (
-                    <div key={i} className="p-4 rounded-2xl bg-brand-primary/5 border border-brand-primary/10 text-[11px] font-medium text-brand-primary">
-                      {w}
-                    </div>
-                  ))}
-                  {(!result.categories?.[activeCategory]?.weaknesses?.length) && <p className="text-[11px] text-zinc-400 px-2 italic">Standard quality maintained.</p>}
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 px-2 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                    Key Assets
+                  </h4>
+                  <div className="space-y-3">
+                    {(result.categories?.[activeCategory]?.strengths || []).map((s, i) => (
+                      <div key={i} className="p-4 rounded-2xl bg-emerald-500/[0.03] border border-emerald-500/10 text-xs font-medium text-emerald-700 dark:text-emerald-400 leading-tight">
+                        {s}
+                      </div>
+                    ))}
+                    {(!result.categories?.[activeCategory]?.strengths?.length) && <p className="text-[11px] text-zinc-400 px-2 italic">Standard baseline metadata.</p>}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-brand-primary px-2 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-brand-primary" />
+                    Critical fixes
+                  </h4>
+                  <div className="space-y-3">
+                    {(result.categories?.[activeCategory]?.weaknesses || []).map((w, i) => (
+                      <div key={i} className="p-4 rounded-2xl bg-brand-primary/[0.03] border border-brand-primary/10 text-xs font-medium text-brand-primary leading-tight">
+                        {w}
+                      </div>
+                    ))}
+                    {(!result.categories?.[activeCategory]?.weaknesses?.length) && <p className="text-[11px] text-zinc-400 px-2 italic">No immediate refinements detected.</p>}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-
-          {(result.categories?.[activeCategory]?.found?.length > 0 || result.categories?.[activeCategory]?.missing?.length > 0) && (
-            <div className="mt-10 pt-8 border-t border-zinc-100 dark:border-white/5 grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest px-2">Keywords Found</p>
-                <div className="flex flex-wrap gap-2">
-                  {result.categories?.[activeCategory]?.found.map((k, i) => (
-                    <span key={i} className="px-3 py-1 rounded-full bg-zinc-100 dark:bg-white/5 text-[9px] font-bold text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/10">{k}</span>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-3">
-                <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest px-2">Missing & High Impact</p>
-                <div className="flex flex-wrap gap-2">
-                  {result.categories?.[activeCategory]?.missing.map((k, i) => (
-                    <span key={i} className="px-3 py-1 rounded-full bg-brand-primary/10 text-[9px] font-bold text-brand-primary border border-brand-primary/20">{k}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12 animate-fade-in pb-20 px-4 md:px-0">
+    <div className="max-w-4xl mx-auto space-y-10 animate-fade-in pb-20 px-4 md:px-0">
       {!hideHeader && (
-        <header className="text-center space-y-4">
-          <h2 className="text-3xl md:text-5xl font-bold text-zinc-900 dark:text-white tracking-tighter leading-none">Placement <span className="text-transparent bg-clip-text bg-brand-gradient">Prefect</span></h2>
-          <p className="text-zinc-500 font-semibold tracking-widest text-[10px]">Get AI Feedback to help your placement prep</p>
+        <header className="text-center space-y-3">
+          <h2 className="text-3xl md:text-4xl font-semibold text-zinc-900 dark:text-white tracking-tight leading-tight">Placement <span className="text-transparent bg-clip-text bg-gradient-to-br from-brand-primary to-brand-secondary">Prefect</span></h2>
+          <p className="text-zinc-500 font-medium tracking-wide text-xs">Unlock your career potential with advanced AI resume intelligence</p>
         </header>
       )}
 
@@ -566,16 +1204,16 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
         </div>
       )}
 
-      <div className="glass-panel p-8 md:p-10 rounded-[64px] shadow-2xl space-y-8">
+      <div className="glass-panel p-8 rounded-[40px] shadow-2xl space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <div className="space-y-5">
             <div className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-black text-[10px] sm:text-xs shrink-0 border border-brand-primary/20`}>
+              <div className={`w-8 h-8 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-semibold text-[10px] shrink-0 border border-brand-primary/20`}>
               1
             </div>
-            <h3 className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-zinc-800 dark:text-zinc-200">Your Resume</h3>
+            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-zinc-800 dark:text-zinc-200">Your Resume</h3>
             </div>
-            <div className="relative border-4 border-dashed border-zinc-100 dark:border-white/5 rounded-[40px] p-8 text-center hover:border-brand-primary/40 transition-all bg-zinc-50 dark:bg-white/[0.02] group cursor-pointer shadow-inner">
+            <div className="relative border-2 border-dashed border-zinc-100 dark:border-white/5 rounded-[32px] p-8 text-center hover:border-brand-primary/40 transition-all bg-zinc-50 dark:bg-white/[0.02] group cursor-pointer shadow-inner">
               <input type="file" accept=".pdf" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
               <IconFile />
               <p className="text-sm font-medium text-zinc-400 group-hover:text-brand-primary transition-colors">
@@ -587,25 +1225,28 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
           <div className="space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-[10px]">2</div>
-                <label className="text-[9px] font-medium text-zinc-400 tracking-[0.2em] block">Target Role</label>
+                <div className="w-8 h-8 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-semibold text-[10px]">2</div>
+                <label className="text-[10px] font-semibold text-zinc-400 tracking-wider block uppercase">Target Role</label>
               </div>
-              <div className="flex bg-zinc-100 dark:bg-white/5 p-1 rounded-[16px]">
-                <button onClick={() => setAnalysisMode('trend')} className={`px-4 py-1.5 rounded-xl text-[9px] font-medium transition-all ${analysisMode === 'trend' ? 'bg-brand-primary text-white shadow-lg' : 'text-zinc-500'}`}>Presets</button>
-                <button onClick={() => setAnalysisMode('custom')} className={`px-4 py-1.5 rounded-xl text-[9px] font-medium transition-all ${analysisMode === 'custom' ? 'bg-brand-primary text-white shadow-lg' : 'text-zinc-500'}`}>Paste JD</button>
+              <div className="flex bg-zinc-100 dark:bg-white/5 p-1 rounded-xl">
+                <button onClick={() => setAnalysisMode('trend')} className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${analysisMode === 'trend' ? 'bg-brand-primary text-white shadow-lg' : 'text-zinc-500'}`}>Presets</button>
+                <button onClick={() => setAnalysisMode('custom')} className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${analysisMode === 'custom' ? 'bg-brand-primary text-white shadow-lg' : 'text-zinc-500'}`}>Paste JD</button>
               </div>
             </div>
             {analysisMode === 'trend' ? (
-              <div className="grid grid-cols-2 gap-2">
-                {INDUSTRY_ROLES.map(role => (
-                  <button key={role.id} onClick={() => handleRoleSelect(role.id)} className={`p-4 rounded-2xl border text-left transition-all ${selectedRoleId === role.id ? 'bg-brand-primary/10 border-brand-primary text-brand-primary scale-[1.02]' : 'bg-zinc-50 dark:bg-[#0a0a0a] border-zinc-100 dark:border-white/5 text-zinc-500 hover:border-brand-primary/30'}`}>
-                    <p className="text-[10px] font-semibold tracking-tight leading-tight">{role.name}</p>
-                  </button>
-                ))}
-              </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {INDUSTRY_ROLES.map(role => (
+                    <button key={role.id} onClick={() => handleRoleSelect(role.id)} className={`p-4 rounded-2xl border text-left transition-all flex items-center gap-3 ${selectedRoleId === role.id ? 'bg-brand-primary/10 border-brand-primary text-brand-primary scale-[1.02]' : 'bg-zinc-50 dark:bg-[#0a0a0a] border-zinc-100 dark:border-white/5 text-zinc-500 hover:border-brand-primary/30'}`}>
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${selectedRoleId === role.id ? 'bg-brand-primary text-white border-brand-primary' : 'bg-white dark:bg-white/5 border-zinc-100 dark:border-white/10'}`}>
+                        {role.icon}
+                      </div>
+                      <p className="text-[10px] font-semibold tracking-tight leading-tight">{role.name}</p>
+                    </button>
+                  ))}
+                </div>
             ) : (
               <textarea
-                className="w-full h-[220px] bg-zinc-50 dark:bg-[#0a0a0a]/60 border border-zinc-100 dark:border-white/10 rounded-[32px] p-8 text-sm text-zinc-800 dark:text-white focus:ring-4 focus:ring-brand-primary/10 outline-none resize-none transition-all font-normal leading-relaxed placeholder:opacity-30 shadow-inner"
+                className="w-full h-[220px] bg-zinc-50 dark:bg-[#0a0a0a]/60 border border-zinc-100 dark:border-white/10 rounded-[24px] p-6 text-sm text-zinc-800 dark:text-white focus:ring-4 focus:ring-brand-primary/10 outline-none resize-none transition-all font-normal leading-relaxed placeholder:opacity-30 shadow-inner"
                 placeholder="Paste job description here..."
                 value={jdText}
                 onChange={(e) => setJdText(e.target.value)}
@@ -621,13 +1262,13 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
           >
             <div className={`w-3 h-3 rounded-full transition-all ${deepAnalysis ? 'bg-white' : 'bg-zinc-400 group-hover:bg-brand-primary'}`} />
             <div className="text-left">
-              <span className={`text-[9px] font-medium block ${deepAnalysis ? 'text-white' : 'text-zinc-400 group-hover:text-brand-primary'}`}>Detailed Review</span>
+              <span className={`text-[10px] font-medium block ${deepAnalysis ? 'text-white' : 'text-zinc-400 group-hover:text-brand-primary'}`}>Detailed Review</span>
             </div>
           </button>
           <button
             onClick={handleAnalyze}
             disabled={!resumeText || !jdText || loading}
-            className={`flex-1 py-4 rounded-[24px] font-bold text-[10px] tracking-widest transition-all flex items-center justify-center gap-2 ${!resumeText || !jdText || loading ? 'bg-zinc-100 dark:bg-zinc-800/10 text-zinc-400 cursor-not-allowed border border-zinc-200 dark:border-white/5' : 'bg-brand-primary text-white shadow-xl shadow-brand-primary/20 hover:opacity-90 active:scale-[0.98] border-none'}`}
+            className={`flex-1 py-4 rounded-[24px] font-semibold text-xs tracking-wider transition-all flex items-center justify-center gap-2 ${!resumeText || !jdText || loading ? 'bg-zinc-100 dark:bg-zinc-800/10 text-zinc-400 cursor-not-allowed border border-zinc-200 dark:border-white/5' : 'bg-brand-primary text-white shadow-xl shadow-brand-primary/20 hover:opacity-90 active:scale-[0.98] border-none'}`}
           >
             Analyze Resume
           </button>
@@ -637,26 +1278,26 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
       {savedReports.length > 0 && (
         <div className="space-y-6">
           <div className="flex items-center justify-between px-2">
-            <h3 className="text-xl font-bold text-zinc-800 dark:text-white tracking-tight">Past Reviews</h3>
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{savedReports.length}/10 Stored</span>
+            <h3 className="text-lg font-semibold text-zinc-800 dark:text-white tracking-tight">Past Reviews</h3>
+            <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider">{savedReports.length}/10 Stored</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {savedReports.map((report, idx) => (
               <button
                 key={idx}
                 onClick={() => setSearchParams({ tab: 'placement', id: idx.toString() })}
-                className="group p-6 rounded-[32px] bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-white/5 text-left hover:border-brand-primary/30 transition-all flex items-center justify-between shadow-sm active:scale-[0.98]"
+                className="group p-6 rounded-[24px] bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-white/5 text-left hover:border-brand-primary/30 transition-all flex items-center justify-between shadow-sm active:scale-[0.98]"
               >
                 <div className="space-y-1">
-                  <p className="text-xs font-bold text-zinc-900 dark:text-white tracking-tight truncate max-w-[150px]">{report.label}</p>
-                  <p className="text-[9px] font-medium text-zinc-400 uppercase tracking-widest">Score: {report.totalScore}%</p>
+                  <p className="text-xs font-semibold text-zinc-900 dark:text-white tracking-tight truncate max-w-[150px]">{report.label}</p>
+                  <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider">Score: {report.totalScore}%</p>
                 </div>
                 <div className="flex items-center gap-2">
                    <div onClick={(e) => handleDeleteReport(idx, e)} className="p-2.5 rounded-xl text-zinc-400 hover:bg-brand-primary/10 hover:text-brand-primary border-none bg-transparent transition-all">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" /></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" /></svg>
                   </div>
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 bg-brand-primary/5 text-brand-primary`}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M9 18l6-6-6-6" /></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><path d="M9 18l6-6-6-6" /></svg>
                   </div>
                 </div>
               </button>

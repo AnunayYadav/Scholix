@@ -101,9 +101,9 @@ const getPathFromModule = (module: ModuleType, uniKey: UniversityId = 'none'): s
     case ModuleType.LIBRARY: return `${prefix}/library`;
     case ModuleType.CAMPUS: return `${prefix}/campus`;
     case ModuleType.FRESHERS: return `${prefix}/freshers`;
-    case ModuleType.HELP: return `${prefix}/help`;
-    case ModuleType.ABOUT: return `${prefix}/about`;
-    case ModuleType.PROFILE: return `${prefix}/profile`;
+    case ModuleType.HELP: return `${prefix}/settings/help`;
+    case ModuleType.ABOUT: return `${prefix}/settings/about`;
+    case ModuleType.PROFILE: return `${prefix}/settings/profile`;
     case ModuleType.DASHBOARD: return uniSlug ? `/${uniSlug}` : '/';
     case ModuleType.SHARE_CGPA: return `/share-cgpa`;
     case ModuleType.MARKETPLACE: return `${prefix}/marketplace`;
@@ -112,10 +112,10 @@ const getPathFromModule = (module: ModuleType, uniKey: UniversityId = 'none'): s
     case ModuleType.AI_TOOLS: return `${prefix}/ai-tools`;
     case ModuleType.TOOLS: return `${prefix}/tools`;
     case ModuleType.ADMIN_STATS: return `${prefix}/admin-stats`;
-    case ModuleType.PRIVACY: return `${prefix}/privacy`;
+    case ModuleType.PRIVACY: return `${prefix}/settings/privacy`;
     case ModuleType.LOGIN: return `${prefix}/login`;
     case ModuleType.SIGNUP: return `${prefix}/signup`;
-    case ModuleType.SETTINGS: return `${prefix}/settings`;
+    case ModuleType.SETTINGS: return `${prefix}/settings/profile`;
     default: return uniSlug ? `/${uniSlug}` : '/';
   }
 };
@@ -555,23 +555,29 @@ const AppContent: React.FC = () => {
 
   // Auth modal path sync
   useEffect(() => {
-    if (!authIsReady) return; // Wait for auth state to be confirmed before showing modals
+    // If not ready, we skip the automated check to avoid flickers,
+    // but if we are on an auth path explicitly, we should probably allow it 
+    // after a short delay if auth is STILL not ready.
+    if (!authIsReady) return;
 
     const path = location.pathname;
-    const isAuthPath = path.endsWith('/login') || path.endsWith('/signup');
     
-    // Only show login/signup modal if user is NOT logged in
-    if (path.endsWith('/login') && !userProfile) {
+    // Check if path ends with /login or /signup (handling both /login and /lpu/login)
+    const isLogin = path === '/login' || path.endsWith('/login');
+    const isSignup = path === '/signup' || path.endsWith('/signup');
+
+    if (isLogin && !userProfile) {
       setAuthMode('login');
       setShowAuthModal(true);
-    } else if (path.endsWith('/signup') && !userProfile) {
+    } else if (isSignup && !userProfile) {
       setAuthMode('signup');
       setShowAuthModal(true);
-    } else if (userProfile && userProfile?.is_verified !== 'no' && isAuthPath) {
-      // Auto-close if we're on login/signup path but already have a profile
+    } else if (userProfile && (isLogin || isSignup)) {
+      // If already logged in, close modal and redirect to dashboard
       setShowAuthModal(false);
+      navigate(getPathFromModule(ModuleType.DASHBOARD), { replace: true });
     }
-  }, [location.pathname, userProfile, authIsReady]);
+  }, [location.pathname, userProfile, authIsReady, navigate]);
 
   useEffect(() => {
     const pathParts = location.pathname.split('/').filter(Boolean);
@@ -657,6 +663,12 @@ const AppContent: React.FC = () => {
     document.documentElement.classList.toggle('dark', savedTheme === 'dark');
 
     // Subscribe to auth changes
+    if (!NexusServer.isConfigured()) {
+      console.warn("NexusServer is not configured. Setting auth as ready (unauthenticated mode).");
+      setAuthIsReady(true);
+      return;
+    }
+
     const unsubscribe = NexusServer.onAuthStateChange(async (user) => {
       if (user) {
         // Skip redundant profile sync if we already handled this user ID
@@ -672,7 +684,6 @@ const AppContent: React.FC = () => {
         } catch (e) {
           console.error("Profile sync failure:", e);
           // If profile sync fails, we still allow the app to be 'ready' with user=null 
-          // or we can keep it unready. Usually better to let user interact if possible.
           lastHandledUserRef.current = null;
         }
       } else {
@@ -682,8 +693,14 @@ const AppContent: React.FC = () => {
       setAuthIsReady(true);
     });
 
+    // Fallback timer: if auth takes more than 5 seconds, mark as ready to prevent infinite loading
+    const timeout = setTimeout(() => {
+      setAuthIsReady(true);
+    }, 5000);
+
     return () => {
       unsubscribe();
+      clearTimeout(timeout);
     };
   }, []);
 
@@ -727,7 +744,7 @@ const AppContent: React.FC = () => {
           toggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           userProfile={userProfile}
         />
-        <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative bg-white dark:bg-[#0a0a0a]">
+        <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative bg-white dark:bg-[#0a0a0a] md:pl-[72px]">
           <BackgroundEffects />
 
         <header className="sticky top-0 h-16 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-2xl border-b border-zinc-200/50 dark:border-white/5 flex items-center px-4 md:px-8 z-[100] transition-all duration-300">
@@ -845,7 +862,7 @@ const AppContent: React.FC = () => {
                           </button>
                         )}
                         <button
-                          onClick={() => { navigate('/settings'); handleProfileClose(); }}
+                          onClick={() => { navigate(getPathFromModule(ModuleType.SETTINGS)); handleProfileClose(); }}
                           className="w-full text-left px-5 py-2.5 text-xs font-semibold text-zinc-700 dark:text-white/80 hover:text-brand-primary dark:hover:text-white hover:bg-brand-primary/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
                         >
                           <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-brand-primary/20 transition-colors">
@@ -865,16 +882,15 @@ const AppContent: React.FC = () => {
             </div>
           </div>
         </header>
-        <div id="main-content-area" className={`flex-1 overflow-y-auto relative scroll-smooth ${location.pathname === '/' || location.pathname === '/lpu' || location.pathname === '/iitm' ? 'p-0' : 'p-4 md:p-8'} bg-transparent no-scrollbar`}>
-          <div className={`relative ${location.pathname === '/' || location.pathname === '/lpu' || location.pathname === '/iitm' ? 'w-full' : 'max-w-7xl mx-auto'}`}>
+        <div id="main-content-area" className={`flex-1 ${['/settings', '/profile', '/privacy', '/about', '/help'].some(p => location.pathname.includes(p)) ? 'overflow-hidden' : 'overflow-y-auto'} relative scroll-smooth ${['/', '/lpu', '/iitm'].includes(location.pathname) || ['/settings', '/profile', '/privacy', '/about', '/help'].some(p => location.pathname.includes(p)) ? 'p-0' : 'p-4 md:p-8'} bg-transparent no-scrollbar`}>
+          <div className={`relative ${['/settings', '/profile', '/privacy', '/about', '/help'].some(p => location.pathname.includes(p)) ? 'h-full' : ''} ${['/', '/lpu', '/iitm'].includes(location.pathname) || ['/settings', '/profile', '/privacy', '/about', '/help'].some(p => location.pathname.includes(p)) ? 'w-full' : 'max-w-7xl mx-auto'}`}>
             <Routes>
               <Route path="/welcome" element={<ScholixLanding userProfile={userProfile} />} />
+              <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
-              <Route path="/help" element={<HelpSection />} />
-              <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
-              <Route path="/:uniKey/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} />} />
-              <Route path="/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} />} />
+              <Route path="/:uniKey/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} authModalOpen={showAuthModal} />} />
+              <Route path="/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} authModalOpen={showAuthModal} />} />
             </Routes>
           </div>
         </div>
@@ -902,7 +918,7 @@ const AppContent: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <UniversalSearch 
                     autoFocus={true} 
-                    placeholder="Search Nexus..." 
+                    placeholder="Search Scholix..." 
                     resultsPortalRef={searchResultsRef}
                   />
                 </div>
@@ -936,8 +952,10 @@ const FeatureRoutes: React.FC<{
   setUserProfile: React.Dispatch<React.SetStateAction<UserProfile | null>>,
   navigateToModule: (module: ModuleType) => void,
   theme: string, 
-  toggleTheme: () => void 
-}> = ({ userProfile, setUserProfile, navigateToModule, theme, toggleTheme }) => {
+  toggleTheme: () => void,
+  onOpenSignup: () => void,
+  authModalOpen: boolean
+}> = ({ userProfile, setUserProfile, navigateToModule, theme, toggleTheme, onOpenSignup, authModalOpen }) => {
   const { selectedUniversity } = useUniversity();
   const navigate = useNavigate();
 
@@ -953,8 +971,6 @@ const FeatureRoutes: React.FC<{
       <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
       <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
       
-      <Route path="/about" element={<FeatureGuard module={ModuleType.ABOUT}><AboutUs userProfile={userProfile} /></FeatureGuard>} />
-      <Route path="/help" element={<FeatureGuard module={ModuleType.HELP}><HelpSection /></FeatureGuard>} />
       <Route path="/freshers" element={<FeatureGuard module={ModuleType.FRESHERS}><FreshersKit /></FeatureGuard>} />
       <Route path="/tools" element={<ToolsHub userProfile={userProfile} />} />
       <Route path="/share-cgpa" element={<ShareReport />} />
@@ -963,7 +979,7 @@ const FeatureRoutes: React.FC<{
       <Route path="/attendance" element={<FeatureGuard module={ModuleType.ATTENDANCE}><Navigate to="/tools?tab=attendance" replace /></FeatureGuard>} />
       <Route path="/cgpa" element={<FeatureGuard module={ModuleType.CGPA}><Navigate to="/tools?tab=cgpa" replace /></FeatureGuard>} />
       
-      <Route path="/profile" element={<FeatureGuard module={ModuleType.PROFILE}><ProfileSection userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} /></FeatureGuard>} />
+
       <Route path="/timetable" element={<FeatureGuard module={ModuleType.TIMETABLE}><TimetableHub userProfile={userProfile} /></FeatureGuard>} />
       
       <Route path="/quiz" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
@@ -979,8 +995,12 @@ const FeatureRoutes: React.FC<{
       <Route path="/ai-tools" element={<FeatureGuard module={ModuleType.AI_TOOLS}><AIToolsDirectory /></FeatureGuard>} />
       <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
       <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
-      <Route path="/privacy" element={<PrivacyPolicy />} />
-      <Route path="/settings" element={<SettingsHub userProfile={userProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} />} />
+      <Route path="/settings" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="profile" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+      <Route path="/settings/profile" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="profile" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+      <Route path="/settings/privacy" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="privacy" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+      <Route path="/settings/about" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="about" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+      <Route path="/settings/help" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="help_center" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+      <Route path="/settings/theme" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="theme" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
       <Route path="/login" element={<Dashboard userProfile={userProfile} />} />
       <Route path="/signup" element={<Dashboard userProfile={userProfile} />} />
       <Route path="*" element={<Dashboard userProfile={userProfile} />} />

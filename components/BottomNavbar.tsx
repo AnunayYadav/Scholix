@@ -114,6 +114,15 @@ const BottomNavbar: React.FC<BottomNavbarProps> = ({ currentModule }) => {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] w-full">
+      <svg width="0" height="0" className="absolute pointer-events-none" aria-hidden="true">
+        <defs>
+          <linearGradient id="bottom-nav-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="var(--brand-primary)" />
+            <stop offset="100%" stopColor="var(--brand-secondary)" />
+          </linearGradient>
+        </defs>
+      </svg>
+
       <div className="bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-3xl border-t border-zinc-200/50 dark:border-white/10 rounded-t-[24px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.4)] flex items-center h-[80px] px-4 relative overflow-hidden pb-safe">
         {navItems.map((item) => (
           <button
@@ -126,10 +135,32 @@ const BottomNavbar: React.FC<BottomNavbarProps> = ({ currentModule }) => {
               }`} />
 
             <div className={`flex flex-col items-center justify-center transition-all duration-300 ${item.active ? 'scale-105' : 'scale-100 active:scale-95'}`}>
-              <div className={`${item.active ? 'text-brand-primary drop-shadow-[0_0_8px_rgba(249,115,22,0.2)]' : 'text-zinc-400 dark:text-zinc-600 group-hover:text-zinc-500 dark:group-hover:text-zinc-400'}`}>
-                {item.icon(item.active)}
+              <div className={`${item.active ? 'drop-shadow-[0_0_8px_rgba(249,115,22,0.2)]' : 'text-zinc-400 dark:text-zinc-600 group-hover:text-zinc-500 dark:group-hover:text-zinc-400'}`}>
+                {(() => {
+                  const icon = item.icon(item.active);
+                  if (!item.active) return icon;
+                  
+                  return React.cloneElement(icon as React.ReactElement, {
+                    // Inject gradient to the SVG results
+                    children: React.Children.map((icon as React.ReactElement).props.children, (child: any) => {
+                      if (!React.isValidElement(child)) return child;
+                      const props = child.props as any;
+                      const isFillCurrent = props.fill === 'currentColor';
+                      const isStrokeCurrent = props.stroke === 'currentColor';
+                      
+                      if (!isFillCurrent && !isStrokeCurrent) return child;
+                      
+                      return React.cloneElement(child as React.ReactElement, {
+                        fill: isFillCurrent ? 'url(#bottom-nav-gradient)' : props.fill,
+                        stroke: isStrokeCurrent ? 'url(#bottom-nav-gradient)' : props.stroke,
+                      });
+                    }),
+                    fill: (icon as React.ReactElement).props.fill === 'currentColor' ? 'url(#bottom-nav-gradient)' : (icon as React.ReactElement).props.fill,
+                    stroke: (icon as React.ReactElement).props.stroke === 'currentColor' ? 'url(#bottom-nav-gradient)' : (icon as React.ReactElement).props.stroke,
+                  } as any);
+                })()}
               </div>
-              <span className={`text-[10px] font-bold mt-1.5 transition-colors duration-300 ${item.active ? 'text-brand-primary' : 'text-zinc-400 dark:text-zinc-600'}`}>
+              <span className={`text-[10px] font-bold mt-1.5 transition-all duration-300 ${item.active ? 'bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent' : 'text-zinc-400 dark:text-zinc-600'}`}>
                 {item.label}
               </span>
             </div>

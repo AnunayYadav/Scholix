@@ -140,9 +140,9 @@ export const UniversityProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const getNaming = () => {
     switch (selectedUniversity) {
       case 'lpu':
-        return { full: 'LPU Nexus', short: 'Nexus', student: 'Verto' };
+        return { full: 'LPU Scholix', short: 'Scholix', student: 'Verto' };
       case 'iitm_bs':
-        return { full: 'Indian Institute of Technology BS Degree', short: 'IITM', student: 'IITian' };
+        return { full: 'IITM Scholix', short: 'Scholix', student: 'IITian' };
       default:
         return { full: 'Scholix', short: 'Scholix', student: 'Student' };
     }

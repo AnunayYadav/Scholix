@@ -97,15 +97,8 @@ const HelpSection: React.FC = () => {
   const totalResults = filteredFaqs.reduce((acc, cat) => acc + cat.questions.length, 0);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20">
-      <header className="mb-10">
-        <h2 className="text-3xl font-black text-zinc-800 dark:text-white mb-2 tracking-tighter">Knowledge <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Base</span></h2>
-        <p className="text-zinc-600 dark:text-zinc-400 text-lg font-medium leading-relaxed">Master the {fullBrandName} ecosystem with verified intel.</p>
-      </header>
-
-      {/* Search Bar */}
-      <div className="relative group">
-        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600 group-focus-within:text-brand-primary transition-colors">
+    <div className="w-full pb-12 space-y-6 animate-fade-in">      <div className="relative group">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600 group-focus-within:text-brand-primary transition-colors">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
         </div>
         <input
@@ -113,41 +106,41 @@ const HelpSection: React.FC = () => {
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           placeholder="Search FAQs..."
-          className="w-full pl-12 pr-5 py-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#030303] text-sm font-bold text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30 transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600 placeholder:font-bold"
+          className="w-full pl-10 pr-4 py-3 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#030303] text-[13px] font-bold text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30 transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600 placeholder:font-bold"
         />
         {searchQuery && (
-          <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[11px] sm:text-xs font-medium text-brand-primary">
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-medium text-brand-primary">
             {totalResults} result{totalResults !== 1 ? 's' : ''}
           </span>
         )}
       </div>
 
       {filteredFaqs.length === 0 ? (
-        <div className="text-center py-16 border-4 border-dashed border-zinc-100 dark:border-white/5 rounded-2xl opacity-40">
-          <p className="text-[11px] sm:text-xs font-medium">No matching questions found</p>
+        <div className="text-center py-10 border-2 border-dashed border-zinc-100 dark:border-white/5 rounded-2xl opacity-40">
+          <p className="text-[11px] font-medium">No matching questions found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
           {filteredFaqs.map((cat, idx) => (
-            <div key={idx} className="glass-panel p-8 rounded-2xl border border-zinc-200 dark:border-white/5 bg-white dark:bg-[#030303] flex flex-col h-full shadow-sm hover:shadow-xl transition-all">
-              <h3 className="text-[11px] sm:text-xs font-black text-brand-primary uppercase tracking-[0.3em] mb-6 border-b border-zinc-100 dark:border-white/5 pb-4">{cat.category}</h3>
-              <div className="space-y-3 flex-1">
+            <div key={idx} className="p-6 md:p-8 rounded-[32px] bg-zinc-50 dark:bg-[#111111] space-y-4">
+              <h3 className="text-[11px] font-black text-brand-primary uppercase tracking-[0.2em] border-b border-zinc-100 dark:border-white/5 pb-2">{cat.category}</h3>
+              <div className="space-y-2">
                 {cat.questions.map((item, qIdx) => {
                   const key = `${idx}-${qIdx}`;
                   const isOpen = openItems.has(key) || !!searchQuery.trim();
                   return (
-                    <div key={qIdx} className="rounded-xl overflow-hidden">
+                    <div key={qIdx} className="rounded-xl overflow-hidden bg-zinc-50 dark:bg-white/[0.03]">
                       <button
                         onClick={() => toggleItem(key)}
-                        className="w-full flex items-start justify-between gap-3 text-left p-4 rounded-xl bg-zinc-50 dark:bg-white/[0.03] hover:bg-zinc-100 dark:hover:bg-white/5 transition-all border-none group/q cursor-pointer"
+                        className="w-full flex items-start justify-between gap-3 text-left p-3 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors border-none group/q cursor-pointer"
                       >
-                        <h4 className="font-black text-zinc-800 dark:text-white leading-tight text-sm md:text-base flex items-start">
-                          <span className="text-brand-primary mr-2 flex-shrink-0">Q.</span>
+                        <h4 className="font-bold text-zinc-800 dark:text-white text-[12px] flex items-start leading-snug">
+                          <span className="text-brand-primary mr-1.5 flex-shrink-0">Q.</span>
                           {item.q}
                         </h4>
                         <svg
                           viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"
-                          className={`w-4 h-4 flex-shrink-0 mt-1 text-zinc-400 dark:text-zinc-600 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                          className={`w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-zinc-400 dark:text-zinc-600 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
                         >
                           <path d="m6 9 6 6 6-6" />
                         </svg>
@@ -155,7 +148,7 @@ const HelpSection: React.FC = () => {
                       <div
                         className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
                       >
-                        <p className="text-xs md:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium px-4 pb-4 pt-2 border-l-2 border-zinc-100 dark:border-white/10 ml-4">
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium px-4 pb-3 pt-1 border-l-2 border-zinc-100 dark:border-white/10 ml-3.5">
                           {item.a}
                         </p>
                       </div>
@@ -168,47 +161,21 @@ const HelpSection: React.FC = () => {
         </div>
       )}
 
-      {/* Compliance & Policy Links */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="md:col-span-2 glass-panel p-10 rounded-[32px] border border-brand-primary/10 bg-brand-primary/5 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 blur-[80px] rounded-full -mr-32 -mt-32" />
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
-                <div className="space-y-3">
-                    <h3 className="text-xl font-bold text-zinc-800 dark:text-white tracking-tight">Compliance & Policies</h3>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed max-w-sm">Learn about how we handle your data, our adherence to university academic rules, and our commitment to privacy.</p>
-                </div>
-                <div className="flex gap-4">
-                  <a 
-                    href="/privacy" 
-                    className="px-8 py-3.5 bg-brand-primary text-white rounded-2xl text-[13px] font-bold hover:translate-y-1 transition-all shadow-lg shadow-brand-primary/20 active:scale-95 flex items-center gap-2"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                    View Privacy Policy
-                  </a>
-                </div>
-            </div>
-          </div>
-      </div>
-
-      <div className="mt-12 p-10 bg-zinc-900 dark:bg-[#030303] border border-zinc-800 dark:border-white/5 rounded-2xl text-center shadow-2xl relative overflow-hidden group">
-        <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none transition-transform duration-1000 group-hover:scale-110">
-          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" />
-          </svg>
-        </div>
-        <h3 className="text-white text-2xl font-black mb-4 relative z-10 uppercase tracking-tight">Still have questions?</h3>
-        <p className="text-zinc-400 mb-8 max-w-md mx-auto relative z-10 text-sm font-medium">Our student support team is ready to help you navigate through your campus journey.</p>
+      {/* Support Action */}
+      <div className="mt-8 p-6 bg-zinc-900 dark:bg-[#030303] border border-zinc-800 dark:border-white/5 rounded-2xl text-center relative overflow-hidden group">
+        <h3 className="text-white text-[15px] font-black mb-2 relative z-10 tracking-tight">Need further assistance?</h3>
+        <p className="text-zinc-400 mb-5 relative z-10 text-[11px] font-medium">Reach out to our support team for any other queries.</p>
         <a
           href="https://mail.google.com/mail/?view=cm&fs=1&to=anunayarvind@gmail.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center space-x-3 bg-white text-black px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-primary hover:text-white hover:scale-105 active:scale-95 transition-all shadow-xl relative z-10"
+          className="inline-flex items-center space-x-2 bg-white text-black px-6 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-wider hover:bg-brand-primary hover:text-white active:scale-95 transition-all relative z-10"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
             <polyline points="22,6 12,13 2,6" />
           </svg>
-          <span>Email for Help</span>
+          <span>Email Support</span>
         </a>
       </div>
     </div>

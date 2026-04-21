@@ -302,7 +302,7 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
           {isLoading ? (
             <div className="py-12 flex flex-col items-center justify-center opacity-40">
               <div className="w-6 h-6 rounded-full border-2 border-brand-primary border-t-transparent animate-spin mb-4"></div>
-              <p className="text-[10px] font-medium uppercase tracking-[0.2em]">Searching {shortBrandName} Nexus...</p>
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em]">Searching Scholix...</p>
             </div>
           ) : results.length > 0 ? (
             <div className="grid grid-cols-1 gap-1">

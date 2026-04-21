@@ -211,31 +211,48 @@ export const analyzeResume = async (resumeText: string, jdText: string, deepAnal
     : "Perform a professional resume audit against modern tech standards.";
 
   const prompt = `
-    TASK: GENERATE A SEMANTIC ATS DIAGNOSTIC REPORT AND FULL TEXT X-RAY.
-    TARGET CONTEXT (JD/TRENDS): ${jdText}
-    RESUME CONTENT: ${resumeText}
+    TASK: Tier-1 Tech Recruiter (Meta/Google-level) Resume Diagnostic & X-Ray.
+    ROLE CONTEXT: ${jdText}
+    RESUME CONTENT: 
+    """
+    ${resumeText}
+    """
 
-    CRITICAL RECRUITER LOGIC:
-    - Act as a Tier-1 Tech Recruiter (Google/Netflix/Meta level). Be EXTREMELY STRICT.
-    - If a resume lacks quantified impact (e.g., specific numbers, %, dollars), penalize the "Impact & Results" score heavily.
-    - Consistency Check: If they claim a skill but provide no project/work evidence, it's a "Bad" fragment.
-    - Formatting: Check for density, whitespace, and font consistency.
+    EVALUATION GUIDELINES:
+    - IMPACT: Penalize heavily if achievements lack quantifiable metrics (%, $, numbers).
+    - EVIDENCE: Skills claimed without project context are "Bad" segments.
+    - STRUCTURE: Check for ATS-friendly density and semantic hierarchy.
 
-    REQUIREMENTS:
-    ${depthInstruction}
-    1. CATEGORY BREAKDOWN: For each category (keywordAnalysis, jobFit, achievements, formatting, language, branding), provide:
-       - score (0-100)
-       - details (A 2-3 sentence overview)
-       - strengths (Array of specific positive points) 
-       - weaknesses (Array of specific items to improve)
-       - found (Keywords found)
-       - missing (Keywords missing)
-    2. ANNOTATED FULL CONTENT: You MUST provide an array of fragments that TOGETHER reconstruct the EXACT RAW TEXT of the resume provided. 
-       - Every single character of the resume must be included in one of the fragments. 
-       - Map each fragment to 'good', 'bad', or 'neutral'. 
-       - 'good' or 'bad' fragments MUST have a 'reason' and 'suggestion'.
-
-    Output a JSON object.
+    JSON OUTPUT REQUIREMENTS:
+    1. stats: Count 'errors', 'improvements', 'passed'.
+    2. detailedScores: 0-100 for (keywordMatch, skillsAlignment, experienceRelevance, formattingQuality, overallImpact).
+    3. improvementSuggestions: List 'category', 'original' text, 'improved' text, 'impact' (High/Med/Low), and 'reason'.
+    4. passedChecks: List 'category', 'checkName', 'insight' for 3-5 successes.
+    5. skillDiversity: AN ARRAY OF CATEGORIES. 
+       - Categories MUST be exactly: ["Technical Skills", "Soft Skills", "Domain Expertise"].
+       - Each category has "skills": array of { name: string, found: boolean, level: 'Mandatory' | 'Desired' | 'Optional' }.
+       - 'Mandatory': Critical for the role.
+       - 'Desired': Value-add skills.
+       - 'Optional': Found in resume but not core to JD.
+    6. radarData: 0-100 for (qualification, experience, roleAlignment, domainDiversity, retention).
+    7. annotatedContent: 
+       - CRITICAL: You MUST provide an array of fragments that TOGETHER reconstruct the EXACT RAW TEXT of the resume provided.
+       - EVERY SINGLE LINE and every single character of the resume must be included in one of the fragments.
+       - Do NOT omit anything (no summaries, no "...", no "etc").
+       - Break the text into line-level or paragraph-level chunks.
+       - Types: 'good', 'bad', or 'neutral'.
+       - 'good' or 'bad' fragments MUST have 'reason' and 'suggestion'.
+       - Neutral fragments are for parts that are fine or just structural (like names, headers, contact info).
+    8. categories: Detailed breakdown for (keywordAnalysis, jobFit, achievements, formatting, language, branding).
+    9. summary: High-level recruiter verdict.
+    10. actionPlan: CRITICAL. Provide 3-4 EXACT tasks.
+        - action: MUST be one of (Build, Practice, Add, Refactor).
+        - task: A specific title.
+        - description: One sentence explaining why/how.
+    11. simulation: 
+        - currentShortlistChance: 0-100.
+        - projectedShortlistChance: 0-100 (Must be higher than current).
+        - explanation: Why.
   `;
 
   const categorySchema = {
@@ -256,15 +273,107 @@ export const analyzeResume = async (resumeText: string, jdText: string, deepAnal
     properties: {
       totalScore: { type: Type.INTEGER },
       meaningScore: { type: Type.INTEGER },
-      annotatedContent: {
+      stats: {
+        type: Type.OBJECT,
+        properties: {
+          errors: { type: Type.INTEGER },
+          improvements: { type: Type.INTEGER },
+          passed: { type: Type.INTEGER }
+        },
+        required: ["errors", "improvements", "passed"]
+      },
+      detailedScores: {
+        type: Type.OBJECT,
+        properties: {
+          keywordMatch: { type: Type.INTEGER },
+          skillsAlignment: { type: Type.INTEGER },
+          experienceRelevance: { type: Type.INTEGER },
+          formattingQuality: { type: Type.INTEGER },
+          overallImpact: { type: Type.INTEGER }
+        },
+        required: ["keywordMatch", "skillsAlignment", "experienceRelevance", "formattingQuality", "overallImpact"]
+      },
+      improvementSuggestions: {
         type: Type.ARRAY,
         items: {
           type: Type.OBJECT,
           properties: {
-            text: { type: Type.STRING },
+            category: { type: Type.STRING },
+            original: { type: Type.STRING },
+            improved: { type: Type.STRING },
+            impact: { type: Type.STRING, enum: ["High", "Medium", "Low"] },
+            reason: { type: Type.STRING }
+          },
+          required: ["category", "original", "improved", "impact", "reason"]
+        }
+      },
+      passedChecks: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            category: { type: Type.STRING },
+            checkName: { type: Type.STRING },
+            insight: { type: Type.STRING }
+          },
+          required: ["category", "checkName", "insight"]
+        }
+      },
+      quantifiableOpportunities: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            opportunity: { type: Type.STRING },
+            suggestion: { type: Type.STRING },
+            metric: { type: Type.STRING }
+          },
+          required: ["opportunity", "suggestion", "metric"]
+        }
+      },
+      skillDiversity: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            category: { type: Type.STRING },
+            skills: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  name: { type: Type.STRING },
+                  found: { type: Type.BOOLEAN },
+                  level: { type: Type.STRING, enum: ["Mandatory", "Desired", "Optional"] }
+                },
+                required: ["name", "found", "level"]
+              }
+            }
+          },
+          required: ["category", "skills"]
+        }
+      },
+      radarData: {
+        type: Type.OBJECT,
+        properties: {
+          qualification: { type: Type.INTEGER },
+          experience: { type: Type.INTEGER },
+          roleAlignment: { type: Type.INTEGER },
+          domainDiversity: { type: Type.INTEGER },
+          retention: { type: Type.INTEGER }
+        },
+        required: ["qualification", "experience", "roleAlignment", "domainDiversity", "retention"]
+      },
+      annotatedContent: {
+        type: Type.ARRAY,
+        description: "CRITICAL: The sum of all 'text' fields MUST exactly match the provided resume text letter-for-letter.",
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            text: { type: Type.STRING, description: "Exactly preserve the segment of the resume, including newlines and leading spaces." },
             type: { type: Type.STRING, enum: ["good", "bad", "neutral"] },
-            reason: { type: Type.STRING },
-            suggestion: { type: Type.STRING }
+            reason: { type: Type.STRING, description: "Detailed recruiter insight (required for good/bad)." },
+            suggestion: { type: Type.STRING, description: "Actionable improvement (required for good/bad)." }
           },
           required: ["text", "type"]
         }
@@ -292,9 +401,37 @@ export const analyzeResume = async (resumeText: string, jdText: string, deepAnal
         },
         required: ["keywordAnalysis", "jobFit", "achievements", "formatting", "language", "branding"]
       },
-      summary: { type: Type.STRING, description: "Professional executive summary of the resume's match for the JD." }
+      summary: { type: Type.STRING, description: "Professional executive summary of the resume's match for the JD." },
+      actionPlan: {
+        type: Type.OBJECT,
+        properties: {
+          title: { type: Type.STRING },
+          tasks: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                action: { type: Type.STRING, enum: ["Build", "Practice", "Add", "Refactor"] },
+                task: { type: Type.STRING },
+                description: { type: Type.STRING }
+              },
+              required: ["action", "task", "description"]
+            }
+          }
+        },
+        required: ["title", "tasks"]
+      },
+      simulation: {
+        type: Type.OBJECT,
+        properties: {
+          currentShortlistChance: { type: Type.INTEGER },
+          projectedShortlistChance: { type: Type.INTEGER },
+          explanation: { type: Type.STRING }
+        },
+        required: ["currentShortlistChance", "projectedShortlistChance", "explanation"]
+      }
     },
-    required: ["totalScore", "meaningScore", "annotatedContent", "flags", "categories", "summary"]
+    required: ["totalScore", "meaningScore", "stats", "detailedScores", "improvementSuggestions", "skillDiversity", "radarData", "annotatedContent", "flags", "categories", "summary", "actionPlan", "simulation"]
   };
 
   const data = await callGeminiProxy("ANALYZE_RESUME", { prompt, schema, deep: deepAnalysis });

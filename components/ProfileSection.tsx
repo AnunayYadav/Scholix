@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { UserProfile, ModuleType } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
 import VerifiedBadge from './VerifiedBadge.tsx';
@@ -15,9 +16,10 @@ interface ProfileSectionProps {
   userProfile: UserProfile | null;
   setUserProfile: (p: UserProfile | null) => void;
   navigateToModule: (m: ModuleType) => void;
+  onSignOut: () => void;
 }
 
-const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserProfile, navigateToModule }) => {
+const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserProfile, navigateToModule, onSignOut }) => {
   const { updateUserQuizProfile } = useQuizDashboardStore();
   const { brandColor } = useUniversity();
   
@@ -32,8 +34,97 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  
+  // Security Modal States
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [modalError, setModalError] = useState<string | null>(null);
+  const [isForgotMode, setIsForgotMode] = useState(false);
+  const [forgotStep, setForgotStep] = useState<'email' | 'otp'>('email');
+  const [otpValue, setOtpValue] = useState('');
+  const [resendTimer, setResendTimer] = useState(0);
+  const [deleteStep, setDeleteStep] = useState(1);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [changeHistory, setChangeHistory] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Resend Timer Logic
+  useEffect(() => {
+    let interval: any;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
+  const handleSendRecoveryOTP = async () => {
+    if (!userProfile?.email) return;
+    setIsUpdating(true);
+    setModalError(null);
+    try {
+      const response = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userProfile.email.toLowerCase().trim(),
+          type: 'password_reset',
+          university: userProfile?.university || 'LPU'
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to dispatch recovery code.");
+      setForgotStep('otp');
+      setResendTimer(60);
+      showToast("Recovery code sent to your email", "success");
+    } catch (err: any) {
+      setModalError(err.message);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    setModalError(null);
+    if (otpValue.length !== 6) {
+      setModalError("Enter 6-digit recovery code");
+      return;
+    }
+    if (!newPassword || newPassword.length < 6) {
+      setModalError("New password must be at least 6 characters");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const resetResponse = await fetch('/api/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userProfile?.email.toLowerCase().trim(),
+          otp: otpValue,
+          newPassword: newPassword
+        })
+      });
+
+      const resetData = await resetResponse.json();
+      if (!resetResponse.ok) throw new Error(resetData.error || "Reset failed.");
+
+      setShowPasswordModal(false);
+      setNewPassword('');
+      setOtpValue('');
+      setIsForgotMode(false);
+      showToast("Password reset successfully!", "success");
+    } catch (err: any) {
+      setModalError(err.message);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const userId = userProfile?.id || null;
   const { totalXP, level: levelInfo } = useXP(userId);
@@ -154,12 +245,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
   );
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pt-8 pb-32 animate-fade-in no-scrollbar relative">
-      {/* Background Aesthetic */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-brand-primary/5 blur-[120px]" />
-        <div className="absolute bottom-[20%] right-[-5%] w-[30%] h-[30%] rounded-full bg-brand-secondary/5 blur-[100px]" />
-      </div>
+    <div className="max-w-4xl mx-auto px-6 md:px-12 pt-8 pb-32 animate-in fade-in slide-in-from-right-4 duration-500 no-scrollbar relative">
 
       {/* Header Profile Card */}
       <header className="flex flex-col items-center mb-10 relative">
@@ -174,7 +260,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                 <motion.img 
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  src={`/Nexus-Journey/${userProfile.avatar_frame}`}
+                  src={`/Scholix-Journey/${userProfile.avatar_frame}`}
                   alt="Frame"
                   className="w-full h-full object-contain"
                   style={{ 
@@ -337,7 +423,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
               const isActive = userProfile.avatar_frame === frame;
               return (
                 <motion.div 
-                  key={frame}
+                   key={frame}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
                     NexusServer.updateProfile(userProfile.id, { avatar_frame: frame });
@@ -346,7 +432,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                   }}
                   className={`aspect-square rounded-[24px] flex items-center justify-center cursor-pointer transition-all border-2 ${isActive ? 'border-brand-primary bg-brand-primary/5' : 'border-zinc-100 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 opacity-70 hover:opacity-100'}`}
                 >
-                  <img src={`/Nexus-Journey/${frame}`} alt="Frame" className="w-16 h-16 object-contain" />
+                  <img src={`/Scholix-Journey/${frame}`} alt="Frame" className="w-16 h-16 object-contain" />
                 </motion.div>
               );
             })}
@@ -359,11 +445,41 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                 onClick={() => navigateToModule(ModuleType.QUIZ)}
                 className="mt-2 text-[10px] font-bold text-brand-primary uppercase tracking-wider"
               >
-                Go to Learning Journey
+                Go to Scholix Learning
               </button>
             </div>
           )}
         </div>
+      </Section>
+
+      <Section title="Security & Account" footer="Manage your password and account status.">
+        <button
+          onClick={() => setShowPasswordModal(true)}
+          className="w-full flex items-center gap-4 py-4 px-1 bg-transparent group/row transition-all duration-200 text-left border-none"
+        >
+          <div className="w-10 h-10 rounded-[14px] flex items-center justify-center text-zinc-500 bg-zinc-500/10 shrink-0 shadow-sm transition-transform group-hover/row:scale-105 duration-300">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+          </div>
+          <div className="flex-1 min-w-0 flex flex-col justify-center">
+            <p className="text-[14px] font-bold text-zinc-700 dark:text-zinc-200">Change Password</p>
+            <p className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium">Update your security credentials</p>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-700"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+
+        <button
+          onClick={() => setShowDeleteModal(true)}
+          className="w-full flex items-center gap-4 py-4 px-1 bg-transparent group/row transition-all duration-200 text-left border-none"
+        >
+          <div className="w-10 h-10 rounded-[14px] flex items-center justify-center text-red-500 bg-red-500/10 shrink-0 shadow-sm transition-transform group-hover/row:scale-105 duration-300">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+          </div>
+          <div className="flex-1 min-w-0 flex flex-col justify-center">
+            <p className="text-[14px] font-bold text-red-500">Delete Account</p>
+            <p className="text-[11px] text-red-500/60 font-medium">Permanently remove your account</p>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-red-200 dark:text-red-900"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
       </Section>
 
       <div className="mt-12 space-y-4">
@@ -379,18 +495,406 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
           )}
         </button>
 
-        <button
-          onClick={async () => { await NexusServer.signOut(); window.location.reload(); }}
-          className="w-full bg-zinc-950/5 dark:bg-white/5 border border-transparent rounded-[28px] py-4.5 flex items-center justify-center gap-3 text-red-500 font-bold text-[14px] active:scale-[0.98] active:bg-red-500/10 transition-all duration-200 shadow-sm"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Sign Out of Nexus
-        </button>
       </div>
 
       <div className="mt-12 text-center opacity-30">
-        <p className="text-[10px] font-semibold tracking-[0.2em] text-zinc-500 uppercase">Nexus Profile Build 3.0.0</p>
+        <p className="text-[10px] font-semibold tracking-[0.2em] text-zinc-500 uppercase">Scholix Profile Build 3.0.0</p>
       </div>
+
+      {/* Change Password Modal */}
+      {createPortal(
+        <AnimatePresence>
+          {showPasswordModal && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden pointer-events-auto">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => {
+                  if (!isUpdating) {
+                    setShowPasswordModal(false);
+                    setCurrentPassword('');
+                    setNewPassword('');
+                    setIsForgotMode(false);
+                    setForgotStep('email');
+                    setOtpValue('');
+                    setModalError(null);
+                  }
+                }}
+                className="absolute inset-0 bg-black/40 backdrop-blur-xl"
+                style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-sm bg-white dark:bg-[#0a0a0a] rounded-[32px] border border-zinc-200 dark:border-white/10 shadow-2xl p-8 overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => {
+                    setShowPasswordModal(false);
+                    setCurrentPassword('');
+                    setNewPassword('');
+                    setIsForgotMode(false);
+                    setForgotStep('email');
+                    setOtpValue('');
+                    setModalError(null);
+                  }}
+                  className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90 cursor-pointer outline-none"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+
+                <div className="w-14 h-14 bg-brand-primary/10 rounded-2xl flex items-center justify-center mb-6 border border-brand-primary/20">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7 text-brand-primary"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                </div>
+
+                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-1 tracking-tight leading-none">Security Settings</h3>
+                <p className="text-zinc-500 text-[12px] font-medium mb-5">Update your credentials. At least 6 characters.</p>
+
+                {modalError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-4 p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-start gap-2.5"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-red-500 mt-0.5 shrink-0"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                    <p className="text-[11px] font-bold text-red-500 leading-tight">{modalError}</p>
+                  </motion.div>
+                )}
+
+                {isForgotMode ? (
+                  forgotStep === 'email' ? (
+                    <div className="text-center animate-fade-in">
+                      <p className="text-zinc-500 dark:text-zinc-400 text-xs mb-6 font-medium leading-relaxed">
+                        We'll send a 6-digit recovery code to your registered email <br />
+                        <span className="text-brand-primary font-bold">{userProfile?.email}</span>
+                      </p>
+                      <button
+                        onClick={handleSendRecoveryOTP}
+                        disabled={isUpdating}
+                        className="w-full py-3.5 rounded-2xl bg-brand-primary text-white font-bold text-[13px] shadow-lg shadow-brand-primary/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50"
+                      >
+                        {isUpdating ? "Sending Code..." : "Send Recovery Code"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsForgotMode(false);
+                          setModalError(null);
+                        }}
+                        className="mt-4 text-[11px] font-bold text-zinc-400 hover:text-zinc-600 transition-colors bg-transparent border-none"
+                      >
+                        Back to password login
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 animate-fade-in">
+                      <div className="text-center mb-6">
+                        <p className="text-xs text-zinc-400 font-medium">
+                          Enter the code sent to your email and your new password.
+                        </p>
+                      </div>
+                      <div className="relative group">
+                        <input
+                          type="text"
+                          placeholder="000000"
+                          value={otpValue}
+                          maxLength={6}
+                          onChange={(e) => {
+                            setOtpValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 6));
+                            if (modalError) setModalError(null);
+                          }}
+                          disabled={isUpdating}
+                          className="w-full p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-center tracking-[12px] text-lg font-black text-zinc-800 dark:text-zinc-200"
+                        />
+                      </div>
+                      <div className="relative group">
+                        <input
+                          type="password"
+                          placeholder="New secure password"
+                          value={newPassword}
+                          onChange={(e) => {
+                            setNewPassword(e.target.value);
+                            if (modalError) setModalError(null);
+                          }}
+                          disabled={isUpdating}
+                          className="w-full p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/5 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-3 pt-2">
+                        <button
+                          onClick={handleSendRecoveryOTP}
+                          disabled={isUpdating || resendTimer > 0}
+                          className="text-[11px] font-bold text-brand-primary hover:text-brand-primary/80 transition-colors bg-transparent border-none disabled:opacity-50"
+                        >
+                          {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Didn't receive the code? Resend"}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setForgotStep('email');
+                            setModalError(null);
+                          }}
+                          className="text-[11px] font-medium text-zinc-400 hover:text-zinc-600 transition-colors bg-transparent border-none"
+                        >
+                          Change recovery email
+                        </button>
+                      </div>
+                    </div>
+                  )
+                ) : (
+                  <>
+                    <div className="space-y-4">
+                      <div className="relative group">
+                        <input
+                          type="password"
+                          placeholder="Current password"
+                          value={currentPassword}
+                          onChange={(e) => {
+                            setCurrentPassword(e.target.value);
+                            if (modalError) setModalError(null);
+                          }}
+                          disabled={isUpdating}
+                          className="w-full p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/5 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
+                        />
+                      </div>
+                      <div className="flex justify-end -mt-1 mb-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsForgotMode(true);
+                            setModalError(null);
+                          }}
+                          className="text-[10px] font-bold text-zinc-400 hover:text-brand-primary transition-colors bg-transparent border-none p-0 cursor-pointer"
+                        >
+                          Forgot Password?
+                        </button>
+                      </div>
+                      <div className="relative group">
+                        <input
+                          type="password"
+                          placeholder="New secure password"
+                          value={newPassword}
+                          onChange={(e) => {
+                            setNewPassword(e.target.value);
+                            if (modalError) setModalError(null);
+                          }}
+                          disabled={isUpdating}
+                          className="w-full p-3.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:ring-4 focus:ring-brand-primary/5 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 mt-6">
+                      <button
+                        onClick={() => {
+                          setShowPasswordModal(false);
+                          setCurrentPassword('');
+                          setNewPassword('');
+                        }}
+                        disabled={isUpdating}
+                        className="flex-1 py-3.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-[13px] border-none bg-transparent transition-colors cursor-pointer outline-none"
+                      >
+                        Dismiss
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!currentPassword) {
+                            setModalError("Please enter current password");
+                            return;
+                          }
+                          if (!newPassword || newPassword.length < 6) {
+                            setModalError("New password must be at least 6 characters");
+                            return;
+                          }
+                          setIsUpdating(true);
+                          setModalError(null);
+                          try {
+                            await NexusServer.updatePassword(newPassword, currentPassword);
+                            setShowPasswordModal(false);
+                            setNewPassword('');
+                            setCurrentPassword('');
+                            showToast("Password updated successfully!", "success");
+                          } catch (e: any) {
+                            setModalError(e.message || "Failed to update password");
+                          } finally {
+                            setIsUpdating(false);
+                          }
+                        }}
+                        disabled={isUpdating}
+                        className="flex-[1.5] py-3.5 rounded-2xl bg-brand-primary text-white font-bold text-[13px] shadow-lg shadow-brand-primary/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {isUpdating ? (
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                            Update Password
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {isForgotMode && forgotStep === 'otp' && (
+                  <div className="mt-6">
+                    <button
+                      onClick={handleResetPassword}
+                      disabled={isUpdating}
+                      className="w-full py-3.5 rounded-2xl bg-brand-primary text-white font-bold text-[13px] shadow-lg shadow-brand-primary/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {isUpdating ? (
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        "Confirm New Password"
+                      )}
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.getElementById('modal-root') || document.body
+      )}
+
+      {/* Delete Account Modal */}
+      {createPortal(
+        <AnimatePresence>
+          {showDeleteModal && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden pointer-events-auto">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => {
+                  if (!isUpdating) {
+                    setShowDeleteModal(false);
+                    setDeleteStep(1);
+                    setDeleteConfirmation('');
+                  }
+                }}
+                className="absolute inset-0 bg-black/40 backdrop-blur-xl"
+                style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-sm bg-white dark:bg-[#0a0a0a] rounded-[32px] border border-red-500/10 shadow-2xl p-8 overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setDeleteStep(1);
+                    setDeleteConfirmation('');
+                  }}
+                  className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90 cursor-pointer outline-none"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+
+                <div className="w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center mb-6 border border-red-500/20">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7 text-red-500"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                </div>
+
+                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-1 tracking-tight leading-none">Delete Account?</h3>
+                <p className="text-zinc-500 text-[12px] font-medium mb-5">This action is permanent and cannot be reversed.</p>
+
+                {modalError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-4 p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-start gap-2.5"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-red-500 mt-0.5 shrink-0"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                    <p className="text-[11px] font-bold text-red-500 leading-tight">{modalError}</p>
+                  </motion.div>
+                )}
+
+                <div className="bg-red-500/5 rounded-2xl p-5 mb-6 border border-red-500/10">
+                  <p className="text-[12px] text-red-600 dark:text-red-400 font-medium leading-relaxed">
+                    {deleteStep === 1
+                      ? "By confirming, your profile, study history, and saved data will be wiped from our servers immediately."
+                      : "Final confirmation required. This action cannot be undone."}
+                  </p>
+                </div>
+
+                {deleteStep === 2 && (
+                  <div className="mb-6 animate-fade-in">
+                    <p className="text-[10px] text-zinc-500 mb-2 font-bold text-center">Type <span className="text-red-500">'delete my account'</span> to confirm</p>
+                    <input
+                      type="text"
+                      placeholder="Match the phrase"
+                      value={deleteConfirmation}
+                      onChange={(e) => {
+                        setDeleteConfirmation(e.target.value);
+                        if (modalError) setModalError(null);
+                      }}
+                      disabled={isUpdating}
+                      className="w-full p-3.5 rounded-2xl bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 focus:border-red-500 text-zinc-800 dark:text-zinc-200 transition-all outline-none font-medium text-sm shadow-inner text-center"
+                    />
+                  </div>
+                )}
+
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => {
+                      setShowDeleteModal(false);
+                      setDeleteStep(1);
+                      setDeleteConfirmation('');
+                      setModalError(null);
+                    }}
+                    disabled={isUpdating}
+                    className="flex-1 py-3.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-[13px] border-none bg-transparent transition-colors cursor-pointer outline-none"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (deleteStep === 1) {
+                        setDeleteStep(2);
+                        setModalError(null);
+                        return;
+                      }
+
+                      if (deleteConfirmation.toLowerCase().trim() !== 'delete my account') {
+                        setModalError("Phrase doesn't match");
+                        return;
+                      }
+
+                      if (!userProfile) return;
+                      setIsUpdating(true);
+                      setModalError(null);
+                      try {
+                        await NexusServer.deleteAccount(userProfile.id);
+                        showToast("Account deleted. Farewell!", "info");
+                        onSignOut();
+                      } catch (e: any) {
+                        setModalError(e.message || "Deletion failed");
+                      } finally {
+                        setIsUpdating(false);
+                      }
+                    }}
+                    disabled={isUpdating || (deleteStep === 2 && deleteConfirmation.toLowerCase().trim() !== 'delete my account')}
+                    className="flex-[2] py-3.5 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-bold text-[13px] shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-2.5 border-none disabled:opacity-50 cursor-pointer outline-none"
+                  >
+                    {isUpdating ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    )}
+                    <span>{isUpdating ? (deleteStep === 1 ? "Preparing..." : "Deleting...") : (deleteStep === 1 ? "Delete Forever" : "Confirm Deletion")}</span>
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.getElementById('modal-root') || document.body
+      )}
     </div>
   );
 };

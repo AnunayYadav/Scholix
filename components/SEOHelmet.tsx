@@ -63,7 +63,7 @@ const SEOHelmet: React.FC<SEOHelmetProps> = ({ currentModule }) => {
           description = `Examine the ${uniName} 3D campus map. Find blocks, lecture halls, and facilities with ease through our navigator.`;
           keywords += `, campus map, ${uniShort} navigation, block finder, room guide`;
         } else if (subTab === 'market') {
-          title = `Nexus Market | Buy & Sell locally at ${uniShort} - ${fullBrandName}`;
+          title = `Scholix Market | Buy & Sell locally at ${uniShort} - ${fullBrandName}`;
           description = `The student marketplace for ${uniName}. Buy and sell cycles, gadgets, and textbooks from fellow students safely.`;
           keywords += `, student market, second hand books, buy sell cycle, campus deals`;
         } else if (subTab === 'roommate') {
