@@ -111,28 +111,6 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
             />
           </div>
         );
-      case 'university':
-        return (
-          <div className="animate-in fade-in slide-in-from-right-4 duration-300 max-w-xl mx-auto px-6 md:px-12 py-12 text-center">
-            <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mb-6 border border-amber-500/20 mx-auto">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-amber-500"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
-            </div>
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-2">Change University</h3>
-            <p className="text-zinc-500 text-sm mb-8 leading-relaxed">
-              You are currently affiliated with <span className="text-brand-primary font-semibold">{fullBrandName}</span>.
-              Switching will change your experience and resource library.
-            </p>
-            <button
-              onClick={() => {
-                selectUniversity('none');
-                navigate('/welcome');
-              }}
-              className="px-8 py-3.5 rounded-xl bg-brand-primary text-white font-semibold text-sm shadow-lg shadow-brand-primary/20 hover:brightness-110 active:scale-95 transition-all"
-            >
-              Switch University Now
-            </button>
-          </div>
-        );
       case 'help_center':
         return (
           <div className="animate-in fade-in slide-in-from-right-4 duration-500 px-6 py-10 w-full max-w-3xl mx-auto">
@@ -144,74 +122,6 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
         return <AboutUs userProfile={userProfile} />;
       case 'privacy':
         return <PrivacyPolicy />;
-      case 'social':
-        return (
-          <div className="animate-in fade-in slide-in-from-right-4 duration-300 max-w-xl mx-auto px-6 md:px-12 py-12">
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-6">Connect with Us</h3>
-            <div className="grid grid-cols-1 gap-4">
-              <button
-                onClick={() => window.open('https://chat.whatsapp.com/your-link', '_blank')}
-                className="flex items-center gap-4 p-5 rounded-2xl bg-green-500/10 border border-green-500/20 hover:bg-green-500/15 transition-all text-left"
-              >
-                <div className="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center text-white">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M21 11.5a8.38 8.38 0 1 1-.9-3.8 8.5 8.5 0 0 1 .9 3.8z" /><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z" /></svg>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-zinc-900 dark:text-white">WhatsApp Community</h4>
-                  <p className="text-xs text-zinc-500 font-medium">Join 2000+ students for instant updates</p>
-                </div>
-              </button>
-              <button
-                onClick={() => window.open('https://instagram.com/scholix_app', '_blank')}
-                className="flex items-center gap-4 p-5 rounded-2xl bg-pink-500/10 border border-pink-500/20 hover:bg-pink-500/15 transition-all text-left"
-              >
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-yellow-400 to-purple-600 flex items-center justify-center text-white">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></svg>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-zinc-900 dark:text-white">Instagram</h4>
-                  <p className="text-xs text-zinc-500 font-medium">Daily news and university highlights</p>
-                </div>
-              </button>
-            </div>
-          </div>
-        );
-      case 'chat_support':
-        return (
-          <div className="animate-in fade-in slide-in-from-right-4 duration-300 max-w-xl mx-auto px-6 md:px-12 py-12 text-center">
-            <div className="w-16 h-16 bg-cyan-500/10 rounded-2xl flex items-center justify-center mb-6 border border-cyan-500/20 mx-auto">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-cyan-500"><path d="M21 11.5a8.38 8.38 0 1 1-.9-3.8 8.5 8.5 0 0 1 .9 3.8z" /><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z" /></svg>
-            </div>
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-2">Automated Support</h3>
-            <p className="text-zinc-500 text-sm mb-8 leading-relaxed">
-              Need instant help? Our automated assistant is here to guide you through {shortBrandName} features and resolve common queries.
-            </p>
-            <button
-              onClick={() => setShowChatModal(true)}
-              className="px-8 py-3.5 rounded-xl bg-cyan-500 text-white font-semibold text-sm shadow-lg shadow-cyan-500/20 hover:brightness-110 active:scale-95 transition-all"
-            >
-              Launch Chat Assistant
-            </button>
-          </div>
-        );
-      case 'feedback':
-        return (
-          <div className="animate-in fade-in slide-in-from-right-4 duration-300 max-w-xl mx-auto px-6 md:px-12 py-12 text-center">
-            <div className="w-16 h-16 bg-pink-500/10 rounded-2xl flex items-center justify-center mb-6 border border-pink-500/20 mx-auto">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-8 h-8 text-pink-500"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-            </div>
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-2">Share Your Thoughts</h3>
-            <p className="text-zinc-500 text-sm mb-8 leading-relaxed">
-              Your feedback drives our development. Found a bug or have a feature request? Let us know!
-            </p>
-            <button
-              onClick={() => setShowFeedbackModal(true)}
-              className="px-8 py-3.5 rounded-xl bg-pink-500 text-white font-semibold text-sm shadow-lg shadow-pink-500/20 hover:brightness-110 active:scale-95 transition-all"
-            >
-              Submit Feedback
-            </button>
-          </div>
-        );
       default:
         return null;
     }
@@ -261,6 +171,15 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                         } else if (item.id === 'profile' && !userProfile) {
                           if (onOpenSignup) onOpenSignup();
                           setActiveTab('profile');
+                        } else if (item.id === 'university') {
+                          selectUniversity('none');
+                          navigate('/welcome');
+                        } else if (item.id === 'chat_support') {
+                          setShowChatModal(true);
+                        } else if (item.id === 'social') {
+                          setShowSocialModal(true);
+                        } else if (item.id === 'feedback') {
+                          setShowFeedbackModal(true);
                         } else {
                           const route = tabToRoute[item.id];
                           if (route) {
