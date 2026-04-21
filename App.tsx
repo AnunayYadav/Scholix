@@ -115,7 +115,7 @@ const getPathFromModule = (module: ModuleType, uniKey: UniversityId = 'none'): s
     case ModuleType.PRIVACY: return `${prefix}/settings/privacy`;
     case ModuleType.LOGIN: return `${prefix}/login`;
     case ModuleType.SIGNUP: return `${prefix}/signup`;
-    case ModuleType.SETTINGS: return `${prefix}/settings/profile`;
+    case ModuleType.SETTINGS: return `${prefix}/settings`;
     default: return uniSlug ? `/${uniSlug}` : '/';
   }
 };
@@ -995,7 +995,7 @@ const FeatureRoutes: React.FC<{
       <Route path="/ai-tools" element={<FeatureGuard module={ModuleType.AI_TOOLS}><AIToolsDirectory /></FeatureGuard>} />
       <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
       <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
-      <Route path="/settings" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="profile" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+      <Route path="/settings" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
       <Route path="/settings/profile" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="profile" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
       <Route path="/settings/privacy" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="privacy" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
       <Route path="/settings/about" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="about" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />

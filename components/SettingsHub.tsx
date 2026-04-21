@@ -30,16 +30,14 @@ interface SettingsHubProps {
 const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme, toggleTheme, navigateToModule, setUserProfile, initialTab, onOpenSignup, authModalOpen }) => {
   const navigate = useNavigate();
   const { fullBrandName, shortBrandName, selectUniversity, uniSlug } = useUniversity();
-  const [activeTab, setActiveTab] = useState<string | null>(initialTab || 'profile');
+  const [activeTab, setActiveTab] = useState<string | null>(initialTab || null);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
   const [showSocialModal, setShowSocialModal] = useState(false);
   const prefix = uniSlug ? `/${uniSlug}` : '';
 
   useEffect(() => {
-    if (initialTab) {
-      setActiveTab(initialTab);
-    }
+    setActiveTab(initialTab || null);
   }, [initialTab]);
 
   // Handle deselection if auth modal closed without login
