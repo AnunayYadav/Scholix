@@ -13,6 +13,8 @@ import ProfileSection from './ProfileSection.tsx';
 import HelpSection from './HelpSection.tsx';
 import AboutUs from './AboutUs.tsx';
 import PrivacyPolicy from './PrivacyPolicy.tsx';
+import DownloadAPKModal from './DownloadAPKModal.tsx';
+
 
 
 interface SettingsHubProps {
@@ -34,6 +36,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
   const [showSocialModal, setShowSocialModal] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
   const prefix = uniSlug ? `/${uniSlug}` : '';
 
   useEffect(() => {
@@ -162,12 +165,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
                         if (item.isToggle) {
                           toggleTheme();
                         } else if (item.id === 'download') {
-                          const link = document.createElement('a');
-                          link.href = '/Scholix.apk';
-                          link.download = 'Scholix.apk';
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
+                          setShowDownloadModal(true);
                         } else if (item.id === 'profile' && !userProfile) {
                           if (onOpenSignup) onOpenSignup();
                           setActiveTab('profile');
@@ -317,6 +315,11 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
       <SocialModal
         isOpen={showSocialModal}
         onClose={() => setShowSocialModal(false)}
+      />
+
+      <DownloadAPKModal
+        isOpen={showDownloadModal}
+        onClose={() => setShowDownloadModal(false)}
       />
     </div>
   );

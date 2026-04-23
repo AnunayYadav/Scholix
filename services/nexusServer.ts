@@ -501,6 +501,22 @@ class NexusServer {
     }
   }
 
+  static async getEventCount(eventName: string): Promise<number> {
+    const client = getSupabase();
+    if (!client) return 0;
+    try {
+      const { data, error } = await client
+        .from('event_stats')
+        .select('count')
+        .eq('event_name', eventName)
+        .maybeSingle();
+      if (error) return 0;
+      return data?.count || 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
   static async getTimeSeriesStats(type: 'views' | 'visitors' | 'feedback' | 'reports', days: number = 12): Promise<any[]> {
     const client = getSupabase();
     if (!client) return [];

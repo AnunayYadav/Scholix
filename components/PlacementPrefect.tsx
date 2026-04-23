@@ -7,6 +7,9 @@ import { analyzeResume } from '../services/geminiService';
 import { ResumeAnalysisResult, UserProfile, AnnotatedFragment, SkillCategory, ImprovementSuggestion } from '../types';
 import { showToast, showConfirm } from './Toast.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
 import { 
   ResponsiveContainer, 
   RadarChart, 
@@ -439,6 +442,259 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
     }
   };
 
+  const [downloadLoading, setDownloadLoading] = useState(false);
+
+  const handleDownloadReport = async () => {
+    if (!reportRef.current || !result) return;
+    
+    setDownloadLoading(true);
+    try {
+      showToast("Generating formal diagnostic report...", "info");
+      
+      const isDark = document.documentElement.classList.contains('dark');
+      const backgroundColor = isDark ? '#0a0a0a' : '#ffffff';
+      const textColor = isDark ? '#fafafa' : '#18181b';
+      const subTextColor = isDark ? '#a1a1aa' : '#71717a';
+      const borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+      const accentColor = '#f97316'; 
+      
+      const generateRadarSVG = (scores: Record<string, number>) => {
+        const size = 240;
+        const center = size / 2;
+        const radius = size * 0.35;
+        const keys = Object.keys(scores).length > 0 ? Object.keys(scores) : ['Keywords', 'Skills', 'Exp', 'Format', 'Impact'];
+        const count = keys.length;
+        const angleStep = (Math.PI * 2) / count;
+
+        const getPoints = (dataSet: Record<string, number>, defaultVal: number) => {
+          return keys.map((key, i) => {
+            const val = dataSet[key] !== undefined ? dataSet[key] : defaultVal;
+            const scale = val / 100;
+            const x = center + radius * scale * Math.cos(i * angleStep - Math.PI / 2);
+            const y = center + radius * scale * Math.sin(i * angleStep - Math.PI / 2);
+            return `${x},${y}`;
+          }).join(' ');
+        };
+
+        const grid = [0.5, 1].map(scale => {
+          const points = keys.map((_, i) => {
+            const x = center + radius * scale * Math.cos(i * angleStep - Math.PI / 2);
+            const y = center + radius * scale * Math.sin(i * angleStep - Math.PI / 2);
+            return `${x},${y}`;
+          }).join(' ');
+          return `<polygon points="${points}" fill="none" stroke="${borderColor}" stroke-width="0.5" />`;
+        }).join('');
+
+        return `
+          <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+            ${grid}
+            <polygon points="${getPoints({}, 95)}" fill="none" stroke="#10b981" stroke-width="1" stroke-dasharray="2,2" opacity="0.5" />
+            <polygon points="${getPoints({}, 55)}" fill="none" stroke="#71717a" stroke-width="1" stroke-dasharray="2,2" opacity="0.5" />
+            <polygon points="${getPoints(scores, 0)}" fill="${accentColor}11" stroke="${accentColor}" stroke-width="1.5" />
+            ${keys.map((k, i) => {
+              const x = center + (radius + 22) * Math.cos(i * angleStep - Math.PI / 2);
+              const y = center + (radius + 22) * Math.sin(i * angleStep - Math.PI / 2);
+              const anchor = x > center + 5 ? 'start' : x < center - 5 ? 'end' : 'middle';
+              return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="7" font-weight="700" fill="${subTextColor}">${k.toUpperCase()}</text>`;
+            }).join('')}
+          </svg>
+        `;
+      };
+
+      const printContainer = document.createElement('div');
+      printContainer.style.position = 'absolute';
+      printContainer.style.left = '-9999px';
+      printContainer.style.width = '700px';
+      printContainer.style.backgroundColor = backgroundColor;
+      printContainer.style.color = textColor;
+      printContainer.style.fontFamily = 'Inter, sans-serif';
+      printContainer.style.padding = '40px 40px 80px 40px';
+      
+      const radarSVG = generateRadarSVG(result.detailedScores || {});
+
+      printContainer.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 32px;">
+          <!-- Header -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid ${borderColor}; padding-bottom: 20px;">
+            <img src="/Scholix_light.png" style="height: 32px; width: auto;" />
+            <div style="text-align: right;">
+              <p style="font-size: 10px; font-weight: 700; color: ${subTextColor}; margin: 0; text-transform: uppercase; letter-spacing: 0.1em;">Placement Diagnostic Report • ${new Date().toLocaleDateString()}</p>
+            </div>
+          </div>
+
+          <!-- Score Card -->
+          <div style="display: grid; grid-template-columns: 160px 1fr; gap: 32px; align-items: center; background: ${isDark ? '#111' : '#f9f9f9'}; padding: 24px; border-radius: 16px; border: 1px solid ${borderColor}; break-inside: avoid;">
+             <div style="text-align: center; border-right: 1px solid ${borderColor};">
+                <div style="font-size: 44px; font-weight: 900; color: ${accentColor}; line-height: 1;">${result.totalScore}%</div>
+                <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: ${subTextColor}; margin-top: 8px;">Overall Score</div>
+             </div>
+             <div>
+                <h3 style="font-size: 13px; font-weight: 800; margin: 0 0 8px 0;">EXECUTIVE SUMMARY</h3>
+                <p style="font-size: 11px; line-height: 1.6; color: ${subTextColor}; margin: 0;">${result.summary || 'Summary not available.'}</p>
+             </div>
+          </div>
+
+          <!-- Radar & Metrics -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; break-inside: avoid;">
+            <div style="background: ${isDark ? '#111' : '#f9f9f9'}; padding: 20px; border-radius: 16px; border: 1px solid ${borderColor};">
+               <h3 style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: ${subTextColor}; margin-bottom: 12px;">Competency Mapping</h3>
+               <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                 ${radarSVG}
+                 <div style="display: flex; gap: 12px; font-size: 7px; font-weight: 700;">
+                   <div style="display: flex; align-items: center; gap: 4px;"><div style="width: 6px; height: 6px; background: #10b981; border-radius: 1px;"></div> IDEAL</div>
+                   <div style="display: flex; align-items: center; gap: 4px;"><div style="width: 6px; height: 6px; background: #71717a; border-radius: 1px;"></div> AVERAGE</div>
+                   <div style="display: flex; align-items: center; gap: 4px;"><div style="width: 6px; height: 6px; background: ${accentColor}; border-radius: 1px;"></div> YOU</div>
+                 </div>
+               </div>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+               <h3 style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: ${subTextColor}; margin-bottom: 8px;">Metric Breakdown</h3>
+               ${Object.entries(result.detailedScores || {}).map(([key, score]) => `
+                <div style="padding: 10px 14px; border: 1px solid ${borderColor}; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; background: ${isDark ? '#111' : '#fff'};">
+                  <span style="font-size: 10px; font-weight: 700; text-transform: capitalize;">${key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                  <span style="font-size: 11px; font-weight: 800; color: ${accentColor};">${score}%</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Probability Simulation -->
+          <div style="background: ${accentColor}; color: white; padding: 24px; border-radius: 16px; break-inside: avoid;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h3 style="font-size: 11px; font-weight: 800; text-transform: uppercase; margin: 0;">Market Shortlist Probability</h3>
+              <div style="padding: 4px 10px; background: rgba(255,255,255,0.2); border-radius: 99px; font-size: 8px; font-weight: 900;">AI SIMULATION</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 32px;">
+              <div>
+                <div style="font-size: 9px; opacity: 0.8; margin-bottom: 2px;">CURRENT</div>
+                <div style="font-size: 24px; font-weight: 900;">${result.simulation?.currentShortlistChance || 0}%</div>
+              </div>
+              <div style="font-size: 18px; opacity: 0.5;">→</div>
+              <div>
+                <div style="font-size: 9px; opacity: 0.8; margin-bottom: 2px;">TARGET</div>
+                <div style="font-size: 24px; font-weight: 900;">${result.simulation?.projectedShortlistChance || 0}%</div>
+              </div>
+            </div>
+            <p style="font-size: 10px; margin-top: 12px; line-height: 1.5; opacity: 0.9;">${result.simulation?.explanation || ''}</p>
+          </div>
+
+          <!-- Skills Assessment -->
+          ${Object.keys(result.skillMatrix || {}).length > 0 ? `
+          <div style="break-inside: avoid;">
+            <h3 style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: ${subTextColor}; margin-bottom: 12px;">Skill Index</h3>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+              ${Object.entries(result.skillMatrix || {}).map(([cat, skills]) => `
+                <div style="padding: 14px; border: 1px solid ${borderColor}; border-radius: 12px; background: ${isDark ? '#111' : '#f9f9f9'};">
+                  <div style="font-size: 9px; font-weight: 800; color: ${accentColor}; margin-bottom: 8px;">${cat.toUpperCase()}</div>
+                  <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    ${((skills as string[]) || []).map(skill => `<span style="padding: 3px 6px; background: ${isDark ? '#222' : '#eee'}; border-radius: 4px; font-size: 9px; font-weight: 700;">${skill}</span>`).join('')}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>` : ''}
+
+          <!-- Action Plan -->
+          ${(result.actionPlan?.tasks || []).length > 0 ? `
+          <div style="break-inside: avoid;">
+            <h3 style="font-size: 13px; font-weight: 800; margin-bottom: 16px;">ACTIONABLE FEEDBACK</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              ${result.actionPlan.tasks.map((t, i) => `
+                <div style="padding: 16px; border: 1px solid ${borderColor}; border-radius: 14px; display: flex; gap: 16px; align-items: flex-start; background: ${isDark ? '#111' : '#fcfcfc'}; break-inside: avoid;">
+                  <div style="width: 20px; height: 20px; background: ${accentColor}; color: white; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 11px; flex-shrink: 0;">${i + 1}</div>
+                  <div>
+                    <div style="font-size: 11px; font-weight: 800; margin-bottom: 2px;">${t.task} <span style="font-size: 8px; color: ${accentColor}; margin-left: 8px; opacity: 0.8;">[${t.action}]</span></div>
+                    <p style="font-size: 10px; color: ${subTextColor}; line-height: 1.4; margin: 0;">${t.description}</p>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>` : ''}
+
+          <!-- Improvement Bridge -->
+          ${(result.improvements || []).length > 0 ? `
+          <div style="break-inside: avoid;">
+            <h3 style="font-size: 13px; font-weight: 800; margin-bottom: 16px;">CRITICAL OPTIMIZATIONS</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              ${result.improvements.map(imp => `
+                <div style="border: 1px solid ${borderColor}; border-radius: 14px; overflow: hidden; background: ${isDark ? '#111' : '#fff'}; break-inside: avoid;">
+                  <div style="padding: 8px 16px; background: ${isDark ? '#222' : '#f0f0f0'}; border-bottom: 1px solid ${borderColor}; font-size: 9px; font-weight: 800; color: ${subTextColor};">${imp.section.toUpperCase()}</div>
+                  <div style="padding: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div style="font-size: 10px; color: #ef4444; font-style: italic;">"${imp.originalText}"</div>
+                    <div style="font-size: 10px; color: #10b981; font-weight: 600;">"${imp.improvedText}"</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>` : ''}
+
+          <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid ${borderColor}; text-align: center; break-inside: avoid;">
+            <p style="font-size: 8px; color: ${subTextColor}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">© ${new Date().getFullYear()} SCHOLIX AI • SECURITY VERIFIED REPORT</p>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(printContainer);
+
+      const canvas = await html2canvas(printContainer, {
+        scale: 1.5,
+        useCORS: true,
+        backgroundColor: backgroundColor,
+        logging: false,
+        onclone: (clonedDoc) => {
+          const colorRegex = /(oklch|oklab|color)\((?:[^()]+|\([^()]*\))*\)/g;
+          const fallbackColor = isDark ? '#27272a' : '#71717a';
+          const elements = clonedDoc.querySelectorAll('*');
+          elements.forEach(el => {
+            const htmlEl = el as HTMLElement;
+            if (htmlEl.style && htmlEl.style.cssText) {
+              if (htmlEl.style.cssText.includes('oklch') || htmlEl.style.cssText.includes('oklab')) {
+                htmlEl.style.cssText = htmlEl.style.cssText.replace(colorRegex, fallbackColor);
+              }
+            }
+          });
+          const links = clonedDoc.querySelectorAll('link[rel="stylesheet"]');
+          links.forEach(l => l.remove());
+        }
+      });
+
+      document.body.removeChild(printContainer);
+
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      const ratio = canvasHeight / canvasWidth;
+      
+      const imgWidth = pageWidth;
+      const imgHeight = imgWidth * ratio;
+
+      let position = 0;
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+      
+      let remainingHeight = imgHeight - pageHeight;
+      while (remainingHeight > 0) {
+        position -= pageHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+        remainingHeight -= pageHeight;
+      }
+
+      pdf.save(`Scholix_Report_${fileName.replace(/\.[^/.]+$/, "") || 'Report'}.pdf`);
+      showToast("Formal report downloaded!", "success");
+      
+    } catch (err) {
+      console.error("PDF generation failed", err);
+      showToast("Failed to generate PDF. Check browser console.", "error");
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
+
   const handleDeleteReport = async (idx: number, e: React.MouseEvent) => {
     e.stopPropagation();
     const confirmed = await showConfirm("Delete this review?");
@@ -504,7 +760,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
               </p>
             </div>
           ) : <div />}
-          <div className="flex flex-wrap gap-2 ml-auto md:ml-0">
+          <div className="flex flex-wrap gap-2 ml-auto md:ml-0 header-actions">
             <button 
               onClick={handleShareReport} 
               disabled={shareLoading}
@@ -517,9 +773,24 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
               )}
               Share
             </button>
-            <button onClick={handleSaveReport} className="px-4 py-2 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-xl font-semibold text-[11px] tracking-wide transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm">
+            <button 
+              onClick={handleSaveReport} 
+              className="px-4 py-2 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-xl font-semibold text-[11px] tracking-wide transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm"
+            >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
               Save History
+            </button>
+            <button 
+              onClick={handleDownloadReport}
+              disabled={downloadLoading}
+              className="px-4 py-2 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-xl font-semibold text-[11px] tracking-wide transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+            >
+              {downloadLoading ? (
+                <div className="w-3.5 h-3.5 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              )}
+              Download
             </button>
             <button 
               onClick={() => {
@@ -1029,7 +1300,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             </div>
           </div>
           
-          <div className="relative group/xray" ref={reportRef}>
+          <div className="relative group/xray">
             {/* High-Tech Container */}
             <div className="glass-panel p-4 md:p-10 rounded-[28px] md:rounded-[40px] bg-[#0c0c0c] border border-white/5 shadow-2xl relative overflow-hidden ring-1 ring-white/5">
               {/* Scanline Effect - Subtle and Premium */}
