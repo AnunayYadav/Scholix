@@ -1678,6 +1678,12 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
           {/* Actions Column (Timer & Submit) */}
           <div className="lg:col-span-4 flex items-center justify-end gap-3 px-4 md:px-0">
+            {isPracticeMode && (
+              <div className="hidden md:flex items-center gap-2 px-4 h-11 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 2v8m0 4v2m-7.5-6h15" strokeLinecap="round"/><circle cx="12" cy="12" r="10"/></svg>
+                <span className="text-[11px] font-bold uppercase tracking-widest">Practice</span>
+              </div>
+            )}
             {timerActive && (
               <div className="flex items-center gap-3 px-5 h-11 rounded-2xl bg-white/60 dark:bg-dark-900/40 border border-zinc-200 dark:border-white/5 backdrop-blur-md shadow-sm">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`w-4 h-4 ${timeLeft < 60 ? 'text-red-500 animate-pulse' : 'text-orange-500'}`}>
@@ -3621,7 +3627,27 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <motion.button
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setIsPracticeMode(!isPracticeMode)}
+                      className={`relative p-5 rounded-[28px] border transition-all flex items-center justify-between group overflow-hidden ${isPracticeMode ? 'bg-orange-500/5 border-orange-500/30' : 'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 hover:border-orange-500/20'}`}
+                    >
+                      <div className="flex items-center gap-4 z-10">
+                        <div className={`p-3 rounded-2xl transition-colors ${isPracticeMode ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'bg-zinc-100 dark:bg-dark-800 text-zinc-500'}`}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 2v8m0 4v2m-7.5-6h15" strokeLinecap="round"/><circle cx="12" cy="12" r="10"/></svg>
+                        </div>
+                        <div className="text-left">
+                          <p className={`text-sm font-semibold tracking-tight ${isPracticeMode ? 'text-orange-500' : 'text-zinc-900 dark:text-white'}`}>Practice Mode</p>
+                          <p className="text-[10px] text-zinc-500 font-semibold tracking-wider opacity-60">Instant feedback enabled</p>
+                        </div>
+                      </div>
+                      <div className={`w-12 h-6 rounded-full relative transition-colors z-10 ${isPracticeMode ? 'bg-orange-500' : 'bg-zinc-200 dark:bg-dark-800'}`}>
+                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${isPracticeMode ? 'right-1 bg-white' : 'left-1 bg-zinc-400 dark:bg-zinc-600'}`} />
+                      </div>
+                    </motion.button>
+
                     <motion.button
                       whileHover={{ y: -2 }}
                       whileTap={{ scale: 0.98 }}
