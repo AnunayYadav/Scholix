@@ -131,10 +131,10 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
   };
 
   return (
-    <div className="flex h-full w-full bg-white dark:bg-black overflow-hidden lg:pl-16">
+    <div className="flex h-full w-full bg-white dark:bg-dark-950 overflow-hidden lg:pl-16">
       {/* Settings Navigation Sidebar */}
       <div className={`
-        flex-shrink-0 w-full md:w-[320px] lg:w-[350px] h-full border-r border-zinc-200 dark:border-white/10 bg-white dark:bg-black transition-all duration-300
+        flex-shrink-0 w-full md:w-[320px] lg:w-[350px] h-full border-r border-zinc-200 dark:border-white/10 bg-white dark:bg-dark-950 transition-all duration-300
         ${activeTab ? 'hidden md:block' : 'block'}
       `}>
         <svg width="0" height="0" className="absolute pointer-events-none" aria-hidden="true">
@@ -249,13 +249,13 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
 
       {/* Main Content Area */}
       <div className={`
-        flex-1 h-full overflow-y-auto bg-white dark:bg-black relative
+        flex-1 h-full overflow-y-auto bg-white dark:bg-dark-950 relative
         ${!activeTab ? 'hidden md:block' : 'block'}
       `}>
         <div className={`min-h-full flex flex-col w-full px-0 sm:px-4 md:px-8 lg:px-12`}>
           {/* Mobile Header / Back Button */}
           {activeTab && (
-            <div className="md:hidden sticky top-0 z-20 bg-white dark:bg-black border-b border-zinc-200 dark:border-white/10 px-4 py-3 flex items-center shrink-0">
+            <div className="md:hidden sticky top-0 z-20 bg-white dark:bg-dark-950 border-b border-zinc-200 dark:border-white/10 px-4 py-3 flex items-center shrink-0">
               <button
                 onClick={() => {
                    setActiveTab(null);
