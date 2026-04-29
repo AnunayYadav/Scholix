@@ -1779,7 +1779,7 @@ class NexusServer {
       client.from('quiz_attempts').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
       client.from('question_reports').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
       client.from('feedback').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
-      client.from('user_history').select('*').eq('user_id', userId).order('created_at', { ascending: false })
+      client.from('user_history').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(5000)
     ]);
 
     // Aggregate stats from history records
@@ -1799,7 +1799,7 @@ class NexusServer {
       history.data.forEach((record: any) => {
         switch (record.type) {
           case 'study_session':
-            if (record.content?.duration) stats.studyTime += record.content.duration;
+            if (record.content?.duration) stats.studyTime += Number(record.content.duration);
             break;
           case 'file_access':
             stats.filesAccessed += 1;

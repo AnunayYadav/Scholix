@@ -23,7 +23,8 @@ export default async function handler(req: any, res: any) {
     const { data: records, error: historyError } = await supabase
       .from('user_history')
       .select('user_id, content')
-      .eq('type', 'study_session');
+      .eq('type', 'study_session')
+      .limit(10000);
 
     if (historyError) throw historyError;
 

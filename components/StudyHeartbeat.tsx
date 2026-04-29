@@ -46,17 +46,31 @@ const StudyHeartbeat: React.FC<StudyHeartbeatProps> = ({ userId }) => {
       const now = Date.now();
       const elapsedSeconds = Math.floor((now - lastPulseRef.current) / 1000);
       
-      // Persist study session segment to history
-      NexusServer.saveRecord(userId, 'study_session', `Studying in ${getModuleName(location.pathname)}`, { 
-        duration: elapsedSeconds, 
-        path: location.pathname,
-        timestamp: new Date().toISOString()
-      });
-      
-      lastPulseRef.current = now;
+      if (elapsedSeconds > 0) {
+        // Persist study session segment to history
+        NexusServer.saveRecord(userId, 'study_session', `Studying in ${getModuleName(location.pathname)}`, { 
+          duration: elapsedSeconds, 
+          path: location.pathname,
+          timestamp: new Date().toISOString()
+        });
+        lastPulseRef.current = now;
+      }
     }, INTERVAL);
 
-    return () => clearInterval(heartbeat);
+    return () => {
+      clearInterval(heartbeat);
+      // Record any remaining time before cleanup/navigation
+      const now = Date.now();
+      const elapsedSeconds = Math.floor((now - lastPulseRef.current) / 1000);
+      
+      if (elapsedSeconds >= 1) { // Minimum 1 second to record
+        NexusServer.saveRecord(userId, 'study_session', `Studying in ${getModuleName(location.pathname)}`, { 
+          duration: elapsedSeconds, 
+          path: location.pathname,
+          timestamp: new Date().toISOString()
+        });
+      }
+    };
   }, [location.pathname, userId]);
 
   return null;
