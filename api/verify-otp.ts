@@ -75,7 +75,7 @@ export default async function handler(req: any, res: any) {
           console.log(`Resolved userId from profiles: ${userId}`);
         } else {
           // Fallback to auth admin if not in profiles
-          const userQuery = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+          const userQuery = await fetch(`${supabaseUrl}/auth/v1/admin/users?per_page=1000`, {
             headers: {
               'apikey': supabaseServiceKey,
               'Authorization': `Bearer ${supabaseServiceKey}`,

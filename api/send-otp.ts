@@ -58,7 +58,7 @@ export default async function handler(req: any, res: any) {
     // If not found in profiles, or if it's a signup (to prevent ghost user conflicts), check Auth Admin
     if (!userExists || type === 'signup') {
       try {
-        const authCheckResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+        const authCheckResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users?per_page=1000`, {
           headers: {
             'apikey': supabaseServiceKey,
             'Authorization': `Bearer ${supabaseServiceKey}`,

@@ -56,29 +56,49 @@ export default async function handler(req: any, res: any) {
       return res.status(410).json({ error: 'Verification code expired.' });
     }
 
-    // 2. Find User ID in Supabase Auth
-    // We need to list users to find the one with this email because reset-password doesn't give us the ID directly
-    const listUsersResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+    // 2. Find User ID
+    let userId: string | null = null;
+
+    // A. Try finding in profiles table first (fastest and handles most cases)
+    const profileResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=id`, {
       headers: {
         'apikey': supabaseServiceKey,
         'Authorization': `Bearer ${supabaseServiceKey}`,
       }
     });
-
-    const usersData = await listUsersResponse.json();
-    if (!listUsersResponse.ok) {
-        console.error('List Users Error:', usersData);
-        return res.status(500).json({ error: 'Failed to retrieve user identity.' });
+    
+    if (profileResponse.ok) {
+      const profileData = await profileResponse.json();
+      if (profileData && profileData.length > 0) {
+        userId = profileData[0].id;
+      }
     }
 
-    const user = (usersData.users || []).find((u: any) => u.email.toLowerCase() === email.toLowerCase().trim());
+    // B. If not in profiles, search Auth Admin users (Ghost User scenario)
+    if (!userId) {
+      // Increase per_page to 1000 to minimize pagination misses
+      const listUsersResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users?per_page=1000`, {
+        headers: {
+          'apikey': supabaseServiceKey,
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+        }
+      });
 
-    if (!user) {
+      if (listUsersResponse.ok) {
+        const usersData = await listUsersResponse.json();
+        const user = (usersData.users || []).find((u: any) => u.email.toLowerCase() === email.toLowerCase().trim());
+        if (user) {
+          userId = user.id;
+        }
+      }
+    }
+
+    if (!userId) {
       return res.status(404).json({ error: 'No user found with this email protocol.' });
     }
 
     // 3. Update Password
-    const updateResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users/${user.id}`, {
+    const updateResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users/${userId}`, {
       method: 'PUT',
       headers: {
         'apikey': supabaseServiceKey,
