@@ -13,46 +13,44 @@ const DownloadAPKModal: React.FC<DownloadAPKModalProps> = ({ isOpen, onClose }) 
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      const fetchStats = async () => {
-        try {
+    let isMounted = true;
+    const fetchDownloads = async () => {
+      try {
+        if (NexusServer.isConfigured()) {
           const count = await NexusServer.getEventCount('apk_download');
-          // Start with a base of 40 for social proof, then add the actual tracked downloads
-          setDownloadCount(40 + count);
-        } catch (error) {
-          console.error("Failed to fetch download count:", error);
+          if (isMounted) {
+            // Only update if we haven't manually incremented yet or if the server has a higher count
+            setDownloadCount(prev => Math.max(prev, 40 + count));
+          }
         }
-      };
-      fetchStats();
-    }
-  }, [isOpen]);
+      } catch (error) {
+        console.error('Error fetching downloads:', error);
+      }
+    };
+    fetchDownloads();
+    return () => { isMounted = false; };
+  }, []);
 
   const handleDownload = async () => {
-    if (isDownloading) return;
-    
-    setIsDownloading(true);
     try {
-      // Track the download in the database
+      setIsDownloading(true);
+      // Optimistic update
+      setDownloadCount(prev => prev + 1);
+      
       await NexusServer.trackEvent('apk_download');
       
-      // Update local count
-      setDownloadCount(prev => prev + 1);
-
-      // Trigger the actual download
       const link = document.createElement('a');
-      link.href = '/Scholix.apk';
+      link.href = 'https://raw.githubusercontent.com/AnunayYadav/LPU-Nexus/main/Scholix.apk';
       link.download = 'Scholix.apk';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // Give a little time for the animation/feel
+      
       setTimeout(() => {
         setIsDownloading(false);
-        onClose();
-      }, 500);
+      }, 2000);
     } catch (error) {
-      console.error("Download tracking failed:", error);
+      console.error('Download error:', error);
       setIsDownloading(false);
     }
   };

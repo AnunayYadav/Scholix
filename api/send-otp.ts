@@ -35,38 +35,59 @@ export default async function handler(req: any, res: any) {
 
   try {
     // 0. Identity Verification Checks
-    if (type === 'login' || type === 'password_reset') {
-      const checkResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=id`, {
-        method: 'GET',
-        headers: {
-          'apikey': supabaseServiceKey,
-          'Authorization': `Bearer ${supabaseServiceKey}`,
-        }
-      });
-      const userData = await checkResponse.json();
-      
-      if (!checkResponse.ok) {
-        console.error('Database Check Error:', userData);
-        return res.status(500).json({ error: 'Identity verification system offline.' });
-      }
+    let userExists = false;
+    let isVerified = false;
 
-      if (!userData || userData.length === 0) {
+    // First check profiles table (PostgREST)
+    const profileCheckResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=id,is_verified`, {
+      method: 'GET',
+      headers: {
+        'apikey': supabaseServiceKey,
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+      }
+    });
+
+    if (profileCheckResponse.ok) {
+      const userData = await profileCheckResponse.json();
+      if (userData && userData.length > 0) {
+        userExists = true;
+        isVerified = userData[0].is_verified === 'yes';
+      }
+    }
+
+    // If not found in profiles, or if it's a signup (to prevent ghost user conflicts), check Auth Admin
+    if (!userExists || type === 'signup') {
+      try {
+        const authCheckResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+          headers: {
+            'apikey': supabaseServiceKey,
+            'Authorization': `Bearer ${supabaseServiceKey}`,
+          }
+        });
+        
+        if (authCheckResponse.ok) {
+          const authUsersData = await authCheckResponse.json();
+          const authUser = (authUsersData.users || []).find((u: any) => u.email?.toLowerCase() === email.toLowerCase().trim());
+          if (authUser) {
+            userExists = true;
+            // If they are in auth but not profiles, we'll treat them as existing for password reset
+          }
+        }
+      } catch (e) {
+        console.error('Auth Admin Identity check failed:', e);
+      }
+    }
+
+    // Final decision based on user presence and requested action
+    if (type === 'login' || type === 'password_reset') {
+      if (!userExists) {
         const errorMsg = type === 'login' 
           ? `No account found with this email. Please join ${shortBrandName} first.` 
           : `Recovery failed: This email is not registered in the ${shortBrandName} database.`;
         return res.status(404).json({ error: errorMsg });
       }
     } else if (type === 'signup') {
-      const checkResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=id,is_verified`, {
-        method: 'GET',
-        headers: {
-          'apikey': supabaseServiceKey,
-          'Authorization': `Bearer ${supabaseServiceKey}`,
-        }
-      });
-      const userData = await checkResponse.json();
-      
-      if (userData && userData.length > 0 && userData[0].is_verified === 'yes') {
+      if (userExists && isVerified) {
         return res.status(409).json({ error: 'This email is already registered and verified. Please login instead.' });
       }
     }
