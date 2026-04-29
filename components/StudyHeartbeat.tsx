@@ -25,50 +25,73 @@ interface StudyHeartbeatProps {
  */
 const StudyHeartbeat: React.FC<StudyHeartbeatProps> = ({ userId }) => {
   const location = useLocation();
-  const lastPulseRef = useRef<number>(Date.now());
-  const INTERVAL = 60000; // 1 minute pulse for analytic efficiency
+  const sessionRecordIdRef = useRef<string | null>(null);
+  const sessionStartTimeRef = useRef<number>(Date.now());
+  const INTERVAL = 60000; // Update every minute for safety
 
   useEffect(() => {
-    // Analytics only active for authenticated students
     if (!userId) return;
 
-    // Determine if current view is a study-focused module
     const isStudyModule = STUDY_ROUTES.some(route => 
       location.pathname.startsWith(route) || (location.pathname === '/' && route === '/')
     );
 
-    if (!isStudyModule) return;
+    if (!isStudyModule) {
+      sessionRecordIdRef.current = null;
+      return;
+    }
 
-    // Reset last pulse when entering a study module
-    lastPulseRef.current = Date.now();
+    // Start a new session for this route
+    sessionStartTimeRef.current = Date.now();
+    const currentPath = location.pathname;
+    
+    const startSession = async () => {
+      const record = await NexusServer.saveRecord(userId, 'study_session', `Studying in ${getModuleName(currentPath)}`, { 
+        duration: 0, 
+        path: currentPath,
+        startTime: new Date(sessionStartTimeRef.current).toISOString(),
+        status: 'active'
+      });
+      if (record?.id) {
+        sessionRecordIdRef.current = record.id;
+      }
+    };
 
-    const heartbeat = setInterval(() => {
+    startSession();
+
+    const heartbeat = setInterval(async () => {
+      if (!sessionRecordIdRef.current) return;
+      
       const now = Date.now();
-      const elapsedSeconds = Math.floor((now - lastPulseRef.current) / 1000);
+      const elapsedSeconds = Math.floor((now - sessionStartTimeRef.current) / 1000);
       
       if (elapsedSeconds > 0) {
-        // Persist study session segment to history
-        NexusServer.saveRecord(userId, 'study_session', `Studying in ${getModuleName(location.pathname)}`, { 
+        await NexusServer.updateRecord(sessionRecordIdRef.current, { 
           duration: elapsedSeconds, 
-          path: location.pathname,
-          timestamp: new Date().toISOString()
+          path: currentPath,
+          startTime: new Date(sessionStartTimeRef.current).toISOString(),
+          lastPulse: new Date().toISOString(),
+          status: 'active'
         });
-        lastPulseRef.current = now;
       }
     }, INTERVAL);
 
     return () => {
       clearInterval(heartbeat);
-      // Record any remaining time before cleanup/navigation
-      const now = Date.now();
-      const elapsedSeconds = Math.floor((now - lastPulseRef.current) / 1000);
-      
-      if (elapsedSeconds >= 1) { // Minimum 1 second to record
-        NexusServer.saveRecord(userId, 'study_session', `Studying in ${getModuleName(location.pathname)}`, { 
+      if (sessionRecordIdRef.current) {
+        const now = Date.now();
+        const elapsedSeconds = Math.floor((now - sessionStartTimeRef.current) / 1000);
+        
+        // Final update for this session
+        NexusServer.updateRecord(sessionRecordIdRef.current, { 
           duration: elapsedSeconds, 
-          path: location.pathname,
-          timestamp: new Date().toISOString()
+          path: currentPath,
+          startTime: new Date(sessionStartTimeRef.current).toISOString(),
+          endTime: new Date().toISOString(),
+          status: 'completed'
         });
+        
+        sessionRecordIdRef.current = null;
       }
     };
   }, [location.pathname, userId]);

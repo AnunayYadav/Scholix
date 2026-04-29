@@ -1146,6 +1146,28 @@ class NexusServer {
     }
   }
 
+  static async updateRecord(id: string, content: any): Promise<any | null> {
+    const client = getSupabase();
+    if (!client) return null;
+
+    try {
+      const { data, error } = await client
+        .from('user_history')
+        .update({ content })
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) {
+        console.error('Update Record Error:', error);
+        return null;
+      }
+      return data;
+    } catch (e) {
+      console.error('Update Record Exception:', e);
+      return null;
+    }
+  }
+
   static async deleteRecord(id: string, type: string, uid: string | null) {
     const client = getSupabase();
     if (client && uid) await client.from('user_history').delete().eq('id', id);
