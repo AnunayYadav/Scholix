@@ -17,8 +17,8 @@ const DownloadAPKModal: React.FC<DownloadAPKModalProps> = ({ isOpen, onClose }) 
       const fetchStats = async () => {
         try {
           const count = await NexusServer.getEventCount('apk_download');
-          // Starting at 40 as requested by the user if the count is lower
-          setDownloadCount(Math.max(40, count));
+          // Start with a base of 40 for social proof, then add the actual tracked downloads
+          setDownloadCount(40 + count);
         } catch (error) {
           console.error("Failed to fetch download count:", error);
         }

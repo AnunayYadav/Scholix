@@ -495,7 +495,28 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return;
     try {
-      await client.rpc('increment_event_stat', { p_event_name: eventName });
+      const { error } = await client.rpc('increment_event_stat', { p_event_name: eventName });
+      
+      if (error) {
+        console.warn("Event tracking RPC failed, using fallback:", error.message);
+        // Fallback: Direct table manipulation
+        const { data: existing } = await client
+          .from('event_stats')
+          .select('count')
+          .eq('event_name', eventName)
+          .maybeSingle();
+
+        if (existing) {
+          await client
+            .from('event_stats')
+            .update({ count: (existing.count || 0) + 1 })
+            .eq('event_name', eventName);
+        } else {
+          await client
+            .from('event_stats')
+            .insert([{ event_name: eventName, count: 1 }]);
+        }
+      }
     } catch (e) {
       console.warn("Event tracking failed:", e);
     }
