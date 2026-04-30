@@ -29,7 +29,64 @@ interface SettingsHubProps {
   authModalOpen?: boolean;
 }
 
-const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme, toggleTheme, navigateToModule, setUserProfile, initialTab, onOpenSignup, authModalOpen }) => {
+const getTabToRoute = (prefix: string): Record<string, string> => ({
+  'profile': `${prefix}/settings/profile`,
+  'privacy': `${prefix}/settings/privacy`,
+  'about': `${prefix}/settings/about`,
+  'help_center': `${prefix}/settings/help`,
+  'theme': `${prefix}/settings/theme`,
+  'settings': `${prefix}/settings/profile`
+});
+
+const SECTIONS = (userProfile: UserProfile | null) => [
+  {
+    title: 'Your account',
+    items: [
+      { 
+        id: 'profile', 
+        label: userProfile ? 'Edit profile' : 'Log in', 
+        color: 'text-brand-primary dark:text-brand-primary', 
+        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg> 
+      },
+      { id: 'university', label: 'Change University', color: 'text-emerald-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg> },
+    ]
+  },
+  {
+    title: 'How you use Scholix',
+    items: [
+      { id: 'theme', label: 'Dark mode', color: 'text-indigo-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>, isToggle: true },
+    ]
+  },
+  {
+    title: 'Who can see your content',
+    items: [
+      { id: 'privacy', label: 'Privacy Policy', color: 'text-rose-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg> },
+    ]
+  },
+  {
+    title: 'More info and support',
+    items: [
+      { id: 'help_center', label: 'Help Center', color: 'text-amber-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg> },
+      { id: 'chat_support', label: 'Chat Support', color: 'text-sky-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 1 1-.9-3.8 8.5 8.5 0 0 1 .9 3.8z" /><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z" /></svg> },
+      { id: 'download', label: 'Download Android App', color: 'text-purple-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg> },
+      { id: 'about', label: 'About Us', color: 'text-fuchsia-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg> },
+      { id: 'social', label: 'Social Handles', color: 'text-pink-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg> },
+      { id: 'feedback', label: 'Send Feedback', color: 'text-teal-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg> },
+    ]
+  }
+];
+
+export function SettingsHub({ 
+  userProfile, 
+  onSignOut, 
+  theme, 
+  toggleTheme, 
+  navigateToModule, 
+  setUserProfile, 
+  initialTab, 
+  onOpenSignup, 
+  authModalOpen 
+}: SettingsHubProps) {
   const navigate = useNavigate();
   const { fullBrandName, shortBrandName, selectUniversity, uniSlug } = useUniversity();
   const [activeTab, setActiveTab] = useState<string | null>(initialTab || null);
@@ -43,84 +100,29 @@ const SettingsHub: React.FC<SettingsHubProps> = ({ userProfile, onSignOut, theme
     setActiveTab(initialTab || null);
   }, [initialTab]);
 
-  // Handle deselection if auth modal closed without login
   useEffect(() => {
     if (!authModalOpen && !userProfile && activeTab === 'profile') {
       setActiveTab(null);
     }
   }, [authModalOpen, userProfile, activeTab]);
 
-  // Map of tab IDs to their respective routes
-  const tabToRoute: Record<string, string> = {
-    'profile': `${prefix}/settings/profile`,
-    'privacy': `${prefix}/settings/privacy`,
-    'about': `${prefix}/settings/about`,
-    'help_center': `${prefix}/settings/help`,
-    'theme': `${prefix}/settings/theme`,
-    'settings': `${prefix}/settings/profile`
-  };
-
-  const sections = [
-    {
-      title: 'Your account',
-      items: [
-        { 
-          id: 'profile', 
-          label: userProfile ? 'Edit profile' : 'Log in', 
-          color: 'text-brand-primary dark:text-brand-primary', 
-          icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg> 
-        },
-        { id: 'university', label: 'Change University', color: 'text-emerald-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg> },
-      ]
-    },
-    {
-      title: 'How you use Scholix',
-      items: [
-        { id: 'theme', label: 'Dark mode', color: 'text-indigo-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>, isToggle: true },
-      ]
-    },
-    {
-      title: 'Who can see your content',
-      items: [
-        { id: 'privacy', label: 'Privacy Policy', color: 'text-rose-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg> },
-      ]
-    },
-    {
-      title: 'More info and support',
-      items: [
-        { id: 'help_center', label: 'Help Center', color: 'text-amber-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg> },
-        { id: 'chat_support', label: 'Chat Support', color: 'text-sky-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 1 1-.9-3.8 8.5 8.5 0 0 1 .9 3.8z" /><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z" /></svg> },
-        { id: 'download', label: 'Download Android App', color: 'text-purple-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg> },
-        { id: 'about', label: 'About Us', color: 'text-fuchsia-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg> },
-        { id: 'social', label: 'Social Handles', color: 'text-pink-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg> },
-        { id: 'feedback', label: 'Send Feedback', color: 'text-teal-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg> },
-      ]
-    }
-  ];
+  const tabToRoute = getTabToRoute(prefix);
+  const sections = SECTIONS(userProfile);
 
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
-        if (!userProfile) {
-          return null;
-        }
+        if (!userProfile) return null;
         return (
-          <div className="animate-in fade-in slide-in-from-right-4 duration-500 h-full w-full">
-            <ProfileSection
-              userProfile={userProfile}
-              setUserProfile={setUserProfile}
-              navigateToModule={navigateToModule || (() => { })}
-              onSignOut={onSignOut}
-            />
-          </div>
+          <ProfileSection
+            userProfile={userProfile}
+            setUserProfile={setUserProfile}
+            navigateToModule={navigateToModule || (() => { })}
+            onSignOut={onSignOut}
+          />
         );
       case 'help_center':
-        return (
-          <div className="animate-in fade-in slide-in-from-right-4 duration-500 px-6 py-10 w-full max-w-3xl mx-auto">
-            <HelpSection />
-          </div>
-        );
-
+        return <HelpSection />;
       case 'about':
         return <AboutUs userProfile={userProfile} />;
       case 'privacy':
