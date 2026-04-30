@@ -245,7 +245,7 @@ const userId = userProfile?.id || null;
   if (!userProfile) return null;
 
   return (
-    <div className="max-w-4xl mx-auto px-6 md:px-12 pt-8 pb-32 animate-in fade-in slide-in-from-right-4 duration-500 no-scrollbar relative">
+    <div className="max-w-4xl mx-auto px-6 md:px-12 pt-8 pb-32 no-scrollbar relative">
 
       {/* Header Profile Card */}
       <header className="flex flex-col items-center mb-10 relative">
@@ -257,9 +257,7 @@ const userId = userProfile?.id || null;
             {/* Frame Layer */}
             <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
               {userProfile?.avatar_frame && (
-                <motion.img 
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                <img 
                   src={`/Nexus-Journey/${userProfile.avatar_frame}`}
                   alt="Frame"
                   className="w-full h-full object-contain"
@@ -273,10 +271,10 @@ const userId = userProfile?.id || null;
 
             {/* Avatar Image Layer */}
             <div 
-              className={`relative w-full h-full rounded-full flex items-center justify-center z-10 transition-all duration-300 ${!userProfile?.avatar_frame ? 'bg-white dark:bg-zinc-800 border-[3px] border-white dark:border-zinc-800 shadow-2xl' : ''}`}
+              className={`relative w-full h-full rounded-full flex items-center justify-center z-10 transition-all duration-300 ${!userProfile?.avatar_frame ? 'bg-white dark:bg-zinc-800 border-[3px] border-white dark:border-zinc-800 shadow-2xl' : 'bg-white dark:bg-zinc-900 shadow-xl'}`}
               style={{ padding: userProfile?.avatar_frame ? frameConfig.padding : '2px' }}
             >
-              <div className={`w-full h-full rounded-full overflow-hidden flex items-center justify-center transition-all ${userProfile?.avatar_frame ? 'ring-2 ring-white/10 shadow-lg' : 'bg-zinc-100 dark:bg-zinc-900'}`}>
+              <div className={`w-full h-full rounded-full overflow-hidden flex items-center justify-center transition-all ${userProfile?.avatar_frame ? 'ring-2 ring-white/10' : 'bg-zinc-100 dark:bg-zinc-900'}`}>
                 {userProfile.avatar_url ? (
                   <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover rounded-full" />
                 ) : (
