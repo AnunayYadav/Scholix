@@ -250,7 +250,7 @@ const userId = userProfile?.id || null;
       {/* Header Profile Card */}
       <header className="flex flex-col items-center mb-10 relative">
         <div className="relative group">
-          <div className="relative w-36 h-36 md:w-40 md:h-40 shrink-0 transition-transform duration-500 group-hover:scale-[1.02]">
+          <div className="relative w-28 h-28 md:w-32 md:h-32 shrink-0 transition-transform duration-500 group-hover:scale-[1.02]">
             {/* Ambient Glow */}
             <div className="absolute -inset-4 bg-gradient-to-tr from-brand-primary/30 to-brand-secondary/30 rounded-full blur-2xl opacity-40 group-hover:opacity-60 animate-pulse transition-opacity" />
             
