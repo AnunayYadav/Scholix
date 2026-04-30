@@ -19,6 +19,35 @@ interface ProfileSectionProps {
   onSignOut: () => void;
 }
 
+const Section = ({ title, children, footer }: { title?: string; children: React.ReactNode; footer?: string }) => (
+  <div className="mb-8 last:mb-0">
+    {title && <h3 className="px-1 text-[13px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3 ml-2">{title}</h3>}
+    <div className="bg-white/60 dark:bg-zinc-950/40 backdrop-blur-2xl border border-zinc-200/50 dark:border-white/5 rounded-[32px] overflow-hidden px-4 py-1 shadow-sm transition-all duration-300">
+      <div className="divide-y divide-zinc-100/80 dark:divide-white/5">
+        {children}
+      </div>
+    </div>
+    {footer && <p className="px-6 mt-3 text-[11px] font-medium text-zinc-400 dark:text-zinc-500 leading-relaxed">{footer}</p>}
+  </div>
+);
+
+const EditRow = ({ label, icon, children, color = "text-zinc-500", showChevron = false }: { label: string; icon: React.ReactNode; children: React.ReactNode; color?: string; showChevron?: boolean }) => (
+  <div className="w-full flex items-center gap-4 py-4 px-1 bg-transparent group/row transition-all duration-200">
+    <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${color} bg-current/10 shrink-0 shadow-sm transition-transform group-hover/row:scale-105 duration-300`}>
+      {React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5" })}
+    </div>
+    <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4">
+      <p className="text-[14px] font-bold text-zinc-700 dark:text-zinc-200">{label}</p>
+      <div className="flex-1 sm:max-w-[60%] lg:max-w-[70%] relative">
+        {children}
+      </div>
+    </div>
+    {showChevron && (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-700"><path d="m9 18 6-6-6-6"/></svg>
+    )}
+  </div>
+);
+
 const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserProfile, navigateToModule, onSignOut }) => {
   const { updateUserQuizProfile } = useQuizDashboardStore();
   const { brandColor } = useUniversity();
@@ -126,7 +155,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
     }
   };
 
-  const userId = userProfile?.id || null;
+const userId = userProfile?.id || null;
   const { totalXP, level: levelInfo } = useXP(userId);
   const frameConfig = getFrameConfig(userProfile?.avatar_frame || '');
 
@@ -215,35 +244,6 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
 
   if (!userProfile) return null;
 
-  const Section = ({ title, children, footer }: { title?: string; children: React.ReactNode; footer?: string }) => (
-    <div className="mb-8 last:mb-0">
-      {title && <h3 className="px-1 text-[13px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3 ml-2">{title}</h3>}
-      <div className="bg-white/60 dark:bg-zinc-950/40 backdrop-blur-2xl border border-zinc-200/50 dark:border-white/5 rounded-[32px] overflow-hidden px-4 py-1 shadow-sm transition-all duration-300">
-        <div className="divide-y divide-zinc-100/80 dark:divide-white/5">
-          {children}
-        </div>
-      </div>
-      {footer && <p className="px-6 mt-3 text-[11px] font-medium text-zinc-400 dark:text-zinc-500 leading-relaxed">{footer}</p>}
-    </div>
-  );
-
-  const EditRow = ({ label, icon, children, color = "text-zinc-500", showChevron = false }: { label: string; icon: React.ReactNode; children: React.ReactNode; color?: string; showChevron?: boolean }) => (
-    <div className="w-full flex items-center gap-4 py-4 px-1 bg-transparent group/row transition-all duration-200">
-      <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${color} bg-current/10 shrink-0 shadow-sm transition-transform group-hover/row:scale-105 duration-300`}>
-        {React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5" })}
-      </div>
-      <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4">
-        <p className="text-[14px] font-bold text-zinc-700 dark:text-zinc-200">{label}</p>
-        <div className="flex-1 sm:max-w-[60%] lg:max-w-[70%] relative">
-          {children}
-        </div>
-      </div>
-      {showChevron && (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-700"><path d="m9 18 6-6-6-6"/></svg>
-      )}
-    </div>
-  );
-
   return (
     <div className="max-w-4xl mx-auto px-6 md:px-12 pt-8 pb-32 animate-in fade-in slide-in-from-right-4 duration-500 no-scrollbar relative">
 
@@ -260,7 +260,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                 <motion.img 
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  src={`/Scholix-Journey/${userProfile.avatar_frame}`}
+                  src={`/Nexus-Journey/${userProfile.avatar_frame}`}
                   alt="Frame"
                   className="w-full h-full object-contain"
                   style={{ 
@@ -432,7 +432,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
                   }}
                   className={`aspect-square rounded-[24px] flex items-center justify-center cursor-pointer transition-all border-2 ${isActive ? 'border-brand-primary bg-brand-primary/5' : 'border-zinc-100 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 opacity-70 hover:opacity-100'}`}
                 >
-                  <img src={`/Scholix-Journey/${frame}`} alt="Frame" className="w-16 h-16 object-contain" />
+                  <img src={`/Nexus-Journey/${frame}`} alt="Frame" className="w-16 h-16 object-contain" />
                 </motion.div>
               );
             })}
