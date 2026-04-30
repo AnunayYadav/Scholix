@@ -1146,8 +1146,10 @@ class NexusServer {
     if (!client) return null;
 
     const session_id = this.getAnonSessionId();
+    const recordId = crypto.randomUUID();
 
     const record: any = {
+      id: recordId,
       user_id: uid || null,
       session_id: session_id,
       type,
@@ -1161,16 +1163,13 @@ class NexusServer {
       
       if (error) {
         console.error(`[NexusServer] Save Record Error (${type}):`, error);
+        // Even if select fails, if there was no error on insert, we can return our local record
+        // But here 'error' usually means the insert itself failed.
         return null;
       }
 
-      if (!data || data.length === 0) {
-        // This often happens if RLS allows INSERT but not SELECT
-        console.warn(`[NexusServer] Record inserted but not returned (likely RLS). Type: ${type}`);
-        return null;
-      }
-
-      return data[0];
+      // If we got data back, use it. Otherwise return our constructed record.
+      return (data && data.length > 0) ? data[0] : record;
     } catch (e) {
       console.error('[NexusServer] Save Record Exception:', e);
       return null;

@@ -264,7 +264,7 @@ const userId = userProfile?.id || null;
                   alt="Frame"
                   className="w-full h-full object-contain"
                   style={{ 
-                    transform: `scale(${frameConfig.scale ? frameConfig.scale * 1.15 : 1.4}) translateY(${frameConfig.translateY || '0%'})`,
+                    transform: `scale(${frameConfig.scale || 1.4}) translateY(${frameConfig.translateY || '0%'})`,
                     filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
                   }}
                 />
