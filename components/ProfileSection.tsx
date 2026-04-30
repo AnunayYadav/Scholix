@@ -171,7 +171,7 @@ const userId = userProfile?.id || null;
       });
       fetchHistory();
     }
-  }, [userProfile]);
+  }, [userProfile?.id]);
 
   const fetchHistory = async () => {
     if (!userProfile) return;
