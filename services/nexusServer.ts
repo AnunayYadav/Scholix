@@ -1105,6 +1105,7 @@ class NexusServer {
     if (typeof window === 'undefined') return 'anon-server';
     let anonId = localStorage.getItem('nexus_anon_session_id');
     if (!anonId) {
+      // Use a proper UUID format for database compatibility
       anonId = crypto.randomUUID();
       localStorage.setItem('nexus_anon_session_id', anonId);
     }
@@ -1144,7 +1145,7 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return null;
 
-    const session_id = this.getAnonSessionId ? this.getAnonSessionId() : null;
+    const session_id = this.getAnonSessionId();
 
     const record: any = {
       user_id: uid || null,
@@ -1155,36 +1156,45 @@ class NexusServer {
     };
 
     try {
-      const { data, error } = await client.from('user_history').insert([record]).select().single();
+      // Use .select() and check data[0] instead of .single() to be more resilient to RLS/empty returns
+      const { data, error } = await client.from('user_history').insert([record]).select();
+      
       if (error) {
-        console.error('Save Record Error:', error);
+        console.error(`[NexusServer] Save Record Error (${type}):`, error);
         return null;
       }
-      return data;
+
+      if (!data || data.length === 0) {
+        // This often happens if RLS allows INSERT but not SELECT
+        console.warn(`[NexusServer] Record inserted but not returned (likely RLS). Type: ${type}`);
+        return null;
+      }
+
+      return data[0];
     } catch (e) {
-      console.error('Save Record Exception:', e);
+      console.error('[NexusServer] Save Record Exception:', e);
       return null;
     }
   }
 
   static async updateRecord(id: string, content: any): Promise<any | null> {
     const client = getSupabase();
-    if (!client) return null;
+    if (!client || !id) return null;
 
     try {
       const { data, error } = await client
         .from('user_history')
         .update({ content })
         .eq('id', id)
-        .select()
-        .single();
+        .select();
+
       if (error) {
-        console.error('Update Record Error:', error);
+        console.error('[NexusServer] Update Record Error:', error);
         return null;
       }
-      return data;
+      return data && data.length > 0 ? data[0] : null;
     } catch (e) {
-      console.error('Update Record Exception:', e);
+      console.error('[NexusServer] Update Record Exception:', e);
       return null;
     }
   }
