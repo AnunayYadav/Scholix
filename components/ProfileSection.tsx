@@ -248,7 +248,7 @@ const userId = userProfile?.id || null;
     <div className="max-w-4xl mx-auto px-6 md:px-12 pt-8 pb-32 no-scrollbar relative">
 
       {/* Header Profile Card */}
-      <header className="flex flex-col items-center mb-10 relative">
+      <header className="flex flex-col items-center mb-8 relative">
         <div className="relative group">
           <div className="relative w-28 h-28 md:w-32 md:h-32 shrink-0 transition-transform duration-500 group-hover:scale-[1.02]">
             {/* Ambient Glow */}
@@ -299,9 +299,9 @@ const userId = userProfile?.id || null;
           )}
         </div>
 
-        <div className="mt-6 text-center space-y-2">
+        <div className="mt-4 text-center space-y-1.5">
           <div className="flex items-center justify-center gap-2">
-            <h2 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tighter">{userProfile.username || 'Student'}</h2>
+            <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tighter">{userProfile.username || 'Student'}</h2>
             <VerifiedBadge isAdmin={userProfile.is_admin} size="w-6 h-6" />
           </div>
           <p className="text-[13px] font-bold text-zinc-400 dark:text-zinc-500 tracking-wide uppercase">{userProfile.email}</p>
