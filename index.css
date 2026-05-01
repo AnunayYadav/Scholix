@@ -639,18 +639,18 @@ body.modal-open {
 
 /* ── Premium Folder Shimmer ── */
 @keyframes folder-shimmer-sweep {
-  0% {
-    transform: translateX(-100%) skewX(-15deg);
+  0%, 15% {
+    transform: translateX(-120%) skewX(-15deg);
     opacity: 0;
   }
-  10% {
+  20% {
     opacity: 1;
   }
-  90% {
+  80% {
     opacity: 1;
   }
-  100% {
-    transform: translateX(250%) skewX(-15deg);
+  85%, 100% {
+    transform: translateX(280%) skewX(-15deg);
     opacity: 0;
   }
 }
@@ -704,7 +704,6 @@ body.modal-open {
     transparent 100%
   );
   animation: folder-shimmer-sweep 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  animation-delay: 0.5s;
   pointer-events: none;
   z-index: 10;
 }
