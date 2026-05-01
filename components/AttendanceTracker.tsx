@@ -404,26 +404,26 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               />
             </div>
           </div>
-          <div className="col-span-1 md:col-span-2">
-            <label className="block text-[10px] md:text-xs font-medium text-zinc-400 mb-1 ml-1">Initial DL</label>
+          <div className="col-span-1 md:col-span-1">
+            <label className="block text-[10px] md:text-xs font-medium text-zinc-400 mb-1 ml-1 truncate">DL</label>
             <input
               type="number" placeholder="0" value={newSub.dutyLeaves}
               onChange={(e) => setNewSub({ ...newSub, dutyLeaves: e.target.value })}
-              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-xl md:rounded-2xl px-4 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
+              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-xl md:rounded-2xl px-2 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
             />
           </div>
-          <div className="col-span-1 md:col-span-2">
-            <label className="block text-[10px] md:text-xs font-medium text-zinc-400 mb-1 ml-1">Goal %</label>
+          <div className="col-span-1 md:col-span-1">
+            <label className="block text-[10px] md:text-xs font-medium text-zinc-400 mb-1 ml-1 truncate">Goal</label>
             <input
               type="number" placeholder="75" value={newSub.goal}
               onChange={(e) => setNewSub({ ...newSub, goal: e.target.value })}
-              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-xl md:rounded-2xl px-4 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
+              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-xl md:rounded-2xl px-2 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
             />
           </div>
-          <div className="col-span-2 md:col-span-2 flex items-end gap-2">
+          <div className="col-span-2 md:col-span-4 flex items-end gap-2">
             <button
               onClick={addSubject}
-              className="flex-1 bg-brand-primary hover:opacity-90 text-white py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-xs md:text-[13px] tracking-tight transition-all shadow-lg shadow-brand-primary/20 active:scale-95 flex items-center justify-center whitespace-nowrap"
+              className="flex-[2] bg-brand-primary hover:opacity-90 text-white h-11 md:h-14 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm tracking-tight transition-all shadow-lg shadow-brand-primary/20 active:scale-95 flex items-center justify-center whitespace-nowrap"
             >
               Track
             </button>
@@ -440,7 +440,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               disabled={isAiProcessing}
               onClick={() => fileInputRef.current?.click()}
               className={`
-                px-4 h-11 md:h-12 rounded-xl md:rounded-2xl transition-all flex items-center justify-center gap-2 border flex-shrink-0
+                flex-1 px-3 h-11 md:h-14 rounded-xl md:rounded-2xl transition-all flex items-center justify-center gap-2 border flex-shrink-0
                 ${isAiProcessing 
                   ? 'bg-zinc-100 dark:bg-white/5 border-transparent text-zinc-400 cursor-not-allowed' 
                   : 'bg-zinc-100 dark:bg-[#0a0a0a] border-zinc-200 dark:border-white/10 text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary active:scale-95'
@@ -452,7 +452,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               ) : (
                 <>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
-                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider">Upload</span>
+                  <span className="text-[11px] md:text-xs font-bold">Upload</span>
                 </>
               )}
             </button>
@@ -468,7 +468,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
           <SubjectSkeleton />
         </div>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 relative z-0">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-6 relative z-0">
           {filteredSubjects.map((sub) => {
             const { percentage, needed, skippable, goal } = calculateStats(sub);
             const isBelowGoal = percentage < goal;
@@ -490,29 +490,29 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                 {/* Top Section: Name and Percentage */}
                 <div className="flex justify-between items-start mb-2.5">
                   <div className="space-y-0.5">
-                    <h3 className="text-sm sm:text-base md:text-xl font-semibold text-zinc-800 dark:text-white tracking-tight truncate max-w-[70px] sm:max-w-none">
+                    <h3 className="text-[13px] sm:text-lg md:text-xl font-bold text-zinc-800 dark:text-white tracking-tight truncate max-w-[60px] sm:max-w-none">
                       {sub.name}
                     </h3>
-                    <div className="flex items-center gap-2">
-                      <span className="flex items-center gap-1 bg-zinc-100 dark:bg-white/5 px-1.5 py-0.5 rounded text-[11px] sm:text-xs font-medium text-zinc-500">
-                        {sub.present}{sub.dutyLeaves ? `+${sub.dutyLeaves}` : ''}/{sub.total} S
+                    <div className="flex items-center gap-1">
+                      <span className="flex items-center gap-1 bg-zinc-100 dark:bg-white/5 px-1 py-0.5 rounded text-[9px] sm:text-xs font-medium text-zinc-500">
+                        {sub.present}{sub.dutyLeaves ? `+${sub.dutyLeaves}` : ''}/{sub.total}
                       </span>
                     </div>
                   </div>
 
                   <div className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl ${accentBg} border border-transparent group-hover:border-current/10 transition-all`}>
-                    <span className={`${accentColor} text-sm sm:text-base md:text-xl font-semibold tracking-tight`}>
+                    <span className={`${accentColor} text-[13px] sm:text-lg md:text-xl font-bold tracking-tight`}>
                       {percentage.toFixed(1)}
-                      <span className="text-[10px] sm:text-xs opacity-60 ml-0.5 font-medium">%</span>
+                      <span className="text-[9px] sm:text-xs opacity-60 ml-0.5 font-medium">%</span>
                     </span>
                   </div>
                 </div>
 
                 {/* Progress Bar Section */}
                 <div className="mb-4">
-                  <div className="flex justify-between items-center mb-1.5 px-0.5">
-                    <p className="text-[11px] sm:text-xs font-semibold text-zinc-400">Progress</p>
-                    <p className="text-[11px] sm:text-xs font-semibold text-brand-primary">Goal: {sub.goal}%</p>
+                  <div className="flex justify-between items-center mb-1 px-0.5">
+                    <p className="text-[9px] sm:text-xs font-semibold text-zinc-400">Progress</p>
+                    <p className="text-[9px] sm:text-xs font-semibold text-brand-primary">Goal: {sub.goal}%</p>
                   </div>
                   <div className="h-1.5 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden relative">
                     {/* Goal Marker */}
@@ -535,27 +535,30 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
 
                 {/* Action Buttons */}
                 {!showArchived && (
-                  <div className="grid grid-cols-3 gap-1.5 mb-3.5">
+                  <div className="grid grid-cols-3 gap-1 mb-3">
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'present', e)}
-                      className="group/btn h-8 bg-white dark:bg-white text-black rounded-full font-semibold text-[11px] sm:text-xs hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center justify-center gap-1.5 border-none px-2 shadow-sm"
+                      className="group/btn h-7 sm:h-8 bg-white dark:bg-white text-black rounded-full font-bold text-[10px] sm:text-xs hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center justify-center gap-1 border-none px-1 shadow-sm"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5 text-emerald-600"><path d="M20 6L9 17l-5-5" /></svg>
-                      Present
+                      <span className="hidden xs:inline">Present</span>
+                      <span className="xs:hidden">P</span>
                     </button>
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'duty', e)}
-                      className="group/btn h-8 bg-brand-primary/10 text-brand-primary rounded-full font-semibold text-[11px] sm:text-xs hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center justify-center gap-1.5 border border-brand-primary/20 px-2 shadow-sm"
+                      className="group/btn h-7 sm:h-8 bg-brand-primary/10 text-brand-primary rounded-full font-bold text-[10px] sm:text-xs hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center justify-center gap-1 border border-brand-primary/20 px-1 shadow-sm"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                      DL
+                      <span className="hidden xs:inline">DL</span>
+                      <span className="xs:hidden">DL</span>
                     </button>
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'absent', e)}
-                      className="group/btn h-8 bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 rounded-full font-semibold text-[11px] sm:text-xs hover:bg-zinc-100 dark:hover:bg-white/10 hover:scale-[1.05] active:scale-[0.95] transition-all border border-zinc-200/50 dark:border-white/10 flex items-center justify-center gap-1.5 px-2 shadow-sm"
+                      className="group/btn h-7 sm:h-8 bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 rounded-full font-bold text-[10px] sm:text-xs hover:bg-zinc-100 dark:hover:bg-white/10 hover:scale-[1.05] active:scale-[0.95] transition-all border border-zinc-200/50 dark:border-white/10 flex items-center justify-center gap-1 px-1 shadow-sm"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5 opacity-50"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                      Absent
+                      <span className="hidden xs:inline">Absent</span>
+                      <span className="xs:hidden">A</span>
                     </button>
                   </div>
                 )}
@@ -563,14 +566,14 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                 {/* Footer Analysis */}
                 <div className="mt-auto flex items-center justify-between pt-4 border-t border-zinc-100 dark:border-white/5">
                   <div className={`
-                    px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold flex items-center gap-2
+                    px-2 py-1 rounded-lg text-[9px] sm:text-xs font-bold flex items-center gap-1.5
                     ${isBelowGoal ? 'bg-brand-secondary/5 text-brand-secondary' : 'bg-emerald-500/5 text-emerald-500'}
                   `}>
-                    <div className={`w-1.5 h-1.5 rounded-full ${isBelowGoal ? 'bg-brand-secondary' : 'bg-emerald-500'} animate-pulse`} />
+                    <div className={`w-1 h-1 rounded-full ${isBelowGoal ? 'bg-brand-secondary' : 'bg-emerald-500'} animate-pulse`} />
                     {isBelowGoal ? (
-                      <span>Needs {needed >= 999 ? '∞' : needed} more</span>
+                      <span>{needed >= 999 ? '∞' : needed} more</span>
                     ) : (
-                      <span>Safe for {skippable >= 999 ? '∞' : skippable} skips</span>
+                      <span>{skippable >= 999 ? '∞' : skippable} skips</span>
                     )}
                   </div>
 
