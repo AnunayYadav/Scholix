@@ -35,14 +35,13 @@ import { CSS } from '@dnd-kit/utilities';
 
 import VerifiedBadge from './VerifiedBadge.tsx';
 
-const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' | 'category' | 'root' | 'subcategory', size?: string }) => {
+const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' | 'category' | 'root', size?: string }) => {
 
-  const colors: Record<string, string> = {
+  const colors = {
     root: 'text-zinc-400',
     semester: 'text-orange-500',
     subject: 'text-orange-500',
-    category: 'text-orange-500',
-    subcategory: 'text-orange-500'
+    category: 'text-orange-500'
   };
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`${size} ${colors[type]} mb-2 transition-colors`}>
@@ -75,14 +74,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
-  const params = useParams();
-  const program = params.program;
-  const pathSegments = useMemo(() => (params['*'] || '').split('/').filter(Boolean), [params]);
+  const { program, semester, subject, category } = useParams();
   const navigate = useNavigate();
   const routePrefix = uniSlug ? `/${uniSlug}` : '';
 
-  const [activeFolder, setActiveFolder] = useState<Folder | null>(null);
-  const [folderPath, setFolderPath] = useState<Folder[]>([]);
+
+  const [activeSemester, setActiveSemester] = useState<Folder | null>(null);
+  const [activeSubject, setActiveSubject] = useState<Folder | null>(null);
+  const [activeCategory, setActiveCategory] = useState<Folder | null>(null);
 
   const initialPrograms = ["BTech CSE", "BTech IT", "BCA", "MCA", "MBA", "BCom", "BA"];
   const [availablePrograms, setAvailablePrograms] = useState(initialPrograms);
@@ -213,9 +212,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       file: f,
       name: f.name.replace(/\.[^/.]+$/, ""),
       description: '',
-      semester: forceSemester || folderPath[0]?.name || '',
-      subject: forceSubject || folderPath[1]?.name || '',
-      type: forceType || folderPath[2]?.name || 'General',
+      semester: forceSemester || activeSemester?.name || '',
+      subject: forceSubject || activeSubject?.name || '',
+      type: forceType || activeCategory?.name || '',
       program: forceProgram || selectedProgram
     }));
 
@@ -233,7 +232,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       });
     }
     setShowUploadModal(true);
-  }, [folderPath, selectedProgram, availablePrograms, pendingUploads.length]);
+  }, [activeSemester, activeSubject, activeCategory, selectedProgram, availablePrograms, pendingUploads.length]);
 
   // Sync current metaForm back to pendingUploads
   useEffect(() => {
@@ -292,7 +291,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     fetchFromSource(true);
   }, [fetchFromSource]);
 
-  // Sync state with URL segments
+  // Sync state with URL params
   useEffect(() => {
     if (folders.length > 0) {
       let matchedProgram = selectedProgram;
@@ -306,33 +305,31 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         setSelectedProgram(matchedProgram);
       }
 
-      // Resolve folder path from segments
-      let currentParentId: string | null = null;
-      const resolvedPath: Folder[] = [];
-      let lastFoundFolder: Folder | null = null;
-
-      for (const segment of pathSegments) {
-        const segmentSlug = segment; // URL segments are already slugs
-        const found = folders.find(f => 
-          slugify(f.name) === segmentSlug && 
-          f.parent_id === currentParentId && 
-          (f.program === matchedProgram || f.program === 'All')
-        );
-
-        if (found) {
-          resolvedPath.push(found);
-          currentParentId = found.id;
-          lastFoundFolder = found;
+      if (semester) {
+        const sem = folders.find(f => f.type === 'semester' && slugify(f.name) === semester && f.program === matchedProgram);
+        setActiveSemester(sem || null);
+        
+        if (subject && sem) {
+          const subj = folders.find(f => f.type === 'subject' && slugify(f.name) === subject && f.parent_id === sem.id);
+          setActiveSubject(subj || null);
+          
+          if (category && subj) {
+            const cat = folders.find(f => f.type === 'category' && slugify(f.name) === category && f.parent_id === subj.id);
+            setActiveCategory(cat || null);
+          } else {
+            setActiveCategory(null);
+          }
         } else {
-          // If a segment isn't found, we stop resolving
-          break;
+          setActiveSubject(null);
+          setActiveCategory(null);
         }
+      } else {
+        setActiveSemester(null);
+        setActiveSubject(null);
+        setActiveCategory(null);
       }
-
-      setFolderPath(resolvedPath);
-      setActiveFolder(lastFoundFolder);
     }
-  }, [program, pathSegments, folders, availablePrograms, selectedProgram]);
+  }, [program, semester, subject, category, folders, availablePrograms, selectedProgram]);
 
   const displayFiles = useMemo(() => {
     let data = [...allFiles];
@@ -340,23 +337,20 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     if (isAdminView || viewMode === 'my-uploads' || searchQuery.trim() !== '') {
       // Global flattened views
     } else if (viewMode === 'browse') {
-      // Filter by active folder ID
-      // If we are in recursive mode, we use folder_id
-      data = data.filter(f => f.folder_id === activeFolder?.id);
-
-      // Fallback for legacy data if no folder_id is set
-      // (This part might need to be refined if we want strictly recursive behavior)
-      if (data.length === 0 && activeFolder) {
-         // Attempt to match by name strings if folder_id is missing
-         // This is a safety net for unmigrated data
-         const pathNames = folderPath.map(p => p.name);
-         if (pathNames.length === 1) { // Semester level
-           data = allFiles.filter(f => f.semester === pathNames[0] && (!f.subject || f.subject === ''));
-         } else if (pathNames.length === 2) { // Subject level
-           data = allFiles.filter(f => f.semester === pathNames[0] && f.subject === pathNames[1] && (!f.type || f.type === ''));
-         } else if (pathNames.length === 3) { // Category level
-           data = allFiles.filter(f => f.semester === pathNames[0] && f.subject === pathNames[1] && f.type === pathNames[2]);
-         }
+      if (activeCategory) {
+        data = data.filter(f =>
+          f.semester === activeSemester?.name &&
+          f.subject === activeSubject?.name &&
+          f.type === activeCategory.name
+        );
+      } else if (activeSubject) {
+        data = data.filter(f =>
+          f.semester === activeSemester?.name &&
+          f.subject === activeSubject.name &&
+          (!f.type || f.type.trim() === '' || f.type === 'General')
+        );
+      } else {
+        data = [];
       }
     }
 
@@ -373,7 +367,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       return 0;
     });
     return data;
-  }, [allFiles, searchQuery, isAdminView, viewMode, activeFolder, folderPath, sortBy]);
+  }, [allFiles, searchQuery, isAdminView, viewMode, activeSemester, activeSubject, activeCategory, sortBy]);
 
   // DnD Sensors
   const sensors = useSensors(
@@ -425,9 +419,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     if (isAdminView || viewMode === 'my-uploads' || searchQuery.trim() !== '') return [];
 
     return folders.filter(f => {
-      return f.parent_id === (activeFolder?.id || null);
+      if (!activeSemester) return f.type === 'semester';
+      if (!activeSubject) return f.type === 'subject' && f.parent_id === activeSemester.id;
+      if (!activeCategory) return f.type === 'category' && f.parent_id === activeSubject.id;
+      return false;
     });
-  }, [folders, activeFolder, isAdminView, viewMode, searchQuery]);
+  }, [folders, activeSemester, activeSubject, activeCategory, isAdminView, viewMode, searchQuery]);
 
   const dropdownLists = useMemo(() => {
     const sems = Array.from(new Set(folders.filter(f => f.type === 'semester').map(f => f.name)));
@@ -463,46 +460,29 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   const [isCreatingNew, setIsCreatingNew] = useState({ program: false, semester: false, subject: false, type: false });
 
-  const navigateTo = (folder: Folder | null, options: { replace?: boolean, newProgram?: string } = {}) => {
-    const prog = options.newProgram || selectedProgram;
-    const progSlug = slugify(prog);
-    
-    if (!folder) {
-      navigate(`${routePrefix}/library/${progSlug}`, { replace: options.replace });
-      return;
-    }
-
-    // Build the path by traversing up the parents or using the current path
-    const buildPath = (f: Folder): string => {
-      const segments: string[] = [slugify(f.name)];
-      let current = f;
-      while (current.parent_id) {
-        const parent = folders.find(p => p.id === current.parent_id);
-        if (parent) {
-          segments.unshift(slugify(parent.name));
-          current = parent;
-        } else break;
+  const navigateTo = (sem: Folder | null, subj: Folder | null, cat: Folder | null) => {
+    let path = `${routePrefix}/library/${slugify(selectedProgram)}`;
+    if (sem) {
+      path += `/${slugify(sem.name)}`;
+      if (subj) {
+        path += `/${slugify(subj.name)}`;
+        if (cat) {
+          path += `/${slugify(cat.name)}`;
+        }
       }
-      return segments.join('/');
-    };
-
-    const path = buildPath(folder);
-    navigate(`${routePrefix}/library/${progSlug}/${path}`, { replace: options.replace });
+    }
+    navigate(path);
   };
 
   const handleCreateFolder = async () => {
     if (!newFolderName.trim() || !userProfile?.is_admin) return;
     setIsProcessing(true);
     try {
-      // Logic for type is now more flexible
-      let type: any = 'semester';
-      if (activeFolder) {
-        if (activeFolder.type === 'semester') type = 'subject';
-        else if (activeFolder.type === 'subject') type = 'category';
-        else type = 'subcategory';
-      }
-
-      await NexusServer.createFolder(newFolderName, type, activeFolder?.id || null, selectedProgram, isShining);
+      let type: 'semester' | 'subject' | 'category' = 'semester';
+      let parentId: string | null = null;
+      if (activeSubject) { type = 'category'; parentId = activeSubject.id; }
+      else if (activeSemester) { type = 'subject'; parentId = activeSemester.id; }
+      await NexusServer.createFolder(newFolderName, type, parentId, selectedProgram, isShining);
       setNewFolderName('');
       setIsShining(false);
       handleCloseFolder();
@@ -514,6 +494,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     if (pendingUploads.length === 0 || !userProfile) return;
     setIsProcessing(true);
     try {
+      // Use the latest state of pendingUploads
       for (const upload of pendingUploads) {
         await NexusServer.uploadFile(
           upload.file,
@@ -524,8 +505,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
           upload.type.trim(),
           userProfile.id,
           userProfile.is_admin,
-          upload.program.trim(),
-          activeFolder?.id || null // Added folder_id here
+          upload.program.trim()
         );
 
         if (!availablePrograms.includes(upload.program)) {
@@ -618,8 +598,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       {viewMode === 'originals' ? (
         <NexusOriginals
           userProfile={userProfile}
-          activeSubject={folderPath[1]?.name || 'Search Subject'}
-          activeSemester={folderPath[0]?.name || 'All'}
+          activeSubject={activeSubject?.name || 'Search Subject'}
+          activeSemester={activeSemester?.name || 'All'}
           activeProgram={selectedProgram}
           onBack={() => setViewMode('browse')}
         />
@@ -628,8 +608,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
           <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold text-zinc-800 dark:text-white tracking-tight leading-none mb-1 flex items-center">
-                {activeFolder ? (
-                  <>{activeFolder.name} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">{activeFolder.type === 'subject' ? 'Notes' : 'Hub'}</span></>
+                {activeSubject ? (
+                  <>{activeSubject.name} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Notes</span></>
+                ) : activeSemester ? (
+                  <>{activeSemester.name} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Hub</span></>
                 ) : (
                   <>Content <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Library</span> Hub</>
                 )}
@@ -648,45 +630,18 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   </div>
                 </div>
               </h1>
-               {!isAdminView && !searchQuery && viewMode === 'browse' && (
+              {!isAdminView && !searchQuery && viewMode === 'browse' && (
                 <nav className="mt-2 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-zinc-400">
-                  <button onClick={() => navigateTo(null)} className="hover:text-orange-500 transition-colors border-none bg-transparent">Root</button>
-                  {folderPath.map((folder, idx) => (
-                    <React.Fragment key={folder.id}>
-                      <span className="opacity-30">/</span>
-                      <button 
-                        onClick={() => navigateTo(folder)} 
-                        className={`border-none bg-transparent ${idx === folderPath.length - 1 ? 'text-orange-500' : 'hover:text-orange-500'}`}
-                      >
-                        {folder.name}
-                      </button>
-                    </React.Fragment>
-                  ))}
+                  <button onClick={() => navigateTo(null, null, null)} className="hover:text-orange-500 transition-colors border-none bg-transparent">Root</button>
+                  {activeSemester && <><span className="opacity-30">/</span><button onClick={() => navigateTo(activeSemester, null, null)} className={`border-none bg-transparent ${!activeSubject ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSemester.name}</button></>}
+                  {activeSubject && <><span className="opacity-30">/</span><button onClick={() => navigateTo(activeSemester, activeSubject, null)} className={`border-none bg-transparent ${!activeCategory ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSubject.name}</button></>}
+                  {activeCategory && <><span className="opacity-30">/</span><span className="text-orange-500">{activeCategory.name}</span></>}
                 </nav>
               )}
             </div>
             <div className="flex gap-2">
               {userProfile?.is_admin && (
                 <>
-                  {isAdminView && (
-                    <button
-                      onClick={async () => {
-                        if(window.confirm("Start migrating legacy files to the new recursive structure? This might take a minute.")) {
-                          try {
-                            await NexusServer.migrateLegacyFiles();
-                            alert("Migration completed successfully! Refreshing page...");
-                            window.location.reload();
-                          } catch (e: any) {
-                            alert("Migration error: " + e.message);
-                          }
-                        }
-                      }}
-                      className="h-10 px-4 bg-orange-500/10 text-orange-500 rounded-xl text-sm font-bold hover:bg-orange-500 hover:text-white transition-all flex items-center gap-2 border-none cursor-pointer"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-                      Migrate Data
-                    </button>
-                  )}
                   <button onClick={toggleAdminView} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${isAdminView ? 'bg-orange-500 text-white shadow-lg' : 'bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400'}`} title={isAdminView ? "Exit Review Hub" : "Enter Review Hub"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></button>
                   <button onClick={() => { setNewFolderName(''); setShowFolderModal(true); }} className="w-10 h-10 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center text-orange-500 hover:scale-110 active:scale-95 transition-all shadow-sm border-none" title="Create Folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg></button>
                 </>
@@ -699,7 +654,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     return;
                   }
                   setViewMode('originals'); 
-                  navigateTo(null); 
+                  navigateTo(null, null, null); 
                   setIsAdminView(false); 
                 }}
                 className="w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400 hover:text-orange-500"
@@ -715,7 +670,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     return;
                   }
                   setViewMode(viewMode === 'my-uploads' ? 'browse' : 'my-uploads'); 
-                  navigateTo(null); 
+                  navigateTo(null, null, null); 
                   setIsAdminView(false); 
                 }} 
                 className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'my-uploads' ? 'bg-orange-500 text-white shadow-lg' : 'bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400 hover:text-orange-500'}`} 
@@ -788,7 +743,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 >
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                     {currentFolders.map(folder => (
-                      <div key={folder.id} onDragOver={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(folder.id); }} onDragLeave={() => setDraggingOverId(null)} onDrop={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(null); const droppedFiles = e.dataTransfer.files; if (droppedFiles && droppedFiles.length > 0) { handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : folderPath[0]?.name, folder.type === 'subject' ? folder.name : folderPath[1]?.name, folder.type === 'category' ? folder.name : ''); } }} onClick={() => navigateTo(folder)} className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''} ${draggingOverId === folder.id ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-orange-500/50 hover:shadow-lg'}`}>
+                      <div key={folder.id} onDragOver={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(folder.id); }} onDragLeave={() => setDraggingOverId(null)} onDrop={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(null); const droppedFiles = e.dataTransfer.files; if (droppedFiles && droppedFiles.length > 0) { handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : ''); } }} onClick={() => { if (folder.type === 'semester') navigateTo(folder, null, null); else if (folder.type === 'subject') navigateTo(activeSemester, folder, null); else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder); }} className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''} ${draggingOverId === folder.id ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-orange-500/50 hover:shadow-lg'}`}>
                         {userProfile?.is_admin && (
                           <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                             <button onClick={(e) => { e.stopPropagation(); setFolderToManage(folder); setNewFolderName(folder.name); setIsShining(folder.is_shining || false); setShowRenameModal(true); }} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-orange-500 hover:bg-orange-50 dark:hover:bg-zinc-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>

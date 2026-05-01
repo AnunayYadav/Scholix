@@ -269,7 +269,6 @@ export interface LibraryFile {
   isUserUploaded?: boolean;
   program: string;
   display_order?: number;
-  folder_id?: string | null;
   pending_update?: {
     name: string;
     description: string;
@@ -283,7 +282,7 @@ export interface LibraryFile {
 export interface Folder {
   id: string;
   name: string;
-  type: 'semester' | 'subject' | 'category' | 'subcategory' | 'folder';
+  type: 'semester' | 'subject' | 'category';
   parent_id: string | null;
   program: string;
   is_shining?: boolean;

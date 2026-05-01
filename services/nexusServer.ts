@@ -970,13 +970,10 @@ class NexusServer {
     let query = client.from('folders').select('*');
     if (program && program !== 'All') query = query.eq('program', program);
     const { data } = await query.order('name', { ascending: true });
-    return (data || []).map(f => ({
-      ...f,
-      type: f.type as any // Cast to our expanded Folder type
-    }));
+    return data || [];
   }
 
-  static async createFolder(name: string, type: string, parentId: string | null, program: string, is_shining: boolean = false) {
+  static async createFolder(name: string, type: 'semester' | 'subject' | 'category', parentId: string | null, program: string, is_shining: boolean = false) {
     const client = getSupabase();
     if (!client) return;
     
@@ -1084,28 +1081,23 @@ class NexusServer {
       uploader_is_admin: (item.uploader as any)?.is_admin || false,
       description: item.description,
       admin_notes: item.admin_notes,
-      display_order: item.display_order,
-      folder_id: item.folder_id
+      display_order: item.display_order
     }));
   }
 
-  static async uploadFile(file: File, name: string, desc: string, sub: string, sem: string, type: string, uid: string, admin: boolean, program: string, folderId?: string | null) {
+  static async uploadFile(file: File, name: string, desc: string, sub: string, sem: string, type: string, uid: string, admin: boolean, program: string) {
     const client = getSupabase();
     if (!client) return;
     const cleanName = this.sanitizeStoragePath(file.name);
     const path = `community/${Math.random().toString(36).substring(7)}_${cleanName}`;
     const { error: storageErr } = await client.storage.from('nexus-documents').upload(path, file);
     if (storageErr) throw storageErr;
-
-    const payload: any = {
+    const { error: dbErr } = await client.from('documents').insert([{
       name, description: desc, subject: sub, semester: sem, type,
       size: `${(file.size / 1024 / 1024).toFixed(2)} MB`, storage_path: path,
       uploader_id: uid, status: admin ? 'approved' : 'pending',
       program: program.trim()
-    };
-    if (folderId) payload.folder_id = folderId;
-
-    const { error: dbErr } = await client.from('documents').insert([payload]);
+    }]);
     if (dbErr) throw dbErr;
   }
 
@@ -1274,8 +1266,7 @@ class NexusServer {
       uploader_username: (item.uploader as any)?.username || "Anonymous Verto",
       description: item.description,
       admin_notes: item.admin_notes,
-      program: item.program,
-      folder_id: item.folder_id
+      program: item.program
     }));
   }
 
@@ -1290,8 +1281,7 @@ class NexusServer {
       uploader_username: (item.uploader as any)?.username || "Anonymous Verto",
       description: item.description,
       admin_notes: item.admin_notes,
-      program: item.program,
-      folder_id: item.folder_id
+      program: item.program
     }));
   }
 
@@ -2050,77 +2040,6 @@ class NexusServer {
     if (!client) return;
     const { error } = await client.from('app_announcements').delete().eq('id', id);
     if (error) throw error;
-  }
-
-  static async migrateLegacyFiles() {
-    const client = getSupabase();
-    if (!client) throw new Error("Supabase client not initialized");
-
-    const { data: files, error: filesError } = await client
-      .from('documents')
-      .select('*')
-      .is('folder_id', null);
-
-    if (filesError) throw filesError;
-    if (!files || files.length === 0) return { migrated: 0, total: 0 };
-
-    const { data: allFolders, error: foldersError } = await client
-      .from('folders')
-      .select('*');
-
-    if (foldersError) throw foldersError;
-
-    let migratedCount = 0;
-    const activeFolders = [...(allFolders || [])];
-
-    for (const file of files) {
-      try {
-        let currentParentId: string | null = null;
-        
-        // 1. Semester
-        if (file.semester) {
-          let sem = activeFolders.find(f => f.type === 'semester' && f.name === file.semester && (f.program === file.program || f.program === 'All'));
-          if (!sem) {
-            sem = await this.createFolder(file.semester, 'semester', null, file.program);
-            activeFolders.push(sem);
-          }
-          currentParentId = sem.id;
-        }
-
-        // 2. Subject
-        if (file.subject && currentParentId) {
-          let subj = activeFolders.find(f => f.type === 'subject' && f.name === file.subject && f.parent_id === currentParentId);
-          if (!subj) {
-            subj = await this.createFolder(file.subject, 'subject', currentParentId, file.program);
-            activeFolders.push(subj);
-          }
-          currentParentId = subj.id;
-        }
-
-        // 3. Category (Type)
-        if (file.type && file.type !== 'General' && currentParentId) {
-          let cat = activeFolders.find(f => f.type === 'category' && f.name === file.type && f.parent_id === currentParentId);
-          if (!cat) {
-            cat = await this.createFolder(file.type, 'category', currentParentId, file.program);
-            activeFolders.push(cat);
-          }
-          currentParentId = cat.id;
-        }
-
-        // Update file
-        if (currentParentId) {
-          await client
-            .from('documents')
-            .update({ folder_id: currentParentId })
-            .eq('id', file.id);
-          migratedCount++;
-        }
-      } catch (err) {
-        console.error(`Failed to migrate file ${file.id}:`, err);
-      }
-    }
-
-    return { migrated: migratedCount, total: files.length };
   }
 }
 
