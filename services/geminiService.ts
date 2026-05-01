@@ -602,9 +602,10 @@ export const generateSubjectOriginals = async (subjectName: string, syllabusText
 export const extractAttendanceFromImage = async (base64Image: string): Promise<any[]> => {
   const prompt = `
     Extract subject names and attendance details from this screenshot.
-    Look for subject names/codes, total lectures held, and lectures attended.
+    Look for subject names/codes, total lectures held, lectures attended, and duty leaves (often labeled as 'DL', 'Duty Leave', or 'ML').
+    If DL is not visible or not found for a subject, assume 0.
     Return a structured JSON array of objects.
-    Each object must have: 'name' (subject name or code), 'present' (number), 'total' (number).
+    Each object must have: 'name' (subject name or code), 'present' (number), 'total' (number), and 'dutyLeaves' (number).
   `;
 
   const schema = {
@@ -614,9 +615,10 @@ export const extractAttendanceFromImage = async (base64Image: string): Promise<a
       properties: {
         name: { type: Type.STRING },
         present: { type: Type.INTEGER },
-        total: { type: Type.INTEGER }
+        total: { type: Type.INTEGER },
+        dutyLeaves: { type: Type.INTEGER }
       },
-      required: ["name", "present", "total"]
+      required: ["name", "present", "total", "dutyLeaves"]
     }
   };
 

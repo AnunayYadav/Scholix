@@ -162,7 +162,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
           name: item.name,
           present: item.present,
           total: item.total,
-          dutyLeaves: 0,
+          dutyLeaves: item.dutyLeaves || 0,
           goal: 75,
           archived: false
         }));
@@ -175,7 +175,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
         });
 
         if (userProfile?.id) {
-          NexusServer.saveRecord(userProfile.id, 'attendance_ocr', `Uploaded SS, extracted ${extracted.length} subjects`);
+          NexusServer.saveRecord(userProfile.id, 'attendance_ocr', `Uploaded SS, extracted ${extracted.length} subjects`, { count: extracted.length });
         }
         
         if (newSubjects.length > 0) {
@@ -488,9 +488,9 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                 `}
               >
                 {/* Top Section: Name and Percentage */}
-                <div className="flex justify-between items-start mb-2.5">
-                  <div className="space-y-0.5">
-                    <h3 className="text-[13px] sm:text-lg md:text-xl font-bold text-zinc-800 dark:text-white tracking-tight truncate max-w-[60px] sm:max-w-none">
+                <div className="flex justify-between items-start mb-2.5 min-w-0">
+                  <div className="space-y-0.5 min-w-0 flex-1">
+                    <h3 className="text-[13px] sm:text-lg md:text-xl font-bold text-zinc-800 dark:text-white tracking-tight truncate">
                       {sub.name}
                     </h3>
                     <div className="flex items-center gap-1">
@@ -628,7 +628,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
       {!isInitializing && filteredSubjects.length === 0 && (
         <div className="text-center py-20 md:py-24 bg-zinc-50 dark:bg-white/5 rounded-[32px] md:rounded-[48px] border-4 border-dashed border-zinc-200 dark:border-white/5">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-6 text-zinc-200 dark:text-zinc-800"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
-          <p className="font-black text-zinc-400 uppercase tracking-[0.3em] text-[11px] sm:text-xs">
+          <p className="font-bold text-zinc-400 tracking-tight text-[11px] sm:text-xs">
             {showArchived ? 'Archive is empty' : 'No subjects added yet.'}
           </p>
         </div>
@@ -645,7 +645,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               <button onClick={handleClose} className="absolute top-5 right-5 md:top-6 md:right-6 p-2 text-white/50 hover:text-white transition-colors border-none bg-transparent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
-              <h3 className="text-lg md:text-xl font-bold tracking-tight uppercase leading-none mb-1">Modify Entry</h3>
+              <h3 className="text-lg md:text-xl font-bold tracking-tight leading-none mb-1">Modify Entry</h3>
               <p className="text-white/60 text-[11px] sm:text-xs font-medium">Update subject details</p>
             </div>
 
@@ -713,7 +713,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                 <button
                   type="button"
                   onClick={saveEdit}
-                  className="flex-[2] bg-brand-primary text-white py-3.5 md:py-4 rounded-xl md:rounded-2xl font-black text-[11px] sm:text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none"
+                  className="flex-[2] bg-brand-primary text-white py-3.5 md:py-4 rounded-xl md:rounded-2xl font-bold text-[11px] sm:text-xs tracking-wide shadow-xl active:scale-95 transition-all border-none"
                 >
                   Save Changes
                 </button>
