@@ -969,8 +969,32 @@ class NexusServer {
     if (!client) return [];
     let query = client.from('folders').select('*');
     if (program && program !== 'All') query = query.eq('program', program);
-    const { data } = await query.order('name', { ascending: true });
+    
+    // Primary sort: display_order, Secondary sort: name
+    const { data } = await query
+      .order('display_order', { ascending: true, nullsFirst: false })
+      .order('name', { ascending: true });
+      
     return data || [];
+  }
+
+  static async reorderFolders(folderOrders: { id: string, order: number }[]) {
+    try {
+      const client = getSupabase();
+      if (!client) return;
+
+      const updates = folderOrders.map(item =>
+        client.from('folders').update({ display_order: item.order }).eq('id', item.id)
+      );
+
+      const results = await Promise.all(updates);
+      const firstError = results.find(r => r.error);
+      if (firstError) {
+        console.warn("Folder reorder failed (likely missing column):", firstError.error);
+      }
+    } catch (e) {
+      console.warn("Folder reorder exception:", e);
+    }
   }
 
   static async createFolder(name: string, type: 'semester' | 'subject' | 'category', parentId: string | null, program: string, is_shining: boolean = false) {

@@ -389,40 +389,72 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
     if (!over || active.id === over.id || !userProfile?.is_admin) return;
 
-    const oldIndex = allFiles.findIndex(f => f.id === active.id);
-    const newIndex = allFiles.findIndex(f => f.id === over.id);
+    const oldIndexFiles = allFiles.findIndex(f => f.id === active.id);
+    const newIndexFiles = allFiles.findIndex(f => f.id === over.id);
 
-    if (oldIndex === -1 || newIndex === -1) return;
+    if (oldIndexFiles !== -1 && newIndexFiles !== -1) {
+      const movedFiles = arrayMove(allFiles, oldIndexFiles, newIndexFiles);
 
-    const movedFiles = arrayMove(allFiles, oldIndex, newIndex);
+      // Update the objects themselves so the sort useMemo doesn't fight the change
+      const updatedFiles = movedFiles.map((f: LibraryFile, index: number) => ({
+        ...f,
+        display_order: index
+      }));
 
-    // Update the objects themselves so the sort useMemo doesn't fight the change
-    const updatedFiles = movedFiles.map((f: LibraryFile, index: number) => ({
-      ...f,
-      display_order: index
-    }));
+      // Update local state for immediate feedback
+      setAllFiles(updatedFiles);
 
-    // Update local state for immediate feedback
-    setAllFiles(updatedFiles);
+      // Persist to DB
+      try {
+        const fileOrders = updatedFiles.map((f, index) => ({ id: f.id, order: index }));
+        await NexusServer.reorderFiles(fileOrders);
+      } catch (e: any) {
+        showToast("Failed to save order: " + e.message, "error");
+        fetchFromSource(false); // Revert on failure
+      }
+      return;
+    }
 
-    // Persist to DB
-    try {
-      const fileOrders = updatedFiles.map((f, index) => ({ id: f.id, order: index }));
-      await NexusServer.reorderFiles(fileOrders);
-    } catch (e: any) {
-      showToast("Failed to save order: " + e.message, "error");
-      fetchFromSource(false); // Revert on failure
+    // Handle Folder Reordering
+    const oldIndexFolders = folders.findIndex(f => f.id === active.id);
+    const newIndexFolders = folders.findIndex(f => f.id === over.id);
+
+    if (oldIndexFolders !== -1 && newIndexFolders !== -1) {
+      const movedFolders = arrayMove(folders, oldIndexFolders, newIndexFolders);
+
+      // Update the objects themselves
+      const updatedFolders = movedFolders.map((f: Folder, index: number) => ({
+        ...f,
+        display_order: index
+      }));
+
+      // Update local state
+      setFolders(updatedFolders);
+
+      // Persist to DB
+      try {
+        const folderOrders = updatedFolders.map((f, index) => ({ id: f.id, order: index }));
+        await NexusServer.reorderFolders(folderOrders);
+      } catch (e: any) {
+        showToast("Failed to save folder order: " + e.message, "error");
+        fetchFromSource(false);
+      }
     }
   };
 
   const currentFolders = useMemo(() => {
-    if (isAdminView || viewMode === 'my-uploads' || searchQuery.trim() !== '') return [];
-
-    return folders.filter(f => {
+    const filtered = folders.filter(f => {
       if (!activeSemester) return f.type === 'semester';
       if (!activeSubject) return f.type === 'subject' && f.parent_id === activeSemester.id;
       if (!activeCategory) return f.type === 'category' && f.parent_id === activeSubject.id;
       return false;
+    });
+
+    return [...filtered].sort((a, b) => {
+      const orderA = a.display_order ?? Number.MAX_SAFE_INTEGER;
+      const orderB = b.display_order ?? Number.MAX_SAFE_INTEGER;
+      if (orderA !== orderB) return orderA - orderB;
+      return a.name.localeCompare(b.name);
     });
   }, [folders, activeSemester, activeSubject, activeCategory, isAdminView, viewMode, searchQuery]);
 
@@ -736,76 +768,106 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
               >
-                <SortableContext
-                  items={displayFiles.map(f => f.id)}
-                  strategy={rectSortingStrategy}
-                  disabled={!userProfile?.is_admin}
-                >
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                    {currentFolders.map(folder => (
-                      <div key={folder.id} onDragOver={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(folder.id); }} onDragLeave={() => setDraggingOverId(null)} onDrop={(e) => { if (!userProfile?.is_admin) return; e.preventDefault(); setDraggingOverId(null); const droppedFiles = e.dataTransfer.files; if (droppedFiles && droppedFiles.length > 0) { handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : ''); } }} onClick={() => { if (folder.type === 'semester') navigateTo(folder, null, null); else if (folder.type === 'subject') navigateTo(activeSemester, folder, null); else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder); }} className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''} ${draggingOverId === folder.id ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-orange-500/50 hover:shadow-lg'}`}>
-                        {userProfile?.is_admin && (
-                          <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                            <button onClick={(e) => { e.stopPropagation(); setFolderToManage(folder); setNewFolderName(folder.name); setIsShining(folder.is_shining || false); setShowRenameModal(true); }} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-orange-500 hover:bg-orange-50 dark:hover:bg-zinc-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
-                            <button onClick={(e) => handleDeleteFolder(folder, e)} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red dark:hover:bg-zinc-900 transition-colors shadow-sm border-none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
-                          </div>
-                        )}
-                        <FolderIcon type={folder.type} size="w-10 h-10" />
-                        <h3 className="text-[11px] sm:text-xs md:text-base font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight mt-1">{folder.name}</h3>
-                        <p className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500 mt-1">
-                          {folderFileCounts[folder.id] || 0} File{folderFileCounts[folder.id] !== 1 ? 's' : ''}
-                        </p>
-                        <div className="absolute -right-2 -bottom-2 opacity-5 group-hover:scale-110 transition-transform"><FolderIcon type={folder.type} size="w-24 h-24" /></div>
-                      </div>
-                    ))}
-                    {displayFiles.map(file => (
-                      <FileCard
-                        key={file.id}
-                        file={file}
-                        userProfile={userProfile}
-                        isAdminMode={isAdminView}
-                        isPersonal={viewMode === 'my-uploads'}
-                        onApprove={async () => {
-                          setIsProcessing(true);
-                          try {
-                            const allFolders = await NexusServer.fetchFolders('All');
-                            let semFolder = allFolders.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && f.program === file.program);
-                            if (!semFolder) {
-                              await NexusServer.createFolder(file.semester.trim(), 'semester', null, file.program);
-                              const fresh = await NexusServer.fetchFolders('All');
-                              semFolder = fresh.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && (f.program === file.program || f.program === 'All'));
-                            }
-                            let subjFolder = allFolders.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder?.id && f.program === file.program);
-                            if (!subjFolder && semFolder) {
-                              await NexusServer.createFolder(file.subject.trim(), 'subject', semFolder.id, file.program);
-                              const fresh = await NexusServer.fetchFolders('All');
-                              subjFolder = fresh.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder.id && (f.program === file.program || f.program === 'All'));
-                            }
-                            if (file.type && file.type.trim()) {
-                              let catFolder = allFolders.find(f => f.type === 'category' && f.name.trim() === file.type.trim() && f.parent_id === subjFolder?.id && f.program === file.program);
-                              if (!catFolder && subjFolder) {
-                                await NexusServer.createFolder(file.type.trim(), 'category', subjFolder.id, file.program);
+                <div className="flex flex-col gap-6">
+                  {currentFolders.length > 0 && (
+                    <SortableContext
+                      items={currentFolders.map(f => f.id)}
+                      strategy={rectSortingStrategy}
+                      disabled={!userProfile?.is_admin}
+                    >
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                        {currentFolders.map(folder => (
+                          <FolderCard
+                            key={folder.id}
+                            folder={folder}
+                            userProfile={userProfile}
+                            fileCount={folderFileCounts[folder.id] || 0}
+                            onDragOver={() => setDraggingOverId(folder.id)}
+                            onDragLeave={() => setDraggingOverId(null)}
+                            onDrop={(e) => {
+                              setDraggingOverId(null);
+                              const droppedFiles = e.dataTransfer.files;
+                              if (droppedFiles && droppedFiles.length > 0) {
+                                handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : '');
                               }
-                            }
-                            await NexusServer.approveFile(file.id);
-                            fetchFromSource(false);
-                          } catch (e: any) {
-                            showToast("Approval error: " + e.message, 'error');
-                          } finally {
-                            setIsProcessing(false);
-                          }
-                        }}
-                        onReject={async () => { const confirmed = await showConfirm("Reject and remove this file?"); if (confirmed) { setIsProcessing(true); NexusServer.rejectFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
-                        onDemote={async () => { const confirmed = await showConfirm("Send this file back to pending review?"); if (confirmed) { setIsProcessing(true); NexusServer.demoteFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
-                        onEdit={() => { setSelectedFile(file); setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type }); setShowEditModal(true); }}
-                        onDelete={async () => { const confirmed = await showConfirm("Permanently delete this file?"); if (confirmed) { setIsProcessing(true); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
-                        onAccess={() => handleFileAccess(file)}
-                        onShowDetails={() => { setSelectedFile(file); setShowDetailsModal(true); }}
-                      />
-                    ))}
-                    {displayFiles.length === 0 && currentFolders.length === 0 && !isLoading && <div className="col-span-full py-20 text-center text-zinc-400 text-[11px] sm:text-xs opacity-40">No files found.</div>}
-                  </div>
-                </SortableContext>
+                            }}
+                            onClick={() => {
+                              if (folder.type === 'semester') navigateTo(folder, null, null);
+                              else if (folder.type === 'subject') navigateTo(activeSemester, folder, null);
+                              else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder);
+                            }}
+                            onRename={() => {
+                              setFolderToManage(folder);
+                              setNewFolderName(folder.name);
+                              setIsShining(folder.is_shining || false);
+                              setShowRenameModal(true);
+                            }}
+                            onDelete={(e) => handleDeleteFolder(folder, e)}
+                            isDraggingOver={draggingOverId === folder.id}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  )}
+
+                  {displayFiles.length > 0 ? (
+                    <SortableContext
+                      items={displayFiles.map(f => f.id)}
+                      strategy={rectSortingStrategy}
+                      disabled={!userProfile?.is_admin}
+                    >
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                        {displayFiles.map(file => (
+                          <FileCard
+                            key={file.id}
+                            file={file}
+                            userProfile={userProfile}
+                            isAdminMode={isAdminView}
+                            isPersonal={viewMode === 'my-uploads'}
+                            onApprove={async () => {
+                              setIsProcessing(true);
+                              try {
+                                const allFolders = await NexusServer.fetchFolders('All');
+                                let semFolder = allFolders.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && f.program === file.program);
+                                if (!semFolder) {
+                                  await NexusServer.createFolder(file.semester.trim(), 'semester', null, file.program);
+                                  const fresh = await NexusServer.fetchFolders('All');
+                                  semFolder = fresh.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && (f.program === file.program || f.program === 'All'));
+                                }
+                                let subjFolder = allFolders.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder?.id && f.program === file.program);
+                                if (!subjFolder && semFolder) {
+                                  await NexusServer.createFolder(file.subject.trim(), 'subject', semFolder.id, file.program);
+                                  const fresh = await NexusServer.fetchFolders('All');
+                                  subjFolder = fresh.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder.id && (f.program === file.program || f.program === 'All'));
+                                }
+                                if (file.type && file.type.trim()) {
+                                  let catFolder = allFolders.find(f => f.type === 'category' && f.name.trim() === file.type.trim() && f.parent_id === subjFolder?.id && f.program === file.program);
+                                  if (!catFolder && subjFolder) {
+                                    await NexusServer.createFolder(file.type.trim(), 'category', subjFolder.id, file.program);
+                                  }
+                                }
+                                await NexusServer.approveFile(file.id);
+                                fetchFromSource(false);
+                              } catch (e: any) {
+                                showToast("Approval error: " + e.message, 'error');
+                              } finally {
+                                setIsProcessing(false);
+                              }
+                            }}
+                            onReject={async () => { const confirmed = await showConfirm("Reject and remove this file?"); if (confirmed) { setIsProcessing(true); NexusServer.rejectFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
+                            onDemote={async () => { const confirmed = await showConfirm("Send this file back to pending review?"); if (confirmed) { setIsProcessing(true); NexusServer.demoteFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
+                            onEdit={() => { setSelectedFile(file); setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type }); setShowEditModal(true); }}
+                            onDelete={async () => { const confirmed = await showConfirm("Permanently delete this file?"); if (confirmed) { setIsProcessing(true); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
+                            onAccess={() => handleFileAccess(file)}
+                            onShowDetails={() => { setSelectedFile(file); setShowDetailsModal(true); }}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  ) : currentFolders.length === 0 && !isLoading && (
+                    <div className="col-span-full py-20 text-center text-zinc-400 text-[11px] sm:text-xs opacity-40">No files found.</div>
+                  )}
+                </div>
                 {createPortal(
                   <DragOverlay dropAnimation={{
                     sideEffects: defaultDropAnimationSideEffects({
@@ -818,11 +880,18 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   }}>
                     {activeId ? (
                       <div className="scale-105 shadow-2xl opacity-90 cursor-grabbing overflow-hidden rounded-[30px] border border-orange-500/50 bg-white dark:bg-[#0a0a0a] w-[200px] md:w-[220px]">
-                        <StaticFileCard
-                          file={displayFiles.find(f => f.id === activeId)!}
-                          userProfile={userProfile}
-                          isAdminMode={isAdminView}
-                        />
+                        {displayFiles.find(f => f.id === activeId) ? (
+                          <StaticFileCard
+                            file={displayFiles.find(f => f.id === activeId)!}
+                            userProfile={userProfile}
+                            isAdminMode={isAdminView}
+                          />
+                        ) : folders.find(f => f.id === activeId) ? (
+                          <StaticFolderCard
+                            folder={folders.find(f => f.id === activeId)!}
+                            fileCount={folderFileCounts[activeId] || 0}
+                          />
+                        ) : null}
                       </div>
                     ) : null}
                   </DragOverlay>,
@@ -1191,7 +1260,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                   {metaForm.type === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
                                 </button>
                               ))}
-                              <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, type: true }); setMetaForm({ ...metaForm, type: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
+<button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, type: true }); setMetaForm({ ...metaForm, type: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
                                 Create New Folder
                               </button>
@@ -1249,7 +1318,93 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
           />
         )
       }
-    </div >
+      
+    </div>
+  );
+};
+
+const FolderCard: React.FC<{
+  folder: Folder;
+  userProfile: UserProfile | null;
+  fileCount: number;
+  onDragOver: (e: React.DragEvent) => void;
+  onDragLeave: () => void;
+  onDrop: (e: React.DragEvent) => void;
+  onClick: () => void;
+  onRename: () => void;
+  onDelete: (e: React.MouseEvent) => void;
+  isDraggingOver: boolean;
+}> = ({ folder, userProfile, fileCount, onDragOver, onDragLeave, onDrop, onClick, onRename, onDelete, isDraggingOver }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: folder.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 'auto',
+    opacity: isDragging ? 0.3 : 1,
+  };
+
+  const isAdmin = userProfile?.is_admin || false;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      onDragOver={(e) => { if (!isAdmin) return; e.preventDefault(); onDragOver(e); }}
+      onDragLeave={onDragLeave}
+      onDrop={(e) => { if (!isAdmin) return; e.preventDefault(); onDrop(e); }}
+      onClick={onClick}
+      className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''} ${isDraggingOver ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-orange-500/50 hover:shadow-lg'} ${isDragging ? 'shadow-2xl border-orange-500' : ''}`}
+    >
+      {isAdmin && (
+        <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+          <div
+            {...attributes}
+            {...listeners}
+            className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-zinc-300 hover:text-orange-500 cursor-grab active:cursor-grabbing transition-colors shadow-sm"
+            onClick={(e) => e.stopPropagation()}
+            title="Drag to reorder"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><circle cx="9" cy="5" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="9" cy="19" r="1" /><circle cx="15" cy="5" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="19" r="1" /></svg>
+          </div>
+          <button onClick={(e) => { e.stopPropagation(); onRename(); }} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-orange-500 hover:bg-orange-50 dark:hover:bg-zinc-900 transition-colors shadow-sm border-none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+          </button>
+          <button onClick={onDelete} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red dark:hover:bg-zinc-900 transition-colors shadow-sm border-none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
+          </button>
+        </div>
+      )}
+      <FolderIcon type={folder.type} size="w-10 h-10" />
+      <h3 className="text-[11px] sm:text-xs md:text-base font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight mt-1">{folder.name}</h3>
+      <p className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500 mt-1">
+        {fileCount} File{fileCount !== 1 ? 's' : ''}
+      </p>
+      <div className="absolute -right-2 -bottom-2 opacity-5 group-hover:scale-110 transition-transform"><FolderIcon type={folder.type} size="w-24 h-24" /></div>
+    </div>
+  );
+};
+
+const StaticFolderCard: React.FC<{
+  folder: Folder;
+  fileCount: number;
+}> = ({ folder, fileCount }) => {
+  return (
+    <div className={`p-5 rounded-[30px] border border-orange-500 bg-white dark:bg-[#0a0a0a] flex flex-col justify-center min-h-[140px] ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''}`}>
+      <FolderIcon type={folder.type} size="w-10 h-10" />
+      <h3 className="text-[11px] sm:text-xs md:text-base font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight mt-1">{folder.name}</h3>
+      <p className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500 mt-1">
+        {fileCount} File{fileCount !== 1 ? 's' : ''}
+      </p>
+      <div className="absolute -right-2 -bottom-2 opacity-5"><FolderIcon type={folder.type} size="w-24 h-24" /></div>
+    </div>
   );
 };
 

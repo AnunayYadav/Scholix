@@ -286,6 +286,7 @@ export interface Folder {
   parent_id: string | null;
   program: string;
   is_shining?: boolean;
+  display_order?: number;
 }
 
 export interface Flashcard {
