@@ -443,6 +443,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   };
 
   const currentFolders = useMemo(() => {
+    if (isAdminView) return [];
+    
     const filtered = folders.filter(f => {
       if (!activeSemester) return f.type === 'semester';
       if (!activeSubject) return f.type === 'subject' && f.parent_id === activeSemester.id;
