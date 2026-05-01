@@ -259,6 +259,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const [currentPage, setCurrentPage] = useState(1);
     const [scale, setScale] = useState(1.0);
     const [isLoading, setIsLoading] = useState(true);
+    const [loadProgress, setLoadProgress] = useState(0);
     const [error, setError] = useState<string | null>(null);
     const [pdfDoc, setPdfDoc] = useState<any>(null);
     const [pdfjsLibState, setPdfjsLibState] = useState<any>(null);
@@ -421,6 +422,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
             try {
                 setIsLoading(true);
+                setLoadProgress(0);
                 // Security: Fetch PDF as binary data to obfuscate URL in network tab
                 // 🔐 Session Token Verification: Get the current user's session token
                 const { data: { session } } = await NexusServer.getSession();
@@ -431,14 +433,44 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     }
                 });
                 if (!response.ok) throw new Error("Security response failed (Protocol 403)");
-                const arrayBuffer = await response.arrayBuffer();
-                const data = new Uint8Array(arrayBuffer);
+
+                // Stream-based download with progress tracking
+                const contentLength = response.headers.get('content-length');
+                const total = contentLength ? parseInt(contentLength, 10) : 0;
+                const reader = response.body?.getReader();
+                
+                let data: Uint8Array;
+                if (reader && total > 0) {
+                    const chunks: Uint8Array[] = [];
+                    let received = 0;
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        chunks.push(value);
+                        received += value.length;
+                        setLoadProgress(Math.min(Math.round((received / total) * 95), 95));
+                    }
+                    const combined = new Uint8Array(received);
+                    let offset = 0;
+                    for (const chunk of chunks) {
+                        combined.set(chunk, offset);
+                        offset += chunk.length;
+                    }
+                    data = combined;
+                } else {
+                    // Fallback if content-length unavailable or no stream
+                    setLoadProgress(30);
+                    const arrayBuffer = await response.arrayBuffer();
+                    data = new Uint8Array(arrayBuffer);
+                    setLoadProgress(80);
+                }
 
                 const loadingTask = pdfjsLib.getDocument({ data });
                 const pdf = await loadingTask.promise;
                 pdfDocRef.current = pdf;
                 setPdfDoc(pdf);
                 setNumPages(pdf.numPages);
+                setLoadProgress(100);
 
                 // Get first page to calculate initial scale
                 const firstPage = await pdf.getPage(1);
@@ -1009,12 +1041,43 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'none' }}
                 >
                     {isLoading ? (
-                        <div className="flex flex-col items-center w-full max-w-4xl px-4 mx-auto space-y-8">
-                            {Array.from({ length: 3 }).map((_, i) => (
-                                <div key={i} className="w-full bg-zinc-200 dark:bg-white/5 rounded-xl aspect-[1/1.4] animate-pulse relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-300/20 dark:via-white/5 to-transparent shimmer-effect" />
+                        <div className="flex flex-col items-center justify-center w-full h-full min-h-[60vh]">
+                            <div className="flex flex-col items-center gap-6">
+                                {/* Animated ring spinner */}
+                                <div className="relative w-20 h-20">
+                                    <svg className="w-full h-full pdf-loader-ring" viewBox="0 0 80 80">
+                                        <circle cx="40" cy="40" r="34" fill="none" stroke="currentColor" strokeWidth="3" className="text-zinc-200 dark:text-white/5" />
+                                        <circle cx="40" cy="40" r="34" fill="none" stroke="url(#loaderGradient)" strokeWidth="3" strokeLinecap="round" strokeDasharray="160 54" className="pdf-loader-arc" />
+                                        <defs>
+                                            <linearGradient id="loaderGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                <stop offset="0%" stopColor="#ea580c" />
+                                                <stop offset="100%" stopColor="#f97316" />
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+                                    {/* Center icon */}
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7 text-orange-500/80 pdf-loader-pulse">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
+                                        </svg>
+                                    </div>
                                 </div>
-                            ))}
+
+                                {/* Progress text */}
+                                <div className="flex flex-col items-center gap-1.5">
+                                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 tracking-tight">
+                                        {loadProgress > 0 ? `Loading document — ${loadProgress}%` : 'Establishing secure connection…'}
+                                    </p>
+                                    {loadProgress > 0 && (
+                                        <div className="w-48 h-1 bg-zinc-200 dark:bg-white/5 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-300 ease-out"
+                                                style={{ width: `${loadProgress}%` }}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     ) : (
                         <div 
@@ -1111,14 +1174,33 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     to { opacity: 1; }
                 }
 
-                .shimmer-effect {
-                    animation: shimmer 2s infinite linear;
-                    background-size: 200% 100%;
+                /* PDF Loader Animations */
+                .pdf-loader-ring {
+                    animation: pdf-ring-spin 1.4s linear infinite;
                 }
 
-                @keyframes shimmer {
-                    from { transform: translateX(-100%); }
-                    to { transform: translateX(100%); }
+                .pdf-loader-arc {
+                    animation: pdf-arc-dash 1.4s ease-in-out infinite;
+                }
+
+                .pdf-loader-pulse {
+                    animation: pdf-icon-pulse 2s ease-in-out infinite;
+                }
+
+                @keyframes pdf-ring-spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+
+                @keyframes pdf-arc-dash {
+                    0% { stroke-dasharray: 1 213; stroke-dashoffset: 0; }
+                    50% { stroke-dasharray: 120 213; stroke-dashoffset: -40; }
+                    100% { stroke-dasharray: 1 213; stroke-dashoffset: -213; }
+                }
+
+                @keyframes pdf-icon-pulse {
+                    0%, 100% { opacity: 0.6; transform: scale(1); }
+                    50% { opacity: 1; transform: scale(1.08); }
                 }
 
                 .watermark-overlay {
