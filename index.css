@@ -637,39 +637,76 @@ body.modal-open {
   box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.5);
 }
 
-@keyframes folder-shimmer {
-  0% { transform: translate(-100%, -100%) rotate(35deg); opacity: 0; }
-  20% { opacity: 1; }
-  80% { opacity: 1; }
-  100% { transform: translate(150%, 150%) rotate(35deg); opacity: 0; }
+/* ── Premium Folder Shimmer ── */
+@keyframes folder-shimmer-sweep {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(250%) skewX(-15deg);
+    opacity: 0;
+  }
+}
+
+@keyframes folder-border-glow {
+  0%, 100% {
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 0 transparent, inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+  50% {
+    border-color: var(--brand-glow, rgba(249, 115, 22, 0.25));
+    box-shadow: 0 0 18px -4px var(--brand-glow, rgba(249, 115, 22, 0.15)), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
 }
 
 .shimmer-wrapper {
   position: relative;
   overflow: hidden;
+  animation: folder-border-glow 4s ease-in-out infinite;
+}
+
+.shimmer-effect::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 30% 20%,
+    var(--brand-glow, rgba(249, 115, 22, 0.06)) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.5;
 }
 
 .shimmer-effect::after {
   content: "";
   position: absolute;
-  top: -75%;
-  left: -75%;
-  width: 300%;
-  height: 300%;
+  top: 0;
+  left: 0;
+  width: 45%;
+  height: 100%;
   background: linear-gradient(
-    135deg,
+    90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0) 40%,
-    rgba(255, 255, 255, 0.1) 48%,
-    rgba(255, 255, 255, 0.25) 50%,
-    rgba(255, 255, 255, 0.1) 52%,
-    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, 0.03) 20%,
+    rgba(255, 255, 255, 0.09) 45%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.09) 55%,
+    rgba(255, 255, 255, 0.03) 80%,
     transparent 100%
   );
-  animation: folder-shimmer 4s infinite linear;
+  animation: folder-shimmer-sweep 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: 0.5s;
   pointer-events: none;
   z-index: 10;
-  filter: blur(12px);
 }
 
 /* Hide number input arrows */
