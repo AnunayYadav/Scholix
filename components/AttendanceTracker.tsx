@@ -319,7 +319,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
   const filteredSubjects = subjects.filter(s => showArchived ? s.archived : !s.archived);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 md:space-y-8 animate-fade-in pb-24 px-4 md:px-0">
+    <div className="max-w-5xl mx-auto space-y-6 md:space-y-8 animate-fade-in pb-24 px-2 md:px-0">
       <header className={`flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6 ${hideHeader ? 'mb-4' : ''}`}>
         {!hideHeader ? (
           <div>
@@ -368,7 +368,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
         </div>
       </header>
 
-      <div className="glass-panel p-4 md:p-8 rounded-[24px] md:rounded-[40px] bg-white dark:bg-[#0a0a0a]/50 border border-zinc-200 dark:border-white/5 shadow-xl relative z-0">
+      <div className="glass-panel p-3 md:p-8 rounded-[24px] md:rounded-[40px] bg-white dark:bg-[#0a0a0a]/50 border border-zinc-200 dark:border-white/5 shadow-xl relative z-0">
         <div className="grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-5 items-end">
           <div className="col-span-2 md:col-span-3">
             <label className="block text-[10px] md:text-xs font-medium text-zinc-400 mb-1 ml-1">
