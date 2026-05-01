@@ -5,6 +5,22 @@
       "dest": "/api/$1"
     },
     {
+      "src": "/privacy-policy",
+      "dest": "/privacy-policy.html"
+    },
+    {
+      "src": "/terms",
+      "dest": "/terms.html"
+    },
+    {
+      "src": "/about-scholix",
+      "dest": "/about-scholix.html"
+    },
+    {
+      "src": "/contact",
+      "dest": "/contact.html"
+    },
+    {
       "handle": "filesystem"
     },
     {

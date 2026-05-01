@@ -60,7 +60,7 @@ const CookieBanner: React.FC = () => {
                                     Accept All
                                 </button>
                                 <a 
-                                    href="/privacy"
+                                    href="/privacy-policy"
                                     className="px-6 py-3 bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 dark:hover:bg-white/10 transition-all active:scale-95"
                                 >
                                     Details

@@ -136,23 +136,29 @@
     <priority>0.7</priority>
   </url>
 
-  <!-- Global Feature Routes -->
+  <!-- Static Informational Routes (Crawlable) -->
   <url>
-    <loc>https://scholix.app/about</loc>
-    <lastmod>2026-04-16</lastmod>
+    <loc>https://scholix.app/about-scholix</loc>
+    <lastmod>2026-05-01</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scholix.app/help</loc>
-    <lastmod>2026-04-16</lastmod>
+    <loc>https://scholix.app/privacy-policy</loc>
+    <lastmod>2026-05-01</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://scholix.app/privacy</loc>
-    <lastmod>2026-04-16</lastmod>
+    <loc>https://scholix.app/terms</loc>
+    <lastmod>2026-05-01</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/contact</loc>
+    <lastmod>2026-05-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>

@@ -180,6 +180,8 @@ export function SettingsHub({
                           setShowSocialModal(true);
                         } else if (item.id === 'feedback') {
                           setShowFeedbackModal(true);
+                        } else if ((item as any).isExternal) {
+                          window.open((item as any).href, '_blank');
                         } else {
                           const route = tabToRoute[item.id];
                           if (route) {

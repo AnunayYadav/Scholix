@@ -138,6 +138,59 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
           </div>
         </div>
 
+        {/* SEO-Rich Content Section for AdSense Crawlers */}
+        <div className="w-full max-w-4xl mt-24 px-4 text-left animate-fade-in">
+          <div className="flex items-center gap-4 mb-12">
+            <h2 className="text-[10px] font-semibold uppercase tracking-[0.4em] text-zinc-400 dark:text-zinc-500 whitespace-nowrap">Platform Overview</h2>
+            <div className="h-px flex-1 bg-gradient-to-r from-zinc-200 dark:via-white/10 to-transparent" />
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr,1.6fr] gap-12 mb-20 items-center">
+            <div className="space-y-4">
+              <h3 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">The academic operating system.</h3>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                Scholix is an all-in-one student utility hub designed to eliminate the friction of university life. From AI-powered resume analysis to centralized study materials, we provide the tools you need to excel.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {[
+                { val: "200+", label: "Study Materials" },
+                { val: "8000+", label: "Practice Qs" },
+                { val: "50+", label: "Active Students" },
+                { val: "10+", label: "Smart Tools" },
+                { val: "2", label: "Universities" },
+              ].map((stat, i) => (
+                <div key={i} className="group p-4 py-10 rounded-[2rem] bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-white/[0.05] flex flex-col items-center justify-center text-center transition-all hover:bg-white dark:hover:bg-zinc-900/60 hover:border-brand-primary/30">
+                  <span className="block text-2xl font-bold text-brand-primary leading-none mb-3 tracking-tight">{stat.val}</span>
+                  <span className="text-[7.5px] font-bold uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-500/80 leading-tight max-w-[60px]">{stat.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-8">
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight">Frequently Asked Questions</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-200">What is Scholix?</h4>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">A free, AI-powered student utility hub providing study materials, attendance tracking, and placement tools for university students.</p>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-200">How do I access notes?</h4>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Select your university gateway and log in to access the Content Library, where materials are organized by subject and semester.</p>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-200">Is it free?</h4>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Yes, Scholix is completely free. We sustain the platform through community contributions and non-intrusive advertising.</p>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-200">Can I contribute?</h4>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Absolutely. Students can upload their own notes and PYQs through the library interface to help their peers.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Enhanced Footer */}
         <div className="mt-12 md:mt-32 mb-12 flex flex-col items-center w-full px-6">
           <div className="w-full h-px bg-gradient-to-r from-transparent via-zinc-200 dark:via-white/5 to-transparent mb-16" />
@@ -155,24 +208,30 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
 
             <div className="space-y-4">
               <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 dark:text-zinc-500">Resources</h4>
-              <button 
-                onClick={() => navigate('/privacy')}
-                className="block w-full md:w-auto text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-colors border-none bg-transparent p-0"
+              <a 
+                href="/privacy-policy"
+                className="block w-full md:w-auto text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-colors"
               >
                 Privacy Policy
-              </button>
-              <button 
-                onClick={() => navigate('/help')}
-                className="block w-full md:w-auto text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-colors border-none bg-transparent p-0"
+              </a>
+              <a 
+                href="/terms"
+                className="block w-full md:w-auto text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-colors"
               >
-                Help & Support
-              </button>
-              <button 
-                onClick={() => navigate('/about')}
-                className="block w-full md:w-auto text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-colors border-none bg-transparent p-0"
+                Terms of Service
+              </a>
+              <a 
+                href="/about-scholix"
+                className="block w-full md:w-auto text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-colors"
               >
-                Our Mission
-              </button>
+                About Scholix
+              </a>
+              <a 
+                href="/contact"
+                className="block w-full md:w-auto text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-colors"
+              >
+                Contact Support
+              </a>
             </div>
 
             <div className="space-y-4">
