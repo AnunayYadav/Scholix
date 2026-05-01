@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import NexusServer from '../services/nexusServer.ts';
 import { UserProfile } from '../types.ts';
+import { extractAttendanceFromImage } from '../services/geminiService.ts';
+import { toast } from './Toast.tsx';
 
 interface Subject {
   id: string;
@@ -44,6 +46,8 @@ interface Props {
 const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('nexus_attendance');
@@ -135,6 +139,58 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
     }
 
     setNewSub({ name: '', present: '0', total: '0', dutyLeaves: '0', goal: '75' });
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsAiProcessing(true);
+    try {
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve) => {
+        reader.onload = (event) => resolve(event.target?.result as string);
+        reader.readAsDataURL(file);
+      });
+
+      const base64 = await base64Promise;
+      const extracted = await extractAttendanceFromImage(base64);
+
+      if (extracted && Array.isArray(extracted)) {
+        const newSubjects = extracted.map(item => ({
+          id: Math.random().toString(36).substr(2, 9),
+          name: item.name,
+          present: item.present,
+          total: item.total,
+          dutyLeaves: 0,
+          goal: 75,
+          archived: false
+        }));
+
+        setSubjects(prev => {
+          // Filter out subjects that might already exist by name to avoid duplicates if user uploads same SS twice
+          const existingNames = new Set(prev.map(s => s.name.toLowerCase()));
+          const uniqueNew = newSubjects.filter(s => !existingNames.has(s.name.toLowerCase()));
+          return [...prev, ...uniqueNew];
+        });
+
+        if (userProfile?.id) {
+          NexusServer.saveRecord(userProfile.id, 'attendance_ocr', `Uploaded SS, extracted ${extracted.length} subjects`);
+        }
+        
+        if (newSubjects.length > 0) {
+          toast.success(`Successfully extracted ${newSubjects.length} subjects!`);
+        } else {
+          toast.info("No new subjects found in the screenshot.");
+        }
+      }
+    } catch (err: any) {
+      console.error("AI Error:", err);
+      toast.error(err.message || "Failed to process screenshot. Please try again.");
+    } finally {
+      setIsAiProcessing(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   const handleEdit = (sub: Subject, e: React.MouseEvent) => {
@@ -364,12 +420,41 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-xl md:rounded-2xl px-4 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
             />
           </div>
-          <div className="col-span-2 md:col-span-2">
+          <div className="col-span-2 md:col-span-2 flex items-end gap-2">
             <button
               onClick={addSubject}
-              className="w-full bg-brand-primary hover:opacity-90 text-white py-3 md:py-[1.15rem] rounded-xl md:rounded-2xl font-bold text-xs md:text-[13px] tracking-tight transition-all shadow-xl shadow-brand-primary/20 active:scale-95 flex items-center justify-center whitespace-nowrap"
+              className="flex-1 bg-brand-primary hover:opacity-90 text-white py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-xs md:text-[13px] tracking-tight transition-all shadow-lg shadow-brand-primary/20 active:scale-95 flex items-center justify-center whitespace-nowrap"
             >
-              Track Subject
+              Track
+            </button>
+            
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handlePhotoUpload} 
+              accept="image/*" 
+              className="hidden" 
+            />
+            
+            <button
+              disabled={isAiProcessing}
+              onClick={() => fileInputRef.current?.click()}
+              className={`
+                px-4 h-11 md:h-12 rounded-xl md:rounded-2xl transition-all flex items-center justify-center gap-2 border flex-shrink-0
+                ${isAiProcessing 
+                  ? 'bg-zinc-100 dark:bg-white/5 border-transparent text-zinc-400 cursor-not-allowed' 
+                  : 'bg-zinc-100 dark:bg-[#0a0a0a] border-zinc-200 dark:border-white/10 text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary active:scale-95'
+                }
+              `}
+            >
+              {isAiProcessing ? (
+                <div className="w-4 h-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider">Upload</span>
+                </>
+              )}
             </button>
           </div>
         </div>

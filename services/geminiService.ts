@@ -102,6 +102,26 @@ const callGeminiProxy = async (action: string, payload: any, retries = 2, delay 
             break;
           }
 
+          case "EXTRACT_ATTENDANCE": {
+            const response = await ai.models.generateContent({
+              model: "gemini-3.1-flash-lite-preview",
+              contents: [{
+                role: 'user',
+                parts: [
+                  { text: payload.prompt },
+                  { inlineData: { mimeType: "image/png", data: payload.imageData } }
+                ]
+              }],
+              config: {
+                responseMimeType: "application/json",
+                responseSchema: payload.schema,
+                temperature: 0.1,
+              },
+            });
+            responseText = response.text || "";
+            break;
+          }
+
           case "GENERATE_SUBJECT_ORIGINALS": {
             const response = await ai.models.generateContent({
               model: "gemini-3.1-flash-lite-preview",
@@ -573,6 +593,38 @@ export const generateSubjectOriginals = async (subjectName: string, syllabusText
   };
 
   const data = await callGeminiProxy("GENERATE_SUBJECT_ORIGINALS", { prompt, schema });
+  return JSON.parse(data.text);
+};
+
+/**
+ * Module: Attendance Tracker OCR
+ */
+export const extractAttendanceFromImage = async (base64Image: string): Promise<any[]> => {
+  const prompt = `
+    Extract subject names and attendance details from this screenshot.
+    Look for subject names/codes, total lectures held, and lectures attended.
+    Return a structured JSON array of objects.
+    Each object must have: 'name' (subject name or code), 'present' (number), 'total' (number).
+  `;
+
+  const schema = {
+    type: Type.ARRAY,
+    items: {
+      type: Type.OBJECT,
+      properties: {
+        name: { type: Type.STRING },
+        present: { type: Type.INTEGER },
+        total: { type: Type.INTEGER }
+      },
+      required: ["name", "present", "total"]
+    }
+  };
+
+  const data = await callGeminiProxy("EXTRACT_ATTENDANCE", {
+    prompt,
+    schema,
+    imageData: base64Image.split(',')[1] || base64Image
+  });
   return JSON.parse(data.text);
 };
 
