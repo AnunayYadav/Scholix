@@ -8,6 +8,7 @@ import MarketplaceHub from './MarketplaceHub.tsx';
 import RoommateFinder from './RoommateFinder.tsx';
 import NexusAd from './NexusAd.tsx';
 import type { UserProfile } from '../types';
+import CampusFacilities from './CampusFacilities.tsx';
 
 const IconMarket = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className || "w-5 h-5 mr-2"}>
@@ -105,10 +106,11 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
   const availableTabs = React.useMemo(() => [
     ...(universityInfo?.features.campusTabs || ['mess', 'map']),
     'market',
-    'roommate'
+    'roommate',
+    'facilities'
   ], [universityInfo]);
 
-  const [activeTab, setActiveTab] = useState<'mess' | 'map' | 'market' | 'roommate' | ''>(() => {
+  const [activeTab, setActiveTab] = useState<'mess' | 'map' | 'market' | 'roommate' | 'facilities' | ''>(() => {
     if (urlTab && availableTabs.includes(urlTab)) return urlTab as any;
     return '';
   });
@@ -141,6 +143,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
   // Modal & Floating Button State
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isWalkthroughActive, setIsWalkthroughActive] = useState(false);
   const [reportForm, setReportForm] = useState({
     hostelName: '',
     issueDetails: '',
@@ -161,7 +164,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
     }
   }, [urlTab, availableTabs]);
 
-  const handleTabChange = (tab: 'mess' | 'map' | 'market' | 'roommate' | '') => {
+  const handleTabChange = (tab: 'mess' | 'map' | 'market' | 'roommate' | 'facilities' | '') => {
     // Only navigate; the useEffect will sync the state
     const prefix = uniKey ? `/${uniKey}/campus` : '/campus';
     navigate(tab ? `${prefix}/${tab}` : prefix);
@@ -324,15 +327,45 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
       {/* Persistent Header for Hub & Sections */}
       <header className="pt-2 flex items-center justify-between">
         <div className="animate-fade-in">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-1 ml-0.5">
+          <p className="text-[10px] font-semibold tracking-wider text-zinc-500 mb-1 ml-0.5">
             {userProfile ? `Welcome, ${userProfile.full_name?.split(' ')[0] || 'User'}` : 'Exploration Mode'}
           </p>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
             {{
             'mess': <>{universityInfo?.shortName || ''} Mess <span className="text-brand-primary">Menu</span></>,
-            'map': <>{universityInfo?.shortName || ''} Campus <span className="text-brand-secondary">Map</span></>,
+            'map': (
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold tracking-tight">{universityInfo?.shortName || ''} Campus <span className="text-brand-secondary">Map</span></span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsWalkthroughActive(!isWalkthroughActive);
+                  }}
+                  className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all border active:scale-95 ${
+                    isWalkthroughActive 
+                      ? 'bg-brand-primary text-white border-brand-primary shadow-sm' 
+                      : 'bg-zinc-100 dark:bg-white/5 border-zinc-200/60 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:border-brand-primary/30'
+                  }`}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3">
+                    {isWalkthroughActive ? (
+                      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                    ) : (
+                      <>
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </>
+                    )}
+                  </svg>
+                  <span className="text-[9px] font-bold uppercase tracking-tight whitespace-nowrap">
+                    {isWalkthroughActive ? '3D Map' : 'Walkthrough'}
+                  </span>
+                </button>
+              </div>
+            ),
             'market': <>Nexus <span className="text-blue-500">Market</span></>,
             'roommate': <>Roommate <span className="text-purple-500">Finder</span></>,
+            'facilities': <>Campus <span className="text-brand-primary">Facilities</span></>,
             '': <>{universityInfo?.shortName || ''} Campus <span className="text-brand-primary">Hub</span></>
           }[activeTab] || <>{universityInfo?.shortName || ''} Campus <span className="text-brand-primary">Hub</span></>}
           </h1>
@@ -341,7 +374,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
         {activeTab && (
           <button 
             onClick={() => handleTabChange('')}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 font-semibold text-[9px] uppercase tracking-[0.15em] hover:bg-brand-primary/10 hover:text-brand-primary transition-all border-none active:scale-95 group shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 font-semibold text-[10px] tracking-tight hover:bg-brand-primary/10 hover:text-brand-primary transition-all border-none active:scale-95 group shadow-sm"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 transition-transform group-hover:-translate-x-0.5"><polyline points="15 18 9 12 15 6" /></svg>
             Campus Hub
@@ -354,7 +387,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
       {!activeTab && (
         <div className="space-y-12 pb-20">
           <div key="hub" className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 animate-fade-in">
-            {(availableTabs as ('mess' | 'map' | 'market' | 'roommate')[]).map((tabId) => {
+            {(availableTabs as ('mess' | 'map' | 'market' | 'roommate' | 'facilities')[]).map((tabId) => {
               const isActive = activeTab === tabId;
               const config = {
                 mess: {
@@ -388,6 +421,14 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                   bgColor: 'from-purple-500/20 via-purple-500/5 to-transparent',
                   accentColor: 'text-purple-500',
                   gradient: 'radial-gradient(circle at center, rgba(168, 85, 247, 0.15), transparent 70%)'
+                },
+                facilities: {
+                  label: 'Facilities',
+                  desc: 'Shops & Services',
+                  icon: <IconGlobe />,
+                  bgColor: 'from-brand-primary/20 via-brand-primary/5 to-transparent',
+                  accentColor: 'text-brand-primary',
+                  gradient: 'radial-gradient(circle at center, var(--brand-glow), transparent 70%)'
                 }
               }[tabId];
 
@@ -432,7 +473,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
           {/* Student Toolkit Section */}
           <div className="space-y-6 pt-4 pb-12">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-lg font-bold text-zinc-800 dark:text-white tracking-tight uppercase">Student Toolkit</h3>
+              <h3 className="text-lg font-bold text-zinc-800 dark:text-white tracking-tight">Student Toolkit</h3>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-2 py-1 rounded-lg">Essentials</span>
               </div>
@@ -602,17 +643,30 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
           )}
 
           {activeTab === 'map' && (
-            <div className="glass-panel p-1 rounded-3xl h-[600px] overflow-hidden shadow-2xl relative animate-fade-in border dark:border-white/5 bg-black">
-              {universityInfo?.campusMapUrl ? (
-                <iframe src={universityInfo.campusMapUrl} className="w-full h-full rounded-2xl" frameBorder="0" allowFullScreen title="Map" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-zinc-500 uppercase tracking-widest">Map Protocol Pending...</div>
-              )}
+            <div className="space-y-4">
+              <div className="glass-panel p-1 rounded-[2.5rem] h-[600px] overflow-hidden shadow-2xl relative animate-fade-in border dark:border-white/5 bg-black">
+                {isWalkthroughActive ? (
+                  <iframe 
+                    src="https://www.google.com/maps/embed?pb=!4v1777702274105!6m8!1m7!1sPPeXkt5NPYNTeQijNbwYCg!2m2!1d31.2607325620669!2d75.70697036279117!3f237.79!4f0.4200000000000017!5f0.8741376114956905" 
+                    className="w-full h-full rounded-[2.2rem]" 
+                    style={{ border: 0 }} 
+                    allowFullScreen 
+                    loading="lazy" 
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Campus Walkthrough"
+                  />
+                ) : universityInfo?.campusMapUrl ? (
+                  <iframe src={universityInfo.campusMapUrl} className="w-full h-full rounded-[2.2rem]" frameBorder="0" allowFullScreen title="Map" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-zinc-500 uppercase tracking-widest">Map Protocol Pending...</div>
+                )}
+              </div>
             </div>
           )}
 
           {activeTab === 'market' && <MarketplaceHub userProfile={userProfile} />}
           {activeTab === 'roommate' && <RoommateFinder userProfile={userProfile} />}
+          {activeTab === 'facilities' && <CampusFacilities />}
         </div>
       )}
 

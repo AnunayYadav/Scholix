@@ -136,6 +136,18 @@ const callGeminiProxy = async (action: string, payload: any, retries = 2, delay 
             break;
           }
 
+          case "GENERATE_JD": {
+            const response = await ai.models.generateContent({
+              model: "gemini-3.1-flash-lite-preview",
+              contents: [{ role: 'user', parts: [{ text: payload.prompt }] }],
+              config: {
+                temperature: 0.7,
+              },
+            });
+            responseText = response.text || "";
+            break;
+          }
+
           default:
             throw new Error("Invalid protocol action requested.");
         }
@@ -631,3 +643,24 @@ export const extractAttendanceFromImage = async (base64Image: string): Promise<a
 };
 
 
+/**
+ * Module: Placement Prefect - AI JD Generation
+ */
+export const generateJobDescription = async (rolePrompt: string): Promise<string> => {
+  const prompt = `
+    Act as a professional technical recruiter. 
+    Generate a detailed and realistic Job Description based on the following user prompt: "${rolePrompt}".
+    
+    The JD should include:
+    1. Role Overview
+    2. Key Responsibilities
+    3. Mandatory Skills (Technical)
+    4. Desired Skills
+    5. Required Experience level.
+    
+    Format the output as clean, professional text without markdown formatting symbols like # or *. Just plain text with clear headings.
+  `;
+
+  const data = await callGeminiProxy("GENERATE_JD", { prompt });
+  return data.text;
+};

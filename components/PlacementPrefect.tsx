@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { extractTextFromPdf } from '../services/pdfUtils';
 import NexusServer from '../services/nexusServer.ts';
-import { analyzeResume } from '../services/geminiService';
+import { analyzeResume, generateJobDescription } from '../services/geminiService';
 import { ResumeAnalysisResult, UserProfile, AnnotatedFragment, SkillCategory, ImprovementSuggestion } from '../types';
 import { showToast, showConfirm } from './Toast.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
@@ -302,6 +302,49 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0, flipped: false });
   const hoverTimer = useRef<number | null>(null);
 
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [isGeneratingJd, setIsGeneratingJd] = useState(false);
+  const [showAiInput, setShowAiInput] = useState(false);
+
+  // Loading Progress System
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingStep, setLoadingStep] = useState(0);
+
+  const ANALYSIS_STEPS = [
+    { label: 'Reading resume', desc: 'Parsing document content' },
+    { label: 'Extracting skills', desc: 'Identifying competencies' },
+    { label: 'Matching requirements', desc: 'Cross-referencing with JD' },
+    { label: 'Scoring alignment', desc: 'Calculating ATS metrics' },
+    { label: 'Generating report', desc: 'Building diagnostic insights' },
+  ];
+
+  useEffect(() => {
+    let interval: number;
+    if (loading) {
+      setLoadingProgress(0);
+      setLoadingStep(0);
+
+      interval = window.setInterval(() => {
+        setLoadingProgress(prev => {
+          let increment: number;
+          if (prev < 70) {
+            increment = Math.random() * 2.5 + 1.2;
+          } else if (prev < 90) {
+            increment = Math.random() * 0.8 + 0.3;
+          } else {
+            // After 90%, crawl slowly — never stops, approaches 99.5
+            increment = (99.5 - prev) * 0.02 + 0.01;
+          }
+          const next = Math.min(prev + increment, 99.5);
+          const step = Math.min(Math.floor(next / 20), 4);
+          setLoadingStep(step);
+          return next;
+        });
+      }, 200);
+    }
+    return () => clearInterval(interval);
+  }, [loading]);
+
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -392,6 +435,23 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
       setError(err.message || "Analysis failed. Please try again later.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerateAiJd = async () => {
+    if (!aiPrompt.trim()) return;
+    setIsGeneratingJd(true);
+    try {
+      const generatedJd = await generateJobDescription(aiPrompt);
+      setJdText(generatedJd);
+      setAnalysisMode('custom');
+      setShowAiInput(false);
+      setSelectedRoleId('ai_generated');
+      showToast("Job description generated successfully!", "success");
+    } catch (err: any) {
+      showToast(err.message || "Failed to generate job description.", "error");
+    } finally {
+      setIsGeneratingJd(false);
     }
   };
 
@@ -729,19 +789,69 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
 
   if (loading) {
     return (
-      <div className="h-[70vh] flex flex-col items-center justify-center space-y-10 animate-fade-in">
-        <div className="relative">
-          <div className="w-20 h-20 border-[3px] border-brand-primary/10 rounded-full" />
-          <div className="absolute inset-0 w-20 h-20 border-[3px] border-brand-primary border-t-transparent rounded-full animate-spin" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-brand-primary animate-pulse">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
+      <div className="min-h-[65vh] flex flex-col items-center justify-center animate-fade-in px-4">
+        <div className="w-full max-w-sm space-y-8">
+          {/* Header */}
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-primary/10 mb-3">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-brand-primary">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white tracking-tight">Analyzing your resume</h3>
+            <p className="text-xs text-zinc-400 font-medium">This usually takes 15-30 seconds</p>
           </div>
-        </div>
-        <div className="text-center space-y-2">
-          <h3 className="text-xl font-medium text-zinc-800 dark:text-white">Analyzing Resume</h3>
-          <p className="text-[10px] font-medium text-zinc-500 tracking-wider animate-pulse">Checking your content...</p>
+
+          {/* Progress Bar */}
+          <div className="space-y-2">
+            <div className="h-1.5 w-full bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${loadingProgress}%` }}
+              />
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] font-medium text-zinc-400">{ANALYSIS_STEPS[loadingStep]?.label}</span>
+              <span className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400">{Math.round(loadingProgress)}%</span>
+            </div>
+          </div>
+
+          {/* Step List */}
+          <div className="space-y-1">
+            {ANALYSIS_STEPS.map((step, i) => {
+              const isDone = i < loadingStep;
+              const isActive = i === loadingStep;
+              return (
+                <div key={i} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ${
+                  isActive ? 'bg-brand-primary/[0.06] dark:bg-brand-primary/10' : ''
+                }`}>
+                  <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 ${
+                    isDone 
+                      ? 'bg-emerald-500 text-white' 
+                      : isActive 
+                        ? 'bg-brand-primary text-white' 
+                        : 'bg-zinc-100 dark:bg-white/5'
+                  }`}>
+                    {isDone ? (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M20 6 9 17 4 12"/></svg>
+                    ) : isActive ? (
+                      <div className="w-2 h-2 border-[1.5px] border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <div className="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className={`text-xs font-semibold transition-colors duration-300 ${
+                      isDone ? 'text-emerald-600 dark:text-emerald-400' : isActive ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'
+                    }`}>{step.label}</p>
+                    {isActive && (
+                      <p className="text-[10px] text-zinc-400 font-medium mt-0.5">{step.desc}</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
@@ -1505,16 +1615,65 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
               </div>
             </div>
             {analysisMode === 'trend' ? (
-                <div className="grid grid-cols-2 gap-2">
-                  {INDUSTRY_ROLES.map(role => (
-                    <button key={role.id} onClick={() => handleRoleSelect(role.id)} className={`p-4 rounded-2xl border text-left transition-all flex items-center gap-3 ${selectedRoleId === role.id ? 'bg-brand-primary/10 border-brand-primary text-brand-primary scale-[1.02]' : 'bg-zinc-50 dark:bg-[#0a0a0a] border-zinc-100 dark:border-white/5 text-zinc-500 hover:border-brand-primary/30'}`}>
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${selectedRoleId === role.id ? 'bg-brand-primary text-white border-brand-primary' : 'bg-white dark:bg-white/5 border-zinc-100 dark:border-white/10'}`}>
-                        {role.icon}
+              <div className="space-y-4">
+                {showAiInput ? (
+                  <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">AI Prompt</span>
+                      <button onClick={() => setShowAiInput(false)} className="text-[10px] font-bold text-brand-primary uppercase tracking-widest hover:underline">Back to presets</button>
+                    </div>
+                    <div className="relative group">
+                      <input
+                        autoFocus
+                        type="text"
+                        placeholder="e.g. Software Engineer at Google"
+                        className="w-full bg-zinc-50 dark:bg-[#0a0a0a] border border-zinc-100 dark:border-white/10 rounded-2xl p-4 pr-12 text-sm text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
+                        value={aiPrompt}
+                        onChange={(e) => setAiPrompt(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleGenerateAiJd()}
+                      />
+                      <button 
+                        onClick={handleGenerateAiJd}
+                        disabled={isGeneratingJd || !aiPrompt.trim()}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-brand-primary text-white flex items-center justify-center disabled:opacity-50 transition-all hover:scale-105"
+                      >
+                        {isGeneratingJd ? (
+                          <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        )}
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-zinc-400 italic">Describe the company and role for a tailored analysis.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2 animate-in fade-in duration-300">
+                    {INDUSTRY_ROLES.map(role => (
+                      <button key={role.id} onClick={() => handleRoleSelect(role.id)} className={`p-4 rounded-2xl border text-left transition-all flex items-center gap-3 ${selectedRoleId === role.id ? 'bg-brand-primary/10 border-brand-primary text-brand-primary scale-[1.02]' : 'bg-zinc-50 dark:bg-[#0a0a0a] border-zinc-100 dark:border-white/5 text-zinc-500 hover:border-brand-primary/30'}`}>
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${selectedRoleId === role.id ? 'bg-brand-primary text-white border-brand-primary' : 'bg-white dark:bg-white/5 border-zinc-100 dark:border-white/10'}`}>
+                          {role.icon}
+                        </div>
+                        <p className="text-[10px] font-semibold tracking-tight leading-tight">{role.name}</p>
+                      </button>
+                    ))}
+                    <button 
+                      onClick={() => setShowAiInput(true)} 
+                      className={`p-4 rounded-2xl border text-left transition-all flex items-center gap-3 bg-gradient-to-br from-brand-primary/5 to-brand-secondary/5 border-brand-primary/20 text-brand-primary hover:border-brand-primary/40 group`}
+                    >
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border border-brand-primary/20 bg-brand-primary/10 text-brand-primary group-hover:scale-110 transition-transform">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                          <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                          <path d="m5 3 1 1"/><path d="m19 3-1 1"/><path d="m5 21 1-1"/><path d="m19 21-1-1"/>
+                        </svg>
                       </div>
-                      <p className="text-[10px] font-semibold tracking-tight leading-tight">{role.name}</p>
+                      <div className="flex flex-col">
+                        <p className="text-[10px] font-bold tracking-tight leading-tight">Generate with AI</p>
+                        <p className="text-[8px] opacity-60 font-medium">Any role or company</p>
+                      </div>
                     </button>
-                  ))}
-                </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <textarea
                 className="w-full h-[220px] bg-zinc-50 dark:bg-[#0a0a0a]/60 border border-zinc-100 dark:border-white/10 rounded-[24px] p-6 text-sm text-zinc-800 dark:text-white focus:ring-4 focus:ring-brand-primary/10 outline-none resize-none transition-all font-normal leading-relaxed placeholder:opacity-30 shadow-inner"
