@@ -387,7 +387,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
       {!activeTab && (
         <div className="space-y-12 pb-20">
           <div key="hub" className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 animate-fade-in">
-            {(availableTabs as ('mess' | 'map' | 'market' | 'roommate' | 'facilities')[]).map((tabId) => {
+            {(availableTabs as ('mess' | 'map' | 'market' | 'roommate' | 'facilities')[]).filter(id => id !== 'facilities').map((tabId) => {
               const isActive = activeTab === tabId;
               const config = {
                 mess: {
@@ -484,7 +484,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                 { title: 'Freshers Kit', desc: 'Essential guide for newcomers', icon: '🎒', color: 'from-orange-500 to-amber-600', path: '/freshers' },
                 { title: 'CGPA Predictor', desc: 'Calculate your target grades', icon: '📊', color: 'from-blue-500 to-indigo-600', path: '/tools?tab=cgpa' },
                 { title: 'Attendance Aide', desc: 'Track and reach your goals', icon: '🕒', color: 'from-purple-500 to-pink-600', path: '/tools?tab=attendance' },
-                { title: 'Campus Helpdesk', desc: 'Direct support & resources', icon: '🚑', color: 'from-emerald-500 to-teal-600', path: '/help' },
+                { title: 'Facilities', desc: 'Shops & Services', icon: '🌐', color: 'from-emerald-500 to-teal-600', path: '/campus/facilities' },
               ].map((tool, idx) => (
                 <button
                   key={idx}
