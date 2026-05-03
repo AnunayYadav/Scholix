@@ -12,10 +12,17 @@ interface ExtractedAttendance {
  * Extracts attendance data from an image using Tesseract.js
  * This replaces the Gemini-based OCR to avoid rate limits.
  */
-export const extractAttendanceWithTesseract = async (image: string | File): Promise<ExtractedAttendance[]> => {
+export const extractAttendanceWithTesseract = async (
+  image: string | File, 
+  onProgress?: (progress: number) => void
+): Promise<ExtractedAttendance[]> => {
   try {
     const { data: { text } } = await Tesseract.recognize(image, 'eng', {
-      logger: m => console.log(m)
+      logger: m => {
+        if (m.status === 'recognizing text' && onProgress) {
+          onProgress(m.progress);
+        }
+      }
     });
 
     console.log("Tesseract Raw Text:", text);
@@ -36,12 +43,12 @@ const parseAttendanceText = (text: string): ExtractedAttendance[] => {
   const cleanText = text.replace(/\r/g, '').trim();
   
   // Split into potential subject blocks. 
-  // Each block usually starts with a Subject Code like "CHE110" or "CSE101"
-  const subjectCodeRegex = /([A-Z]{2,5}\d{2,4})/g;
+  // LPU Subject Codes are typically 3 letters followed by 3 numbers (e.g., CSE101, CHE110)
+  // We use a stricter regex to avoid matching things like "CH23" in seating.
+  const subjectCodeRegex = /\b([A-Z]{2,5}\d{3,4})\b/g;
   const matches = [...cleanText.matchAll(subjectCodeRegex)];
   
   if (matches.length === 0) {
-    // Fallback to simpler line-based parsing if no codes found
     return fallbackLineParsing(cleanText);
   }
 
@@ -50,51 +57,53 @@ const parseAttendanceText = (text: string): ExtractedAttendance[] => {
   for (let i = 0; i < matches.length; i++) {
     const startIndex = matches[i].index;
     const endIndex = matches[i + 1] ? matches[i + 1].index : cleanText.length;
-    const block = cleanText.substring(startIndex, endIndex);
+    let block = cleanText.substring(startIndex, endIndex);
+    
+    // The subject code itself - strictly the alphanumeric part
+    const subjectCode = matches[i][1].toUpperCase();
 
-    // Extract Subject Code and Name
-    const lines = block.split('\n');
-    const firstLine = lines[0].trim();
-    const subjectName = firstLine.replace(/[-|:]/g, ' ').replace(/\s+/g, ' ').trim();
-
-    // Search for Attended/Delivered: 22/26
-    const attDelMatch = block.match(/ATTENDED\s*\/\s*DELIVERED\s*[:|-]?\s*(\d+)\s*\/\s*(\d+)/i);
+    // LPU Portal often has "Attended/Delivered: X/Y"
+    // We look for the attendance pattern within the block associated with this subject code
+    const attDelMatch = block.match(/(?:ATTENDED|DELIVERED|ATTENDANCE)\s*(?:\/|\|)?\s*(?:DELIVERED|ATTENDED)?\s*[:|-]?\s*(\d+)\s*[\/|]\s*(\d+)/i);
     
     // Search for Duty Leaves: 2
     const dlMatch = block.match(/DUTY\s*LEAVES\s*[:|-]?\s*(\d+)/i);
 
-    // Alternative: Just search for X/Y pattern in the block
-    const slashPattern = block.match(/(\d+)\s*\/\s*(\d+)/);
-
-    let present = 0;
-    let total = 0;
+    let present = -1;
+    let total = -1;
     let dl = 0;
 
     if (attDelMatch) {
       present = parseInt(attDelMatch[1]);
       total = parseInt(attDelMatch[2]);
-    } else if (slashPattern) {
-      // Avoid matching dates like 5/1/2026
-      // We look for numbers that aren't 2026
-      const allSlashes = [...block.matchAll(/(\d+)\s*\/\s*(\d+)/g)];
-      const filtered = allSlashes.filter(m => parseInt(m[2]) !== 2026 && parseInt(m[2]) !== 2025);
-      if (filtered.length > 0) {
-        present = parseInt(filtered[0][1]);
-        total = parseInt(filtered[0][2]);
+      
+      // OCR Sanity Check: If present > total, they might be swapped
+      if (present > total) {
+        [present, total] = [total, present];
       }
-    }
+    } 
 
     if (dlMatch) {
       dl = parseInt(dlMatch[1]);
     }
 
-    if (subjectName && total > 0) {
-      results.push({
-        name: subjectName.toUpperCase(),
-        present,
-        total,
-        dutyLeaves: dl
-      });
+    // STRICTOR VALIDATION:
+    // 1. Must have a subject code
+    // 2. Must have found the attendance (present/total) line
+    // 3. The attendance line must be reasonably close to the subject code (within 300 chars)
+    // 4. Must not be a partial/garbled match (total > 0 and not too large)
+    const isAttendanceNearCode = attDelMatch && (block.indexOf(attDelMatch[0]) < 400);
+
+    if (subjectCode && attDelMatch && total > 0 && isAttendanceNearCode) {
+      // Ensure we don't pick up unrealistic numbers or garbled text
+      if (total < 150) { 
+        results.push({
+          name: subjectCode,
+          present,
+          total,
+          dutyLeaves: dl
+        });
+      }
     }
   }
 
@@ -112,7 +121,7 @@ const fallbackLineParsing = (text: string): ExtractedAttendance[] => {
     line = line.trim().toUpperCase();
     const numbers = line.match(/\d+/g);
     if (numbers && numbers.length >= 2) {
-      const subjectCodeRegex = /([A-Z]{2,5}\d{2,4})/;
+      const subjectCodeRegex = /([A-Z]{2,5}\d{3,4})/;
       const match = line.match(subjectCodeRegex);
       if (match) {
         const name = match[0];

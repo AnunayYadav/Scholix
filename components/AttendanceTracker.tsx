@@ -141,55 +141,78 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
     setNewSub({ name: '', present: '0', total: '0', dutyLeaves: '0', goal: '75' });
   };
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const [ocrProgress, setOcrProgress] = useState(0);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [dragActive, setDragActive] = useState(false);
+  const [processingIndex, setProcessingIndex] = useState(-1);
 
+  const handleFiles = (files: FileList | null) => {
+    if (!files) return;
+    const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+    setSelectedFiles(prev => [...prev, ...newFiles]);
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const processAllFiles = async () => {
+    if (selectedFiles.length === 0) return;
+    
     setIsAiProcessing(true);
+    let totalExtracted = 0;
+    
     try {
-      const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve) => {
-        reader.onload = (event) => resolve(event.target?.result as string);
-        reader.readAsDataURL(file);
-      });
-
-      const base64 = await base64Promise;
-      const extracted = await extractAttendanceWithTesseract(base64);
-
-      if (extracted && Array.isArray(extracted)) {
-        const newSubjects = extracted.map(item => ({
-          id: Math.random().toString(36).substr(2, 9),
-          name: item.name,
-          present: item.present,
-          total: item.total,
-          dutyLeaves: item.dutyLeaves || 0,
-          goal: 75,
-          archived: false
-        }));
-
-        setSubjects(prev => {
-          // Filter out subjects that might already exist by name to avoid duplicates if user uploads same SS twice
-          const existingNames = new Set(prev.map(s => s.name.toLowerCase()));
-          const uniqueNew = newSubjects.filter(s => !existingNames.has(s.name.toLowerCase()));
-          return [...prev, ...uniqueNew];
+      for (let i = 0; i < selectedFiles.length; i++) {
+        setProcessingIndex(i);
+        const file = selectedFiles[i];
+        
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve) => {
+          reader.onload = (event) => resolve(event.target?.result as string);
+          reader.readAsDataURL(file);
         });
 
-        if (userProfile?.id) {
-          NexusServer.saveRecord(userProfile.id, 'attendance_ocr', `Uploaded SS, extracted ${extracted.length} subjects`, { count: extracted.length });
-        }
-        
-        if (newSubjects.length > 0) {
-          toast.success(`Successfully extracted ${newSubjects.length} subjects!`);
-        } else {
-          toast.info("No new subjects found in the screenshot.");
+        const base64 = await base64Promise;
+        const extracted = await extractAttendanceWithTesseract(base64, (progress) => {
+          setOcrProgress(Math.round(progress * 100));
+        });
+
+        if (extracted && Array.isArray(extracted)) {
+          totalExtracted += extracted.length;
+          const newSubjects = extracted.map(item => ({
+            id: Math.random().toString(36).substr(2, 9),
+            name: item.name,
+            present: item.present,
+            total: item.total,
+            dutyLeaves: item.dutyLeaves || 0,
+            goal: 75,
+            archived: false
+          }));
+
+          setSubjects(prev => {
+            const existingNames = new Set(prev.map(s => s.name.toLowerCase()));
+            const uniqueNew = newSubjects.filter(s => !existingNames.has(s.name.toLowerCase()));
+            return [...prev, ...uniqueNew];
+          });
         }
       }
+
+      if (totalExtracted > 0) {
+        toast.success(`Successfully processed ${selectedFiles.length} images!`);
+        setIsUploadModalOpen(false);
+        setSelectedFiles([]);
+      } else {
+        toast.info("No new subjects found in the screenshots.");
+      }
     } catch (err: any) {
-      console.error("AI Error:", err);
-      toast.error(err.message || "Failed to process screenshot. Please ensure the image is clear.");
+      console.error("Batch OCR Error:", err);
+      toast.error(err.message || "Failed to process one or more images.");
     } finally {
       setIsAiProcessing(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      setOcrProgress(0);
+      setProcessingIndex(-1);
     }
   };
 
@@ -428,33 +451,12 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               Track
             </button>
             
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handlePhotoUpload} 
-              accept="image/*" 
-              className="hidden" 
-            />
-            
             <button
-              disabled={isAiProcessing}
-              onClick={() => fileInputRef.current?.click()}
-              className={`
-                flex-1 px-3 h-11 md:h-14 rounded-xl md:rounded-2xl transition-all flex items-center justify-center gap-2 border flex-shrink-0
-                ${isAiProcessing 
-                  ? 'bg-zinc-100 dark:bg-white/5 border-transparent text-zinc-400 cursor-not-allowed' 
-                  : 'bg-zinc-100 dark:bg-[#0a0a0a] border-zinc-200 dark:border-white/10 text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary active:scale-95'
-                }
-              `}
+              onClick={() => setIsUploadModalOpen(true)}
+              className="flex-1 px-3 h-11 md:h-14 rounded-xl md:rounded-2xl transition-all flex items-center justify-center gap-2 border flex-shrink-0 bg-zinc-100 dark:bg-[#0a0a0a] border-zinc-200 dark:border-white/10 text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary active:scale-95"
             >
-              {isAiProcessing ? (
-                <div className="w-4 h-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
-                  <span className="text-[11px] md:text-xs font-bold">Upload</span>
-                </>
-              )}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+              <span className="text-[11px] md:text-xs font-bold">Upload</span>
             </button>
           </div>
         </div>
@@ -718,6 +720,154 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                   Save Changes
                 </button>
               </div>
+            </div>
+          </div>
+        </div>,
+        document.getElementById('modal-root') || document.body
+      )}
+      {isUploadModalOpen && createPortal(
+        <div
+          className={`modal-overlay ${isAiProcessing ? '' : (isClosing ? 'closing' : '')}`}
+          style={{ backdropFilter: 'blur(30px) saturate(180%)', WebkitBackdropFilter: 'blur(30px) saturate(180%)' }}
+          onClick={(e) => { if (e.target === e.currentTarget && !isAiProcessing) setIsUploadModalOpen(false); }}
+        >
+          <div className={`bg-white dark:bg-[#0a0a0a] rounded-[40px] w-full max-w-lg shadow-[0_32px_128px_rgba(0,0,0,0.8)] border border-zinc-200 dark:border-white/10 relative overflow-hidden flex flex-col animate-slide-up ${isClosing ? 'closing' : ''}`}>
+            <div className="bg-black p-7 text-white relative flex-shrink-0">
+              {!isAiProcessing && (
+                <button onClick={() => setIsUploadModalOpen(false)} className="absolute top-6 right-6 p-2 text-white/50 hover:text-white transition-colors border-none bg-transparent">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+              )}
+              <div className="flex items-center gap-3 mb-1">
+                <div className="p-2 bg-brand-primary/20 rounded-xl">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-brand-primary"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                </div>
+                <h3 className="text-xl font-bold tracking-tight leading-none">Smart Batch Upload</h3>
+              </div>
+              <p className="text-white/60 text-xs font-medium ml-10">Extract attendance from multiple screenshots instantly</p>
+            </div>
+
+            <div className="p-7 space-y-6">
+              {/* Dropzone */}
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={(e) => { e.preventDefault(); setDragActive(false); handleFiles(e.dataTransfer.files); }}
+                className={`
+                  relative border-2 border-dashed rounded-[32px] p-10 transition-all flex flex-col items-center justify-center text-center gap-5
+                  ${dragActive ? 'border-brand-primary bg-brand-primary/5 scale-[0.98]' : 'border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5'}
+                  ${isAiProcessing ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
+              >
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={(e) => handleFiles(e.target.files)} 
+                  multiple 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+                
+                <div className="relative">
+                  <div className="w-20 h-20 bg-brand-primary/10 rounded-full flex items-center justify-center text-brand-primary group-hover:scale-110 transition-transform">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white dark:bg-[#0a0a0a] rounded-full border border-zinc-200 dark:border-white/10 flex items-center justify-center shadow-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-brand-primary"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-base font-bold text-zinc-800 dark:text-white">Drag & Drop screenshots</p>
+                  <p className="text-xs text-zinc-400 font-medium">LPU portal attendance reports work best</p>
+                </div>
+
+                {!isAiProcessing && (
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mt-2 px-6 py-2.5 bg-brand-primary text-white text-xs font-bold rounded-xl shadow-lg shadow-brand-primary/20 hover:opacity-90 active:scale-95 transition-all border-none"
+                  >
+                    Browse Files
+                  </button>
+                )}
+              </div>
+
+              {/* File List */}
+              {selectedFiles.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center px-1">
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+                      <span className="w-1 h-1 bg-brand-primary rounded-full" />
+                      Queue ({selectedFiles.length})
+                    </p>
+                    {selectedFiles.length > 0 && !isAiProcessing && (
+                      <button onClick={() => setSelectedFiles([])} className="text-[10px] font-bold text-brand-secondary hover:underline bg-transparent border-none p-0">Clear Queue</button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 max-h-[180px] overflow-y-auto pr-2 custom-scrollbar p-1">
+                    {selectedFiles.map((file, idx) => (
+                      <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden group border border-zinc-200 dark:border-white/10 shadow-sm">
+                        <img 
+                          src={URL.createObjectURL(file)} 
+                          className="w-full h-full object-cover" 
+                          alt="preview" 
+                        />
+                        {!isAiProcessing && (
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); removeFile(idx); }}
+                            className="absolute top-1.5 right-1.5 bg-black/60 text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity border-none backdrop-blur-md"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                          </button>
+                        )}
+                        {processingIndex === idx && (
+                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[2px]">
+                            <div className="w-7 h-7 border-3 border-brand-primary border-t-transparent rounded-full animate-spin" />
+                          </div>
+                        )}
+                        {processingIndex > idx && (
+                          <div className="absolute inset-0 bg-emerald-500/60 flex items-center justify-center backdrop-blur-[2px]">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-7 h-7 text-white"><path d="M20 6L9 17l-5-5" /></svg>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Progress and Submit */}
+              {isAiProcessing ? (
+                <div className="space-y-4 pt-2">
+                  <div className="flex justify-between items-center">
+                    <div className="flex flex-col">
+                      <p className="text-xs font-bold text-brand-primary">Scanning Document {processingIndex + 1} of {selectedFiles.length}</p>
+                      <p className="text-[10px] text-zinc-400 font-medium">Please wait, performing local OCR...</p>
+                    </div>
+                    <p className="text-sm font-black text-brand-primary">{ocrProgress}%</p>
+                  </div>
+                  <div className="h-2.5 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner">
+                    <div 
+                      className="h-full bg-brand-primary transition-all duration-300 relative overflow-hidden" 
+                      style={{ width: `${ocrProgress}%` }}
+                    >
+                      <div className="absolute inset-0 bg-white/20 animate-shimmer" />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  disabled={selectedFiles.length === 0}
+                  onClick={processAllFiles}
+                  className={`
+                    w-full py-4.5 rounded-[20px] md:rounded-[24px] font-bold text-sm tracking-wide transition-all shadow-xl active:scale-[0.98] border-none flex items-center justify-center gap-2
+                    ${selectedFiles.length > 0 ? 'bg-brand-primary text-white shadow-brand-primary/30' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400 cursor-not-allowed'}
+                  `}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                  Process All Screenshots
+                </button>
+              )}
             </div>
           </div>
         </div>,
