@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import NexusServer from '../services/nexusServer.ts';
 import { UserProfile } from '../types.ts';
-import { extractAttendanceFromImage } from '../services/geminiService.ts';
+import { extractAttendanceWithTesseract } from '../services/ocrService.ts';
 import { toast } from './Toast.tsx';
 
 interface Subject {
@@ -154,7 +154,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
       });
 
       const base64 = await base64Promise;
-      const extracted = await extractAttendanceFromImage(base64);
+      const extracted = await extractAttendanceWithTesseract(base64);
 
       if (extracted && Array.isArray(extracted)) {
         const newSubjects = extracted.map(item => ({
@@ -186,7 +186,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
       }
     } catch (err: any) {
       console.error("AI Error:", err);
-      toast.error(err.message || "Failed to process screenshot. Please try again.");
+      toast.error(err.message || "Failed to process screenshot. Please ensure the image is clear.");
     } finally {
       setIsAiProcessing(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
