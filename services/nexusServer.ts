@@ -94,17 +94,20 @@ class NexusServer {
     if (error) throw error;
   }
 
-  static async updateCommunityTimetable(id: string, metadata: any) {
+  static async updateCommunityTimetable(id: string, metadata: any, schedule?: any) {
     const client = getSupabase();
     if (!client) return;
     const generatedName = `${metadata.section} - ${metadata.branch} ${metadata.year} Year Sem ${metadata.semester}`;
-    const { error } = await client.from('community_timetables').update({
+    const updateData: any = {
       section: metadata.section,
       branch: metadata.branch,
       year: metadata.year,
       semester: metadata.semester,
       name: generatedName
-    }).eq('id', id);
+    };
+    if (schedule) updateData.schedule = schedule;
+    
+    const { error } = await client.from('community_timetables').update(updateData).eq('id', id);
     if (error) throw error;
   }
 

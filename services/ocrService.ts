@@ -65,14 +65,14 @@ const parseTimetableText = (text: string): DaySchedule[] => {
   }
 
   const slots: TimetableSlot[] = [];
-  const timeRegex = /(\d{1,2}[:.]\d{2})\s*[-—]\s*(\d{1,2}[:.]\d{2})/;
+  const timeRegex = /(\d{1,2}[:.]\d{2}(?:\s*[AP]M)?)\s*[-—]\s*(\d{1,2}[:.]\d{2}(?:\s*[AP]M)?)/i;
   const subjectRegex = /\b([A-Z]{2,5}\d{3,4})\b/;
   const roomRegex = /(\d{1,2}-\d{3,4}[A-Z]?)/;
   
   let currentSlot: Partial<TimetableSlot> = {};
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].toUpperCase();
+    const line = lines[i]; // Keep original case for AM/PM detection if needed, but regex is /i
     
     // Time is usually the trigger for a new slot in LPU Touch list view
     const timeMatch = line.match(timeRegex);
@@ -89,10 +89,12 @@ const parseTimetableText = (text: string): DaySchedule[] => {
         currentSlot = {};
       }
       
-      let start = timeMatch[1].replace('.', ':');
-      let end = timeMatch[2].replace('.', ':');
-      if (start.length === 4) start = '0' + start;
-      if (end.length === 4) end = '0' + end;
+      let start = timeMatch[1].replace('.', ':').toUpperCase();
+      let end = timeMatch[2].replace('.', ':').toUpperCase();
+      
+      // Pad with zero if needed for consistent sorting (e.g., 9:00 -> 09:00)
+      if (/^\d:/.test(start)) start = '0' + start;
+      if (/^\d:/.test(end)) end = '0' + end;
       
       currentSlot.startTime = start;
       currentSlot.endTime = end;
@@ -108,9 +110,10 @@ const parseTimetableText = (text: string): DaySchedule[] => {
       currentSlot.room = roomMatch[1];
     }
 
-    if (line.includes('LAB') || line.includes('PRACTICAL')) {
+    const upperLine = line.toUpperCase();
+    if (upperLine.includes('LAB') || upperLine.includes('PRACTICAL')) {
       currentSlot.type = 'lab';
-    } else if (line.includes('LECTURE') || line.includes('TUTORIAL') || line.includes('CLASS')) {
+    } else if (upperLine.includes('LECTURE') || upperLine.includes('TUTORIAL') || upperLine.includes('CLASS')) {
       currentSlot.type = 'class';
     }
   }
