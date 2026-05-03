@@ -201,52 +201,26 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
             ) : (
               <>
                 <StatCounter
-                  target={200}
-                  label="Study Materials"
-                  subLabel="PYQs, Notes & Records"
+                  target={stats?.registered || 0}
+                  label="Total Users"
+                  subLabel="Registered Students"
                   accentColor="text-orange-500"
                   isVisible={isSectionVisible}
                 />
                 <StatCounter
-                  target={8000}
-                  label="Practice Questions"
-                  subLabel="AI Generated Content"
+                  target={stats?.visitors || 0}
+                  label="Unique Visitors"
+                  subLabel="Impact & Reach"
                   accentColor="text-blue-400"
                   isVisible={isSectionVisible}
                 />
-                <div className="grid grid-cols-2 gap-4">
-                  <StatCounter
-                    target={50}
-                    label="Active Students"
-                    subLabel="Learning Hub"
-                    accentColor="text-emerald-500"
-                    isVisible={isSectionVisible}
-                  />
-                  <StatCounter
-                    target={10}
-                    label="Smart Tools"
-                    subLabel="AI Powered"
-                    accentColor="text-orange-400"
-                    isVisible={isSectionVisible}
-                  />
-                </div>
                 <StatCounter
-                  target={2}
-                  label="Universities"
-                  subLabel="LPU & IITM BS"
-                  accentColor="text-purple-400"
+                  target={stats?.totalViews || 0}
+                  label="Raw Hits"
+                  subLabel="Global Page Views"
+                  accentColor="text-emerald-500"
                   isVisible={isSectionVisible}
                 />
-                {userProfile?.is_admin && (
-                  <StatCounter
-                    target={stats?.totalViews || 0}
-                    label="Admin Only: Views"
-                    subLabel="Total raw hits / reloads"
-                    accentColor="text-zinc-500"
-                    isVisible={isSectionVisible}
-                    isAdmin={true}
-                  />
-                )}
               </>
             )}
           </div>

@@ -460,13 +460,15 @@ class NexusServer {
       }
     };
 
-    const [reg, vis, views] = await Promise.all([
+    const [reg, vis, pageData] = await Promise.all([
       fetchCount('profiles'),
       fetchCount('site_visits'),
-      fetchCount('site_views')
+      client.from('page_stats').select('views')
     ]);
 
-    return { registered: reg, visitors: vis, totalViews: views };
+    const totalViews = (pageData.data || []).reduce((acc, curr) => acc + (Number(curr.views) || 0), 0);
+
+    return { registered: reg, visitors: vis, totalViews };
   }
 
   static async trackPageView(path: string): Promise<void> {
