@@ -63,8 +63,11 @@ const parseAttendanceText = (text: string): ExtractedAttendance[] => {
     const subjectCode = matches[i][1].toUpperCase();
 
     // LPU Portal often has "Attended/Delivered: X/Y"
-    // We look for the attendance pattern within the block associated with this subject code
-    const attDelMatch = block.match(/(?:ATTENDED|DELIVERED|ATTENDANCE)\s*(?:\/|\|)?\s*(?:DELIVERED|ATTENDED)?\s*[:|-]?\s*(\d+)\s*[\/|]\s*(\d+)/i);
+    // We look for the attendance pattern within the block associated with this subject code.
+    // Stricter regex to avoid matching dates like 5/1/2026:
+    // 1. We prioritize "Delivered" or the "Attended/Delivered" combo.
+    // 2. We ensure the numbers are not followed by another slash (which would indicate a date).
+    const attDelMatch = block.match(/(?:ATTENDED\s*[\/|]\s*DELIVERED|DELIVERED|ATTENDANCE)\s*[:|-]?\s*(\d+)\s*[\/|]\s*(\d+)(?!\s*[\/|]\s*\d+)/i);
     
     // Search for Duty Leaves: 2
     const dlMatch = block.match(/DUTY\s*LEAVES\s*[:|-]?\s*(\d+)/i);
@@ -119,15 +122,19 @@ const fallbackLineParsing = (text: string): ExtractedAttendance[] => {
   
   for (let line of lines) {
     line = line.trim().toUpperCase();
+    // Skip lines that look like dates (e.g., 5/1/2026)
+    if (/\d+[\/|-]\d+[\/|-]\d+/.test(line)) continue;
+
     const numbers = line.match(/\d+/g);
     if (numbers && numbers.length >= 2) {
       const subjectCodeRegex = /([A-Z]{2,5}\d{3,4})/;
       const match = line.match(subjectCodeRegex);
       if (match) {
         const name = match[0];
+        // Ensure we take numbers that look like attendance, not parts of a date if regex missed it
         const p = parseInt(numbers[numbers.length - 2]);
         const t = parseInt(numbers[numbers.length - 1]);
-        if (p <= t) {
+        if (p <= t && t < 150) {
           results.push({ name, present: p, total: t, dutyLeaves: 0 });
         }
       }
