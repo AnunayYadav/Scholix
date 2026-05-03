@@ -650,7 +650,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                         >
                           <div className="min-w-0 pr-12">
                             <p className="text-[11px] sm:text-xs font-medium text-zinc-800 dark:text-white truncate">{batch.name}</p>
-                            <p className="text-[11px] sm:text-xs font-bold text-zinc-500 uppercase mt-0.5">Full 5-Day Schedule</p>
+                            <p className="text-[10px] font-semibold text-zinc-500 mt-0.5">Full 5-Day Schedule</p>
                           </div>
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                         </button>
@@ -676,9 +676,9 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                             <div className="min-w-0 pr-16">
                               <p className="text-[11px] sm:text-xs font-medium text-zinc-800 dark:text-white truncate">{preset.name}</p>
                               <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="text-[11px] sm:text-xs font-black text-zinc-500 uppercase tracking-widest">{preset.branch}</span>
-                                <span className="w-1 h-1 bg-white/10 rounded-full" />
-                                <span className="text-[11px] sm:text-xs font-black text-zinc-500 uppercase tracking-widest">{preset.year}</span>
+                                <span className="text-[10px] font-bold text-zinc-500">{preset.branch}</span>
+                                <span className="w-1 h-1 bg-zinc-200 dark:bg-white/10 rounded-full" />
+                                <span className="text-[10px] font-bold text-zinc-500">{preset.year} Year</span>
                               </div>
                             </div>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
@@ -728,8 +728,8 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
           ) : (
             <div className="space-y-4">
               <div className="flex items-center justify-between px-4">
-                <h3 className="text-[11px] sm:text-xs font-medium text-orange-600">{activeDay} Schedule ({activeTimetable.ownerName})</h3>
-                <span className="text-[11px] sm:text-xs font-bold text-zinc-500 uppercase">{daySlotsWithBreaks.filter(s => s.type !== 'break').length} Activities Today</span>
+                <h3 className="text-[11px] font-semibold text-orange-600">{activeDay} Schedule</h3>
+                <span className="text-[10px] font-semibold text-zinc-400">{daySlotsWithBreaks.filter(s => s.type !== 'break').length} Activities</span>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {daySlotsWithBreaks.length === 0 ? (
@@ -841,7 +841,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                       {myTimetable?.ownerName || 'My Profile'}
                     </span>
                     {myTimetable?.branch && (
-                      <span className="text-[11px] sm:text-xs font-black text-zinc-500 uppercase tracking-widest">{myTimetable.branch} • {myTimetable.year} • S{myTimetable.semester}</span>
+                      <span className="text-[10px] font-semibold text-zinc-500">{myTimetable.branch} • {myTimetable.year} • S{myTimetable.semester}</span>
                     )}
                   </div>
                 </div>
@@ -869,7 +869,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                           {friend.ownerName}
                         </span>
                         {friend.branch && (
-                          <span className="text-[11px] sm:text-xs font-black text-zinc-500 uppercase tracking-widest">{friend.branch} • {friend.year} • S{friend.semester}</span>
+                          <span className="text-[10px] font-semibold text-zinc-500">{friend.branch} • {friend.year} • S{friend.semester}</span>
                         )}
                       </div>
                     </div>
