@@ -8,6 +8,133 @@ interface ExtractedAttendance {
   dutyLeaves: number;
 }
 
+export interface TimetableSlot {
+  id: string;
+  subject: string;
+  room: string;
+  startTime: string;
+  endTime: string;
+  type: 'class' | 'lab' | 'break';
+}
+
+export interface DaySchedule {
+  day: string;
+  slots: TimetableSlot[];
+}
+
+/**
+ * Extracts timetable data from an image using Tesseract.js
+ */
+export const extractTimetableWithTesseract = async (
+  image: string | File,
+  onProgress?: (progress: number) => void
+): Promise<DaySchedule[]> => {
+  try {
+    const { data: { text } } = await Tesseract.recognize(image, 'eng', {
+      logger: m => {
+        if (m.status === 'recognizing text' && onProgress) {
+          onProgress(m.progress);
+        }
+      }
+    });
+
+    console.log("Tesseract Timetable Raw Text:", text);
+    return parseTimetableText(text);
+  } catch (error) {
+    console.error("Tesseract Error:", error);
+    throw new Error("Failed to extract timetable from image.");
+  }
+};
+
+/**
+ * Parses raw text into timetable slots.
+ * Specifically optimized for LPU Touch timetable format.
+ */
+const parseTimetableText = (text: string): DaySchedule[] => {
+  const cleanText = text.replace(/\r/g, '').trim();
+  const lines = cleanText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  
+  const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+  let detectedDay = 'Monday';
+  
+  for (const day of days) {
+    if (cleanText.toUpperCase().includes(day)) {
+      detectedDay = day.charAt(0) + day.slice(1).toLowerCase();
+      break;
+    }
+  }
+
+  const slots: TimetableSlot[] = [];
+  const timeRegex = /(\d{1,2}[:.]\d{2})\s*[-—]\s*(\d{1,2}[:.]\d{2})/;
+  const subjectRegex = /\b([A-Z]{2,5}\d{3,4})\b/;
+  const roomRegex = /(\d{1,2}-\d{3,4}[A-Z]?)/;
+  
+  let currentSlot: Partial<TimetableSlot> = {};
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].toUpperCase();
+    
+    // Time is usually the trigger for a new slot in LPU Touch list view
+    const timeMatch = line.match(timeRegex);
+    if (timeMatch) {
+      if (currentSlot.subject) {
+        slots.push({
+          id: Math.random().toString(36).substr(2, 9),
+          subject: currentSlot.subject,
+          room: currentSlot.room || 'N/A',
+          startTime: currentSlot.startTime || '09:00',
+          endTime: currentSlot.endTime || '10:00',
+          type: currentSlot.type || 'class'
+        } as TimetableSlot);
+        currentSlot = {};
+      }
+      
+      let start = timeMatch[1].replace('.', ':');
+      let end = timeMatch[2].replace('.', ':');
+      if (start.length === 4) start = '0' + start;
+      if (end.length === 4) end = '0' + end;
+      
+      currentSlot.startTime = start;
+      currentSlot.endTime = end;
+    }
+
+    const subMatch = line.match(subjectRegex);
+    if (subMatch) {
+      currentSlot.subject = subMatch[1];
+    }
+
+    const roomMatch = line.match(roomRegex);
+    if (roomMatch) {
+      currentSlot.room = roomMatch[1];
+    }
+
+    if (line.includes('LAB') || line.includes('PRACTICAL')) {
+      currentSlot.type = 'lab';
+    } else if (line.includes('LECTURE') || line.includes('TUTORIAL') || line.includes('CLASS')) {
+      currentSlot.type = 'class';
+    }
+  }
+
+  // Push last slot
+  if (currentSlot.subject) {
+    slots.push({
+      id: Math.random().toString(36).substr(2, 9),
+      subject: currentSlot.subject,
+      room: currentSlot.room || 'N/A',
+      startTime: currentSlot.startTime || '09:00',
+      endTime: currentSlot.endTime || '10:00',
+      type: currentSlot.type || 'class'
+    } as TimetableSlot);
+  }
+
+  if (slots.length === 0) return [];
+
+  return [{
+    day: detectedDay,
+    slots: slots.sort((a, b) => a.startTime.localeCompare(b.startTime))
+  }];
+};
+
 /**
  * Extracts attendance data from an image using Tesseract.js
  * This replaces the Gemini-based OCR to avoid rate limits.

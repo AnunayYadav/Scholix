@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { UserProfile, TimetableData, DaySchedule, TimetableSlot } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
-import { extractTimetableFromImage } from '../services/geminiService.ts';
+import { extractTimetableWithTesseract } from '../services/ocrService.ts';
 import NexusDropdown from './NexusDropdown.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import { showToast, showConfirm } from './Toast.tsx';
@@ -248,6 +248,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
   };
 
   const [isProcessingAI, setIsProcessingAI] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState(0);
   const [processingStatus, setProcessingStatus] = useState('');
   const [targetForAction, setTargetForAction] = useState<'me' | 'friend'>('me');
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -347,22 +348,34 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     if (!files || files.length === 0) return;
 
     setIsProcessingAI(true);
+    setOcrProgress(0);
     const combinedSchedules: DaySchedule[] = [];
 
     try {
       for (let i = 0; i < files.length; i++) {
-        setProcessingStatus(`Scanning Day ${i + 1}/${files.length}...`);
-        const base64 = await readFileAsDataURL(files[i]);
-        const daySchedule = await extractTimetableFromImage(base64, university.name);
+        setProcessingStatus(`Analyzing Image ${i + 1}/${files.length}...`);
+        
+        // Pass a progress handler that scales 0-100 across all files
+        const daySchedules = await extractTimetableWithTesseract(files[i], (p) => {
+          const overallProgress = ((i / files.length) + (p / files.length)) * 100;
+          setOcrProgress(overallProgress);
+        });
 
-        daySchedule.forEach(newDay => {
+        daySchedules.forEach(newDay => {
           const existing = combinedSchedules.find(s => s.day === newDay.day);
           if (existing) {
-            existing.slots = [...existing.slots, ...newDay.slots].filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+            // Merge slots and remove duplicates based on startTime
+            existing.slots = [...existing.slots, ...newDay.slots].filter((v, i, a) => 
+              a.findIndex(t => t.startTime === v.startTime) === i
+            );
           } else {
             combinedSchedules.push(newDay);
           }
         });
+      }
+
+      if (combinedSchedules.length === 0) {
+        throw new Error("No timetable data found in images.");
       }
 
       setPendingTimetable(combinedSchedules);
@@ -371,9 +384,11 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       handleCloseUpload();
       setShowMetadataModal(true);
     } catch (err) {
-      showToast("AI was unable to process those images. Please ensure they are clear screenshots from LPU Touch.", "error");
+      console.error(err);
+      showToast("Unable to read timetable. Please ensure screenshots are clear and from LPU Touch.", "error");
     } finally {
       setIsProcessingAI(false);
+      setOcrProgress(0);
       setProcessingStatus('');
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
@@ -723,35 +738,54 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     }
 
                     return (
-                      <div key={slot.id} className={`group relative p-3.5 md:p-5 rounded-[24px] md:rounded-[32px] transition-all flex flex-col justify-between ${isActive ? 'bg-orange-600/10 border border-orange-500 shadow-2xl scale-[1.02] z-10' : isFinished ? 'bg-zinc-50 dark:bg-white/[0.01] border border-transparent opacity-40 grayscale' : isBreak ? 'bg-zinc-50/50 dark:bg-white/[0.02] border border-dashed border-zinc-200 dark:border-white/10' : 'bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-white/5 hover:border-orange-500/30'}`}>
+                      <div key={slot.id} className={`group relative p-4 md:p-6 rounded-[32px] transition-all flex flex-col justify-between ${isActive ? 'bg-orange-600/10 border border-orange-500 shadow-2xl scale-[1.02] z-10' : isFinished ? 'bg-zinc-50 dark:bg-white/[0.01] border border-transparent opacity-40 grayscale' : isBreak ? 'bg-zinc-50/50 dark:bg-white/[0.02] border border-dashed border-zinc-200 dark:border-white/10' : 'bg-white dark:bg-[#0c0c0c] border border-zinc-100 dark:border-white/5 hover:border-orange-500/30'}`}>
 
-                        <div className="space-y-2 md:space-y-4">
+                        <div className="space-y-4">
                           <div className="flex justify-between items-center gap-2">
-                            <div className={`px-2 py-0.5 md:px-3 md:py-1.5 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black whitespace-nowrap tabular-nums ${isActive ? 'bg-orange-600 text-white' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500'}`}>
-                              {slot.startTime} — {slot.endTime}
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${isActive ? 'bg-orange-600 text-white' : isBreak ? 'bg-zinc-100 dark:bg-white/5 text-zinc-400' : 'bg-orange-600/10 text-orange-600'}`}>
+                                {isBreak ? (
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" /></svg>
+                                ) : (
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
+                                )}
+                              </div>
+                              <div className={`px-3 py-1.5 rounded-xl text-[11px] font-black whitespace-nowrap tabular-nums ${isActive ? 'bg-orange-600 text-white' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500'}`}>
+                                {slot.startTime} — {slot.endTime}
+                              </div>
                             </div>
-                            <div className={`px-2 py-0.5 text-[9px] md:text-xs font-black uppercase tracking-widest rounded-md ${isActive ? 'text-orange-500 animate-pulse' : isFinished ? 'text-zinc-400' : 'text-zinc-300'}`}>
+                            <div className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-widest rounded-md ${isActive ? 'text-orange-500 animate-pulse' : isFinished ? 'text-zinc-400' : 'text-zinc-300'}`}>
                               {statusLabel}
                             </div>
                           </div>
 
                           <div className="min-w-0">
-                            <h4 className={`text-sm md:text-xl font-bold leading-tight mb-0.5 md:mb-2 truncate ${isActive ? 'text-orange-600' : isBreak ? 'text-zinc-400' : 'text-zinc-800 dark:text-white'}`}>
+                            <h4 className={`text-base md:text-2xl font-bold leading-tight mb-1 truncate ${isActive ? 'text-orange-600' : isBreak ? 'text-zinc-400' : 'text-zinc-800 dark:text-white'}`}>
                               {slot.subject}
                             </h4>
-                            <p className="text-[9px] md:text-xs font-bold text-zinc-500 dark:text-zinc-400/60 uppercase tracking-widest leading-tight truncate">
-                              {isBreak ? 'Free Window' : `Room ${slot.room} • ${slot.type}`}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-[10px] md:text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${slot.type === 'lab' ? 'bg-blue-500/10 text-blue-500' : 'bg-orange-500/10 text-orange-500'}`}>
+                                {slot.type}
+                              </span>
+                              {!isBreak && (
+                                <>
+                                  <span className="w-1 h-1 bg-zinc-300 dark:bg-white/10 rounded-full" />
+                                  <p className="text-[10px] md:text-xs font-bold text-zinc-500 dark:text-zinc-400/60 uppercase tracking-widest leading-tight truncate">
+                                    Room {slot.room}
+                                  </p>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
 
                         {isActive && (
-                          <div className="mt-2 md:mt-4 flex items-center gap-1.5 overflow-hidden">
-                            <span className="flex h-1 w-1 md:h-1.5 md:w-1.5 relative shrink-0">
+                          <div className="mt-4 flex items-center gap-1.5 overflow-hidden">
+                            <span className="flex h-1.5 w-1.5 relative shrink-0">
                               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-1 w-1 md:h-1.5 md:w-1.5 bg-orange-500"></span>
+                              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-orange-500"></span>
                             </span>
-                            <span className="text-[9px] md:text-xs font-black text-orange-600 uppercase tracking-widest truncate">Session in progress</span>
+                            <span className="text-[10px] font-black text-orange-600 uppercase tracking-widest truncate">Ongoing Session</span>
                           </div>
                         )}
                       </div>
@@ -973,9 +1007,26 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
             </div>
             <div className="p-8 space-y-6">
               {isProcessingAI ? (
-                <div className="py-10 text-center space-y-6">
-                  <div className="w-12 h-12 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-[10px] font-medium tracking-0.2em text-orange-600 animate-pulse">{processingStatus}</p>
+                <div className="py-12 text-center space-y-8">
+                  <div className="relative w-20 h-20 mx-auto">
+                    <div className="absolute inset-0 border-4 border-orange-600/20 rounded-full" />
+                    <div 
+                      className="absolute inset-0 border-4 border-orange-600 rounded-full border-t-transparent animate-spin"
+                      style={{ borderRightColor: 'transparent' }}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[10px] font-black text-orange-600">{Math.round(ocrProgress)}%</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black tracking-[0.2em] text-orange-600 uppercase animate-pulse">{processingStatus}</p>
+                    <div className="w-full h-1 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden max-w-[200px] mx-auto">
+                      <div 
+                        className="h-full bg-orange-600 transition-all duration-300 ease-out"
+                        style={{ width: `${ocrProgress}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <>
