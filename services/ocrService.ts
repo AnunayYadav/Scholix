@@ -55,58 +55,71 @@ const parseAttendanceText = (text: string): ExtractedAttendance[] => {
   const results: ExtractedAttendance[] = [];
 
   for (let i = 0; i < matches.length; i++) {
-    const startIndex = matches[i].index;
-    const endIndex = matches[i + 1] ? matches[i + 1].index : cleanText.length;
+    const startIndex = matches[i].index || 0;
+    const nextMatch = matches[i + 1];
+    const endIndex = nextMatch ? nextMatch.index : cleanText.length;
     let block = cleanText.substring(startIndex, endIndex);
     
-    // The subject code itself - strictly the alphanumeric part
     const subjectCode = matches[i][1].toUpperCase();
 
-    // LPU Portal often has "Attended/Delivered: X/Y"
-    // We look for the attendance pattern within the block associated with this subject code.
-    // Stricter regex to avoid matching dates like 5/1/2026:
-    // 1. We prioritize "Delivered" or the "Attended/Delivered" combo.
-    // 2. We ensure the numbers are not followed by another slash (which would indicate a date).
-    const attDelMatch = block.match(/(?:ATTENDED\s*[\/|]\s*DELIVERED|DELIVERED|ATTENDANCE)\s*[:|-]?\s*(\d+)\s*[\/|]\s*(\d+)(?!\s*[\/|]\s*\d+)/i);
-    
-    // Search for Duty Leaves: 2
-    const dlMatch = block.match(/DUTY\s*LEAVES\s*[:|-]?\s*(\d+)/i);
+    // Strategy: Find all potential X/Y or X|Y pairs in the block and pick the most likely one
+    // while strictly excluding dates.
+    const pairs = [...block.matchAll(/(\d+)\s*[\/|]\s*(\d+)/g)];
+    let bestAttendance = null;
+    let highestScore = -1;
 
-    let present = -1;
-    let total = -1;
-    let dl = 0;
+    for (const p of pairs) {
+      const v1 = parseInt(p[1]);
+      const v2 = parseInt(p[2]);
+      const fullMatch = p[0];
+      const matchIndex = p.index || 0;
 
-    if (attDelMatch) {
-      present = parseInt(attDelMatch[1]);
-      total = parseInt(attDelMatch[2]);
-      
-      // OCR Sanity Check: If present > total, they might be swapped
-      if (present > total) {
-        [present, total] = [total, present];
+      // 1. Date exclusion: check if it's followed by another slash (X/Y/Z)
+      const afterMatch = block.substring(matchIndex + fullMatch.length, matchIndex + fullMatch.length + 5);
+      if (afterMatch.trim().startsWith('/') || afterMatch.trim().startsWith('-')) continue;
+
+      // 2. Date exclusion: check if it's preceded by another slash (W/X/Y)
+      const beforeMatch = block.substring(Math.max(0, matchIndex - 5), matchIndex);
+      if (beforeMatch.trim().endsWith('/') || beforeMatch.trim().endsWith('-')) continue;
+
+      // 3. 'Last Attended' exclusion
+      const contextBefore = block.substring(Math.max(0, matchIndex - 30), matchIndex).toUpperCase();
+      if (contextBefore.includes('LAST')) continue;
+
+      // 4. Sanity Check
+      const [pres, tot] = v1 > v2 ? [v2, v1] : [v1, v2];
+      if (tot <= 0 || tot >= 150) continue;
+
+      // Scoring
+      let score = 0;
+      if (contextBefore.includes('DELIVERED') || contextBefore.includes('ATTENDANCE') || 
+          contextBefore.includes('PRESENT') || contextBefore.includes('TOTAL')) {
+        score += 20;
       }
-    } 
+      if (contextBefore.includes('ATTENDED') && !contextBefore.includes('LAST')) {
+        score += 15;
+      }
+      
+      // Proximity to subject code (closer is better)
+      score += Math.max(0, (400 - matchIndex) / 10);
 
-    if (dlMatch) {
-      dl = parseInt(dlMatch[1]);
+      if (score > highestScore) {
+        highestScore = score;
+        bestAttendance = { present: pres, total: tot };
+      }
     }
 
-    // STRICTOR VALIDATION:
-    // 1. Must have a subject code
-    // 2. Must have found the attendance (present/total) line
-    // 3. The attendance line must be reasonably close to the subject code (within 300 chars)
-    // 4. Must not be a partial/garbled match (total > 0 and not too large)
-    const isAttendanceNearCode = attDelMatch && (block.indexOf(attDelMatch[0]) < 400);
+    // Search for Duty Leaves separately
+    const dlMatch = block.match(/DUTY\s*LEAVES\s*[:|-]?\s*(\d+)/i);
+    const dl = dlMatch ? parseInt(dlMatch[1]) : 0;
 
-    if (subjectCode && attDelMatch && total > 0 && isAttendanceNearCode) {
-      // Ensure we don't pick up unrealistic numbers or garbled text
-      if (total < 150) { 
-        results.push({
-          name: subjectCode,
-          present,
-          total,
-          dutyLeaves: dl
-        });
-      }
+    if (subjectCode && bestAttendance) {
+      results.push({
+        name: subjectCode,
+        present: bestAttendance.present,
+        total: bestAttendance.total,
+        dutyLeaves: dl
+      });
     }
   }
 
@@ -125,17 +138,27 @@ const fallbackLineParsing = (text: string): ExtractedAttendance[] => {
     // Skip lines that look like dates (e.g., 5/1/2026)
     if (/\d+[\/|-]\d+[\/|-]\d+/.test(line)) continue;
 
-    const numbers = line.match(/\d+/g);
+    const numbers = line.match(/\b\d+\b/g);
     if (numbers && numbers.length >= 2) {
       const subjectCodeRegex = /([A-Z]{2,5}\d{3,4})/;
       const match = line.match(subjectCodeRegex);
       if (match) {
         const name = match[0];
-        // Ensure we take numbers that look like attendance, not parts of a date if regex missed it
-        const p = parseInt(numbers[numbers.length - 2]);
-        const t = parseInt(numbers[numbers.length - 1]);
-        if (p <= t && t < 150) {
-          results.push({ name, present: p, total: t, dutyLeaves: 0 });
+        
+        // Find pairs in numbers that aren't dates
+        // We'll look for the last pair that fits attendance criteria
+        for (let i = numbers.length - 1; i >= 1; i--) {
+          const t = parseInt(numbers[i]);
+          const p = parseInt(numbers[i-1]);
+          
+          // Skip if any of them look like a year
+          if (t > 2000 && t < 2100) continue;
+          if (p > 2000 && p < 2100) continue;
+          
+          if (p <= t && t < 150 && t > 0) {
+            results.push({ name, present: p, total: t, dutyLeaves: 0 });
+            break;
+          }
         }
       }
     }
