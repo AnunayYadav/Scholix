@@ -368,7 +368,11 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
             existing.slots = [...existing.slots, ...newDay.slots].filter((v, i, a) => 
               a.findIndex(t => t.startTime === v.startTime) === i
             );
+            // Sort slots by time
+            existing.slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
           } else {
+            // Sort new day slots before adding
+            newDay.slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
             combinedSchedules.push(newDay);
           }
         });
@@ -699,7 +703,17 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
 
       <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar">
         {DAYS.map(day => (
-          <button key={day} onClick={() => setActiveDay(day)} className={`flex-shrink-0 px-8 py-4 rounded-3xl text-[11px] sm:text-xs font-medium transition-all border-none ${activeDay === day ? 'bg-orange-600 text-white shadow-2xl scale-105' : 'bg-white/5 text-zinc-500 hover:text-white'}`}>{day}</button>
+          <button 
+            key={day} 
+            onClick={() => setActiveDay(day)} 
+            className={`flex-shrink-0 px-6 py-2.5 rounded-2xl text-[13px] font-semibold transition-all duration-300 border-none ${
+              activeDay === day 
+                ? 'bg-orange-600/10 text-orange-600 shadow-sm' 
+                : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-white/10'
+            }`}
+          >
+            {day}
+          </button>
         ))}
       </div>
 
@@ -738,56 +752,41 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     }
 
                     return (
-                      <div key={slot.id} className={`group relative p-4 md:p-6 rounded-[32px] transition-all flex flex-col justify-between ${isActive ? 'bg-orange-600/10 border border-orange-500 shadow-2xl scale-[1.02] z-10' : isFinished ? 'bg-zinc-50 dark:bg-white/[0.01] border border-transparent opacity-40 grayscale' : isBreak ? 'bg-zinc-50/50 dark:bg-white/[0.02] border border-dashed border-zinc-200 dark:border-white/10' : 'bg-white dark:bg-[#0c0c0c] border border-zinc-100 dark:border-white/5 hover:border-orange-500/30'}`}>
+                      <div key={slot.id} className={`group relative p-5 rounded-[24px] transition-all flex flex-col justify-between ${isActive ? 'bg-orange-600/5 border border-orange-500/50 shadow-xl' : isFinished ? 'opacity-40 grayscale' : 'bg-white dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 hover:border-orange-500/30'}`}>
 
-                        <div className="space-y-4">
-                          <div className="flex justify-between items-center gap-2">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${isActive ? 'bg-orange-600 text-white' : isBreak ? 'bg-zinc-100 dark:bg-white/5 text-zinc-400' : 'bg-orange-600/10 text-orange-600'}`}>
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isActive ? 'bg-orange-600 text-white' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400'}`}>
                                 {isBreak ? (
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" /></svg>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" /></svg>
                                 ) : (
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
                                 )}
                               </div>
-                              <div className={`px-3 py-1.5 rounded-xl text-[11px] font-black whitespace-nowrap tabular-nums ${isActive ? 'bg-orange-600 text-white' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500'}`}>
+                              <span className={`text-[11px] font-bold tabular-nums ${isActive ? 'text-orange-600' : 'text-zinc-500'}`}>
                                 {slot.startTime} — {slot.endTime}
-                              </div>
+                              </span>
                             </div>
-                            <div className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-widest rounded-md ${isActive ? 'text-orange-500 animate-pulse' : isFinished ? 'text-zinc-400' : 'text-zinc-300'}`}>
-                              {statusLabel}
-                            </div>
+                            {isActive && <span className="text-[9px] font-bold text-orange-500 animate-pulse">LIVE</span>}
                           </div>
 
                           <div className="min-w-0">
-                            <h4 className={`text-base md:text-2xl font-bold leading-tight mb-1 truncate ${isActive ? 'text-orange-600' : isBreak ? 'text-zinc-400' : 'text-zinc-800 dark:text-white'}`}>
+                            <h4 className={`text-lg font-bold leading-tight mb-1 truncate ${isActive ? 'text-orange-600' : isBreak ? 'text-zinc-400' : 'text-zinc-800 dark:text-zinc-100'}`}>
                               {slot.subject}
                             </h4>
                             <div className="flex items-center gap-2">
-                              <span className={`text-[10px] md:text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${slot.type === 'lab' ? 'bg-blue-500/10 text-blue-500' : 'bg-orange-500/10 text-orange-500'}`}>
+                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${slot.type === 'lab' ? 'bg-blue-500/10 text-blue-500' : 'bg-orange-500/10 text-orange-500'}`}>
                                 {slot.type}
                               </span>
-                              {!isBreak && (
-                                <>
-                                  <span className="w-1 h-1 bg-zinc-300 dark:bg-white/10 rounded-full" />
-                                  <p className="text-[10px] md:text-xs font-bold text-zinc-500 dark:text-zinc-400/60 uppercase tracking-widest leading-tight truncate">
-                                    Room {slot.room}
-                                  </p>
-                                </>
+                              {!isBreak && slot.room !== 'N/A' && (
+                                <p className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
+                                  Room {slot.room}
+                                </p>
                               )}
                             </div>
                           </div>
                         </div>
-
-                        {isActive && (
-                          <div className="mt-4 flex items-center gap-1.5 overflow-hidden">
-                            <span className="flex h-1.5 w-1.5 relative shrink-0">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-orange-500"></span>
-                            </span>
-                            <span className="text-[10px] font-black text-orange-600 uppercase tracking-widest truncate">Ongoing Session</span>
-                          </div>
-                        )}
                       </div>
                     );
                   })
@@ -801,32 +800,31 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
         </div>
 
         <div className="lg:col-span-4 space-y-8">
-          <div className="p-8 rounded-[48px] bg-gradient-to-br from-orange-600 to-red-700 text-white shadow-2xl relative overflow-hidden group border-none">
+          <div className="p-8 rounded-[40px] bg-zinc-100 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 shadow-xl relative overflow-hidden group">
             <div className="relative z-10">
-              <h3 className="text-[11px] sm:text-xs font-medium opacity-80 mb-6">Shared Gaps</h3>
+              <h3 className="text-[11px] font-bold text-orange-600 uppercase tracking-wider mb-6">Shared Gaps</h3>
               {selectedEntityId === 'me' ? (
                 <div className="py-4 text-center">
-                  <p className="text-[11px] sm:text-xs font-medium opacity-60 tracking-widest">Select a connection below to compare free time.</p>
+                  <p className="text-sm text-zinc-400">Select a connection below to find common free time.</p>
                 </div>
               ) : commonBreaks.length === 0 ? (
                 <div className="py-4 text-center">
-                  <p className="text-[11px] sm:text-xs font-medium opacity-60 tracking-widest">No common gaps found for {activeDay}.</p>
+                  <p className="text-sm text-zinc-400">No common gaps found for {activeDay}.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {commonBreaks.map((b, i) => (
-                    <div key={i} className="p-4 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
+                    <div key={i} className="p-4 bg-white dark:bg-white/[0.03] rounded-2xl border border-zinc-100 dark:border-white/5">
                       <div className="flex justify-between items-center mb-1">
-                        <p className="text-[11px] sm:text-xs font-medium">Common Break</p>
-                        <span className="text-[11px] sm:text-xs font-bold opacity-50">{b.duration} mins</span>
+                        <p className="text-[10px] font-bold text-zinc-500">Common Break</p>
+                        <span className="text-[10px] font-bold text-orange-600">{b.duration} mins</span>
                       </div>
-                      <p className="text-lg font-black tracking-tight">{b.start} — {b.end}</p>
+                      <p className="text-lg font-bold text-zinc-800 dark:text-zinc-100">{b.start} — {b.end}</p>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 blur-[60px] rounded-full pointer-events-none" />
           </div>
 
           <div className="glass-panel p-8 rounded-[48px] border border-zinc-200 dark:border-white/5 bg-white dark:bg-[#0a0a0a]">
