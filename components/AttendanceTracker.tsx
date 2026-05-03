@@ -110,7 +110,6 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
       localStorage.setItem('nexus_attendance', JSON.stringify(subjects));
     }
   }, [subjects, isInitializing]);
-
   const addSubject = () => {
     if (!newSub.name.trim()) {
       setShowValidation(true);
@@ -123,19 +122,34 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
     const dutyLeaves = parseInt(newSub.dutyLeaves) || 0;
     const goal = parseInt(newSub.goal) || 75;
 
-    setSubjects(prev => [...prev, {
-      id: Math.random().toString(36).substr(2, 9),
-      name: newSub.name,
-      present: Math.min(present, total),
-      total: total,
-      dutyLeaves: dutyLeaves,
-      goal: goal,
-      archived: false
-    }]);
+    setSubjects(prev => {
+      const existingIndex = prev.findIndex(s => s.name.toLowerCase() === newSub.name.toLowerCase());
+      if (existingIndex !== -1) {
+        const updated = [...prev];
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          present: Math.min(present, total),
+          total: total,
+          dutyLeaves: dutyLeaves,
+          goal: goal,
+          archived: false
+        };
+        return updated;
+      }
+      return [...prev, {
+        id: Math.random().toString(36).substr(2, 9),
+        name: newSub.name,
+        present: Math.min(present, total),
+        total: total,
+        dutyLeaves: dutyLeaves,
+        goal: goal,
+        archived: false
+      }];
+    });
 
     // Tracking
     if (userProfile?.id) {
-      NexusServer.saveRecord(userProfile.id, 'attendance_update', `Added subject: ${newSub.name}`, { name: newSub.name, present, total });
+      NexusServer.saveRecord(userProfile.id, 'attendance_update', `Updated/Added subject: ${newSub.name}`, { name: newSub.name, present, total });
     }
 
     setNewSub({ name: '', present: '0', total: '0', dutyLeaves: '0', goal: '75' });
@@ -192,9 +206,24 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
           }));
 
           setSubjects(prev => {
-            const existingNames = new Set(prev.map(s => s.name.toLowerCase()));
-            const uniqueNew = newSubjects.filter(s => !existingNames.has(s.name.toLowerCase()));
-            return [...prev, ...uniqueNew];
+            const updated = [...prev];
+            newSubjects.forEach(newSub => {
+              const existingIndex = updated.findIndex(s => s.name.toLowerCase() === newSub.name.toLowerCase());
+              if (existingIndex !== -1) {
+                // Update existing record with latest OCR data
+                updated[existingIndex] = {
+                  ...updated[existingIndex],
+                  present: newSub.present,
+                  total: newSub.total,
+                  dutyLeaves: newSub.dutyLeaves || updated[existingIndex].dutyLeaves,
+                  archived: false // Bring back to active if it was archived
+                };
+              } else {
+                // Add as new subject
+                updated.push(newSub);
+              }
+            });
+            return updated;
           });
         }
       }
