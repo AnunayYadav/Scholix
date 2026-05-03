@@ -166,12 +166,12 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
                 Scholix is an all-in-one student utility hub designed to eliminate the friction of university life. From AI-powered resume analysis to centralized study materials, we provide the tools you need to excel.
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className={`grid grid-cols-1 ${userProfile?.is_admin ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-3`}>
               {[
                 { val: stats?.registered ? `${stats.registered}+` : "50+", label: "Total Users", color: "text-orange-500" },
                 { val: stats?.visitors ? `${stats.visitors}+` : "100+", label: "Unique Visitors", color: "text-blue-400" },
-                { val: stats?.totalViews ? `${stats.totalViews}+` : "1000+", label: "Raw Hits", color: "text-emerald-500" },
-              ].map((stat, i) => (
+                { val: stats?.totalViews ? `${stats.totalViews}+` : "1000+", label: "Raw Hits", color: "text-emerald-500", adminOnly: true },
+              ].filter(s => !s.adminOnly || userProfile?.is_admin).map((stat, i) => (
                 <div key={i} className="group p-4 py-10 rounded-[2rem] bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-white/[0.05] flex flex-col items-center justify-center text-center transition-all hover:bg-white dark:hover:bg-zinc-900/60 hover:border-brand-primary/30">
                   <span className={`block text-2xl font-bold ${stat.color} leading-none mb-3 tracking-tight`}>{stat.val}</span>
                   <span className="text-[7.5px] font-bold uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-500/80 leading-tight max-w-[100px]">{stat.label}</span>

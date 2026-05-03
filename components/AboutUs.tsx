@@ -214,13 +214,16 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
                   accentColor="text-blue-400"
                   isVisible={isSectionVisible}
                 />
-                <StatCounter
-                  target={stats?.totalViews || 0}
-                  label="Raw Hits"
-                  subLabel="Global Page Views"
-                  accentColor="text-emerald-500"
-                  isVisible={isSectionVisible}
-                />
+                {userProfile?.is_admin && (
+                  <StatCounter
+                    target={stats?.totalViews || 0}
+                    label="Raw Hits"
+                    subLabel="Global Page Views"
+                    accentColor="text-emerald-500"
+                    isVisible={isSectionVisible}
+                    isAdmin={true}
+                  />
+                )}
               </>
             )}
           </div>
