@@ -57,8 +57,10 @@ const parseTimetableText = (text: string): DaySchedule[] => {
   const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
   let detectedDay = 'Monday';
   
+  // Detect day from anywhere in the text
+  const upperText = cleanText.toUpperCase();
   for (const day of days) {
-    if (cleanText.toUpperCase().includes(day)) {
+    if (upperText.includes(day)) {
       detectedDay = day.charAt(0) + day.slice(1).toLowerCase();
       break;
     }
@@ -71,23 +73,28 @@ const parseTimetableText = (text: string): DaySchedule[] => {
   
   let currentSlot: Partial<TimetableSlot> = {};
 
+  const flushSlot = () => {
+    if (currentSlot.subject && currentSlot.startTime && currentSlot.endTime) {
+      slots.push({
+        id: Math.random().toString(36).substr(2, 9),
+        subject: currentSlot.subject,
+        room: currentSlot.room || 'N/A',
+        startTime: currentSlot.startTime,
+        endTime: currentSlot.endTime,
+        type: currentSlot.type || 'class'
+      } as TimetableSlot);
+    }
+    currentSlot = {};
+  };
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].toUpperCase();
     
-    // Time is usually the trigger for a new slot in LPU Touch list view
+    // Time is the main trigger for a new slot block
     const timeMatch = line.match(timeRegex);
     if (timeMatch) {
-      if (currentSlot.subject) {
-        slots.push({
-          id: Math.random().toString(36).substr(2, 9),
-          subject: currentSlot.subject,
-          room: currentSlot.room || 'N/A',
-          startTime: currentSlot.startTime || '09:00',
-          endTime: currentSlot.endTime || '10:00',
-          type: currentSlot.type || 'class'
-        } as TimetableSlot);
-        currentSlot = {};
-      }
+      // If we already have a partial slot, try to save it before starting a new one
+      if (currentSlot.subject) flushSlot();
       
       let start = timeMatch[1].replace('.', ':');
       let end = timeMatch[2].replace('.', ':');
@@ -108,30 +115,34 @@ const parseTimetableText = (text: string): DaySchedule[] => {
       currentSlot.room = roomMatch[1];
     }
 
-    if (line.includes('LAB') || line.includes('PRACTICAL')) {
+    if (line.includes('LAB') || line.includes('PRACTICAL') || line.includes(' (P)')) {
       currentSlot.type = 'lab';
-    } else if (line.includes('LECTURE') || line.includes('TUTORIAL') || line.includes('CLASS')) {
+    } else if (line.includes('LECTURE') || line.includes('TUTORIAL') || line.includes(' (L)') || line.includes(' (T)')) {
       currentSlot.type = 'class';
+    }
+    
+    // If we have all critical info, we can flush it early to avoid missing data in multi-line blocks
+    if (currentSlot.subject && currentSlot.startTime && currentSlot.room && currentSlot.type) {
+      flushSlot();
     }
   }
 
-  // Push last slot
-  if (currentSlot.subject) {
-    slots.push({
-      id: Math.random().toString(36).substr(2, 9),
-      subject: currentSlot.subject,
-      room: currentSlot.room || 'N/A',
-      startTime: currentSlot.startTime || '09:00',
-      endTime: currentSlot.endTime || '10:00',
-      type: currentSlot.type || 'class'
-    } as TimetableSlot);
-  }
+  // Push final remaining slot
+  flushSlot();
 
   if (slots.length === 0) return [];
 
   return [{
     day: detectedDay,
-    slots: slots.sort((a, b) => a.startTime.localeCompare(b.startTime))
+    slots: slots.sort((a, b) => {
+      // Use timeToMinutes for proper comparison since they are 12hr strings potentially
+      const aMins = a.startTime.split(':').map(Number);
+      const bMins = b.startTime.split(':').map(Number);
+      // Heuristic: hours < 8 are PM
+      let aH = aMins[0]; if (aH < 8) aH += 12;
+      let bH = bMins[0]; if (bH < 8) bH += 12;
+      return (aH * 60 + aMins[1]) - (bH * 60 + bMins[1]);
+    })
   }];
 };
 

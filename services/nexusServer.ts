@@ -1,6 +1,6 @@
 
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
-import { LibraryFile, UserProfile, Folder, QuizQuestion, TimetableData, NexusNotification } from '../types.ts';
+import { LibraryFile, UserProfile, Folder, QuizQuestion, TimetableData, NexusNotification, DaySchedule } from '../types.ts';
 
 const getEnvVar = (name: string): string => {
   try {
@@ -94,18 +94,34 @@ class NexusServer {
     if (error) throw error;
   }
 
-  static async updateCommunityTimetable(id: string, metadata: any) {
+  static async updateCommunityTimetable(id: string, metadata: any, schedule?: DaySchedule[]) {
     const client = getSupabase();
     if (!client) return;
-    const generatedName = `${metadata.section} - ${metadata.branch} ${metadata.year} Year Sem ${metadata.semester}`;
-    const { error } = await client.from('community_timetables').update({
+    const generatedName = metadata.name || `${metadata.section} - ${metadata.branch} ${metadata.year} Year Sem ${metadata.semester}`;
+    const updatePayload: any = {
       section: metadata.section,
       branch: metadata.branch,
       year: metadata.year,
       semester: metadata.semester,
       name: generatedName
-    }).eq('id', id);
+    };
+    if (schedule) updatePayload.schedule = schedule;
+    
+    const { error } = await client.from('community_timetables').update(updatePayload).eq('id', id);
     if (error) throw error;
+  }
+
+  // Aliases for TimetableHub compatibility
+  static async updateTimetablePreset(id: string, data: any) {
+    return this.updateCommunityTimetable(id, data, data.schedule);
+  }
+
+  static async createTimetablePreset(data: any) {
+    return this.shareTimetable(data, data);
+  }
+
+  static async getTimetablePresets() {
+    return this.fetchCommunityTimetables();
   }
 
   static async deleteCommunityTimetable(id: string) {
