@@ -130,11 +130,33 @@ const parseTimetableText = (text: string): DaySchedule[] => {
     } as TimetableSlot);
   }
 
+  const timeToMinutes = (time: string) => {
+    if (!time) return 0;
+    const clean = time.toUpperCase().replace(/[\s.]/g, '');
+    const match12 = clean.match(/(\d{1,2})[:]?(\d{0,2})([AP][MN])/);
+    if (match12) {
+      let hours = parseInt(match12[1]);
+      const minutes = match12[2] ? parseInt(match12[2]) : 0;
+      const period = match12[3];
+      if (period.startsWith('P') && hours < 12) hours += 12;
+      if (period.startsWith('A') && hours === 12) hours = 0;
+      return hours * 60 + minutes;
+    }
+    const match24 = clean.match(/(\d{1,2})[:]?(\d{0,2})/);
+    if (match24) {
+      let hours = parseInt(match24[1]);
+      const minutes = match24[2] ? parseInt(match24[2]) : 0;
+      if (hours >= 1 && hours < 8) hours += 12; // Heuristic for afternoon classes
+      return hours * 60 + minutes;
+    }
+    return 0;
+  };
+
   if (slots.length === 0) return [];
 
   return [{
     day: detectedDay,
-    slots: slots.sort((a, b) => a.startTime.localeCompare(b.startTime))
+    slots: slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime))
   }];
 };
 

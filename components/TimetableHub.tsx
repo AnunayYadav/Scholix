@@ -14,27 +14,46 @@ const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 const timeToMinutes = (time: string) => {
   if (!time) return 0;
   
-  // Normalize time string: replace common misread characters
-  const normalizedTime = time.replace(/[.;-]/g, ':').replace(/\s+/g, '').trim().toUpperCase();
+  // Normalize: remove dots, internal spaces, and handle common OCR glitches for AM/PM
+  // Added common misreads like RM, FM, BN, etc.
+  const clean = time.toUpperCase()
+    .replace(/[\s.]/g, '')
+    .replace('AN', 'AM')
+    .replace('PN', 'PM')
+    .replace('RM', 'PM')
+    .replace('FM', 'PM')
+    .replace('AM.', 'AM')
+    .replace('PM.', 'PM')
+    .replace('BM', 'AM');
   
-  // Match hours and minutes
-  const match = normalizedTime.match(/(\d{1,2}):(\d{2})(AM|PM)?/);
-  if (!match) return 0;
-  
-  let hours = parseInt(match[1]);
-  const minutes = parseInt(match[2]);
-  const period = match[3];
-
-  if (period) {
+  // Match 12-hour with AM/PM suffix (e.g. 9:00AM, 05:00 PM)
+  const match12 = clean.match(/(\d{1,2})[:]?(\d{0,2})\s*([AP]M)/);
+  if (match12) {
+    let hours = parseInt(match12[1]);
+    const minutes = match12[2] ? parseInt(match12[2]) : 0;
+    const period = match12[3];
+    
     if (period === 'PM' && hours < 12) hours += 12;
     if (period === 'AM' && hours === 12) hours = 0;
-  } else {
-    // LPU Timetable Heuristic (Classes from 8:00 to 19:00)
-    // 1:00 to 7:59 is likely PM
-    if (hours >= 1 && hours < 8) hours += 12;
+    return hours * 60 + minutes;
   }
   
-  return hours * 60 + minutes;
+  // Match 24-hour or simple 12-hour with heuristic (e.g. 09:00, 5:00)
+  const match24 = clean.match(/(\d{1,2})[:]?(\d{0,2})/);
+  if (match24) {
+    let hours = parseInt(match24[1]);
+    const minutes = match24[2] ? parseInt(match24[2]) : 0;
+    
+    // LPU Heuristic: Classes between 1-7 are almost certainly PM
+    // 8:00 and onwards are AM. 1:00 to 7:00 are PM.
+    if (hours >= 1 && hours <= 7) {
+      hours += 12;
+    }
+    
+    return hours * 60 + minutes;
+  }
+  
+  return 0;
 };
 
 const minutesToTime = (mins: number) => {
@@ -43,186 +62,7 @@ const minutesToTime = (mins: number) => {
   return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 };
 
-const MX325_SCHEDULE: DaySchedule[] = [
-  {
-    day: 'Monday',
-    slots: [
-      { id: 'm1', subject: 'MTH166', room: '27-407A', startTime: '09:00', endTime: '10:00', type: 'class' },
-      { id: 'm2', subject: 'INT306', room: '27-407A', startTime: '10:00', endTime: '11:00', type: 'class' },
-      { id: 'm3', subject: 'INT306', room: '27-407A', startTime: '11:00', endTime: '12:00', type: 'class' },
-      { id: 'm4', subject: 'PEL130', room: '28-406', startTime: '13:00', endTime: '14:00', type: 'lab' },
-      { id: 'm5', subject: 'CSE101', room: '27-101', startTime: '15:00', endTime: '16:00', type: 'lab' },
-      { id: 'm6', subject: 'CSE101', room: '27-101', startTime: '16:00', endTime: '17:00', type: 'lab' },
-    ]
-  },
-  {
-    day: 'Tuesday',
-    slots: [
-      { id: 't1', subject: 'INT306', room: '37-906', startTime: '09:00', endTime: '10:00', type: 'lab' },
-      { id: 't2', subject: 'INT306', room: '37-906', startTime: '10:00', endTime: '11:00', type: 'lab' },
-      { id: 't3', subject: 'ECE279', room: '36-101', startTime: '11:00', endTime: '12:00', type: 'lab' },
-      { id: 't4', subject: 'ECE279', room: '36-101', startTime: '12:00', endTime: '13:00', type: 'lab' },
-      { id: 't5', subject: 'PEL130', room: '28-507A', startTime: '13:00', endTime: '14:00', type: 'class' },
-      { id: 't6', subject: 'ECE249', room: '27-101', startTime: '15:00', endTime: '16:00', type: 'class' },
-      { id: 't7', subject: 'CSE320', room: '27-101', startTime: '16:00', endTime: '17:00', type: 'class' },
-    ]
-  },
-  {
-    day: 'Wednesday',
-    slots: [
-      { id: 'w1', subject: 'PEL130', room: '37-708', startTime: '09:00', endTime: '10:00', type: 'lab' },
-      { id: 'w2', subject: 'PEL130', room: '37-708', startTime: '10:00', endTime: '11:00', type: 'lab' },
-      { id: 'w3', subject: 'CHE110', room: '37-609', startTime: '11:00', endTime: '12:00', type: 'class' },
-      { id: 'w4', subject: 'MTH166', room: '28-308', startTime: '13:00', endTime: '14:00', type: 'class' },
-      { id: 'w5', subject: 'CSE320', room: '27-101A', startTime: '14:00', endTime: '15:00', type: 'class' },
-      { id: 'w6', subject: 'CSE121', room: '26-505', startTime: '16:00', endTime: '17:00', type: 'class' },
-    ]
-  },
-  {
-    day: 'Thursday',
-    slots: [
-      { id: 'th1', subject: 'INT306', room: '37-609', startTime: '09:00', endTime: '10:00', type: 'class' },
-      { id: 'th2', subject: 'MTH166', room: '37-609', startTime: '10:00', endTime: '11:00', type: 'class' },
-      { id: 'th3', subject: 'CSE101', room: '37-609', startTime: '11:00', endTime: '12:00', type: 'class' },
-      { id: 'th4', subject: 'CSE101', room: '37-609', startTime: '12:00', endTime: '13:00', type: 'class' },
-      { id: 'th5', subject: 'ECE249', room: '37-703', startTime: '14:00', endTime: '15:00', type: 'class' },
-      { id: 'th6', subject: 'CSE320', room: '37-703', startTime: '15:00', endTime: '16:00', type: 'class' },
-      { id: 'th7', subject: 'CSE121', room: '37-703', startTime: '16:00', endTime: '17:00', type: 'class' },
-    ]
-  },
-  {
-    day: 'Friday',
-    slots: [
-      { id: 'f1', subject: 'CSE101', room: '27-309', startTime: '11:00', endTime: '12:00', type: 'class' },
-      { id: 'f2', subject: 'ECE249', room: '27-407A', startTime: '14:00', endTime: '15:00', type: 'class' },
-      { id: 'f3', subject: 'CHE110', room: '27-407A', startTime: '15:00', endTime: '16:00', type: 'class' },
-      { id: 'f4', subject: 'MTH166', room: '27-106', startTime: '16:00', endTime: '17:00', type: 'class' },
-    ]
-  }
-];
 
-// Fix: Added missing schedule constants to resolve name errors in batch presets
-const SECTION_325QB_SCHEDULE: DaySchedule[] = [
-  {
-    day: 'Monday',
-    slots: [
-      { id: 'qb-m1', subject: 'CSE320', room: '37-907', startTime: '09:00', endTime: '10:00', type: 'class' },
-      { id: 'qb-m2', subject: 'CSE101', room: '37-907', startTime: '10:00', endTime: '11:00', type: 'class' },
-      { id: 'qb-m3', subject: 'CSE101', room: '37-907', startTime: '11:00', endTime: '12:00', type: 'class' },
-      { id: 'qb-m4', subject: 'PEL125', room: '29-305', startTime: '13:00', endTime: '14:00', type: 'lab' },
-      { id: 'qb-m5', subject: 'ECE249', room: '37-708', startTime: '14:00', endTime: '15:00', type: 'class' },
-      { id: 'qb-m6', subject: 'INT306', room: '37-707', startTime: '15:00', endTime: '16:00', type: 'lab' },
-      { id: 'qb-m7', subject: 'INT306', room: '37-707', startTime: '16:00', endTime: '17:00', type: 'lab' },
-    ]
-  },
-  {
-    day: 'Tuesday',
-    slots: [
-      { id: 'qb-t1', subject: 'INT306', room: '37-902', startTime: '09:00', endTime: '10:00', type: 'class' },
-      { id: 'qb-t2', subject: 'INT306', room: '37-902', startTime: '10:00', endTime: '11:00', type: 'class' },
-      { id: 'qb-t3', subject: 'CSE320', room: '37-902', startTime: '11:00', endTime: '12:00', type: 'class' },
-      { id: 'qb-t4', subject: 'PEL125', room: '34-508', startTime: '13:00', endTime: '14:00', type: 'class' },
-      { id: 'qb-t5', subject: 'CHE110', room: '27-402', startTime: '14:00', endTime: '15:00', type: 'class' },
-      { id: 'qb-t6', subject: 'CSE121', room: '37-702', startTime: '15:00', endTime: '16:00', type: 'class' },
-      { id: 'qb-t7', subject: 'ECE249', room: '37-702', startTime: '16:00', endTime: '17:00', type: 'class' },
-    ]
-  },
-  {
-    day: 'Wednesday',
-    slots: [
-      { id: 'qb-w1', subject: 'PEL125', room: '34-506', startTime: '09:00', endTime: '10:00', type: 'lab' },
-      { id: 'qb-w2', subject: 'PEL125', room: '34-506', startTime: '10:00', endTime: '11:00', type: 'lab' },
-      { id: 'qb-w3', subject: 'CSE101', room: '37-607', startTime: '11:00', endTime: '12:00', type: 'class' },
-      { id: 'qb-w4', subject: 'MTH166', room: '37-607', startTime: '12:00', endTime: '13:00', type: 'class' },
-      { id: 'qb-w5', subject: 'CHE110', room: '27-101', startTime: '14:00', endTime: '15:00', type: 'class' },
-      { id: 'qb-w6', subject: 'INT306', room: '27-101', startTime: '15:00', endTime: '16:00', type: 'class' },
-      { id: 'qb-w7', subject: 'ECE249', room: '27-101', startTime: '16:00', endTime: '17:00', type: 'class' },
-    ]
-  },
-  {
-    day: 'Thursday',
-    slots: [
-      { id: 'qb-th1', subject: 'MTH166', room: '37-907', startTime: '09:00', endTime: '10:00', type: 'class' },
-      { id: 'qb-th2', subject: 'CSE101', room: '37-907', startTime: '10:00', endTime: '11:00', type: 'lab' },
-      { id: 'qb-th3', subject: 'CSE101', room: '37-907', startTime: '11:00', endTime: '12:00', type: 'lab' },
-      { id: 'qb-th4', subject: 'MTH166', room: '37-908', startTime: '15:00', endTime: '16:00', type: 'class' },
-    ]
-  },
-  {
-    day: 'Friday',
-    slots: [
-      { id: 'qb-f1', subject: 'MTH166', room: '37-808', startTime: '11:00', endTime: '12:00', type: 'class' },
-      { id: 'qb-f2', subject: 'ECE279', room: '36-104', startTime: '13:00', endTime: '14:00', type: 'lab' },
-      { id: 'qb-f3', subject: 'ECE279', room: '36-104', startTime: '14:00', endTime: '15:00', type: 'lab' },
-      { id: 'qb-f4', subject: 'CSE121', room: '37-907', startTime: '15:00', endTime: '16:00', type: 'class' },
-      { id: 'qb-f5', subject: 'CSE320', room: '37-907', startTime: '16:00', endTime: '17:00', type: 'class' },
-    ]
-  }
-];
-
-const SECTION_325QG_SCHEDULE: DaySchedule[] = [
-  {
-    day: 'Monday',
-    slots: [
-      { id: 'qg-m1', subject: 'PEL121', room: '37-903', startTime: '09:00', endTime: '10:00', type: 'class' },
-      { id: 'qg-m2', subject: 'INT306', room: '37-903', startTime: '10:00', endTime: '11:00', type: 'class' },
-      { id: 'qg-m3', subject: 'ECE279', room: '33-102', startTime: '11:00', endTime: '12:00', type: 'lab' },
-      { id: 'qg-m4', subject: 'ECE279', room: '33-102', startTime: '12:00', endTime: '13:00', type: 'lab' },
-      { id: 'qg-m5', subject: 'ECE249', room: '37-706', startTime: '14:00', endTime: '15:00', type: 'class' },
-      { id: 'qg-m6', subject: 'CSE101', room: '37-706', startTime: '15:00', endTime: '16:00', type: 'class' },
-      { id: 'qg-m7', subject: 'CSE101', room: '37-706', startTime: '16:00', endTime: '17:00', type: 'class' },
-    ]
-  },
-  {
-    day: 'Tuesday',
-    slots: [
-      { id: 'qg-t1', subject: 'MTH166', room: '37-809', startTime: '09:00', endTime: '10:00', type: 'class' },
-      { id: 'qg-t2', subject: 'PEL121', room: '37-809', startTime: '10:00', endTime: '11:00', type: 'lab' },
-      { id: 'qg-t3', subject: 'CSE101', room: '37-901', startTime: '11:00', endTime: '12:00', type: 'class' },
-      { id: 'qg-t4', subject: 'CHE110', room: '37-901', startTime: '12:00', endTime: '13:00', type: 'class' },
-      { id: 'qg-t5', subject: 'ECE249', room: '37-609', startTime: '14:00', endTime: '15:00', type: 'class' },
-      { id: 'qg-t6', subject: 'CSE320', room: '37-609', startTime: '15:00', endTime: '16:00', type: 'class' },
-    ]
-  },
-  {
-    day: 'Wednesday',
-    slots: [
-      { id: 'qg-w1', subject: 'MTH166', room: '37-902', startTime: '09:00', endTime: '10:00', type: 'class' },
-      { id: 'qg-w2', subject: 'CSE121', room: '37-902', startTime: '10:00', endTime: '11:00', type: 'class' },
-      { id: 'qg-w3', subject: 'CSE121', room: '37-902', startTime: '11:00', endTime: '12:00', type: 'class' },
-      { id: 'qg-w4', subject: 'PEL121', room: '37-605', startTime: '13:00', endTime: '14:00', type: 'lab' },
-      { id: 'qg-w5', subject: 'PEL121', room: '37-605', startTime: '14:00', endTime: '15:00', type: 'lab' },
-      { id: 'qg-w6', subject: 'CSE320', room: '37-710', startTime: '15:00', endTime: '16:00', type: 'class' },
-    ]
-  },
-  {
-    day: 'Thursday',
-    slots: [
-      { id: 'qg-th1', subject: 'MTH166', room: '37-607', startTime: '09:00', endTime: '10:00', type: 'class' },
-      { id: 'qg-th2', subject: 'INT306', room: '37-607', startTime: '10:00', endTime: '11:00', type: 'lab' },
-      { id: 'qg-th3', subject: 'INT306', room: '37-607', startTime: '11:00', endTime: '12:00', type: 'lab' },
-      { id: 'qg-th4', subject: 'ECE249', room: '37-607', startTime: '12:00', endTime: '13:00', type: 'class' },
-      { id: 'qg-th5', subject: 'CHE110', room: '37-701', startTime: '14:00', endTime: '15:00', type: 'class' },
-      { id: 'qg-th6', subject: 'CSE320', room: '37-701', startTime: '15:00', endTime: '16:00', type: 'class' },
-    ]
-  },
-  {
-    day: 'Friday',
-    slots: [
-      { id: 'qg-f1', subject: 'MTH166', room: '37-807', startTime: '09:00', endTime: '10:00', type: 'class' },
-      { id: 'qg-f2', subject: 'INT306', room: '37-807', startTime: '10:00', endTime: '11:00', type: 'class' },
-      { id: 'qg-f3', subject: 'INT306', room: '37-807', startTime: '11:00', endTime: '12:00', type: 'class' },
-      { id: 'qg-f4', subject: 'CSE101', room: '28-408', startTime: '13:00', endTime: '14:00', type: 'lab' },
-      { id: 'qg-f5', subject: 'CSE101', room: '28-408', startTime: '14:00', endTime: '15:00', type: 'lab' },
-    ]
-  }
-];
-
-const PRESET_BATCHES = [
-  { id: '325qb-2026', name: '325QB - CSE 2nd Sem 2026', schedule: SECTION_325QB_SCHEDULE, section: '325QB', branch: 'CSE', year: '2nd', semester: '2' },
-  { id: '325qg-2026', name: '325QG - CSE 2nd Sem 2026', schedule: SECTION_325QG_SCHEDULE, section: '325QG', branch: 'CSE', year: '2nd', semester: '2' },
-  { id: '325mx-2026', name: '325MX - CSE 2nd Sem 2026', schedule: MX325_SCHEDULE, section: '325MX', branch: 'CSE', year: '2nd', semester: '2' },
-];
 
 const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfile }) => {
   const { university } = useUniversity();
@@ -240,6 +80,9 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
   const [renameTargetId, setRenameTargetId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
 
+  // Added for update profile selection
+  const [selectedUpdateProfile, setSelectedUpdateProfile] = useState<any>(null);
+
   const handleCloseUpload = () => {
     setIsClosingUpload(true);
     setTimeout(() => {
@@ -247,6 +90,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       setIsClosingUpload(false);
       setIsUpdatingPreset(false);
       setPresetToUpdateId(null);
+      setSelectedUpdateProfile(null);
       setRawPastedText('');
     }, 250);
   };
@@ -270,6 +114,16 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     }, 250);
   };
 
+  const handleCloseSlot = () => {
+    setIsClosingSlot(true);
+    setTimeout(() => {
+      setShowSlotModal(false);
+      setIsClosingSlot(false);
+      setEditingSlot(null);
+      setSlotForm({ subject: '', room: '', startTime: '09:00', endTime: '10:00', type: 'class' });
+    }, 250);
+  };
+
   const [isProcessingAI, setIsProcessingAI] = useState(false);
   const [ocrProgress, setOcrProgress] = useState(0);
   const [processingStatus, setProcessingStatus] = useState('');
@@ -285,6 +139,12 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
   const [editingPresetId, setEditingPresetId] = useState<string | null>(null);
   const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
   const [presetToUpdateId, setPresetToUpdateId] = useState<string | null>(null);
+  const [presetSearchQuery, setPresetSearchQuery] = useState('');
+  const [dropdownSearchQuery, setDropdownSearchQuery] = useState('');
+  const [showSlotModal, setShowSlotModal] = useState(false);
+  const [isClosingSlot, setIsClosingSlot] = useState(false);
+  const [editingSlot, setEditingSlot] = useState<TimetableSlot | null>(null);
+  const [slotForm, setSlotForm] = useState({ subject: '', room: '', startTime: '09:00', endTime: '10:00', type: 'class' as 'class' | 'lab' });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -347,6 +207,35 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     handleCloseRename();
   };
 
+  const handleDeletePreset = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const confirmed = await showConfirm("Are you sure you want to delete this community preset?");
+    if (confirmed) {
+      try {
+        await NexusServer.deleteCommunityTimetable(id);
+        showToast("Preset removed from community.", "success");
+        loadCommunityPresets();
+      } catch (err) {
+        showToast("Failed to delete preset.", "error");
+      }
+    }
+  };
+
+  const handleEditPresetMetadata = (preset: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setEditingPresetId(preset.id);
+    setMetadata({
+      section: preset.section || '',
+      year: preset.year || '',
+      branch: preset.branch || '',
+      semester: preset.semester || ''
+    });
+    setPendingTimetable(preset.schedule);
+    setShowMetadataModal(true);
+  };
+
   const handleRemoveFriend = async (friendId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
@@ -402,22 +291,21 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
         if (!currentDay) continue;
 
         // Detect Time pattern (e.g. 09:00 - 10:00 or 9:00 AM)
-        const timeMatch = line.match(/(\d{1,2}:\d{2})\s*(?:-|—|to)?\s*(\d{1,2}:\d{2})/i);
+        const timeMatch = line.match(/(\d{1,2}[:.]\d{2}(?:\s*[AP]M)?)\s*(?:-|—|to|UNTIL)?\s*(\d{1,2}[:.]\d{2}(?:\s*[AP]M)?)/i);
         if (timeMatch) {
-          const startTime = timeMatch[1];
-          const endTime = timeMatch[2];
+          const startTime = timeMatch[1].replace('.', ':');
+          const endTime = timeMatch[2].replace('.', ':');
           
           // Look for subject and room near this time
-          // Often subject is the line before, and room is the line after or in the same line
           let subject = "Unknown";
           let room = "N/A";
 
-          // Heuristic: Subject is usually before time
-          if (i > 0 && !dayKeywords.includes(lines[i-1])) {
+          // Heuristic: Subject is usually before time or on the same line if it's a course code
+          if (i > 0 && !dayKeywords.some(d => lines[i-1].includes(d))) {
             subject = lines[i-1];
           }
           
-          // Heuristic: Room is usually after time
+          // Room is usually after time
           if (i < lines.length - 1) {
             room = lines[i+1];
           }
@@ -426,11 +314,11 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
           if (dayData) {
             dayData.slots.push({
               id: `pasted-${Math.random().toString(36).substr(2, 5)}`,
-              subject,
-              room,
+              subject: subject.trim(),
+              room: room.trim(),
               startTime,
               endTime,
-              type: subject.toLowerCase().includes('lab') ? 'lab' : 'class'
+              type: (subject.toLowerCase().includes('lab') || subject.toLowerCase().includes('practical')) ? 'lab' : 'class'
             });
           }
         }
@@ -455,13 +343,13 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       
       // Update/New Workflow
       if (isUpdatingPreset && presetToUpdateId) {
-        const preset = communityPresets.find(p => p.id === presetToUpdateId);
-        if (preset) {
+        const existingProfile = [myTimetable, ...friendTimetables, ...communityPresets].find(p => (p?.id || p?.ownerId) === presetToUpdateId);
+        if (existingProfile) {
           setMetadata({
-            section: preset.section || '',
-            branch: preset.branch || '',
-            year: preset.year || '',
-            semester: preset.semester || ''
+            section: existingProfile.section || '',
+            branch: existingProfile.branch || '',
+            year: existingProfile.year || '',
+            semester: existingProfile.semester || ''
           });
           setEditingPresetId(presetToUpdateId);
         }
@@ -524,13 +412,22 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       setPendingTimetable(combinedSchedules);
       
       if (isUpdatingPreset && presetToUpdateId) {
-        const preset = communityPresets.find(p => p.id === presetToUpdateId);
-        if (preset) {
+        const existingProfile = [...friendTimetables, ...communityPresets].find(p => (p?.id || p?.ownerId) === presetToUpdateId);
+        if (!existingProfile && myTimetable && (myTimetable.ownerId === presetToUpdateId || presetToUpdateId === 'me')) {
+          const profile = myTimetable;
           setMetadata({
-            section: preset.section || '',
-            branch: preset.branch || '',
-            year: preset.year || '',
-            semester: preset.semester || ''
+            section: profile.section || '',
+            branch: profile.branch || '',
+            year: profile.year || '',
+            semester: profile.semester || ''
+          });
+          setEditingPresetId(presetToUpdateId);
+        } else if (existingProfile) {
+          setMetadata({
+            section: existingProfile.section || '',
+            branch: existingProfile.branch || '',
+            year: existingProfile.year || '',
+            semester: existingProfile.semester || ''
           });
           setEditingPresetId(presetToUpdateId);
         }
@@ -553,7 +450,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     }
   };
 
-  const submitMetadata = async () => {
+  const handleMetadataSubmit = async () => {
     const { section, branch, year, semester } = metadata;
     if (!section || !branch || !year || !semester) {
       showToast("Please fill all details to continue.", "info");
@@ -625,10 +522,97 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     return today === activeDay;
   }, [activeDay]);
 
+  const updateTimetableState = async (updatedSchedule: DaySchedule[]) => {
+    if (!activeTimetable) return;
+    const updatedTimetable = { ...activeTimetable, schedule: updatedSchedule };
+    
+    if (selectedEntityId === 'me') {
+      setMyTimetable(updatedTimetable);
+      await NexusServer.saveRecord(userProfile?.id || null, 'timetable_main', updatedTimetable.ownerName, updatedTimetable);
+    } else {
+      setFriendTimetables(prev => prev.map(f => f.ownerId === selectedEntityId ? updatedTimetable : f));
+    }
+
+    // Sync with community if applicable
+    if (activeTimetable.originPresetId) {
+       const preset = communityPresets.find(p => p.id === activeTimetable.originPresetId);
+       if (preset && (preset.owner_id === userProfile?.id || userProfile?.is_admin)) {
+          try {
+            await NexusServer.updateCommunityTimetable(preset.id, preset, updatedSchedule);
+            loadCommunityPresets();
+          } catch (e) {
+            console.error("Failed to sync with community:", e);
+          }
+       }
+    }
+  };
+
+  const handleOpenAddSlot = () => {
+    setEditingSlot(null);
+    setSlotForm({ subject: '', room: '', startTime: '09:00', endTime: '10:00', type: 'class' });
+    setShowSlotModal(true);
+  };
+
+  const handleOpenEditSlot = (slot: TimetableSlot) => {
+    setEditingSlot(slot);
+    setSlotForm({ subject: slot.subject, room: slot.room, startTime: slot.startTime, endTime: slot.endTime, type: slot.type });
+    setShowSlotModal(true);
+  };
+
+  const handleDeleteSlot = async (slotId: string) => {
+    if (!activeTimetable) return;
+    const confirmed = await showConfirm("Delete this class from the schedule?");
+    if (!confirmed) return;
+
+    const updatedSchedule = activeTimetable.schedule.map(day => {
+      if (day.day === activeDay) {
+        return { ...day, slots: day.slots.filter(s => s.id !== slotId) };
+      }
+      return day;
+    });
+
+    await updateTimetableState(updatedSchedule);
+  };
+
+  const handleSaveSlot = async () => {
+    if (!activeTimetable || !slotForm.subject) return;
+
+    const newSlot: TimetableSlot = {
+      id: editingSlot?.id || `slot-${Math.random().toString(36).substr(2, 9)}`,
+      ...slotForm
+    };
+
+    let updatedSchedule = [...activeTimetable.schedule];
+    let dayData = updatedSchedule.find(s => s.day === activeDay);
+    
+    if (!dayData) {
+      dayData = { day: activeDay, slots: [] };
+      updatedSchedule.push(dayData);
+    }
+
+    if (editingSlot) {
+      dayData.slots = dayData.slots.map(s => s.id === editingSlot.id ? newSlot : s);
+    } else {
+      dayData.slots.push(newSlot);
+    }
+    
+    dayData.slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+    
+    await updateTimetableState(updatedSchedule);
+    handleCloseSlot();
+  };
+
   const activeTimetable = useMemo(() => {
     if (selectedEntityId === 'me') return myTimetable;
     return friendTimetables.find(f => f.ownerId === selectedEntityId) || null;
   }, [selectedEntityId, myTimetable, friendTimetables]);
+
+  const canEditCurrent = useMemo(() => {
+    if (!userProfile) return false;
+    if (userProfile.is_admin) return true;
+    if (selectedEntityId === 'me') return true;
+    return false;
+  }, [selectedEntityId, userProfile]);
 
   const daySlotsWithBreaks = useMemo(() => {
     if (!activeTimetable || !activeTimetable.schedule) return [];
@@ -718,7 +702,8 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       section: batch.section,
       year: batch.year,
       branch: batch.branch,
-      semester: batch.semester
+      semester: batch.semester,
+      originPresetId: batch.id
     };
 
     if (targetForAction === 'me' && !targetId) {
@@ -777,10 +762,10 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     <div className="max-w-6xl mx-auto space-y-8 animate-fade-in pb-20 px-4 md:px-0">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-bold text-zinc-800 dark:text-white mb-2 tracking-tighter">
-            Timetable <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Hub</span>
+          <h2 className="text-3xl font-medium text-zinc-800 dark:text-white mb-2 tracking-tighter">
+            Timetable <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 font-semibold">Hub</span>
           </h2>
-          <p className="text-zinc-600 dark:text-zinc-400 font-medium text-[11px] sm:text-xs">Organize your classes and find time to meet with friends.</p>
+          <p className="text-zinc-500 dark:text-zinc-400 font-medium text-[11px] sm:text-xs">Organize your classes and find time to meet with friends.</p>
         </div>
         <div className="flex gap-3">
           <NexusDropdown
@@ -788,60 +773,86 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
             options={[]}
             onChange={() => { }}
             className="flex-shrink-0"
+            align="right"
             renderCustomMenu={(close) => (
-              <div className="w-[320px] md:w-[400px] p-4 space-y-6 max-h-[500px] overflow-y-auto no-scrollbar">
-                <section className="space-y-3">
-                  <h4 className="text-[11px] sm:text-xs font-medium text-zinc-500 ml-1">Standard Batches</h4>
-                  <div className="space-y-2">
-                    {PRESET_BATCHES.map(batch => (
-                      <div key={batch.id} className="relative group/card">
-                        <button
-                          onClick={() => {
-                            setTargetForAction(selectedEntityId === 'me' ? 'me' : 'friend');
-                            applyPreset(batch, selectedEntityId === 'me' ? undefined : selectedEntityId);
-                            close();
-                          }}
-                          className="w-full p-4 bg-zinc-50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 rounded-2xl text-left hover:border-orange-500/50 hover:bg-zinc-100 dark:hover:bg-white/[0.05] transition-all flex items-center justify-between group border-none"
-                        >
-                          <div className="min-w-0 pr-12">
-                            <p className="text-[11px] sm:text-xs font-medium text-zinc-800 dark:text-white truncate">{batch.name}</p>
-                            <p className="text-[10px] font-semibold text-zinc-500 mt-0.5">Full 5-Day Schedule</p>
-                          </div>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                        </button>
-                      </div>
-                    ))}
+              <div className="w-[300px] sm:w-[350px] md:w-[400px] p-4 space-y-6 max-h-[500px] overflow-y-auto no-scrollbar bg-white dark:bg-[#0d0d0d] rounded-[24px] border border-zinc-100 dark:border-white/5 shadow-xl">
+                <div className="sticky top-0 z-20 pb-2 bg-white dark:bg-[#0d0d0d]">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search batches or sections..."
+                      value={dropdownSearchQuery}
+                      onChange={e => setDropdownSearchQuery(e.target.value)}
+                      className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-4 py-3 text-[11px] font-medium outline-none focus:ring-2 focus:ring-orange-600/20 transition-all"
+                    />
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
                   </div>
-                </section>
+                </div>
 
-                {communityPresets.length > 0 && (
+
+
+                {communityPresets.filter(p => p.name.toLowerCase().includes(dropdownSearchQuery.toLowerCase()) || p.section.toLowerCase().includes(dropdownSearchQuery.toLowerCase())).length > 0 && (
                   <section className="space-y-3">
-                    <h4 className="text-[11px] sm:text-xs font-medium text-orange-500 ml-1">Community Uploads</h4>
+                  <h4 className="text-[11px] font-medium text-orange-500/80 tracking-tight ml-1">Community uploads</h4>
                     <div className="space-y-2">
-                      {communityPresets.map(preset => (
-                        <div key={preset.id} className="relative group/card">
-                          <button
-                            onClick={() => {
-                              setTargetForAction(selectedEntityId === 'me' ? 'me' : 'friend');
-                              applyPreset(preset, selectedEntityId === 'me' ? undefined : selectedEntityId);
-                              close();
-                            }}
-                            className="w-full p-4 bg-zinc-50 dark:bg-orange-600/[0.03] border border-zinc-200 dark:border-orange-600/10 rounded-2xl text-left hover:border-orange-500/50 hover:bg-zinc-100 dark:hover:bg-orange-600/[0.05] transition-all flex items-center justify-between group border-none"
-                          >
-                            <div className="min-w-0 pr-16">
-                              <p className="text-[11px] sm:text-xs font-medium text-zinc-800 dark:text-white truncate">{preset.name}</p>
-                              <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="text-[10px] font-bold text-zinc-500">{preset.branch}</span>
-                                <span className="w-1 h-1 bg-zinc-200 dark:bg-white/10 rounded-full" />
-                                <span className="text-[10px] font-bold text-zinc-500">{preset.year} Year</span>
+                      {communityPresets.filter(p => p.name.toLowerCase().includes(dropdownSearchQuery.toLowerCase()) || p.section.toLowerCase().includes(dropdownSearchQuery.toLowerCase())).map(preset => {
+                        const isOwner = userProfile?.id === preset.owner_id;
+                        const isAdmin = userProfile?.is_admin;
+                        const canEdit = isOwner || isAdmin;
+                        
+                        return (
+                          <div key={preset.id} className="relative group/card">
+                            <button
+                              onClick={() => {
+                                setTargetForAction(selectedEntityId === 'me' ? 'me' : 'friend');
+                                applyPreset(preset, selectedEntityId === 'me' ? undefined : selectedEntityId);
+                                close();
+                              }}
+                              className="w-full p-4 bg-zinc-50 dark:bg-orange-600/[0.02] border border-transparent rounded-2xl text-left hover:border-orange-500/30 hover:bg-zinc-100 dark:hover:bg-orange-600/[0.04] transition-all flex items-center justify-between group"
+                            >
+                              <div className="min-w-0 pr-20">
+                                <p className="text-[11px] sm:text-xs font-medium text-zinc-800 dark:text-white truncate">{preset.name}</p>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                  <span className="text-[10px] font-medium text-zinc-400">{preset.branch}</span>
+                                  <span className="w-1 h-1 bg-zinc-200 dark:bg-white/10 rounded-full" />
+                                  <span className="text-[10px] font-medium text-zinc-400">{preset.year} Year</span>
+                                </div>
                               </div>
-                            </div>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white/20 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                          </button>
-                        </div>
-                      ))}
+                              <div className="w-8 h-8 rounded-xl bg-orange-600/0 group-hover:bg-orange-600/10 flex items-center justify-center transition-all">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-zinc-300 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                              </div>
+                            </button>
+
+                            {canEdit && (
+                              <div className="absolute right-12 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-all z-10 bg-white/80 dark:bg-[#0d0d0d]/80 backdrop-blur-md p-1 rounded-xl shadow-lg border border-zinc-100 dark:border-white/10">
+                                <button 
+                                  onClick={(e) => handleEditPresetMetadata(preset, e)}
+                                  title="Edit metadata"
+                                  className="w-8 h-8 rounded-lg hover:bg-orange-600/10 flex items-center justify-center text-zinc-400 hover:text-orange-600 transition-colors border-none bg-transparent"
+                                >
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                </button>
+                                <button 
+                                  onClick={(e) => handleDeletePreset(preset.id, e)}
+                                  title="Delete preset"
+                                  className="w-8 h-8 rounded-lg hover:bg-red-600/10 flex items-center justify-center text-zinc-400 hover:text-red-500 transition-colors border-none bg-transparent"
+                                >
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </section>
+                )}
+                
+                {dropdownSearchQuery && communityPresets.filter(b => b.name.toLowerCase().includes(dropdownSearchQuery.toLowerCase()) || b.section.toLowerCase().includes(dropdownSearchQuery.toLowerCase())).length === 0 && (
+                  <div className="py-12 text-center space-y-2">
+                    <p className="text-[11px] font-semibold text-zinc-400">No matching presets found</p>
+                    <p className="text-[10px] text-zinc-500">Try searching with section code or branch</p>
+                  </div>
                 )}
               </div>
             )}
@@ -861,9 +872,9 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
           <button 
             key={day} 
             onClick={() => setActiveDay(day)} 
-            className={`flex-shrink-0 px-6 py-2.5 rounded-2xl text-[13px] font-semibold transition-all duration-300 border-none ${
+            className={`flex-shrink-0 px-6 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-300 border-none ${
               activeDay === day 
-                ? 'bg-orange-600/10 text-orange-600 shadow-sm' 
+                ? 'bg-orange-600/10 text-orange-600' 
                 : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-white/10'
             }`}
           >
@@ -877,16 +888,27 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
           {(!activeTimetable || !activeTimetable.schedule || activeTimetable.schedule.length === 0) ? (
             <div className="glass-panel p-16 rounded-[48px] border-4 border-dashed border-zinc-200 dark:border-white/5 flex flex-col items-center justify-center text-center bg-zinc-100 dark:bg-[#0a0a0a]">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-20 h-20 mb-6"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
-              <h3 className="text-xl font-mediumer">No Schedule Data</h3>
-              <p className="text-[11px] sm:text-xs font-bold mt-2">Use a Batch Preset or Upload screenshots for {activeTimetable?.ownerName || (selectedEntityId === 'me' ? 'your profile' : 'this friend')}.</p>
+              <h3 className="text-xl font-medium text-zinc-800 dark:text-white">No Schedule Data</h3>
+              <p className="text-[11px] sm:text-xs font-medium text-zinc-500 mt-2">Use a Batch Preset or Upload screenshots for {activeTimetable?.ownerName || (selectedEntityId === 'me' ? 'your profile' : 'this friend')}.</p>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="flex items-center justify-between px-4">
-                <h3 className="text-[11px] font-semibold text-orange-600">{activeDay} Schedule</h3>
-                <span className="text-[10px] font-semibold text-zinc-400">{daySlotsWithBreaks.filter(s => s.type !== 'break').length} Activities</span>
+                <h3 className="text-[12px] font-medium text-orange-600/80 tracking-tight">{activeDay} schedule</h3>
+                <span className="text-[10px] font-medium text-zinc-400">{daySlotsWithBreaks.filter(s => s.type !== 'break').length} Activities</span>
               </div>
               <div className="grid grid-cols-2 gap-4">
+                {canEditCurrent && (
+                  <button 
+                    onClick={handleOpenAddSlot}
+                    className="col-span-full py-8 rounded-[32px] border-2 border-dashed border-zinc-200 dark:border-white/5 hover:border-orange-500/30 hover:bg-orange-600/[0.03] transition-all flex flex-col items-center justify-center gap-2 group border-none"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-orange-600/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 text-orange-600"><path d="M12 5v14M5 12h14" /></svg>
+                    </div>
+                    <span className="text-[11px] font-semibold text-zinc-500 group-hover:text-orange-600 tracking-tight transition-colors">Add Class for {activeDay}</span>
+                  </button>
+                )}
                 {daySlotsWithBreaks.length === 0 ? (
                   <div className="col-span-full p-10 bg-zinc-50 dark:bg-[#0a0a0a] border border-zinc-100 dark:border-white/5 rounded-[32px] text-center"><p className="text-[11px] sm:text-xs font-medium text-zinc-400">No events found for {activeDay}.</p></div>
                 ) : (
@@ -899,39 +921,45 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     const isUpcoming = isCurrentDay && currentMinutes < startMin;
                     const isBreak = slot.type === 'break';
 
-                    let statusLabel = 'Plan';
-                    if (isCurrentDay) {
-                      if (isActive) statusLabel = 'Now';
-                      else if (isFinished) statusLabel = 'Done';
-                      else if (isUpcoming) statusLabel = 'Next';
-                    }
-
                     return (
-                      <div key={slot.id} className={`group relative p-5 rounded-[24px] transition-all flex flex-col justify-between ${isActive ? 'bg-orange-600/5 border border-orange-500/50 shadow-xl' : isFinished ? 'opacity-40 grayscale' : 'bg-white dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 hover:border-orange-500/30'}`}>
+                      <div key={slot.id} className={`group relative p-5 rounded-[22px] transition-all flex flex-col justify-between ${isActive ? 'bg-orange-600/[0.03] border border-orange-500/20 shadow-sm' : isFinished ? 'opacity-40 grayscale' : 'bg-white dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 hover:border-orange-500/20'}`}>
 
                         <div className="space-y-3">
                           <div className="flex justify-between items-center">
                             <div className="flex items-center gap-2">
-                              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isActive ? 'bg-orange-600 text-white' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400'}`}>
+                              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isActive ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400'}`}>
                                 {isBreak ? (
                                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" /></svg>
                                 ) : (
                                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
                                 )}
                               </div>
-                              <span className={`text-[11px] font-bold tabular-nums ${isActive ? 'text-orange-600' : 'text-zinc-500'}`}>
+                              <span className={`text-[11px] font-medium tabular-nums ${isActive ? 'text-orange-600' : 'text-zinc-500'}`}>
                                 {slot.startTime} — {slot.endTime}
                               </span>
                             </div>
-                            {isActive && <span className="text-[9px] font-bold text-orange-500 animate-pulse">LIVE</span>}
+                            
+                            <div className="flex items-center gap-1">
+                              {isActive && <span className="text-[9px] font-semibold text-orange-500 animate-pulse tracking-wider mr-2">Live</span>}
+                              {canEditCurrent && !isBreak && (
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                  <button onClick={(e) => { e.stopPropagation(); handleOpenEditSlot(slot); }} className="p-1.5 hover:text-orange-500 text-zinc-300 transition-colors border-none bg-transparent">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                  </button>
+                                  <button onClick={(e) => { e.stopPropagation(); handleDeleteSlot(slot.id); }} className="p-1.5 hover:text-red-500 text-zinc-300 transition-colors border-none bg-transparent">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           </div>
 
                           <div className="min-w-0">
-                            <h4 className={`text-lg font-bold leading-tight mb-1 truncate ${isActive ? 'text-orange-600' : isBreak ? 'text-zinc-400' : 'text-zinc-800 dark:text-zinc-100'}`}>
+                            <h4 className={`text-lg font-medium leading-tight mb-1 truncate ${isActive ? 'text-orange-600' : isBreak ? 'text-zinc-400' : 'text-zinc-800 dark:text-zinc-100'}`}>
                               {slot.subject}
                             </h4>
                             <div className="flex items-center gap-2">
-                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${slot.type === 'lab' ? 'bg-blue-500/10 text-blue-500' : 'bg-orange-500/10 text-orange-500'}`}>
+                              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${slot.type === 'lab' ? 'bg-blue-500/10 text-blue-500' : 'bg-orange-500/10 text-orange-500'}`}>
                                 {slot.type}
                               </span>
                               {!isBreak && slot.room !== 'N/A' && (
@@ -957,7 +985,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
         <div className="lg:col-span-4 space-y-8">
           <div className="p-8 rounded-[40px] bg-zinc-100 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 shadow-xl relative overflow-hidden group">
             <div className="relative z-10">
-              <h3 className="text-[11px] font-bold text-orange-600 uppercase tracking-wider mb-6">Shared Gaps</h3>
+              <h3 className="text-[12px] font-medium text-orange-600/80 tracking-tight mb-6">Shared gaps</h3>
               {selectedEntityId === 'me' ? (
                 <div className="py-4 text-center">
                   <p className="text-sm text-zinc-400">Select a connection below to find common free time.</p>
@@ -971,10 +999,10 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                   {commonBreaks.map((b, i) => (
                     <div key={i} className="p-4 bg-white dark:bg-white/[0.03] rounded-2xl border border-zinc-100 dark:border-white/5">
                       <div className="flex justify-between items-center mb-1">
-                        <p className="text-[10px] font-bold text-zinc-500">Common Break</p>
-                        <span className="text-[10px] font-bold text-orange-600">{b.duration} mins</span>
+                        <p className="text-[10px] font-medium text-zinc-400 tracking-tight">Common break</p>
+                        <span className="text-[10px] font-medium text-orange-600">{b.duration} mins</span>
                       </div>
-                      <p className="text-lg font-bold text-zinc-800 dark:text-zinc-100">{b.start} — {b.end}</p>
+                      <p className="text-lg font-medium text-zinc-800 dark:text-zinc-100">{b.start} — {b.end}</p>
                     </div>
                   ))}
                 </div>
@@ -990,13 +1018,13 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                 className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedEntityId === 'me' ? 'bg-orange-600/10 border-orange-600' : 'bg-white dark:bg-[#0a0a0a] border-zinc-200 dark:border-white/5 hover:border-orange-500/30'}`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-orange-600 flex items-center justify-center font-black text-[11px] sm:text-xs uppercase flex-shrink-0">{userProfile?.username?.[0] || 'M'}</div>
+                  <div className="w-8 h-8 rounded-full bg-orange-600 flex items-center justify-center font-semibold text-[11px] sm:text-xs flex-shrink-0">{userProfile?.username?.[0] || 'M'}</div>
                   <div className="min-w-0 truncate">
-                    <span className={`text-[11px] font-bold block truncate ${selectedEntityId === 'me' ? 'text-orange-500' : 'text-zinc-700 dark:text-white'}`}>
+                    <span className={`text-[11px] font-medium block truncate ${selectedEntityId === 'me' ? 'text-orange-500' : 'text-zinc-700 dark:text-white'}`}>
                       {myTimetable?.ownerName || 'My Profile'}
                     </span>
                     {myTimetable?.branch && (
-                      <span className="text-[10px] font-semibold text-zinc-500">{myTimetable.branch} • {myTimetable.year} • S{myTimetable.semester}</span>
+                      <span className="text-[10px] font-medium text-zinc-500">{myTimetable.branch} • {myTimetable.year} • S{myTimetable.semester}</span>
                     )}
                   </div>
                 </div>
@@ -1018,13 +1046,13 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedEntityId === friend.ownerId ? 'bg-blue-600/10 border-blue-600' : 'bg-white dark:bg-[#0a0a0a] border-zinc-200 dark:border-white/5 hover:border-orange-500/30'}`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-black text-[11px] sm:text-xs uppercase flex-shrink-0">{friend.ownerName?.[0] || 'F'}</div>
+                      <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-semibold text-[11px] sm:text-xs flex-shrink-0">{friend.ownerName?.[0] || 'F'}</div>
                       <div className="min-w-0 truncate">
-                        <span className={`text-[11px] font-bold block truncate ${selectedEntityId === friend.ownerId ? 'text-blue-500' : 'text-zinc-700 dark:text-white'}`}>
+                        <span className={`text-[11px] font-medium block truncate ${selectedEntityId === friend.ownerId ? 'text-blue-500' : 'text-zinc-700 dark:text-white'}`}>
                           {friend.ownerName}
                         </span>
                         {friend.branch && (
-                          <span className="text-[10px] font-semibold text-zinc-500">{friend.branch} • {friend.year} • S{friend.semester}</span>
+                          <span className="text-[10px] font-medium text-zinc-500">{friend.branch} • {friend.year} • S{friend.semester}</span>
                         )}
                       </div>
                     </div>
@@ -1067,24 +1095,24 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
           style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
           onClick={(e) => { if (e.target === e.currentTarget) handleCloseRename(); }}
         >
-          <div className={`nexus-modal w-full max-w-sm ${isClosingRename ? 'closing' : ''}`}>
-            <div className="p-8 text-center text-zinc-800 dark:text-white">
-              <h3 className="text-xl font-bold tracking-tight uppercase mb-2">Rename Profile</h3>
-              <p className="text-zinc-500 text-[11px] sm:text-xs font-medium">Personalize the name</p>
-              <div className="mt-8">
-                <input
-                  autoFocus
-                  type="text"
-                  value={newName}
-                  onChange={e => setNewName(e.target.value)}
-                  placeholder="Enter name..."
-                  onKeyDown={e => e.key === 'Enter' && handleRename()}
-                  className="w-full bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl px-6 py-4 text-sm font-black text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/10 transition-all"
-                />
-              </div>
-              <div className="flex gap-4 mt-6">
-                <button onClick={handleCloseRename} className="flex-1 py-3 text-[11px] sm:text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors border-none bg-transparent">Cancel</button>
-                <button onClick={handleRename} className="flex-1 py-3 bg-orange-600 text-white rounded-xl font-black text-[11px] sm:text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none">Update</button>
+          <div className={`nexus-modal w-full max-w-sm bg-white dark:bg-[#0d0d0d] rounded-[24px] border border-zinc-100 dark:border-white/5 shadow-xl ${isClosingRename ? 'closing' : ''}`}>
+            <div className="p-8 text-center">
+              <h3 className="text-xl font-medium text-zinc-800 dark:text-white mb-2">Rename Profile</h3>
+              <p className="text-zinc-500 text-xs font-medium mb-8">Personalize the name for easier access.</p>
+              
+              <input
+                autoFocus
+                type="text"
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+                placeholder="Enter name..."
+                onKeyDown={e => e.key === 'Enter' && handleRename()}
+                className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-3.5 text-sm font-medium text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600/20 transition-all"
+              />
+              
+              <div className="flex gap-3 mt-8">
+                <button onClick={handleCloseRename} className="flex-1 py-3 text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors border-none bg-transparent">Cancel</button>
+                <button onClick={handleRename} className="flex-1 py-3 bg-orange-600 text-white rounded-xl font-medium text-xs shadow-lg shadow-orange-600/20 active:scale-95 transition-all border-none">Update</button>
               </div>
             </div>
           </div>
@@ -1094,298 +1122,346 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       {showMetadataModal && createPortal(
         <div
           className={`modal-overlay modal-overlay-fade ${isClosingMetadata ? 'closing' : ''}`}
-          style={{ backdropFilter: 'blur(32px) saturate(210%)', WebkitBackdropFilter: 'blur(32px) saturate(210%)' }}
+          style={{ backdropFilter: 'blur(40px) saturate(200%)', WebkitBackdropFilter: 'blur(40px) saturate(200%)' }}
           onClick={(e) => { if (e.target === e.currentTarget) handleCloseMetadata(); }}
         >
-          <div className={`nexus-modal w-full max-w-xl overflow-hidden border-none bg-white dark:bg-[#080808] shadow-[0_48px_96px_-24px_rgba(0,0,0,0.5)] ${isClosingMetadata ? 'closing' : ''}`}>
-            {/* Header with Visual Status */}
-            <div className="p-10 pb-8 text-center space-y-6 bg-gradient-to-b from-orange-600/[0.05] to-transparent relative">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-600/30 to-transparent" />
-              
-              <div className="relative inline-block">
-                <div className="w-20 h-20 bg-orange-600 rounded-[32px] flex items-center justify-center mx-auto shadow-[0_20px_40px_-8px_rgba(234,88,12,0.3)] transform -rotate-3 border border-orange-400/20">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-white"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-zinc-900 dark:bg-white rounded-full flex items-center justify-center border-4 border-white dark:border-[#080808] shadow-lg">
-                  <span className="text-[10px] font-black text-white dark:text-zinc-900">{pendingTimetable?.length || 0}d</span>
-                </div>
+          <div className={`nexus-modal w-full max-w-lg bg-white dark:bg-[#0d0d0d] border border-zinc-100 dark:border-white/5 shadow-xl rounded-[32px] overflow-hidden ${isClosingMetadata ? 'closing' : ''}`}>
+            <div className="p-10 pb-4 text-center">
+              <div className="w-14 h-14 bg-orange-600/[0.03] rounded-2xl flex items-center justify-center mx-auto mb-6 border border-orange-600/5 relative group">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-7 h-7 text-orange-600/80"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
               </div>
-
-              <div>
-                <h3 className="text-2xl font-bold tracking-tight text-zinc-800 dark:text-white mb-2">
-                  {editingPresetId ? 'Update Hub Record' : 'Upload Success!'}
-                </h3>
-                <p className="text-zinc-500 text-xs font-medium max-w-[320px] mx-auto leading-relaxed">
-                  {editingPresetId 
-                    ? 'Updating existing community preset with your latest schedule screenshots.' 
-                    : 'We\'ve extracted your schedule. Now add some details so others can find it.'}
-                </p>
-              </div>
+              <h3 className="text-2xl font-medium text-zinc-800 dark:text-white mb-2 tracking-tight">
+                {editingPresetId ? 'Update Timetable' : 'Extraction Complete'}
+              </h3>
+              <p className="text-zinc-500 text-xs font-medium opacity-80">
+                {editingPresetId ? 'Review academic details before updating' : 'Provide details to categorize this schedule'}
+              </p>
             </div>
             
-            <div className="p-10 pt-2 space-y-8">
-              {/* High Density Form */}
-              <div className="grid grid-cols-2 gap-x-6 gap-y-6">
+            <div className="p-10 pt-4 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between px-1">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Section</label>
-                  </div>
+                  <label className="text-[10px] font-semibold text-zinc-400 ml-1 tracking-wider">Section code</label>
                   <input 
                     type="text" 
                     placeholder="e.g. 325QB" 
                     value={metadata.section} 
                     onChange={e => setMetadata({ ...metadata, section: e.target.value.toUpperCase() })} 
-                    className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500 transition-all placeholder:text-zinc-300 dark:placeholder:text-zinc-700" 
+                    className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-4 text-sm font-medium text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/5 transition-all placeholder:text-zinc-300 shadow-sm" 
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between px-1">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Branch</label>
-                  </div>
+                  <label className="text-[10px] font-semibold text-zinc-400 ml-1 tracking-wider">Branch</label>
                   <input 
                     type="text" 
-                    placeholder="e.g. CSE / ME" 
+                    placeholder="e.g. CSE" 
                     value={metadata.branch} 
                     onChange={e => setMetadata({ ...metadata, branch: e.target.value.toUpperCase() })} 
-                    className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500 transition-all placeholder:text-zinc-300 dark:placeholder:text-zinc-700" 
+                    className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-4 text-sm font-medium text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/5 transition-all placeholder:text-zinc-300 shadow-sm" 
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between px-1">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Academic Year</label>
-                  </div>
+                  <label className="text-[10px] font-semibold text-zinc-400 ml-1 tracking-wider">Academic year</label>
                   <NexusDropdown
                     placeholder="Select Year"
-                    options={['1st', '2nd', '3rd', '4th']}
+                    options={['1st', '2nd', '3rd', '4th', '5th']}
                     value={metadata.year}
                     onChange={(val) => setMetadata({ ...metadata, year: val })}
-                    className="w-full !rounded-2xl !bg-zinc-50 dark:!bg-white/[0.03] !border-zinc-200 dark:!border-white/10"
+                    className="w-full"
+                    buttonClassName="!rounded-2xl !bg-zinc-50 dark:!bg-white/[0.03] !border-zinc-100 dark:!border-white/5 !px-5 !py-4 !min-w-0 !text-sm !font-medium"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between px-1">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Semester</label>
-                  </div>
+                  <label className="text-[10px] font-semibold text-zinc-400 ml-1 tracking-wider">Semester</label>
                   <input 
                     type="number" 
                     min="1" 
-                    max="8" 
-                    placeholder="1-8" 
+                    max="10" 
+                    placeholder="1-10" 
                     value={metadata.semester} 
                     onChange={e => setMetadata({ ...metadata, semester: e.target.value })} 
-                    className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500 transition-all placeholder:text-zinc-300 dark:placeholder:text-zinc-700" 
+                    className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-4 text-sm font-medium text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/5 transition-all placeholder:text-zinc-300 shadow-sm" 
                   />
                 </div>
               </div>
 
-              {/* Data Summary Chips */}
-              <div className="p-4 bg-zinc-50 dark:bg-white/[0.02] rounded-2xl border border-zinc-100 dark:border-white/5 flex flex-wrap gap-2 items-center justify-center">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Parsed:</span>
-                {pendingTimetable?.map(day => (
-                  <div key={day.day} className="flex items-center gap-1.5 px-2.5 py-1 bg-white dark:bg-white/5 rounded-lg shadow-sm border border-zinc-100 dark:border-white/10">
-                    <span className="text-[10px] font-black text-orange-600 uppercase">{day.day.substring(0, 3)}</span>
-                    <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400">{day.slots.length}</span>
-                  </div>
-                ))}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <p className="text-[11px] font-medium text-zinc-400">Activity map</p>
+                  <span className="text-[10px] font-medium text-orange-600 bg-orange-600/5 px-3 py-1 rounded-full border border-orange-600/5">Verified extraction</span>
+                </div>
+                <div className="grid grid-cols-6 gap-2 p-4 bg-zinc-50 dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 rounded-3xl shadow-inner">
+                  {DAYS.map(dayName => {
+                    const dayData = pendingTimetable?.find(d => d.day === dayName);
+                    const hasSlots = dayData && dayData.slots.length > 0;
+                    return (
+                      <div key={dayName} className="flex flex-col items-center gap-2">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${hasSlots ? 'bg-white dark:bg-white/10 shadow-sm border border-zinc-100 dark:border-white/10' : 'opacity-20 grayscale'}`}>
+                          <span className={`text-[11px] font-semibold ${hasSlots ? 'text-zinc-800 dark:text-white' : 'text-zinc-400'}`}>{dayName.substring(0, 1)}</span>
+                        </div>
+                        <span className={`text-[10px] font-medium transition-colors ${hasSlots ? 'text-orange-600' : 'text-zinc-300'}`}>
+                          {dayData?.slots.length || 0}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="pt-4 flex flex-col gap-4">
+              <div className="flex flex-col gap-4 pt-4">
                 <button 
-                  onClick={submitMetadata} 
-                  className="w-full py-5 bg-zinc-900 dark:bg-orange-600 text-white rounded-[24px] font-black text-xs uppercase tracking-[0.25em] shadow-2xl shadow-orange-600/20 active:scale-[0.98] transition-all border-none hover:bg-black dark:hover:bg-orange-500 group flex items-center justify-center gap-3"
+                  onClick={handleMetadataSubmit} 
+                  className="w-full py-5 bg-orange-600 text-white rounded-2xl font-semibold text-[14px] shadow-lg shadow-orange-600/10 active:scale-[0.96] hover:bg-orange-500 transition-all border-none relative overflow-hidden group"
                 >
-                  {editingPresetId ? 'Update Preset Data' : 'Publish to Timetable Hub'}
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 transition-transform group-hover:translate-x-1"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                  <span className="relative z-10">{editingPresetId ? 'Save Changes' : 'Confirm & Save'}</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 </button>
                 <button 
                   onClick={handleCloseMetadata} 
-                  className="w-full py-2 text-[11px] font-bold text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors border-none bg-transparent"
+                  className="w-full py-2 text-[11px] font-medium text-zinc-400 hover:text-red-500 transition-colors border-none bg-transparent"
                 >
-                  Back to Hub
+                  Discard results
                 </button>
               </div>
             </div>
           </div>
         </div>,
         document.getElementById('modal-root') || document.body
-      )}dy
+      )}
       {showUploadModal && createPortal(
         <div
           className={`modal-overlay modal-overlay-fade ${isClosingUpload ? 'closing' : ''}`}
-          style={{ backdropFilter: 'blur(32px) saturate(220%)', WebkitBackdropFilter: 'blur(32px) saturate(220%)' }}
+          style={{ backdropFilter: 'blur(48px) saturate(160%)', WebkitBackdropFilter: 'blur(48px) saturate(160%)' }}
           onClick={(e) => { if (e.target === e.currentTarget && !isProcessingAI) handleCloseUpload(); }}
         >
-          <div className={`nexus-modal w-full max-w-2xl bg-white dark:bg-[#080808] border-none shadow-[0_48px_128px_-32px_rgba(0,0,0,0.6)] ${isClosingUpload ? 'closing' : ''}`}>
-            {/* Modal Header */}
-            <div className="p-10 pb-6 flex items-center justify-between border-b border-zinc-100 dark:border-white/5 bg-gradient-to-r from-orange-600/[0.02] to-transparent">
-              <div className="space-y-1">
-                <div className="flex items-center gap-3">
-                  <div className="w-2.5 h-2.5 bg-orange-600 rounded-full animate-pulse" />
-                  <h3 className="text-2xl font-black text-zinc-800 dark:text-white tracking-tighter uppercase">Import Schedule</h3>
+          <div className={`nexus-modal w-full max-w-2xl bg-white dark:bg-[#0d0d0d] border border-zinc-100 dark:border-white/5 shadow-xl rounded-[32px] overflow-hidden ${isClosingUpload ? 'closing' : ''}`}>
+            {/* Header */}
+            <div className="p-10 pb-6 flex items-center justify-between border-b border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01]">
+              <div className="flex items-center gap-5">
+                <div className="w-12 h-12 bg-orange-600/[0.03] dark:bg-orange-600/[0.05] border border-orange-600/5 rounded-2xl flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6 text-orange-600/80"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
                 </div>
-                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] pl-6">
-                  Target: <span className="text-orange-600">{targetForAction === 'me' ? 'My Primary Profile' : 'Secondary Connection'}</span>
-                </p>
+                <div>
+                  <h3 className="text-2xl font-medium text-zinc-800 dark:text-white tracking-tight">Import timetable</h3>
+                  <p className="text-[11px] font-medium text-orange-600/60 tracking-tight mt-0.5">Extraction engine</p>
+                </div>
               </div>
               <button 
                 onClick={handleCloseUpload} 
-                className="w-12 h-12 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-white/5 rounded-2xl transition-all border-none bg-transparent text-zinc-400 hover:text-zinc-900 dark:hover:text-white group"
+                className="w-10 h-10 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-white/10 rounded-xl transition-all border-none bg-transparent text-zinc-400 hover:text-zinc-800 dark:hover:text-white"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 group-hover:rotate-90 transition-transform"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
 
-            <div className="p-10 pt-8 space-y-10">
+            <div className="p-10 space-y-8">
               {isProcessingAI ? (
-                <div className="py-24 text-center space-y-12 animate-pulse">
+                <div className="py-24 text-center space-y-10">
                   <div className="relative w-40 h-40 mx-auto">
-                    <div className="absolute inset-0 border-8 border-orange-600/5 rounded-[48px] rotate-12" />
-                    <div className="absolute inset-0 border-8 border-orange-600/10 rounded-[48px] -rotate-6" />
-                    <div className="absolute inset-0 border-8 border-orange-600 rounded-[48px] border-t-transparent animate-spin" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <span className="text-3xl font-black text-orange-600 block leading-none mb-1">{Math.round(ocrProgress)}%</span>
-                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">AI Parsing</span>
-                      </div>
+                    <div className="absolute inset-0 border-[8px] border-orange-600/5 rounded-full" />
+                    <div className="absolute inset-0 border-[8px] border-orange-600 rounded-full border-t-transparent animate-spin" style={{ animationDuration: '0.8s' }} />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-4xl font-medium text-zinc-800 dark:text-white tabular-nums tracking-tighter">{Math.round(ocrProgress)}%</span>
+                      <span className="text-[11px] font-medium text-orange-600/60 tracking-tight mt-1">Processing</span>
                     </div>
                   </div>
-                  <div className="space-y-6 max-w-[320px] mx-auto">
-                    <div className="flex items-center justify-between px-2">
-                      <p className="text-[10px] font-black tracking-[0.3em] text-orange-600 uppercase">{processingStatus}</p>
-                      <span className="text-[10px] font-bold text-zinc-400">Step {ocrProgress < 50 ? '1' : '2'}/2</span>
-                    </div>
-                    <div className="w-full h-2.5 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden p-0.5 shadow-inner">
-                      <div className="h-full bg-gradient-to-r from-orange-500 to-orange-600 rounded-full transition-all duration-700 ease-out shadow-[0_0_15px_rgba(234,88,12,0.5)]" style={{ width: `${ocrProgress}%` }} />
-                    </div>
-                    <p className="text-[10px] font-medium text-zinc-500">Don't close this window while the AI is analyzing your images.</p>
+                  <div className="space-y-3">
+                    <p className="text-lg font-semibold text-zinc-800 dark:text-white animate-pulse">{processingStatus}</p>
+                    <p className="text-[11px] text-zinc-500 font-medium leading-relaxed max-w-[280px] mx-auto opacity-70">Converting visual schedule to structured data points...</p>
                   </div>
                 </div>
               ) : (
                 <>
-                  {/* Premium Tab Toggle */}
-                  <div className="flex p-1.5 bg-zinc-100 dark:bg-white/[0.03] rounded-[28px] border border-zinc-200/50 dark:border-white/5 relative">
+                  {/* Mode Toggles */}
+                  <div className="flex p-1.5 bg-zinc-100 dark:bg-white/[0.03] rounded-[22px] border border-zinc-200 dark:border-white/5 shadow-inner">
                     <button 
-                      onClick={() => { setIsUpdatingPreset(false); setPresetToUpdateId(null); }}
-                      className={`flex-1 py-4 rounded-[22px] text-[11px] font-black uppercase tracking-widest transition-all border-none relative z-10 ${!isUpdatingPreset ? 'text-orange-600' : 'text-zinc-500'}`}
+                      onClick={() => { setIsUpdatingPreset(false); setPresetToUpdateId(null); setSelectedUpdateProfile(null); }}
+                      className={`flex-1 py-3 rounded-[18px] text-[11px] font-semibold transition-all border-none ${!isUpdatingPreset ? 'bg-white dark:bg-white/10 text-orange-600 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
                     >
                       New Profile
                     </button>
                     <button 
                       onClick={() => setIsUpdatingPreset(true)}
-                      className={`flex-1 py-4 rounded-[22px] text-[11px] font-black uppercase tracking-widest transition-all border-none relative z-10 ${isUpdatingPreset ? 'text-orange-600' : 'text-zinc-500'}`}
+                      className={`flex-1 py-3 rounded-[18px] text-[11px] font-semibold transition-all border-none ${isUpdatingPreset ? 'bg-white dark:bg-white/10 text-orange-600 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
                     >
-                      Update Hub
+                      Update Existing
                     </button>
-                    <div 
-                      className="absolute inset-y-1.5 w-[calc(50%-6px)] bg-white dark:bg-[#161616] rounded-[22px] shadow-[0_8px_24px_-4px_rgba(0,0,0,0.15)] transition-all duration-500 ease-spring"
-                      style={{ transform: `translateX(${isUpdatingPreset ? '100%' : '0%'})` }}
-                    />
                   </div>
 
-                  <div className="max-h-[450px] overflow-y-auto pr-2 custom-scrollbar space-y-10">
-                    {isUpdatingPreset ? (
-                      <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
-                        <div className="flex items-center justify-between px-1">
-                          <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em]">Select Community Preset</label>
-                          <span className="text-[9px] font-bold text-orange-600 bg-orange-600/10 px-2 py-0.5 rounded-full">CONTRIBUTE</span>
+                  <div className="max-h-[500px] overflow-y-auto pr-2 no-scrollbar min-h-[380px]">
+                    {isUpdatingPreset && !presetToUpdateId ? (
+                      <div className="space-y-8 animate-fade-in">
+                        <div className="relative">
+                          <input 
+                            type="text" 
+                            placeholder="Search your connections..." 
+                            value={presetSearchQuery}
+                            onChange={e => setPresetSearchQuery(e.target.value)}
+                            className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/5 rounded-[22px] px-6 py-4 text-sm font-medium outline-none focus:ring-4 focus:ring-orange-600/10 transition-all placeholder:text-zinc-400 shadow-inner"
+                          />
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300 transition-colors"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
                         </div>
-                        <div className="grid grid-cols-1 gap-3">
-                          {communityPresets.map(preset => (
-                            <button
-                              key={preset.id}
-                              onClick={() => setPresetToUpdateId(preset.id)}
-                              className={`w-full p-6 rounded-[32px] border-2 text-left transition-all flex items-center justify-between group overflow-hidden relative ${presetToUpdateId === preset.id ? 'bg-orange-600/5 border-orange-500 shadow-xl' : 'bg-zinc-50 dark:bg-white/[0.02] border-transparent hover:bg-zinc-100 dark:hover:bg-white/[0.04]'}`}
-                            >
-                              <div className="min-w-0 pr-6 relative z-10">
-                                <p className={`text-base font-black tracking-tight truncate ${presetToUpdateId === preset.id ? 'text-orange-600' : 'text-zinc-800 dark:text-zinc-100'}`}>{preset.name}</p>
-                                <div className="flex items-center gap-3 mt-1.5">
-                                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{preset.section}</span>
-                                  <div className="w-1 h-1 bg-zinc-300 dark:bg-white/10 rounded-full" />
-                                  <span className="text-[10px] font-bold text-zinc-500">{preset.branch}</span>
+                        
+                        <div className="space-y-8">
+                          {/* Categorized List */}
+                          <div className="space-y-6">
+                            {/* Section: Your Profiles */}
+                            {[myTimetable, ...friendTimetables]
+                              .filter(Boolean)
+                              .filter(p => p!.ownerName.toLowerCase().includes(presetSearchQuery.toLowerCase()) || p!.section?.toLowerCase().includes(presetSearchQuery.toLowerCase()))
+                              .length > 0 && (
+                              <div className="space-y-3">
+                                <h4 className="text-[11px] font-medium text-zinc-400 ml-2 tracking-tight">Your connections</h4>
+                                  <div className="grid gap-2">
+                                  {[myTimetable, ...friendTimetables]
+                                    .filter(Boolean)
+                                    .filter(p => p!.ownerName.toLowerCase().includes(presetSearchQuery.toLowerCase()) || p!.section?.toLowerCase().includes(presetSearchQuery.toLowerCase()))
+                                    .map(p => (
+                                      <button
+                                        key={p!.ownerId}
+                                        onClick={() => { setPresetToUpdateId(p!.ownerId); setSelectedUpdateProfile(p); }}
+                                        className="w-full p-3 rounded-2xl bg-zinc-50 dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 text-left transition-all flex items-center justify-between group hover:border-orange-500/30 hover:bg-orange-600/[0.02]"
+                                      >
+                                        <div className="min-w-0 pr-4 flex items-center gap-4">
+                                          <div className="w-10 h-10 rounded-xl bg-white dark:bg-white/5 border border-zinc-100 dark:border-white/5 flex items-center justify-center font-semibold text-zinc-400 group-hover:text-orange-600 transition-all">
+                                            {p!.ownerName[0]}
+                                          </div>
+                                          <div>
+                                            <p className="text-[14px] font-medium text-zinc-800 dark:text-white truncate group-hover:text-orange-600 transition-colors">{p!.ownerName}</p>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                              <span className="text-[10px] font-medium text-zinc-400 tracking-tight">{p!.section || 'LOCAL'}</span>
+                                              <span className="w-1 h-1 bg-zinc-200 dark:bg-white/10 rounded-full" />
+                                              <span className="text-[10px] font-medium text-orange-600/40 tracking-tight">{p!.branch || 'UNSET'}</span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div className="w-8 h-8 rounded-full bg-orange-600/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-orange-600"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                        </div>
+                                      </button>
+                                    ))}
                                 </div>
                               </div>
-                              <div className={`w-8 h-8 rounded-2xl flex items-center justify-center transition-all relative z-10 ${presetToUpdateId === preset.id ? 'bg-orange-600 text-white shadow-lg rotate-0' : 'bg-zinc-200 dark:bg-white/10 text-zinc-400 rotate-12'}`}>
-                                {presetToUpdateId === preset.id ? (
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-4 h-4"><polyline points="20 6 9 17 4 12" /></svg>
-                                ) : (
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
-                                )}
+                            )}
+
+                            {/* Section: Community Hub */}
+                            {communityPresets
+                              .filter(p => p.name.toLowerCase().includes(presetSearchQuery.toLowerCase()) || p.section.toLowerCase().includes(presetSearchQuery.toLowerCase()))
+                              .length > 0 && (
+                              <div className="space-y-4">
+                                <h4 className="text-[11px] font-medium text-orange-500/80 ml-2 tracking-tight">Community hub</h4>
+                                <div className="grid gap-2">
+                                  {communityPresets
+                                    .filter(p => p.name.toLowerCase().includes(presetSearchQuery.toLowerCase()) || p.section.toLowerCase().includes(presetSearchQuery.toLowerCase()))
+                                    .map(preset => (
+                                      <button
+                                        key={preset.id}
+                                        onClick={() => { setPresetToUpdateId(preset.id); setSelectedUpdateProfile(preset); }}
+                                        className="w-full p-3 rounded-2xl bg-zinc-50 dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 text-left transition-all flex items-center justify-between group hover:border-orange-500/30 hover:bg-orange-600/[0.03]"
+                                      >
+                                        <div className="min-w-0 pr-4 flex items-center gap-4">
+                                          <div className="w-10 h-10 rounded-xl bg-orange-600/5 border border-orange-600/10 flex items-center justify-center font-semibold text-orange-600/40 group-hover:text-orange-600 transition-all">
+                                            H
+                                          </div>
+                                          <div>
+                                            <p className="text-[14px] font-medium text-zinc-800 dark:text-white truncate group-hover:text-orange-600 transition-colors">{preset.name}</p>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                              <span className="text-[10px] font-medium text-zinc-400 tracking-tight">{preset.section}</span>
+                                              <span className="w-1 h-1 bg-zinc-200 dark:bg-white/10 rounded-full" />
+                                              <span className="text-[10px] font-medium text-orange-600/40 tracking-tight">Sem {preset.semester}</span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div className="w-8 h-8 rounded-full bg-orange-600/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-orange-600"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                        </div>
+                                      </button>
+                                    ))}
+                                </div>
                               </div>
-                              {presetToUpdateId === preset.id && (
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600/5 rounded-full blur-3xl -mr-16 -mt-16" />
-                              )}
-                            </button>
-                          ))}
-                          {communityPresets.length === 0 && (
-                            <div className="py-16 text-center bg-zinc-50 dark:bg-white/[0.01] rounded-[40px] border-4 border-dashed border-zinc-100 dark:border-white/5">
-                              <p className="text-sm font-bold text-zinc-400">No community presets found.</p>
-                              <p className="text-[10px] font-medium text-zinc-500 mt-2">Try searching by section name or create a new entry.</p>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
                       </div>
                     ) : (
-                      <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        {/* UMS Method */}
+                      <div className="space-y-10 animate-fade-in">
+                        {isUpdatingPreset && selectedUpdateProfile && (
+                          <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-600/5 border border-orange-100 dark:border-orange-500/10 rounded-2xl">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center shadow-sm">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-white"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                              </div>
+                              <div className="min-w-0">
+                                  <p className="text-[10px] font-medium text-orange-600/60 tracking-tight">Target profile</p>
+                                  <p className="text-[14px] font-medium text-zinc-800 dark:text-white truncate">{selectedUpdateProfile.ownerName || selectedUpdateProfile.name}</p>
+                              </div>
+                            </div>
+                            <button 
+                              onClick={() => { setPresetToUpdateId(null); setSelectedUpdateProfile(null); }}
+                              className="px-4 py-2 text-[10px] font-semibold text-zinc-500 hover:text-orange-600 transition-colors bg-zinc-100 dark:bg-white/5 rounded-lg border-none"
+                            >
+                              Change
+                            </button>
+                          </div>
+                        )}
+
                         <div className="space-y-4">
-                          <div className="flex items-center justify-between px-1">
-                            <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em]">UMS Data Feed</label>
-                            <span className="text-[9px] font-black text-white bg-zinc-900 dark:bg-orange-600 px-3 py-1 rounded-full tracking-widest shadow-lg">ULTRA FAST</span>
+                          <div className="flex items-center justify-between px-2">
+                            <label className="text-[11px] font-medium text-zinc-400 tracking-tight">Quick paste</label>
+                            <span className="text-[10px] font-medium text-orange-600/80 bg-orange-600/5 px-2.5 py-1 rounded-full">Text mode</span>
                           </div>
                           <textarea
                             value={rawPastedText}
                             onChange={e => setRawPastedText(e.target.value)}
-                            className="w-full h-40 bg-zinc-50 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/10 rounded-[32px] p-8 text-xs font-bold focus:ring-4 focus:ring-orange-600/10 focus:border-orange-500 transition-all outline-none resize-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700 leading-relaxed shadow-inner"
-                            placeholder="Navigate to UMS -> Timetable. Press Ctrl+A, then Ctrl+C. Paste it all here. We'll handle the magic."
+                            className="w-full h-40 bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-3xl p-6 text-sm font-medium focus:ring-4 focus:ring-orange-600/5 transition-all outline-none resize-none placeholder:text-zinc-300 shadow-inner"
+                            placeholder="Paste your UMS Timetable text here..."
                           />
                         </div>
 
-                        {/* Divider */}
-                        <div className="relative py-4">
-                          <div className="absolute inset-0 flex items-center"><div className="w-full border-t-2 border-zinc-100 dark:border-white/5"></div></div>
-                          <div className="relative flex justify-center"><span className="px-6 bg-white dark:bg-[#080808] text-[10px] font-black text-zinc-300 uppercase tracking-[0.5em] text-center">Visual Import</span></div>
+                        <div className="relative flex items-center gap-6 py-4">
+                          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-zinc-200 dark:via-white/10 to-transparent"></div>
+                          <span className="text-[10px] font-semibold text-zinc-300 dark:text-zinc-600 tracking-[0.4em]">OR</span>
+                          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-zinc-200 dark:via-white/10 to-transparent"></div>
                         </div>
 
-                        {/* Screenshot Method */}
                         <div className="space-y-4">
-                          <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] ml-1">Screenshot Gallery</label>
+                          <div className="flex items-center justify-between px-2">
+                            <label className="text-[11px] font-medium text-zinc-400 tracking-tight">Snapshots</label>
+                            <span className="text-[10px] font-medium text-zinc-500/80 bg-zinc-100 dark:bg-white/5 px-2.5 py-1 rounded-full">Visual mode</span>
+                          </div>
                           <div 
                             onClick={() => fileInputRef.current?.click()} 
-                            className="group relative border-4 border-dashed border-zinc-100 dark:border-white/5 rounded-[48px] p-16 text-center hover:border-orange-500/50 hover:bg-orange-600/[0.03] transition-all cursor-pointer overflow-hidden bg-zinc-50/50 dark:bg-white/[0.01] shadow-xl hover:shadow-2xl"
+                            className="border-2 border-dashed border-zinc-200 dark:border-white/5 rounded-[32px] p-10 text-center hover:border-orange-500/50 hover:bg-orange-600/[0.01] transition-all cursor-pointer group bg-zinc-50/30 dark:bg-white/[0.01]"
                           >
-                            <div className="relative z-10 space-y-6">
-                              <div className="w-24 h-24 bg-white dark:bg-white/5 rounded-[40px] shadow-2xl flex items-center justify-center mx-auto group-hover:scale-110 group-hover:-rotate-6 transition-all duration-700 border border-zinc-100 dark:border-white/10">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-10 h-10 text-orange-600"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+                            <div className="space-y-4">
+                              <div className="w-14 h-14 bg-white dark:bg-white/5 rounded-2xl border border-zinc-100 dark:border-white/5 flex items-center justify-center mx-auto group-hover:scale-105 transition-all shadow-sm">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6 text-orange-600"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
                               </div>
-                              <div className="space-y-1">
-                                <p className="text-xl font-black text-zinc-800 dark:text-zinc-100 tracking-tight">Drop Timetable Images</p>
-                                <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Supports Multi-Image OCR</p>
+                              <div>
+                                <p className="text-[15px] font-medium text-zinc-800 dark:text-zinc-100 tracking-tight">Select Screenshots</p>
+                                <p className="text-[10px] font-medium text-zinc-400 mt-1 opacity-60">Drag images or click to browse</p>
                               </div>
                             </div>
-                            <div className="absolute inset-0 bg-gradient-to-br from-orange-600/[0.05] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                           </div>
                         </div>
                       </div>
                     )}
                   </div>
                   
-                  <div className="flex items-center justify-between p-2 bg-zinc-50 dark:bg-white/[0.02] rounded-[24px] border border-zinc-100 dark:border-white/5">
-                    <div className="flex items-center gap-3 ml-4">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" />
-                      <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Tesseract Engine Ready</span>
-                    </div>
-                    {rawPastedText.length > 50 && (
-                      <button 
-                        onClick={handleParsePastedData}
-                        className="px-8 py-3 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all border-none"
-                      >
-                        Parse Data
-                      </button>
-                    )}
+                  {/* Action Bar */}
+                  {(rawPastedText.length > 20 && (!isUpdatingPreset || (isUpdatingPreset && presetToUpdateId))) && (
+                  <div className="pt-6">
+                    <button 
+                      onClick={handleParsePastedData}
+                      className="w-full py-4 bg-orange-600 text-white rounded-xl text-[13px] font-semibold shadow-lg shadow-orange-600/10 active:scale-[0.98] transition-all border-none"
+                    >
+                      Extract Schedule
+                    </button>
                   </div>
+                  )}
 
                   <input
                     type="file"

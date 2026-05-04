@@ -10,6 +10,7 @@ interface NexusDropdownProps {
     placeholder?: string;
     icon?: React.ReactNode;
     renderCustomMenu?: (close: () => void) => React.ReactNode;
+    align?: 'left' | 'right';
 }
 
 const NexusDropdown: React.FC<NexusDropdownProps> = ({
@@ -21,7 +22,8 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
     buttonClassName = "",
     placeholder = "Select...",
     icon,
-    renderCustomMenu
+    renderCustomMenu,
+    align = 'left'
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -67,7 +69,7 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
             </button>
 
             {isOpen && (
-                <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-[220px] bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-2xl border border-zinc-200 dark:border-white/10 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-fade-in-up origin-top p-2 space-y-1">
+                <div className={`absolute top-[calc(100%+8px)] ${align === 'right' ? 'right-0' : 'left-0'} min-w-full w-max max-w-[92vw] sm:max-w-[400px] bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-2xl border border-zinc-200 dark:border-white/10 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-fade-in-up origin-top p-2 space-y-1 z-50`}>
                     <div className="max-h-[300px] overflow-y-auto no-scrollbar">
                         {renderCustomMenu ? renderCustomMenu(() => setIsOpen(false)) : (
                             options.map(option => (

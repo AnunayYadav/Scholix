@@ -130,6 +130,7 @@ export interface TimetableData {
   year?: string;
   branch?: string;
   semester?: string;
+  originPresetId?: string;
 }
 
 export interface ResumeCategoryDetail {
