@@ -217,8 +217,13 @@ const TodaysSchedule: React.FC = () => {
   const dayData = timetable?.schedule?.find(s => s.day === today);
 
   const timeToMinutes = (time: string) => {
-    const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
+    if (!time) return 0;
+    const parts = time.split(' ');
+    const [timeStr, modifier] = parts;
+    let [hours, minutes] = timeStr.split(':').map(Number);
+    if (modifier === 'PM' && hours < 12) hours += 12;
+    if (modifier === 'AM' && hours === 12) hours = 0;
+    return (hours * 60) + (minutes || 0);
   };
 
   const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
@@ -285,12 +290,14 @@ const TodaysSchedule: React.FC = () => {
                     </div>
                  </div>
               </div>
-              <div className="flex flex-col items-center text-center max-w-[70px] sm:max-w-[80px]">
-                <span className={`text-[10px] sm:text-xs font-bold leading-none mb-0.5 truncate w-full ${isGoingOn ? 'text-brand-primary' : 'text-zinc-600 dark:text-zinc-400'}`}>
-                  {slot.room}
-                </span>
-                <span className="text-[8px] sm:text-[9px] font-medium text-zinc-400 dark:text-zinc-500 tabular-nums">
-                  {slot.startTime}
+              <div className="flex flex-col items-center text-center min-w-[70px] sm:min-w-[80px]">
+                {slot.room && slot.room !== 'N/A' && slot.room !== 'nan' && (
+                  <span className={`text-[10px] sm:text-xs font-bold leading-none mb-0.5 ${isGoingOn ? 'text-brand-primary' : 'text-zinc-600 dark:text-zinc-400'}`}>
+                    {slot.room}
+                  </span>
+                )}
+                <span className="text-[8px] sm:text-[9px] font-medium text-zinc-400 dark:text-zinc-500 tabular-nums whitespace-nowrap">
+                  {slot.startTime} - {slot.endTime}
                 </span>
               </div>
             </button>
