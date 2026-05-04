@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { UserProfile, TimetableData, DaySchedule, TimetableSlot } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
-import { extractTimetableWithTesseract } from '../services/ocrService.ts';
+import { extractTimetableWithTesseract, parseTimetableText } from '../services/ocrService.ts';
 import NexusDropdown from './NexusDropdown.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import { showToast, showConfirm } from './Toast.tsx';
@@ -83,16 +83,21 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
   // Added for update profile selection
   const [selectedUpdateProfile, setSelectedUpdateProfile] = useState<any>(null);
 
+  const [importStep, setImportStep] = useState<'input' | 'destination'>('input');
+  const [extractedData, setExtractedData] = useState<TimetableData | null>(null);
+
   const handleCloseUpload = () => {
     setIsClosingUpload(true);
     setTimeout(() => {
       setShowUploadModal(false);
       setIsClosingUpload(false);
+      setRawPastedText('');
       setIsUpdatingPreset(false);
       setPresetToUpdateId(null);
       setSelectedUpdateProfile(null);
-      setRawPastedText('');
-    }, 250);
+      setImportStep('input');
+      setExtractedData(null);
+    }, 400);
   };
 
   const handleCloseRename = () => {
@@ -261,106 +266,18 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
     if (!rawPastedText.trim()) return;
 
     setIsProcessingAI(true);
-    setOcrProgress(20);
-    setProcessingStatus('Extracting UMS patterns...');
+    setOcrProgress(50);
+    setProcessingStatus('Analyzing patterns...');
 
     try {
-      const combinedSchedules: DaySchedule[] = [];
-      const lines = rawPastedText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      
-      let currentDay = '';
-      const dayKeywords = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      
-      // Heuristic: UMS copy-paste usually lists the day, then slots under it
-      // Format 1: DAY \n COURSE \n TIME \n ROOM
-      // Format 2: Tab separated rows
-      
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        
-        // Detect Day
-        const foundDay = dayKeywords.find(d => line.toUpperCase().includes(d.toUpperCase()));
-        if (foundDay) {
-          currentDay = foundDay;
-          if (!combinedSchedules.find(s => s.day === currentDay)) {
-            combinedSchedules.push({ day: currentDay, slots: [] });
-          }
-          continue;
-        }
-
-        if (!currentDay) continue;
-
-        // Detect Time pattern (e.g. 09:00 - 10:00 or 9:00 AM)
-        const timeMatch = line.match(/(\d{1,2}[:.]\d{2}(?:\s*[AP]M)?)\s*(?:-|—|to|UNTIL)?\s*(\d{1,2}[:.]\d{2}(?:\s*[AP]M)?)/i);
-        if (timeMatch) {
-          const startTime = timeMatch[1].replace('.', ':');
-          const endTime = timeMatch[2].replace('.', ':');
-          
-          // Look for subject and room near this time
-          let subject = "Unknown";
-          let room = "N/A";
-
-          // Heuristic: Subject is usually before time or on the same line if it's a course code
-          if (i > 0 && !dayKeywords.some(d => lines[i-1].includes(d))) {
-            subject = lines[i-1];
-          }
-          
-          // Room is usually after time
-          if (i < lines.length - 1) {
-            room = lines[i+1];
-          }
-
-          const dayData = combinedSchedules.find(s => s.day === currentDay);
-          if (dayData) {
-            dayData.slots.push({
-              id: `pasted-${Math.random().toString(36).substr(2, 5)}`,
-              subject: subject.trim(),
-              room: room.trim(),
-              startTime,
-              endTime,
-              type: (subject.toLowerCase().includes('lab') || subject.toLowerCase().includes('practical')) ? 'lab' : 'class'
-            });
-          }
-        }
-      }
-
-      setOcrProgress(80);
-      setProcessingStatus('Finalizing schedule...');
+      const combinedSchedules = parseTimetableText(rawPastedText);
 
       if (combinedSchedules.length === 0 || combinedSchedules.every(d => d.slots.length === 0)) {
-        throw new Error("Could not detect any valid timetable patterns. Try the screenshot method.");
+        throw new Error("Could not detect any valid timetable patterns. Please ensure the text format is correct.");
       }
-
-      // Cleanup and sort
-      combinedSchedules.forEach(d => {
-        d.slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
-      });
-
-      const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      combinedSchedules.sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
-
-      setPendingTimetable(combinedSchedules);
       
-      // Update/New Workflow
-      if (isUpdatingPreset && presetToUpdateId) {
-        const existingProfile = [myTimetable, ...friendTimetables, ...communityPresets].find(p => (p?.id || p?.ownerId) === presetToUpdateId);
-        if (existingProfile) {
-          setMetadata({
-            section: existingProfile.section || '',
-            branch: existingProfile.branch || '',
-            year: existingProfile.year || '',
-            semester: existingProfile.semester || ''
-          });
-          setEditingPresetId(presetToUpdateId);
-        }
-      } else {
-        setEditingPresetId(null);
-        setMetadata({ section: '', year: '', branch: '', semester: '' });
-      }
-
-      handleCloseUpload();
-      setShowMetadataModal(true);
-
+      setPendingTimetable(combinedSchedules);
+      setImportStep('destination');
     } catch (err: any) {
       showToast(err.message || "Failed to parse text. Use screenshots instead.", "error");
     } finally {
@@ -368,6 +285,45 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       setOcrProgress(0);
       setProcessingStatus('');
     }
+  };
+
+  const handleFinalizeImport = async () => {
+    // If we have text but no parsed data yet, parse it now
+    if (rawPastedText.length > 20 && importStep === 'destination' && (!pendingTimetable || pendingTimetable.length === 0)) {
+      try {
+        const combinedSchedules = parseTimetableText(rawPastedText);
+
+        if (combinedSchedules.length === 0 || combinedSchedules.every(d => d.slots.length === 0)) {
+          showToast("Could not detect any valid timetable patterns. Try cleaning the text or using a screenshot.", "error");
+          return;
+        }
+        
+        setPendingTimetable(combinedSchedules);
+      } catch (err) {
+        showToast("Failed to parse text. Please check the format.", "error");
+        return;
+      }
+    }
+
+    // Now handle the Update/New logic
+    if (isUpdatingPreset && presetToUpdateId) {
+      const existingProfile = [myTimetable, ...friendTimetables, ...communityPresets].find(p => (p?.id || p?.ownerId) === presetToUpdateId);
+      if (existingProfile) {
+        setMetadata({
+          section: existingProfile.section || '',
+          branch: existingProfile.branch || '',
+          year: existingProfile.year || '',
+          semester: existingProfile.semester || ''
+        });
+        setEditingPresetId(presetToUpdateId);
+      }
+    } else {
+      setEditingPresetId(null);
+      setMetadata({ section: '', year: '', branch: '', semester: '' });
+    }
+
+    handleCloseUpload();
+    setShowMetadataModal(true);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -410,35 +366,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       combinedSchedules.sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
 
       setPendingTimetable(combinedSchedules);
-      
-      if (isUpdatingPreset && presetToUpdateId) {
-        const existingProfile = [...friendTimetables, ...communityPresets].find(p => (p?.id || p?.ownerId) === presetToUpdateId);
-        if (!existingProfile && myTimetable && (myTimetable.ownerId === presetToUpdateId || presetToUpdateId === 'me')) {
-          const profile = myTimetable;
-          setMetadata({
-            section: profile.section || '',
-            branch: profile.branch || '',
-            year: profile.year || '',
-            semester: profile.semester || ''
-          });
-          setEditingPresetId(presetToUpdateId);
-        } else if (existingProfile) {
-          setMetadata({
-            section: existingProfile.section || '',
-            branch: existingProfile.branch || '',
-            year: existingProfile.year || '',
-            semester: existingProfile.semester || ''
-          });
-          setEditingPresetId(presetToUpdateId);
-        }
-      } else {
-        // Reset metadata for new upload
-        setEditingPresetId(null);
-        setMetadata({ section: '', year: '', branch: '', semester: '' });
-      }
-
-      handleCloseUpload();
-      setShowMetadataModal(true);
+      setImportStep('destination');
     } catch (err) {
       console.error(err);
       showToast("Unable to read timetable. Please ensure screenshots are clear.", "error");
@@ -1234,242 +1162,232 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       {showUploadModal && createPortal(
         <div
           className={`modal-overlay modal-overlay-fade ${isClosingUpload ? 'closing' : ''}`}
-          style={{ backdropFilter: 'blur(48px) saturate(160%)', WebkitBackdropFilter: 'blur(48px) saturate(160%)' }}
+          style={{ backdropFilter: 'blur(32px) saturate(160%)', WebkitBackdropFilter: 'blur(32px) saturate(160%)' }}
           onClick={(e) => { if (e.target === e.currentTarget && !isProcessingAI) handleCloseUpload(); }}
         >
-          <div className={`nexus-modal w-full max-w-2xl bg-white dark:bg-[#0d0d0d] border border-zinc-100 dark:border-white/5 shadow-xl rounded-[32px] overflow-hidden ${isClosingUpload ? 'closing' : ''}`}>
-            {/* Header */}
-            <div className="p-10 pb-6 flex items-center justify-between border-b border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01]">
-              <div className="flex items-center gap-5">
-                <div className="w-12 h-12 bg-orange-600/[0.03] dark:bg-orange-600/[0.05] border border-orange-600/5 rounded-2xl flex items-center justify-center">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6 text-orange-600/80"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+          <div className={`nexus-modal w-full max-w-lg bg-white dark:bg-[#0d0d0d] border border-zinc-100 dark:border-white/5 shadow-2xl rounded-[24px] overflow-hidden ${isClosingUpload ? 'closing' : ''}`}>
+            {/* Header - Reduced padding and size */}
+            <div className="px-6 py-5 flex items-center justify-between border-b border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-orange-600/[0.03] dark:bg-orange-600/[0.05] border border-orange-600/5 rounded-xl flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-orange-600/80"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-medium text-zinc-800 dark:text-white tracking-tight">Import timetable</h3>
-                  <p className="text-[11px] font-medium text-orange-600/60 tracking-tight mt-0.5">Extraction engine</p>
+                  <h3 className="text-lg font-semibold text-zinc-800 dark:text-white tracking-tight">Import timetable</h3>
+                  <p className="text-[10px] font-medium text-orange-600/60 tracking-tight">Step {importStep === 'input' ? '1' : '2'}: {importStep === 'input' ? 'Source' : 'Destination'}</p>
                 </div>
               </div>
               <button 
                 onClick={handleCloseUpload} 
-                className="w-10 h-10 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-white/10 rounded-xl transition-all border-none bg-transparent text-zinc-400 hover:text-zinc-800 dark:hover:text-white"
+                className="w-8 h-8 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-white/10 rounded-lg transition-all border-none bg-transparent text-zinc-400 hover:text-zinc-800 dark:hover:text-white"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
 
-            <div className="p-10 space-y-8">
+            <div className="p-6">
               {isProcessingAI ? (
-                <div className="py-24 text-center space-y-10">
-                  <div className="relative w-40 h-40 mx-auto">
-                    <div className="absolute inset-0 border-[8px] border-orange-600/5 rounded-full" />
-                    <div className="absolute inset-0 border-[8px] border-orange-600 rounded-full border-t-transparent animate-spin" style={{ animationDuration: '0.8s' }} />
+                <div className="py-16 text-center space-y-6">
+                  <div className="relative w-24 h-24 mx-auto">
+                    <div className="absolute inset-0 border-[4px] border-orange-600/5 rounded-full" />
+                    <div className="absolute inset-0 border-[4px] border-orange-600 rounded-full border-t-transparent animate-spin" style={{ animationDuration: '0.8s' }} />
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-4xl font-medium text-zinc-800 dark:text-white tabular-nums tracking-tighter">{Math.round(ocrProgress)}%</span>
-                      <span className="text-[11px] font-medium text-orange-600/60 tracking-tight mt-1">Processing</span>
+                      <span className="text-xl font-semibold text-zinc-800 dark:text-white tabular-nums tracking-tighter">{Math.round(ocrProgress)}%</span>
                     </div>
                   </div>
-                  <div className="space-y-3">
-                    <p className="text-lg font-semibold text-zinc-800 dark:text-white animate-pulse">{processingStatus}</p>
-                    <p className="text-[11px] text-zinc-500 font-medium leading-relaxed max-w-[280px] mx-auto opacity-70">Converting visual schedule to structured data points...</p>
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-zinc-800 dark:text-white animate-pulse">{processingStatus}</p>
+                    <p className="text-[10px] text-zinc-500 font-medium leading-relaxed max-w-[200px] mx-auto opacity-70">Extracting schedule details...</p>
                   </div>
                 </div>
               ) : (
                 <>
-                  {/* Mode Toggles */}
-                  <div className="flex p-1.5 bg-zinc-100 dark:bg-white/[0.03] rounded-[22px] border border-zinc-200 dark:border-white/5 shadow-inner">
-                    <button 
-                      onClick={() => { setIsUpdatingPreset(false); setPresetToUpdateId(null); setSelectedUpdateProfile(null); }}
-                      className={`flex-1 py-3 rounded-[18px] text-[11px] font-semibold transition-all border-none ${!isUpdatingPreset ? 'bg-white dark:bg-white/10 text-orange-600 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
-                    >
-                      New Profile
-                    </button>
-                    <button 
-                      onClick={() => setIsUpdatingPreset(true)}
-                      className={`flex-1 py-3 rounded-[18px] text-[11px] font-semibold transition-all border-none ${isUpdatingPreset ? 'bg-white dark:bg-white/10 text-orange-600 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
-                    >
-                      Update Existing
-                    </button>
-                  </div>
-
-                  <div className="max-h-[500px] overflow-y-auto pr-2 no-scrollbar min-h-[380px]">
-                    {isUpdatingPreset && !presetToUpdateId ? (
-                      <div className="space-y-8 animate-fade-in">
-                        <div className="relative">
-                          <input 
-                            type="text" 
-                            placeholder="Search your connections..." 
-                            value={presetSearchQuery}
-                            onChange={e => setPresetSearchQuery(e.target.value)}
-                            className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/5 rounded-[22px] px-6 py-4 text-sm font-medium outline-none focus:ring-4 focus:ring-orange-600/10 transition-all placeholder:text-zinc-400 shadow-inner"
-                          />
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300 transition-colors"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                        </div>
-                        
-                        <div className="space-y-8">
-                          {/* Categorized List */}
-                          <div className="space-y-6">
-                            {/* Section: Your Profiles */}
-                            {[myTimetable, ...friendTimetables]
-                              .filter(Boolean)
-                              .filter(p => p!.ownerName.toLowerCase().includes(presetSearchQuery.toLowerCase()) || p!.section?.toLowerCase().includes(presetSearchQuery.toLowerCase()))
-                              .length > 0 && (
-                              <div className="space-y-3">
-                                <h4 className="text-[11px] font-medium text-zinc-400 ml-2 tracking-tight">Your connections</h4>
-                                  <div className="grid gap-2">
-                                  {[myTimetable, ...friendTimetables]
-                                    .filter(Boolean)
-                                    .filter(p => p!.ownerName.toLowerCase().includes(presetSearchQuery.toLowerCase()) || p!.section?.toLowerCase().includes(presetSearchQuery.toLowerCase()))
-                                    .map(p => (
-                                      <button
-                                        key={p!.ownerId}
-                                        onClick={() => { setPresetToUpdateId(p!.ownerId); setSelectedUpdateProfile(p); }}
-                                        className="w-full p-3 rounded-2xl bg-zinc-50 dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 text-left transition-all flex items-center justify-between group hover:border-orange-500/30 hover:bg-orange-600/[0.02]"
-                                      >
-                                        <div className="min-w-0 pr-4 flex items-center gap-4">
-                                          <div className="w-10 h-10 rounded-xl bg-white dark:bg-white/5 border border-zinc-100 dark:border-white/5 flex items-center justify-center font-semibold text-zinc-400 group-hover:text-orange-600 transition-all">
-                                            {p!.ownerName[0]}
-                                          </div>
-                                          <div>
-                                            <p className="text-[14px] font-medium text-zinc-800 dark:text-white truncate group-hover:text-orange-600 transition-colors">{p!.ownerName}</p>
-                                            <div className="flex items-center gap-2 mt-0.5">
-                                              <span className="text-[10px] font-medium text-zinc-400 tracking-tight">{p!.section || 'LOCAL'}</span>
-                                              <span className="w-1 h-1 bg-zinc-200 dark:bg-white/10 rounded-full" />
-                                              <span className="text-[10px] font-medium text-orange-600/40 tracking-tight">{p!.branch || 'UNSET'}</span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <div className="w-8 h-8 rounded-full bg-orange-600/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
-                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-orange-600"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                                        </div>
-                                      </button>
-                                    ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Section: Community Hub */}
-                            {communityPresets
-                              .filter(p => p.name.toLowerCase().includes(presetSearchQuery.toLowerCase()) || p.section.toLowerCase().includes(presetSearchQuery.toLowerCase()))
-                              .length > 0 && (
-                              <div className="space-y-4">
-                                <h4 className="text-[11px] font-medium text-orange-500/80 ml-2 tracking-tight">Community hub</h4>
-                                <div className="grid gap-2">
-                                  {communityPresets
-                                    .filter(p => p.name.toLowerCase().includes(presetSearchQuery.toLowerCase()) || p.section.toLowerCase().includes(presetSearchQuery.toLowerCase()))
-                                    .map(preset => (
-                                      <button
-                                        key={preset.id}
-                                        onClick={() => { setPresetToUpdateId(preset.id); setSelectedUpdateProfile(preset); }}
-                                        className="w-full p-3 rounded-2xl bg-zinc-50 dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 text-left transition-all flex items-center justify-between group hover:border-orange-500/30 hover:bg-orange-600/[0.03]"
-                                      >
-                                        <div className="min-w-0 pr-4 flex items-center gap-4">
-                                          <div className="w-10 h-10 rounded-xl bg-orange-600/5 border border-orange-600/10 flex items-center justify-center font-semibold text-orange-600/40 group-hover:text-orange-600 transition-all">
-                                            H
-                                          </div>
-                                          <div>
-                                            <p className="text-[14px] font-medium text-zinc-800 dark:text-white truncate group-hover:text-orange-600 transition-colors">{preset.name}</p>
-                                            <div className="flex items-center gap-2 mt-0.5">
-                                              <span className="text-[10px] font-medium text-zinc-400 tracking-tight">{preset.section}</span>
-                                              <span className="w-1 h-1 bg-zinc-200 dark:bg-white/10 rounded-full" />
-                                              <span className="text-[10px] font-medium text-orange-600/40 tracking-tight">Sem {preset.semester}</span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <div className="w-8 h-8 rounded-full bg-orange-600/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
-                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-orange-600"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                                        </div>
-                                      </button>
-                                    ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-10 animate-fade-in">
-                        {isUpdatingPreset && selectedUpdateProfile && (
-                          <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-600/5 border border-orange-100 dark:border-orange-500/10 rounded-2xl">
-                            <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center shadow-sm">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-white"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                              </div>
-                              <div className="min-w-0">
-                                  <p className="text-[10px] font-medium text-orange-600/60 tracking-tight">Target profile</p>
-                                  <p className="text-[14px] font-medium text-zinc-800 dark:text-white truncate">{selectedUpdateProfile.ownerName || selectedUpdateProfile.name}</p>
-                              </div>
-                            </div>
-                            <button 
-                              onClick={() => { setPresetToUpdateId(null); setSelectedUpdateProfile(null); }}
-                              className="px-4 py-2 text-[10px] font-semibold text-zinc-500 hover:text-orange-600 transition-colors bg-zinc-100 dark:bg-white/5 rounded-lg border-none"
-                            >
-                              Change
-                            </button>
-                          </div>
-                        )}
-
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between px-2">
-                            <label className="text-[11px] font-medium text-zinc-400 tracking-tight">Quick paste</label>
-                            <span className="text-[10px] font-medium text-orange-600/80 bg-orange-600/5 px-2.5 py-1 rounded-full">Text mode</span>
+                  <div className="max-h-[60vh] overflow-y-auto pr-1 no-scrollbar">
+                    {importStep === 'input' ? (
+                      <div className="space-y-6 animate-fade-in">
+                        {/* Quick Paste Area */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between px-1">
+                            <label className="text-[11px] font-semibold text-zinc-400 tracking-tight">Quick paste</label>
+                            <span className="text-[9px] font-bold text-orange-600/80 bg-orange-600/5 px-2 py-0.5 rounded-full">Text mode</span>
                           </div>
                           <textarea
                             value={rawPastedText}
                             onChange={e => setRawPastedText(e.target.value)}
-                            className="w-full h-40 bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-3xl p-6 text-sm font-medium focus:ring-4 focus:ring-orange-600/5 transition-all outline-none resize-none placeholder:text-zinc-300 shadow-inner"
+                            className="w-full h-32 bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-2xl p-4 text-[13px] font-medium focus:ring-4 focus:ring-orange-600/5 transition-all outline-none resize-none placeholder:text-zinc-300 shadow-inner"
                             placeholder="Paste your UMS Timetable text here..."
                           />
                         </div>
 
-                        <div className="relative flex items-center gap-6 py-4">
+                        <div className="relative flex items-center gap-4 py-2">
                           <div className="h-px flex-1 bg-gradient-to-r from-transparent via-zinc-200 dark:via-white/10 to-transparent"></div>
-                          <span className="text-[10px] font-semibold text-zinc-300 dark:text-zinc-600 tracking-[0.4em]">OR</span>
+                          <span className="text-[9px] font-bold text-zinc-300 dark:text-zinc-600 tracking-[0.3em]">OR</span>
                           <div className="h-px flex-1 bg-gradient-to-r from-transparent via-zinc-200 dark:via-white/10 to-transparent"></div>
                         </div>
 
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between px-2">
-                            <label className="text-[11px] font-medium text-zinc-400 tracking-tight">Snapshots</label>
-                            <span className="text-[10px] font-medium text-zinc-500/80 bg-zinc-100 dark:bg-white/5 px-2.5 py-1 rounded-full">Visual mode</span>
+                        {/* Screenshot Upload Area */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between px-1">
+                            <label className="text-[11px] font-semibold text-zinc-400 tracking-tight">Snapshots</label>
+                            <span className="text-[9px] font-bold text-zinc-500/80 bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded-full">Visual mode</span>
                           </div>
                           <div 
                             onClick={() => fileInputRef.current?.click()} 
-                            className="border-2 border-dashed border-zinc-200 dark:border-white/5 rounded-[32px] p-10 text-center hover:border-orange-500/50 hover:bg-orange-600/[0.01] transition-all cursor-pointer group bg-zinc-50/30 dark:bg-white/[0.01]"
+                            className="border-2 border-dashed border-zinc-200 dark:border-white/5 rounded-2xl p-8 text-center hover:border-orange-500/50 hover:bg-orange-600/[0.01] transition-all cursor-pointer group bg-zinc-50/30 dark:bg-white/[0.01]"
                           >
-                            <div className="space-y-4">
-                              <div className="w-14 h-14 bg-white dark:bg-white/5 rounded-2xl border border-zinc-100 dark:border-white/5 flex items-center justify-center mx-auto group-hover:scale-105 transition-all shadow-sm">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6 text-orange-600"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+                            <div className="space-y-3">
+                              <div className="w-12 h-12 bg-white dark:bg-white/5 rounded-xl border border-zinc-100 dark:border-white/5 flex items-center justify-center mx-auto group-hover:scale-105 transition-all shadow-sm">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-orange-600"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
                               </div>
                               <div>
-                                <p className="text-[15px] font-medium text-zinc-800 dark:text-zinc-100 tracking-tight">Select Screenshots</p>
+                                <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 tracking-tight">Select Screenshots</p>
                                 <p className="text-[10px] font-medium text-zinc-400 mt-1 opacity-60">Drag images or click to browse</p>
                               </div>
                             </div>
                           </div>
                         </div>
+
+                        {rawPastedText.length > 20 && (
+                          <div className="pt-2 animate-slide-up">
+                            <button 
+                              onClick={() => setImportStep('destination')}
+                              className="w-full py-3.5 bg-orange-600 text-white rounded-xl text-[12px] font-bold shadow-lg shadow-orange-600/10 active:scale-[0.98] transition-all border-none flex items-center justify-center gap-2"
+                            >
+                              Continue to destination
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-6 animate-fade-in">
+                        <div className="flex p-1 bg-zinc-100 dark:bg-white/[0.03] rounded-xl border border-zinc-200 dark:border-white/5 shadow-inner">
+                          <button 
+                            onClick={() => { setIsUpdatingPreset(false); setPresetToUpdateId(null); setSelectedUpdateProfile(null); }}
+                            className={`flex-1 py-2.5 rounded-lg text-[10px] font-bold transition-all border-none ${!isUpdatingPreset ? 'bg-white dark:bg-white/10 text-orange-600 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                          >
+                            New Profile
+                          </button>
+                          <button 
+                            onClick={() => setIsUpdatingPreset(true)}
+                            className={`flex-1 py-2.5 rounded-lg text-[10px] font-bold transition-all border-none ${isUpdatingPreset ? 'bg-white dark:bg-white/10 text-orange-600 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                          >
+                            Update Existing
+                          </button>
+                        </div>
+
+                        {isUpdatingPreset && !presetToUpdateId ? (
+                          <div className="space-y-4 animate-fade-in">
+                            <div className="relative">
+                              <input 
+                                type="text" 
+                                placeholder="Search connections..." 
+                                value={presetSearchQuery}
+                                onChange={e => setPresetSearchQuery(e.target.value)}
+                                className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/5 rounded-xl px-4 py-3 text-[13px] font-medium outline-none focus:ring-4 focus:ring-orange-600/10 transition-all placeholder:text-zinc-400 shadow-inner"
+                              />
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-300"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                            </div>
+                            
+                            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1 no-scrollbar">
+                              {[myTimetable, ...friendTimetables]
+                                .filter(Boolean)
+                                .filter(p => p!.ownerName.toLowerCase().includes(presetSearchQuery.toLowerCase()))
+                                .map(p => (
+                                  <button
+                                    key={p!.ownerId}
+                                    onClick={() => { setPresetToUpdateId(p!.ownerId); setSelectedUpdateProfile(p); }}
+                                    className="w-full p-2.5 rounded-xl bg-zinc-50 dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 text-left transition-all flex items-center justify-between group hover:border-orange-500/30 hover:bg-orange-600/[0.02]"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-8 h-8 rounded-lg bg-white dark:bg-white/5 border border-zinc-100 dark:border-white/5 flex items-center justify-center font-bold text-xs text-zinc-400 group-hover:text-orange-600 transition-all">
+                                        {p!.ownerName[0]}
+                                      </div>
+                                      <div>
+                                        <p className="text-[13px] font-semibold text-zinc-800 dark:text-white truncate group-hover:text-orange-600 transition-colors">{p!.ownerName}</p>
+                                        <p className="text-[9px] font-medium text-zinc-400 tracking-tight">{p!.section || 'LOCAL'} • {p!.branch || 'UNSET'}</p>
+                                      </div>
+                                    </div>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5 text-orange-600 opacity-0 group-hover:opacity-100 transition-all"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                  </button>
+                                ))}
+
+                              {communityPresets
+                                .filter(p => p.name.toLowerCase().includes(presetSearchQuery.toLowerCase()))
+                                .map(preset => (
+                                  <button
+                                    key={preset.id}
+                                    onClick={() => { setPresetToUpdateId(preset.id); setSelectedUpdateProfile(preset); }}
+                                    className="w-full p-2.5 rounded-xl bg-zinc-50 dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 text-left transition-all flex items-center justify-between group hover:border-orange-500/30 hover:bg-orange-600/[0.03]"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-8 h-8 rounded-lg bg-orange-600/5 border border-orange-600/10 flex items-center justify-center font-bold text-xs text-orange-600/40 group-hover:text-orange-600 transition-all">
+                                        H
+                                      </div>
+                                      <div>
+                                        <p className="text-[13px] font-semibold text-zinc-800 dark:text-white truncate group-hover:text-orange-600 transition-colors">{preset.name}</p>
+                                        <p className="text-[9px] font-medium text-zinc-400 tracking-tight">{preset.section} • Sem {preset.semester}</p>
+                                      </div>
+                                    </div>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5 text-orange-600 opacity-0 group-hover:opacity-100 transition-all"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                  </button>
+                                ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-6 animate-fade-in">
+                            {isUpdatingPreset && selectedUpdateProfile && (
+                              <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-600/5 border border-orange-100 dark:border-orange-500/10 rounded-xl">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center shadow-sm">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-white"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                                  </div>
+                                  <div>
+                                      <p className="text-[9px] font-bold text-orange-600/60 uppercase tracking-widest">Target profile</p>
+                                      <p className="text-[13px] font-semibold text-zinc-800 dark:text-white truncate">{selectedUpdateProfile.ownerName || selectedUpdateProfile.name}</p>
+                                  </div>
+                                </div>
+                                <button 
+                                  onClick={() => { setPresetToUpdateId(null); setSelectedUpdateProfile(null); }}
+                                  className="px-3 py-1.5 text-[10px] font-bold text-zinc-500 hover:text-orange-600 transition-colors bg-zinc-100 dark:bg-white/5 rounded-lg border-none"
+                                >
+                                  Change
+                                </button>
+                              </div>
+                            )}
+
+                            <div className="flex flex-col gap-3">
+                              <button 
+                                onClick={handleFinalizeImport}
+                                className="w-full py-3 bg-orange-600 text-white rounded-xl text-[12px] font-bold shadow-lg shadow-orange-600/20 active:scale-[0.98] transition-all border-none"
+                              >
+                                {isUpdatingPreset ? 'Sync with selected profile' : 'Create new profile'}
+                              </button>
+                              <button 
+                                onClick={() => { setImportStep('input'); setPendingTimetable([]); }}
+                                className="w-full py-2 text-[10px] font-bold text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors border-none bg-transparent"
+                              >
+                                ← Back to source
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
                   
-                  {/* Action Bar */}
-                  {(rawPastedText.length > 20 && (!isUpdatingPreset || (isUpdatingPreset && presetToUpdateId))) && (
-                  <div className="pt-6">
-                    <button 
-                      onClick={handleParsePastedData}
-                      className="w-full py-4 bg-orange-600 text-white rounded-xl text-[13px] font-semibold shadow-lg shadow-orange-600/10 active:scale-[0.98] transition-all border-none"
-                    >
-                      Extract Schedule
-                    </button>
-                  </div>
-                  )}
-
                   <input
                     type="file"
                     ref={fileInputRef}
                     className="hidden"
                     accept="image/*"
                     multiple
-                    onChange={handleFileUpload}
+                    onChange={(e) => {
+                      handleFileUpload(e);
+                      // After file selection, the logic in handleFileUpload should probably handle the next step
+                      // But the user wants the option to pick destination LATER.
+                      // So we let the OCR happen, and then we'll be in 'destination' step.
+                    }}
                   />
                 </>
               )}

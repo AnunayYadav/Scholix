@@ -50,115 +50,178 @@ export const extractTimetableWithTesseract = async (
  * Parses raw text into timetable slots.
  * Specifically optimized for LPU Touch timetable format.
  */
-const parseTimetableText = (text: string): DaySchedule[] => {
-  const cleanText = text.replace(/\r/g, '').trim();
+/**
+ * Parses raw text into timetable slots.
+ * Specifically optimized for LPU Touch timetable format.
+ * Handles multiple days and various OCR inaccuracies.
+ */
+export const parseTimetableText = (text: string): DaySchedule[] => {
+  const cleanText = text.replace(/\r/g, '');
   const lines = cleanText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   
-  const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
-  let detectedDay = 'Monday';
+  const dayNames = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+  const daySchedules = new Map<string, TimetableSlot[]>();
   
-  for (const day of days) {
-    if (cleanText.toUpperCase().includes(day)) {
-      detectedDay = day.charAt(0) + day.slice(1).toLowerCase();
-      break;
-    }
-  }
+  let currentDay = '';
+  let activeSlots: Partial<TimetableSlot>[] = [];
 
-  const slots: TimetableSlot[] = [];
-  const timeRegex = /(\d{1,2}[:.]\d{2}(?:\s*[AP]M)?)\s*[-—]\s*(\d{1,2}[:.]\d{2}(?:\s*[AP]M)?)/i;
-  const subjectRegex = /\b([A-Z]{2,5}\d{3,4})\b/;
-  const roomRegex = /(\d{1,2}-\d{3,4}[A-Z]?)/;
-  
-  let currentSlot: Partial<TimetableSlot> = {};
+  // Robust Regexes
+  const timeRegex = /(\d{1,2})\s*[:.]\s*(\d{2})\s*([APMRFB]{1,2})?\s*[-—~]\s*(\d{1,2})\s*[:.]\s*(\d{2})\s*([APMRFB]{1,2})?/gi;
+  const subjectRegex = /(?:C\s*[:]\s*)?([A-Z]{2,5}\s*\d{3,4}[A-Z]?)/gi;
+  const roomRegex = /(?:R\s*[:]\s*)?(\d{1,2}\s*[-]\s*\d{2,4}[A-Z]?)/gi;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]; // Keep original case for AM/PM detection if needed, but regex is /i
-    
-    // Time is usually the trigger for a new slot in LPU Touch list view
-    const timeMatch = line.match(timeRegex);
-    if (timeMatch) {
-      if (currentSlot.subject) {
-        slots.push({
-          id: Math.random().toString(36).substr(2, 9),
-          subject: currentSlot.subject,
-          room: currentSlot.room || 'N/A',
-          startTime: currentSlot.startTime || '09:00',
-          endTime: currentSlot.endTime || '10:00',
-          type: currentSlot.type || 'class'
-        } as TimetableSlot);
-        currentSlot = {};
-      }
-      
-      let start = timeMatch[1].replace('.', ':').toUpperCase();
-      let end = timeMatch[2].replace('.', ':').toUpperCase();
-      
-      // Pad with zero if needed for consistent sorting (e.g., 9:00 -> 09:00)
-      if (/^\d:/.test(start)) start = '0' + start;
-      if (/^\d:/.test(end)) end = '0' + end;
-      
-      currentSlot.startTime = start;
-      currentSlot.endTime = end;
-    }
-
-    const subMatch = line.match(subjectRegex);
-    if (subMatch) {
-      currentSlot.subject = subMatch[1];
-    }
-
-    const roomMatch = line.match(roomRegex);
-    if (roomMatch) {
-      currentSlot.room = roomMatch[1];
-    }
-
-    const upperLine = line.toUpperCase();
-    if (upperLine.includes('LAB') || upperLine.includes('PRACTICAL')) {
-      currentSlot.type = 'lab';
-    } else if (upperLine.includes('LECTURE') || upperLine.includes('TUTORIAL') || upperLine.includes('CLASS')) {
-      currentSlot.type = 'class';
-    }
-  }
-
-  // Push last slot
-  if (currentSlot.subject) {
-    slots.push({
+  const finalizeSlot = (slot: Partial<TimetableSlot>): TimetableSlot => {
+    return {
       id: Math.random().toString(36).substr(2, 9),
-      subject: currentSlot.subject,
-      room: currentSlot.room || 'N/A',
-      startTime: currentSlot.startTime || '09:00',
-      endTime: currentSlot.endTime || '10:00',
-      type: currentSlot.type || 'class'
-    } as TimetableSlot);
-  }
-
-  const timeToMinutes = (time: string) => {
-    if (!time) return 0;
-    const clean = time.toUpperCase().replace(/[\s.]/g, '');
-    const match12 = clean.match(/(\d{1,2})[:]?(\d{0,2})([AP][MN])/);
-    if (match12) {
-      let hours = parseInt(match12[1]);
-      const minutes = match12[2] ? parseInt(match12[2]) : 0;
-      const period = match12[3];
-      if (period.startsWith('P') && hours < 12) hours += 12;
-      if (period.startsWith('A') && hours === 12) hours = 0;
-      return hours * 60 + minutes;
-    }
-    const match24 = clean.match(/(\d{1,2})[:]?(\d{0,2})/);
-    if (match24) {
-      let hours = parseInt(match24[1]);
-      const minutes = match24[2] ? parseInt(match24[2]) : 0;
-      if (hours >= 1 && hours < 8) hours += 12; // Heuristic for afternoon classes
-      return hours * 60 + minutes;
-    }
-    return 0;
+      subject: slot.subject || 'Unknown Subject',
+      room: slot.room || 'N/A',
+      startTime: slot.startTime || '09:00',
+      endTime: slot.endTime || '10:00',
+      type: slot.type || 'class'
+    };
   };
 
-  if (slots.length === 0) return [];
+  const flushActiveSlots = () => {
+    if (activeSlots.length > 0) {
+      const day = currentDay || 'Monday';
+      if (!daySchedules.has(day)) daySchedules.set(day, []);
+      
+      activeSlots.forEach(slot => {
+        if (slot.subject || slot.startTime) {
+          daySchedules.get(day)!.push(finalizeSlot(slot));
+        }
+      });
+      activeSlots = [];
+    }
+  };
 
-  return [{
-    day: detectedDay,
-    slots: slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime))
-  }];
+  const normalizeOCRTime = (h: string, m: string, period?: string): string => {
+    let hh = parseInt(h);
+    let mm = m.padStart(2, '0');
+    let p = period ? period.toUpperCase().trim() : '';
+    
+    if (p.includes('A')) p = 'AM';
+    else if (p.includes('P') || p.includes('R') || p.includes('F') || p.includes('B')) p = 'PM';
+    else if (p === 'M') p = (hh >= 8 && hh <= 11) ? 'AM' : 'PM';
+    else p = (hh >= 8 && hh <= 11) ? 'AM' : 'PM';
+
+    let hhStr = hh.toString().padStart(2, '0');
+    return `${hhStr}:${mm} ${p}`;
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const upperLine = line.toUpperCase();
+
+    // 1. Detect Day
+    const foundDay = dayNames.find(d => 
+      upperLine === d || 
+      upperLine.startsWith(d + ' ') || 
+      upperLine.endsWith(' ' + d)
+    );
+    
+    if (foundDay) {
+      flushActiveSlots();
+      currentDay = foundDay.charAt(0) + foundDay.slice(1).toLowerCase();
+      continue;
+    }
+
+    // 2. Detect Times (Multiple on one line for multi-column)
+    const timeMatches = [...line.matchAll(timeRegex)];
+    if (timeMatches.length > 0) {
+      flushActiveSlots(); // Start a new "row" of slots
+      
+      timeMatches.forEach(match => {
+        activeSlots.push({
+          startTime: normalizeOCRTime(match[1], match[2], match[3]),
+          endTime: normalizeOCRTime(match[4], match[5], match[6]),
+          type: 'class'
+        });
+      });
+      continue;
+    }
+
+    // 3. Detect Subject Codes (Assign to active slots in order)
+    const subMatches = [...line.matchAll(subjectRegex)];
+    if (subMatches.length > 0) {
+      // If we have no active slots, maybe the subjects came BEFORE the times or we missed the times
+      if (activeSlots.length === 0) {
+        subMatches.forEach(match => {
+          activeSlots.push({ subject: match[1].replace(/\s+/g, ''), type: 'class' });
+        });
+      } else {
+        subMatches.forEach((match, idx) => {
+          if (activeSlots[idx] && !activeSlots[idx].subject) {
+            activeSlots[idx].subject = match[1].replace(/\s+/g, '');
+          }
+        });
+      }
+    }
+
+    // 4. Detect Rooms (Assign to active slots in order)
+    const roomMatches = [...line.matchAll(roomRegex)];
+    if (roomMatches.length > 0 && activeSlots.length > 0) {
+      roomMatches.forEach((match, idx) => {
+        if (activeSlots[idx] && !activeSlots[idx].room) {
+          activeSlots[idx].room = match[1].replace(/\s+/g, '');
+        }
+      });
+    }
+
+    // 5. Detect Type / Lab
+    if (activeSlots.length > 0) {
+      if (upperLine.includes('LAB') || upperLine.includes('PRACTICAL')) {
+        activeSlots.forEach(s => s.type = 'lab');
+      }
+    }
+  }
+
+  flushActiveSlots();
+
+  const result: DaySchedule[] = [];
+  daySchedules.forEach((slots, day) => {
+    // Filter out duplicates and sort
+    const uniqueSlots = slots.filter((v, idx, a) => 
+      a.findIndex(t => t.startTime === v.startTime && t.subject === v.subject) === idx
+    );
+    
+    result.push({
+      day,
+      slots: uniqueSlots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime))
+    });
+  });
+
+  return result;
 };
+
+const timeToMinutes = (time: string): number => {
+  if (!time) return 0;
+  const clean = time.toUpperCase().replace(/[\s.]/g, '');
+  
+  // Handle 12-hour format
+  const match12 = clean.match(/(\d{1,2})[:]?(\d{0,2})([AP]M)/);
+  if (match12) {
+    let hours = parseInt(match12[1]);
+    const minutes = match12[2] ? parseInt(match12[2]) : 0;
+    const period = match12[3];
+    if (period === 'PM' && hours < 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  }
+  
+  // Handle 24-hour format or partials
+  const match24 = clean.match(/(\d{1,2})[:](\d{2})/);
+  if (match24) {
+    let hours = parseInt(match24[1]);
+    const minutes = parseInt(match24[2]);
+    // Heuristic: if hour is 1-7, it's probably PM (LPU classes are usually 8 AM - 6 PM)
+    if (hours >= 1 && hours <= 7) hours += 12;
+    return hours * 60 + minutes;
+  }
+  
+  return 0;
+};
+
 
 /**
  * Extracts attendance data from an image using Tesseract.js
