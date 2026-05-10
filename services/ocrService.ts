@@ -380,3 +380,28 @@ const fallbackLineParsing = (text: string): ExtractedAttendance[] => {
   }
   return results;
 };
+
+/**
+ * Extracts raw text from a resume image using Tesseract.js
+ */
+export const extractResumeWithTesseract = async (
+  image: string | File,
+  onProgress?: (progress: number) => void
+): Promise<string> => {
+  try {
+    const { data: { text } } = await Tesseract.recognize(image, 'eng', {
+      logger: m => {
+        if (m.status === 'recognizing text' && onProgress) {
+          onProgress(m.progress);
+        }
+      }
+    });
+
+    console.log("Tesseract Resume OCR Text:", text);
+    return text;
+  } catch (error) {
+    console.error("Tesseract Resume OCR Error:", error);
+    throw new Error("Failed to extract text from resume image.");
+  }
+};
+

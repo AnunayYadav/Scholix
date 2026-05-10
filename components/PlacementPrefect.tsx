@@ -9,6 +9,7 @@ import { showToast, showConfirm } from './Toast.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { extractResumeWithTesseract } from '../services/ocrService.ts';
 
 import { 
   ResponsiveContainer, 
@@ -121,11 +122,11 @@ const ScoreAura: React.FC<ScoreAuraProps> = ({ score, size = 180 }) => {
   };
 
   const getStatusColor = (s: number) => {
-    if (s >= 90) return "text-emerald-500";
-    if (s >= 75) return "text-emerald-400";
-    if (s >= 60) return "text-yellow-400";
-    if (s >= 40) return "text-orange-500";
-    return "text-red-500";
+    if (s >= 90) return "#10b981"; // emerald-500
+    if (s >= 75) return "#34d399"; // emerald-400
+    if (s >= 60) return "#facc15"; // yellow-400
+    if (s >= 40) return "#f97316"; // orange-500
+    return "#ef4444"; // red-500
   };
 
   return (
@@ -165,7 +166,7 @@ const ScoreAura: React.FC<ScoreAuraProps> = ({ score, size = 180 }) => {
           <text x="0" y="0" textAnchor="middle" className="fill-zinc-900 dark:fill-white text-5xl font-black tracking-tighter filter drop-shadow-md">
             {displayScore}
           </text>
-          <text x="0" y="24" textAnchor="middle" className={`font-black text-[10px] uppercase tracking-[0.3em] ${getStatusColor(score).replace('text-', 'fill-')}`}>
+          <text x="0" y="24" textAnchor="middle" className="font-black text-[10px] uppercase tracking-[0.3em]" fill={getStatusColor(score)}>
             {getStatus(score)}
           </text>
         </g>
@@ -200,48 +201,61 @@ const ScanlineStyles = () => (
   `}} />
 );
 
+const CustomRadarTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 p-3 rounded-xl shadow-xl space-y-1.5">
+        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{payload[0].payload.subject}</p>
+        <div className="space-y-1">
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center justify-between gap-4">
+              <span className="text-[11px] font-medium" style={{ color: entry.color }}>{entry.name} :</span>
+              <span className="text-[11px] font-bold text-zinc-900 dark:text-white">{entry.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 const MetricBar: React.FC<{ label: string; score: number }> = ({ label, score }) => (
-  <div className="space-y-1.5 flex-1 w-full">
-    <div className="flex justify-between items-center px-0.5">
-      <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{label}</span>
-      <span className="text-[10px] font-black text-zinc-600 dark:text-zinc-300">{score}%</span>
-    </div>
-    <div className="h-[3px] w-full bg-zinc-100 dark:bg-white/[0.03] rounded-full overflow-hidden shadow-inner">
+  <div className="flex items-center gap-3 w-full">
+    <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 w-[120px] shrink-0">{label}</span>
+    <div className="flex-1 h-[5px] bg-zinc-100 dark:bg-zinc-800/50 rounded-full overflow-hidden">
       <div 
-        className="h-full bg-gradient-to-r from-brand-primary/80 to-brand-secondary/80 rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(var(--brand-primary-rgb),0.3)]"
+        className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all duration-1000 ease-out shadow-sm shadow-emerald-500/20"
         style={{ width: `${score}%` }}
       />
     </div>
+    <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 w-[45px] text-right shrink-0">{score}/100</span>
   </div>
 );
 
 const ComparisonCard: React.FC<{ suggestion: ImprovementSuggestion }> = ({ suggestion }) => (
-  <div className="glass-panel p-5 md:p-6 rounded-[24px] border dark:border-white/5 bg-white dark:bg-[#0a0a0a] space-y-4 transition-all hover:border-brand-primary/20 duration-300">
-    <div className="flex items-center justify-between">
-      <span className="px-2.5 py-1 rounded-full bg-brand-primary/[0.03] text-[9px] font-medium uppercase tracking-wider text-brand-primary/80 border border-brand-primary/10">
-        {suggestion.category || 'Improvement'}
-      </span>
-    </div>
-    <div className="space-y-4">
-      <div className="space-y-1.5">
-        <label className="text-[9px] font-medium text-red-500/80 uppercase tracking-widest ml-1">Current Gap</label>
-        <div className="p-4 rounded-xl bg-red-500/[0.02] border border-red-500/5 text-xs text-zinc-500 dark:text-zinc-400 italic leading-relaxed">
+  <div className="p-4 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm space-y-3">
+    <span className="px-2 py-0.5 rounded-md bg-brand-primary/10 text-[9px] font-semibold uppercase tracking-wider text-brand-primary">
+      {suggestion.category || 'Improvement'}
+    </span>
+    <div className="space-y-2.5 pt-1">
+      <div className="space-y-1">
+        <label className="text-[9px] font-semibold text-red-500/80 uppercase tracking-wider">Current gap</label>
+        <p className="px-3 py-2 rounded-xl bg-red-50/50 dark:bg-red-500/[0.04] border border-red-100/60 dark:border-red-500/10 text-[11px] text-zinc-500 dark:text-zinc-400 italic">
           "{suggestion.original}"
-        </div>
+        </p>
       </div>
-      <div className="space-y-1.5">
-        <label className="text-[9px] font-medium text-emerald-500/80 uppercase tracking-widest ml-1">AI Recommendation</label>
-        <div className="p-4 rounded-xl bg-emerald-500/[0.02] border border-emerald-500/5 text-xs font-medium text-zinc-800 dark:text-zinc-200 leading-relaxed">
+      <div className="space-y-1">
+        <label className="text-[9px] font-semibold text-emerald-500/80 uppercase tracking-wider">AI recommendation</label>
+        <p className="px-3 py-2 rounded-xl bg-emerald-50/50 dark:bg-emerald-500/[0.04] border border-emerald-100/60 dark:border-emerald-500/10 text-[11px] font-medium text-zinc-800 dark:text-zinc-200">
           {suggestion.improved}
-        </div>
+        </p>
       </div>
     </div>
-    <div className="pt-4 border-t border-zinc-50 dark:border-white/5">
-      <p className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed">
-        <span className="font-semibold text-brand-primary uppercase text-[9px] tracking-widest mr-2">Rationale:</span>
-        {suggestion.reason}
-      </p>
-    </div>
+    <p className="text-[10px] text-zinc-500 dark:text-zinc-400 pt-1 border-t border-zinc-50 dark:border-white/5">
+      <span className="font-semibold text-brand-primary text-[9px] uppercase tracking-wider mr-1.5">Rationale:</span>
+      {suggestion.reason}
+    </p>
   </div>
 );
 
@@ -309,6 +323,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
   // Loading Progress System
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingStep, setLoadingStep] = useState(0);
+  const [processingStatus, setProcessingStatus] = useState<string>('');
 
   const ANALYSIS_STEPS = [
     { label: 'Reading resume', desc: 'Parsing document content' },
@@ -386,14 +401,34 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
       try {
         setLoading(true);
         setError(null);
-        const text = await extractTextFromPdf(file);
+        setLoadingProgress(0);
+        
+        let text = '';
+        if (file.type === 'application/pdf') {
+          text = await extractTextFromPdf(file);
+        } else if (file.type.startsWith('image/')) {
+          setProcessingStatus('Performing OCR...');
+          text = await extractResumeWithTesseract(file, (p) => {
+            setLoadingProgress(p * 100);
+          });
+        } else {
+          throw new Error("Unsupported file type. Please upload a PDF or an image.");
+        }
+
+        if (!text || text.trim().length < 50) {
+           showToast("Limited text extracted. Scanned document detected?", "info");
+        }
+
         setResumeText(text);
         setFileName(file.name);
         showToast("Resume uploaded successfully.", "success");
-      } catch (err) {
-        setError("Could not read the PDF file. Please ensure it is a valid document.");
+      } catch (err: any) {
+        setError(err.message || "Could not read the file. Please ensure it is a valid document.");
+        showToast(err.message || "Upload failed.", "error");
       } finally {
         setLoading(false);
+        setProcessingStatus('');
+        setLoadingProgress(0);
       }
     }
   };
@@ -412,6 +447,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
     setError(null);
     setResult(null);
     try {
+      setProcessingStatus('Connecting to AI Engine...');
       const data = await analyzeResume(resumeText, jdText, deepAnalysis);
       setResult(data);
       // Tracking & Persistence for Sharing
@@ -435,6 +471,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
       setError(err.message || "Analysis failed. Please try again later.");
     } finally {
       setLoading(false);
+      setProcessingStatus('');
     }
   };
 
@@ -799,12 +836,12 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-zinc-900 dark:text-white tracking-tight">Analyzing your resume</h3>
-            <p className="text-xs text-zinc-400 font-medium">This usually takes 15-30 seconds</p>
+            <p className="text-xs text-zinc-400 font-medium">{processingStatus || 'This usually takes 15-30 seconds'}</p>
           </div>
 
           {/* Progress Bar */}
           <div className="space-y-2">
-            <div className="h-1.5 w-full bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full transition-all duration-300 ease-out"
                 style={{ width: `${loadingProgress}%` }}
@@ -823,7 +860,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
               const isActive = i === loadingStep;
               return (
                 <div key={i} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ${
-                  isActive ? 'bg-brand-primary/[0.06] dark:bg-brand-primary/10' : ''
+                  isActive ? 'bg-brand-primary/[0.06] dark:bg-zinc-900' : ''
                 }`}>
                   <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 ${
                     isDone 
@@ -874,7 +911,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             <button 
               onClick={handleShareReport} 
               disabled={shareLoading}
-              className="px-4 py-2 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-xl font-semibold text-[11px] tracking-wide transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+              className="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-xl font-semibold text-[11px] tracking-wide transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm disabled:opacity-50"
             >
               {shareLoading ? (
                 <div className="w-3.5 h-3.5 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
@@ -885,7 +922,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             </button>
             <button 
               onClick={handleSaveReport} 
-              className="px-4 py-2 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-xl font-semibold text-[11px] tracking-wide transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm"
+              className="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-xl font-semibold text-[11px] tracking-wide transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
               Save History
@@ -893,7 +930,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             <button 
               onClick={handleDownloadReport}
               disabled={downloadLoading}
-              className="px-4 py-2 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-xl font-semibold text-[11px] tracking-wide transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+              className="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-xl font-semibold text-[11px] tracking-wide transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm disabled:opacity-50"
             >
               {downloadLoading ? (
                 <div className="w-3.5 h-3.5 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
@@ -907,314 +944,138 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                 setResult(null);
                 setSearchParams({ tab: 'placement' }, { replace: true });
               }} 
-              className="px-5 py-2 bg-brand-primary text-white rounded-xl font-semibold text-[11px] tracking-wide active:scale-95 transition-all border-none shadow-lg shadow-brand-primary/20"
+              className="px-5 py-2 bg-brand-primary text-white rounded-full font-semibold text-[11px] tracking-wide active:scale-95 transition-all border-none shadow-md shadow-brand-primary/20"
             >
               Analyze New
             </button>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Main Score & Stats Dashboard */}
-          <div className="glass-panel p-6 md:p-8 rounded-[28px] flex flex-col gap-8 bg-white dark:bg-[#0a0a0a] border dark:border-white/5 shadow-xl shadow-zinc-200/50 dark:shadow-none">
-            {/* Top row: Meter and Detailed Scores */}
-            <div className="flex flex-col md:flex-row items-center gap-10">
-              <ScoreAura score={result.totalScore} size={220} />
+        {/* Top Row: 3-column grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* ATS Score */}
+          <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex flex-col items-center text-center">
+            <ScoreAura score={result.totalScore} size={160} />
+            <p className="text-[11px] text-zinc-400 mt-2 max-w-[200px]">
+              {result.totalScore >= 75 ? 'Your resume is well-optimized!' : 'Room for improvement detected.'}
+            </p>
+          </div>
 
-              <div className="flex-1 w-full space-y-4 px-1">
-                <MetricBar label="Keywords" score={result.detailedScores?.keywordMatch || 0} />
-                <MetricBar label="Skills Alignment" score={result.detailedScores?.skillsAlignment || 0} />
-                <MetricBar label="Experience" score={result.detailedScores?.experienceRelevance || 0} />
-                <MetricBar label="Formatting" score={result.detailedScores?.formattingQuality || 0} />
-                <MetricBar label="Overall Impact" score={result.detailedScores?.overallImpact || 0} />
-              </div>
-            </div>
-
-            {/* Bottom row: Full-width Banners */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div className="flex flex-col items-center justify-center p-4 rounded-3xl bg-red-500/10 border border-red-500/20 text-center group/stat transition-all hover:bg-red-500/15">
-                <div className="mb-2 w-8 h-8 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                </div>
-                <div className="space-y-0.5">
-                  <span className="text-sm font-black text-red-500">{result.stats?.errors || 0} Critical Errors</span>
-                  <p className="text-[9px] text-red-500/60 font-bold uppercase tracking-wider">Requires fix</p>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-center justify-center p-4 rounded-3xl bg-orange-500/10 border border-orange-500/20 text-center group/stat transition-all hover:bg-orange-500/15">
-                <div className="mb-2 w-8 h-8 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                </div>
-                <div className="space-y-0.5">
-                  <span className="text-sm font-black text-orange-500">{result.stats?.improvements || 0} Improvements</span>
-                  <p className="text-[9px] text-orange-500/60 font-bold uppercase tracking-wider">Strategic edge</p>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-center justify-center p-4 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 text-center group/stat transition-all hover:bg-emerald-500/15">
-                <div className="mb-2 w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
-                <div className="space-y-0.5">
-                  <span className="text-sm font-black text-emerald-500">{result.stats?.passed || 0} Indicators</span>
-                  <p className="text-[9px] text-emerald-500/60 font-bold uppercase tracking-wider">Valid checks</p>
-                </div>
-              </div>
+          {/* Score Breakdown */}
+          <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">Score Breakdown</h3>
+            <div className="space-y-3">
+              <MetricBar label="Content Relevance" score={result.detailedScores?.keywordMatch || 0} />
+              <MetricBar label="Keyword Match" score={result.detailedScores?.skillsAlignment || 0} />
+              <MetricBar label="Formatting" score={result.detailedScores?.formattingQuality || 0} />
+              <MetricBar label="Skills Match" score={result.detailedScores?.experienceRelevance || 0} />
+              <MetricBar label="Overall Impact" score={result.detailedScores?.overallImpact || 0} />
             </div>
           </div>
 
-          {/* Skill Radar Graph */}
-          <div className="glass-panel p-6 rounded-[28px] bg-white dark:bg-[#0a0a0a] border dark:border-white/5 flex flex-col h-full shadow-xl shadow-zinc-200/50 dark:shadow-none">
-            <div className="flex items-start justify-between mb-2 px-2">
-              <div className="space-y-1">
-                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight">Competency Radar</h3>
-                <p className="text-[9px] font-medium text-zinc-400 uppercase tracking-widest">Industry Benchmarking</p>
+          {/* Quick Stats */}
+          <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex flex-col gap-3">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Quick Summary</h3>
+            <div className="flex-1 flex flex-col justify-between gap-2">
+              <div className="flex items-center justify-between py-2 border-b border-zinc-50 dark:border-white/5">
+                <span className="text-[11px] text-zinc-500">Critical errors</span>
+                <span className="text-[11px] font-semibold text-red-500">{result.stats?.errors || 0}</span>
               </div>
-              
-              {/* Legend Box matching user image style */}
-              <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-white/5 space-y-1.5 min-w-[140px]">
-                <p className="text-[9px] font-black text-zinc-800 dark:text-zinc-200 uppercase tracking-wider mb-1">Skill Radar Graph</p>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-sm bg-blue-500" />
-                  <span className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400">Ideal Candidate Pool</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-sm bg-orange-500" />
-                  <span className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400">Average Candidate Pool</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
-                  <span className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400">You</span>
-                </div>
+              <div className="flex items-center justify-between py-2 border-b border-zinc-50 dark:border-white/5">
+                <span className="text-[11px] text-zinc-500">Improvements</span>
+                <span className="text-[11px] font-semibold text-orange-500">{result.stats?.improvements || 0}</span>
               </div>
-            </div>
-            
-            <div className="flex-1 min-h-[300px] relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={[
-                  { subject: 'Qualification', you: result.radarData?.qualification || 0, fullMark: 100, avg: 65, ideal: 95 },
-                  { subject: 'Retention', you: result.radarData?.retention || 0, fullMark: 100, avg: 55, ideal: 85 },
-                  { subject: 'Domain Diversity', you: result.radarData?.domainDiversity || 0, fullMark: 100, avg: 60, ideal: 90 },
-                  { subject: 'Professional', you: result.radarData?.roleAlignment || 0, fullMark: 100, avg: 70, ideal: 92 },
-                  { subject: 'Experience', you: result.radarData?.experience || 0, fullMark: 100, avg: 50, ideal: 88 }
-                ]}>
-                  <PolarGrid stroke="rgba(113, 113, 122, 0.2)" />
-                  <PolarAngleAxis 
-                    dataKey="subject" 
-                    tick={{ fill: '#71717a', fontSize: 10, fontWeight: 700 }} 
-                  />
-                  
-                  {/* Ideal Candidate Pool - Blue */}
-                  <Radar
-                    name="Ideal Candidate Pool"
-                    dataKey="ideal"
-                    stroke="#3b82f6"
-                    strokeWidth={1.5}
-                    fill="#3b82f6"
-                    fillOpacity={0.25}
-                    dot={{ r: 2, fill: '#3b82f6', strokeWidth: 0 }}
-                  />
-                  
-                  {/* Average Candidate Pool - Orange */}
-                  <Radar
-                    name="Average Candidate Pool"
-                    dataKey="avg"
-                    stroke="#f97316"
-                    strokeWidth={1.5}
-                    fill="#f97316"
-                    fillOpacity={0.25}
-                    dot={{ r: 2, fill: '#f97316', strokeWidth: 0 }}
-                  />
-                  
-                  {/* You - Green */}
-                  <Radar
-                    name="You"
-                    dataKey="you"
-                    stroke="#10b981"
-                    strokeWidth={2.5}
-                    fill="#10b981"
-                    fillOpacity={0.4}
-                    dot={{ r: 3, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
-                  />
-                  
-                  <RechartsTooltip 
-                    contentStyle={{ borderRadius: '16px', border: 'none', backgroundColor: '#18181b', color: '#fff', fontSize: '10px' }}
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
+              <div className="flex items-center justify-between py-2 border-b border-zinc-50 dark:border-white/5">
+                <span className="text-[11px] text-zinc-500">Passed checks</span>
+                <span className="text-[11px] font-semibold text-emerald-500">{result.stats?.passed || 0}</span>
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <span className="text-[11px] text-zinc-500">File analyzed</span>
+                <span className="text-[11px] font-medium text-zinc-700 dark:text-zinc-300 truncate max-w-[120px]">{fileName || 'N/A'}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Shortlist Simulation */}
-        <section className="space-y-6 pt-5">
-          <div className="px-1 flex items-end justify-between">
-            <div className="space-y-1">
-              <h3 className="text-xl md:text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">Hiring Probablity Simulation</h3>
-              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] opacity-75">Predictive AI shortlisting analysis</p>
+        {/* Competency Radar - Compact */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm">
+            <div className="flex items-start justify-between mb-2">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Competency Radar</h3>
+              <div className="flex items-center gap-3 text-[9px] text-zinc-400">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-blue-500 inline-block" /> Ideal</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-orange-500 inline-block" /> Average</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-emerald-500 inline-block" /> You</span>
+              </div>
             </div>
-            <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Growth Potential</span>
+            <div className="h-[260px] relative">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="75%" data={[
+                  { subject: 'Qualification', you: result.radarData?.qualification || 0, fullMark: 100, avg: 65, ideal: 95 },
+                  { subject: 'Retention', you: result.radarData?.retention || 0, fullMark: 100, avg: 55, ideal: 85 },
+                  { subject: 'Domain', you: result.radarData?.domainDiversity || 0, fullMark: 100, avg: 60, ideal: 90 },
+                  { subject: 'Professional', you: result.radarData?.roleAlignment || 0, fullMark: 100, avg: 70, ideal: 92 },
+                  { subject: 'Experience', you: result.radarData?.experience || 0, fullMark: 100, avg: 50, ideal: 88 }
+                ]}>
+                  <PolarGrid stroke="rgba(113, 113, 122, 0.15)" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#71717a', fontSize: 10, fontWeight: 600 }} />
+                  <Radar name="Ideal" dataKey="ideal" stroke="#3b82f6" strokeWidth={1} fill="#3b82f6" fillOpacity={0.15} />
+                  <Radar name="Average" dataKey="avg" stroke="#f97316" strokeWidth={1} fill="#f97316" fillOpacity={0.15} />
+                  <Radar name="You" dataKey="you" stroke="#10b981" strokeWidth={2} fill="#10b981" fillOpacity={0.3} dot={{ r: 2.5, fill: '#10b981', strokeWidth: 0 }} />
+                  <RechartsTooltip content={<CustomRadarTooltip />} />
+                </RadarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
-          <div className="glass-panel p-6 md:p-8 rounded-[32px] bg-white dark:bg-[#0a0a0a] border dark:border-white/5 shadow-xl relative overflow-hidden group">
-            {/* Ambient Background Glow */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 rounded-full blur-[90px] -translate-y-1/2 translate-x-1/4 group-hover:bg-brand-primary/10 transition-colors duration-700" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-secondary/5 rounded-full blur-[90px] translate-y-1/2 -translate-x-1/4" />
-            
-            <div className="relative flex flex-col gap-8">
-              <div className="flex flex-col md:flex-row items-stretch justify-between gap-6 md:gap-4">
-                {/* Current State Card */}
-                <div className="flex-1 p-5 rounded-2xl bg-zinc-50/50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">As of Today</span>
-                    <span className="text-xl font-black text-zinc-400">{result.simulation.currentShortlistChance}%</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-end">
-                      <span className="text-[10px] font-bold text-zinc-500">Shortlist Chance</span>
-                      <span className="text-[8px] font-medium text-zinc-400">Baseline</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-zinc-200 dark:bg-white/5 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-zinc-400 dark:bg-zinc-600 rounded-full transition-all duration-1000 ease-out" 
-                        style={{ width: `${result.simulation.currentShortlistChance}%` }} 
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Bridge Element */}
-                <div className="flex-none flex items-center justify-center py-2 md:py-0">
-                  <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 border border-brand-primary/20 shadow-lg shadow-brand-primary/10 z-10">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-brand-primary"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                  </div>
-                  {/* Subtle connecting line for desktop only */}
-                  <div className="hidden md:block absolute left-1/2 top-1/2 -translate-y-1/2 w-[80%] h-[1px] bg-gradient-to-r from-transparent via-brand-primary/20 to-transparent -z-0" />
-                </div>
-
-                {/* Projected State Card */}
-                <div className="flex-1 p-5 rounded-2xl bg-brand-primary/[0.03] dark:bg-brand-primary/[0.05] border border-brand-primary/10 space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-black text-brand-primary uppercase tracking-widest">Optimized Target</span>
-                    <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-br from-brand-primary to-brand-secondary">
-                      {result.simulation.projectedShortlistChance}%
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-end">
-                      <span className="text-[10px] font-bold text-brand-primary/80">Success Probability</span>
-                      <span className="text-[8px] font-black text-emerald-500 uppercase tracking-tighter">+{(result.simulation.projectedShortlistChance - result.simulation.currentShortlistChance)}% Increase</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-brand-primary/10 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(var(--brand-primary-rgb),0.4)]" 
-                        style={{ width: `${result.simulation.projectedShortlistChance}%` }} 
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-zinc-50/80 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 w-full">
-                 <div className="flex gap-4">
-                    <div className="flex-none p-2 h-fit rounded-xl bg-zinc-200 dark:bg-white/5 text-brand-primary">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Prediction Model Feedback</p>
-                      <p className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400 leading-relaxed italic">
-                        "{result.simulation.explanation}"
-                      </p>
-                    </div>
-                 </div>
-              </div>
+          {/* Recruiter Verdict */}
+          <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex flex-col">
+            <div className="flex items-center gap-2 mb-3">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-brand-primary">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+              </svg>
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Recruiter verdict</h3>
             </div>
+            <p className="text-[12px] text-zinc-600 dark:text-zinc-400 leading-relaxed italic flex-1">
+              "{result.summary}"
+            </p>
+            {result.simulation && (
+              <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-white/5 flex items-center gap-6">
+                <div>
+                  <p className="text-[9px] text-zinc-400 uppercase tracking-wider mb-0.5">Current chance</p>
+                  <span className="text-lg font-semibold text-zinc-700 dark:text-zinc-300">{result.simulation.currentShortlistChance}%</span>
+                </div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-zinc-300"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                <div>
+                  <p className="text-[9px] text-brand-primary uppercase tracking-wider mb-0.5">Optimized target</p>
+                  <span className="text-lg font-semibold text-brand-primary">{result.simulation.projectedShortlistChance}%</span>
+                </div>
+              </div>
+            )}
           </div>
-        </section>
+        </div>
 
         {/* Strategic Action Plan */}
-        <section className="space-y-6 pt-5">
-          <div className="px-1">
-            <h3 className="text-xl md:text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">Strategic Action Plan</h3>
-            <p className="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-[0.2em] opacity-75">Precision tasks to maximize your potential</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <section className="pt-5">
+          <h3 className="text-base font-semibold text-zinc-900 dark:text-white mb-3">Strategic Action Plan</h3>
+          <div className="rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm divide-y divide-zinc-100/50 dark:divide-white/5">
             {result.actionPlan.tasks.map((task, idx) => {
-              const types = {
-                Build: { 
-                  color: "text-blue-500", 
-                  bg: "bg-blue-500/10", 
-                  border: "border-blue-500/20",
-                  badge: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-                  icon: (
-                    <>
-                      <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="1.5" />
-                      <path d="M12 8v8M8 12h8" strokeWidth="1.5" />
-                    </>
-                  )
-                },
-                Practice: { 
-                  color: "text-purple-500", 
-                  bg: "bg-purple-500/10", 
-                  border: "border-purple-500/20",
-                  badge: "bg-purple-500/10 text-purple-500 border-purple-500/20",
-                  icon: (
-                    <>
-                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" strokeWidth="1.5" />
-                      <polyline points="14 2 14 8 20 8" strokeWidth="1.5" />
-                      <path d="M10 13l2 2 4-4" strokeWidth="1.5" />
-                    </>
-                  )
-                },
-                Add: { 
-                  color: "text-emerald-500", 
-                  bg: "bg-emerald-500/10", 
-                  border: "border-emerald-500/20",
-                  badge: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-                  icon: (
-                    <>
-                      <circle cx="12" cy="12" r="9" strokeWidth="1.5" />
-                      <line x1="12" y1="8" x2="12" y2="16" strokeWidth="1.5" />
-                      <line x1="8" y1="12" x2="16" y2="12" strokeWidth="1.5" />
-                    </>
-                  )
-                },
-                Refactor: { 
-                  color: "text-orange-500", 
-                  bg: "bg-orange-500/10", 
-                  border: "border-orange-500/20",
-                  badge: "bg-orange-500/10 text-orange-500 border-orange-500/20",
-                  icon: (
-                    <>
-                      <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" strokeWidth="1.5" />
-                      <polyline points="21 3 21 8 16 8" strokeWidth="1.5" />
-                    </>
-                  )
-                }
+              const colorMap: Record<string, string> = {
+                Build: 'bg-blue-500', Practice: 'bg-purple-500', Add: 'bg-emerald-500', Refactor: 'bg-orange-500'
               };
-
-              const config = types[task.action as keyof typeof types];
-
+              const badgeMap: Record<string, string> = {
+                Build: 'text-blue-600 bg-blue-50 dark:bg-blue-500/10', Practice: 'text-purple-600 bg-purple-50 dark:bg-purple-500/10',
+                Add: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10', Refactor: 'text-orange-600 bg-orange-50 dark:bg-orange-500/10'
+              };
               return (
-                <div key={idx} className="glass-panel p-4 md:p-5 rounded-[28px] border dark:border-white/5 bg-white dark:bg-[#0a0a0a] flex items-start gap-4 hover:border-brand-primary/30 transition-all duration-300 group shadow-sm hover:shadow-lg hover:shadow-brand-primary/5">
-                  <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border ${config.bg} ${config.border} ${config.color} group-hover:scale-105 transition-transform duration-300 shadow-inner`}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
-                      {config.icon}
-                    </svg>
-                  </div>
-                  <div className="space-y-1.5 flex-1 py-0.5">
-                    <div className="flex items-center justify-between">
-                       <span className={`px-2 py-0.5 rounded-full border text-[7px] font-black uppercase tracking-widest ${config.badge}`}>
-                         {task.action}
-                       </span>
+                <div key={idx} className="flex items-start gap-3 px-4 py-3">
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${colorMap[task.action] || 'bg-zinc-400'}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase ${badgeMap[task.action] || 'text-zinc-500 bg-zinc-100'}`}>{task.action}</span>
+                      <h4 className="text-[12px] font-semibold text-zinc-900 dark:text-white truncate">{task.task}</h4>
                     </div>
-                    <h4 className="text-[13px] font-black text-zinc-900 dark:text-white leading-tight group-hover:text-brand-primary transition-colors pr-2">{task.task}</h4>
-                    <p className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-[95%]">{task.description}</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">{task.description}</p>
                   </div>
                 </div>
               );
@@ -1222,75 +1083,43 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
           </div>
         </section>
 
-        {/* Executive Summary */}
-        <div className="p-6 rounded-[24px] bg-gradient-to-br from-brand-primary/[0.02] to-brand-secondary/[0.02] border border-brand-primary/10 flex items-start gap-5">
-            <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center shrink-0">
-               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-brand-primary"><path d="M12 2v20M2 12h20" className="rotate-45" /><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></svg>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[9px] font-semibold text-brand-primary/70 tracking-widest uppercase">Recruiter Verdict</p>
-              <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 leading-relaxed italic">
-                "{result.summary}"
-              </p>
-            </div>
-        </div>
 
-        {/* Deep Dive Section - What's Wrong vs What's Right */}
-        <section className="space-y-6 pt-5">
-          <div className="flex flex-col md:flex-row md:items-end justify-between px-2 gap-4">
-            <div>
-              <h3 className="text-xl md:text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">Deep Dive Improvements</h3>
-              <p className="text-[11px] font-medium text-zinc-400 mt-1 tracking-wide uppercase tracking-widest">Actionable suggestions to improve your ATS score</p>
-            </div>
-            <div className="flex gap-4 mb-1">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Gaps</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Optimized</span>
-              </div>
+        {/* Deep Dive Improvements */}
+        <section className="pt-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-semibold text-zinc-900 dark:text-white">Deep Dive Improvements</h3>
+            <div className="flex gap-3 text-[9px] text-zinc-400">
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" /> Gaps</span>
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" /> Optimized</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {result.improvementSuggestions?.map((suggestion, idx) => (
               <ComparisonCard key={idx} suggestion={suggestion} />
             ))}
             {(!result.improvementSuggestions?.length) && (
-              <div className="p-12 text-center rounded-[40px] bg-zinc-50 dark:bg-white/[0.02] border-2 border-dashed border-zinc-200 dark:border-white/5">
+              <div className="p-12 text-center rounded-2xl bg-zinc-50/50 dark:bg-white/[0.02] border-2 border-dashed border-zinc-200/60 dark:border-white/[0.08]">
                 <p className="text-zinc-400 font-medium text-xs uppercase tracking-widest">No major improvements needed</p>
               </div>
             )}
           </div>
         </section>
 
-        {/* Success Indicators - What You Did Right */}
+        {/* Success Indicators */}
         {result.passedChecks && result.passedChecks.length > 0 && (
-          <section className="space-y-6 pt-10">
-            <div className="px-2">
-              <h3 className="text-xl md:text-2xl font-semibold text-emerald-600 dark:text-emerald-400 tracking-tight">Success Indicators</h3>
-              <p className="text-[11px] font-medium text-zinc-400 mt-1 uppercase tracking-widest">Key strengths identified by our ATS engine</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <section className="pt-5">
+            <h3 className="text-base font-semibold text-emerald-600 dark:text-emerald-400 mb-3">Success Indicators</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {result.passedChecks.map((check, idx) => (
-                <div key={idx} className="glass-panel p-5 rounded-[24px] border dark:border-white/10 bg-white dark:bg-[#0a0a0a] shadow-sm hover:border-emerald-500/20 transition-all duration-300">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/5 flex items-center justify-center text-emerald-500 shrink-0">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
-                        <path d="m9 12 2 2 4-4" />
-                        <circle cx="12" cy="12" r="10" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-bold text-emerald-500/70 uppercase tracking-widest mb-1">{check.category}</p>
-                      <h4 className="text-sm font-semibold text-zinc-900 dark:text-white leading-tight">{check.checkName}</h4>
-                      <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 mt-2 leading-relaxed">
-                        {check.insight}
-                      </p>
-                    </div>
+                <div key={idx} className="p-3 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex items-start gap-3 hover:border-emerald-300/50 dark:hover:border-emerald-500/20 transition-colors">
+                  <div className="w-5 h-5 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0 mt-0.5">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><polyline points="20 6 9 17 4 12" /></svg>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[9px] text-emerald-500 uppercase tracking-wider mb-0.5">{check.category}</p>
+                    <h4 className="text-[12px] font-semibold text-zinc-900 dark:text-white leading-tight">{check.checkName}</h4>
+                    <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1">{check.insight}</p>
                   </div>
                 </div>
               ))}
@@ -1299,89 +1128,49 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
         )}
 
         {/* Skill Diversity Matrix */}
-        <section className="space-y-6 pt-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between px-2 gap-4">
-            <div className="space-y-1">
-              <h3 className="text-xl md:text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">Skill Diversity Matrix</h3>
-              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] opacity-75">Categorized mapping against industry trends</p>
-            </div>
-            
-            {/* Legend for Skill Matrix */}
-            <div className="flex flex-wrap gap-2.5 items-center bg-zinc-50 dark:bg-zinc-900/40 p-2.5 rounded-2xl border border-zinc-100 dark:border-white/5 shadow-inner">
-              <div className="flex items-center gap-1.5 px-1.5">
-                <div className="w-2 h-2 rounded-full bg-brand-primary shadow-sm shadow-brand-primary/20" />
-                <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Mandatory</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-1.5">
-                <div className="w-2 h-2 rounded-full bg-sky-500 shadow-sm shadow-sky-500/20" />
-                <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Desired</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-1.5">
-                <div className="w-2 h-2 rounded-full bg-zinc-400 shadow-sm shadow-zinc-400/20" />
-                <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Other</span>
-              </div>
-              <div className="h-3 w-[1px] bg-zinc-200 dark:bg-white/10 mx-0.5" />
-              <div className="flex items-center gap-1.5 px-2 py-1.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 flex items-center justify-center">
-                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-1 h-1 text-white"><polyline points="20 6 9 17 4 12" /></svg>
-                </div>
-                <span className="text-[8px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.05em]">Your Mastery</span>
-              </div>
+        <section className="pt-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-semibold text-zinc-900 dark:text-white">Skill Diversity Matrix</h3>
+            <div className="flex gap-3 text-[9px] text-zinc-400">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-brand-primary inline-block" /> Mandatory</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sky-500 inline-block" /> Desired</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> Matched</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {result.skillDiversity?.map((cat, idx) => (
-              <div key={idx} className="glass-panel p-5 rounded-[28px] border dark:border-white/5 space-y-4 flex flex-col h-full bg-white dark:bg-[#0a0a0a] shadow-sm hover:border-brand-primary/20 transition-all duration-300">
+              <div key={idx} className="p-4 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm space-y-3 flex flex-col h-full hover:border-brand-primary/20 transition-colors">
                 <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <h4 className="text-[9px] font-black uppercase text-zinc-400 dark:text-zinc-500 tracking-[0.15em] mb-0.5">{cat.category}</h4>
-                    <span className="text-[11px] font-bold text-zinc-900 dark:text-white">Proficiency Map</span>
-                  </div>
-                  <div className="px-2 py-0.5 rounded-lg bg-zinc-100 dark:bg-white/5 text-[9px] font-black text-zinc-600 dark:text-zinc-400">
-                    {cat.skills.filter(s => s.found).length}/{cat.skills.length}
-                  </div>
+                  <h4 className="text-[12px] font-semibold text-zinc-900 dark:text-white">{cat.category}</h4>
+                  <span className="text-[10px] text-zinc-400">{cat.skills.filter(s => s.found).length}/{cat.skills.length}</span>
                 </div>
-                <div className="flex flex-wrap gap-2 flex-1 items-start content-start">
+                <div className="flex flex-wrap gap-1.5 flex-1 items-start content-start">
                   {cat.skills.map((skill, sIdx) => {
                     const isMandatory = skill.level === 'Mandatory';
                     const isDesired = skill.level === 'Desired';
                     const isFound = skill.found;
                     
-                    let variantStyles = "bg-zinc-50 dark:bg-zinc-900/40 border-zinc-200 dark:border-white/5 text-zinc-500";
-                    let accentColor = "bg-zinc-300 dark:bg-zinc-700";
-                    
-                    if (isMandatory) {
-                      variantStyles = "bg-brand-primary/5 border-brand-primary/20 text-brand-primary";
-                      accentColor = "bg-brand-primary";
-                    } else if (isDesired) {
-                      variantStyles = "bg-sky-500/5 border-sky-500/20 text-sky-500";
-                      accentColor = "bg-sky-500";
-                    }
+                    let dotColor = 'bg-zinc-300';
+                    if (isMandatory) dotColor = 'bg-brand-primary';
+                    else if (isDesired) dotColor = 'bg-sky-500';
                     
                     return (
-                      <div 
+                      <span 
                         key={sIdx}
-                        className={`group/skill relative px-2.5 py-1.5 rounded-xl text-[9px] font-black transition-all border select-none flex items-center gap-2 ${variantStyles} ${isFound 
-                          ? 'ring-1 ring-emerald-500/30 !border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
-                          : 'opacity-70 grayscale-[0.5]'}`}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] border transition-all ${
+                          isFound 
+                            ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 shadow-sm shadow-emerald-500/5' 
+                            : 'bg-zinc-50/80 dark:bg-zinc-900 border-zinc-200/60 dark:border-white/[0.08] text-zinc-500 dark:text-zinc-400'
+                        }`}
                       >
                         {isFound ? (
-                          <div className="flex-none p-0.5 rounded-full bg-emerald-500 text-white shadow-sm">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-1.5 h-1.5"><polyline points="20 6 9 17 4 12" /></svg>
-                          </div>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5 text-emerald-500"><polyline points="20 6 9 17 4 12" /></svg>
                         ) : (
-                          <div className={`w-1.5 h-1.5 rounded-full flex-none shadow-sm ${accentColor} ${isMandatory ? 'animate-pulse' : ''}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
                         )}
-                        <span className="truncate">{skill.name}</span>
-                        
-                        {/* Hover Tooltip for Level */}
-                        {!isFound && (
-                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-900 text-white text-[8px] rounded opacity-0 group-hover/skill:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 font-bold uppercase tracking-widest border border-white/10">
-                            Missing {skill.level} Skill
-                          </div>
-                        )}
-                      </div>
+                        {skill.name}
+                      </span>
                     );
                   })}
                 </div>
@@ -1391,36 +1180,17 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
         </section>
 
         {/* Annotated Resume X-Ray */}
-        <section className="space-y-6 pt-10">
-          <div className="px-2 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-            <div className="space-y-1">
-              <h3 className="text-xl md:text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">Annotated Resume X-Ray</h3>
-              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] opacity-75">Full reconstruction with deep recruiter insights</p>
-            </div>
-            
-            <div className="flex gap-4 mb-1 self-start md:self-auto bg-zinc-50 dark:bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-100 dark:border-white/5">
-               <div className="flex items-center gap-2">
-                 <div className="w-3 h-[2px] bg-emerald-500 rounded-full" />
-                 <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Optimized</span>
-               </div>
-               <div className="flex items-center gap-2">
-                 <div className="w-3 h-[2px] bg-red-500 rounded-full" />
-                 <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Recruiter Flag</span>
-               </div>
+        <section className="pt-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-semibold text-zinc-900 dark:text-white">Annotated Resume X-Ray</h3>
+            <div className="flex gap-3 text-[9px] text-zinc-400">
+              <span className="flex items-center gap-1"><span className="w-3 h-[2px] bg-emerald-500 rounded-full inline-block" /> Optimized</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-[2px] bg-red-500 rounded-full inline-block" /> Flagged</span>
             </div>
           </div>
           
           <div className="relative group/xray">
-            {/* High-Tech Container */}
-            <div className="glass-panel p-4 md:p-10 rounded-[28px] md:rounded-[40px] bg-[#0c0c0c] border border-white/5 shadow-2xl relative overflow-hidden ring-1 ring-white/5">
-              {/* Scanline Effect - Subtle and Premium */}
-              <div className="absolute inset-x-0 h-[80px] bg-gradient-to-b from-transparent via-brand-primary/5 to-transparent top-0 animate-[scanline_10s_linear_infinite] pointer-events-none z-10 opacity-30" />
-              
-              {/* Decorative Corner Ornaments */}
-              <div className="absolute top-4 left-4 w-4 h-4 border-t border-l border-white/10" />
-              <div className="absolute top-4 right-4 w-4 h-4 border-t border-r border-white/10" />
-              <div className="absolute bottom-4 left-4 w-4 h-4 border-b border-l border-white/10" />
-              <div className="absolute bottom-4 right-4 w-4 h-4 border-b border-r border-white/10" />
+            <div className="p-5 md:p-8 rounded-2xl bg-zinc-950 border border-white/[0.08] shadow-lg relative overflow-hidden">
 
               <div className="max-h-[600px] overflow-y-auto custom-scrollbar pr-4 relative z-20">
                 <div className="text-[12px] md:text-[13px] text-zinc-600 font-medium leading-relaxed whitespace-pre-wrap font-mono tracking-tight">
@@ -1471,25 +1241,12 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             )}
             </div>
             
-            {/* Tech Status Bar */}
-            <div className="mt-4 flex items-center justify-between px-2">
-               <div className="flex items-center gap-4">
-                 <div className="flex items-center gap-1.5">
-                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                   <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Neural Link Active</span>
-                 </div>
-                 <div className="flex items-center gap-1.5">
-                   <div className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-                   <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">ATS Engine v4.2</span>
-                 </div>
-               </div>
-               <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Hover highlighted text for deep insights</p>
-             </div>
+            <p className="text-[9px] text-zinc-500 mt-3 text-center">Hover highlighted text for insights</p>
          </section>
 
-        {/* Category breakdown remains for deeper tabs if needed, but redesigned */}
-        <div className="pt-10 space-y-8">
-           <div className="flex items-center gap-4 px-4 overflow-x-auto no-scrollbar py-2">
+        {/* Category Breakdown */}
+        <div className="pt-5 space-y-4">
+           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
             {CATEGORIES.map((cat) => {
               const catData = result.categories?.[cat.id] || { score: 0 };
               const isActive = activeCategory === cat.id;
@@ -1497,62 +1254,49 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`px-6 py-3 rounded-full border whitespace-nowrap transition-all flex items-center gap-3 shrink-0 ${isActive ? 'bg-brand-primary border-brand-primary text-white shadow-lg' : 'bg-white dark:bg-white/5 border-zinc-100 dark:border-white/10 text-zinc-500 hover:border-brand-primary/30'}`}
+                  className={`px-3.5 py-1.5 rounded-full border whitespace-nowrap transition-all flex items-center gap-2 shrink-0 text-[11px] ${isActive ? 'bg-brand-primary border-brand-primary text-white shadow-md shadow-brand-primary/20' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-white/10 text-zinc-500 hover:border-brand-primary/30'}`}
                 >
-                  <span className={`text-xs font-black ${isActive ? 'text-white' : 'text-zinc-900 dark:text-white'}`}>{catData.score}%</span>
-                  <span className="text-[10px] font-black uppercase tracking-widest">{cat.label}</span>
+                  <span className={`font-semibold ${isActive ? 'text-white' : 'text-zinc-900 dark:text-white'}`}>{catData.score}%</span>
+                  <span>{cat.label}</span>
                 </button>
               );
             })}
           </div>
 
-          <div className="glass-panel p-8 md:p-10 rounded-[48px] shadow-2xl animate-fade-in border dark:border-white/5 bg-white dark:bg-[#0a0a0a]">
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="w-full md:w-1/3 space-y-6">
-                <div className="p-6 rounded-[32px] bg-brand-primary/5 border border-brand-primary/10">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-brand-primary mb-2">Diagnostic Score</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-black text-zinc-900 dark:text-white">{result.categories?.[activeCategory]?.score || 0}%</span>
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Accuracy</span>
-                  </div>
+          <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm">
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="w-full md:w-1/4 space-y-3">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-primary/5 to-brand-primary/[0.02] border border-brand-primary/10">
+                  <p className="text-[9px] text-brand-primary uppercase tracking-wider mb-1">Score</p>
+                  <span className="text-3xl font-semibold text-zinc-900 dark:text-white">{result.categories?.[activeCategory]?.score || 0}%</span>
                 </div>
-                
-                <div className="space-y-4 px-2">
-                  <h4 className="text-[11px] font-black uppercase tracking-widest text-zinc-800 dark:text-white">Analysis Overview</h4>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
-                    {result.categories?.[activeCategory]?.details || "Evaluating specific metrics for this category..."}
-                  </p>
-                </div>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  {result.categories?.[activeCategory]?.details || "Evaluating specific metrics for this category..."}
+                </p>
               </div>
 
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 px-2 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                    Key Assets
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-semibold text-emerald-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Key assets
                   </h4>
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {(result.categories?.[activeCategory]?.strengths || []).map((s, i) => (
-                      <div key={i} className="p-4 rounded-2xl bg-emerald-500/[0.03] border border-emerald-500/10 text-xs font-medium text-emerald-700 dark:text-emerald-400 leading-tight">
-                        {s}
-                      </div>
+                      <p key={i} className="px-3 py-2 rounded-xl bg-emerald-50/50 dark:bg-emerald-500/[0.04] border border-emerald-100/60 dark:border-emerald-500/10 text-[11px] text-emerald-700 dark:text-emerald-400">{s}</p>
                     ))}
-                    {(!result.categories?.[activeCategory]?.strengths?.length) && <p className="text-[11px] text-zinc-400 px-2 italic">Standard baseline metadata.</p>}
+                    {(!result.categories?.[activeCategory]?.strengths?.length) && <p className="text-[11px] text-zinc-400 italic">Standard baseline metadata.</p>}
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-brand-primary px-2 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-brand-primary" />
-                    Critical fixes
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-semibold text-brand-primary uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand-primary" /> Critical fixes
                   </h4>
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {(result.categories?.[activeCategory]?.weaknesses || []).map((w, i) => (
-                      <div key={i} className="p-4 rounded-2xl bg-brand-primary/[0.03] border border-brand-primary/10 text-xs font-medium text-brand-primary leading-tight">
-                        {w}
-                      </div>
+                      <p key={i} className="px-3 py-2 rounded-xl bg-brand-primary/[0.03] dark:bg-brand-primary/[0.04] border border-brand-primary/10 text-[11px] text-brand-primary">{w}</p>
                     ))}
-                    {(!result.categories?.[activeCategory]?.weaknesses?.length) && <p className="text-[11px] text-zinc-400 px-2 italic">No immediate refinements detected.</p>}
+                    {(!result.categories?.[activeCategory]?.weaknesses?.length) && <p className="text-[11px] text-zinc-400 italic">No immediate refinements detected.</p>}
                   </div>
                 </div>
               </div>
@@ -1573,19 +1317,13 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
       )}
 
       {error && (
-        <div className="p-8 bg-brand-primary/10 border border-brand-primary/20 rounded-[40px] text-center space-y-4 animate-fade-in">
-          <div className="w-12 h-12 bg-brand-primary/20 rounded-2xl flex items-center justify-center mx-auto text-brand-primary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-          </div>
-          <div className="space-y-1">
-            <h4 className="text-sm font-medium text-brand-primary tracking-widest">Analysis Error</h4>
-            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-md mx-auto">{error}</p>
-          </div>
-          <button onClick={() => setError(null)} className="px-6 py-2 bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-primary rounded-xl font-bold text-[9px] tracking-widest transition-all border-none">Acknowledge</button>
+        <div className="p-5 bg-red-50 dark:bg-red-950/20 border border-red-200/60 dark:border-red-500/15 rounded-2xl text-center space-y-2">
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          <button onClick={() => setError(null)} className="px-4 py-1.5 bg-red-100/80 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-full text-xs hover:bg-red-200 transition-colors">Dismiss</button>
         </div>
       )}
 
-      <div className="glass-panel p-8 rounded-[40px] shadow-2xl space-y-8">
+      <div className="p-5 md:p-6 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <div className="space-y-5">
             <div className="flex items-center gap-3">
@@ -1594,7 +1332,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             </div>
             <h3 className="text-[10px] font-semibold uppercase tracking-wider text-zinc-800 dark:text-zinc-200">Your Resume</h3>
             </div>
-            <div className="relative border-2 border-dashed border-zinc-100 dark:border-white/5 rounded-[32px] p-8 text-center hover:border-brand-primary/40 transition-all bg-zinc-50 dark:bg-white/[0.02] group cursor-pointer shadow-inner">
+            <div className="relative border-2 border-dashed border-zinc-200 dark:border-white/10 rounded-2xl p-6 text-center hover:border-brand-primary/40 transition-all bg-zinc-50 dark:bg-zinc-950 group cursor-pointer">
               <input type="file" accept=".pdf" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
               <IconFile />
               <p className="text-sm font-medium text-zinc-400 group-hover:text-brand-primary transition-colors">
@@ -1609,9 +1347,9 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                 <div className="w-8 h-8 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-semibold text-[10px]">2</div>
                 <label className="text-[10px] font-semibold text-zinc-400 tracking-wider block uppercase">Target Role</label>
               </div>
-              <div className="flex bg-zinc-100 dark:bg-white/5 p-1 rounded-xl">
-                <button onClick={() => setAnalysisMode('trend')} className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${analysisMode === 'trend' ? 'bg-brand-primary text-white shadow-lg' : 'text-zinc-500'}`}>Presets</button>
-                <button onClick={() => setAnalysisMode('custom')} className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${analysisMode === 'custom' ? 'bg-brand-primary text-white shadow-lg' : 'text-zinc-500'}`}>Paste JD</button>
+              <div className="flex bg-zinc-100/80 dark:bg-zinc-900 p-1 rounded-full">
+                <button onClick={() => setAnalysisMode('trend')} className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${analysisMode === 'trend' ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/20' : 'text-zinc-500'}`}>Presets</button>
+                <button onClick={() => setAnalysisMode('custom')} className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${analysisMode === 'custom' ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/20' : 'text-zinc-500'}`}>Paste JD</button>
               </div>
             </div>
             {analysisMode === 'trend' ? (
@@ -1627,7 +1365,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                         autoFocus
                         type="text"
                         placeholder="e.g. Software Engineer at Google"
-                        className="w-full bg-zinc-50 dark:bg-[#0a0a0a] border border-zinc-100 dark:border-white/10 rounded-2xl p-4 pr-12 text-sm text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
+                        className="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/10 rounded-2xl p-4 pr-12 text-sm text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
                         value={aiPrompt}
                         onChange={(e) => setAiPrompt(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleGenerateAiJd()}
@@ -1649,17 +1387,17 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                 ) : (
                   <div className="grid grid-cols-2 gap-2 animate-in fade-in duration-300">
                     {INDUSTRY_ROLES.map(role => (
-                      <button key={role.id} onClick={() => handleRoleSelect(role.id)} className={`p-4 rounded-2xl border text-left transition-all flex items-center gap-3 ${selectedRoleId === role.id ? 'bg-brand-primary/10 border-brand-primary text-brand-primary scale-[1.02]' : 'bg-zinc-50 dark:bg-[#0a0a0a] border-zinc-100 dark:border-white/5 text-zinc-500 hover:border-brand-primary/30'}`}>
+                      <button key={role.id} onClick={() => handleRoleSelect(role.id)} className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-3 ${selectedRoleId === role.id ? 'bg-brand-primary/10 border-brand-primary text-brand-primary shadow-sm shadow-brand-primary/10' : 'bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-white/5 text-zinc-500 hover:border-brand-primary/30'}`}>
                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${selectedRoleId === role.id ? 'bg-brand-primary text-white border-brand-primary' : 'bg-white dark:bg-white/5 border-zinc-100 dark:border-white/10'}`}>
                           {role.icon}
                         </div>
                         <p className="text-[10px] font-semibold tracking-tight leading-tight">{role.name}</p>
                       </button>
                     ))}
-                    <button 
-                      onClick={() => setShowAiInput(true)} 
-                      className={`p-4 rounded-2xl border text-left transition-all flex items-center gap-3 bg-gradient-to-br from-brand-primary/5 to-brand-secondary/5 border-brand-primary/20 text-brand-primary hover:border-brand-primary/40 group`}
-                    >
+                      <button 
+                        onClick={() => setShowAiInput(true)} 
+                        className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/50 border-brand-primary/20 text-brand-primary hover:border-brand-primary/40 group`}
+                      >
                       <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border border-brand-primary/20 bg-brand-primary/10 text-brand-primary group-hover:scale-110 transition-transform">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
                           <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
@@ -1676,7 +1414,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
               </div>
             ) : (
               <textarea
-                className="w-full h-[220px] bg-zinc-50 dark:bg-[#0a0a0a]/60 border border-zinc-100 dark:border-white/10 rounded-[24px] p-6 text-sm text-zinc-800 dark:text-white focus:ring-4 focus:ring-brand-primary/10 outline-none resize-none transition-all font-normal leading-relaxed placeholder:opacity-30 shadow-inner"
+                className="w-full h-[180px] bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/10 rounded-2xl p-4 text-sm text-zinc-800 dark:text-white focus:ring-2 focus:ring-brand-primary/20 outline-none resize-none transition-all font-normal leading-relaxed placeholder:opacity-40"
                 placeholder="Paste job description here..."
                 value={jdText}
                 onChange={(e) => setJdText(e.target.value)}
@@ -1685,20 +1423,18 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-zinc-100 dark:border-white/5">
+        <div className="flex items-center justify-between gap-4 pt-4 border-t border-zinc-100 dark:border-white/5">
           <button
             onClick={() => setDeepAnalysis(!deepAnalysis)}
-            className={`flex items-center gap-4 px-6 py-3 rounded-[24px] border transition-all cursor-pointer group ${deepAnalysis ? 'bg-brand-primary border-brand-primary shadow-xl' : 'bg-zinc-50 dark:bg-white/5 border-zinc-100 dark:border-white/5 hover:border-brand-primary/50'}`}
+            className={`flex items-center gap-2 px-3 py-2 rounded-full border transition-all cursor-pointer group text-[11px] ${deepAnalysis ? 'bg-brand-primary border-brand-primary text-white shadow-md shadow-brand-primary/20' : 'bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-white/10 text-zinc-500 hover:border-brand-primary/40'}`}
           >
-            <div className={`w-3 h-3 rounded-full transition-all ${deepAnalysis ? 'bg-white' : 'bg-zinc-400 group-hover:bg-brand-primary'}`} />
-            <div className="text-left">
-              <span className={`text-[10px] font-medium block ${deepAnalysis ? 'text-white' : 'text-zinc-400 group-hover:text-brand-primary'}`}>Detailed Review</span>
-            </div>
+            <div className={`w-2 h-2 rounded-full transition-all ${deepAnalysis ? 'bg-white' : 'bg-zinc-400'}`} />
+            Detailed Review
           </button>
           <button
             onClick={handleAnalyze}
             disabled={!resumeText || !jdText || loading}
-            className={`flex-1 py-4 rounded-[24px] font-semibold text-xs tracking-wider transition-all flex items-center justify-center gap-2 ${!resumeText || !jdText || loading ? 'bg-zinc-100 dark:bg-zinc-800/10 text-zinc-400 cursor-not-allowed border border-zinc-200 dark:border-white/5' : 'bg-brand-primary text-white shadow-xl shadow-brand-primary/20 hover:opacity-90 active:scale-[0.98] border-none'}`}
+            className={`flex-1 py-2.5 rounded-full font-medium text-xs transition-all flex items-center justify-center gap-2 ${!resumeText || !jdText || loading ? 'bg-zinc-100/80 dark:bg-zinc-800/10 text-zinc-400 cursor-not-allowed border border-zinc-200/60 dark:border-white/[0.08]' : 'bg-brand-primary text-white hover:opacity-90 active:scale-[0.98] shadow-md shadow-brand-primary/20'}`}
           >
             Analyze Resume
           </button>
@@ -1716,7 +1452,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
               <button
                 key={idx}
                 onClick={() => setSearchParams({ tab: 'placement', id: idx.toString() })}
-                className="group p-6 rounded-[24px] bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-white/5 text-left hover:border-brand-primary/30 transition-all flex items-center justify-between shadow-sm active:scale-[0.98]"
+                className="group p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/[0.08] text-left hover:border-brand-primary/30 transition-all flex items-center justify-between shadow-sm"
               >
                 <div className="space-y-1">
                   <p className="text-xs font-semibold text-zinc-900 dark:text-white tracking-tight truncate max-w-[150px]">{report.label}</p>
@@ -1726,7 +1462,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                    <div onClick={(e) => handleDeleteReport(idx, e)} className="p-2.5 rounded-xl text-zinc-400 hover:bg-brand-primary/10 hover:text-brand-primary border-none bg-transparent transition-all">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" /></svg>
                   </div>
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 bg-brand-primary/5 text-brand-primary`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 bg-brand-primary/5 text-brand-primary`}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><path d="M9 18l6-6-6-6" /></svg>
                   </div>
                 </div>
