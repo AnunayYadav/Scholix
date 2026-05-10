@@ -31,37 +31,115 @@ const INDUSTRY_ROLES = [
     id: 'swe', 
     name: 'Software Engineer', 
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><path d="m18 16 4-4-4-4M6 8l-4 4 4 4M14.5 4l-5 16"/></svg>,
-    jd: 'We are looking for a Software Engineer...' 
+    jd: `Role: Software Engineer (Full Stack)
+Summary: We are seeking a versatile Software Engineer to design and implement scalable web applications. You will work on both frontend and backend components, ensuring high performance and responsiveness.
+
+Responsibilities:
+- Build high-quality, scalable features for our core platform.
+- Write clean, maintainable, and testable code following industry best practices.
+- Collaborate with cross-functional teams to define, design, and ship new features.
+- Optimize application for maximum speed and scalability.
+
+Technical Requirements:
+- Strong proficiency in Java, C++, Python, or Go.
+- Solid understanding of Data Structures, Algorithms, and System Design.
+- Experience with modern web frameworks (React, Node.js) and SQL/NoSQL databases.
+- Familiarity with CI/CD pipelines and Cloud infrastructure (AWS/GCP).`
   },
   { 
     id: 'frontend', 
     name: 'Frontend Developer', 
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.01M9 8h.01M12 8h.01"/></svg>,
-    jd: 'Join us as a Frontend Developer...' 
+    jd: `Role: Senior Frontend Developer
+Summary: Join our UX-focused team to build stunning, high-performance user interfaces. You will be responsible for translating complex designs into high-quality code and optimizing web performance for a global user base.
+
+Responsibilities:
+- Develop interactive and responsive UI components using modern frontend frameworks.
+- Ensure the technical feasibility of UI/UX designs and maintain design system consistency.
+- Implement complex state management logic and frontend performance optimizations.
+- Maintain high standards for web accessibility (WCAG) and cross-browser compatibility.
+
+Technical Requirements:
+- Expert knowledge of JavaScript/TypeScript, HTML5, and CSS3/SCSS.
+- Extensive experience with React, Next.js, and Tailwind CSS.
+- Proficiency in state management libraries like Redux, Zustand, or TanStack Query.
+- Knowledge of build tools (Vite, Webpack) and automated testing (Jest, Cypress).`
   },
   { 
     id: 'backend', 
     name: 'Backend Developer', 
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><line x1="6" x2="6" y1="6" y2="6"/><line x1="6" x2="6" y1="18" y2="18"/></svg>,
-    jd: "We're seeking a Backend Developer..." 
+    jd: `Role: Backend Systems Engineer
+Summary: We are looking for a Backend Engineer to build robust server-side logic and maintain our critical data systems. You will focus on performance, scalability, and the architectural integrity of our services.
+
+Responsibilities:
+- Design and implement scalable microservices, RESTful APIs, and GraphQL endpoints.
+- Optimize database performance, indexing strategies, and query efficiency.
+- Integrate with third-party services and manage enterprise-grade data security.
+- Develop and maintain background processing systems and distributed caching layers.
+
+Technical Requirements:
+- Strong experience with Node.js, Go, or Python (Django/FastAPI).
+- Deep understanding of API design, authentication (OAuth/JWT), and security protocols.
+- Expertise in PostgreSQL, MongoDB, and Redis.
+- Familiarity with Docker, Kubernetes, and serverless architectures.`
   },
   { 
     id: 'ai', 
     name: 'AI/ML Engineer', 
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><path d="M12 2v10l8-8M12 12V22M12 12H2M12 12h10"/></svg>,
-    jd: 'As an AI/ML Engineer...' 
+    jd: `Role: Machine Learning Engineer
+Summary: Drive our AI initiatives by designing, training, and deploying advanced machine learning models. You will work on the full ML lifecycle, from data engineering to model inference and optimization.
+
+Responsibilities:
+- Develop and implement production-ready ML models and deep learning algorithms.
+- Build and maintain scalable data pipelines for model training and real-time evaluation.
+- Optimize model performance for low-latency inference in production environments.
+- Research and integrate state-of-the-art AI techniques and LLM fine-tuning.
+
+Technical Requirements:
+- Strong proficiency in Python and ML libraries (PyTorch, TensorFlow, Scikit-learn).
+- Solid grasp of Statistics, Linear Algebra, and Calculus.
+- Experience with NLP, Computer Vision, or Generative AI workflows.
+- Familiarity with MLOps tools (MLflow, Kubeflow) and GPU acceleration techniques.`
   },
   { 
     id: 'data', 
     name: 'Data Scientist', 
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><path d="M3 3v18h18M7 16l4-4 4 4 6-6"/></svg>,
-    jd: 'We are looking for a Data Scientist...' 
+    jd: `Role: Senior Data Scientist
+Summary: Help us turn complex datasets into actionable business insights. You will analyze large-scale data, build predictive models, and communicate findings to drive strategic decision-making.
+
+Responsibilities:
+- Perform exploratory data analysis (EDA) to identify critical trends and business opportunities.
+- Build predictive models and statistical frameworks to solve complex business problems.
+- Create compelling data visualizations and automated reports for executive stakeholders.
+- Collaborate with engineering teams to integrate data models into production systems.
+
+Technical Requirements:
+- Advanced knowledge of Python/R and complex SQL query optimization.
+- Proven experience with data visualization tools (Tableau, D3.js, or Plotly).
+- Strong background in Statistics, Probability, and Hypothesis Testing.
+- Familiarity with Big Data technologies (Spark, Snowflake, or Databricks).`
   },
   { 
     id: 'pm', 
     name: 'Product Manager', 
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><circle cx="12" cy="12" r="4"/></svg>,
-    jd: 'Join our team as a Product Manager...' 
+    jd: `Role: Technical Product Manager
+Summary: Bridge the gap between business goals, user experience, and engineering constraints. You will define product vision, prioritize roadmaps, and lead cross-functional teams to deliver high-impact features.
+
+Responsibilities:
+- Define product strategy, roadmaps, and key success metrics (KPIs).
+- Conduct market research and user interviews to synthesize product requirements.
+- Write detailed Product Requirement Documents (PRDs) and manage technical backlogs.
+- Analyze product telemetry and user feedback to iterate on core functionality.
+
+Technical Requirements:
+- Strong analytical skills and data-driven approach to product management.
+- Excellent communication and stakeholder management in an Agile environment.
+- Fundamental understanding of software architecture and API integrations.
+- Experience with Figma, Jira, and Product Analytics tools (Mixpanel/Amplitude).`
   }
 ];
 
@@ -305,6 +383,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
   const [error, setError] = useState<string | null>(null);
   const [currentRecordId, setCurrentRecordId] = useState<string | null>(null);
   const [shareLoading, setShareLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const { uniSlug } = useUniversity();
   const prefix = uniSlug && uniSlug !== 'none' ? `/${uniSlug}` : '';
 
@@ -399,7 +478,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
     const file = e.target.files?.[0];
     if (file) {
       try {
-        setLoading(true);
+        setIsUploading(true);
         setError(null);
         setLoadingProgress(0);
         
@@ -426,7 +505,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
         setError(err.message || "Could not read the file. Please ensure it is a valid document.");
         showToast(err.message || "Upload failed.", "error");
       } finally {
-        setLoading(false);
+        setIsUploading(false);
         setProcessingStatus('');
         setLoadingProgress(0);
       }
@@ -1332,12 +1411,27 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             </div>
             <h3 className="text-[10px] font-semibold uppercase tracking-wider text-zinc-800 dark:text-zinc-200">Your Resume</h3>
             </div>
-            <div className="relative border-2 border-dashed border-zinc-200 dark:border-white/10 rounded-2xl p-6 text-center hover:border-brand-primary/40 transition-all bg-zinc-50 dark:bg-zinc-950 group cursor-pointer">
-              <input type="file" accept=".pdf" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-              <IconFile />
-              <p className="text-sm font-medium text-zinc-400 group-hover:text-brand-primary transition-colors">
-                {fileName ? fileName : "Upload PDF Resume"}
-              </p>
+            <div className="relative border-2 border-dashed border-zinc-200 dark:border-white/10 rounded-2xl p-6 text-center hover:border-brand-primary/40 transition-all bg-zinc-50 dark:bg-zinc-950 group cursor-pointer overflow-hidden min-h-[120px] flex flex-col items-center justify-center">
+              {isUploading ? (
+                <div className="space-y-3 animate-in fade-in zoom-in-95 duration-300">
+                  <div className="relative w-10 h-10 mx-auto">
+                    <div className="absolute inset-0 border-2 border-brand-primary/20 rounded-xl" />
+                    <div className="absolute inset-0 border-2 border-brand-primary border-t-transparent rounded-xl animate-spin" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-brand-primary uppercase tracking-widest">Processing</p>
+                    <p className="text-[9px] text-zinc-400 font-medium">{processingStatus || 'Reading document...'}</p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <input type="file" accept=".pdf,image/*" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                  <IconFile />
+                  <p className="text-sm font-medium text-zinc-400 group-hover:text-brand-primary transition-colors">
+                    {fileName ? fileName : "Upload PDF or Image Resume"}
+                  </p>
+                </>
+              )}
             </div>
           </div>
 
@@ -1433,8 +1527,8 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
           </button>
           <button
             onClick={handleAnalyze}
-            disabled={!resumeText || !jdText || loading}
-            className={`flex-1 py-2.5 rounded-full font-medium text-xs transition-all flex items-center justify-center gap-2 ${!resumeText || !jdText || loading ? 'bg-zinc-100/80 dark:bg-zinc-800/10 text-zinc-400 cursor-not-allowed border border-zinc-200/60 dark:border-white/[0.08]' : 'bg-brand-primary text-white hover:opacity-90 active:scale-[0.98] shadow-md shadow-brand-primary/20'}`}
+            disabled={!resumeText || !jdText || loading || isUploading}
+            className={`flex-1 py-2.5 rounded-full font-medium text-xs transition-all flex items-center justify-center gap-2 ${!resumeText || !jdText || loading || isUploading ? 'bg-zinc-100/80 dark:bg-zinc-800/10 text-zinc-400 cursor-not-allowed border border-zinc-200/60 dark:border-white/[0.08]' : 'bg-brand-primary text-white hover:opacity-90 active:scale-[0.98] shadow-md shadow-brand-primary/20'}`}
           >
             Analyze Resume
           </button>
