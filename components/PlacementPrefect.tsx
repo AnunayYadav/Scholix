@@ -166,7 +166,7 @@ const ScoreAura: React.FC<ScoreAuraProps> = ({ score, size = 180 }) => {
           <text x="0" y="0" textAnchor="middle" className="fill-zinc-900 dark:fill-white text-5xl font-black tracking-tighter filter drop-shadow-md">
             {displayScore}
           </text>
-          <text x="0" y="24" textAnchor="middle" className="font-black text-[10px] uppercase tracking-[0.3em]" fill={getStatusColor(score)}>
+          <text x="0" y="24" textAnchor="middle" className="font-black text-[10px] uppercase tracking-[0.3em]" style={{ fill: getStatusColor(score) }}>
             {getStatus(score)}
           </text>
         </g>
@@ -1190,59 +1190,18 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
           </div>
           
           <div className="relative group/xray">
-            <div className="p-5 md:p-8 rounded-2xl bg-zinc-950 border border-white/[0.08] shadow-lg relative overflow-hidden">
-
+            <div className="p-5 md:p-8 rounded-2xl bg-zinc-950 border border-white/[0.08] shadow-lg relative">
               <div className="max-h-[600px] overflow-y-auto custom-scrollbar pr-4 relative z-20">
-                <div className="text-[12px] md:text-[13px] text-zinc-600 font-medium leading-relaxed whitespace-pre-wrap font-mono tracking-tight">
+                <div className="text-[12px] md:text-[13px] text-zinc-400 font-medium leading-relaxed whitespace-pre-wrap font-mono tracking-tight">
                   {result.annotatedContent.map((fragment, i) => (
                     <FragmentHighlight key={i} fragment={fragment} onHover={handleFragmentHover} />
                   ))}
                 </div>
               </div>
             </div>
-            
-            {/* Tooltip implementation for hover insights - Moved outside overflow-hidden */}
-            {hoveredFragment && hoveredFragment.type !== 'neutral' && (
-              <div 
-                className="absolute z-[9999] pointer-events-none transition-all duration-200"
-                style={{ 
-                  left: `${tooltipPos.x}px`, 
-                  top: `${tooltipPos.y}px`,
-                  transform: `translate(-50%, ${tooltipPos.flipped ? '0%' : '-100%'})`
-                }}
-              >
-                <div className={`p-4 rounded-2xl shadow-2xl border flex flex-col gap-2.5 w-72 md:w-80 animate-in fade-in zoom-in duration-200 shadow-brand-primary/10 ${hoveredFragment.type === 'good' ? 'bg-[#0f1711] border-emerald-500/30' : 'bg-[#1a0f0f] border-red-500/30'}`}>
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full ${hoveredFragment.type === 'good' ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                      <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${hoveredFragment.type === 'good' ? 'text-emerald-500' : 'text-red-500'}`}>
-                        {hoveredFragment.type === 'good' ? 'Best Practice' : 'Critical Flag'}
-                      </span>
-                    </div>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`w-3 h-3 ${hoveredFragment.type === 'good' ? 'text-emerald-500' : 'text-red-500'}`}>
-                      {hoveredFragment.type === 'good' ? <path d="m5 12 5 5L20 7" /> : <path d="m21 21-18-18m18 0L3 21" />}
-                    </svg>
-                  </div>
-                  
-                  <p className="text-[11px] font-bold text-zinc-100 leading-tight">
-                    {hoveredFragment.reason}
-                  </p>
-                  
-                  {hoveredFragment.suggestion && (
-                    <div className={`mt-1 p-3 rounded-xl border ${hoveredFragment.type === 'good' ? 'bg-emerald-500/5 border-emerald-500/10' : 'bg-red-500/5 border-red-500/10'}`}>
-                      <p className="text-[8px] font-black opacity-50 uppercase tracking-widest mb-1 shadow-sm">AI Recommendation</p>
-                      <p className="text-[10px] font-medium text-zinc-300 leading-relaxed italic">
-                        {hoveredFragment.suggestion}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-            </div>
-            
             <p className="text-[9px] text-zinc-500 mt-3 text-center">Hover highlighted text for insights</p>
-         </section>
+          </div>
+        </section>
 
         {/* Category Breakdown */}
         <div className="pt-5 space-y-4">
@@ -1303,6 +1262,47 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             </div>
           </div>
         </div>
+
+        {/* Floating Hover Insights Tooltip */}
+        {hoveredFragment && (
+          <div 
+            className={`absolute z-[100] w-[280px] p-4 rounded-2xl bg-zinc-900/95 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-200 pointer-events-none ${
+              tooltipPos.flipped ? 'animate-in fade-in slide-in-from-top-2' : 'animate-in fade-in slide-in-from-bottom-2'
+            }`}
+            style={{ 
+              top: tooltipPos.y, 
+              left: tooltipPos.x,
+              transform: 'translateX(-50%)'
+            }}
+          >
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${
+                  hoveredFragment.type === 'good' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                }`}>
+                  {hoveredFragment.type === 'good' ? 'Strength' : 'Improvement'}
+                </span>
+              </div>
+              <p className="text-[11px] text-zinc-100 font-medium leading-relaxed">
+                {hoveredFragment.insight}
+              </p>
+              {hoveredFragment.suggestion && (
+                <div className="pt-2.5 border-t border-white/5">
+                  <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Recommendation</p>
+                  <p className="text-[10px] text-zinc-400 italic leading-relaxed">
+                    "{hoveredFragment.suggestion}"
+                  </p>
+                </div>
+              )}
+            </div>
+            {/* Tooltip Arrow */}
+            <div 
+              className={`absolute left-1/2 -translate-x-1/2 w-3 h-3 bg-zinc-900 border-l border-t border-white/10 rotate-45 ${
+                tooltipPos.flipped ? '-top-1.5' : '-bottom-1.5'
+              }`} 
+            />
+          </div>
+        )}
       </div>
     );
   }
