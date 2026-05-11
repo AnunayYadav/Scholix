@@ -17,9 +17,9 @@ const MarketplaceHub: React.FC<{ userProfile: UserProfile | null }> = ({ userPro
     const { uniSlug, fullBrandName, studentTerm, universityName, communityName } = useUniversity();
     
     // Determine base route for navigation to be mount-point agnostic
-    const baseRoute = pathname.includes('/campus/market') 
+    const baseRoute = (pathname.includes('/campus/market') || pathname.includes('/market'))
         ? `/${uniSlug}/campus/market` 
-        : `/${uniSlug}/marketplace`;
+        : `/${uniSlug}/campus/market`;
 
     const [items, setItems] = useState<MarketplaceItem[]>([]);
     const [loading, setLoading] = useState(true);

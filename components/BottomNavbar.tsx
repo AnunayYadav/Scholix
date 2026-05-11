@@ -93,7 +93,7 @@ const BottomNavbar: React.FC<BottomNavbarProps> = ({ currentModule }) => {
         </svg>
       ),
       path: `${prefix}/campus`,
-      active: location.pathname.includes('/campus') || location.pathname.includes('/marketplace') || location.pathname.includes('/roommate')
+      active: location.pathname.includes('/campus') || location.pathname.includes('/market') || location.pathname.includes('/roommate')
     },
     {
       id: 'settings',

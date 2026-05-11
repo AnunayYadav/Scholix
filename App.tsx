@@ -97,7 +97,7 @@ const getModuleFromPath = (path: string): ModuleType => {
   if (normalizedPath.includes('/help')) return ModuleType.HELP;
   if (normalizedPath.includes('/about')) return ModuleType.ABOUT;
   if (normalizedPath.includes('/profile')) return ModuleType.PROFILE;
-  if (normalizedPath.includes('/marketplace')) return ModuleType.MARKETPLACE;
+  if (normalizedPath.includes('/market')) return ModuleType.MARKETPLACE;
   if (normalizedPath.includes('/roommate')) return ModuleType.ROOMMATE;
   if (normalizedPath.includes('/emergency')) return ModuleType.EMERGENCY;
 
@@ -127,7 +127,7 @@ const getPathFromModule = (module: ModuleType, uniKey: UniversityId = 'none'): s
     case ModuleType.PROFILE: return `${prefix}/settings/profile`;
     case ModuleType.DASHBOARD: return uniSlug ? `/${uniSlug}` : '/';
     case ModuleType.SHARE_CGPA: return `/share-cgpa`;
-    case ModuleType.MARKETPLACE: return `${prefix}/marketplace`;
+    case ModuleType.MARKETPLACE: return `${prefix}/campus/market`;
     case ModuleType.ROOMMATE: return `${prefix}/roommate`;
     case ModuleType.EMERGENCY: return `${prefix}/emergency`;
 
@@ -1674,9 +1674,10 @@ const FeatureRoutes: React.FC<{
       <Route path="/quiz/:subjectName" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
       <Route path="/quiz/:subjectName/:quizId" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
       
-      <Route path="/marketplace" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
-      <Route path="/marketplace/:category" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
-      <Route path="/marketplace/item/:itemId" element={<FeatureGuard module={ModuleType.MARKETPLACE}><MarketplaceHub userProfile={userProfile} /></FeatureGuard>} />
+      <Route path="/market" element={<Navigate to="/campus/market" replace />} />
+      <Route path="/market/:category" element={<Navigate to="/campus/market" replace />} />
+      <Route path="/market/item/:itemId" element={<Navigate to="/campus/market" replace />} />
+
       
       <Route path="/roommate" element={<FeatureGuard module={ModuleType.ROOMMATE}><RoommateFinder userProfile={userProfile} /></FeatureGuard>} />
       <Route path="/emergency" element={<FeatureGuard module={ModuleType.EMERGENCY}><EmergencyContacts /></FeatureGuard>} />
