@@ -21,7 +21,6 @@ export const SUPPORT_CHAT_TREE: Record<string, ChatNode> = {
     options: [
       { id: '1', text: 'Academic Tools', nextId: 'academics' },
       { id: '2', text: 'Campus & Marketplace', nextId: 'campus' },
-      { id: '3', text: 'AI & Research', nextId: 'ai_forge' },
       { id: '4', text: 'Account & Settings', nextId: 'account_settings' },
       { id: '5', text: 'Bug / Feedback', action: 'feedback' },
       { id: '6', text: 'Human Support', nextId: 'human_direct' }
@@ -116,26 +115,7 @@ export const SUPPORT_CHAT_TREE: Record<string, ChatNode> = {
     ]
   },
 
-  // AI SECTION
-  ai_forge: {
-    id: 'ai_forge',
-    message: "Welcome to AI Forge! The future of students.",
-    options: [
-      { id: 'ai1', text: 'Placements Help (AI)', nextId: 'placement_help' },
-      { id: 'ai2', text: 'Global Gateway', response: 'Global Gateway helps you find international opportunities and university transfer programs using AI filtering.' },
-      { id: 'ai3', text: 'Free AI Tools', response: 'We curate Free and Freemium tools like Perplexity, Gamma, and Claude in our directory. Check the "Free" tag!' },
-      { id: 'ai4', text: 'Back to start', nextId: 'start' }
-    ]
-  },
-  placement_help: {
-    id: 'placement_help',
-    message: "Getting ready for corporate?",
-    options: [
-      { id: 'ph1', text: 'Resume Review', response: 'Use the Placement Prefect tool to upload your resume. It analyzes keywords against top tech companies requirements.' },
-      { id: 'ph2', text: 'Mock Interview', response: 'Our AI-powered Mock Interview (Beta) helps you practice behavioral questions. Coming soon in build 4.0!' },
-      { id: 'ph3', text: 'AI Menu', nextId: 'ai_forge' }
-    ]
-  },
+
 
   // ACCOUNT SECTION
   account_settings: {

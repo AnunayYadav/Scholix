@@ -47,7 +47,6 @@ export const UNIVERSITIES: University[] = [
         ModuleType.PLACEMENT,
         ModuleType.LIBRARY,
         ModuleType.CAMPUS,
-        ModuleType.AI_TOOLS,
         ModuleType.MARKETPLACE,
         ModuleType.ROOMMATE,
         ModuleType.EMERGENCY,
@@ -79,7 +78,7 @@ export const UNIVERSITIES: University[] = [
         ModuleType.LIBRARY,
         ModuleType.CAMPUS,
         ModuleType.EMERGENCY,
-        ModuleType.AI_TOOLS,
+
         ModuleType.QUIZ,
         ModuleType.HELP,
         ModuleType.ABOUT,

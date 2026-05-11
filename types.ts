@@ -16,7 +16,7 @@ export enum ModuleType {
   MARKETPLACE = 'MARKETPLACE',
   ROOMMATE = 'ROOMMATE',
   EMERGENCY = 'EMERGENCY',
-  AI_TOOLS = 'AI_TOOLS',
+
   ADMIN_STATS = 'ADMIN_STATS',
   PRIVACY = 'PRIVACY',
   LOGIN = 'LOGIN',
@@ -66,16 +66,7 @@ export interface EmergencyContact {
   category: 'Administration' | 'Hostel' | 'Security' | 'Healthcare' | 'Helpdesk';
 }
 
-export interface AITool {
-  id: string;
-  name: string;
-  description: string;
-  url: string;
-  category: 'Writing' | 'Coding' | 'Research' | 'Design' | 'General' | 'Productivity' | 'Presentations' | 'Video' | 'Audio' | 'Business' | 'Education' | '3D' | 'Data' | 'Security' | 'Healthcare';
-  pricing: 'Free' | 'Freemium' | 'Paid';
-  tags: string[];
-  isHero?: boolean;
-}
+
 
 declare global {
   interface Window {

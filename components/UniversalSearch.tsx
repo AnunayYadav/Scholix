@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import NexusServer from '../services/nexusServer.ts';
-import { aiTools } from '../data/aiToolsData.ts';
 import { allDirectory } from '../data/emergencyData.ts';
 import { slugify } from '../utils/slugify.ts';
 import { useUniversity } from '../hooks/useUniversity.tsx';
@@ -60,7 +59,7 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
     { id: 'marketplace', name: `${shortBrandName} Market`, desc: 'Buy/Sell used books and items.', path: '/marketplace', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/></svg> },
     { id: 'roommate', name: 'Roommate Finder', desc: `Find your perfect ${shortBrandName} flatmate.`, path: '/roommate', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg> },
     { id: 'emergency', name: 'Rescue Line', desc: `Emergency ${shortBrandName} official contacts.`, path: '/emergency', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6" /></svg> },
-    { id: 'ai-tools', name: 'AI Directory', desc: 'Curated AI tools for students.', path: '/ai-tools', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><circle cx="12" cy="12" r="3"/></svg> },
+
   ];
 
   const navigations = [
@@ -159,27 +158,7 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
       }
     });
 
-    // 3. Smart AI Directory Search (One result for all tool/category matches)
-    const aiModule = modules.find(m => m.id === 'ai-tools');
-    const matchesAiHub = aiTools.some(tool => 
-      tool.name.toLowerCase().includes(searchLower) || 
-      tool.description.toLowerCase().includes(searchLower) || 
-      tool.category.toLowerCase().includes(searchLower) ||
-      tool.tags.some(t => t.toLowerCase().includes(searchLower))
-    );
 
-    // Only add if not already added by the name search in step 1
-    if (matchesAiHub && !newResults.find(r => r.id === 'ai-tools')) {
-      newResults.push({
-        id: 'ai-tools-smart',
-        type: 'module',
-        title: 'AI Directory',
-        description: `Search for tools related to "${q}" in our curated library.`,
-        path: `/ai-tools?q=${encodeURIComponent(q)}`,
-        icon: aiModule?.icon || <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-indigo-500"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><circle cx="12" cy="12" r="3"/></svg>,
-        category: 'AI Store'
-      });
-    }
 
     // 5. Search Rescue Line Contacts
     allDirectory.forEach(contact => {

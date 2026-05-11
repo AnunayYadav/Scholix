@@ -21,15 +21,7 @@ const HelpSection: React.FC = () => {
           { q: "Is the marketplace safe?", a: `${university?.shortName || shortBrandName} Market is exclusively for verified students. However, always meet in public campus areas for exchanges. You can report suspicious listings via the feedback modal.` }
         ]
       },
-      {
-        id: 'ai',
-        category: 'AI Forge (Directory)',
-        module: ModuleType.AI_TOOLS,
-        questions: [
-          { q: "Are all AI tools listed here free?", a: "We curate a mix of Free, Freemium, and Paid tools. Most student-focused tools like Gamma (for PPTs) and ChatGPT have generous free tiers. Check the tags on each card for pricing details." },
-          { q: "How often is the directory updated?", a: "The 'AI Forge' is updated weekly with the latest breakthroughs in AI for coding, research, and presentations to keep you ahead in your academics." }
-        ]
-      },
+
       {
         id: 'academics',
         category: 'Tools & Academics',

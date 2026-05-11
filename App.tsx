@@ -16,7 +16,6 @@ import QuizTaker from './components/QuizTaker.tsx';
 import MarketplaceHub from './components/MarketplaceHub.tsx';
 import RoommateFinder from './components/RoommateFinder.tsx';
 import EmergencyContacts from './components/EmergencyContacts.tsx';
-import AIToolsDirectory from './components/AIToolsDirectory.tsx';
 import AdminStats from './components/AdminStats.tsx';
 import BuyMeACoffee from './components/BuyMeACoffee.tsx';
 import PaymentSuccess from './components/PaymentSuccess.tsx';
@@ -36,7 +35,17 @@ import {
   CheckCircle2, 
   Rocket, 
   Briefcase, 
-  X
+  X,
+  ChevronDown,
+  ChevronRight,
+  ArrowUp,
+  Utensils,
+  PlayCircle,
+  Sun,
+  Moon,
+  PenTool,
+  Map,
+  Calculator
 } from 'lucide-react';
 import BottomNavbar from './components/BottomNavbar.tsx';
 import NexusAd from './components/NexusAd.tsx';
@@ -91,7 +100,7 @@ const getModuleFromPath = (path: string): ModuleType => {
   if (normalizedPath.includes('/marketplace')) return ModuleType.MARKETPLACE;
   if (normalizedPath.includes('/roommate')) return ModuleType.ROOMMATE;
   if (normalizedPath.includes('/emergency')) return ModuleType.EMERGENCY;
-  if (normalizedPath.includes('/ai-tools')) return ModuleType.AI_TOOLS;
+
   if (normalizedPath.includes('/admin-stats')) return ModuleType.ADMIN_STATS;
   if (normalizedPath.includes('/privacy')) return ModuleType.PRIVACY;
   if (normalizedPath.includes('/login')) return ModuleType.LOGIN;
@@ -121,7 +130,7 @@ const getPathFromModule = (module: ModuleType, uniKey: UniversityId = 'none'): s
     case ModuleType.MARKETPLACE: return `${prefix}/marketplace`;
     case ModuleType.ROOMMATE: return `${prefix}/roommate`;
     case ModuleType.EMERGENCY: return `${prefix}/emergency`;
-    case ModuleType.AI_TOOLS: return `${prefix}/ai-tools`;
+
     case ModuleType.TOOLS: return `${prefix}/tools`;
     case ModuleType.ADMIN_STATS: return `${prefix}/admin-stats`;
     case ModuleType.PRIVACY: return `${prefix}/settings/privacy`;
@@ -210,7 +219,6 @@ const TodaysSchedule: React.FC = () => {
   const [timetable, setTimetable] = useState<TimetableData | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const navigate = useNavigate();
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
   if (universityInfo && !universityInfo.features.enabledModules.includes(ModuleType.TIMETABLE)) {
     return null;
@@ -240,82 +248,114 @@ const TodaysSchedule: React.FC = () => {
 
   const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
 
-  if (!dayData || dayData.slots.length === 0) {
-    return (
-      <div className="max-w-6xl mx-auto px-6 mb-8 animate-fade-in">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center flex-1">
-            <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Featured Timetable</h3>
-            <div className="h-[2px] flex-1 bg-zinc-100 dark:bg-white/5 ml-4" />
-          </div>
-          <button onClick={() => navigate('/timetable')} className="text-[10px] font-bold text-brand-primary border-none bg-transparent ml-4">SYNC</button>
-        </div>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-          {[1,2,3].map(i => (
-            <div key={i} className="flex-shrink-0 flex flex-col items-center space-y-2 opacity-30">
-              <div className="w-16 h-16 rounded-full border-2 border-dashed border-zinc-300 dark:border-white/20 flex items-center justify-center">
-                <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-white/5" />
-              </div>
-              <div className="w-12 h-2 bg-zinc-200 dark:bg-white/10 rounded-full" />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-6xl mx-auto px-6 mb-10 animate-fade-in">
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center flex-1">
-          <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Featured Timetable</h3>
-          <div className="h-[2px] flex-1 bg-zinc-100 dark:bg-white/5 ml-4" />
+    <div className="w-full animate-fade-in">
+      <div className="bg-white dark:bg-[#0a0a0a] rounded-2xl border border-zinc-100/80 dark:border-white/5 p-4 lg:p-6 shadow-sm flex flex-col h-full transition-all duration-500">
+        <div className="flex items-center justify-between mb-4 lg:mb-6">
+          <div>
+            <h4 className="text-sm md:text-base font-bold text-zinc-900 dark:text-white tracking-tight">Today's Schedule</h4>
+            <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase opacity-70">{today}</p>
+          </div>
         </div>
-        <button 
-          onClick={() => navigate('/timetable')}
-          className="text-[10px] font-bold text-brand-primary border-none bg-transparent hover:opacity-80 transition-opacity ml-4"
-        >
-          VIEW ALL
-        </button>
-      </div>
 
-      <div ref={scrollContainerRef} className="flex gap-5 overflow-x-auto pb-4 px-1 -mx-6 no-scrollbar snap-x snap-mandatory">
-        <div className="flex-shrink-0 w-1 sm:hidden" /> {/* Spacer */}
-        {dayData.slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)).map((slot) => {
-          const start = timeToMinutes(slot.startTime);
-          const end = timeToMinutes(slot.endTime);
-          const isGoingOn = currentMinutes >= start && currentMinutes < end;
-          const isUpcoming = currentMinutes < start;
-          
-          return (
-            <button
-              key={slot.id}
-              onClick={() => navigate('/timetable')}
-              className="flex-shrink-0 flex flex-col items-center space-y-3 group border-none bg-transparent active:scale-90 transition-transform"
-            >
-              <div className={`relative p-[3px] rounded-full transition-all duration-500 ${isGoingOn ? 'bg-gradient-to-tr from-brand-primary via-brand-secondary to-brand-primary animate-pulse' : 'bg-zinc-200 dark:bg-white/10 group-hover:bg-brand-primary/50'}`}>
-                 <div className="absolute -inset-1 bg-brand-primary/20 blur-md rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white dark:bg-[#121212] p-[2px] relative z-10 overflow-hidden shadow-xl">
-                    <div className={`w-full h-full rounded-full flex flex-col items-center justify-center text-center px-1 overflow-hidden ${isGoingOn ? 'bg-brand-gradient text-white' : 'bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200'}`}>
-                      <span className="text-[7px] sm:text-[9px] font-black uppercase leading-none opacity-60 mb-1">{slot.type}</span>
-                      <span className="text-[10px] sm:text-xs font-bold leading-tight truncate w-full px-1">{slot.subject}</span>
+        {!dayData || dayData.slots.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 py-8 lg:py-12 bg-zinc-50/50 dark:bg-white/[0.02] rounded-xl border border-dashed border-zinc-100 dark:border-white/5">
+            <div className="w-16 h-16 rounded-full border-2 border-dashed border-zinc-100 dark:border-white/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-white/5 animate-pulse" />
+            </div>
+            <p className="text-xs font-bold text-zinc-400">No classes today</p>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-hidden">
+            <div className="flex flex-row lg:flex-col gap-6 lg:gap-3 overflow-x-auto lg:overflow-y-auto pb-2 lg:pb-0 lg:pr-3 custom-scrollbar snap-x no-scrollbar">
+              {dayData.slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)).map((slot) => {
+                const start = timeToMinutes(slot.startTime);
+                const end = timeToMinutes(slot.endTime);
+                const isGoingOn = currentMinutes >= start && currentMinutes < end;
+                
+                return (
+                  <button
+                    key={slot.id}
+                    onClick={() => navigate('/timetable')}
+                    className={`flex flex-col lg:flex-row items-center lg:items-center gap-3 lg:gap-3 shrink-0 snap-center lg:snap-start transition-all duration-300 w-[80px] lg:w-full group`}
+                  >
+                    {/* Circle Subject Box (Instagram Story style on mobile) */}
+                    <div className={`
+                      relative flex items-center justify-center 
+                      w-16 h-16 lg:w-12 lg:h-12 
+                      rounded-full lg:rounded-xl 
+                      transition-all duration-500
+                      ${isGoingOn 
+                        ? 'p-[2px] bg-gradient-to-tr from-brand-primary via-brand-secondary to-brand-primary animate-gradient-xy shadow-lg shadow-brand-primary/20' 
+                        : 'border border-zinc-100 dark:border-white/5'
+                      }
+                      lg:border-0 lg:bg-transparent lg:animate-none
+                    `}>
+                      <div className={`
+                        flex flex-col items-center justify-center w-full h-full rounded-full lg:rounded-xl 
+                        ${isGoingOn ? 'bg-brand-primary text-white lg:bg-brand-primary/10 lg:text-brand-primary' : 'bg-white dark:bg-white/5 text-zinc-500 lg:bg-zinc-50 lg:dark:bg-white/5'}
+                        ${!isGoingOn ? 'border-2 border-white dark:border-[#0a0a0a] lg:border-0' : ''}
+                        text-center px-1
+                      `}>
+                        {/* Mobile: All info inside circle */}
+                        <div className="lg:hidden flex flex-col items-center justify-center -space-y-0.5">
+                          <span className="text-[9px] font-black tracking-tighter leading-none uppercase truncate max-w-full">
+                            {slot.subject.substring(0, 6)}
+                          </span>
+                          <span className="text-[7px] font-bold opacity-80 mt-0.5">
+                            {slot.startTime.split(' ')[0]}
+                          </span>
+                          {slot.room && slot.room !== 'N/A' && (
+                            <span className="text-[7px] font-black mt-0.5 text-brand-secondary/90">
+                              {slot.room}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Desktop: Only Subject initial/code */}
+                        <span className="hidden lg:block text-[11px] font-bold tracking-tighter truncate px-1 max-w-full">
+                          {slot.subject.substring(0, 6)}
+                        </span>
+                      </div>
+                      
+                      {isGoingOn && (
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-brand-primary rounded-full border-2 border-white dark:border-[#0a0a0a] z-10 lg:hidden" />
+                      )}
                     </div>
-                 </div>
-              </div>
-              <div className="flex flex-col items-center text-center min-w-[70px] sm:min-w-[80px]">
-                {slot.room && slot.room !== 'N/A' && slot.room !== 'nan' && (
-                  <span className={`text-[10px] sm:text-xs font-bold leading-none mb-0.5 ${isGoingOn ? 'text-brand-primary' : 'text-zinc-600 dark:text-zinc-400'}`}>
-                    {slot.room}
-                  </span>
-                )}
-                <span className="text-[8px] sm:text-[9px] font-medium text-zinc-400 dark:text-zinc-500 tabular-nums whitespace-nowrap">
-                  {slot.startTime} - {slot.endTime}
-                </span>
-              </div>
-            </button>
-          );
-        })}
-        <div className="flex-shrink-0 w-1 sm:hidden" /> {/* Spacer */}
+
+                    {/* Desktop Content */}
+                    <div className={`
+                      hidden lg:flex flex-1 items-center gap-3 p-2 rounded-xl transition-all duration-300 text-left w-full
+                      ${isGoingOn 
+                        ? 'bg-brand-primary/[0.03] ring-1 ring-brand-primary/10' 
+                        : 'bg-zinc-50/30 dark:bg-white/[0.02] hover:bg-zinc-50 dark:hover:bg-white/[0.05]'
+                      }
+                    `}>
+                      <div className="flex-1 min-w-0">
+                        <h5 className={`text-[11px] font-bold leading-tight truncate ${isGoingOn ? 'text-brand-primary' : 'text-zinc-900 dark:text-white'}`}>
+                          {slot.subject}
+                        </h5>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[9px] font-medium text-zinc-500">
+                            {slot.startTime.split(' ')[0]} - {slot.endTime.split(' ')[0]}
+                          </span>
+                          {slot.room && slot.room !== 'N/A' && (
+                            <span className="text-[9px] font-bold text-brand-primary/80">
+                              {slot.room}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mobile labels removed as they are now inside the circle */}
+                    <div className="lg:hidden" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -326,95 +366,124 @@ const PlacementRedirect: React.FC = () => {
   return <Navigate to={`/tools?tab=placement&id=${reportId}`} replace />;
 };
 
-const DashboardHero: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ userProfile }) => {
+const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ userProfile }) => {
   const [greeting, setGreeting] = useState('');
-  const { studentTerm, fullBrandName } = useUniversity();
+  const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
+  const navigate = useNavigate();
 
   useEffect(() => {
     const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) setGreeting('Good Morning');
-    else if (hour >= 12 && hour < 17) setGreeting('Good Afternoon');
-    else setGreeting('Good Evening');
+    if (hour >= 5 && hour < 12) setGreeting('Good morning');
+    else if (hour >= 12 && hour < 17) setGreeting('Good afternoon');
+    else setGreeting('Good evening');
   }, []);
 
-  const displayName = userProfile?.username || studentTerm;
+  const toggleTheme = () => {
+    const newTheme = !isDark;
+    setIsDark(newTheme);
+    if (newTheme) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
+
+  const displayName = userProfile?.username || 'Verto';
 
   return (
-    <div className="relative overflow-hidden bg-transparent pt-6 pb-6">
-      <div className="max-w-6xl mx-auto px-6 text-left space-y-1">
-        <h1 className="text-2xl md:text-4xl font-bold text-zinc-900 dark:text-white tracking-tight leading-tight ml-1">
-          {greeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">{displayName}</span>
-        </h1>
-        <p className="text-zinc-500 dark:text-zinc-400 text-xs md:text-base font-medium ml-1">
-          Welcome to {fullBrandName}
-        </p>
+    <div className="w-full pt-6 md:pt-10 pb-6 md:pb-10 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="flex flex-col gap-6 md:gap-8">
+          {/* Main Header Row */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            {/* Greeting + Actions */}
+            <div className="flex items-center justify-between w-full lg:w-auto gap-4">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight flex items-center gap-2.5 truncate">
+                  {greeting}, {displayName} <span className="text-2xl md:text-3xl animate-bounce-subtle shrink-0">👋</span>
+                </h1>
+                <p className="text-zinc-500 dark:text-zinc-400 text-xs md:text-sm font-bold opacity-70 mt-1">
+                  Let's make today productive!
+                </p>
+              </div>
+
+              {/* Actions: Mobile only */}
+              <div className="flex lg:hidden items-center gap-2 shrink-0">
+                <NotificationBell userProfile={userProfile} />
+                <button 
+                  onClick={toggleTheme}
+                  className="w-10 h-10 rounded-2xl bg-white dark:bg-white/5 flex items-center justify-center text-zinc-600 dark:text-zinc-400 border border-zinc-100 dark:border-white/5 active:scale-95 shadow-sm"
+                  aria-label="Toggle Theme"
+                >
+                  {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Desktop Search */}
+            <div className="hidden lg:block flex-1 max-w-xl mx-12">
+              <UniversalSearch />
+            </div>
+            
+            {/* Desktop Actions */}
+            <div className="hidden lg:flex items-center gap-4 shrink-0">
+              <NotificationBell userProfile={userProfile} />
+              <button 
+                onClick={toggleTheme}
+                className="w-12 h-12 rounded-2xl bg-white dark:bg-white/5 flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary transition-all border border-zinc-100 dark:border-white/5 active:scale-95 shadow-sm hover:shadow-md"
+                aria-label="Toggle Theme"
+              >
+                {isDark ? <Sun size={22} /> : <Moon size={22} />}
+              </button>
+            </div>
+
+            {/* Mobile Search: Added more horizontal padding */}
+            <div className="lg:hidden w-full px-6 sm:px-8">
+              <UniversalSearch />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 });
 
+
 const FeatureCard = React.memo(({ f, navigate }: { f: any, navigate: any }) => {
-  const [transform, setTransform] = React.useState('');
   const [isHovered, setIsHovered] = React.useState(false);
-  const cardRef = React.useRef<HTMLButtonElement>(null);
-
-  const { universityInfo } = useUniversity();
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    // Calculate rotation (-10 to 10 degrees max) for smoothness
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -10;
-    const rotateY = ((x - centerX) / centerX) * 10;
-
-    // Lift card using translateY and scale
-    setTransform(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px) scale(1.02)`);
-  };
-
-  const handleMouseEnter = () => setIsHovered(true);
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setTransform('perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale(1)');
-  };
 
   return (
     <button
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onClick={() => navigate(`/${f.id}`)}
-      style={{
-        transform: transform || 'perspective(1000px) rotateX(0deg) rotateY(0deg)',
-        transition: isHovered ? 'transform 0.1s ease-out, box-shadow 0.3s ease, border 0.3s ease' : 'transform 0.5s ease-out, box-shadow 0.5s ease, border 0.5s ease',
-        transformStyle: 'preserve-3d'
-      }}
-      className={`group relative p-3 sm:p-6 bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl rounded-[20px] sm:rounded-[32px] border border-zinc-200 dark:border-white/10 text-left cursor-pointer overflow-hidden transition-all duration-500 ${isHovered ? 'shadow-[0_45px_120px_-20px_rgba(0,0,0,0.4)] dark:shadow-[0_45px_120px_-20px_rgba(0,0,0,0.8)] border-brand-primary/40 z-10' : ''}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={() => navigate()}
+      className={`group relative p-3 md:p-4 bg-white dark:bg-[#0a0a0a] rounded-2xl border border-zinc-100/80 dark:border-white/5 text-left cursor-pointer transition-all duration-500 ${isHovered ? 'shadow-xl shadow-zinc-200/40 dark:shadow-none border-brand-primary/30 -translate-y-1 bg-zinc-50/30 dark:bg-white/[0.03]' : 'shadow-sm'}`}
     >
-      <div className={`absolute inset-0 bg-gradient-to-br from-brand-primary to-brand-secondary transition-opacity duration-500 ${isHovered ? 'opacity-[0.03] dark:opacity-[0.07]' : 'opacity-0'}`} />
-
-      {/* Wrapping content with translateZ for parallax effect inside the card */}
-      <div style={{ transform: isHovered ? 'translateZ(40px)' : 'translateZ(0)', transition: 'transform 0.4s ease-out', pointerEvents: 'none' }} className="w-full h-full relative flex flex-col items-start justify-center">
-        <div className={`relative w-8 h-8 sm:w-12 sm:h-12 rounded-[10px] sm:rounded-[16px] bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center text-white mb-2 sm:mb-6 shadow-2xl transition-all duration-500 ${isHovered ? 'shadow-brand-primary/50 scale-[1.15] rotate-3' : 'shadow-brand-primary/20'}`}>
-          <div className={`absolute inset-0 rounded-[10px] sm:rounded-[16px] bg-inherit -z-10 transition-all duration-500 ${isHovered ? 'blur-2xl opacity-70' : 'blur-xl opacity-40'}`} />
-          <div className="scale-65 sm:scale-90">
-            {f.icon}
+      <div className="flex flex-col gap-2 md:gap-3">
+        {/* Icon Container */}
+        <div className={`w-10 h-10 rounded-xl ${f.lightColor || 'bg-brand-primary/10'} flex items-center justify-center shrink-0 transition-all duration-500 ${isHovered ? 'scale-105 rotate-3 shadow-md' : ''}`}>
+          <div className={`${f.iconColor || 'text-brand-primary'} transition-transform duration-500`}>
+            {React.cloneElement(f.icon as React.ReactElement, { size: 20, strokeWidth: 2.2 })}
           </div>
         </div>
 
-        <div className="relative space-y-0.5 sm:space-y-2 text-left w-full">
-          <h4 className="text-[12px] sm:text-lg font-bold text-zinc-900 dark:text-white tracking-tight leading-tight sm:leading-none">{f.name}</h4>
-          <p className="text-[10px] sm:text-xs text-zinc-500 dark:text-zinc-400/80 leading-relaxed max-w-[95%] sm:max-w-[90%] line-clamp-2">{f.desc}</p>
+        {/* Content */}
+        <div className="space-y-1">
+          <h4 className="text-[13px] font-bold text-zinc-900 dark:text-white group-hover:text-brand-primary transition-colors duration-300 leading-tight">
+            {f.name}
+          </h4>
+          <p className="text-[10px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium opacity-80 line-clamp-1">
+            {f.desc}
+          </p>
         </div>
-
-        <div className={`absolute top-1 right-1 sm:top-2 sm:right-2 text-zinc-300 dark:text-white/10 transition-all duration-500 ${isHovered ? 'text-brand-primary translate-x-1 -translate-y-1 scale-110' : ''}`}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3 sm:w-4 sm:h-4"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
+      </div>
+      
+      {/* Subtle indicator */}
+      <div className="absolute top-4 right-4 transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0">
+        <div className="w-5 h-5 rounded-full bg-brand-primary/10 flex items-center justify-center">
+          <ArrowRight size={10} className="text-brand-primary" />
         </div>
       </div>
     </button>
@@ -434,80 +503,73 @@ const StaticRedirect: React.FC<{ to: string }> = ({ to }) => {
 
 const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ userProfile }) => {
   const navigate = useNavigate();
-  const { shortBrandName, universityInfo, uniSlug, selectedUniversity } = useUniversity();
-  const [activeTab, setActiveTab] = useState('All');
+  const { selectedUniversity } = useUniversity();
+    const allFeatures = [
+      { id: ModuleType.ATTENDANCE, name: 'Attendance Tracker', desc: 'Track your daily attendance.', icon: <CheckCircle2 />, category: 'Tools', lightColor: 'bg-emerald-500/10', iconColor: 'text-emerald-500' },
+      { id: ModuleType.CAMPUS, name: 'Campus Map', desc: 'Find buildings and facilities.', icon: <Map />, category: 'Campus', lightColor: 'bg-blue-500/10', iconColor: 'text-blue-500' },
+      { id: ModuleType.CGPA, name: 'CGPA Calculator', desc: 'Plan your grades and GPA.', icon: <Calculator />, category: 'Tools', lightColor: 'bg-purple-500/10', iconColor: 'text-purple-500' },
+      { id: ModuleType.PLACEMENT, name: 'Resume Checker', desc: 'AI feedback on your resume.', icon: <Briefcase />, category: 'Tools', lightColor: 'bg-rose-500/10', iconColor: 'text-rose-500' },
+      { id: 'mess', name: 'Mess Menu', desc: "Today's meal planning.", icon: <Utensils />, category: 'Campus', lightColor: 'bg-orange-500/10', iconColor: 'text-orange-500' },
+      { id: ModuleType.LIBRARY, name: 'Content Library', desc: 'Study materials and resources.', icon: <Rocket />, category: 'Study', lightColor: 'bg-indigo-500/10', iconColor: 'text-indigo-500' },
+      { id: ModuleType.QUIZ, name: 'Quiz Taker', desc: 'Practice with AI generated quizzes.', icon: <PenTool />, category: 'Study', lightColor: 'bg-cyan-500/10', iconColor: 'text-cyan-500' },
 
-  const allFeatures = [
-    { id: ModuleType.LIBRARY, name: 'Content Library', desc: 'Comprehensive hub for PYQs, notes, and study resources.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /><path d="M8 8h10M8 12h10" /></svg>, category: 'Study' },
-    { id: ModuleType.QUIZ, name: 'Quiz Taker', desc: 'Generate custom tests from your subjects.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="m9 12 2 2 4-4" /></svg>, category: 'Study' },
-    { id: ModuleType.TIMETABLE, name: 'Timetable Hub', desc: 'Sync and manage your weekly schedule.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>, category: 'Study' },
-    { id: ModuleType.CGPA, name: 'CGPA Calc', desc: 'Calculate and forecast your performance.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="4" y="2" width="16" height="20" rx="2" /><line x1="8" y1="6" x2="16" y2="6" /><line x1="16" y1="14" x2="16" y2="18" /><path d="M16 10h.01" /><path d="M12 10h.01" /><path d="M8 10h.01" /><path d="M12 14h.01" /><path d="M8 14h.01" /><path d="M12 18h.01" /><path d="M8 18h.01" /></svg>, category: 'Tools' },
-    { id: ModuleType.ATTENDANCE, name: 'Attendance', desc: 'Track your attendance and safe-bunks.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>, category: 'Tools' },
-    { id: ModuleType.PLACEMENT, name: 'Placement Prefect', desc: 'Analyze resumes and prep for jobs.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>, category: 'Tools' },
-    { id: ModuleType.CAMPUS, name: 'Campus Hub', desc: 'Find blocks and rooms with ease.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>, category: 'Campus' },
-    { id: ModuleType.FRESHERS, name: 'Freshmen Kit', desc: 'Essential guide for newcomers.', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M4 20V10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" /><path d="M9 6V4a3 3 0 0 1 6 0v2" /><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5" /></svg>, category: 'Campus' },
-
-    { id: ModuleType.ROOMMATE, name: 'Roommate Finder', desc: `Find your perfect ${shortBrandName} flatmate.`, icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>, category: 'Social' },
-    { id: ModuleType.EMERGENCY, name: 'Rescue Line', desc: `Emergency ${shortBrandName} official contacts.`, icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>, category: 'Campus' },
-    { id: ModuleType.AI_TOOLS, name: 'AI Directory', desc: 'Curated AI tools for students.', icon: <svg viewBox="0 0 16 16" fill="currentColor" className="w-6 h-6"><path d="M14.949 6.547a3.94 3.94 0 0 0-.348-3.273 4.11 4.11 0 0 0-4.4-1.934A4.1 4.1 0 0 0 8.423.2 4.15 4.15 0 0 0 6.305.086a4.1 4.1 0 0 0-1.891.948 4.04 4.04 0 0 0-1.158 1.753 4.1 4.1 0 0 0-1.563.679A4 4 0 0 0 .554 4.72a3.99 3.99 0 0 0 .502 4.731 3.94 3.94 0 0 0 .346 3.274 4.11 4.11 0 0 0 4.402 1.933c.382.425.852.764 1.377.995.526.231 1.095.35 1.67.346 1.78.002 3.358-1.132 3.901-2.804a4.1 4.1 0 0 0 1.563-.68 4 4 0 0 0 1.14-1.253 3.99 3.99 0 0 0-.506-4.716m-6.097 8.406a3.05 3.05 0 0 1-1.945-.694l.096-.054 3.23-1.838a.53.53 0 0 0 .265-.455v-4.49l1.366.778q.02.011.025.035v3.722c-.003 1.653-1.361 2.992-3.037 2.996m-6.53-2.75a2.95 2.95 0 0 1-.36-2.01l.095.057L5.29 12.09a.53.53 0 0 0 .527 0l3.949-2.246v1.555a.05.05 0 0 1-.022.041L6.473 13.3c-1.454.826-3.311.335-4.15-1.098m-.85-6.94A3.02 3.02 0 0 1 3.07 3.949v3.785a.51.51 0 0 0 .262.451l3.93 2.237-1.366.779a.05.05 0 0 1-.048 0L2.585 9.342a2.98 2.98 0 0 1-1.113-4.094zm11.216 2.571L8.747 5.576l1.362-.776a.05.05 0 0 1 .048 0l3.265 1.86a3 3 0 0 1 1.173 1.207 2.96 2.96 0 0 1-.27 3.2 3.05 3.05 0 0 1-1.36.997V8.279a.52.52 0 0 0-.276-.445m1.36-2.015-.097-.057-3.226-1.855a.53.53 0 0 0-.53 0L6.249 6.153V4.598a.04.04 0 0 1 .019-.04L9.533 2.7a3.07 3.07 0 0 1 3.257.139c.474.325.843.778 1.066 1.303.223.526.289 1.103.191 1.664zM5.503 8.575 4.139 7.8a.05.05 0 0 1-.026-.037V4.049c0-.57.166-1.127.476-1.607s.752-.864 1.275-1.105a3.08 3.08 0 0 1 3.234.41l-.096.054-3.23 1.838a.53.53 0 0 0-.265.455zm.742-1.577 1.758-1 1.762 1v2l-1.755 1-1.762-1z" /></svg>, category: 'Tools' }
-  ];
-
-  const categories = ['All', 'Study', 'Placement', 'Events', 'Tools'];
-
-  const filteredFeatures = allFeatures.filter(f => {
-    const isEnabled = !universityInfo || universityInfo.features.enabledModules.includes(f.id);
-    const matchesCategory = activeTab === 'All' || f.category === activeTab;
-    return isEnabled && matchesCategory;
-  });
+      { id: ModuleType.ROOMMATE, name: 'Roommate Finder', desc: 'Find your perfect roomie.', icon: <User />, category: 'Social', lightColor: 'bg-amber-500/10', iconColor: 'text-amber-500' },
+      { id: ModuleType.MARKETPLACE, name: 'Marketplace', desc: 'Buy and sell student gear.', icon: <Briefcase />, category: 'Social', lightColor: 'bg-violet-500/10', iconColor: 'text-violet-500' },
+    ];
 
   return (
-    <div className="w-full h-full pb-32 pt-0 animate-fade-in relative z-0">
-      <DashboardHero userProfile={userProfile} />
-      <TodaysSchedule />
+    <div className="w-full min-h-screen pb-32 animate-fade-in relative z-0 bg-[#fbfcfd] dark:bg-[#030303]">
+      <DashboardHeader userProfile={userProfile} />
       
-      {/* Strategic Dashboard Ad */}
-      <div className="max-w-6xl mx-auto px-6">
-        <NexusAd slot="2912081909" format="rectangle" hideLabel />
-      </div>
-      
-      <div className="max-w-6xl mx-auto px-6 mb-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 items-start">
+          
+          {/* Left Side: Tools */}
+          <div className="lg:col-span-8 order-2 lg:order-1 space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <h3 className="text-base md:text-lg font-bold text-zinc-900 dark:text-white tracking-tight">Your Tools</h3>
+                <p className="text-[10px] md:text-xs text-zinc-500 font-medium">Quickly access essential features</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
+              {allFeatures.map((f) => (
+                <FeatureCard key={f.id} f={f} navigate={() => navigate(getPathFromModule(f.id as any, selectedUniversity))} />
+              ))}
+            </div>
+          </div>
 
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Categories</h3>
-          <div className="h-[2px] flex-1 bg-zinc-100 dark:bg-white/5 ml-4" />
+          {/* Right Side: Schedule */}
+          <div className="lg:col-span-4 order-1 lg:order-2">
+            <TodaysSchedule />
+          </div>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-6 px-1">
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveTab(cat)}
-              className={`
-                flex-shrink-0 px-6 py-2.5 rounded-xl text-[12px] font-semibold tracking-tight transition-all duration-300 border 
-                ${activeTab === cat 
-                  ? 'bg-brand-primary text-white border-transparent shadow-[0_8px_20px_-4px_var(--brand-glow)] scale-105' 
-                  : 'bg-white dark:bg-white/[0.03] text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-white/5 hover:border-brand-primary/30 hover:text-brand-primary dark:hover:text-white'
-                }
-              `}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+        <div className="flex flex-col gap-12 md:gap-16 mt-12 md:mt-16">
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-16">
-          {filteredFeatures.map((f) => (
-            <FeatureCard key={f.id} f={f} navigate={() => navigate(getPathFromModule(f.id, selectedUniversity))} />
-          ))}
-        </div>
+          {/* Bottom Banner */}
+          <div className="w-full">
+            <div className="p-4 bg-gradient-to-br from-brand-primary/5 to-brand-secondary/5 rounded-2xl border border-brand-primary/10 relative overflow-hidden group shadow-sm">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-brand-primary/10 blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <h4 className="text-[10px] font-bold text-brand-primary tracking-tight uppercase">Pro tip</h4>
+                  <p className="text-[10px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
+                    Sync your timetable once and it will automatically show up here every morning. No manual entry needed.
+                  </p>
+                </div>
+                <button onClick={() => navigate('/timetable')} className="w-fit px-4 py-2 bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-primary rounded-xl text-[10px] font-bold flex items-center gap-2 transition-all shadow-sm">
+                  Sync now <ArrowRight size={12} />
+                </button>
+              </div>
+            </div>
+          </div>
 
-        {/* Dynamic Ad between Grid and Support Section */}
-        <div className="mb-16">
-          <NexusAd slot="2912081909" format="horizontal" hideLabel />
+          {/* Buy Me A Coffee Section */}
+          <div className="w-full">
+            <BuyMeACoffee />
+          </div>
         </div>
-
-        <BuyMeACoffee userProfile={userProfile} />
       </div>
     </div>
   );
@@ -1361,141 +1423,143 @@ const AppContent: React.FC = () => {
         <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative bg-white dark:bg-[#0a0a0a] md:pl-[72px]">
           <BackgroundEffects />
 
-        <header className="sticky top-0 h-16 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-2xl border-b border-zinc-200/50 dark:border-white/5 flex items-center px-4 md:px-8 z-[100] transition-all duration-300">
-          <div className="flex items-center gap-1 md:gap-4 flex-1 md:flex-none">
-            <button 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-zinc-700 dark:text-zinc-400 mr-1 border-none active:scale-75 transition-all bg-zinc-100/50 dark:bg-white/5 group"
-              aria-label="Toggle menu"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 transition-transform group-hover:scale-110">
-                <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="15" y2="6" /><line x1="3" y1="18" x2="18" y2="18" />
-              </svg>
-            </button>
-            <div className="flex-1 md:hidden flex justify-center">
-              <img 
-                src={theme === 'dark' ? '/Scholix_dark.png' : '/Scholix_light.png'} 
-                alt="Scholix" 
-                className="h-7 sm:h-8 md:h-9 object-contain cursor-pointer active:scale-95 transition-transform"
-                onClick={() => navigate('/')}
-              />
-            </div>
-          </div>
-
-          <div className="flex-1 hidden md:flex ml-0 justify-start">
-            <div className="w-full max-w-[480px]">
-              <UniversalSearch />
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2 ml-auto">
-            <button 
-              onClick={handleOpenMobileSearch}
-              className="md:hidden p-2.5 rounded-full text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border-none active:scale-90"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-            </button>
-            <NotificationBell userProfile={userProfile} />
-            <div className="hidden md:flex">
-                <button onClick={toggleTheme} className="p-2.5 rounded-full bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90">
-                  {theme === 'dark' ? (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
-                  )}
-                </button>
+        {currentModule !== ModuleType.DASHBOARD && (
+          <header className="sticky top-0 h-16 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-2xl border-b border-zinc-200/50 dark:border-white/5 flex items-center px-4 md:px-8 z-[100] transition-all duration-300">
+            <div className="flex items-center gap-1 md:gap-4 flex-1 md:flex-none">
+              <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-zinc-700 dark:text-zinc-400 mr-1 border-none active:scale-75 transition-all bg-zinc-100/50 dark:bg-white/5 group"
+                aria-label="Toggle menu"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 transition-transform group-hover:scale-110">
+                  <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="15" y2="6" /><line x1="3" y1="18" x2="18"/>
+                </svg>
+              </button>
+              <div className="flex-1 md:hidden flex justify-center">
+                <img 
+                  src={theme === 'dark' ? '/Scholix_dark.png' : '/Scholix_light.png'} 
+                  alt="Scholix" 
+                  className="h-7 sm:h-8 md:h-9 object-contain cursor-pointer active:scale-95 transition-transform"
+                  onClick={() => navigate('/')}
+                />
+              </div>
             </div>
 
-            {/* Desktop Profile Menu - Hidden on mobile as settings are in Bottom Navbar */}
-            <div className="hidden md:block relative ml-2">
-              {!authIsReady ? (
-                <div className="w-11 h-11 rounded-full bg-zinc-100 dark:bg-white/5 animate-pulse" />
-              ) : userProfile ? (
-                <>
-                  <button 
-                    onClick={() => isProfileMenuOpen ? handleProfileClose() : setIsProfileMenuOpen(true)} 
-                    className={`w-11 h-11 transition-all relative group text-left border-none cursor-pointer flex items-center justify-center rounded-full ${!userProfile.avatar_frame ? 'bg-gradient-to-tr from-brand-primary to-brand-secondary p-[1.5px] shadow-[0_8px_20px_var(--brand-glow)] hover:scale-105 active:scale-95' : ''}`}
-                  >
-                    {(() => {
-                      const frameConfig = getFrameConfig(userProfile.avatar_frame);
-                      return (
-                        <div className="relative w-10 h-10 flex items-center justify-center">
-                          {userProfile.avatar_frame && (
-                            <img
-                              src={`/Nexus-Journey/${userProfile.avatar_frame}`}
-                              alt="Avatar Frame"
-                              className="absolute inset-0 w-full h-full object-contain pointer-events-none z-20"
-                              style={{ transform: `scale(${frameConfig.navbarScale}) translateY(${frameConfig.translateY || '0%'})` }}
-                            />
-                          )}
-                          <div 
-                            className={`w-full h-full rounded-full overflow-hidden bg-nexus-darker flex items-center justify-center`}
-                            style={{ padding: frameConfig.padding }}
-                          >
-                            {userProfile.avatar_url ? (
-                              <img
-                                src={userProfile.avatar_url}
-                                alt="Avatar"
-                                className="w-full h-full object-cover rounded-full"
-                              />
-                            ) : (
-                              <span className="text-zinc-900 dark:text-brand-primary font-bold text-xs">
-                                {userProfile.username?.[0] || userProfile.email[0]}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })()}
+            <div className="flex-1 hidden md:flex ml-0 justify-start">
+              <div className="w-full max-w-[480px]">
+                <UniversalSearch />
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 ml-auto">
+              <button 
+                onClick={handleOpenMobileSearch}
+                className="md:hidden p-2.5 rounded-full text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border-none active:scale-90"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+              </button>
+              <NotificationBell userProfile={userProfile} />
+              <div className="hidden md:flex">
+                  <button onClick={toggleTheme} className="p-2.5 rounded-full bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90">
+                    {theme === 'dark' ? (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+                    )}
                   </button>
-                  {isProfileMenuOpen && (
-                    <>
-                      <div className="fixed inset-0 z-40 bg-transparent" onClick={handleProfileClose} />
-                      <div className={`absolute right-0 mt-3 w-56 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-50 animate-fade-in backdrop-blur-xl transition-all duration-300 ${isClosingProfile ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
-                        <div className="px-5 py-3 border-b border-zinc-100 dark:border-white/5 mb-2 flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-[11px] sm:text-xs shrink-0 border border-brand-primary/5 overflow-hidden">
-                            {userProfile.avatar_url ? <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" /> : (userProfile.username?.[0]?.toUpperCase() || studentTerm[0])}
-                          </div>
-                          <div className="flex flex-col text-left min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <p className="font-bold text-zinc-800 dark:text-white tracking-wider text-[11px] sm:text-xs truncate">{userProfile.username || studentTerm}</p>
-                              <VerifiedBadge isAdmin={userProfile.is_admin} size="w-3.5 h-3.5" />
+              </div>
+
+              {/* Desktop Profile Menu */}
+              <div className="hidden md:block relative ml-2">
+                {!authIsReady ? (
+                  <div className="w-11 h-11 rounded-full bg-zinc-100 dark:bg-white/5 animate-pulse" />
+                ) : userProfile ? (
+                  <>
+                    <button 
+                      onClick={() => isProfileMenuOpen ? handleProfileClose() : setIsProfileMenuOpen(true)} 
+                      className={`w-11 h-11 transition-all relative group text-left border-none cursor-pointer flex items-center justify-center rounded-full ${!userProfile.avatar_frame ? 'bg-gradient-to-tr from-brand-primary to-brand-secondary p-[1.5px] shadow-[0_8px_20px_var(--brand-glow)] hover:scale-105 active:scale-95' : ''}`}
+                    >
+                      {(() => {
+                        const frameConfig = getFrameConfig(userProfile.avatar_frame);
+                        return (
+                          <div className="relative w-10 h-10 flex items-center justify-center">
+                            {userProfile.avatar_frame && (
+                              <img
+                                src={`/Nexus-Journey/${userProfile.avatar_frame}`}
+                                alt="Avatar Frame"
+                                className="absolute inset-0 w-full h-full object-contain pointer-events-none z-20"
+                                style={{ transform: `scale(${frameConfig.navbarScale}) translateY(${frameConfig.translateY || '0%'})` }}
+                              />
+                            )}
+                            <div 
+                              className={`w-full h-full rounded-full overflow-hidden bg-nexus-darker flex items-center justify-center`}
+                              style={{ padding: frameConfig.padding }}
+                            >
+                              {userProfile.avatar_url ? (
+                                <img
+                                  src={userProfile.avatar_url}
+                                  alt="Avatar"
+                                  className="w-full h-full object-cover rounded-full"
+                                />
+                              ) : (
+                                <span className="text-zinc-900 dark:text-brand-primary font-bold text-xs">
+                                  {userProfile.username?.[0] || userProfile.email[0]}
+                                </span>
+                              )}
                             </div>
-                            <p className="text-[11px] sm:text-xs font-bold text-zinc-400 tracking-widest truncate">{userProfile.email}</p>
                           </div>
-                        </div>
-                        {userProfile.is_admin && (
+                        );
+                      })()}
+                    </button>
+                    {isProfileMenuOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40 bg-transparent" onClick={handleProfileClose} />
+                        <div className={`absolute right-0 mt-3 w-56 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-50 animate-fade-in backdrop-blur-xl transition-all duration-300 ${isClosingProfile ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
+                          <div className="px-5 py-3 border-b border-zinc-100 dark:border-white/5 mb-2 flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-[11px] sm:text-xs shrink-0 border border-brand-primary/5 overflow-hidden">
+                              {userProfile.avatar_url ? <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" /> : (userProfile.username?.[0]?.toUpperCase() || studentTerm[0])}
+                            </div>
+                            <div className="flex flex-col text-left min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <p className="font-bold text-zinc-800 dark:text-white tracking-wider text-[11px] sm:text-xs truncate">{userProfile.username || studentTerm}</p>
+                                <VerifiedBadge isAdmin={userProfile.is_admin} size="w-3.5 h-3.5" />
+                              </div>
+                              <p className="text-[11px] sm:text-xs font-bold text-zinc-400 tracking-widest truncate">{userProfile.email}</p>
+                            </div>
+                          </div>
+                          {userProfile.is_admin && (
+                            <button
+                              onClick={() => { navigate('/admin-stats'); handleProfileClose(); }}
+                              className="w-full text-left px-5 py-2.5 text-xs font-semibold text-brand-primary hover:bg-brand-primary/5 border-none bg-transparent flex items-center gap-3 transition-all"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 2v20M2 12h20" /></svg>
+                              </div>
+                              Admin Dashboard
+                            </button>
+                          )}
                           <button
-                            onClick={() => { navigate('/admin-stats'); handleProfileClose(); }}
-                            className="w-full text-left px-5 py-2.5 text-xs font-semibold text-brand-primary hover:bg-brand-primary/5 border-none bg-transparent flex items-center gap-3 transition-all"
+                            onClick={() => { navigate(getPathFromModule(ModuleType.SETTINGS)); handleProfileClose(); }}
+                            className="w-full text-left px-5 py-2.5 text-xs font-semibold text-zinc-700 dark:text-white/80 hover:text-brand-primary dark:hover:text-white hover:bg-brand-primary/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
                           >
-                            <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 2v20M2 12h20" /></svg>
+                            <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-brand-primary/20 transition-colors">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                             </div>
-                            Admin Dashboard
+                            Settings
                           </button>
-                        )}
-                        <button
-                          onClick={() => { navigate(getPathFromModule(ModuleType.SETTINGS)); handleProfileClose(); }}
-                          className="w-full text-left px-5 py-2.5 text-xs font-semibold text-zinc-700 dark:text-white/80 hover:text-brand-primary dark:hover:text-white hover:bg-brand-primary/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
-                        >
-                          <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-brand-primary/20 transition-colors">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                          </div>
-                          Settings
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </>
-              ) : (
-                <button onClick={openAuth} className="w-10 h-10 rounded-full border-none bg-zinc-100 dark:bg-[#0a0a0a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-95">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                </button>
-              )}
+                        </div>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <button onClick={openAuth} className="w-10 h-10 rounded-full border-none bg-zinc-100 dark:bg-[#0a0a0a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-95">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
+        )}
         <div id="main-content-area" className={`flex-1 ${['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p)) ? 'overflow-hidden' : 'overflow-y-auto'} relative scroll-smooth ${['/', '/lpu', '/iitm'].includes(location.pathname) || ['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p)) ? 'p-0' : 'p-4 md:p-8'} bg-transparent no-scrollbar`}>
           <div className={`relative ${['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p)) ? 'h-full' : ''} ${['/', '/lpu', '/iitm'].includes(location.pathname) || ['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p)) ? 'w-full' : 'max-w-7xl mx-auto'}`}>
             <Routes>
@@ -1616,7 +1680,7 @@ const FeatureRoutes: React.FC<{
       
       <Route path="/roommate" element={<FeatureGuard module={ModuleType.ROOMMATE}><RoommateFinder userProfile={userProfile} /></FeatureGuard>} />
       <Route path="/emergency" element={<FeatureGuard module={ModuleType.EMERGENCY}><EmergencyContacts /></FeatureGuard>} />
-      <Route path="/ai-tools" element={<FeatureGuard module={ModuleType.AI_TOOLS}><AIToolsDirectory /></FeatureGuard>} />
+
       <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
       <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
       <Route path="/settings" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />

@@ -56,14 +56,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
     },
     {
-      id: ModuleType.AI_TOOLS,
-      label: 'AI Directory',
-      icon: <svg viewBox="0 0 24 24"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /><path d="m5 3 1 1" /><path d="m2 5 2-1" /><path d="m19 17 1 1" /><path d="m18 20 2-1" /></svg>
-    },
-    {
       id: ModuleType.EMERGENCY,
       label: 'Rescue Line',
       icon: <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    },
+    {
+      id: ModuleType.SETTINGS,
+      label: 'Settings',
+      icon: <svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.72V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.17a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
     },
   ];
 
@@ -71,8 +71,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     ? allNavItems.filter(item => {
         if (
           item.id === ModuleType.DASHBOARD || 
-          item.id === ModuleType.AI_TOOLS ||
-          item.id === ModuleType.EMERGENCY
+          item.id === ModuleType.EMERGENCY ||
+          item.id === ModuleType.SETTINGS
         ) return true;
         
         if (item.id === ModuleType.TOOLS) {
@@ -172,7 +172,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   if (window.innerWidth < 768) toggleMobileMenu();
                 }}
                 className={`w-full h-12 flex items-center rounded-xl border-none text-left relative group transition-all duration-200
-                  ${currentModule === item.id
+                  ${(currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE))
                     ? 'text-zinc-950 dark:text-white'
                     : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/[0.03] hover:text-zinc-900 dark:hover:text-zinc-200'
                   }
@@ -180,15 +180,16 @@ const Sidebar: React.FC<SidebarProps> = ({
               >
                 <div className="flex items-center w-full h-full text-zinc-900/90 dark:text-zinc-100/90">
                   <div className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) flex-shrink-0 flex items-center justify-center ${isHovered || isMobileMenuOpen ? 'w-12' : 'w-12'}`}>
-                    <span className={`flex-shrink-0 flex items-center justify-center transition-all duration-500 group-hover:scale-110 ${currentModule === item.id ? 'scale-110 active-icon-glow' : ''}`}>
+                    <span className={`flex-shrink-0 flex items-center justify-center transition-all duration-500 group-hover:scale-110 ${(currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE)) ? 'scale-110 active-icon-glow' : ''}`}>
                       {React.cloneElement(item.icon as React.ReactElement, { 
-                        className: `w-5 h-5 sm:w-[22px] sm:h-[22px] transition-all duration-300 ${currentModule === item.id ? '' : 'text-zinc-500 dark:text-zinc-400'}`,
+                        className: `w-5 h-5 sm:w-[22px] sm:h-[22px] transition-all duration-300 ${(currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE)) ? '' : 'text-zinc-500 dark:text-zinc-400'}`,
                         children: React.Children.map((item.icon as React.ReactElement).props.children, (child: any, idx: number) => {
                           if (!React.isValidElement(child)) return child;
+                          const isActive = currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE);
                           return React.cloneElement(child as React.ReactElement, {
-                            fill: (idx === 0 && currentModule === item.id) ? 'url(#sidebar-icon-gradient)' : 'none',
-                            fillOpacity: (idx === 0 && currentModule === item.id) ? 0.2 : 0,
-                            stroke: currentModule === item.id ? 'url(#sidebar-icon-gradient)' : 'currentColor',
+                            fill: (idx === 0 && isActive) ? 'url(#sidebar-icon-gradient)' : 'none',
+                            fillOpacity: (idx === 0 && isActive) ? 0.2 : 0,
+                            stroke: isActive ? 'url(#sidebar-icon-gradient)' : 'currentColor',
                             strokeWidth: 1.5, // Thinner strokes
                             strokeLinecap: "round",
                             strokeLinejoin: "round",
@@ -197,7 +198,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       })}
                     </span>
                   </div>
-                  <span className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) whitespace-nowrap text-sm tracking-wide overflow-hidden ${isHovered || isMobileMenuOpen ? 'max-w-[200px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0'} ${currentModule === item.id ? 'font-semibold bg-gradient-to-br from-brand-primary to-brand-secondary bg-clip-text text-transparent' : 'font-medium'}`}>
+                  <span className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) whitespace-nowrap text-sm tracking-wide overflow-hidden ${isHovered || isMobileMenuOpen ? 'max-w-[200px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0'} ${(currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE)) ? 'font-semibold bg-gradient-to-br from-brand-primary to-brand-secondary bg-clip-text text-transparent' : 'font-medium'}`}>
                     {item.label}
                   </span>
                 </div>
@@ -213,47 +214,59 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
 
-        <div className="p-3 bg-white dark:bg-[#0a0a0a] z-[50] relative">
+        <div className="p-3 bg-white dark:bg-[#0a0a0a] border-t border-zinc-200 dark:border-white/10 z-[50] relative">
           <button
             onClick={() => {
-              setModule(ModuleType.SETTINGS);
+              setModule(ModuleType.PROFILE);
               if (window.innerWidth < 768) toggleMobileMenu();
             }}
-            className={`w-full h-11 flex items-center rounded-xl border-none text-left relative group transition-all duration-200
-              ${isSettingsActive
-                ? 'text-zinc-950 dark:text-white'
-                : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/[0.03] hover:text-zinc-900 dark:hover:text-zinc-200'
+            className={`w-full h-14 flex items-center rounded-2xl border-none text-left relative group transition-all duration-300
+              ${currentModule === ModuleType.PROFILE
+                ? 'bg-zinc-50 dark:bg-white/[0.03]'
+                : 'hover:bg-zinc-50 dark:hover:bg-white/[0.03]'
               }
             `}
           >
-            <div className="flex items-center w-full h-full text-zinc-900/90 dark:text-zinc-100/90">
-              <div className="w-12 flex-shrink-0 flex items-center justify-center transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)">
-                <span className={`flex-shrink-0 w-5 h-5 sm:w-[22px] sm:h-[22px] flex items-center justify-center transition-all duration-500 group-hover:scale-110 ${isSettingsActive ? 'scale-110 active-icon-glow' : ''}`}>
-                  <svg viewBox="0 0 24 24" className="w-full h-full transition-all duration-300">
-                    <path 
-                      d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.72V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.17a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
-                      fill={isSettingsActive ? 'url(#sidebar-icon-gradient)' : 'none'}
-                      fillOpacity={isSettingsActive ? 0.2 : 0}
-                      stroke={isSettingsActive ? 'url(#sidebar-icon-gradient)' : 'currentColor'}
-                      strokeWidth={1.5}
-                    />
-                    <circle 
-                      cx="12" cy="12" r="3"
-                      fill="none"
-                      stroke={isSettingsActive ? 'url(#sidebar-icon-gradient)' : 'currentColor'}
-                      strokeWidth={1.5}
-                    />
-                  </svg>
+            <div className="flex items-center w-full h-full">
+              <div className="w-12 flex-shrink-0 flex items-center justify-center">
+                <div className="relative">
+                  <div className={`w-9 h-9 rounded-full overflow-hidden border-2 transition-all duration-300 ${currentModule === ModuleType.PROFILE ? 'border-brand-primary scale-105' : 'border-zinc-200 dark:border-white/10 group-hover:border-brand-primary/50'}`}>
+                    {userProfile?.avatar_url ? (
+                      <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-brand-primary/20 to-brand-secondary/20 flex items-center justify-center text-brand-primary font-bold text-sm">
+                        {userProfile?.username?.[0]?.toUpperCase() || 'U'}
+                      </div>
+                    )}
+                  </div>
+                  {userProfile?.is_verified === 'yes' && (
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-white dark:border-[#0a0a0a] flex items-center justify-center">
+                      <svg viewBox="0 0 24 24" className="w-2 h-2 text-white fill-current"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) flex flex-col overflow-hidden ${isHovered || isMobileMenuOpen ? 'max-w-[200px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0'}`}>
+                <span className={`text-sm font-semibold tracking-tight truncate ${currentModule === ModuleType.PROFILE ? 'text-zinc-950 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                  {userProfile?.username || 'Guest User'}
+                </span>
+                <span className="text-[11px] text-zinc-500 dark:text-zinc-500 font-medium truncate">
+                  Level {userProfile?.level || 1} • {userProfile?.level_title || 'Novice'}
                 </span>
               </div>
-              <span className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) whitespace-nowrap text-sm tracking-wide overflow-hidden ${isHovered || isMobileMenuOpen ? 'max-w-[200px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0'} ${isSettingsActive ? 'font-semibold bg-gradient-to-br from-brand-primary to-brand-secondary bg-clip-text text-transparent' : 'font-medium'}`}>
-                Settings
-              </span>
+              
+              {(isHovered || isMobileMenuOpen) && (
+                <div className="ml-auto mr-2">
+                  <svg viewBox="0 0 24 24" className={`w-4 h-4 transition-all duration-300 ${currentModule === ModuleType.PROFILE ? 'text-brand-primary' : 'text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300'}`}>
+                    <path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              )}
             </div>
 
             {!isHovered && !isMobileMenuOpen && (
               <div className="fixed left-20 px-3 py-1.5 bg-zinc-900 dark:bg-white text-white dark:text-black text-[11px] font-semibold tracking-wide rounded-lg opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-xl">
-                Settings
+                Profile
               </div>
             )}
           </button>

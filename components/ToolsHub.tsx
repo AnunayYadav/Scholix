@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { CheckCircle2, Calculator, Briefcase } from 'lucide-react';
 import AttendanceTracker from './AttendanceTracker';
 import CGPACalculator from './CGPACalculator';
 import PlacementPrefect from './PlacementPrefect';
@@ -57,19 +58,19 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
     { 
       id: 'attendance', 
       name: 'Attendance', 
-      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>,
+      icon: <CheckCircle2 className="w-5 h-5" />,
       module: ModuleType.ATTENDANCE
     },
     { 
       id: 'cgpa', 
       name: 'CGPA Hub', 
-      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><rect x="4" y="2" width="16" height="20" rx="2" /><line x1="8" y1="6" x2="16" y2="6" /><line x1="16" y1="14" x2="16" y2="18" /><path d="M16 10h.01" /><path d="M12 10h.01" /><path d="M8 10h.01" /><path d="M12 14h.01" /><path d="M8 14h.01" /><path d="M12 18h.01" /><path d="M8 18h.01" /></svg>,
+      icon: <Calculator className="w-5 h-5" />,
       module: ModuleType.CGPA
     },
     { 
       id: 'placement', 
       name: 'Placement', 
-      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>,
+      icon: <Briefcase className="w-5 h-5" />,
       module: ModuleType.PLACEMENT
     }
   ];
