@@ -414,7 +414,7 @@ const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.mem
                 <NotificationBell userProfile={userProfile} />
                 <button 
                   onClick={toggleTheme}
-                  className="w-10 h-10 rounded-2xl bg-white dark:bg-white/5 flex items-center justify-center text-zinc-600 dark:text-zinc-400 border border-zinc-100 dark:border-white/5 active:scale-95 shadow-sm"
+                  className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-[#0a0a0a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 active:scale-90 shadow-sm"
                   aria-label="Toggle Theme"
                 >
                   {isDark ? <Sun size={20} /> : <Moon size={20} />}
@@ -432,7 +432,7 @@ const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.mem
               <NotificationBell userProfile={userProfile} />
               <button 
                 onClick={toggleTheme}
-                className="w-12 h-12 rounded-2xl bg-white dark:bg-white/5 flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary transition-all border border-zinc-100 dark:border-white/5 active:scale-95 shadow-sm hover:shadow-md"
+                className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-[#0a0a0a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 active:scale-90 shadow-sm"
                 aria-label="Toggle Theme"
               >
                 {isDark ? <Sun size={22} /> : <Moon size={22} />}

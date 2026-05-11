@@ -53,12 +53,12 @@ const Sidebar: React.FC<SidebarProps> = ({
     {
       id: ModuleType.TOOLS,
       label: 'Tools',
-      icon: <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      icon: <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
     },
     {
       id: ModuleType.EMERGENCY,
       label: 'Rescue Line',
-      icon: <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      icon: <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
     },
     {
       id: ModuleType.SETTINGS,
@@ -67,21 +67,21 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
   ];
 
-  const navItems = universityInfo 
+  const navItems = universityInfo
     ? allNavItems.filter(item => {
-        if (
-          item.id === ModuleType.DASHBOARD || 
-          item.id === ModuleType.EMERGENCY ||
-          item.id === ModuleType.SETTINGS
-        ) return true;
-        
-        if (item.id === ModuleType.TOOLS) {
-          return universityInfo.features.enabledModules.includes(ModuleType.ATTENDANCE) || 
-                 universityInfo.features.enabledModules.includes(ModuleType.CGPA) || 
-                 universityInfo.features.enabledModules.includes(ModuleType.PLACEMENT);
-        }
-        return universityInfo.features.enabledModules.includes(item.id);
-      })
+      if (
+        item.id === ModuleType.DASHBOARD ||
+        item.id === ModuleType.EMERGENCY ||
+        item.id === ModuleType.SETTINGS
+      ) return true;
+
+      if (item.id === ModuleType.TOOLS) {
+        return universityInfo.features.enabledModules.includes(ModuleType.ATTENDANCE) ||
+          universityInfo.features.enabledModules.includes(ModuleType.CGPA) ||
+          universityInfo.features.enabledModules.includes(ModuleType.PLACEMENT);
+      }
+      return universityInfo.features.enabledModules.includes(item.id);
+    })
     : allNavItems;
 
   const isSettingsActive = [
@@ -99,10 +99,10 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="overlay md:hidden" onClick={toggleMobileMenu} />
       )}
 
-      <FeedbackModal 
-        isOpen={showFeedbackModal} 
-        onClose={() => setShowFeedbackModal(false)} 
-        userProfile={userProfile} 
+      <FeedbackModal
+        isOpen={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        userProfile={userProfile}
       />
 
       {/* Mobile sidebar backdrop */}
@@ -181,7 +181,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <div className="flex items-center w-full h-full text-zinc-900/90 dark:text-zinc-100/90">
                   <div className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) flex-shrink-0 flex items-center justify-center ${isHovered || isMobileMenuOpen ? 'w-12' : 'w-12'}`}>
                     <span className={`flex-shrink-0 flex items-center justify-center transition-all duration-500 group-hover:scale-110 ${(currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE)) ? 'scale-110 active-icon-glow' : ''}`}>
-                      {React.cloneElement(item.icon as React.ReactElement, { 
+                      {React.cloneElement(item.icon as React.ReactElement, {
                         className: `w-5 h-5 sm:w-[22px] sm:h-[22px] transition-all duration-300 ${(currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE)) ? '' : 'text-zinc-500 dark:text-zinc-400'}`,
                         children: React.Children.map((item.icon as React.ReactElement).props.children, (child: any, idx: number) => {
                           if (!React.isValidElement(child)) return child;
@@ -241,7 +241,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                   {userProfile?.is_verified === 'yes' && (
                     <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-white dark:border-[#0a0a0a] flex items-center justify-center">
-                      <svg viewBox="0 0 24 24" className="w-2 h-2 text-white fill-current"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                      <svg viewBox="0 0 24 24" className="w-2 h-2 text-white fill-current"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" /></svg>
                     </div>
                   )}
                 </div>
@@ -254,11 +254,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                   Level {userProfile?.level || 1} • {userProfile?.level_title || 'Novice'}
                 </span>
               </div>
-              
+
               {(isHovered || isMobileMenuOpen) && (
                 <div className="ml-auto mr-2">
                   <svg viewBox="0 0 24 24" className={`w-4 h-4 transition-all duration-300 ${currentModule === ModuleType.PROFILE ? 'text-brand-primary' : 'text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300'}`}>
-                    <path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
               )}
