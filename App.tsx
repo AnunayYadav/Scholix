@@ -259,7 +259,7 @@ const TodaysSchedule: React.FC = () => {
 
   return (
     <div className="w-full animate-fade-in">
-      <div className="bg-white dark:bg-[#0a0a0a] rounded-[24px] border border-zinc-100/80 dark:border-white/5 p-5 lg:p-6 shadow-sm transition-all duration-500 overflow-hidden">
+      <div className="bg-white dark:bg-[#0a0a0a] rounded-[24px] border border-zinc-100/80 dark:border-white/5 p-5 lg:p-6 shadow-sm transition-all duration-500 overflow-hidden lg:max-h-[520px] flex flex-col">
         {/* Header Section */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
@@ -292,62 +292,64 @@ const TodaysSchedule: React.FC = () => {
         ) : (
           <>
             {/* Desktop View: Timeline Design */}
-            <div className="hidden md:block relative pl-8">
-              {/* Timeline Line */}
-              <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-dashed border-l border-dashed border-zinc-200 dark:border-white/10" />
-              
-              <div className="space-y-5">
-                {sortedSlots.map((slot) => {
-                  const start = timeToMinutes(slot.startTime);
-                  const end = timeToMinutes(slot.endTime);
-                  const isGoingOn = currentMinutes >= start && currentMinutes < end;
-                  const isDone = currentMinutes >= end;
+            <div className="hidden md:block relative flex-1 overflow-y-auto pr-2 custom-scrollbar">
+              <div className="relative pl-8">
+                {/* Timeline Line */}
+                <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-dashed border-l border-dashed border-zinc-200 dark:border-white/10" />
+                
+                <div className="space-y-5">
+                  {sortedSlots.map((slot) => {
+                    const start = timeToMinutes(slot.startTime);
+                    const end = timeToMinutes(slot.endTime);
+                    const isGoingOn = currentMinutes >= start && currentMinutes < end;
+                    const isDone = currentMinutes >= end;
 
-                  return (
-                    <div key={slot.id} className="relative group">
-                      {/* Timeline Dot */}
-                      <div className={`absolute -left-[31px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 bg-white dark:bg-[#0a0a0a] transition-all duration-500 z-10 flex items-center justify-center
-                        ${isGoingOn ? 'border-brand-primary scale-125 shadow-[0_0_10px_rgba(var(--brand-primary-rgb),0.4)]' : isDone ? 'border-zinc-300 dark:border-white/20' : 'border-zinc-200 dark:border-white/10'}
-                      `}>
-                        {isGoingOn && <div className="w-1.5 h-1.5 rounded-full bg-brand-primary animate-ping" />}
-                      </div>
-
-                      <button
-                        onClick={() => navigate('/timetable')}
-                        className={`w-full flex items-center gap-4 p-3 rounded-2xl border transition-all duration-300 text-left
-                          ${isGoingOn 
-                            ? 'bg-brand-primary/[0.03] border-brand-primary/20 shadow-lg shadow-brand-primary/5 ring-1 ring-brand-primary/5' 
-                            : 'bg-white dark:bg-white/[0.02] border-zinc-100 dark:border-white/[0.03] hover:border-zinc-200 dark:hover:border-white/10 hover:shadow-md'
-                          }
-                        `}
-                      >
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-[10px] font-black uppercase tracking-tighter shrink-0 transition-all duration-500
-                          ${isGoingOn ? 'bg-brand-primary text-white scale-105' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500'}
+                    return (
+                      <div key={slot.id} className="relative group">
+                        {/* Timeline Dot */}
+                        <div className={`absolute -left-[31px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 bg-white dark:bg-[#0a0a0a] transition-all duration-500 z-10 flex items-center justify-center
+                          ${isGoingOn ? 'border-brand-primary scale-125 shadow-[0_0_10px_rgba(var(--brand-primary-rgb),0.4)]' : isDone ? 'border-zinc-300 dark:border-white/20' : 'border-zinc-200 dark:border-white/10'}
                         `}>
-                          {slot.type?.substring(0, 3)}
+                          {isGoingOn && <div className="w-1.5 h-1.5 rounded-full bg-brand-primary animate-ping" />}
                         </div>
 
-                        <div className="flex-1 min-w-0">
-                          <h5 className={`text-[13px] font-bold truncate transition-colors ${isGoingOn ? 'text-brand-primary' : 'text-zinc-900 dark:text-white'}`}>
-                            {slot.subject}
-                          </h5>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">
-                              {slot.startTime.split(' ')[0]} - {slot.endTime.split(' ')[0]}
-                            </span>
-                            {slot.room && slot.room !== 'N/A' && (
-                              <span className="text-[9px] font-black text-brand-primary/80 px-1.5 py-0.5 bg-brand-primary/5 rounded-md">
-                                {slot.room}
-                              </span>
-                            )}
+                        <button
+                          onClick={() => navigate('/timetable')}
+                          className={`w-full flex items-center gap-4 p-3 rounded-2xl border transition-all duration-300 text-left
+                            ${isGoingOn 
+                              ? 'bg-brand-primary/[0.03] border-brand-primary/20 shadow-lg shadow-brand-primary/5 ring-1 ring-brand-primary/5' 
+                              : 'bg-white dark:bg-white/[0.02] border-zinc-100 dark:border-white/[0.03] hover:border-zinc-200 dark:hover:border-white/10 hover:shadow-md'
+                            }
+                          `}
+                        >
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-[10px] font-black uppercase tracking-tighter shrink-0 transition-all duration-500
+                            ${isGoingOn ? 'bg-brand-primary text-white scale-105' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500'}
+                          `}>
+                            {slot.type?.substring(0, 3)}
                           </div>
-                        </div>
 
-                        <ArrowRight size={14} className={`text-zinc-300 dark:text-zinc-700 transition-transform ${isGoingOn ? 'translate-x-0.5 text-brand-primary' : 'group-hover:translate-x-0.5'}`} />
-                      </button>
-                    </div>
-                  );
-                })}
+                          <div className="flex-1 min-w-0">
+                            <h5 className={`text-[13px] font-bold truncate transition-colors ${isGoingOn ? 'text-brand-primary' : 'text-zinc-900 dark:text-white'}`}>
+                              {slot.subject}
+                            </h5>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">
+                                {slot.startTime.split(' ')[0]} - {slot.endTime.split(' ')[0]}
+                              </span>
+                              {slot.room && slot.room !== 'N/A' && (
+                                <span className="text-[9px] font-black text-brand-primary/80 px-1.5 py-0.5 bg-brand-primary/5 rounded-md">
+                                  {slot.room}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <ArrowRight size={14} className={`text-zinc-300 dark:text-zinc-700 transition-transform ${isGoingOn ? 'translate-x-0.5 text-brand-primary' : 'group-hover:translate-x-0.5'}`} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
@@ -441,7 +443,7 @@ const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.mem
             {/* Greeting + Actions */}
             <div className="flex items-center justify-between w-full lg:w-auto gap-4">
               <div className="flex-1 min-w-0">
-                <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight flex items-center gap-2.5 truncate">
+                <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight flex flex-wrap items-center gap-x-2.5 gap-y-1">
                   {greeting}, <span className="text-brand-primary">{displayName}</span> <span className="text-2xl md:text-3xl animate-bounce-subtle shrink-0">👋</span>
                 </h1>
                 <p className="text-zinc-500 dark:text-zinc-400 text-xs md:text-sm font-bold opacity-70 mt-1">
