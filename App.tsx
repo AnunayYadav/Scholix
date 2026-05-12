@@ -45,7 +45,9 @@ import {
   Moon,
   PenTool,
   Map,
-  Calculator
+  Calculator,
+  ShoppingBag,
+  Calendar
 } from 'lucide-react';
 import BottomNavbar from './components/BottomNavbar.tsx';
 import NexusAd from './components/NexusAd.tsx';
@@ -239,6 +241,7 @@ const TodaysSchedule: React.FC = () => {
   const timeToMinutes = (time: string) => {
     if (!time) return 0;
     const parts = time.split(' ');
+    if (parts.length < 1) return 0;
     const [timeStr, modifier] = parts;
     let [hours, minutes] = timeStr.split(':').map(Number);
     if (modifier === 'PM' && hours < 12) hours += 12;
@@ -247,88 +250,151 @@ const TodaysSchedule: React.FC = () => {
   };
 
   const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+  const sortedSlots = dayData?.slots ? [...dayData.slots].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)) : [];
+  const activeSlot = sortedSlots.find(slot => {
+    const start = timeToMinutes(slot.startTime);
+    const end = timeToMinutes(slot.endTime);
+    return currentMinutes >= start && currentMinutes < end;
+  });
 
   return (
     <div className="w-full animate-fade-in">
-      <div className="bg-white dark:bg-[#0a0a0a] rounded-2xl border border-zinc-100/80 dark:border-white/5 p-4 lg:p-6 shadow-sm flex flex-col h-full transition-all duration-500">
-        <div className="flex items-center justify-between mb-4 lg:mb-6">
-          <div>
-            <h4 className="text-sm md:text-base font-bold text-zinc-900 dark:text-white tracking-tight">Today's Schedule</h4>
-            <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase opacity-70">{today}</p>
+      <div className="bg-white dark:bg-[#0a0a0a] rounded-[24px] border border-zinc-100/80 dark:border-white/5 p-5 lg:p-6 shadow-sm transition-all duration-500 overflow-hidden">
+        {/* Header Section */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary">
+              <Calendar size={20} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h4 className="text-[15px] font-bold text-zinc-900 dark:text-white tracking-tight leading-tight">
+                Today's <span className="text-brand-primary">Schedule</span>
+              </h4>
+              <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase opacity-70 mt-0.5">{today}</p>
+            </div>
           </div>
+          
+          {activeSlot && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-primary/5 border border-brand-primary/10 animate-pulse">
+              <div className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+              <span className="text-[9px] font-black text-brand-primary uppercase tracking-tighter">Live</span>
+            </div>
+          )}
         </div>
 
-        {!dayData || dayData.slots.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 py-8 lg:py-12 bg-zinc-50/50 dark:bg-white/[0.02] rounded-xl border border-dashed border-zinc-100 dark:border-white/5">
+        {!dayData || sortedSlots.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center space-y-4 py-12 bg-zinc-50/50 dark:bg-white/[0.02] rounded-2xl border border-dashed border-zinc-100 dark:border-white/10">
             <div className="w-16 h-16 rounded-full border-2 border-dashed border-zinc-100 dark:border-white/10 flex items-center justify-center">
-              <div className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-white/5 animate-pulse" />
+              <Calendar className="text-zinc-300 dark:text-zinc-700" size={24} />
             </div>
-            <p className="text-xs font-bold text-zinc-400">No classes today</p>
+            <p className="text-[11px] font-bold text-zinc-400">No classes scheduled for today</p>
           </div>
         ) : (
-          <div className="flex-1 overflow-hidden">
-            <div className="flex flex-col gap-3 overflow-y-auto max-h-[400px] lg:pr-3 custom-scrollbar">
-              {dayData.slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)).map((slot) => {
-                const start = timeToMinutes(slot.startTime);
-                const end = timeToMinutes(slot.endTime);
-                const isGoingOn = currentMinutes >= start && currentMinutes < end;
-                
-                return (
-                  <button
-                    key={slot.id}
-                    onClick={() => navigate('/timetable')}
-                    className={`flex flex-row items-center gap-3 transition-all duration-300 w-full group p-2 rounded-2xl ${
-                      isGoingOn 
-                        ? 'bg-brand-primary/[0.03] ring-1 ring-brand-primary/10' 
-                        : 'hover:bg-zinc-50 dark:hover:bg-white/[0.02]'
-                    }`}
-                  >
-                    {/* Square Type Box */}
-                    <div className={`
-                      relative flex items-center justify-center shrink-0
-                      w-12 h-12 rounded-xl 
-                      transition-all duration-500
-                      ${isGoingOn 
-                        ? 'p-[2px] bg-gradient-to-tr from-brand-primary via-brand-secondary to-brand-primary animate-gradient-xy shadow-lg shadow-brand-primary/20' 
-                        : 'border border-zinc-100 dark:border-white/5'
-                      }
-                    `}>
-                      <div className={`
-                        flex items-center justify-center w-full h-full rounded-xl 
-                        ${isGoingOn ? 'bg-brand-primary text-white' : 'bg-zinc-50 dark:bg-white/5 text-zinc-500'}
-                        text-center px-1
+          <>
+            {/* Desktop View: Timeline Design */}
+            <div className="hidden md:block relative pl-8">
+              {/* Timeline Line */}
+              <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-dashed border-l border-dashed border-zinc-200 dark:border-white/10" />
+              
+              <div className="space-y-5">
+                {sortedSlots.map((slot) => {
+                  const start = timeToMinutes(slot.startTime);
+                  const end = timeToMinutes(slot.endTime);
+                  const isGoingOn = currentMinutes >= start && currentMinutes < end;
+                  const isDone = currentMinutes >= end;
+
+                  return (
+                    <div key={slot.id} className="relative group">
+                      {/* Timeline Dot */}
+                      <div className={`absolute -left-[31px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 bg-white dark:bg-[#0a0a0a] transition-all duration-500 z-10 flex items-center justify-center
+                        ${isGoingOn ? 'border-brand-primary scale-125 shadow-[0_0_10px_rgba(var(--brand-primary-rgb),0.4)]' : isDone ? 'border-zinc-300 dark:border-white/20' : 'border-zinc-200 dark:border-white/10'}
                       `}>
-                        <span className="text-[10px] font-bold tracking-tighter uppercase truncate px-1 max-w-full">
+                        {isGoingOn && <div className="w-1.5 h-1.5 rounded-full bg-brand-primary animate-ping" />}
+                      </div>
+
+                      <button
+                        onClick={() => navigate('/timetable')}
+                        className={`w-full flex items-center gap-4 p-3 rounded-2xl border transition-all duration-300 text-left
+                          ${isGoingOn 
+                            ? 'bg-brand-primary/[0.03] border-brand-primary/20 shadow-lg shadow-brand-primary/5 ring-1 ring-brand-primary/5' 
+                            : 'bg-white dark:bg-white/[0.02] border-zinc-100 dark:border-white/[0.03] hover:border-zinc-200 dark:hover:border-white/10 hover:shadow-md'
+                          }
+                        `}
+                      >
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-[10px] font-black uppercase tracking-tighter shrink-0 transition-all duration-500
+                          ${isGoingOn ? 'bg-brand-primary text-white scale-105' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500'}
+                        `}>
+                          {slot.type?.substring(0, 3)}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <h5 className={`text-[13px] font-bold truncate transition-colors ${isGoingOn ? 'text-brand-primary' : 'text-zinc-900 dark:text-white'}`}>
+                            {slot.subject}
+                          </h5>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">
+                              {slot.startTime.split(' ')[0]} - {slot.endTime.split(' ')[0]}
+                            </span>
+                            {slot.room && slot.room !== 'N/A' && (
+                              <span className="text-[9px] font-black text-brand-primary/80 px-1.5 py-0.5 bg-brand-primary/5 rounded-md">
+                                {slot.room}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <ArrowRight size={14} className={`text-zinc-300 dark:text-zinc-700 transition-transform ${isGoingOn ? 'translate-x-0.5 text-brand-primary' : 'group-hover:translate-x-0.5'}`} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Mobile View: Circular Horizontal Scroll */}
+            <div className="md:hidden">
+              <div className="flex gap-4 overflow-x-auto pb-4 pt-2 -mx-2 px-2 snap-x scrollbar-hide no-scrollbar">
+                {sortedSlots.map((slot) => {
+                  const start = timeToMinutes(slot.startTime);
+                  const end = timeToMinutes(slot.endTime);
+                  const isGoingOn = currentMinutes >= start && currentMinutes < end;
+
+                  return (
+                    <button
+                      key={slot.id}
+                      onClick={() => navigate('/timetable')}
+                      className="flex flex-col items-center gap-3 snap-center shrink-0 w-[100px]"
+                    >
+                      <div className={`relative w-[80px] h-[80px] rounded-full flex flex-col items-center justify-center border-2 transition-all duration-500
+                        ${isGoingOn 
+                          ? 'border-brand-primary bg-brand-primary/5 shadow-lg shadow-brand-primary/20 scale-105' 
+                          : 'border-zinc-100 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.02]'
+                        }
+                      `}>
+                        <span className={`text-[8px] font-black uppercase tracking-[0.2em] mb-1 ${isGoingOn ? 'text-brand-primary' : 'text-zinc-500'}`}>
                           {slot.type}
                         </span>
-                      </div>
-                      
-                      {isGoingOn && (
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-brand-primary rounded-full border-2 border-white dark:border-[#0a0a0a] z-10" />
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0 text-left">
-                      <h5 className={`text-[13px] font-bold leading-tight truncate ${isGoingOn ? 'text-brand-primary' : 'text-zinc-900 dark:text-white'}`}>
-                        {slot.subject}
-                      </h5>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] font-medium text-zinc-500">
-                          {slot.startTime.split(' ')[0]} - {slot.endTime.split(' ')[0]}
+                        <span className={`text-[13px] font-black tracking-tight text-center px-2 line-clamp-1 ${isGoingOn ? 'text-zinc-900 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                          {slot.subject.split(' ')[0]}
                         </span>
-                        {slot.room && slot.room !== 'N/A' && (
-                          <span className="text-[10px] font-bold text-brand-primary/80 bg-brand-primary/5 px-1.5 py-0.5 rounded-md">
-                            {slot.room}
-                          </span>
+                        
+                        {isGoingOn && (
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-brand-primary rounded-full border-2 border-white dark:border-[#0a0a0a] flex items-center justify-center">
+                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                          </div>
                         )}
                       </div>
-                    </div>
-                  </button>
-                );
-              })}
+                      <div className="text-center space-y-0.5">
+                        <p className={`text-[9px] font-bold whitespace-nowrap ${isGoingOn ? 'text-brand-primary' : 'text-zinc-500'}`}>
+                          {slot.startTime.split(' ')[0]} - {slot.endTime.split(' ')[0]}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>
@@ -376,7 +442,7 @@ const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.mem
             <div className="flex items-center justify-between w-full lg:w-auto gap-4">
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight flex items-center gap-2.5 truncate">
-                  {greeting}, {displayName} <span className="text-2xl md:text-3xl animate-bounce-subtle shrink-0">👋</span>
+                  {greeting}, <span className="text-brand-primary">{displayName}</span> <span className="text-2xl md:text-3xl animate-bounce-subtle shrink-0">👋</span>
                 </h1>
                 <p className="text-zinc-500 dark:text-zinc-400 text-xs md:text-sm font-bold opacity-70 mt-1">
                   Let's make today productive!
@@ -433,31 +499,47 @@ const FeatureCard = React.memo(({ f, navigate }: { f: any, navigate: any }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => navigate()}
-      className={`group relative p-3 md:p-4 bg-white dark:bg-[#0a0a0a] rounded-2xl border border-zinc-100/80 dark:border-white/5 text-left cursor-pointer transition-all duration-500 ${isHovered ? 'shadow-xl shadow-zinc-200/40 dark:shadow-none border-brand-primary/30 -translate-y-1 bg-zinc-50/30 dark:bg-white/[0.03]' : 'shadow-sm'}`}
+      className={`group relative p-4 bg-white dark:bg-[#0a0a0b] rounded-[24px] border border-zinc-100 dark:border-white/[0.04] text-left cursor-pointer transition-all duration-300 overflow-hidden ${
+        isHovered 
+          ? 'shadow-2xl shadow-zinc-200/40 dark:shadow-2xl dark:shadow-black/80 border-zinc-200/50 dark:border-white/10 -translate-y-1' 
+          : 'shadow-sm'
+      }`}
     >
-      <div className="flex flex-col gap-2 md:gap-3">
+      {/* Background Gradient - Simplified to remove 'rectangles' */}
+      <div 
+        className={`absolute inset-0 opacity-[0.7] dark:opacity-[0.85] group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br ${f.gradient || 'from-brand-primary/10 to-transparent'}`} 
+      />
+
+      {/* Top Left Whitish Glow - Radial for maximum smoothness */}
+      <div className="absolute -top-12 -left-12 w-32 h-32 bg-white/10 dark:bg-white/[0.03] blur-[40px] rounded-full pointer-events-none z-0" />
+      
+      {/* Action Arrow Button */}
+      <div className={`absolute top-4 right-4 w-7 h-7 rounded-full border border-white/10 flex items-center justify-center transition-all duration-500 z-20 ${isHovered ? 'bg-white dark:bg-zinc-200 text-zinc-900 scale-110 shadow-lg shadow-black/20' : 'bg-white/5 text-white/30'}`}>
+        <ArrowRight size={12} strokeWidth={3} className={`transition-transform duration-500 ${isHovered ? 'translate-x-0.5' : ''}`} />
+      </div>
+
+      {/* Large Outline Background Icon */}
+      <div className={`absolute -bottom-2 -right-2 ${f.iconColor} opacity-[0.05] dark:opacity-[0.08] transform transition-all duration-700 group-hover:scale-110 group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:opacity-[0.1]`}>
+        {React.cloneElement(f.icon as React.ReactElement, { size: 72, strokeWidth: 1 })}
+      </div>
+
+      <div className="relative z-10 flex flex-col gap-3">
         {/* Icon Container */}
-        <div className={`w-10 h-10 rounded-xl ${f.lightColor || 'bg-brand-primary/10'} flex items-center justify-center shrink-0 transition-all duration-500 ${isHovered ? 'scale-105 rotate-3 shadow-md' : ''}`}>
-          <div className={`${f.iconColor || 'text-brand-primary'} transition-transform duration-500`}>
-            {React.cloneElement(f.icon as React.ReactElement, { size: 20, strokeWidth: 2.2 })}
+        <div className={`relative w-11 h-11 rounded-2xl ${f.lightColor || 'bg-brand-primary/15'} flex items-center justify-center shrink-0 transition-all duration-500 ${isHovered ? 'scale-110' : ''} border border-white/20 dark:border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.1)] overflow-hidden backdrop-blur-md`}>
+          <div className="absolute top-0 left-0 right-0 h-[40%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+          <div className={`${f.iconColor || 'text-brand-primary'} transition-transform duration-500 z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]`}>
+            {React.cloneElement(f.icon as React.ReactElement, { size: 22, strokeWidth: 2.2 })}
           </div>
         </div>
 
         {/* Content */}
-        <div className="space-y-1">
-          <h4 className="text-[13px] font-bold text-zinc-900 dark:text-white group-hover:text-brand-primary transition-colors duration-300 leading-tight">
+        <div className="space-y-0.5">
+          <h4 className="text-[15px] font-bold text-zinc-900 dark:text-white transition-colors duration-300 leading-tight tracking-tight">
             {f.name}
           </h4>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium opacity-80 line-clamp-1">
+          <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-tight font-medium opacity-60 group-hover:opacity-100 transition-opacity duration-300">
             {f.desc}
           </p>
-        </div>
-      </div>
-      
-      {/* Subtle indicator */}
-      <div className="absolute top-4 right-4 transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0">
-        <div className="w-5 h-5 rounded-full bg-brand-primary/10 flex items-center justify-center">
-          <ArrowRight size={10} className="text-brand-primary" />
         </div>
       </div>
     </button>
@@ -479,16 +561,16 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
   const navigate = useNavigate();
   const { selectedUniversity } = useUniversity();
     const allFeatures = [
-      { id: ModuleType.ATTENDANCE, name: 'Attendance Tracker', desc: 'Track your daily attendance.', icon: <CheckCircle2 />, category: 'Tools', lightColor: 'bg-emerald-500/10', iconColor: 'text-emerald-500' },
-      { id: ModuleType.CAMPUS, name: 'Campus Map', desc: 'Find buildings and facilities.', icon: <Map />, category: 'Campus', lightColor: 'bg-blue-500/10', iconColor: 'text-blue-500' },
-      { id: ModuleType.CGPA, name: 'CGPA Calculator', desc: 'Plan your grades and GPA.', icon: <Calculator />, category: 'Tools', lightColor: 'bg-purple-500/10', iconColor: 'text-purple-500' },
-      { id: ModuleType.PLACEMENT, name: 'Resume Checker', desc: 'AI feedback on your resume.', icon: <Briefcase />, category: 'Tools', lightColor: 'bg-rose-500/10', iconColor: 'text-rose-500' },
-      { id: 'mess', name: 'Mess Menu', desc: "Today's meal planning.", icon: <Utensils />, category: 'Campus', lightColor: 'bg-orange-500/10', iconColor: 'text-orange-500' },
-      { id: ModuleType.LIBRARY, name: 'Content Library', desc: 'Study materials and resources.', icon: <Rocket />, category: 'Study', lightColor: 'bg-indigo-500/10', iconColor: 'text-indigo-500' },
-      { id: ModuleType.QUIZ, name: 'Quiz Taker', desc: 'Practice with AI generated quizzes.', icon: <PenTool />, category: 'Study', lightColor: 'bg-cyan-500/10', iconColor: 'text-cyan-500' },
+      { id: ModuleType.ATTENDANCE, name: 'Attendance Tracker', desc: 'Track your daily attendance.', icon: <CheckCircle2 />, category: 'Tools', lightColor: 'bg-emerald-500/20', iconColor: 'text-emerald-500', gradient: 'from-emerald-500/20 to-transparent' },
+      { id: ModuleType.CAMPUS, name: 'Campus Map', desc: 'Find buildings and facilities.', icon: <Map />, category: 'Campus', lightColor: 'bg-blue-500/20', iconColor: 'text-blue-500', gradient: 'from-blue-500/20 to-transparent' },
+      { id: ModuleType.CGPA, name: 'CGPA Calculator', desc: 'Plan your grades and GPA.', icon: <Calculator />, category: 'Tools', lightColor: 'bg-purple-500/20', iconColor: 'text-purple-500', gradient: 'from-purple-500/20 to-transparent' },
+      { id: ModuleType.PLACEMENT, name: 'Resume Checker', desc: 'AI feedback on your resume.', icon: <Briefcase />, category: 'Tools', lightColor: 'bg-rose-500/20', iconColor: 'text-rose-500', gradient: 'from-rose-500/20 to-transparent' },
+      { id: 'mess', name: 'Mess Menu', desc: "Today's meal planning.", icon: <Utensils />, category: 'Campus', lightColor: 'bg-orange-500/20', iconColor: 'text-orange-500', gradient: 'from-orange-500/20 to-transparent' },
+      { id: ModuleType.LIBRARY, name: 'Content Library', desc: 'Study materials and resources.', icon: <Rocket />, category: 'Study', lightColor: 'bg-indigo-500/20', iconColor: 'text-indigo-500', gradient: 'from-indigo-500/20 to-transparent' },
+      { id: ModuleType.QUIZ, name: 'Quiz Taker', desc: 'Practice with AI generated quizzes.', icon: <PenTool />, category: 'Study', lightColor: 'bg-cyan-500/20', iconColor: 'text-cyan-500', gradient: 'from-cyan-500/20 to-transparent' },
 
-      { id: ModuleType.ROOMMATE, name: 'Roommate Finder', desc: 'Find your perfect roomie.', icon: <User />, category: 'Social', lightColor: 'bg-amber-500/10', iconColor: 'text-amber-500' },
-      { id: ModuleType.MARKETPLACE, name: 'Marketplace', desc: 'Buy and sell student gear.', icon: <Briefcase />, category: 'Social', lightColor: 'bg-violet-500/10', iconColor: 'text-violet-500' },
+      { id: ModuleType.ROOMMATE, name: 'Roommate Finder', desc: 'Find your perfect roomie.', icon: <User />, category: 'Social', lightColor: 'bg-amber-500/20', iconColor: 'text-amber-500', gradient: 'from-amber-500/20 to-transparent' },
+      { id: ModuleType.MARKETPLACE, name: 'Marketplace', desc: 'Buy and sell student gear.', icon: <ShoppingBag />, category: 'Social', lightColor: 'bg-violet-500/20', iconColor: 'text-violet-500', gradient: 'from-violet-500/20 to-transparent' },
     ];
 
   return (
@@ -502,11 +584,11 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
           <div className="lg:col-span-8 order-2 lg:order-1 space-y-6">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <h3 className="text-base md:text-lg font-bold text-zinc-900 dark:text-white tracking-tight">Your Tools</h3>
+                <h3 className="text-base md:text-lg font-bold text-zinc-900 dark:text-white tracking-tight">Your <span className="text-brand-primary">Tools</span></h3>
                 <p className="text-[10px] md:text-xs text-zinc-500 font-medium">Quickly access essential features</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
               {allFeatures.map((f) => (
                 <FeatureCard key={f.id} f={f} navigate={() => navigate(getPathFromModule(f.id as any, selectedUniversity))} />
               ))}
