@@ -597,9 +597,8 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
             </div>
           </div>
 
-          {/* Right Side: Schedule */}
           <div className="lg:col-span-4 order-1 lg:order-2 relative min-h-[400px] lg:min-h-0">
-            <div className="lg:absolute lg:inset-0 h-full">
+            <div className="lg:absolute lg:inset-0 h-full overflow-y-auto no-scrollbar">
               <TodaysSchedule />
             </div>
           </div>
@@ -1307,13 +1306,7 @@ const AppContent: React.FC = () => {
     const isLogin = path === '/login' || path.endsWith('/login');
     const isSignup = path === '/signup' || path.endsWith('/signup');
 
-    if (isLogin && !userProfile) {
-      setAuthMode('login');
-      setShowAuthModal(true);
-    } else if (isSignup && !userProfile) {
-      setAuthMode('signup');
-      setShowAuthModal(true);
-    } else if (userProfile && (isLogin || isSignup)) {
+    if (userProfile && (isLogin || isSignup)) {
       // If already logged in, close modal and redirect to dashboard
       setShowAuthModal(false);
       navigate(getPathFromModule(ModuleType.DASHBOARD), { replace: true });
@@ -1639,8 +1632,8 @@ const AppContent: React.FC = () => {
               {/* Internal routes (for app users) */}
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
-              <Route path="/:uniKey/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} authModalOpen={showAuthModal} />} />
-              <Route path="/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} authModalOpen={showAuthModal} />} />
+              <Route path="/:uniKey/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} onOpenAuth={openAuth} authModalOpen={showAuthModal} />} />
+              <Route path="/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} onOpenAuth={openAuth} authModalOpen={showAuthModal} />} />
             </Routes>
           </div>
         </div>
@@ -1709,19 +1702,20 @@ const FeatureRoutes: React.FC<{
   theme: string, 
   toggleTheme: () => void,
   onOpenSignup: () => void,
+  onOpenAuth: () => void,
   authModalOpen: boolean
-}> = ({ userProfile, setUserProfile, navigateToModule, theme, toggleTheme, onOpenSignup, authModalOpen }) => {
+}> = ({ userProfile, setUserProfile, navigateToModule, theme, toggleTheme, onOpenSignup, onOpenAuth, authModalOpen }) => {
   const { selectedUniversity } = useUniversity();
   const navigate = useNavigate();
 
   return (
     <Routes>
       <Route path="/" element={<Dashboard userProfile={userProfile} />} />
-      <Route path="/library" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/library/:program" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/library/:program/:semester" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/library/:program/:semester/:subject" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/library/:program/:semester/:subject/:category" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/library" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/library/:program" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/library/:program/:semester" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/library/:program/:semester/:subject" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/library/:program/:semester/:subject/:category" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
       
       <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
       <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
@@ -1737,9 +1731,9 @@ const FeatureRoutes: React.FC<{
 
       <Route path="/timetable" element={<FeatureGuard module={ModuleType.TIMETABLE}><TimetableHub userProfile={userProfile} /></FeatureGuard>} />
       
-      <Route path="/quiz" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/quiz/:subjectName" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
-      <Route path="/quiz/:subjectName/:quizId" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={() => navigate('/login')} /></FeatureGuard>} />
+      <Route path="/quiz" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/quiz/:subjectName" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/quiz/:subjectName/:quizId" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
       
       <Route path="/market" element={<Navigate to="/campus/market" replace />} />
       <Route path="/market/:category" element={<Navigate to="/campus/market" replace />} />
