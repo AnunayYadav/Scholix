@@ -258,8 +258,8 @@ const TodaysSchedule: React.FC = () => {
   });
 
   return (
-    <div className="w-full animate-fade-in">
-      <div className="bg-white dark:bg-[#0a0a0a] rounded-[24px] border border-zinc-100/80 dark:border-white/5 p-5 lg:p-6 shadow-sm transition-all duration-500 overflow-hidden lg:max-h-[520px] flex flex-col">
+    <div className="w-full h-full animate-fade-in">
+      <div className="bg-white dark:bg-[#0a0a0a] rounded-[24px] border border-zinc-100/80 dark:border-white/5 p-5 lg:p-6 shadow-sm transition-all duration-500 overflow-hidden h-full flex flex-col">
         {/* Header Section */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
@@ -580,7 +580,7 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
       <DashboardHeader userProfile={userProfile} />
       
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 items-stretch">
           
           {/* Left Side: Tools */}
           <div className="lg:col-span-8 order-2 lg:order-1 space-y-6">
@@ -598,8 +598,10 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
           </div>
 
           {/* Right Side: Schedule */}
-          <div className="lg:col-span-4 order-1 lg:order-2">
-            <TodaysSchedule />
+          <div className="lg:col-span-4 order-1 lg:order-2 relative min-h-[400px] lg:min-h-0">
+            <div className="lg:absolute lg:inset-0 h-full">
+              <TodaysSchedule />
+            </div>
           </div>
         </div>
 
@@ -1269,6 +1271,11 @@ const AppContent: React.FC = () => {
 
   const handleAuthClose = () => {
     setShowAuthModal(false);
+    // If the user manually closes the verification modal, don't show it again in this session
+    if (authMode === 'verify_email') {
+      sessionStorage.setItem('nexus_verification_dismissed', 'true');
+    }
+    
     if (location.pathname === '/login' || location.pathname === '/signup') {
       const lastModulePath = localStorage.getItem('last_active_path') || '/';
       navigate(lastModulePath !== location.pathname ? lastModulePath : '/', { replace: true });
@@ -1382,7 +1389,9 @@ const AppContent: React.FC = () => {
       }
     }
 
-    if (userProfile && (userProfile.is_verified === 'no' || !userProfile.is_verified) && !showAuthModal && location.pathname !== '/welcome' && !isWithinGracePeriod) {
+    const isDismissed = sessionStorage.getItem('nexus_verification_dismissed') === 'true';
+
+    if (userProfile && (userProfile.is_verified === 'no' || !userProfile.is_verified) && !showAuthModal && location.pathname !== '/welcome' && !isWithinGracePeriod && !isDismissed) {
       setAuthMode('verify_email');
       setShowAuthModal(true);
     }
