@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { UserProfile, TimetableData, DaySchedule, TimetableSlot } from '../types.ts';
-import NexusServer from '../services/nexusServer.ts';
-import { extractTimetableWithTesseract, parseTimetableText } from '../services/ocrService.ts';
+import { UserProfile, TimetableData, DaySchedule, TimetableSlot } from '../types';
+import NexusServer from '../services/nexusServer';
+import { extractTimetableWithTesseract, parseTimetableText } from '../services/ocrService';
 import NexusDropdown from './NexusDropdown.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import { showToast, showConfirm } from './Toast.tsx';
@@ -125,7 +125,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       setShowSlotModal(false);
       setIsClosingSlot(false);
       setEditingSlot(null);
-      setSlotForm({ subject: '', room: '', startTime: '09:00', endTime: '10:00', type: 'class' });
+      setSlotForm({ subject: '', room: '', startTime: '09:00', endTime: '10:00', type: 'Class' });
     }, 250);
   };
 
@@ -149,7 +149,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
   const [showSlotModal, setShowSlotModal] = useState(false);
   const [isClosingSlot, setIsClosingSlot] = useState(false);
   const [editingSlot, setEditingSlot] = useState<TimetableSlot | null>(null);
-  const [slotForm, setSlotForm] = useState({ subject: '', room: '', startTime: '09:00', endTime: '10:00', type: 'class' as 'class' | 'lab' });
+  const [slotForm, setSlotForm] = useState({ subject: '', room: '', startTime: '09:00', endTime: '10:00', type: 'Class' as 'Class' | 'Lab' | 'Practical' | 'Break' });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -477,7 +477,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
 
   const handleOpenAddSlot = () => {
     setEditingSlot(null);
-    setSlotForm({ subject: '', room: '', startTime: '09:00', endTime: '10:00', type: 'class' });
+    setSlotForm({ subject: '', room: '', startTime: '09:00', endTime: '10:00', type: 'Class' });
     setShowSlotModal(true);
   };
 
@@ -562,7 +562,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
             room: 'N/A',
             startTime: sorted[i].endTime,
             endTime: sorted[i + 1].startTime,
-            type: 'break'
+            type: 'Break'
           });
         }
       }
@@ -823,7 +823,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
             <div className="space-y-4">
               <div className="flex items-center justify-between px-4">
                 <h3 className="text-[12px] font-medium text-orange-600/80 tracking-tight">{activeDay} schedule</h3>
-                <span className="text-[10px] font-medium text-zinc-400">{daySlotsWithBreaks.filter(s => s.type !== 'break').length} Activities</span>
+                <span className="text-[10px] font-medium text-zinc-400">{daySlotsWithBreaks.filter(s => s.type !== 'Break').length} Activities</span>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {canEditCurrent && (
@@ -847,7 +847,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     const isActive = isCurrentDay && currentMinutes >= startMin && currentMinutes < endMin;
                     const isFinished = isCurrentDay && currentMinutes >= endMin;
                     const isUpcoming = isCurrentDay && currentMinutes < startMin;
-                    const isBreak = slot.type === 'break';
+                    const isBreak = slot.type === 'Break';
 
                     return (
                       <div key={slot.id} className={`group relative p-5 rounded-[22px] transition-all flex flex-col justify-between ${isActive ? 'bg-orange-600/[0.03] border border-orange-500/20 shadow-sm' : isFinished ? 'opacity-40 grayscale' : 'bg-white dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 hover:border-orange-500/20'}`}>
@@ -887,7 +887,12 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                               {slot.subject}
                             </h4>
                             <div className="flex items-center gap-2">
-                              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${slot.type === 'lab' ? 'bg-blue-500/10 text-blue-500' : 'bg-orange-500/10 text-orange-500'}`}>
+                              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                                slot.type === 'Lab' ? 'bg-blue-500/10 text-blue-500' : 
+                                slot.type === 'Practical' ? 'bg-purple-500/10 text-purple-500' :
+                                slot.type === 'Class' ? 'bg-orange-500/10 text-orange-500' :
+                                'bg-zinc-500/10 text-zinc-500'
+                              }`}>
                                 {slot.type}
                               </span>
                               {!isBreak && slot.room !== 'N/A' && (

@@ -105,7 +105,7 @@ export interface TimetableSlot {
   room: string;
   startTime: string; // HH:mm format
   endTime: string;   // HH:mm format
-  type: 'class' | 'break' | 'lab';
+  type: 'Class' | 'Break' | 'Lab' | 'Practical';
 }
 
 export interface DaySchedule {

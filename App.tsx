@@ -267,7 +267,7 @@ const TodaysSchedule: React.FC = () => {
           </div>
         ) : (
           <div className="flex-1 overflow-hidden">
-            <div className="flex flex-row lg:flex-col gap-6 lg:gap-3 overflow-x-auto lg:overflow-y-auto pb-2 lg:pb-0 lg:pr-3 custom-scrollbar snap-x no-scrollbar">
+            <div className="flex flex-col gap-3 overflow-y-auto max-h-[400px] lg:pr-3 custom-scrollbar">
               {dayData.slots.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)).map((slot) => {
                 const start = timeToMinutes(slot.startTime);
                 const end = timeToMinutes(slot.endTime);
@@ -277,79 +277,53 @@ const TodaysSchedule: React.FC = () => {
                   <button
                     key={slot.id}
                     onClick={() => navigate('/timetable')}
-                    className={`flex flex-col lg:flex-row items-center lg:items-center gap-3 lg:gap-3 shrink-0 snap-center lg:snap-start transition-all duration-300 w-[80px] lg:w-full group`}
+                    className={`flex flex-row items-center gap-3 transition-all duration-300 w-full group p-2 rounded-2xl ${
+                      isGoingOn 
+                        ? 'bg-brand-primary/[0.03] ring-1 ring-brand-primary/10' 
+                        : 'hover:bg-zinc-50 dark:hover:bg-white/[0.02]'
+                    }`}
                   >
-                    {/* Circle Subject Box (Instagram Story style on mobile) */}
+                    {/* Square Type Box */}
                     <div className={`
-                      relative flex items-center justify-center 
-                      w-16 h-16 lg:w-12 lg:h-12 
-                      rounded-full lg:rounded-xl 
+                      relative flex items-center justify-center shrink-0
+                      w-12 h-12 rounded-xl 
                       transition-all duration-500
                       ${isGoingOn 
                         ? 'p-[2px] bg-gradient-to-tr from-brand-primary via-brand-secondary to-brand-primary animate-gradient-xy shadow-lg shadow-brand-primary/20' 
                         : 'border border-zinc-100 dark:border-white/5'
                       }
-                      lg:border-0 lg:bg-transparent lg:animate-none
                     `}>
                       <div className={`
-                        flex flex-col items-center justify-center w-full h-full rounded-full lg:rounded-xl 
-                        ${isGoingOn ? 'bg-brand-primary text-white lg:bg-brand-primary/10 lg:text-brand-primary' : 'bg-white dark:bg-white/5 text-zinc-500 lg:bg-zinc-50 lg:dark:bg-white/5'}
-                        ${!isGoingOn ? 'border-2 border-white dark:border-[#0a0a0a] lg:border-0' : ''}
+                        flex items-center justify-center w-full h-full rounded-xl 
+                        ${isGoingOn ? 'bg-brand-primary text-white' : 'bg-zinc-50 dark:bg-white/5 text-zinc-500'}
                         text-center px-1
                       `}>
-                        {/* Mobile: All info inside circle */}
-                        <div className="lg:hidden flex flex-col items-center justify-center -space-y-0.5">
-                          <span className="text-[9px] font-black tracking-tighter leading-none uppercase truncate max-w-full">
-                            {slot.subject.substring(0, 6)}
-                          </span>
-                          <span className="text-[7px] font-bold opacity-80 mt-0.5">
-                            {slot.startTime.split(' ')[0]}
-                          </span>
-                          {slot.room && slot.room !== 'N/A' && (
-                            <span className="text-[7px] font-black mt-0.5 text-brand-secondary/90">
-                              {slot.room}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Desktop: Only Subject initial/code */}
-                        <span className="hidden lg:block text-[11px] font-bold tracking-tighter truncate px-1 max-w-full">
-                          {slot.subject.substring(0, 6)}
+                        <span className="text-[10px] font-bold tracking-tighter uppercase truncate px-1 max-w-full">
+                          {slot.type}
                         </span>
                       </div>
                       
                       {isGoingOn && (
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-brand-primary rounded-full border-2 border-white dark:border-[#0a0a0a] z-10 lg:hidden" />
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-brand-primary rounded-full border-2 border-white dark:border-[#0a0a0a] z-10" />
                       )}
                     </div>
 
-                    {/* Desktop Content */}
-                    <div className={`
-                      hidden lg:flex flex-1 items-center gap-3 p-2 rounded-xl transition-all duration-300 text-left w-full
-                      ${isGoingOn 
-                        ? 'bg-brand-primary/[0.03] ring-1 ring-brand-primary/10' 
-                        : 'bg-zinc-50/30 dark:bg-white/[0.02] hover:bg-zinc-50 dark:hover:bg-white/[0.05]'
-                      }
-                    `}>
-                      <div className="flex-1 min-w-0">
-                        <h5 className={`text-[11px] font-bold leading-tight truncate ${isGoingOn ? 'text-brand-primary' : 'text-zinc-900 dark:text-white'}`}>
-                          {slot.subject}
-                        </h5>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[9px] font-medium text-zinc-500">
-                            {slot.startTime.split(' ')[0]} - {slot.endTime.split(' ')[0]}
+                    {/* Content */}
+                    <div className="flex-1 min-w-0 text-left">
+                      <h5 className={`text-[13px] font-bold leading-tight truncate ${isGoingOn ? 'text-brand-primary' : 'text-zinc-900 dark:text-white'}`}>
+                        {slot.subject}
+                      </h5>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[10px] font-medium text-zinc-500">
+                          {slot.startTime.split(' ')[0]} - {slot.endTime.split(' ')[0]}
+                        </span>
+                        {slot.room && slot.room !== 'N/A' && (
+                          <span className="text-[10px] font-bold text-brand-primary/80 bg-brand-primary/5 px-1.5 py-0.5 rounded-md">
+                            {slot.room}
                           </span>
-                          {slot.room && slot.room !== 'N/A' && (
-                            <span className="text-[9px] font-bold text-brand-primary/80">
-                              {slot.room}
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
-
-                    {/* Mobile labels removed as they are now inside the circle */}
-                    <div className="lg:hidden" />
                   </button>
                 );
               })}

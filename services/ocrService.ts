@@ -8,19 +8,7 @@ interface ExtractedAttendance {
   dutyLeaves: number;
 }
 
-export interface TimetableSlot {
-  id: string;
-  subject: string;
-  room: string;
-  startTime: string;
-  endTime: string;
-  type: 'class' | 'lab' | 'break';
-}
-
-export interface DaySchedule {
-  day: string;
-  slots: TimetableSlot[];
-}
+import { DaySchedule, TimetableSlot } from '../types';
 
 /**
  * Extracts timetable data from an image using Tesseract.js
@@ -77,7 +65,7 @@ export const parseTimetableText = (text: string): DaySchedule[] => {
       room: slot.room || 'N/A',
       startTime: slot.startTime || '09:00',
       endTime: slot.endTime || '10:00',
-      type: slot.type || 'class'
+      type: slot.type || 'Class'
     };
   };
 
@@ -135,7 +123,7 @@ export const parseTimetableText = (text: string): DaySchedule[] => {
         activeSlots.push({
           startTime: normalizeOCRTime(match[1], match[2], match[3]),
           endTime: normalizeOCRTime(match[4], match[5], match[6]),
-          type: 'class'
+          type: 'Class'
         });
       });
       continue;
@@ -147,7 +135,7 @@ export const parseTimetableText = (text: string): DaySchedule[] => {
       // If we have no active slots, maybe the subjects came BEFORE the times or we missed the times
       if (activeSlots.length === 0) {
         subMatches.forEach(match => {
-          activeSlots.push({ subject: match[1].replace(/\s+/g, ''), type: 'class' });
+          activeSlots.push({ subject: match[1].replace(/\s+/g, ''), type: 'Class' });
         });
       } else {
         subMatches.forEach((match, idx) => {
@@ -170,8 +158,10 @@ export const parseTimetableText = (text: string): DaySchedule[] => {
 
     // 5. Detect Type / Lab
     if (activeSlots.length > 0) {
-      if (upperLine.includes('LAB') || upperLine.includes('PRACTICAL')) {
-        activeSlots.forEach(s => s.type = 'lab');
+      if (upperLine.includes('LAB')) {
+        activeSlots.forEach(s => s.type = 'Lab');
+      } else if (upperLine.includes('PRACTICAL')) {
+        activeSlots.forEach(s => s.type = 'Practical');
       }
     }
   }
