@@ -736,6 +736,14 @@ const PremiumAuthModal: React.FC<{
     return () => clearInterval(interval);
   }, [resendTimer]);
 
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode);
+      setError(null);
+      setStep('form');
+    }
+  }, [isOpen, initialMode]);
+
   const handleToggleMode = () => {
     setMode(prev => prev === 'login' ? 'signup' : 'login');
     setError(null);
@@ -1205,12 +1213,26 @@ const PremiumAuthModal: React.FC<{
                     <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">
                       Check your inbox at <span className="text-zinc-900 dark:text-white font-bold">{formData.email || userProfile?.email}</span> and click the link to verify.
                     </p>
-                    <button 
-                      onClick={() => setMode('login')}
-                      className="text-accent text-xs font-bold uppercase tracking-widest hover:text-accent-2 transition-colors"
-                    >
-                      Back to Login
-                    </button>
+                    <div className="flex flex-col gap-3">
+                      <button 
+                        onClick={() => setMode('login')}
+                        className="text-accent text-xs font-bold uppercase tracking-widest hover:text-accent-2 transition-colors border-none bg-transparent"
+                      >
+                        Back to Login
+                      </button>
+                      {userProfile && (
+                        <button 
+                          onClick={async () => {
+                            await NexusServer.signOut();
+                            onClose();
+                            window.location.href = '/';
+                          }}
+                          className="text-zinc-500 hover:text-red-500 text-[10px] font-bold uppercase tracking-widest transition-colors border-none bg-transparent"
+                        >
+                          Sign Out
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
               </motion.div>
@@ -1269,11 +1291,13 @@ const AppContent: React.FC = () => {
   };
 
   const handleAuthClose = () => {
-    setShowAuthModal(false);
-    // If the user manually closes the verification modal, don't show it again in this session
-    if (authMode === 'verify_email') {
-      sessionStorage.setItem('nexus_verification_dismissed', 'true');
+    // Prevent closing if identity verification is mandatory
+    const isUnverified = userProfile && (userProfile.is_verified === 'no' || !userProfile.is_verified);
+    if (authMode === 'verify_email' && isUnverified && location.pathname !== '/welcome') {
+      return;
     }
+
+    setShowAuthModal(false);
     
     if (location.pathname === '/login' || location.pathname === '/signup') {
       const lastModulePath = localStorage.getItem('last_active_path') || '/';
@@ -1371,6 +1395,8 @@ const AppContent: React.FC = () => {
     }
     
     // Mandatory verification check
+    if (!authIsReady) return;
+
     const justSignedUp = localStorage.getItem('just_signed_up');
     let isWithinGracePeriod = false;
     if (justSignedUp) {
@@ -1382,13 +1408,13 @@ const AppContent: React.FC = () => {
       }
     }
 
-    const isDismissed = sessionStorage.getItem('nexus_verification_dismissed') === 'true';
+    const isUnverified = userProfile && (userProfile.is_verified === 'no' || !userProfile.is_verified);
 
-    if (userProfile && (userProfile.is_verified === 'no' || !userProfile.is_verified) && !showAuthModal && location.pathname !== '/welcome' && !isWithinGracePeriod && !isDismissed) {
+    if (isUnverified && !showAuthModal && location.pathname !== '/welcome' && !isWithinGracePeriod) {
       setAuthMode('verify_email');
       setShowAuthModal(true);
     }
-  }, [userProfile, location.pathname, navigate, showAuthModal]);
+  }, [userProfile, location.pathname, navigate, showAuthModal, authIsReady]);
 
 
   // Combined Session & Auth State Handling

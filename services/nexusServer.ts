@@ -871,6 +871,7 @@ class NexusServer {
     
     // Robustly check multiple possible locations and formats for verification status
     const isVerifiedInMeta = 
+      !!user.email_confirmed_at || // Supabase native verification
       metadata.is_verified === 'yes' || 
       metadata.is_verified === true || 
       metadata.isVerified === 'yes' || 
