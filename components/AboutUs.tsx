@@ -218,16 +218,16 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
                   <>
                     <StatCounter
                       target={stats?.totalViews || 0}
-                      label="Global Views"
-                      subLabel="Combined Page Hits"
+                      label="Global Hits"
+                      subLabel="Raw Hits of all Pages"
                       accentColor="text-emerald-400"
                       isVisible={isSectionVisible}
                       isAdmin={true}
                     />
                     <StatCounter
                       target={stats?.rawHits || 0}
-                      label="Raw Hits"
-                      subLabel="Total Website Entries"
+                      label="Website Raw Hits"
+                      subLabel="Total Site Entries"
                       accentColor="text-emerald-500"
                       isVisible={isSectionVisible}
                       isAdmin={true}

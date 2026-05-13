@@ -890,13 +890,20 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
             </div>
 
             {/* High Level Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <StatCard 
-                    label="Traffic" 
+                    label="Global Page Hits" 
                     value={data?.summary?.totalViews.toLocaleString() || '0'} 
-                    sub="Total Page Views" 
+                    sub="All Pages Combined" 
+                    color="emerald"
+                    icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>}
+                />
+                <StatCard 
+                    label="Raw Entry" 
+                    value={data?.summary?.rawHits.toLocaleString() || '0'} 
+                    sub="Website Raw Hits" 
                     color="orange"
-                    icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>}
+                    icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><polyline points="13 2 13 9 20 9" /></svg>}
                     onClick={() => setShowDetailedStats('Traffic')}
                 />
                 <StatCard 
@@ -930,13 +937,13 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                     <DetailedDataView 
                         type={showDetailedStats}
                         value={
-                            showDetailedStats === 'Traffic' ? data?.summary?.totalViews.toLocaleString() : 
+                            showDetailedStats === 'Traffic' ? data?.summary?.rawHits.toLocaleString() : 
                             showDetailedStats === 'Users' ? data?.summary?.visitors.toLocaleString() : 
                             showDetailedStats === 'Issues' ? data?.summary?.pendingReports : 
                             data?.summary?.totalFeedback.toLocaleString()
                         }
                         sub={
-                            showDetailedStats === 'Traffic' ? 'Total Page Views' : 
+                            showDetailedStats === 'Traffic' ? 'Website Raw Hits' : 
                             showDetailedStats === 'Users' ? 'Unique Visitors' : 
                             showDetailedStats === 'Issues' ? 'Active Reports' : 
                             'User Feedback'
