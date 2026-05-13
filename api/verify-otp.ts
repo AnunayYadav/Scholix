@@ -157,7 +157,7 @@ export default async function handler(req: any, res: any) {
     });
 
     // 7. Session generation for login/signup
-    if (type === 'login' || type === 'signup') {
+    if ((type === 'login' || type === 'signup') && userId) {
       const { username, registration_number, university } = req.body || {};
       
       const authResponse = await fetch(`${supabaseUrl}/auth/v1/admin/generate_link`, {
@@ -181,6 +181,14 @@ export default async function handler(req: any, res: any) {
       const authData = await authResponse.json();
       if (!authResponse.ok) {
         console.error('Magic Link Error:', authData);
+        // Fallback for signup: if session generation fails but identity is verified, 
+        // we can still return success and let the frontend handle the next step.
+        if (type === 'signup') {
+           return res.status(200).json({ 
+             success: true, 
+             message: 'Identity verified. Please complete signup.' 
+           });
+        }
         return res.status(500).json({ error: 'Identity verified, but session generation failed. Try standard login.' });
       }
 
