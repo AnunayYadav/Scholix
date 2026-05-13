@@ -59,7 +59,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
   const { fullBrandName, shortBrandName, universityInfo } = useUniversity();
   const universityShortName = universityInfo?.shortName || 'University';
 
-  const [stats, setStats] = useState<{ registered: number; visitors: number; totalViews: number } | null>(null);
+  const [stats, setStats] = useState<{ registered: number; visitors: number; totalViews: number; rawHits: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSectionVisible, setIsSectionVisible] = useState(false);
   const metricsRef = useRef<HTMLDivElement>(null);
@@ -71,7 +71,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
         setStats(data);
       } catch (e) {
         console.error("Failed to fetch impact stats");
-        setStats({ registered: 0, visitors: 0, totalViews: 0 });
+        setStats({ registered: 0, visitors: 0, totalViews: 0, rawHits: 0 });
       } finally {
         setLoading(false);
       }
@@ -215,14 +215,24 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
                   isVisible={isSectionVisible}
                 />
                 {userProfile?.is_admin && (
-                  <StatCounter
-                    target={stats?.totalViews || 0}
-                    label="Raw Hits"
-                    subLabel="Global Page Views"
-                    accentColor="text-emerald-500"
-                    isVisible={isSectionVisible}
-                    isAdmin={true}
-                  />
+                  <>
+                    <StatCounter
+                      target={stats?.totalViews || 0}
+                      label="Global Views"
+                      subLabel="Combined Page Hits"
+                      accentColor="text-emerald-400"
+                      isVisible={isSectionVisible}
+                      isAdmin={true}
+                    />
+                    <StatCounter
+                      target={stats?.rawHits || 0}
+                      label="Raw Hits"
+                      subLabel="Total Website Entries"
+                      accentColor="text-emerald-500"
+                      isVisible={isSectionVisible}
+                      isAdmin={true}
+                    />
+                  </>
                 )}
               </>
             )}

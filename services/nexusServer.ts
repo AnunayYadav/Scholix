@@ -445,9 +445,9 @@ class NexusServer {
     }
   }
 
-  static async getSiteStats(): Promise<{ registered: number; visitors: number; totalViews: number }> {
+  static async getSiteStats(): Promise<{ registered: number; visitors: number; totalViews: number; rawHits: number }> {
     const client = getSupabase();
-    if (!client) return { registered: 0, visitors: 0, totalViews: 0 };
+    if (!client) return { registered: 0, visitors: 0, totalViews: 0, rawHits: 0 };
 
     // Fetch counts individually to prevent one RLS failure from wiping all results
     const fetchCount = async (table: string) => {
@@ -463,15 +463,16 @@ class NexusServer {
       }
     };
 
-    const [reg, vis, pageData] = await Promise.all([
+    const [reg, vis, raw, pageData] = await Promise.all([
       fetchCount('profiles'),
       fetchCount('site_visits'),
+      fetchCount('site_views'),
       client.from('page_stats').select('views')
     ]);
 
     const totalViews = (pageData.data || []).reduce((acc, curr) => acc + (Number(curr.views) || 0), 0);
 
-    return { registered: reg, visitors: vis, totalViews };
+    return { registered: reg, visitors: vis, rawHits: raw, totalViews };
   }
 
   static async trackPageView(path: string): Promise<void> {
@@ -587,6 +588,7 @@ class NexusServer {
       registered: number,
       visitors: number,
       totalViews: number,
+      rawHits: number,
       pendingReports: number,
       totalFeedback: number
     }
@@ -595,14 +597,24 @@ class NexusServer {
     if (!client) return { 
       pageStats: [], 
       eventStats: [], 
-      summary: { registered: 0, visitors: 0, totalViews: 0, pendingReports: 0, totalFeedback: 0 } 
+      summary: { registered: 0, visitors: 0, totalViews: 0, rawHits: 0, pendingReports: 0, totalFeedback: 0 } 
     };
 
-    const [pages, events, reg, vis, reports, feedback] = await Promise.all([
+    const fetchCount = async (table: string) => {
+      try {
+        const { count, error } = await client.from(table).select('*', { count: 'exact', head: true });
+        return count || 0;
+      } catch (e) {
+        return 0;
+      }
+    };
+
+    const [pages, events, reg, vis, raw, reports, feedback] = await Promise.all([
       client.from('page_stats').select('*').order('views', { ascending: false }),
       client.from('event_stats').select('*').order('count', { ascending: false }),
       client.from('profiles').select('*', { count: 'exact', head: true }),
       client.from('site_visits').select('*', { count: 'exact', head: true }),
+      fetchCount('site_views'),
       client.from('question_reports').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
       client.from('feedback').select('*', { count: 'exact', head: true })
     ]);
@@ -614,6 +626,7 @@ class NexusServer {
         registered: reg.count || 0,
         visitors: vis.count || 0,
         totalViews: (pages.data || []).reduce((acc: number, curr: any) => acc + Number(curr.views), 0),
+        rawHits: raw,
         pendingReports: reports.count || 0,
         totalFeedback: feedback.count || 0
       }
