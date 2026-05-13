@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { LogOut, User, Shield, ChevronRight, Edit2 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { ModuleType, UserProfile } from '../types';
 import NexusServer from '../services/nexusServer.ts';
@@ -14,6 +15,7 @@ interface SidebarProps {
   isMobileMenuOpen: boolean;
   toggleMobileMenu: () => void;
   userProfile: UserProfile | null;
+  onOpenAuth: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -22,11 +24,35 @@ const Sidebar: React.FC<SidebarProps> = ({
   isMobileMenuOpen,
   toggleMobileMenu,
   userProfile,
+  onOpenAuth,
 }) => {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const { selectedUniversity, universityInfo, fullBrandName, shortBrandName, studentTerm } = useUniversity();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node) && 
+          buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await NexusServer.signOut();
+      window.location.reload();
+    } catch (error) {
+      showToast("Logout failed", "error");
+    }
+  };
 
 
   const allNavItems = [
@@ -216,17 +242,83 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <div className="p-3 bg-white dark:bg-[#0a0a0a] border-t border-zinc-200 dark:border-white/10 z-[50] relative">
           <button
+            ref={buttonRef}
             onClick={() => {
-              setModule(ModuleType.PROFILE);
-              if (window.innerWidth < 768) toggleMobileMenu();
+              if (!userProfile) {
+                onOpenAuth();
+                if (window.innerWidth < 768) toggleMobileMenu();
+                return;
+              }
+              if (isHovered || isMobileMenuOpen) {
+                setShowProfileMenu(!showProfileMenu);
+              } else {
+                setModule(ModuleType.PROFILE);
+                if (window.innerWidth < 768) toggleMobileMenu();
+              }
             }}
             className={`w-full h-14 flex items-center rounded-2xl border-none text-left relative group transition-all duration-300
-              ${currentModule === ModuleType.PROFILE
+              ${currentModule === ModuleType.PROFILE || showProfileMenu
                 ? 'bg-zinc-50 dark:bg-white/[0.03]'
                 : 'hover:bg-zinc-50 dark:hover:bg-white/[0.03]'
               }
             `}
           >
+            {/* Profile Dropdown Menu */}
+            {(isHovered || isMobileMenuOpen) && showProfileMenu && (
+              <div 
+                ref={menuRef}
+                className="absolute bottom-full left-0 w-full mb-2 p-2 bg-white dark:bg-[#0f0f0f] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl animate-fade-in-up z-[60]"
+              >
+                <div className="space-y-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setModule(ModuleType.PROFILE);
+                      setShowProfileMenu(false);
+                      if (window.innerWidth < 768) toggleMobileMenu();
+                    }}
+                    className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
+                      <Edit2 size={16} />
+                    </div>
+                    <span className="text-xs font-bold">Edit Profile</span>
+                  </button>
+
+                  {userProfile?.is_admin && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setModule(ModuleType.ADMIN_STATS);
+                        setShowProfileMenu(false);
+                        if (window.innerWidth < 768) toggleMobileMenu();
+                      }}
+                      className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
+                        <Shield size={16} />
+                      </div>
+                      <span className="text-xs font-bold">Admin View</span>
+                    </button>
+                  )}
+
+                  <div className="h-px bg-zinc-100 dark:bg-white/5 my-1 mx-2" />
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLogout();
+                    }}
+                    className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-red-500/10 text-red-500 transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+                      <LogOut size={16} />
+                    </div>
+                    <span className="text-xs font-bold">Logout</span>
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="flex items-center w-full h-full">
               <div className="w-12 flex-shrink-0 flex items-center justify-center">
                 <div className="relative">
@@ -257,9 +349,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
               {(isHovered || isMobileMenuOpen) && (
                 <div className="ml-auto mr-2">
-                  <svg viewBox="0 0 24 24" className={`w-4 h-4 transition-all duration-300 ${currentModule === ModuleType.PROFILE ? 'text-brand-primary' : 'text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300'}`}>
-                    <path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <ChevronRight size={16} className={`transition-all duration-300 ${showProfileMenu ? 'rotate-90' : ''} ${currentModule === ModuleType.PROFILE ? 'text-brand-primary' : 'text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300'}`} />
                 </div>
               )}
             </div>

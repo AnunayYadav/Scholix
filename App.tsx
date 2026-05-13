@@ -1479,6 +1479,7 @@ const AppContent: React.FC = () => {
           isMobileMenuOpen={isMobileMenuOpen}
           toggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           userProfile={userProfile}
+          onOpenAuth={openAuth}
         />
         <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative bg-white dark:bg-[#0a0a0a] md:pl-[72px]">
           <BackgroundEffects />
