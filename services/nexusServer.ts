@@ -729,18 +729,34 @@ class NexusServer {
 
         const { error: fullError } = await client.from('profiles').upsert(fullProfile, { onConflict: 'id' });
         
-        if (fullError && (fullError.code === 'PGRST204' || fullError.message.includes('column'))) {
-
-          const minimalProfile = {
-            id: result.data.user.id,
-            email: cleanEmail,
-            username: cleanUsername,
-            registration_number: cleanRegNo
-          };
-          const { error: minError } = await client.from('profiles').upsert(minimalProfile, { onConflict: 'id' });
-          if (minError) console.error("[NexusServer] Minimal profile fallback also failed:", minError);
-        } else if (fullError) {
-          console.error("[NexusServer] Initial profile upsert failed with non-schema error:", fullError);
+        if (fullError) {
+          if (fullError.code === '23505' || fullError.message.includes('unique_registration_number')) {
+            console.warn("[NexusServer] Registration number conflict, retrying without it...");
+            const { registration_number, ...profileWithoutReg } = fullProfile;
+            // Ensure is_verified is definitely 'yes' in the retry
+            profileWithoutReg.is_verified = 'yes';
+            const { error: retryError } = await client.from('profiles').upsert(profileWithoutReg, { onConflict: 'id' });
+            if (retryError) console.error("[NexusServer] Profile upsert retry failed:", retryError);
+          } else if (fullError.code === 'PGRST204' || fullError.message.includes('column')) {
+            const minimalProfile: any = {
+              id: result.data.user.id,
+              email: cleanEmail,
+              username: cleanUsername,
+              registration_number: cleanRegNo,
+              is_verified: 'yes'
+            };
+            const { error: minError } = await client.from('profiles').upsert(minimalProfile, { onConflict: 'id' });
+            if (minError) {
+              if (minError.code === '23505') {
+                 const { registration_number, ...minWithoutReg } = minimalProfile;
+                 await client.from('profiles').upsert(minWithoutReg, { onConflict: 'id' });
+              } else {
+                 console.error("[NexusServer] Minimal profile fallback also failed:", minError);
+              }
+            }
+          } else {
+            console.error("[NexusServer] Initial profile upsert failed:", fullError);
+          }
         }
       } catch (e) {
         console.warn("[NexusServer] Signup sync catch-all error:", e);
@@ -886,7 +902,24 @@ class NexusServer {
       if (needsUpdate) {
         // Silent update for profile consistency
         const { data: updated, error: updateError } = await client.from('profiles').update(updates).eq('id', user.id).select().single();
-        if (updateError) console.error("[NexusServer] Profile sync update error:", updateError);
+        
+          if (updateError) {
+            const isConflict = updateError.code === '23505' || 
+                             updateError.message?.includes('unique_registration_number') ||
+                             updateError.message?.includes('duplicate key');
+            
+            if (isConflict) {
+              console.warn("[NexusServer] Profile sync conflict, retrying without registration_number...");
+              const { registration_number, ...safeUpdates } = updates;
+              if (Object.keys(safeUpdates).length > 0) {
+                const { data: retryUpdated, error: retryError } = await client.from('profiles').update(safeUpdates).eq('id', user.id).select().maybeSingle();
+                if (!retryError && retryUpdated) return retryUpdated;
+                if (retryError) console.error("[NexusServer] Profile sync retry failed:", retryError);
+              }
+            } else {
+              console.error("[NexusServer] Profile sync update error:", updateError);
+            }
+          }
         if (updated) return updated;
       }
       return existing;
@@ -919,7 +952,8 @@ class NexusServer {
         id: user.id,
         email: user.email!,
         username: newProfile.username,
-        registration_number: newProfile.registration_number
+        registration_number: newProfile.registration_number,
+        is_verified: isVerifiedInMeta ? 'yes' : 'no'
       };
       const fallback = await client.from('profiles').upsert(minimalNewProfile, { onConflict: 'id' }).select().maybeSingle();
       data = fallback.data;
@@ -927,8 +961,19 @@ class NexusServer {
     }
       
     if (error) {
-      console.error("[NexusServer] Profile creation error:", error);
-      throw error;
+      if (error.code === '23505' || error.message?.includes('unique_registration_number')) {
+        console.warn("[NexusServer] Profile creation conflict on registration_number, retrying without it...");
+        const { registration_number, ...safeProfile } = newProfile;
+        const { data: retryData, error: retryError } = await client.from('profiles').upsert(safeProfile, { onConflict: 'id' }).select().maybeSingle();
+        if (!retryError && retryData) return retryData;
+        if (retryError) {
+          console.error("[NexusServer] Profile creation retry failed:", retryError);
+          throw retryError;
+        }
+      } else {
+        console.error("[NexusServer] Profile creation error:", error);
+        throw error;
+      }
     }
     console.log(`[NexusServer] Profile created successfully for ${user.id}`);
     return data;
@@ -1249,6 +1294,15 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return true;
     const { data } = await client.from('profiles').select('username').eq('username', username.toLowerCase().trim()).maybeSingle();
+    return !data;
+  }
+
+  static async checkRegistrationAvailability(regNo: string): Promise<boolean> {
+    const client = getSupabase();
+    if (!client) return true;
+    const cleanRegNo = regNo.replace(/[^0-9]/g, '');
+    if (cleanRegNo.length === 0) return true;
+    const { data } = await client.from('profiles').select('registration_number').eq('registration_number', cleanRegNo).maybeSingle();
     return !data;
   }
 
