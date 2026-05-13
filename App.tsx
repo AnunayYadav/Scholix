@@ -258,10 +258,10 @@ const TodaysSchedule: React.FC = () => {
   });
 
   return (
-    <div className="w-full h-full animate-fade-in">
-      <div className="bg-white dark:bg-[#0a0a0a] rounded-[24px] border border-zinc-100/80 dark:border-white/5 p-5 lg:p-6 shadow-sm transition-all duration-500 overflow-hidden h-full flex flex-col">
+    <div className="w-full lg:h-full animate-fade-in">
+      <div className="bg-white dark:bg-[#0a0a0a] rounded-[24px] border border-zinc-100/80 dark:border-white/5 p-5 lg:p-6 shadow-sm transition-all duration-500 overflow-hidden lg:h-full flex flex-col">
         {/* Header Section */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6 lg:mb-8">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary">
               <Calendar size={20} strokeWidth={2.5} />
@@ -355,7 +355,7 @@ const TodaysSchedule: React.FC = () => {
 
             {/* Mobile View: Circular Horizontal Scroll */}
             <div className="md:hidden">
-              <div className="flex gap-4 overflow-x-auto pb-4 pt-2 -mx-2 px-2 snap-x scrollbar-hide no-scrollbar">
+              <div className="flex gap-4 overflow-x-auto pb-2 pt-2 -mx-2 px-2 snap-x scrollbar-hide no-scrollbar">
                 {sortedSlots.map((slot) => {
                   const start = timeToMinutes(slot.startTime);
                   const end = timeToMinutes(slot.endTime);
@@ -597,8 +597,8 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
             </div>
           </div>
 
-          <div className="lg:col-span-4 order-1 lg:order-2 relative min-h-[400px] lg:min-h-0">
-            <div className="lg:absolute lg:inset-0 h-full overflow-y-auto no-scrollbar">
+          <div className="lg:col-span-4 order-1 lg:order-2 relative lg:min-h-0">
+            <div className="lg:absolute lg:inset-0 lg:h-full overflow-y-auto no-scrollbar">
               <TodaysSchedule />
             </div>
           </div>
