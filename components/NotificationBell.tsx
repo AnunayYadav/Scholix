@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import NexusServer from '../services/nexusServer';
@@ -27,6 +28,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
         }, 250);
     };
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const detailModalRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
     const loadData = async () => {
@@ -91,6 +93,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
+            if (detailModalRef.current && detailModalRef.current.contains(event.target as Node)) return;
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 handleClose();
             }
@@ -149,6 +152,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
     ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     return (
+        <>
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={handleToggle}
@@ -243,84 +247,89 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                 )}
             </AnimatePresence>
 
-            {/* Notification Detail Modal */}
-            <AnimatePresence>
-                {isDetailModalOpen && selectedNotification && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-0">
-                        <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setIsDetailModalOpen(false)}
-                            className="absolute inset-0 bg-black/60 backdrop-blur-md"
-                        />
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-white dark:bg-[#0c0c0c] w-full max-w-sm rounded-[40px] border border-zinc-200 dark:border-white/10 shadow-3xl overflow-hidden relative z-10"
-                        >
-                            <div className="p-8">
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                                        selectedNotification.type === 'success' ? 'bg-green-500/10 text-green-500' :
-                                        selectedNotification.type === 'warning' ? 'bg-amber-500/10 text-amber-500' :
-                                        selectedNotification.type === 'error' ? 'bg-red-500/10 text-red-500' :
-                                        'bg-orange-500/10 text-orange-600'
-                                    }`}>
-                                        {selectedNotification.type === 'success' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M20 6L9 17l-5-5" /></svg>}
-                                        {selectedNotification.type === 'warning' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>}
-                                        {selectedNotification.type === 'error' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>}
-                                        {selectedNotification.type === 'info' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>}
-                                    </div>
-                                    <button 
-                                        onClick={() => setIsDetailModalOpen(false)}
-                                        className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors border-none bg-transparent text-zinc-400 group"
-                                    >
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 group-hover:rotate-90 transition-transform"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                                    </button>
-                                </div>
-                                
-                                <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2 leading-tight tracking-tight">
-                                    {selectedNotification.title}
-                                </h2>
-                                <p className="text-[10px] font-bold text-zinc-400 mb-6 flex items-center gap-2">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                    {new Date(selectedNotification.created_at).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                </p>
-                                
-                                <div className="bg-zinc-50 dark:bg-white/5 rounded-[24px] p-6 mb-8 border border-zinc-100 dark:border-white/5 max-h-[300px] overflow-y-auto no-scrollbar">
-                                    <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed font-medium">
-                                        {selectedNotification.message}
-                                    </p>
-                                </div>
-
-                                <div className="flex flex-col gap-3">
-                                    {selectedNotification.link && (
-                                        <button 
-                                            onClick={() => {
-                                                navigate(selectedNotification.link);
-                                                setIsDetailModalOpen(false);
-                                                handleClose();
-                                            }}
-                                            className="w-full py-4 bg-orange-600 dark:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none"
-                                        >
-                                            Access Resource
-                                        </button>
-                                    )}
-                                    <button 
-                                        onClick={() => setIsDetailModalOpen(false)}
-                                        className={`w-full py-4 text-zinc-500 dark:text-zinc-400 font-bold text-xs rounded-2xl active:scale-95 transition-all border-none ${selectedNotification.link ? 'bg-transparent' : 'bg-zinc-100 dark:bg-white/5'}`}
-                                    >
-                                        Close Portal
-                                    </button>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
         </div>
+
+            {/* Notification Detail Modal - rendered via portal */}
+            {createPortal(
+                <AnimatePresence>
+                    {isDetailModalOpen && selectedNotification && (
+                        <div ref={detailModalRef} className="fixed inset-0 z-[9999] flex items-center justify-center p-6 sm:p-0">
+                            <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setIsDetailModalOpen(false)}
+                                className="absolute inset-0 bg-black/60 backdrop-blur-md"
+                            />
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="bg-white dark:bg-[#0c0c0c] w-full max-w-sm rounded-[40px] border border-zinc-200 dark:border-white/10 shadow-3xl overflow-hidden relative z-10"
+                            >
+                                <div className="p-8">
+                                    <div className="flex justify-between items-start mb-6">
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                                            selectedNotification.type === 'success' ? 'bg-green-500/10 text-green-500' :
+                                            selectedNotification.type === 'warning' ? 'bg-amber-500/10 text-amber-500' :
+                                            selectedNotification.type === 'error' ? 'bg-red-500/10 text-red-500' :
+                                            'bg-orange-500/10 text-orange-600'
+                                        }`}>
+                                            {selectedNotification.type === 'success' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M20 6L9 17l-5-5" /></svg>}
+                                            {selectedNotification.type === 'warning' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>}
+                                            {selectedNotification.type === 'error' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>}
+                                            {selectedNotification.type === 'info' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>}
+                                        </div>
+                                        <button 
+                                            onClick={() => setIsDetailModalOpen(false)}
+                                            className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors border-none bg-transparent text-zinc-400 group"
+                                        >
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 group-hover:rotate-90 transition-transform"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                        </button>
+                                    </div>
+                                    
+                                    <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2 leading-tight tracking-tight">
+                                        {selectedNotification.title}
+                                    </h2>
+                                    <p className="text-[10px] font-bold text-zinc-400 mb-6 flex items-center gap-2">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                        {new Date(selectedNotification.created_at).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                    
+                                    <div className="bg-zinc-50 dark:bg-white/5 rounded-[24px] p-6 mb-8 border border-zinc-100 dark:border-white/5 max-h-[300px] overflow-y-auto no-scrollbar">
+                                        <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed font-medium">
+                                            {selectedNotification.message}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex flex-col gap-3">
+                                        {selectedNotification.link && (
+                                            <button 
+                                                onClick={() => {
+                                                    navigate(selectedNotification.link);
+                                                    setIsDetailModalOpen(false);
+                                                    handleClose();
+                                                }}
+                                                className="w-full py-4 bg-orange-600 dark:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none"
+                                            >
+                                                Access Resource
+                                            </button>
+                                        )}
+                                        <button 
+                                            onClick={() => setIsDetailModalOpen(false)}
+                                            className={`w-full py-4 text-zinc-500 dark:text-zinc-400 font-bold text-xs rounded-2xl active:scale-95 transition-all border-none ${selectedNotification.link ? 'bg-transparent' : 'bg-zinc-100 dark:bg-white/5'}`}
+                                        >
+                                            Close Portal
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
+        </>
     );
 };
 
