@@ -875,7 +875,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             const originalPdf = await PDFDocument.load(originalPdfBytes);
             const finalPdf = await PDFDocument.create();
 
-            // 4. Embed cover image and add as first page
+            // 4. Copy first page from original PDF
+            const [firstPage] = await finalPdf.copyPages(originalPdf, [0]);
+            finalPdf.addPage(firstPage);
+
+            // 5. Add cover image as second page
             const coverImage = await finalPdf.embedPng(coverImageBytes);
             const coverDims = coverImage.scale(1);
             const coverPage = finalPdf.addPage([coverDims.width, coverDims.height]);
@@ -886,9 +890,12 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 height: coverDims.height,
             });
 
-            // 5. Copy all pages from the original PDF
-            const copiedPages = await finalPdf.copyPages(originalPdf, originalPdf.getPageIndices());
-            copiedPages.forEach(page => finalPdf.addPage(page));
+            // 6. Copy remaining pages from the original PDF (page 2 onward)
+            const remainingIndices = originalPdf.getPageIndices().slice(1);
+            if (remainingIndices.length > 0) {
+                const remainingPages = await finalPdf.copyPages(originalPdf, remainingIndices);
+                remainingPages.forEach(page => finalPdf.addPage(page));
+            }
 
             // 6. Serialize and download
             const finalPdfBytes = await finalPdf.save();
