@@ -691,7 +691,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-3xl font-medium text-zinc-800 dark:text-white mb-2 tracking-tighter">
-            Timetable <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 font-semibold">Hub</span>
+            Timetable <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary font-semibold">Hub</span>
           </h2>
           <p className="text-zinc-500 dark:text-zinc-400 font-medium text-[11px] sm:text-xs">Organize your classes and find time to meet with friends.</p>
         </div>
@@ -711,7 +711,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                       placeholder="Search batches or sections..."
                       value={dropdownSearchQuery}
                       onChange={e => setDropdownSearchQuery(e.target.value)}
-                      className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-4 py-3 text-[11px] font-medium outline-none focus:ring-2 focus:ring-orange-600/20 transition-all"
+                      className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-4 py-3 text-[11px] font-medium outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
                     />
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
                   </div>
@@ -721,7 +721,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
 
                 {communityPresets.filter(p => p.name.toLowerCase().includes(dropdownSearchQuery.toLowerCase()) || p.section.toLowerCase().includes(dropdownSearchQuery.toLowerCase())).length > 0 && (
                   <section className="space-y-3">
-                  <h4 className="text-[11px] font-medium text-orange-500/80 tracking-tight ml-1">Community uploads</h4>
+                  <h4 className="text-[11px] font-medium text-brand-primary/80 tracking-tight ml-1">Community uploads</h4>
                     <div className="space-y-2">
                       {communityPresets.filter(p => p.name.toLowerCase().includes(dropdownSearchQuery.toLowerCase()) || p.section.toLowerCase().includes(dropdownSearchQuery.toLowerCase())).map(preset => {
                         const isOwner = userProfile?.id === preset.owner_id;
@@ -736,7 +736,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                                 applyPreset(preset, selectedEntityId === 'me' ? undefined : selectedEntityId);
                                 close();
                               }}
-                              className="w-full p-4 bg-zinc-50 dark:bg-orange-600/[0.02] border border-transparent rounded-2xl text-left hover:border-orange-500/30 hover:bg-zinc-100 dark:hover:bg-orange-600/[0.04] transition-all flex items-center justify-between group"
+                              className="w-full p-4 bg-zinc-50 dark:bg-brand-primary/[0.02] border border-transparent rounded-2xl text-left hover:border-brand-primary/30 hover:bg-zinc-100 dark:hover:bg-brand-primary/[0.04] transition-all flex items-center justify-between group"
                             >
                               <div className="min-w-0 pr-20">
                                 <p className="text-[11px] sm:text-xs font-medium text-zinc-800 dark:text-white truncate">{preset.name}</p>
@@ -746,8 +746,8 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                                   <span className="text-[10px] font-medium text-zinc-400">{preset.year} Year</span>
                                 </div>
                               </div>
-                              <div className="w-8 h-8 rounded-xl bg-orange-600/0 group-hover:bg-orange-600/10 flex items-center justify-center transition-all">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-zinc-300 group-hover:text-orange-600 transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                              <div className="w-8 h-8 rounded-xl bg-brand-primary/0 group-hover:bg-brand-primary/10 flex items-center justify-center transition-all">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-zinc-300 group-hover:text-brand-primary transition-colors"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                               </div>
                             </button>
 
@@ -756,14 +756,14 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                                 <button 
                                   onClick={(e) => handleEditPresetMetadata(preset, e)}
                                   title="Edit metadata"
-                                  className="w-8 h-8 rounded-lg hover:bg-orange-600/10 flex items-center justify-center text-zinc-400 hover:text-orange-600 transition-colors border-none bg-transparent"
+                                  className="w-8 h-8 rounded-lg hover:bg-brand-primary/10 flex items-center justify-center text-zinc-400 hover:text-brand-primary transition-colors border-none bg-transparent"
                                 >
                                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                                 </button>
                                 <button 
                                   onClick={(e) => handleDeletePreset(preset.id, e)}
                                   title="Delete preset"
-                                  className="w-8 h-8 rounded-lg hover:bg-red-600/10 flex items-center justify-center text-zinc-400 hover:text-red-500 transition-colors border-none bg-transparent"
+                                  className="w-8 h-8 rounded-lg hover:bg-brand-secondary/10 flex items-center justify-center text-zinc-400 hover:text-brand-secondary transition-colors border-none bg-transparent"
                                 >
                                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
                                 </button>
@@ -785,7 +785,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
               </div>
             )}
           />
-          <button onClick={() => { setTargetForAction('me'); setShowUploadModal(true); }} className="px-8 py-3 bg-orange-600 text-white rounded-2xl text-[11px] sm:text-xs font-medium shadow-xl shadow-orange-600/20 active:scale-95 transition-all flex items-center gap-2 border-none">
+          <button onClick={() => { setTargetForAction('me'); setShowUploadModal(true); }} className="px-8 py-3 bg-brand-primary text-white rounded-2xl text-[11px] sm:text-xs font-medium shadow-xl shadow-brand-primary/20 active:scale-95 transition-all flex items-center gap-2 border-none">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
             Upload Screenshots
           </button>
@@ -802,7 +802,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
             onClick={() => setActiveDay(day)} 
             className={`flex-shrink-0 px-6 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-300 border-none ${
               activeDay === day 
-                ? 'bg-orange-600/10 text-orange-600' 
+                ? 'bg-brand-primary/10 text-brand-primary' 
                 : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-white/10'
             }`}
           >
@@ -822,19 +822,19 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
           ) : (
             <div className="space-y-4">
               <div className="flex items-center justify-between px-4">
-                <h3 className="text-[12px] font-medium text-orange-600/80 tracking-tight">{activeDay} schedule</h3>
+                <h3 className="text-[12px] font-medium text-brand-primary/80 tracking-tight">{activeDay} schedule</h3>
                 <span className="text-[10px] font-medium text-zinc-400">{daySlotsWithBreaks.filter(s => s.type !== 'Break').length} Activities</span>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {canEditCurrent && (
                   <button 
                     onClick={handleOpenAddSlot}
-                    className="col-span-full py-8 rounded-[32px] border-2 border-dashed border-zinc-200 dark:border-white/5 hover:border-orange-500/30 hover:bg-orange-600/[0.03] transition-all flex flex-col items-center justify-center gap-2 group border-none"
+                    className="col-span-full py-8 rounded-[32px] border-2 border-dashed border-zinc-200 dark:border-white/5 hover:border-brand-primary/30 hover:bg-brand-primary/[0.03] transition-all flex flex-col items-center justify-center gap-2 group border-none"
                   >
-                    <div className="w-10 h-10 rounded-full bg-orange-600/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 text-orange-600"><path d="M12 5v14M5 12h14" /></svg>
+                    <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 text-brand-primary"><path d="M12 5v14M5 12h14" /></svg>
                     </div>
-                    <span className="text-[11px] font-semibold text-zinc-500 group-hover:text-orange-600 tracking-tight transition-colors">Add Class for {activeDay}</span>
+                    <span className="text-[11px] font-semibold text-zinc-500 group-hover:text-brand-primary tracking-tight transition-colors">Add Class for {activeDay}</span>
                   </button>
                 )}
                 {daySlotsWithBreaks.length === 0 ? (
@@ -850,31 +850,31 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     const isBreak = slot.type === 'Break';
 
                     return (
-                      <div key={slot.id} className={`group relative p-5 rounded-[22px] transition-all flex flex-col justify-between ${isActive ? 'bg-orange-600/[0.03] border border-orange-500/20 shadow-sm' : isFinished ? 'opacity-40 grayscale' : 'bg-white dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 hover:border-orange-500/20'}`}>
+                      <div key={slot.id} className={`group relative p-5 rounded-[22px] transition-all flex flex-col justify-between ${isActive ? 'bg-brand-primary/[0.03] border border-brand-primary/20 shadow-sm' : isFinished ? 'opacity-40 grayscale' : 'bg-white dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 hover:border-brand-primary/20'}`}>
 
                         <div className="space-y-3">
                           <div className="flex justify-between items-center">
                             <div className="flex items-center gap-2">
-                              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isActive ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400'}`}>
+                              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isActive ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400'}`}>
                                 {isBreak ? (
                                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" /></svg>
                                 ) : (
                                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
                                 )}
                               </div>
-                              <span className={`text-[11px] font-medium tabular-nums ${isActive ? 'text-orange-600' : 'text-zinc-500'}`}>
+                              <span className={`text-[11px] font-medium tabular-nums ${isActive ? 'text-brand-primary' : 'text-zinc-500'}`}>
                                 {slot.startTime} — {slot.endTime}
                               </span>
                             </div>
                             
                             <div className="flex items-center gap-1">
-                              {isActive && <span className="text-[9px] font-semibold text-orange-500 animate-pulse tracking-wider mr-2">Live</span>}
+                              {isActive && <span className="text-[9px] font-semibold text-brand-primary animate-pulse tracking-wider mr-2">Live</span>}
                               {canEditCurrent && !isBreak && (
                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                  <button onClick={(e) => { e.stopPropagation(); handleOpenEditSlot(slot); }} className="p-1.5 hover:text-orange-500 text-zinc-300 transition-colors border-none bg-transparent">
+                                  <button onClick={(e) => { e.stopPropagation(); handleOpenEditSlot(slot); }} className="p-1.5 hover:text-brand-primary text-zinc-300 transition-colors border-none bg-transparent">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                                   </button>
-                                  <button onClick={(e) => { e.stopPropagation(); handleDeleteSlot(slot.id); }} className="p-1.5 hover:text-red-500 text-zinc-300 transition-colors border-none bg-transparent">
+                                  <button onClick={(e) => { e.stopPropagation(); handleDeleteSlot(slot.id); }} className="p-1.5 hover:text-brand-secondary text-zinc-300 transition-colors border-none bg-transparent">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
                                   </button>
                                 </div>
@@ -883,14 +883,14 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                           </div>
 
                           <div className="min-w-0">
-                            <h4 className={`text-lg font-medium leading-tight mb-1 truncate ${isActive ? 'text-orange-600' : isBreak ? 'text-zinc-400' : 'text-zinc-800 dark:text-zinc-100'}`}>
+                            <h4 className={`text-lg font-medium leading-tight mb-1 truncate ${isActive ? 'text-brand-primary' : isBreak ? 'text-zinc-400' : 'text-zinc-800 dark:text-zinc-100'}`}>
                               {slot.subject}
                             </h4>
                             <div className="flex items-center gap-2">
                               <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
                                 slot.type === 'Lab' ? 'bg-blue-500/10 text-blue-500' : 
                                 slot.type === 'Practical' ? 'bg-purple-500/10 text-purple-500' :
-                                slot.type === 'Class' ? 'bg-orange-500/10 text-orange-500' :
+                                slot.type === 'Class' ? 'bg-brand-primary/10 text-brand-primary' :
                                 'bg-zinc-500/10 text-zinc-500'
                               }`}>
                                 {slot.type}
@@ -918,7 +918,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
         <div className="lg:col-span-4 space-y-8">
           <div className="p-8 rounded-[40px] bg-zinc-100 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 shadow-xl relative overflow-hidden group">
             <div className="relative z-10">
-              <h3 className="text-[12px] font-medium text-orange-600/80 tracking-tight mb-6">Shared gaps</h3>
+              <h3 className="text-[12px] font-medium text-brand-primary/80 tracking-tight mb-6">Shared gaps</h3>
               {selectedEntityId === 'me' ? (
                 <div className="py-4 text-center">
                   <p className="text-sm text-zinc-400">Select a connection below to find common free time.</p>
@@ -933,7 +933,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     <div key={i} className="p-4 bg-white dark:bg-white/[0.03] rounded-2xl border border-zinc-100 dark:border-white/5">
                       <div className="flex justify-between items-center mb-1">
                         <p className="text-[10px] font-medium text-zinc-400 tracking-tight">Common break</p>
-                        <span className="text-[10px] font-medium text-orange-600">{b.duration} mins</span>
+                        <span className="text-[10px] font-medium text-brand-primary">{b.duration} mins</span>
                       </div>
                       <p className="text-lg font-medium text-zinc-800 dark:text-zinc-100">{b.start} — {b.end}</p>
                     </div>
@@ -948,12 +948,12 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
             <div className="space-y-4">
               <div
                 onClick={() => setSelectedEntityId('me')}
-                className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedEntityId === 'me' ? 'bg-orange-600/10 border-orange-600' : 'bg-white dark:bg-[#0a0a0a] border-zinc-200 dark:border-white/5 hover:border-orange-500/30'}`}
+                className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedEntityId === 'me' ? 'bg-brand-primary/10 border-brand-primary' : 'bg-white dark:bg-[#0a0a0a] border-zinc-200 dark:border-white/5 hover:border-brand-primary/30'}`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-orange-600 flex items-center justify-center font-semibold text-[11px] sm:text-xs flex-shrink-0">{userProfile?.username?.[0] || 'M'}</div>
+                  <div className="w-8 h-8 rounded-full bg-brand-primary flex items-center justify-center font-semibold text-[11px] sm:text-xs flex-shrink-0">{userProfile?.username?.[0] || 'M'}</div>
                   <div className="min-w-0 truncate">
-                    <span className={`text-[11px] font-medium block truncate ${selectedEntityId === 'me' ? 'text-orange-500' : 'text-zinc-700 dark:text-white'}`}>
+                    <span className={`text-[11px] font-medium block truncate ${selectedEntityId === 'me' ? 'text-brand-primary' : 'text-zinc-700 dark:text-white'}`}>
                       {myTimetable?.ownerName || 'My Profile'}
                     </span>
                     {myTimetable?.branch && (
@@ -965,7 +965,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setRenameTargetId('me'); setNewName(myTimetable?.ownerName || ''); setShowRenameModal(true); }}
-                    className="p-1.5 hover:text-orange-500 text-zinc-300 dark:text-white/20 transition-colors border-none bg-transparent"
+                    className="p-1.5 hover:text-brand-primary text-zinc-300 dark:text-white/20 transition-colors border-none bg-transparent"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                   </button>
@@ -976,7 +976,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                 <div key={friend.ownerId} className="space-y-2">
                   <div
                     onClick={() => setSelectedEntityId(friend.ownerId)}
-                    className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedEntityId === friend.ownerId ? 'bg-blue-600/10 border-blue-600' : 'bg-white dark:bg-[#0a0a0a] border-zinc-200 dark:border-white/5 hover:border-orange-500/30'}`}
+                    className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${selectedEntityId === friend.ownerId ? 'bg-blue-600/10 border-blue-600' : 'bg-white dark:bg-[#0a0a0a] border-zinc-200 dark:border-white/5 hover:border-brand-primary/30'}`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-semibold text-[11px] sm:text-xs flex-shrink-0">{friend.ownerName?.[0] || 'F'}</div>
@@ -1000,7 +1000,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                       <button
                         type="button"
                         onClick={(e) => handleRemoveFriend(friend.ownerId, e)}
-                        className="p-1.5 group/del hover:bg-red-500 transition-all border-none bg-transparent rounded-lg"
+                        className="p-1.5 group/del hover:bg-brand-secondary transition-all border-none bg-transparent rounded-lg"
                       >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-zinc-300 dark:text-white/20 group-hover/del:text-white"><path d="M18 6L6 18M6 6l12 12" /></svg>
                       </button>
@@ -1011,10 +1011,10 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
 
               <button
                 onClick={handleAddEmptyConnection}
-                className="w-full p-4 rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5 hover:border-orange-500/30 hover:bg-orange-600/5 transition-all flex items-center justify-center gap-2 group border-none"
+                className="w-full p-4 rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5 hover:border-brand-primary/30 hover:bg-brand-primary/5 transition-all flex items-center justify-center gap-2 group border-none"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-zinc-400 group-hover:text-orange-500 transition-colors"><path d="M12 5v14M5 12h14" /></svg>
-                <span className="text-[11px] sm:text-xs font-medium text-zinc-500 group-hover:text-orange-500 transition-colors">Add New Connection</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-zinc-400 group-hover:text-brand-primary transition-colors"><path d="M12 5v14M5 12h14" /></svg>
+                <span className="text-[11px] sm:text-xs font-medium text-zinc-500 group-hover:text-brand-primary transition-colors">Add New Connection</span>
               </button>
 
             </div>
@@ -1040,12 +1040,12 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                 onChange={e => setNewName(e.target.value)}
                 placeholder="Enter name..."
                 onKeyDown={e => e.key === 'Enter' && handleRename()}
-                className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-3.5 text-sm font-medium text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-600/20 transition-all"
+                className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-3.5 text-sm font-medium text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
               />
               
               <div className="flex gap-3 mt-8">
                 <button onClick={handleCloseRename} className="flex-1 py-3 text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors border-none bg-transparent">Cancel</button>
-                <button onClick={handleRename} className="flex-1 py-3 bg-orange-600 text-white rounded-xl font-medium text-xs shadow-lg shadow-orange-600/20 active:scale-95 transition-all border-none">Update</button>
+                <button onClick={handleRename} className="flex-1 py-3 bg-brand-primary text-white rounded-xl font-medium text-xs shadow-lg shadow-brand-primary/20 active:scale-95 transition-all border-none">Update</button>
               </div>
             </div>
           </div>
@@ -1060,8 +1060,8 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
         >
           <div className={`nexus-modal w-full max-w-lg bg-white dark:bg-[#0d0d0d] border border-zinc-100 dark:border-white/5 shadow-xl rounded-[32px] overflow-hidden ${isClosingMetadata ? 'closing' : ''}`}>
             <div className="p-10 pb-4 text-center">
-              <div className="w-14 h-14 bg-orange-600/[0.03] rounded-2xl flex items-center justify-center mx-auto mb-6 border border-orange-600/5 relative group">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-7 h-7 text-orange-600/80"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+              <div className="w-14 h-14 bg-brand-primary/[0.03] rounded-2xl flex items-center justify-center mx-auto mb-6 border border-brand-primary/5 relative group">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-7 h-7 text-brand-primary/80"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
               </div>
               <h3 className="text-2xl font-medium text-zinc-800 dark:text-white mb-2 tracking-tight">
                 {editingPresetId ? 'Update Timetable' : 'Extraction Complete'}
@@ -1080,7 +1080,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     placeholder="e.g. 325QB" 
                     value={metadata.section} 
                     onChange={e => setMetadata({ ...metadata, section: e.target.value.toUpperCase() })} 
-                    className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-4 text-sm font-medium text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/5 transition-all placeholder:text-zinc-300 shadow-sm" 
+                    className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-4 text-sm font-medium text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-brand-primary/5 transition-all placeholder:text-zinc-300 shadow-sm" 
                   />
                 </div>
 
@@ -1091,7 +1091,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     placeholder="e.g. CSE" 
                     value={metadata.branch} 
                     onChange={e => setMetadata({ ...metadata, branch: e.target.value.toUpperCase() })} 
-                    className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-4 text-sm font-medium text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/5 transition-all placeholder:text-zinc-300 shadow-sm" 
+                    className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-4 text-sm font-medium text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-brand-primary/5 transition-all placeholder:text-zinc-300 shadow-sm" 
                   />
                 </div>
 
@@ -1116,7 +1116,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                     placeholder="1-10" 
                     value={metadata.semester} 
                     onChange={e => setMetadata({ ...metadata, semester: e.target.value })} 
-                    className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-4 text-sm font-medium text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-orange-600/5 transition-all placeholder:text-zinc-300 shadow-sm" 
+                    className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl px-5 py-4 text-sm font-medium text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-brand-primary/5 transition-all placeholder:text-zinc-300 shadow-sm" 
                   />
                 </div>
               </div>
@@ -1124,7 +1124,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
               <div className="space-y-3">
                 <div className="flex items-center justify-between px-1">
                   <p className="text-[11px] font-medium text-zinc-400">Activity map</p>
-                  <span className="text-[10px] font-medium text-orange-600 bg-orange-600/5 px-3 py-1 rounded-full border border-orange-600/5">Verified extraction</span>
+                  <span className="text-[10px] font-medium text-brand-primary bg-brand-primary/5 px-3 py-1 rounded-full border border-brand-primary/5">Verified extraction</span>
                 </div>
                 <div className="grid grid-cols-6 gap-2 p-4 bg-zinc-50 dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 rounded-3xl shadow-inner">
                   {DAYS.map(dayName => {
@@ -1135,7 +1135,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${hasSlots ? 'bg-white dark:bg-white/10 shadow-sm border border-zinc-100 dark:border-white/10' : 'opacity-20 grayscale'}`}>
                           <span className={`text-[11px] font-semibold ${hasSlots ? 'text-zinc-800 dark:text-white' : 'text-zinc-400'}`}>{dayName.substring(0, 1)}</span>
                         </div>
-                        <span className={`text-[10px] font-medium transition-colors ${hasSlots ? 'text-orange-600' : 'text-zinc-300'}`}>
+                        <span className={`text-[10px] font-medium transition-colors ${hasSlots ? 'text-brand-primary' : 'text-zinc-300'}`}>
                           {dayData?.slots.length || 0}
                         </span>
                       </div>
@@ -1147,14 +1147,14 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
               <div className="flex flex-col gap-4 pt-4">
                 <button 
                   onClick={handleMetadataSubmit} 
-                  className="w-full py-5 bg-orange-600 text-white rounded-2xl font-semibold text-[14px] shadow-lg shadow-orange-600/10 active:scale-[0.96] hover:bg-orange-500 transition-all border-none relative overflow-hidden group"
+                  className="w-full py-5 bg-brand-primary text-white rounded-2xl font-semibold text-[14px] shadow-lg shadow-brand-primary/10 active:scale-[0.96] hover:bg-brand-primary transition-all border-none relative overflow-hidden group"
                 >
                   <span className="relative z-10">{editingPresetId ? 'Save Changes' : 'Confirm & Save'}</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 </button>
                 <button 
                   onClick={handleCloseMetadata} 
-                  className="w-full py-2 text-[11px] font-medium text-zinc-400 hover:text-red-500 transition-colors border-none bg-transparent"
+                  className="w-full py-2 text-[11px] font-medium text-zinc-400 hover:text-brand-secondary transition-colors border-none bg-transparent"
                 >
                   Discard results
                 </button>
@@ -1174,12 +1174,12 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
             {/* Header - Reduced padding and size */}
             <div className="px-6 py-5 flex items-center justify-between border-b border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-600/[0.03] dark:bg-orange-600/[0.05] border border-orange-600/5 rounded-xl flex items-center justify-center">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-orange-600/80"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+                <div className="w-10 h-10 bg-brand-primary/[0.03] dark:bg-brand-primary/[0.05] border border-brand-primary/5 rounded-xl flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-brand-primary/80"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-zinc-800 dark:text-white tracking-tight">Import timetable</h3>
-                  <p className="text-[10px] font-medium text-orange-600/60 tracking-tight">Step {importStep === 'input' ? '1' : '2'}: {importStep === 'input' ? 'Source' : 'Destination'}</p>
+                  <p className="text-[10px] font-medium text-brand-primary/60 tracking-tight">Step {importStep === 'input' ? '1' : '2'}: {importStep === 'input' ? 'Source' : 'Destination'}</p>
                 </div>
               </div>
               <button 
@@ -1194,8 +1194,8 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
               {isProcessingAI ? (
                 <div className="py-16 text-center space-y-6">
                   <div className="relative w-24 h-24 mx-auto">
-                    <div className="absolute inset-0 border-[4px] border-orange-600/5 rounded-full" />
-                    <div className="absolute inset-0 border-[4px] border-orange-600 rounded-full border-t-transparent animate-spin" style={{ animationDuration: '0.8s' }} />
+                    <div className="absolute inset-0 border-[4px] border-brand-primary/5 rounded-full" />
+                    <div className="absolute inset-0 border-[4px] border-brand-primary rounded-full border-t-transparent animate-spin" style={{ animationDuration: '0.8s' }} />
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <span className="text-xl font-semibold text-zinc-800 dark:text-white tabular-nums tracking-tighter">{Math.round(ocrProgress)}%</span>
                     </div>
@@ -1214,12 +1214,12 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                         <div className="space-y-3">
                           <div className="flex items-center justify-between px-1">
                             <label className="text-[11px] font-semibold text-zinc-400 tracking-tight">Quick paste</label>
-                            <span className="text-[9px] font-bold text-orange-600/80 bg-orange-600/5 px-2 py-0.5 rounded-full">Text mode</span>
+                            <span className="text-[9px] font-bold text-brand-primary/80 bg-brand-primary/5 px-2 py-0.5 rounded-full">Text mode</span>
                           </div>
                           <textarea
                             value={rawPastedText}
                             onChange={e => setRawPastedText(e.target.value)}
-                            className="w-full h-32 bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-2xl p-4 text-[13px] font-medium focus:ring-4 focus:ring-orange-600/5 transition-all outline-none resize-none placeholder:text-zinc-300 shadow-inner"
+                            className="w-full h-32 bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-2xl p-4 text-[13px] font-medium focus:ring-4 focus:ring-brand-primary/5 transition-all outline-none resize-none placeholder:text-zinc-300 shadow-inner"
                             placeholder="Paste your UMS Timetable text here..."
                           />
                         </div>
@@ -1238,11 +1238,11 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                           </div>
                           <div 
                             onClick={() => fileInputRef.current?.click()} 
-                            className="border-2 border-dashed border-zinc-200 dark:border-white/5 rounded-2xl p-8 text-center hover:border-orange-500/50 hover:bg-orange-600/[0.01] transition-all cursor-pointer group bg-zinc-50/30 dark:bg-white/[0.01]"
+                            className="border-2 border-dashed border-zinc-200 dark:border-white/5 rounded-2xl p-8 text-center hover:border-brand-primary/50 hover:bg-brand-primary/[0.01] transition-all cursor-pointer group bg-zinc-50/30 dark:bg-white/[0.01]"
                           >
                             <div className="space-y-3">
                               <div className="w-12 h-12 bg-white dark:bg-white/5 rounded-xl border border-zinc-100 dark:border-white/5 flex items-center justify-center mx-auto group-hover:scale-105 transition-all shadow-sm">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-orange-600"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-brand-primary"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
                               </div>
                               <div>
                                 <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 tracking-tight">Select Screenshots</p>
@@ -1256,7 +1256,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                           <div className="pt-2 animate-slide-up">
                             <button 
                               onClick={() => setImportStep('destination')}
-                              className="w-full py-3.5 bg-orange-600 text-white rounded-xl text-[12px] font-bold shadow-lg shadow-orange-600/10 active:scale-[0.98] transition-all border-none flex items-center justify-center gap-2"
+                              className="w-full py-3.5 bg-brand-primary text-white rounded-xl text-[12px] font-bold shadow-lg shadow-brand-primary/10 active:scale-[0.98] transition-all border-none flex items-center justify-center gap-2"
                             >
                               Continue to destination
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
@@ -1269,13 +1269,13 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                         <div className="flex p-1 bg-zinc-100 dark:bg-white/[0.03] rounded-xl border border-zinc-200 dark:border-white/5 shadow-inner">
                           <button 
                             onClick={() => { setIsUpdatingPreset(false); setPresetToUpdateId(null); setSelectedUpdateProfile(null); }}
-                            className={`flex-1 py-2.5 rounded-lg text-[10px] font-bold transition-all border-none ${!isUpdatingPreset ? 'bg-white dark:bg-white/10 text-orange-600 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                            className={`flex-1 py-2.5 rounded-lg text-[10px] font-bold transition-all border-none ${!isUpdatingPreset ? 'bg-white dark:bg-white/10 text-brand-primary shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
                           >
                             New Profile
                           </button>
                           <button 
                             onClick={() => setIsUpdatingPreset(true)}
-                            className={`flex-1 py-2.5 rounded-lg text-[10px] font-bold transition-all border-none ${isUpdatingPreset ? 'bg-white dark:bg-white/10 text-orange-600 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                            className={`flex-1 py-2.5 rounded-lg text-[10px] font-bold transition-all border-none ${isUpdatingPreset ? 'bg-white dark:bg-white/10 text-brand-primary shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
                           >
                             Update Existing
                           </button>
@@ -1289,7 +1289,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                                 placeholder="Search connections..." 
                                 value={presetSearchQuery}
                                 onChange={e => setPresetSearchQuery(e.target.value)}
-                                className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/5 rounded-xl px-4 py-3 text-[13px] font-medium outline-none focus:ring-4 focus:ring-orange-600/10 transition-all placeholder:text-zinc-400 shadow-inner"
+                                className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/5 rounded-xl px-4 py-3 text-[13px] font-medium outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all placeholder:text-zinc-400 shadow-inner"
                               />
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-300"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
                             </div>
@@ -1302,18 +1302,18 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                                   <button
                                     key={p!.ownerId}
                                     onClick={() => { setPresetToUpdateId(p!.ownerId); setSelectedUpdateProfile(p); }}
-                                    className="w-full p-2.5 rounded-xl bg-zinc-50 dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 text-left transition-all flex items-center justify-between group hover:border-orange-500/30 hover:bg-orange-600/[0.02]"
+                                    className="w-full p-2.5 rounded-xl bg-zinc-50 dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 text-left transition-all flex items-center justify-between group hover:border-brand-primary/30 hover:bg-brand-primary/[0.02]"
                                   >
                                     <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-lg bg-white dark:bg-white/5 border border-zinc-100 dark:border-white/5 flex items-center justify-center font-bold text-xs text-zinc-400 group-hover:text-orange-600 transition-all">
+                                      <div className="w-8 h-8 rounded-lg bg-white dark:bg-white/5 border border-zinc-100 dark:border-white/5 flex items-center justify-center font-bold text-xs text-zinc-400 group-hover:text-brand-primary transition-all">
                                         {p!.ownerName[0]}
                                       </div>
                                       <div>
-                                        <p className="text-[13px] font-semibold text-zinc-800 dark:text-white truncate group-hover:text-orange-600 transition-colors">{p!.ownerName}</p>
+                                        <p className="text-[13px] font-semibold text-zinc-800 dark:text-white truncate group-hover:text-brand-primary transition-colors">{p!.ownerName}</p>
                                         <p className="text-[9px] font-medium text-zinc-400 tracking-tight">{p!.section || 'LOCAL'} • {p!.branch || 'UNSET'}</p>
                                       </div>
                                     </div>
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5 text-orange-600 opacity-0 group-hover:opacity-100 transition-all"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5 text-brand-primary opacity-0 group-hover:opacity-100 transition-all"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                                   </button>
                                 ))}
 
@@ -1323,18 +1323,18 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                                   <button
                                     key={preset.id}
                                     onClick={() => { setPresetToUpdateId(preset.id); setSelectedUpdateProfile(preset); }}
-                                    className="w-full p-2.5 rounded-xl bg-zinc-50 dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 text-left transition-all flex items-center justify-between group hover:border-orange-500/30 hover:bg-orange-600/[0.03]"
+                                    className="w-full p-2.5 rounded-xl bg-zinc-50 dark:bg-white/[0.01] border border-zinc-100 dark:border-white/5 text-left transition-all flex items-center justify-between group hover:border-brand-primary/30 hover:bg-brand-primary/[0.03]"
                                   >
                                     <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-lg bg-orange-600/5 border border-orange-600/10 flex items-center justify-center font-bold text-xs text-orange-600/40 group-hover:text-orange-600 transition-all">
+                                      <div className="w-8 h-8 rounded-lg bg-brand-primary/5 border border-brand-primary/10 flex items-center justify-center font-bold text-xs text-brand-primary/40 group-hover:text-brand-primary transition-all">
                                         H
                                       </div>
                                       <div>
-                                        <p className="text-[13px] font-semibold text-zinc-800 dark:text-white truncate group-hover:text-orange-600 transition-colors">{preset.name}</p>
+                                        <p className="text-[13px] font-semibold text-zinc-800 dark:text-white truncate group-hover:text-brand-primary transition-colors">{preset.name}</p>
                                         <p className="text-[9px] font-medium text-zinc-400 tracking-tight">{preset.section} • Sem {preset.semester}</p>
                                       </div>
                                     </div>
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5 text-orange-600 opacity-0 group-hover:opacity-100 transition-all"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5 text-brand-primary opacity-0 group-hover:opacity-100 transition-all"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                                   </button>
                                 ))}
                             </div>
@@ -1342,19 +1342,19 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                         ) : (
                           <div className="space-y-6 animate-fade-in">
                             {isUpdatingPreset && selectedUpdateProfile && (
-                              <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-600/5 border border-orange-100 dark:border-orange-500/10 rounded-xl">
+                              <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-brand-primary/5 border border-orange-100 dark:border-brand-primary/10 rounded-xl">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center shadow-sm">
+                                  <div className="w-8 h-8 rounded-lg bg-brand-primary flex items-center justify-center shadow-sm">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-white"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                                   </div>
                                   <div>
-                                      <p className="text-[9px] font-bold text-orange-600/60 uppercase tracking-widest">Target profile</p>
+                                      <p className="text-[9px] font-bold text-brand-primary/60 uppercase tracking-widest">Target profile</p>
                                       <p className="text-[13px] font-semibold text-zinc-800 dark:text-white truncate">{selectedUpdateProfile.ownerName || selectedUpdateProfile.name}</p>
                                   </div>
                                 </div>
                                 <button 
                                   onClick={() => { setPresetToUpdateId(null); setSelectedUpdateProfile(null); }}
-                                  className="px-3 py-1.5 text-[10px] font-bold text-zinc-500 hover:text-orange-600 transition-colors bg-zinc-100 dark:bg-white/5 rounded-lg border-none"
+                                  className="px-3 py-1.5 text-[10px] font-bold text-zinc-500 hover:text-brand-primary transition-colors bg-zinc-100 dark:bg-white/5 rounded-lg border-none"
                                 >
                                   Change
                                 </button>
@@ -1364,7 +1364,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
                             <div className="flex flex-col gap-3">
                               <button 
                                 onClick={handleFinalizeImport}
-                                className="w-full py-3 bg-orange-600 text-white rounded-xl text-[12px] font-bold shadow-lg shadow-orange-600/20 active:scale-[0.98] transition-all border-none"
+                                className="w-full py-3 bg-brand-primary text-white rounded-xl text-[12px] font-bold shadow-lg shadow-brand-primary/20 active:scale-[0.98] transition-all border-none"
                               >
                                 {isUpdatingPreset ? 'Sync with selected profile' : 'Create new profile'}
                               </button>
