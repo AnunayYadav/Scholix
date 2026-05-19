@@ -545,7 +545,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             window.removeEventListener('beforeprint', handleBeforePrint);
             window.removeEventListener('afterprint', handleAfterPrint);
         };
-    }, [url, isAdmin, numPages]);
+    }, [url, isAdmin]);
 
 
     // Handle Resize
@@ -852,7 +852,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
     // 💾 Authenticated Download with Cover Page
     const handleDownload = async () => {
-        if (!isAdmin || !url || isDownloading) return;
+        if (!url || isDownloading) return;
         setIsDownloading(true);
         try {
             showToast('Preparing Secure Download...', 'info');
@@ -918,7 +918,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             
             const link = document.createElement('a');
             link.href = blobUrl;
-            link.setAttribute('download', fileName || 'document.pdf');
+            const downloadName = `(scholix.app) ${fileName || 'document.pdf'}`;
+            link.setAttribute('download', downloadName);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -1067,20 +1068,18 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 group-hover:scale-110 transition-transform"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" /></svg>
                     </button>
 
-                    {isAdmin && (
-                        <button
-                            onClick={handleDownload}
-                            disabled={isDownloading}
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center border-none transition-all shadow-lg shadow-orange-600/20 ${isDownloading ? 'bg-orange-600/60 cursor-wait' : 'bg-orange-600 text-white hover:scale-110 active:scale-95'}`}
-                            title={isDownloading ? 'Preparing download...' : 'Download PDF'}
-                        >
-                            {isDownloading ? (
-                                <svg className="w-5 h-5 animate-spin text-white" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" /></svg>
-                            ) : (
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 text-white"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                            )}
-                        </button>
-                    )}
+                    <button
+                        onClick={handleDownload}
+                        disabled={isDownloading}
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center border-none transition-all shadow-lg shadow-orange-600/20 ${isDownloading ? 'bg-orange-600/60 cursor-wait' : 'bg-orange-600 text-white hover:scale-110 active:scale-95'}`}
+                        title={isDownloading ? 'Preparing download...' : 'Download PDF'}
+                    >
+                        {isDownloading ? (
+                            <svg className="w-5 h-5 animate-spin text-white" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" /></svg>
+                        ) : (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 text-white"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                        )}
+                    </button>
                 </div>
             </div>
 
