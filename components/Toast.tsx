@@ -134,11 +134,14 @@ export const ToastContainer: React.FC = () => {
     return (
         <>
             {/* Toasts */}
-            <div className="fixed bottom-6 right-6 z-[9999] flex flex-col-reverse gap-3 pointer-events-auto" style={{ maxWidth: 400 }}>
-                {toasts.map(toast => (
-                    <ToastItemComponent key={toast.id} toast={toast} onDismiss={dismiss} />
-                ))}
-            </div>
+            {createPortal(
+                <div className="fixed bottom-6 right-6 z-[999999] flex flex-col-reverse gap-3 pointer-events-auto" style={{ maxWidth: 400 }}>
+                    {toasts.map(toast => (
+                        <ToastItemComponent key={toast.id} toast={toast} onDismiss={dismiss} />
+                    ))}
+                </div>,
+                document.getElementById('modal-root') || document.body
+            )}
 
             {/* Confirm Modal */}
             {confirmState && createPortal(
