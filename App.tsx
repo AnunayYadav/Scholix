@@ -130,7 +130,7 @@ const getPathFromModule = (module: ModuleType, uniKey: UniversityId = 'none'): s
     case ModuleType.DASHBOARD: return uniSlug ? `/${uniSlug}` : '/';
     case ModuleType.SHARE_CGPA: return `/share-cgpa`;
     case ModuleType.MARKETPLACE: return `${prefix}/campus/market`;
-    case ModuleType.ROOMMATE: return `${prefix}/roommate`;
+    case ModuleType.ROOMMATE: return `${prefix}/campus/roommate`;
     case ModuleType.EMERGENCY: return `${prefix}/emergency`;
 
     case ModuleType.TOOLS: return `${prefix}/tools`;
@@ -564,10 +564,10 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
   const { selectedUniversity } = useUniversity();
     const allFeatures = [
       { id: ModuleType.ATTENDANCE, name: 'Attendance Tracker', desc: 'Track your daily attendance.', icon: <CheckCircle2 />, category: 'Tools', lightColor: 'bg-emerald-500/20', iconColor: 'text-emerald-500', gradient: 'from-emerald-500/20 to-transparent' },
-      { id: ModuleType.CAMPUS, name: 'Campus Map', desc: 'Find buildings and facilities.', icon: <Map />, category: 'Campus', lightColor: 'bg-blue-500/20', iconColor: 'text-blue-500', gradient: 'from-blue-500/20 to-transparent' },
+      { id: ModuleType.CAMPUS, name: 'Campus Map', desc: 'Find buildings and facilities.', icon: <Map />, category: 'Campus', lightColor: 'bg-blue-500/20', iconColor: 'text-blue-500', gradient: 'from-blue-500/20 to-transparent', customPath: '/campus/map' },
       { id: ModuleType.CGPA, name: 'CGPA Calculator', desc: 'Plan your grades and GPA.', icon: <Calculator />, category: 'Tools', lightColor: 'bg-purple-500/20', iconColor: 'text-purple-500', gradient: 'from-purple-500/20 to-transparent' },
       { id: ModuleType.PLACEMENT, name: 'Resume Checker', desc: 'AI feedback on your resume.', icon: <Briefcase />, category: 'Tools', lightColor: 'bg-rose-500/20', iconColor: 'text-rose-500', gradient: 'from-rose-500/20 to-transparent' },
-      { id: 'mess', name: 'Mess Menu', desc: "Today's meal planning.", icon: <Utensils />, category: 'Campus', lightColor: 'bg-orange-500/20', iconColor: 'text-orange-500', gradient: 'from-orange-500/20 to-transparent' },
+      { id: 'mess', name: 'Mess Menu', desc: "Today's meal planning.", icon: <Utensils />, category: 'Campus', lightColor: 'bg-orange-500/20', iconColor: 'text-orange-500', gradient: 'from-orange-500/20 to-transparent', customPath: '/campus/mess' },
       { id: ModuleType.LIBRARY, name: 'Content Library', desc: 'Study materials and resources.', icon: <Rocket />, category: 'Study', lightColor: 'bg-indigo-500/20', iconColor: 'text-indigo-500', gradient: 'from-indigo-500/20 to-transparent' },
       { id: ModuleType.QUIZ, name: 'Quiz Taker', desc: 'Practice with AI generated quizzes.', icon: <PenTool />, category: 'Study', lightColor: 'bg-cyan-500/20', iconColor: 'text-cyan-500', gradient: 'from-cyan-500/20 to-transparent' },
 
@@ -592,7 +592,7 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
               {allFeatures.map((f) => (
-                <FeatureCard key={f.id} f={f} navigate={() => navigate(getPathFromModule(f.id as any, selectedUniversity))} />
+                <FeatureCard key={f.id} f={f} navigate={() => navigate(f.customPath || getPathFromModule(f.id as any, selectedUniversity))} />
               ))}
             </div>
           </div>
