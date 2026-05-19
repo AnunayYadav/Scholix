@@ -104,11 +104,6 @@ const SEOHelmet: React.FC<SEOHelmetProps> = ({ currentModule }) => {
         description = `Find the perfect roommate or flatmate near ${uniName} campus. Browse student housing listings.`;
         keywords += `, room finder, flatmate search, student housing`;
         break;
-      case ModuleType.AI_TOOLS:
-        title = `AI Tools Directory | Student Productivity - ${fullBrandName}`;
-        description = `Curated list of AI tools to help ${uniName} students with research, writing, and coding. Best AI for college students.`;
-        keywords += `, best ai tools, study ai, productivity tools`;
-        break;
       case ModuleType.DASHBOARD:
         description = `Welcome to the ${uniName} Hub. Access your personalized dashboard for attendance, notes, and campus updates.`;
         break;

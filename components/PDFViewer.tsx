@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { PDFDocument } from 'pdf-lib';
 import { UserProfile } from '../types.ts';
 import { showToast } from './Toast.tsx';
 import NexusServer from '../services/nexusServer.ts';
@@ -848,22 +849,50 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         jumpToPage(searchResults[prev].pageIndex);
     };
 
-    // 💾 Authenticated Download Functionality
+    // 💾 Authenticated Download with Cover Page
     const handleDownload = async () => {
         if (!isAdmin || !url) return;
         try {
             showToast('Preparing Secure Download...', 'info');
             
             const { data: { session } } = await NexusServer.getSession();
-            const response = await fetch(url, {
+
+            // 1. Fetch the original PDF bytes
+            const pdfResponse = await fetch(url, {
                 headers: {
                     'Authorization': session ? `Bearer ${session.access_token}` : ''
                 }
             });
+            if (!pdfResponse.ok) throw new Error("Vault re-verification failed.");
+            const originalPdfBytes = await pdfResponse.arrayBuffer();
 
-            if (!response.ok) throw new Error("Vault re-verification failed.");
-            
-            const blob = await response.blob();
+            // 2. Fetch the cover page image
+            const coverResponse = await fetch('/pdfcover.png');
+            if (!coverResponse.ok) throw new Error("Cover page asset not found.");
+            const coverImageBytes = await coverResponse.arrayBuffer();
+
+            // 3. Load original PDF and create the final output PDF
+            const originalPdf = await PDFDocument.load(originalPdfBytes);
+            const finalPdf = await PDFDocument.create();
+
+            // 4. Embed cover image and add as first page
+            const coverImage = await finalPdf.embedPng(coverImageBytes);
+            const coverDims = coverImage.scale(1);
+            const coverPage = finalPdf.addPage([coverDims.width, coverDims.height]);
+            coverPage.drawImage(coverImage, {
+                x: 0,
+                y: 0,
+                width: coverDims.width,
+                height: coverDims.height,
+            });
+
+            // 5. Copy all pages from the original PDF
+            const copiedPages = await finalPdf.copyPages(originalPdf, originalPdf.getPageIndices());
+            copiedPages.forEach(page => finalPdf.addPage(page));
+
+            // 6. Serialize and download
+            const finalPdfBytes = await finalPdf.save();
+            const blob = new Blob([new Uint8Array(finalPdfBytes)], { type: 'application/pdf' });
             const blobUrl = URL.createObjectURL(blob);
             
             const link = document.createElement('a');
@@ -873,7 +902,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             link.click();
             link.remove();
             
-            // Clean up memory
             setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
             showToast('Download Verified & Complete.', 'success');
         } catch (err) {
