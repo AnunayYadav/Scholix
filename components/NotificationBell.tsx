@@ -310,7 +310,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                                                     setIsDetailModalOpen(false);
                                                     handleClose();
                                                 }}
-                                                className="w-full py-4 bg-orange-600 dark:bg-orange-600 text-white font-bold text-xs rounded-2xl shadow-xl shadow-orange-600/20 active:scale-95 transition-all border-none"
+                                                className="w-full py-4 bg-brand-primary dark:bg-brand-primary text-white font-bold text-xs rounded-2xl shadow-xl shadow-brand-primary/20 active:scale-95 transition-all border-none"
                                             >
                                                 Access Resource
                                             </button>
