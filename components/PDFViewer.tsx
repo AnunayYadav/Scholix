@@ -881,15 +881,27 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             const [firstPage] = await finalPdf.copyPages(originalPdf, [0]);
             finalPdf.addPage(firstPage);
 
-            // 5. Add cover image as second page
+            // 5. Add cover image as second page — sized to match original pages
+            const origFirstPage = originalPdf.getPage(0);
+            const { width: pageWidth, height: pageHeight } = origFirstPage.getSize();
+
             const coverImage = await finalPdf.embedPng(coverImageBytes);
             const coverDims = coverImage.scale(1);
-            const coverPage = finalPdf.addPage([coverDims.width, coverDims.height]);
+
+            // Scale cover to fit within page dimensions while preserving aspect ratio
+            const scaleX = pageWidth / coverDims.width;
+            const scaleY = pageHeight / coverDims.height;
+            const fitScale = Math.min(scaleX, scaleY);
+            const drawWidth = coverDims.width * fitScale;
+            const drawHeight = coverDims.height * fitScale;
+
+            const coverPage = finalPdf.addPage([pageWidth, pageHeight]);
+            // Center the image on the page
             coverPage.drawImage(coverImage, {
-                x: 0,
-                y: 0,
-                width: coverDims.width,
-                height: coverDims.height,
+                x: (pageWidth - drawWidth) / 2,
+                y: (pageHeight - drawHeight) / 2,
+                width: drawWidth,
+                height: drawHeight,
             });
 
             // 6. Copy remaining pages from the original PDF (page 2 onward)
