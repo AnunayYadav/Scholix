@@ -961,13 +961,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
                     <button
                         onClick={handleClose}
-                        className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-zinc-200 dark:bg-white/5 hover:bg-orange-600 text-zinc-600 dark:text-white transition-all border-none group"
+                        className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-zinc-200 dark:bg-white/5 text-zinc-600 dark:text-white transition-all border-none group pdf-back-btn"
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                     </button>
                     <div className="hidden sm:block truncate">
                         <h3 className="text-[13px] font-medium text-zinc-900 dark:text-white tracking-tight truncate max-w-[200px]">{fileName}</h3>
-                        <p className="text-[10px] font-medium text-orange-500 tracking-wide leading-none mt-1">{fullBrandName} Secure Protocol</p>
+                        <p className="text-[10px] font-medium tracking-wide leading-none mt-1" style={{ color: 'var(--brand-primary)' }}>{fullBrandName} Secure Protocol</p>
                     </div>
                 </div>
 
@@ -1072,7 +1072,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     <button
                         onClick={handleDownload}
                         disabled={isDownloading}
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center border-none transition-all shadow-lg shadow-orange-600/20 ${isDownloading ? 'bg-orange-600/60 cursor-wait' : 'bg-orange-600 text-white hover:scale-110 active:scale-95'}`}
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center border-none transition-all shadow-lg ${isDownloading ? 'opacity-60 cursor-wait' : 'text-white hover:scale-110 active:scale-95'}`}
+                        style={{ backgroundColor: isDownloading ? 'var(--brand-primary)' : 'var(--brand-primary)', boxShadow: '0 10px 15px -3px var(--brand-glow)' }}
                         title={isDownloading ? 'Preparing download...' : 'Download PDF'}
                     >
                         {isDownloading ? (
@@ -1167,6 +1168,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             </div>
 
             <style>{`
+                .pdf-back-btn:hover {
+                    background-color: var(--brand-primary) !important;
+                    color: white !important;
+                }
                 .textLayer {
                     position: absolute;
                     left: 0;
