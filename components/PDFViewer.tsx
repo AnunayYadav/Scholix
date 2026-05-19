@@ -853,6 +853,24 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     // 💾 Authenticated Download with Cover Page
     const handleDownload = async () => {
         if (!url || isDownloading) return;
+
+        const STORAGE_KEY = 'nexus_pdf_downloads';
+        const today = new Date().toISOString().split('T')[0];
+        if (!isAdmin) {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (parsed.date === today && parsed.count >= 2) {
+                        showToast('Daily limit (2 downloads) reached. Please try again tomorrow.', 'error');
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.warn("Could not parse download history", e);
+            }
+        }
+
         setIsDownloading(true);
         try {
             showToast('Preparing Secure Download...', 'info');
@@ -926,6 +944,22 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             link.remove();
             
             setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+            
+            if (!isAdmin) {
+                try {
+                    const stored = localStorage.getItem('nexus_pdf_downloads');
+                    let count = 0;
+                    const today = new Date().toISOString().split('T')[0];
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
+                        if (parsed.date === today) count = parsed.count;
+                    }
+                    localStorage.setItem('nexus_pdf_downloads', JSON.stringify({ date: today, count: count + 1 }));
+                } catch (e) {
+                    console.warn("Could not update download history", e);
+                }
+            }
+
             showToast('Download Verified & Complete.', 'success');
         } catch (err: any) {
             console.error("Download failure:", err);
