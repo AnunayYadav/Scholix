@@ -918,7 +918,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             
             const link = document.createElement('a');
             link.href = blobUrl;
-            const downloadName = `(scholix.app) ${fileName || 'document.pdf'}`;
+            const baseName = (fileName || 'document.pdf').replace(/\.pdf$/i, '');
+            const downloadName = `(scholix.app) ${baseName}.pdf`;
             link.setAttribute('download', downloadName);
             document.body.appendChild(link);
             link.click();
