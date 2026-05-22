@@ -160,22 +160,34 @@ interface PlacementPrefectProps {
   reportIdOverride?: string;
 }
 
-interface ScoreAuraProps {
+const getStatus = (s: number) => {
+  if (s >= 90) return "AMAZING";
+  if (s >= 75) return "GOOD";
+  if (s >= 60) return "FAIR";
+  if (s >= 40) return "AVERAGE";
+  return "POOR";
+};
+
+const getStatusColor = (s: number) => {
+  if (s >= 90) return "#10b981"; // emerald-500
+  if (s >= 75) return "#10b981"; // emerald-500
+  if (s >= 60) return "#f59e0b"; // amber-500
+  if (s >= 40) return "#f97316"; // orange-500
+  return "#ef4444"; // red-500
+};
+
+interface ResumeScoreRingProps {
   score: number;
-  label?: string;
   size?: number;
 }
 
-const ScoreAura: React.FC<ScoreAuraProps> = ({ score, size = 180 }) => {
-  const [animatedAngle, setAnimatedAngle] = useState(0);
+const ResumeScoreRing: React.FC<ResumeScoreRingProps> = ({ score, size = 150 }) => {
   const [displayScore, setDisplayScore] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setAnimatedAngle((score / 100) * 180);
-      
       let start = 0;
-      const duration = 1500;
+      const duration = 1200;
       const increment = score / (duration / 16);
       const counter = setInterval(() => {
         start += increment;
@@ -187,68 +199,207 @@ const ScoreAura: React.FC<ScoreAuraProps> = ({ score, size = 180 }) => {
         }
       }, 16);
       return () => clearInterval(counter);
-    }, 300);
+    }, 200);
     return () => clearTimeout(timer);
   }, [score]);
 
-  const getStatus = (s: number) => {
-    if (s >= 90) return "AMAZING";
-    if (s >= 75) return "GOOD";
-    if (s >= 60) return "FAIR";
-    if (s >= 40) return "AVERAGE";
-    return "POOR";
-  };
-
-  const getStatusColor = (s: number) => {
-    if (s >= 90) return "#10b981"; // emerald-500
-    if (s >= 75) return "#34d399"; // emerald-400
-    if (s >= 60) return "#facc15"; // yellow-400
-    if (s >= 40) return "#f97316"; // orange-500
-    return "#ef4444"; // red-500
-  };
+  const radius = 56;
+  const strokeWidth = 10;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (displayScore / 100) * circumference;
 
   return (
-    <div className="relative flex flex-col items-center justify-center shrink-0" style={{ width: size, height: size }}>
-      <svg className="w-full h-full overflow-visible" viewBox="0 0 200 180">
-        {/* Background Track */}
-        <path 
-           d="M 35 80 A 65 65 0 0 1 165 80" 
-           fill="none" 
-           stroke="currentColor" 
-           strokeWidth="16" 
-           className="text-zinc-100 dark:text-white/[0.03]"
+    <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
+      <svg className="w-full h-full -rotate-90 overflow-visible" viewBox="0 0 140 140">
+        {/* Background Circle */}
+        <circle
+          cx="70"
+          cy="70"
+          r={radius}
+          fill="transparent"
+          stroke="currentColor"
+          className="text-zinc-100 dark:text-zinc-800/80"
+          strokeWidth={strokeWidth}
         />
-
-        {/* Actionable Segments - No Gaps, Butt Caps */}
-        <g fill="none" strokeWidth="16" strokeLinecap="butt" className="transition-opacity duration-500">
-          {/* Using slightly overlapping arcs to prevent 1px aliasing gaps */}
-          <path d="M 35.05 80 A 65 65 0 0 1 54.14 34.14" stroke="#ef4444" style={{ opacity: score >= 1 ? 1 : 0.15 }} />
-          <path d="M 54.04 34.04 A 65 65 0 0 1 100 15" stroke="#f97316" style={{ opacity: score >= 25 ? 1 : 0.15 }} />
-          <path d="M 100 15 A 65 65 0 0 1 145.96 34.04" stroke="#eab308" style={{ opacity: score >= 50 ? 1 : 0.15 }} />
-          <path d="M 145.86 34.14 A 65 65 0 0 1 164.95 80" stroke="#10b981" style={{ opacity: score >= 75 ? 1 : 0.15 }} />
-        </g>
-
-        <text x="32" y="98" textAnchor="middle" className="fill-zinc-400 text-[8px] font-bold font-mono opacity-50">0</text>
-        <text x="168" y="98" textAnchor="middle" className="fill-zinc-400 text-[8px] font-bold font-mono opacity-50">100</text>
-
-        {/* Needle - Restored and Refined */}
-        <g transform={`rotate(${animatedAngle}, 100, 80)`} className="transition-transform duration-[1500ms] ease-out">
-          <circle cx="100" cy="80" r="7" className="fill-zinc-900 dark:fill-zinc-100" />
-          <path d="M 100 77 L 40 80 L 100 83 Z" fill="currentColor" className="text-zinc-600 dark:text-zinc-400" />
-          <path d="M 100 79 L 45 80 L 100 81 Z" fill="white" className="opacity-40" />
-          <circle cx="100" cy="80" r="3" className="fill-zinc-100 dark:fill-zinc-900" />
-        </g>
-
-        {/* Score Display */}
-        <g transform="translate(100, 135)">
-          <text x="0" y="0" textAnchor="middle" className="fill-zinc-900 dark:fill-white text-5xl font-black tracking-tighter filter drop-shadow-md">
-            {displayScore}
-          </text>
-          <text x="0" y="24" textAnchor="middle" className="font-black text-[10px] uppercase tracking-[0.3em]" style={{ fill: getStatusColor(score) }}>
-            {getStatus(score)}
-          </text>
-        </g>
+        {/* Progress Circle */}
+        <circle
+          cx="70"
+          cy="70"
+          r={radius}
+          fill="transparent"
+          stroke={getStatusColor(score)}
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          className="transition-all duration-300 ease-out"
+        />
       </svg>
+      {/* Center Text */}
+      <div className="absolute flex flex-col items-center justify-center">
+        <span className="text-4xl font-extrabold text-zinc-900 dark:text-white tracking-tighter leading-none">
+          {displayScore}
+        </span>
+        <span className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 mt-1">
+          /100
+        </span>
+      </div>
+    </div>
+  );
+};
+
+/* SVG Icons for breakdown metrics */
+const IconTarget = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <circle cx="12" cy="12" r="10" />
+    <circle cx="12" cy="12" r="6" />
+    <circle cx="12" cy="12" r="2" />
+  </svg>
+);
+
+const IconSearch = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
+
+const IconFormatting = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+    <line x1="7" y1="8" x2="17" y2="8" />
+    <line x1="7" y1="12" x2="17" y2="12" />
+    <line x1="7" y1="16" x2="13" y2="16" />
+  </svg>
+);
+
+const IconSkills = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <circle cx="12" cy="5" r="3" />
+    <circle cx="5" cy="19" r="3" />
+    <circle cx="19" cy="19" r="3" />
+    <line x1="7.7" y1="16.9" x2="10.3" y2="7.1" />
+    <line x1="16.3" y1="16.9" x2="13.7" y2="7.1" />
+  </svg>
+);
+
+const IconImpact = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    <path d="M2 12h20" />
+  </svg>
+);
+
+const MetricBarWithIcon: React.FC<{ label: string; score: number; type: 'relevance' | 'keyword' | 'formatting' | 'skills' | 'impact' }> = ({ label, score, type }) => {
+  const getTheme = () => {
+    switch (type) {
+      case 'relevance':
+        return {
+          icon: <IconTarget />,
+          bg: 'bg-blue-500/10 text-blue-500 dark:bg-blue-500/20 dark:text-blue-400',
+          bar: 'bg-blue-500 dark:bg-blue-400'
+        };
+      case 'keyword':
+        return {
+          icon: <IconSearch />,
+          bg: 'bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20 dark:text-emerald-400',
+          bar: 'bg-emerald-500 dark:bg-emerald-400'
+        };
+      case 'formatting':
+        return {
+          icon: <IconFormatting />,
+          bg: 'bg-amber-500/10 text-amber-500 dark:bg-amber-500/20 dark:text-amber-400',
+          bar: 'bg-amber-500 dark:bg-amber-400'
+        };
+      case 'skills':
+        return {
+          icon: <IconSkills />,
+          bg: 'bg-violet-500/10 text-violet-500 dark:bg-violet-500/20 dark:text-violet-400',
+          bar: 'bg-violet-500 dark:bg-violet-400'
+        };
+      case 'impact':
+        return {
+          icon: <IconImpact />,
+          bg: 'bg-rose-500/10 text-rose-500 dark:bg-rose-500/20 dark:text-rose-400',
+          bar: 'bg-rose-500 dark:bg-rose-400'
+        };
+    }
+  };
+
+  const theme = getTheme();
+
+  return (
+    <div className="flex items-center gap-4 w-full">
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${theme.bg}`}>
+        {theme.icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 truncate">{label}</span>
+          <span className="text-xs font-bold text-zinc-900 dark:text-white">{score}/100</span>
+        </div>
+        <div className="h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+          <div 
+            className={`h-full ${theme.bar} rounded-full transition-all duration-1000 ease-out`}
+            style={{ width: `${score}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SummaryRow: React.FC<{ label: string; value: number; type: 'errors' | 'improvements' | 'passed' }> = ({ label, value, type }) => {
+  const getTheme = () => {
+    switch (type) {
+      case 'errors':
+        return {
+          icon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-red-500">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          ),
+          bg: 'bg-rose-50/50 border-rose-100 dark:bg-rose-950/10 dark:border-rose-900/20',
+          textColor: 'text-red-600 dark:text-red-400'
+        };
+      case 'improvements':
+        return {
+          icon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-amber-500">
+              <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A5 5 0 0 0 8 8c0 1 .3 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+              <path d="M9 18h6" />
+              <path d="M10 22h4" />
+            </svg>
+          ),
+          bg: 'bg-amber-50/50 border-amber-100 dark:bg-amber-950/10 dark:border-amber-900/20',
+          textColor: 'text-amber-600 dark:text-amber-400'
+        };
+      case 'passed':
+        return {
+          icon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-emerald-500">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+          ),
+          bg: 'bg-emerald-50/50 border-emerald-100 dark:bg-emerald-950/10 dark:border-emerald-900/20',
+          textColor: 'text-emerald-600 dark:text-emerald-400'
+        };
+    }
+  };
+
+  const theme = getTheme();
+
+  return (
+    <div className={`flex items-center justify-between p-3 rounded-xl border ${theme.bg}`}>
+      <div className="flex items-center gap-3">
+        <div className="shrink-0">{theme.icon}</div>
+        <span className={`text-xs font-bold ${theme.textColor}`}>{label}</span>
+      </div>
+      <span className="text-xs font-extrabold text-zinc-900 dark:text-white">{value}</span>
     </div>
   );
 };
@@ -1030,47 +1181,110 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
           </div>
         </header>
 
-        {/* Top Row: 3-column grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* ATS Score */}
-          <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex flex-col items-center text-center">
-            <ScoreAura score={result.totalScore} size={160} />
-            <p className="text-[11px] text-zinc-400 mt-2 max-w-[200px]">
-              {result.totalScore >= 75 ? 'Your resume is well-optimized!' : 'Room for improvement detected.'}
-            </p>
-          </div>
-
-          {/* Score Breakdown */}
-          <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm">
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">Score Breakdown</h3>
-            <div className="space-y-3">
-              <MetricBar label="Content Relevance" score={result.detailedScores?.keywordMatch || 0} />
-              <MetricBar label="Keyword Match" score={result.detailedScores?.skillsAlignment || 0} />
-              <MetricBar label="Formatting" score={result.detailedScores?.formattingQuality || 0} />
-              <MetricBar label="Skills Match" score={result.detailedScores?.experienceRelevance || 0} />
-              <MetricBar label="Overall Impact" score={result.detailedScores?.overallImpact || 0} />
+        {/* Top Section Layout */}
+        <div className="space-y-4">
+          {/* Resume Score Card (Wide, Ring on Left, Text on Right) */}
+          <div className="p-6 md:p-8 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex flex-col sm:flex-row items-center gap-6 md:gap-10">
+            <ResumeScoreRing score={result.totalScore} size={140} />
+            <div className="text-center sm:text-left space-y-1.5 flex-1">
+              <div className="flex items-center justify-center sm:justify-start gap-1.5 text-zinc-400 dark:text-zinc-500">
+                <span className="text-[10px] font-bold uppercase tracking-wider">Resume Score</span>
+                <button className="hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors bg-transparent border-none p-0 cursor-pointer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                </button>
+              </div>
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight" style={{ color: getStatusColor(result.totalScore) }}>
+                {getStatus(result.totalScore)}
+              </h1>
+              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 max-w-xl leading-relaxed">
+                {result.totalScore >= 75 
+                  ? 'Your resume is well-optimized! It meets the core requirements for the target role.' 
+                  : result.totalScore >= 60 
+                    ? 'Room for improvement detected. Optimizing the flagged sections will boost your shortlist probability.' 
+                    : 'Significant refinements recommended. Focus on aligning your skills and impact statements.'}
+              </p>
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex flex-col gap-3">
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Quick Summary</h3>
-            <div className="flex-1 flex flex-col justify-between gap-2">
-              <div className="flex items-center justify-between py-2 border-b border-zinc-50 dark:border-white/5">
-                <span className="text-[11px] text-zinc-500">Critical errors</span>
-                <span className="text-[11px] font-semibold text-red-500">{result.stats?.errors || 0}</span>
+          {/* Bottom Grid: 2 columns */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            {/* Score Breakdown (Left Column, col-span-3) */}
+            <div className="lg:col-span-3 p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex flex-col justify-between">
+              <div>
+                <h3 className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider mb-4">Score Breakdown</h3>
+                <div className="space-y-3.5">
+                  <MetricBarWithIcon 
+                    label="Content Relevance" 
+                    score={result.detailedScores?.keywordMatch || 0} 
+                    type="relevance"
+                  />
+                  <MetricBarWithIcon 
+                    label="Keyword Match" 
+                    score={result.detailedScores?.skillsAlignment || 0} 
+                    type="keyword"
+                  />
+                  <MetricBarWithIcon 
+                    label="Formatting" 
+                    score={result.detailedScores?.formattingQuality || 0} 
+                    type="formatting"
+                  />
+                  <MetricBarWithIcon 
+                    label="Skills Match" 
+                    score={result.detailedScores?.experienceRelevance || 0} 
+                    type="skills"
+                  />
+                  <MetricBarWithIcon 
+                    label="Overall Impact" 
+                    score={result.detailedScores?.overallImpact || 0} 
+                    type="impact"
+                  />
+                </div>
               </div>
-              <div className="flex items-center justify-between py-2 border-b border-zinc-50 dark:border-white/5">
-                <span className="text-[11px] text-zinc-500">Improvements</span>
-                <span className="text-[11px] font-semibold text-orange-500">{result.stats?.improvements || 0}</span>
+            </div>
+
+            {/* Quick Summary & File Analyzed (Right Column, col-span-2) */}
+            <div className="lg:col-span-2 flex flex-col gap-4">
+              {/* Quick Summary */}
+              <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex flex-col justify-between flex-1">
+                <h3 className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider mb-3">Quick Summary</h3>
+                <div className="space-y-2 flex-1 flex flex-col justify-center">
+                  <SummaryRow 
+                    label="Critical errors" 
+                    value={result.stats?.errors || 0} 
+                    type="errors"
+                  />
+                  <SummaryRow 
+                    label="Improvements" 
+                    value={result.stats?.improvements || 0} 
+                    type="improvements"
+                  />
+                  <SummaryRow 
+                    label="Passed checks" 
+                    value={result.stats?.passed || 0} 
+                    type="passed"
+                  />
+                </div>
               </div>
-              <div className="flex items-center justify-between py-2 border-b border-zinc-50 dark:border-white/5">
-                <span className="text-[11px] text-zinc-500">Passed checks</span>
-                <span className="text-[11px] font-semibold text-emerald-500">{result.stats?.passed || 0}</span>
-              </div>
-              <div className="flex items-center justify-between py-2">
-                <span className="text-[11px] text-zinc-500">File analyzed</span>
-                <span className="text-[11px] font-medium text-zinc-700 dark:text-zinc-300 truncate max-w-[120px]">{fileName || 'N/A'}</span>
+
+              {/* File Analyzed */}
+              <div className="p-4 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex flex-col justify-center">
+                <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2.5">File analyzed</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                      <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9.5 8.5c0 .8-.7 1.5-1.5 1.5H7v2H5.5V9H8c.8 0 1.5.7 1.5 1.5v1zm5 2c0 .8-.7 1.5-1.5 1.5h-2.5V9H13c.8 0 1.5.7 1.5 1.5v3zm3.5-3.5H16.5v1.5h2V13h-2v2H15V9h3.5v1.5zm-6.5 0h1v3h-1v-3zm-4.5 0H7v1h.5v-1z"/>
+                    </svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-zinc-900 dark:text-white truncate" title={fileName || 'N/A'}>
+                      {fileName || 'N/A'}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

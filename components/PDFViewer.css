@@ -1,0 +1,155 @@
+/* ============================================
+   PDFViewer Component Styles
+   Extracted from inline <style> in PDFViewer.tsx
+   ============================================ */
+
+/* ---- Text Layer (PDF.js text overlay for selection) ---- */
+.textLayer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    line-height: 1;
+    user-select: none;
+    pointer-events: none;
+}
+
+.textLayer > span {
+    color: transparent;
+    position: absolute;
+    white-space: pre;
+    cursor: text;
+    transform-origin: 0% 0%;
+}
+
+/* ---- Search Highlights ---- */
+.textLayer > span.search-match {
+    background-color: rgba(234, 88, 12, 0.4);
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(234, 88, 12, 0.2);
+    color: white;
+}
+
+mark.pdf-search-match {
+    background-color: rgba(234, 88, 12, 0.3);
+    color: transparent;
+    border-radius: 1px;
+    transition: background 0.2s ease;
+}
+
+mark.pdf-search-match.active-match {
+    background-color: #ea580c;
+    color: transparent;
+    box-shadow: 0 0 15px rgba(234, 88, 12, 0.4);
+    z-index: 10;
+}
+
+/* ---- Toolbar Button Hover (brand color) ---- */
+.pdf-back-btn:hover {
+    background-color: var(--brand-primary) !important;
+    color: white !important;
+}
+
+/* ---- Zoom Performance Mode ---- */
+.is-zooming .textLayer {
+    opacity: 0 !important;
+    transition: none !important;
+}
+
+.is-zooming .page-container {
+    transition: none !important;
+}
+
+/* ---- Scrollbar ---- */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ---- Fullscreen ---- */
+:fullscreen .Toolbar { display: none; }
+
+/* ---- Loading Animations ---- */
+.pdf-loader-ring {
+    animation: pdf-ring-spin 1.4s linear infinite;
+}
+
+.pdf-loader-arc {
+    animation: pdf-arc-dash 1.4s ease-in-out infinite;
+}
+
+.pdf-loader-pulse {
+    animation: pdf-icon-pulse 2s ease-in-out infinite;
+}
+
+@keyframes pdf-ring-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pdf-arc-dash {
+    0% { stroke-dasharray: 1 213; stroke-dashoffset: 0; }
+    50% { stroke-dasharray: 120 213; stroke-dashoffset: -40; }
+    100% { stroke-dasharray: 1 213; stroke-dashoffset: -213; }
+}
+
+@keyframes pdf-icon-pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.08); }
+}
+
+/* ---- Fade In ---- */
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ---- Print Protection Shield ---- */
+@media print {
+    body {
+        display: none !important;
+    }
+    * {
+        visibility: hidden !important;
+    }
+    .pdf-print-shield {
+        visibility: visible !important;
+        display: block !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: #000 !important;
+        color: #ff0000 !important;
+        text-align: center !important;
+        padding-top: 200px !important;
+        font-family: sans-serif !important;
+        font-size: 24px !important;
+        font-weight: bold !important;
+        z-index: 999999 !important;
+    }
+}
+
+@media screen {
+    .pdf-print-shield {
+        display: none;
+    }
+}
