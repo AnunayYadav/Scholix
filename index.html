@@ -40,13 +40,7 @@
   <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 
-  <!-- PDF.js v5.7.284 — Single load point via ES module -->
-  <script type="module">
-    import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/build/pdf.min.mjs';
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/build/pdf.worker.min.mjs';
-    window.pdfjsLib = pdfjsLib;
-    window.dispatchEvent(new CustomEvent('pdfjsReady'));
-  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
   <script>
     (function () {
       const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -56,6 +50,13 @@
         document.documentElement.classList.remove('dark');
       }
     })();
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+    });
   </script>
   <script src="https://cdn.jsdelivr.net/npm/pyodide@0.23.4/pyodide.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js" defer></script>
