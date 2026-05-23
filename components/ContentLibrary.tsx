@@ -34,6 +34,28 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 import VerifiedBadge from './VerifiedBadge.tsx';
+import { BTECH_CSE_2025, findSubjectMetadata } from '../data/curriculumData.ts';
+import { SYLLABUS_DATA } from '../data/syllabusData.ts';
+
+const matchFolderSlug = (folderName: string, paramSlug: string): boolean => {
+  if (!folderName || !paramSlug) return false;
+  const standardSlug = slugify(folderName);
+  if (standardSlug === paramSlug) return true;
+  
+  // Extract subject code from the beginning (e.g. "ECE249: Basic ...")
+  const codeMatch = folderName.match(/^([A-Za-z]+\d{3})/);
+  if (codeMatch) {
+    const codeSlug = slugify(codeMatch[1]);
+    if (codeSlug === paramSlug) return true;
+  }
+  return false;
+};
+
+const matchSemesterName = (nameA: string, nameB: string): boolean => {
+  if (!nameA || !nameB) return false;
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').replace('semester', 'term').replace('sem', 'term');
+  return norm(nameA) === norm(nameB);
+};
 
 const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' | 'category' | 'root', size?: string }) => {
 
@@ -58,6 +80,136 @@ const SkeletonCard = () => (
   </div>
 );
 
+const SubjectDetailHeader: React.FC<{
+  meta: any;
+  syllabusText: string | null;
+}> = ({ meta, syllabusText }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeUnit, setActiveUnit] = useState<number | null>(null);
+
+  const units = useMemo(() => {
+    if (!syllabusText) return [];
+    
+    const items: { title: string; content: string[] }[] = [];
+    const lines = syllabusText.split('\n');
+    let currentUnit: { title: string; content: string[] } | null = null;
+    
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('Unit ')) {
+        if (currentUnit) {
+          items.push(currentUnit);
+        }
+        currentUnit = { title: trimmed, content: [] };
+      } else if (trimmed) {
+        if (currentUnit) {
+          currentUnit.content.push(trimmed);
+        } else {
+          currentUnit = { title: "Course Introduction", content: [trimmed] };
+        }
+      }
+    });
+    if (currentUnit) {
+      items.push(currentUnit);
+    }
+    return items;
+  }, [syllabusText]);
+
+  return (
+    <div className="bg-zinc-50/50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 rounded-2xl p-5 space-y-5 col-span-full shadow-sm">
+      {/* Subject Information Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="px-2 py-0.5 rounded-lg text-[10px] font-semibold text-white shadow-sm" style={{ backgroundColor: 'var(--brand-primary)' }}>
+              {meta.code}
+            </span>
+            <span className="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/5">
+              {meta.credits} Credits
+            </span>
+            <span className="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/5">
+              {meta.type}
+            </span>
+          </div>
+          <div className="text-base md:text-lg font-semibold text-zinc-800 dark:text-zinc-200 tracking-tight leading-tight">
+            {meta.title}
+          </div>
+        </div>
+
+        {/* LTP Badges Row */}
+        <div className="flex gap-1.5 items-center flex-wrap">
+          <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">L-T-P:</span>
+          {[
+            { label: 'L', val: meta.l, bg: 'bg-blue-500/10 text-blue-500 border border-blue-500/20' },
+            { label: 'T', val: meta.t, bg: 'bg-amber-500/10 text-amber-500 border border-amber-500/20' },
+            { label: 'P', val: meta.p, bg: 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' }
+          ].map((ltp, idx) => (
+            <span key={idx} className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold ${ltp.bg}`}>
+              {ltp.val} {ltp.label}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Collapsible Syllabus Accordion */}
+      {units.length > 0 && (
+        <div className="border-t border-zinc-100 dark:border-white/5 pt-4">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="w-full flex items-center justify-between font-semibold text-[11px] sm:text-xs text-zinc-500 hover:text-orange-500 transition-all border-none bg-transparent p-0 cursor-pointer"
+          >
+            <span className="flex items-center gap-2">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4" style={{ color: 'var(--brand-primary)' }}><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+              Course Syllabus Overview
+            </span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+
+          {isOpen && (
+            <div className="mt-3 space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+              {units.map((unit, uIdx) => (
+                <div key={uIdx} className="border-b border-zinc-100 dark:border-white/5 last:border-0 py-2">
+                  <button
+                    onClick={() => setActiveUnit(activeUnit === uIdx ? null : uIdx)}
+                    className="w-full text-left font-medium text-[11px] sm:text-xs text-zinc-700 dark:text-zinc-300 hover:text-orange-500 transition-colors border-none bg-transparent flex justify-between items-center py-1 cursor-pointer"
+                  >
+                    <span>{unit.title}</span>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      className={`w-3.5 h-3.5 transition-transform duration-200 text-zinc-400 ${activeUnit === uIdx ? 'rotate-180 text-orange-500' : ''}`}
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </button>
+                  {activeUnit === uIdx && (
+                    <div className="mt-2 pl-3 border-l-2 border-orange-500/20 text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed space-y-1.5 pb-2">
+                      {unit.content.map((p, pIdx) => (
+                        <p key={pIdx}>{p}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
 interface ContentLibraryProps {
   userProfile: UserProfile | null;
   initialView?: 'browse' | 'my-uploads';
@@ -65,7 +217,7 @@ interface ContentLibraryProps {
 }
 
 const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialView = 'browse', onAuthRequired }) => {
-  const { shortBrandName, uniSlug } = useUniversity();
+  const { shortBrandName, uniSlug, universityInfo } = useUniversity();
   const [allFiles, setAllFiles] = useState<LibraryFile[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [viewMode, setViewMode] = useState<'browse' | 'my-uploads' | 'originals'>(initialView);
@@ -170,25 +322,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   };
   const [metaForm, setMetaForm] = useState({ name: '', description: '', semester: '', subject: '', type: '', program: selectedProgram });
 
-  const modalSemesters = useMemo(() => {
-    return folders.filter(f => f.type === 'semester' && f.program === metaForm.program).map(f => f.name);
-  }, [folders, metaForm.program]);
-
-  const modalSubjects = useMemo(() => {
-    const sem = folders.find(f => f.name === metaForm.semester && f.type === 'semester' && f.program === metaForm.program);
-    return sem ? folders.filter(f => f.type === 'subject' && f.parent_id === sem.id).map(f => f.name) : [];
-  }, [folders, metaForm.semester, metaForm.program]);
-
-  const modalCategories = useMemo(() => {
-    const sub = folders.find(f => f.name === metaForm.subject && f.type === 'subject' && f.program === metaForm.program);
-    return sub ? folders.filter(f => f.type === 'category' && f.parent_id === sub.id).map(f => f.name) : [];
-  }, [folders, metaForm.subject, metaForm.program]);
-
   useEffect(() => {
     if (showUploadModal || showEditModal) {
       setMetaForm(prev => ({ ...prev, program: selectedProgram }));
     }
   }, [showUploadModal, showEditModal, selectedProgram]);
+
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [draggingOverId, setDraggingOverId] = useState<string | null>(null);
@@ -291,9 +430,133 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     fetchFromSource(true);
   }, [fetchFromSource]);
 
+  // Helper function to dynamically merge curriculum with DB folders
+  const getMergedFolders = useCallback((prog: string, activeSub: Folder | null) => {
+    const isBtech = prog.toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
+    if (!isBtech) {
+      return folders;
+    }
+
+    const virtualFolders: Folder[] = [];
+    const curriculum = BTECH_CSE_2025;
+
+    // 1. Add virtual semesters (Terms)
+    curriculum.terms.forEach(term => {
+      virtualFolders.push({
+        id: `v-sem-${term.termNumber}`,
+        name: term.termName,
+        type: 'semester',
+        parent_id: null,
+        program: prog,
+        display_order: term.termNumber
+      });
+
+      // 2. Add virtual subjects (Core and Electives flats under Term)
+      let subjectIndex = 0;
+      term.coreSubjects.forEach((subj) => {
+        virtualFolders.push({
+          id: `v-sub-${term.termNumber}-${subj.code.toLowerCase()}`,
+          name: `${subj.code}: ${subj.title}`,
+          type: 'subject',
+          parent_id: `v-sem-${term.termNumber}`,
+          program: prog,
+          display_order: subjectIndex++
+        });
+      });
+
+      term.electiveBaskets.forEach((basket) => {
+        basket.subjects.forEach((subj) => {
+          virtualFolders.push({
+            id: `v-sub-${term.termNumber}-${subj.code.toLowerCase()}`,
+            name: `${subj.code}: ${subj.title}`,
+            type: 'subject',
+            parent_id: `v-sem-${term.termNumber}`,
+            program: prog,
+            display_order: subjectIndex++
+          });
+        });
+      });
+    });
+
+    // 3. No virtual categories at deep level (only custom folders from DB)
+
+    // 4. Merge custom folders created in the database that don't duplicate virtual folders
+    const customFolders = folders.filter(dbF => {
+      if (dbF.type === 'semester') {
+        return !virtualFolders.some(v => v.type === 'semester' && matchSemesterName(v.name, dbF.name));
+      }
+      if (dbF.type === 'subject') {
+        const parentSem = folders.find(p => p.id === dbF.parent_id);
+        if (parentSem) {
+          const virtualParentSem = virtualFolders.find(v => v.type === 'semester' && matchSemesterName(v.name, parentSem.name));
+          if (virtualParentSem) {
+            return !virtualFolders.some(v => v.type === 'subject' && v.parent_id === virtualParentSem.id && (
+              v.name.toLowerCase() === dbF.name.toLowerCase() ||
+              v.name.split(':')[0].trim().toLowerCase() === dbF.name.split(':')[0].trim().toLowerCase()
+            ));
+          }
+        }
+      }
+
+      return true;
+    });
+
+    const mappedCustomFolders = customFolders.map(dbF => {
+      if (dbF.parent_id) {
+        const dbParent = folders.find(p => p.id === dbF.parent_id);
+        if (dbParent) {
+          const matchingVirtual = virtualFolders.find(v => v.type === dbParent.type && (
+            (v.type === 'semester' && matchSemesterName(v.name, dbParent.name)) ||
+            (v.type === 'subject' && (
+              v.name.toLowerCase() === dbParent.name.toLowerCase() ||
+              v.name.split(':')[0].trim().toLowerCase() === dbParent.name.split(':')[0].trim().toLowerCase()
+            ))
+          ));
+          if (matchingVirtual) {
+            return { ...dbF, parent_id: matchingVirtual.id };
+          }
+        }
+      }
+      return dbF;
+    });
+
+    return [...virtualFolders, ...mappedCustomFolders];
+  }, [folders]);
+
+  // Derived folders list merging virtualized BTech CSE curriculum schema
+  const finalFolders = useMemo(() => {
+    return getMergedFolders(selectedProgram, activeSubject);
+  }, [getMergedFolders, selectedProgram, activeSubject]);
+
+  // Derived folders list for modal context
+  const modalFolders = useMemo(() => {
+    const baseFolders = getMergedFolders(metaForm.program, null);
+    const subFolder = baseFolders.find(f => f.name === metaForm.subject && f.type === 'subject');
+    if (subFolder) {
+      return getMergedFolders(metaForm.program, subFolder);
+    }
+    return baseFolders;
+  }, [getMergedFolders, metaForm.program, metaForm.subject]);
+
+
+  const modalSemesters = useMemo(() => {
+    return modalFolders.filter(f => f.type === 'semester').map(f => f.name);
+  }, [modalFolders]);
+
+  const modalSubjects = useMemo(() => {
+    const sem = modalFolders.find(f => f.name === metaForm.semester && f.type === 'semester');
+    return sem ? modalFolders.filter(f => f.type === 'subject' && f.parent_id === sem.id).map(f => f.name) : [];
+  }, [modalFolders, metaForm.semester]);
+
+  const modalCategories = useMemo(() => {
+    const sub = modalFolders.find(f => f.name === metaForm.subject && f.type === 'subject');
+    return sub ? modalFolders.filter(f => f.type === 'category' && f.parent_id === sub.id).map(f => f.name) : [];
+  }, [modalFolders, metaForm.subject]);
+
+
   // Sync state with URL params
   useEffect(() => {
-    if (folders.length > 0) {
+    if (finalFolders.length > 0) {
       let matchedProgram = selectedProgram;
       if (program) {
         const found = availablePrograms.find(p => slugify(p) === program);
@@ -305,31 +568,55 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         setSelectedProgram(matchedProgram);
       }
 
+      if (semester || subject || category) {
+        if (viewMode !== 'browse') {
+          setViewMode('browse');
+        }
+      }
+
       if (semester) {
-        const sem = folders.find(f => f.type === 'semester' && slugify(f.name) === semester && f.program === matchedProgram);
-        setActiveSemester(sem || null);
+        const sem = finalFolders.find(f => f.type === 'semester' && (slugify(f.name) === semester || matchSemesterName(f.name, semester.replace('-', ' '))) && f.program === matchedProgram);
+        if (activeSemester?.id !== (sem?.id || null)) {
+          setActiveSemester(sem || null);
+        }
         
         if (subject && sem) {
-          const subj = folders.find(f => f.type === 'subject' && slugify(f.name) === subject && f.parent_id === sem.id);
-          setActiveSubject(subj || null);
+          const subj = finalFolders.find(f => f.type === 'subject' && matchFolderSlug(f.name, subject) && f.parent_id === sem.id);
+          if (activeSubject?.id !== (subj?.id || null)) {
+            setActiveSubject(subj || null);
+          }
           
           if (category && subj) {
-            const cat = folders.find(f => f.type === 'category' && slugify(f.name) === category && f.parent_id === subj.id);
-            setActiveCategory(cat || null);
+            const cat = finalFolders.find(f => f.type === 'category' && slugify(f.name) === category && f.parent_id === subj.id);
+            if (activeCategory?.id !== (cat?.id || null)) {
+              setActiveCategory(cat || null);
+            }
           } else {
-            setActiveCategory(null);
+            if (activeCategory !== null) {
+              setActiveCategory(null);
+            }
           }
         } else {
-          setActiveSubject(null);
-          setActiveCategory(null);
+          if (activeSubject !== null) {
+            setActiveSubject(null);
+          }
+          if (activeCategory !== null) {
+            setActiveCategory(null);
+          }
         }
       } else {
-        setActiveSemester(null);
-        setActiveSubject(null);
-        setActiveCategory(null);
+        if (activeSemester !== null) {
+          setActiveSemester(null);
+        }
+        if (activeSubject !== null) {
+          setActiveSubject(null);
+        }
+        if (activeCategory !== null) {
+          setActiveCategory(null);
+        }
       }
     }
-  }, [program, semester, subject, category, folders, availablePrograms, selectedProgram]);
+  }, [program, semester, subject, category, finalFolders, availablePrograms, selectedProgram, viewMode]);
 
   const displayFiles = useMemo(() => {
     let data = [...allFiles];
@@ -338,17 +625,37 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       // Global flattened views
     } else if (viewMode === 'browse') {
       if (activeCategory) {
-        data = data.filter(f =>
-          f.semester === activeSemester?.name &&
-          f.subject === activeSubject?.name &&
-          f.type === activeCategory.name
-        );
+        const isBtech = selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
+        if (isBtech && activeSubject) {
+          const codeMatch = activeSubject.name.match(/^([A-Za-z]+\d{3})/);
+          const code = codeMatch ? codeMatch[1].toUpperCase() : activeSubject.name.toUpperCase().trim();
+          data = data.filter(f =>
+            f.subject.toUpperCase().includes(code) &&
+            f.type?.toLowerCase() === activeCategory.name.toLowerCase()
+          );
+        } else {
+          data = data.filter(f =>
+            f.semester === activeSemester?.name &&
+            f.subject === activeSubject?.name &&
+            f.type?.toLowerCase() === activeCategory.name.toLowerCase()
+          );
+        }
       } else if (activeSubject) {
-        data = data.filter(f =>
-          f.semester === activeSemester?.name &&
-          f.subject === activeSubject.name &&
-          (!f.type || f.type.trim() === '' || f.type === 'General')
-        );
+        const isBtech = selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
+        if (isBtech) {
+          const codeMatch = activeSubject.name.match(/^([A-Za-z]+\d{3})/);
+          const code = codeMatch ? codeMatch[1].toUpperCase() : activeSubject.name.toUpperCase().trim();
+          data = data.filter(f =>
+            f.subject.toUpperCase().includes(code) &&
+            (!f.type || f.type.trim() === '' || f.type.toLowerCase() === 'general')
+          );
+        } else {
+          data = data.filter(f =>
+            f.semester === activeSemester?.name &&
+            f.subject === activeSubject.name &&
+            (!f.type || f.type.trim() === '' || f.type.toLowerCase() === 'general')
+          );
+        }
       } else {
         data = [];
       }
@@ -445,7 +752,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const currentFolders = useMemo(() => {
     if (isAdminView) return [];
     
-    const filtered = folders.filter(f => {
+    const filtered = finalFolders.filter(f => {
       if (!activeSemester) return f.type === 'semester';
       if (!activeSubject) return f.type === 'subject' && f.parent_id === activeSemester.id;
       if (!activeCategory) return f.type === 'category' && f.parent_id === activeSubject.id;
@@ -458,7 +765,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       if (orderA !== orderB) return orderA - orderB;
       return a.name.localeCompare(b.name);
     });
-  }, [folders, activeSemester, activeSubject, activeCategory, isAdminView, viewMode, searchQuery]);
+  }, [finalFolders, activeSemester, activeSubject, activeCategory, isAdminView]);
 
   const dropdownLists = useMemo(() => {
     const sems = Array.from(new Set(folders.filter(f => f.type === 'semester').map(f => f.name)));
@@ -469,28 +776,42 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   const folderFileCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    folders.forEach(folder => {
+    finalFolders.forEach(folder => {
       let count = 0;
       if (folder.type === 'semester') {
-        count = allFiles.filter(f => f.semester === folder.name).length;
+        count = allFiles.filter(f => f.semester?.toLowerCase() === folder.name.toLowerCase()).length;
       } else if (folder.type === 'subject') {
-        const parentSem = folders.find(f => f.id === folder.parent_id);
+        const parentSem = finalFolders.find(f => f.id === folder.parent_id);
         if (parentSem) {
-          count = allFiles.filter(f => f.semester === parentSem.name && f.subject === folder.name).length;
+          const isBtech = selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
+          if (isBtech) {
+            const codeMatch = folder.name.match(/^([A-Za-z]+\d{3})/);
+            const code = codeMatch ? codeMatch[1].toUpperCase() : folder.name.toUpperCase().trim();
+            count = allFiles.filter(f => f.subject?.toUpperCase().includes(code)).length;
+          } else {
+            count = allFiles.filter(f => f.semester?.toLowerCase() === parentSem.name.toLowerCase() && f.subject?.toLowerCase() === folder.name.toLowerCase()).length;
+          }
         }
       } else if (folder.type === 'category') {
-        const parentSub = folders.find(f => f.id === folder.parent_id);
+        const parentSub = finalFolders.find(f => f.id === folder.parent_id);
         if (parentSub) {
-          const parentSem = folders.find(f => f.id === parentSub.parent_id);
+          const parentSem = finalFolders.find(f => f.id === parentSub.parent_id);
           if (parentSem) {
-            count = allFiles.filter(f => f.semester === parentSem.name && f.subject === parentSub.name && f.type === folder.name).length;
+            const isBtech = selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
+            if (isBtech) {
+              const codeMatch = parentSub.name.match(/^([A-Za-z]+\d{3})/);
+              const code = codeMatch ? codeMatch[1].toUpperCase() : parentSub.name.toUpperCase().trim();
+              count = allFiles.filter(f => f.subject?.toUpperCase().includes(code) && f.type?.toLowerCase() === folder.name.toLowerCase()).length;
+            } else {
+              count = allFiles.filter(f => f.semester?.toLowerCase() === parentSem.name.toLowerCase() && f.subject?.toLowerCase() === parentSub.name.toLowerCase() && f.type?.toLowerCase() === folder.name.toLowerCase()).length;
+            }
           }
         }
       }
       counts[folder.id] = count;
     });
     return counts;
-  }, [folders, allFiles]);
+  }, [finalFolders, allFiles, selectedProgram]);
 
   const [isCreatingNew, setIsCreatingNew] = useState({ program: false, semester: false, subject: false, type: false });
 
@@ -641,7 +962,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         <div className="space-y-6 animate-fade-in">
           <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-zinc-800 dark:text-white tracking-tight leading-none mb-1 flex items-center">
+              <div className="text-2xl font-semibold text-zinc-800 dark:text-white tracking-tight leading-none mb-1 flex items-center">
                 {activeSubject ? (
                   <>{activeSubject.name} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Notes</span></>
                 ) : activeSemester ? (
@@ -659,16 +980,16 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   <div className="absolute left-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-64 p-3 bg-white dark:bg-[#1a1a1a] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100]">
                     <p className="text-[10px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium whitespace-normal">
                       <span style={{ color: 'var(--brand-primary)' }} className="font-bold block mb-1 uppercase tracking-wider text-[9px]">Disclaimer</span>
-                      Resources not explicitly marked as <strong className="text-zinc-800 dark:text-white font-bold">{shortBrandName}</strong> (e.g. {shortBrandName} Originals, {shortBrandName} Official) are completely crowdsourced (WhatsApp, Telegram, etc.) and not owned by us.
+                      Resources not explicitly marked as <strong className="text-zinc-800 dark:text-white font-bold">{shortBrandName}</strong> (e.g. {shortBrandName} Originals, {shortBrandName} Official) are crowdsourced (WhatsApp, Telegram, etc.) and not owned by us.
                     </p>
                   </div>
                 </div>
-              </h1>
+              </div>
               {!isAdminView && !searchQuery && viewMode === 'browse' && (
                 <nav className="mt-2 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-zinc-400">
-                  <button onClick={() => navigateTo(null, null, null)} className="hover:text-orange-500 transition-colors border-none bg-transparent">Root</button>
-                  {activeSemester && <><span className="opacity-30">/</span><button onClick={() => navigateTo(activeSemester, null, null)} className={`border-none bg-transparent ${!activeSubject ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSemester.name}</button></>}
-                  {activeSubject && <><span className="opacity-30">/</span><button onClick={() => navigateTo(activeSemester, activeSubject, null)} className={`border-none bg-transparent ${!activeCategory ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSubject.name}</button></>}
+                  <button onClick={() => navigateTo(null, null, null)} className="hover:text-orange-500 transition-colors border-none bg-transparent cursor-pointer">Root</button>
+                  {activeSemester && <><span className="opacity-30">/</span><button onClick={() => navigateTo(activeSemester, null, null)} className={`border-none bg-transparent cursor-pointer ${!activeSubject ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSemester.name}</button></>}
+                  {activeSubject && <><span className="opacity-30">/</span><button onClick={() => navigateTo(activeSemester, activeSubject, null)} className={`border-none bg-transparent cursor-pointer ${!activeCategory ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSubject.name}</button></>}
                   {activeCategory && <><span className="opacity-30">/</span><span className="text-orange-500">{activeCategory.name}</span></>}
                 </nav>
               )}
@@ -771,44 +1092,146 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 onDragEnd={handleDragEnd}
               >
                 <div className="flex flex-col gap-6">
+                  {/* Subject Details Header & Syllabus Accordion */}
+                  {(() => {
+                    if (!activeSubject) return null;
+                    const activeSubjectMeta = findSubjectMetadata(selectedProgram, activeSubject.name);
+                    if (!activeSubjectMeta) return null;
+
+                    const syllabusKey = Object.keys(SYLLABUS_DATA).find(k => k.split(':')[0].trim().toUpperCase() === activeSubjectMeta.code.toUpperCase());
+                    const syllabusText = syllabusKey ? SYLLABUS_DATA[syllabusKey] : null;
+
+                    return (
+                      <SubjectDetailHeader 
+                        meta={activeSubjectMeta} 
+                        syllabusText={syllabusText} 
+                      />
+                    );
+                  })()}
+
                   {currentFolders.length > 0 && (
                     <SortableContext
                       items={currentFolders.map(f => f.id)}
                       strategy={rectSortingStrategy}
                       disabled={!userProfile?.is_admin}
                     >
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                        {currentFolders.map(folder => (
-                          <FolderCard
-                            key={folder.id}
-                            folder={folder}
-                            userProfile={userProfile}
-                            fileCount={folderFileCounts[folder.id] || 0}
-                            onDragOver={() => setDraggingOverId(folder.id)}
-                            onDragLeave={() => setDraggingOverId(null)}
-                            onDrop={(e) => {
-                              setDraggingOverId(null);
-                              const droppedFiles = e.dataTransfer.files;
-                              if (droppedFiles && droppedFiles.length > 0) {
-                                handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : '');
+                      {selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse' && activeSemester && !activeSubject ? (
+                        <div className="space-y-8 col-span-full">
+                          {(() => {
+                            const groups: { name: string; items: Folder[] }[] = [];
+                            const getGroupName = (f: Folder) => {
+                              const meta = findSubjectMetadata(selectedProgram, f.name);
+                              if (meta) {
+                                if (meta.type === 'CR') return 'Core Courses';
+                                const curriculum = BTECH_CSE_2025;
+                                const term = curriculum.terms.find(t => t.termName.toLowerCase() === activeSemester.name.toLowerCase());
+                                if (term) {
+                                  const basket = term.electiveBaskets.find(b => b.subjects.some(s => s.code === meta.code));
+                                  if (basket) return basket.name;
+                                }
                               }
-                            }}
-                            onClick={() => {
-                              if (folder.type === 'semester') navigateTo(folder, null, null);
-                              else if (folder.type === 'subject') navigateTo(activeSemester, folder, null);
-                              else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder);
-                            }}
-                            onRename={() => {
-                              setFolderToManage(folder);
-                              setNewFolderName(folder.name);
-                              setIsShining(folder.is_shining || false);
-                              setShowRenameModal(true);
-                            }}
-                            onDelete={(e) => handleDeleteFolder(folder, e)}
-                            isDraggingOver={draggingOverId === folder.id}
-                          />
-                        ))}
-                      </div>
+                              return 'Other / Custom Courses';
+                            };
+
+                            currentFolders.forEach(f => {
+                              const groupName = getGroupName(f);
+                              let group = groups.find(g => g.name === groupName);
+                              if (!group) {
+                                group = { name: groupName, items: [] };
+                                groups.push(group);
+                              }
+                              group.items.push(f);
+                            });
+
+                            groups.sort((a, b) => {
+                              if (a.name === 'Core Courses') return -1;
+                              if (b.name === 'Core Courses') return 1;
+                              if (a.name.includes('Core Elective')) {
+                                if (b.name.includes('Core Elective')) return a.name.localeCompare(b.name);
+                                return -1;
+                              }
+                              if (b.name.includes('Core Elective')) return 1;
+                              return a.name.localeCompare(b.name);
+                            });
+
+                            return groups.map(group => (
+                              <div key={group.name} className="space-y-4">
+                                <div className="flex items-center gap-3 border-b border-zinc-100 dark:border-white/5 pb-2">
+                                  <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">{group.name}</div>
+                                  <span className="px-2 py-0.5 bg-zinc-100 dark:bg-white/5 rounded-full text-[9px] font-bold text-zinc-500">{group.items.length} Course{group.items.length !== 1 ? 's' : ''}</span>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                                  {group.items.map(folder => (
+                                    <FolderCard
+                                      key={folder.id}
+                                      folder={folder}
+                                      selectedProgram={selectedProgram}
+                                      userProfile={userProfile}
+                                      fileCount={folderFileCounts[folder.id] || 0}
+                                      onDragOver={() => setDraggingOverId(folder.id)}
+                                      onDragLeave={() => setDraggingOverId(null)}
+                                      onDrop={(e) => {
+                                        setDraggingOverId(null);
+                                        const droppedFiles = e.dataTransfer.files;
+                                        if (droppedFiles && droppedFiles.length > 0) {
+                                          handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : '');
+                                        }
+                                      }}
+                                      onClick={() => {
+                                        if (folder.type === 'semester') navigateTo(folder, null, null);
+                                        else if (folder.type === 'subject') navigateTo(activeSemester, folder, null);
+                                        else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder);
+                                      }}
+                                      onRename={() => {
+                                        setFolderToManage(folder);
+                                        setNewFolderName(folder.name);
+                                        setIsShining(folder.is_shining || false);
+                                        setShowRenameModal(true);
+                                      }}
+                                      onDelete={(e) => handleDeleteFolder(folder, e)}
+                                      isDraggingOver={draggingOverId === folder.id}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            ));
+                          })()}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                          {currentFolders.map(folder => (
+                            <FolderCard
+                              key={folder.id}
+                              folder={folder}
+                              selectedProgram={selectedProgram}
+                              userProfile={userProfile}
+                              fileCount={folderFileCounts[folder.id] || 0}
+                              onDragOver={() => setDraggingOverId(folder.id)}
+                              onDragLeave={() => setDraggingOverId(null)}
+                              onDrop={(e) => {
+                                setDraggingOverId(null);
+                                const droppedFiles = e.dataTransfer.files;
+                                if (droppedFiles && droppedFiles.length > 0) {
+                                  handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : '');
+                                }
+                              }}
+                              onClick={() => {
+                                if (folder.type === 'semester') navigateTo(folder, null, null);
+                                else if (folder.type === 'subject') navigateTo(activeSemester, folder, null);
+                                else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder);
+                              }}
+                              onRename={() => {
+                                setFolderToManage(folder);
+                                setNewFolderName(folder.name);
+                                setIsShining(folder.is_shining || false);
+                                setShowRenameModal(true);
+                              }}
+                              onDelete={(e) => handleDeleteFolder(folder, e)}
+                              isDraggingOver={draggingOverId === folder.id}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </SortableContext>
                   )}
 
@@ -888,9 +1311,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                             userProfile={userProfile}
                             isAdminMode={isAdminView}
                           />
-                        ) : folders.find(f => f.id === activeId) ? (
+                        ) : finalFolders.find(f => f.id === activeId) ? (
                           <StaticFolderCard
-                            folder={folders.find(f => f.id === activeId)!}
+                            folder={finalFolders.find(f => f.id === activeId)!}
+                            selectedProgram={selectedProgram}
                             fileCount={folderFileCounts[activeId] || 0}
                           />
                         ) : null}
@@ -1088,8 +1512,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       {pendingUploads.map((up, idx) => (
                         <button
                           key={idx}
-                          onClick={() => switchActiveUpload(idx)}
-                          className={`w-full text-left p-4 rounded-2xl transition-all border-none relative group ${activeUploadIndex === idx ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'hover:bg-orange-500/5 text-zinc-500 hover:text-orange-500'}`}
+                          onClick={() => switchActiveUpload(idx)}                          className={`w-full text-left p-4 rounded-2xl transition-all border-none relative group ${activeUploadIndex === idx ? 'text-white shadow-lg shadow-orange-500/20' : 'hover:bg-orange-500/5 text-zinc-500 dark:text-zinc-400 hover:text-orange-500'}`}
+                          style={activeUploadIndex === idx ? { backgroundColor: 'var(--brand-primary)' } : undefined}
                         >
                           <div className="flex items-center gap-3">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeUploadIndex === idx ? 'bg-white/20' : 'bg-zinc-100 dark:bg-[#0a0a0a]'}`}>
@@ -1139,9 +1563,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     </div>
                   </div>
                 )}
-
                 <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 custom-scrollbar bg-white dark:bg-[#0a0a0a]/20">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className={`grid grid-cols-1 gap-5 ${showUploadModal ? 'md:grid-cols-2 md:gap-6' : ''}`}>
                     <div className="space-y-2 relative z-[95]">
                       <label className="text-[11px] sm:text-xs text-zinc-500 ml-1">Target Program</label>
                       {!isCreatingNew.program ? (
@@ -1156,12 +1579,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           renderCustomMenu={(close) => (
                             <>
                               {availablePrograms.map(opt => (
-                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, program: opt, semester: '', subject: '', type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.program === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-zinc-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, program: opt, semester: '', subject: '', type: '' }); close(); }} className={`w-full text-left px-4 py-3 border-none rounded-xl text-xs font-medium transition-all flex items-center justify-between group ${metaForm.program === opt ? 'text-white' : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-orange-500'}`} style={metaForm.program === opt ? { backgroundColor: 'var(--brand-primary)', boxShadow: '0 10px 15px -3px var(--brand-glow)' } : undefined}>
                                   {opt}
                                   {metaForm.program === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
                                 </button>
                               ))}
-                              <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, program: true }); setMetaForm({ ...metaForm, program: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
+                              <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, program: true }); setMetaForm({ ...metaForm, program: '' }); close(); }} className="w-full text-left px-4 py-3 rounded-xl text-xs font-medium text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-zinc-100 dark:border-white/5 pt-4">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
                                 Add New Program
                               </button>
@@ -1178,7 +1601,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
                     <div className="space-y-2 relative z-[90]">
                       <label className="text-[11px] sm:text-xs text-zinc-500 ml-1">Document Title</label>
-                      <input value={metaForm.name} onChange={e => setMetaForm({ ...metaForm, name: e.target.value })} className="w-full bg-zinc-100 dark:bg-[#0a0a0a]/40 p-4 rounded-2xl font-bold border border-transparent dark:border-white/5 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 text-[11px] sm:text-xs transition-all" />
+                      <input value={metaForm.name} onChange={e => setMetaForm({ ...metaForm, name: e.target.value })} className="w-full bg-zinc-100 dark:bg-[#0a0a0a]/40 p-4 rounded-2xl font-medium border border-transparent dark:border-white/5 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 text-[11px] sm:text-xs transition-all" />
                     </div>
 
                     <div className="space-y-2 relative z-[80]">
@@ -1193,12 +1616,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           renderCustomMenu={(close) => (
                             <>
                               {modalSemesters.map(opt => (
-                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, semester: opt, subject: '', type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.semester === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-zinc-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, semester: opt, subject: '', type: '' }); close(); }} className={`w-full text-left px-4 py-3 border-none rounded-xl text-xs font-medium transition-all flex items-center justify-between group ${metaForm.semester === opt ? 'text-white' : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-orange-500'}`} style={metaForm.semester === opt ? { backgroundColor: 'var(--brand-primary)', boxShadow: '0 10px 15px -3px var(--brand-glow)' } : undefined}>
                                   {opt}
                                   {metaForm.semester === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
                                 </button>
                               ))}
-                              <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, semester: true }); setMetaForm({ ...metaForm, semester: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
+                              <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, semester: true }); setMetaForm({ ...metaForm, semester: '' }); close(); }} className="w-full text-left px-4 py-3 rounded-xl text-xs font-medium text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-zinc-100 dark:border-white/5 pt-4">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
                                 Create New Folder
                               </button>
@@ -1225,12 +1648,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           renderCustomMenu={(close) => (
                             <>
                               {modalSubjects.map(opt => (
-                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, subject: opt, type: '' }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.subject === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-zinc-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, subject: opt, type: '' }); close(); }} className={`w-full text-left px-4 py-3 border-none rounded-xl text-xs font-medium transition-all flex items-center justify-between group ${metaForm.subject === opt ? 'text-white' : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-orange-500'}`} style={metaForm.subject === opt ? { backgroundColor: 'var(--brand-primary)', boxShadow: '0 10px 15px -3px var(--brand-glow)' } : undefined}>
                                   {opt}
                                   {metaForm.subject === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
                                 </button>
                               ))}
-                              <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, subject: true }); setMetaForm({ ...metaForm, subject: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
+                              <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, subject: true }); setMetaForm({ ...metaForm, subject: '' }); close(); }} className="w-full text-left px-4 py-3 rounded-xl text-xs font-medium text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-zinc-100 dark:border-white/5 pt-4">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
                                 Create New Folder
                               </button>
@@ -1257,12 +1680,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           renderCustomMenu={(close) => (
                             <>
                               {modalCategories.map(opt => (
-                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, type: opt }); close(); }} className={`w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] transition-all flex items-center justify-between group border-none ${metaForm.type === opt ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-zinc-400 hover:text-orange-600 hover:bg-white/5'}`}>
+                                <button key={opt} type="button" onClick={() => { setMetaForm({ ...metaForm, type: opt }); close(); }} className={`w-full text-left px-4 py-3 border-none rounded-xl text-xs font-medium transition-all flex items-center justify-between group ${metaForm.type === opt ? 'text-white' : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-orange-500'}`} style={metaForm.type === opt ? { backgroundColor: 'var(--brand-primary)', boxShadow: '0 10px 15px -3px var(--brand-glow)' } : undefined}>
                                   {opt}
                                   {metaForm.type === opt && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3.5 h-3.5"><path d="M20 6 9 17 4 12" /></svg>}
                                 </button>
                               ))}
-<button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, type: true }); setMetaForm({ ...metaForm, type: '' }); close(); }} className="w-full text-left px-4 py-3.5 rounded-2xl text-[11px] sm:text-xs font-black uppercase tracking-[0.15em] text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-white/5 pt-4">
+                              <button type="button" onClick={() => { setIsCreatingNew({ ...isCreatingNew, type: true }); setMetaForm({ ...metaForm, type: '' }); close(); }} className="w-full text-left px-4 py-3 rounded-xl text-xs font-medium text-orange-500 hover:bg-orange-500/10 transition-all border-none flex items-center gap-2 mt-2 border-t border-zinc-100 dark:border-white/5 pt-4">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M12 5v14M5 12h14" /></svg>
                                 Create New Folder
                               </button>
@@ -1277,7 +1700,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       )}
                     </div>
 
-                    <div className="space-y-2 relative z-[50] md:col-span-2">
+                    <div className={`space-y-2 relative z-[50] ${showUploadModal ? 'md:col-span-2' : ''}`}>
                       <label className="text-[11px] sm:text-xs text-zinc-500 ml-1">Short Description</label>
                       <textarea rows={2} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-zinc-100 dark:bg-[#0a0a0a]/40 p-4 rounded-3xl font-medium border border-transparent dark:border-white/5 text-zinc-700 dark:text-zinc-300 outline-none focus:ring-2 focus:ring-orange-500 resize-none italic text-[11px] sm:text-xs transition-all" placeholder="Tell us more about this file..." />
                     </div>
@@ -1327,6 +1750,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
 const FolderCard: React.FC<{
   folder: Folder;
+  selectedProgram: string;
   userProfile: UserProfile | null;
   fileCount: number;
   onDragOver: (e: React.DragEvent) => void;
@@ -1336,7 +1760,7 @@ const FolderCard: React.FC<{
   onRename: () => void;
   onDelete: (e: React.MouseEvent) => void;
   isDraggingOver: boolean;
-}> = ({ folder, userProfile, fileCount, onDragOver, onDragLeave, onDrop, onClick, onRename, onDelete, isDraggingOver }) => {
+}> = ({ folder, selectedProgram, userProfile, fileCount, onDragOver, onDragLeave, onDrop, onClick, onRename, onDelete, isDraggingOver }) => {
   const {
     attributes,
     listeners,
@@ -1354,6 +1778,7 @@ const FolderCard: React.FC<{
   };
 
   const isAdmin = userProfile?.is_admin || false;
+  const meta = folder.type === 'subject' ? findSubjectMetadata(selectedProgram, folder.name) : null;
 
   return (
     <div
@@ -1384,9 +1809,23 @@ const FolderCard: React.FC<{
           </button>
         </div>
       )}
-      <FolderIcon type={folder.type} size="w-10 h-10" />
-      <h3 className="text-[11px] sm:text-xs md:text-base font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight mt-1">{folder.name}</h3>
-      <p className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500 mt-1">
+
+      <div className="flex items-center justify-between w-full mb-3">
+        <FolderIcon type={folder.type} size="w-10 h-10" />
+        {meta && (
+          <div className="flex flex-col items-end gap-1 z-10">
+            <span className="px-1.5 py-0.5 rounded-lg text-[9px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/5 whitespace-nowrap">
+              L:{meta.l} T:{meta.t} P:{meta.p}
+            </span>
+            <span className="px-1.5 py-0.5 rounded-lg text-[9px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/5 whitespace-nowrap">
+              {meta.credits} Credits
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight mt-1 z-10">{folder.name}</div>
+      <p className="text-[10px] sm:text-xs text-zinc-400 dark:text-zinc-500 mt-1 z-10">
         {fileCount} File{fileCount !== 1 ? 's' : ''}
       </p>
       <div className="absolute -right-2 -bottom-2 opacity-5 group-hover:scale-110 transition-transform"><FolderIcon type={folder.type} size="w-24 h-24" /></div>
@@ -1396,13 +1835,28 @@ const FolderCard: React.FC<{
 
 const StaticFolderCard: React.FC<{
   folder: Folder;
+  selectedProgram: string;
   fileCount: number;
-}> = ({ folder, fileCount }) => {
+}> = ({ folder, selectedProgram, fileCount }) => {
+  const meta = folder.type === 'subject' ? findSubjectMetadata(selectedProgram, folder.name) : null;
   return (
-    <div className={`p-5 rounded-[30px] border border-orange-500 bg-white dark:bg-[#0a0a0a] flex flex-col justify-center min-h-[140px] ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''}`}>
-      <FolderIcon type={folder.type} size="w-10 h-10" />
-      <h3 className="text-[11px] sm:text-xs md:text-base font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight mt-1">{folder.name}</h3>
-      <p className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500 mt-1">
+    <div className={`p-5 rounded-[30px] border border-orange-500 bg-white dark:bg-[#0a0a0a] flex flex-col justify-center min-h-[140px] relative overflow-hidden ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''}`}>
+      <div className="flex items-center justify-between w-full mb-3">
+        <FolderIcon type={folder.type} size="w-10 h-10" />
+        {meta && (
+          <div className="flex flex-col items-end gap-1">
+            <span className="px-1.5 py-0.5 rounded-lg text-[9px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/5 whitespace-nowrap">
+              L:{meta.l} T:{meta.t} P:{meta.p}
+            </span>
+            <span className="px-1.5 py-0.5 rounded-lg text-[9px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/5 whitespace-nowrap">
+              {meta.credits} Credits
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight mt-1">{folder.name}</div>
+      <p className="text-[10px] sm:text-xs text-zinc-400 dark:text-zinc-500 mt-1">
         {fileCount} File{fileCount !== 1 ? 's' : ''}
       </p>
       <div className="absolute -right-2 -bottom-2 opacity-5"><FolderIcon type={folder.type} size="w-24 h-24" /></div>
@@ -1411,6 +1865,7 @@ const StaticFolderCard: React.FC<{
 };
 
 const FileCard: React.FC<{
+
   file: LibraryFile;
   userProfile: UserProfile | null;
   isAdminMode: boolean;
@@ -1470,7 +1925,7 @@ const FileCard: React.FC<{
           </div>
         )}
       </div>
-      <h3 className="text-[11px] md:text-[13px] font-bold text-zinc-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2 group-hover:text-orange-500 transition-colors">{file.name}</h3>
+      <div className="text-[11px] md:text-[13px] font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2 group-hover:text-orange-500 transition-colors">{file.name}</div>
       <div className="pt-3 mt-auto border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
         <span className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500">{file.size}</span>
         <div className="flex gap-1.5 peer">
@@ -1531,7 +1986,7 @@ const StaticFileCard: React.FC<{
           </div>
         )}
       </div>
-      <h3 className="text-[11px] md:text-[13px] font-bold text-zinc-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2">{file.name}</h3>
+      <div className="text-[11px] md:text-[13px] font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2">{file.name}</div>
       <div className="pt-3 mt-auto border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
         <span className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500">{file.size}</span>
       </div>
