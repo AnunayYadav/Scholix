@@ -311,6 +311,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         lastTap: number;
         lastTapX: number;
         lastTapY: number;
+        lastFocalX: number;
+        lastFocalY: number;
         isPinching: boolean;
         wasScrolling: boolean;
     }>({
@@ -318,6 +320,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         lastTap: 0,
         lastTapX: 0,
         lastTapY: 0,
+        lastFocalX: 0,
+        lastFocalY: 0,
         isPinching: false,
         wasScrolling: false
     });
@@ -644,6 +648,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     touch1.pageX - touch2.pageX,
                     touch1.pageY - touch2.pageY
                 );
+                touchState.current.lastFocalX = (touch1.clientX + touch2.clientX) / 2;
+                touchState.current.lastFocalY = (touch1.clientY + touch2.clientY) / 2;
                 isInteractingRef.current = true;
                 container.classList.add('is-zooming');
             } else if (e.touches.length === 1) {
@@ -681,23 +687,35 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 const touch1 = e.touches[0];
                 const touch2 = e.touches[1];
                 const dist = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+                const currentFocalX = (touch1.clientX + touch2.clientX) / 2;
+                const currentFocalY = (touch1.clientY + touch2.clientY) / 2;
 
                 if (touchState.current.lastDist > 0) {
                     const ratio = dist / touchState.current.lastDist;
                     const nextScale = Math.min(Math.max(0.3, scaleRef.current * ratio), 4);
                     
                     const rect = container.getBoundingClientRect();
-                    const focalX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
-                    const focalY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
+                    const localFocalX = currentFocalX - rect.left;
+                    const localFocalY = currentFocalY - rect.top;
+                    
+                    // Pan calculations
+                    const deltaX = currentFocalX - touchState.current.lastFocalX;
+                    const deltaY = currentFocalY - touchState.current.lastFocalY;
+
+                    const translatedScrollLeft = container.scrollLeft - deltaX;
+                    const translatedScrollTop = container.scrollTop - deltaY;
+
                     const realRatio = nextScale / scaleRef.current;
 
-                    const nextLeft = (container.scrollLeft + focalX) * realRatio - focalX;
-                    const nextTop = (container.scrollTop + focalY) * realRatio - focalY;
+                    const nextLeft = (translatedScrollLeft + localFocalX) * realRatio - localFocalX;
+                    const nextTop = (translatedScrollTop + localFocalY) * realRatio - localFocalY;
 
                     scaleRef.current = nextScale;
                     updateDOMScale(nextScale, nextLeft, nextTop);
                 }
                 touchState.current.lastDist = dist;
+                touchState.current.lastFocalX = currentFocalX;
+                touchState.current.lastFocalY = currentFocalY;
             } else if (e.touches.length === 1) {
                 touchState.current.wasScrolling = true;
             }

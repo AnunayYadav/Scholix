@@ -72,6 +72,62 @@ const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' |
   );
 };
 
+export const FileIcon = ({ fileName, size = "w-5 h-5", className = "" }: { fileName: string, size?: string, className?: string }) => {
+  const ext = fileName.split('.').pop()?.toLowerCase() || '';
+
+  let colorClass = 'text-zinc-400 dark:text-zinc-500';
+  let label = '';
+
+  if (ext === 'pdf') {
+    colorClass = 'text-red-500';
+    label = 'PDF';
+  } else if (['doc', 'docx'].includes(ext)) {
+    colorClass = 'text-blue-500';
+    label = 'DOC';
+  } else if (['xls', 'xlsx', 'csv'].includes(ext)) {
+    colorClass = 'text-emerald-500';
+    label = 'XLS';
+  } else if (['ppt', 'pptx'].includes(ext)) {
+    colorClass = 'text-orange-500';
+    label = 'PPT';
+  } else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
+    colorClass = 'text-amber-500';
+    label = 'ZIP';
+  } else if (['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif'].includes(ext)) {
+    colorClass = 'text-purple-500';
+    label = 'IMG';
+  } else if (['txt', 'md'].includes(ext)) {
+    colorClass = 'text-teal-500';
+    label = 'TXT';
+  }
+
+  const mergedClassName = className.includes('text-')
+    ? `${size} ${className}`
+    : `${size} ${colorClass} ${className}`;
+
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={mergedClassName}>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      {label && (
+        <text
+          x="12"
+          y="15.5"
+          fill="currentColor"
+          fontSize="6"
+          fontWeight="bold"
+          fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          stroke="none"
+        >
+          {label}
+        </text>
+      )}
+    </svg>
+  );
+};
+
 const SkeletonCard = () => (
   <div className="group p-5 rounded-[30px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 relative overflow-hidden flex flex-col min-h-[140px]">
     <div className="w-10 h-10 skeleton-pulse rounded-xl mb-4" />
@@ -756,7 +812,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   };
 
   const currentFolders = useMemo(() => {
-    if (isAdminView) return [];
+    if (isAdminView || viewMode === 'my-uploads') return [];
     
     const filtered = finalFolders.filter(f => {
       if (!activeSemester) return f.type === 'semester';
@@ -969,7 +1025,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
           <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="text-2xl font-semibold text-zinc-800 dark:text-white tracking-tight leading-none mb-1 flex items-center">
-                {activeSubject ? (
+                {viewMode === 'my-uploads' ? (
+                  <>My Vault <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Hub</span></>
+                ) : activeSubject ? (
                   <>{activeSubject.name.split(':')[0].trim()} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Notes</span></>
                 ) : activeSemester ? (
                   <>{activeSemester.name} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Hub</span></>
@@ -1330,8 +1388,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               <header className="p-6 md:p-8 border-b border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-[#0a0a0a]/20 flex items-start justify-between">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-500/20">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                    <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center border border-zinc-200 dark:border-white/5">
+                      <FileIcon fileName={selectedFile.storage_path} size="w-4 h-4" />
                     </div>
                   </div>
                   <h3 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900 dark:text-white leading-tight">{selectedFile.name}</h3>
@@ -1506,7 +1564,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                         >
                           <div className="flex items-center gap-3">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeUploadIndex === idx ? 'bg-white/20' : 'bg-zinc-100 dark:bg-[#0a0a0a]'}`}>
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                              <FileIcon fileName={up.file.name} size="w-4 h-4" className={activeUploadIndex === idx ? 'text-white' : ''} />
                             </div>
                             <div className="min-w-0">
                               <p className="text-[11px] sm:text-xs font-medium truncate">{up.name || up.file.name}</p>
@@ -1899,8 +1957,8 @@ const FileCard: React.FC<{
       className={`group p-4 rounded-[30px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a] hover:border-orange-500 hover:shadow-xl transition-all relative overflow-hidden flex flex-col min-h-[140px] cursor-pointer ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
     >
       <div className="flex items-start justify-between mb-2">
-        <div className="w-9 h-9 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center group-hover:text-orange-500 transition-colors">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+        <div className="w-9 h-9 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center transition-colors">
+          <FileIcon fileName={file.storage_path} size="w-5 h-5" className="group-hover:scale-110 transition-transform" />
         </div>
         {isAdmin && (
           <div
@@ -1966,8 +2024,8 @@ const StaticFileCard: React.FC<{
   return (
     <div className="p-4 rounded-[30px] border border-orange-500 bg-white dark:bg-[#0a0a0a] flex flex-col min-h-[140px]">
       <div className="flex items-start justify-between mb-2">
-        <div className="w-9 h-9 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center text-orange-500">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+        <div className="w-9 h-9 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center">
+          <FileIcon fileName={file.storage_path} size="w-5 h-5" />
         </div>
         {isAdmin && (
           <div className="p-2 -mr-2 text-orange-500">
