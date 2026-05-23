@@ -283,9 +283,9 @@ const TodaysSchedule: React.FC = () => {
         </div>
 
         {!dayData || sortedSlots.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center space-y-4 py-12 bg-zinc-50/50 dark:bg-white/[0.02] rounded-2xl border border-dashed border-zinc-100 dark:border-white/10">
-            <div className="w-16 h-16 rounded-full border-2 border-dashed border-zinc-100 dark:border-white/10 flex items-center justify-center">
-              <Calendar className="text-zinc-300 dark:text-zinc-700" size={24} />
+          <div className="flex flex-col items-center justify-center text-center space-y-2 md:space-y-4 py-6 md:py-12 bg-zinc-50/50 dark:bg-white/[0.02] rounded-2xl border border-dashed border-zinc-100 dark:border-white/10">
+            <div className="w-10 h-10 md:w-16 md:h-16 rounded-full border-2 border-dashed border-zinc-100 dark:border-white/10 flex items-center justify-center">
+              <Calendar className="text-zinc-300 dark:text-zinc-700 w-5 h-5 md:w-6 md:h-6" />
             </div>
             <p className="text-[11px] font-bold text-zinc-400">No classes scheduled for today</p>
           </div>
