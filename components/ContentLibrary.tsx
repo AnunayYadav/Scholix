@@ -486,6 +486,20 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     fetchFromSource(true);
   }, [fetchFromSource]);
 
+  useEffect(() => {
+    if (!(window as any).pdfjsLib) {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      script.onload = () => {
+        const pdfjsLib = (window as any).pdfjsLib;
+        if (pdfjsLib) {
+          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+      };
+      document.head.appendChild(script);
+    }
+  }, []);
+
   // Helper function to dynamically merge curriculum with DB folders
   const getMergedFolders = useCallback((prog: string, activeSub: Folder | null) => {
     const isBtech = prog.toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
@@ -1911,6 +1925,112 @@ const StaticFolderCard: React.FC<{
   );
 };
 
+const getPdfThumbnail = async (storagePath: string): Promise<string> => {
+  const url = await NexusServer.getFileUrl(storagePath);
+  const pdfjsLib = (window as any).pdfjsLib;
+  if (!pdfjsLib) throw new Error("pdfjsLib not loaded");
+
+  const pdfDoc = await pdfjsLib.getDocument(url).promise;
+  const page = await pdfDoc.getPage(1);
+  
+  const viewport = page.getViewport({ scale: 0.4 });
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error("Canvas context failed");
+
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+
+  await page.render({
+    canvasContext: context,
+    viewport: viewport
+  }).promise;
+
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+  
+  if (pdfDoc.cleanup) pdfDoc.cleanup();
+  
+  return dataUrl;
+};
+
+const getCachedPdfThumbnail = async (fileId: string, storagePath: string): Promise<string> => {
+  const cacheKey = `pdf-thumb-${fileId}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) return cached;
+
+  const dataUrl = await getPdfThumbnail(storagePath);
+  try {
+    localStorage.setItem(cacheKey, dataUrl);
+  } catch (e) {
+    console.warn("Storage full, could not cache thumbnail", e);
+  }
+  return dataUrl;
+};
+
+const FileThumbnail: React.FC<{ file: LibraryFile }> = ({ file }) => {
+  const [thumbUrl, setThumbUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const ext = file.storage_path.split('.').pop()?.toLowerCase() || '';
+  const isPdf = ext === 'pdf';
+  const isImage = ['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif'].includes(ext);
+
+  useEffect(() => {
+    let active = true;
+    
+    const loadThumb = async () => {
+      if (isPdf) {
+        setLoading(true);
+        try {
+          let checkCount = 0;
+          while (!(window as any).pdfjsLib && checkCount < 30) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            checkCount++;
+          }
+          const dataUrl = await getCachedPdfThumbnail(file.id, file.storage_path);
+          if (active) setThumbUrl(dataUrl);
+        } catch (err) {
+          console.warn("Error rendering PDF thumbnail", err);
+        } finally {
+          if (active) setLoading(false);
+        }
+      } else if (isImage) {
+        setLoading(true);
+        try {
+          const url = await NexusServer.getFileUrl(file.storage_path);
+          if (active) setThumbUrl(url);
+        } catch (err) {
+          console.warn("Error loading image thumbnail", err);
+        } finally {
+          if (active) setLoading(false);
+        }
+      }
+    };
+
+    loadThumb();
+    return () => { active = false; };
+  }, [file, isPdf, isImage]);
+
+  if (thumbUrl) {
+    return (
+      <img 
+        src={thumbUrl} 
+        alt="Preview" 
+        loading="lazy"
+        className="w-full h-full object-cover transition-opacity duration-300" 
+      />
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center p-4 text-center space-y-2">
+      <FileIcon fileName={file.storage_path} size="w-8 h-8" />
+      <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+        {ext || 'File'}
+      </span>
+    </div>
+  );
+};
+
 const FileCard: React.FC<{
 
   file: LibraryFile;
@@ -1954,59 +2074,68 @@ const FileCard: React.FC<{
       ref={setNodeRef}
       style={style}
       onClick={onShowDetails}
-      className={`group p-4 rounded-[30px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a] hover:border-orange-500 hover:shadow-xl transition-all relative overflow-hidden flex flex-col min-h-[140px] cursor-pointer ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
+      className={`group p-3 rounded-[32px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a] hover:border-orange-500 hover:shadow-xl transition-all relative overflow-hidden flex flex-col min-h-[240px] cursor-pointer ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
     >
-      <div className="flex items-start justify-between mb-2">
-        <div className="w-9 h-9 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center transition-colors">
-          <FileIcon fileName={file.storage_path} size="w-5 h-5" className="group-hover:scale-110 transition-transform" />
-        </div>
+      {/* 1. Preview Container */}
+      <div className="w-full h-36 bg-zinc-50 dark:bg-[#070707]/60 rounded-[24px] overflow-hidden relative border border-zinc-100 dark:border-white/5 flex items-center justify-center transition-colors">
+        <FileThumbnail file={file} />
+        {/* Floating extension badge */}
+        <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase bg-black/60 text-white backdrop-blur-sm tracking-wider">
+          {file.storage_path.split('.').pop() || 'FILE'}
+        </span>
         {isAdmin && (
           <div
             {...attributes}
             {...listeners}
-            className="p-2 -mr-2 text-zinc-300 hover:text-orange-500 cursor-grab active:cursor-grabbing transition-colors"
+            className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-orange-500 rounded-lg text-white/70 hover:text-white cursor-grab active:cursor-grabbing transition-colors z-20"
             onClick={(e) => e.stopPropagation()}
             title="Drag to reorder"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="9" cy="5" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="9" cy="19" r="1" /><circle cx="15" cy="5" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="19" r="1" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><circle cx="9" cy="5" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="9" cy="19" r="1" /><circle cx="15" cy="5" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="19" r="1" /></svg>
           </div>
         )}
       </div>
-      <div className="text-[11px] md:text-[13px] font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2 group-hover:text-orange-500 transition-colors">{file.name}</div>
-      <div className="pt-3 mt-auto border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
-        <span className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500">{file.size}</span>
-        <div className="flex gap-1.5 peer">
+
+      {/* 2. File Name */}
+      <div className="text-[11px] md:text-[13px] font-bold text-zinc-800 dark:text-white tracking-tight leading-tight line-clamp-1 mt-3 group-hover:text-orange-500 transition-colors">
+        {file.name}
+      </div>
+
+      {/* 3. Actions Footer */}
+      <div className="pt-2 mt-auto border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
+        <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold">{file.size}</span>
+        <div className="flex gap-1.5">
           {isAdminMode ? (
             <div className="flex gap-1.5">
               {file.status !== 'approved' && (
-                <button onClick={(e) => { e.stopPropagation(); onApprove?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Approve">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><polyline points="20 6 9 17 4 12" /></svg>
+                <button onClick={(e) => { e.stopPropagation(); onApprove?.(); }} className="w-7 h-7 bg-zinc-100 dark:bg-[#0a0a0a] text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Approve">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><polyline points="20 6 9 17 4 12" /></svg>
                 </button>
               )}
-              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Edit Metadata">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-7 h-7 bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Edit Metadata">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
               </button>
-              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-blue-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-blue-500 hover:text-white transition-all border-none" title="View Document">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-7 h-7 bg-zinc-100 dark:bg-[#0a0a0a] text-blue-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-blue-500 hover:text-white transition-all border-none" title="View Document">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
               </button>
               {file.status === 'approved' ? (
-                <button onClick={(e) => { e.stopPropagation(); onDemote?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Demote to Pending">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                <button onClick={(e) => { e.stopPropagation(); onDemote?.(); }} className="w-7 h-7 bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Demote to Pending">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                 </button>
               ) : (
-                <button onClick={(e) => { e.stopPropagation(); onReject?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Reject & Remove">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                <button onClick={(e) => { e.stopPropagation(); onReject?.(); }} className="w-7 h-7 bg-zinc-100 dark:bg-[#0a0a0a] text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Reject & Remove">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                 </button>
               )}
             </div>
           ) : isAdmin ? (
             <div className="flex gap-1.5">
-              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Edit Metadata"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
-              <button onClick={(e) => { e.stopPropagation(); onDelete?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
-              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Access File"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
+              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-7 h-7 bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all border-none" title="Edit Metadata"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+              <button onClick={(e) => { e.stopPropagation(); onDelete?.(); }} className="w-7 h-7 bg-zinc-100 dark:bg-[#0a0a0a] text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white transition-all border-none" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-7 h-7 bg-zinc-100 dark:bg-[#0a0a0a] text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white transition-all border-none" title="Access File"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
             </div>
           ) : (
-            <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 px-4 py-1.5 rounded-xl font-medium text-[11px] sm:text-xs flex items-center gap-1.5 hover:bg-orange-500 hover:text-white transition-all shadow-md border-none">Access <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
+            <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 px-3 py-1 rounded-xl font-bold text-[10px] flex items-center gap-1 hover:bg-orange-500 hover:text-white transition-all shadow-md border-none">Access <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
           )}
         </div>
       </div>
@@ -2022,20 +2151,16 @@ const StaticFileCard: React.FC<{
 }> = ({ file, userProfile, isAdminMode }) => {
   const isAdmin = userProfile?.is_admin || false;
   return (
-    <div className="p-4 rounded-[30px] border border-orange-500 bg-white dark:bg-[#0a0a0a] flex flex-col min-h-[140px]">
-      <div className="flex items-start justify-between mb-2">
-        <div className="w-9 h-9 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center">
-          <FileIcon fileName={file.storage_path} size="w-5 h-5" />
-        </div>
-        {isAdmin && (
-          <div className="p-2 -mr-2 text-orange-500">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="9" cy="5" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="9" cy="19" r="1" /><circle cx="15" cy="5" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="19" r="1" /></svg>
-          </div>
-        )}
+    <div className="p-3 rounded-[32px] border border-orange-500 bg-white dark:bg-[#0a0a0a] flex flex-col min-h-[240px]">
+      <div className="w-full h-36 bg-zinc-50 dark:bg-[#070707]/60 rounded-[24px] overflow-hidden relative border border-zinc-100 dark:border-white/5 flex items-center justify-center">
+        <FileThumbnail file={file} />
+        <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase bg-black/60 text-white backdrop-blur-sm tracking-wider">
+          {file.storage_path.split('.').pop() || 'FILE'}
+        </span>
       </div>
-      <div className="text-[11px] md:text-[13px] font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2">{file.name}</div>
-      <div className="pt-3 mt-auto border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
-        <span className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500">{file.size}</span>
+      <div className="text-[11px] md:text-[13px] font-bold text-zinc-800 dark:text-white tracking-tight leading-tight line-clamp-1 mt-3">{file.name}</div>
+      <div className="pt-2 mt-auto border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
+        <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold">{file.size}</span>
       </div>
     </div>
   );
