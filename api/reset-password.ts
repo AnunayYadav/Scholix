@@ -1,4 +1,6 @@
 
+import crypto from 'crypto';
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -48,7 +50,25 @@ export default async function handler(req: any, res: any) {
     const now = new Date();
     const expiresAt = new Date(record.expires_at);
 
-    if (record.otp !== otp.trim()) {
+    // Check attempts first
+    if (record.attempts && record.attempts >= 10) {
+      return res.status(429).json({ error: 'Too many failed attempts. Please request a new verification code.' });
+    }
+
+    // 2. Validate OTP
+    const hashedInput = crypto.createHash('sha256').update(otp.trim()).digest('hex');
+    if (record.otp !== hashedInput) {
+      // Increment attempts counter
+      const currentAttempts = record.attempts || 0;
+      await fetch(`${supabaseUrl}/rest/v1/registration_otps?email=eq.${encodeURIComponent(email.toLowerCase().trim())}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': supabaseServiceKey,
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ attempts: currentAttempts + 1 })
+      });
       return res.status(401).json({ error: 'Invalid verification code.' });
     }
 
@@ -59,7 +79,7 @@ export default async function handler(req: any, res: any) {
     // 2. Find User ID
     let userId: string | null = null;
 
-    // A. Try finding in profiles table first (fastest and handles most cases)
+    // Try finding in profiles table (fastest and handles all standard cases)
     const profileResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=id`, {
       headers: {
         'apikey': supabaseServiceKey,
@@ -71,25 +91,6 @@ export default async function handler(req: any, res: any) {
       const profileData = await profileResponse.json();
       if (profileData && profileData.length > 0) {
         userId = profileData[0].id;
-      }
-    }
-
-    // B. If not in profiles, search Auth Admin users (Ghost User scenario)
-    if (!userId) {
-      // Increase per_page to 1000 to minimize pagination misses
-      const listUsersResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users?per_page=1000`, {
-        headers: {
-          'apikey': supabaseServiceKey,
-          'Authorization': `Bearer ${supabaseServiceKey}`,
-        }
-      });
-
-      if (listUsersResponse.ok) {
-        const usersData = await listUsersResponse.json();
-        const user = (usersData.users || []).find((u: any) => u.email.toLowerCase() === email.toLowerCase().trim());
-        if (user) {
-          userId = user.id;
-        }
       }
     }
 

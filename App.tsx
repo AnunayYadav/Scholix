@@ -641,6 +641,22 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
 
 // --- Premium Auth Components ---
 
+const getPasswordStrength = (password: string): { score: number; label: string; color: string } => {
+  if (!password) return { score: 0, label: '', color: 'bg-zinc-200 dark:bg-white/10' };
+  let score = 0;
+  if (password.length >= 6) score++;
+  if (password.length >= 10) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  if (score <= 1) return { score: 1, label: 'Weak', color: 'bg-red-500' };
+  if (score <= 2) return { score: 2, label: 'Fair', color: 'bg-orange-500' };
+  if (score <= 3) return { score: 3, label: 'Good', color: 'bg-yellow-500' };
+  if (score <= 4) return { score: 4, label: 'Strong', color: 'bg-emerald-500' };
+  return { score: 5, label: 'Excellent', color: 'bg-emerald-400' };
+};
+
 const AuthInput: React.FC<{
   icon: React.ReactNode;
   label: string;
@@ -649,13 +665,39 @@ const AuthInput: React.FC<{
   value: string;
   onChange: (val: string) => void;
   error?: boolean;
-}> = ({ icon, label, placeholder, type = 'text', value, onChange, error }) => {
+  autoComplete?: string;
+  status?: 'idle' | 'checking' | 'available' | 'taken';
+}> = ({ icon, label, placeholder, type = 'text', value, onChange, error, autoComplete, status }) => {
   const [showPassword, setShowPassword] = useState(false);
   const inputType = type === 'password' && showPassword ? 'text' : type;
 
   return (
     <div className="space-y-2 group">
-      <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 tracking-widest ml-1">{label}</label>
+      <div className="flex justify-between items-center px-1">
+        <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 tracking-widest ml-1">{label}</label>
+        {status && status !== 'idle' && (
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider">
+            {status === 'checking' && (
+              <>
+                <div className="w-3 h-3 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+                <span className="text-zinc-400 dark:text-zinc-500">Checking...</span>
+              </>
+            )}
+            {status === 'available' && (
+              <>
+                <CheckCircle2 size={13} className="text-emerald-500" />
+                <span className="text-emerald-500">Available</span>
+              </>
+            )}
+            {status === 'taken' && (
+              <>
+                <X size={13} className="text-red-500" />
+                <span className="text-red-500">Taken</span>
+              </>
+            )}
+          </div>
+        )}
+      </div>
       <div className="relative">
         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 group-focus-within:text-accent transition-colors">
           {icon}
@@ -665,7 +707,12 @@ const AuthInput: React.FC<{
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className={`w-full bg-zinc-100 dark:bg-zinc-900/50 border ${error ? 'border-red-500/50' : 'border-black/5 dark:border-white/10'} rounded-2xl py-4 pl-12 pr-12 text-sm font-medium text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:border-accent/50 focus:ring-4 focus:ring-accent/5 transition-all`}
+          autoComplete={autoComplete}
+          className={`w-full bg-zinc-100 dark:bg-zinc-900/50 border ${
+            error || status === 'taken' ? 'border-red-500/50 focus:border-red-500/50' : 
+            status === 'available' ? 'border-emerald-500/50 focus:border-emerald-500/50' : 
+            'border-black/5 dark:border-white/10'
+          } rounded-2xl py-4 pl-12 pr-12 text-sm font-medium text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:border-accent/50 focus:ring-4 focus:ring-accent/5 transition-all`}
         />
         {type === 'password' && (
           <button
@@ -719,12 +766,20 @@ const PremiumAuthModal: React.FC<{
   const [step, setStep] = useState<'form' | 'otp' | 'reset' | 'verified'>('form');
   const [otpValue, setOtpValue] = useState('');
   const [resendTimer, setResendTimer] = useState(0);
+  
+  const [identifier, setIdentifier] = useState('');
+  const [emailError, setEmailError] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
+  const [regNoStatus, setRegNoStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
+
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     regNo: '',
     password: ''
   });
+
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -741,8 +796,128 @@ const PremiumAuthModal: React.FC<{
       setMode(initialMode);
       setError(null);
       setStep('form');
+      setOtpValue('');
+      setFormData({
+        username: userProfile?.username || '',
+        email: userProfile?.email || '',
+        regNo: userProfile?.registration_number || '',
+        password: ''
+      });
+      setIdentifier('');
+      setEmailError(false);
+      setUsernameStatus('idle');
+      setRegNoStatus('idle');
     }
-  }, [isOpen, initialMode]);
+  }, [isOpen, initialMode, userProfile]);
+
+  // Body scroll lock
+  useEffect(() => {
+    if (isOpen) {
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }
+  }, [isOpen]);
+
+  // Escape key handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (mode === 'verify_email') return;
+      if (e.key === 'Escape' && !loading) {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, loading, mode, onClose]);
+
+  // Focus trap
+  useEffect(() => {
+    if (!isOpen) return;
+    const modal = modalRef.current;
+    if (!modal) return;
+
+    const focusableElements = modal.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusableElements.length === 0) return;
+    const firstFocusable = focusableElements[0] as HTMLElement;
+    const lastFocusable = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey) {
+        if (document.activeElement === firstFocusable) {
+          e.preventDefault();
+          lastFocusable?.focus();
+        }
+      } else {
+        if (document.activeElement === lastFocusable) {
+          e.preventDefault();
+          firstFocusable?.focus();
+        }
+      }
+    };
+
+    modal.addEventListener('keydown', handleTab);
+    firstFocusable?.focus();
+    return () => modal.removeEventListener('keydown', handleTab);
+  }, [isOpen, mode, step]);
+
+  // Debounced username check
+  useEffect(() => {
+    if (mode === 'signup' && formData.username.length >= 3) {
+      const timer = setTimeout(async () => {
+        setUsernameStatus('checking');
+        try {
+          const avail = await NexusServer.checkUsernameAvailability(formData.username);
+          setUsernameStatus(avail ? 'available' : 'taken');
+        } catch (e) {
+          setUsernameStatus('idle');
+        }
+      }, 600);
+      return () => clearTimeout(timer);
+    } else {
+      setUsernameStatus('idle');
+    }
+  }, [formData.username, mode]);
+
+  // Debounced regNo check
+  useEffect(() => {
+    const cleanReg = formData.regNo.replace(/[^0-9]/g, '');
+    if (mode === 'signup' && cleanReg.length === 8) {
+      const timer = setTimeout(async () => {
+        setRegNoStatus('checking');
+        try {
+          const avail = await NexusServer.checkRegistrationAvailability(cleanReg);
+          setRegNoStatus(avail ? 'available' : 'taken');
+        } catch (e) {
+          setRegNoStatus('idle');
+        }
+      }, 600);
+      return () => clearTimeout(timer);
+    } else {
+      setRegNoStatus('idle');
+    }
+  }, [formData.regNo, mode]);
+
+  const handleUsernameChange = (val: string) => {
+    const clean = val.toLowerCase().replace(/[^a-z0-9_]/g, '');
+    if (clean.length <= 15) {
+      setFormData(prev => ({ ...prev, username: clean }));
+    }
+  };
+
+  const handleRegNoChange = (val: string) => {
+    const clean = val.replace(/[^0-9]/g, '');
+    if (clean.length <= 8) {
+      setFormData(prev => ({ ...prev, regNo: clean }));
+    }
+  };
 
   const handleToggleMode = () => {
     setMode(prev => prev === 'login' ? 'signup' : 'login');
@@ -755,13 +930,16 @@ const PremiumAuthModal: React.FC<{
     setLoading(true);
     setError(null);
     try {
+      const emailToUse = formData.email;
       const response = await fetch('/api/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          email: formData.email.toLowerCase().trim(), 
-          username: formData.username, 
-          type: mode === 'forgot_password' ? 'password_reset' : 'signup',
+          email: emailToUse.toLowerCase().trim(), 
+          username: formData.username || userProfile?.username || '', 
+          type: mode === 'forgot_password' ? 'password_reset' 
+                : mode === 'verify_email' ? (emailToUse.toLowerCase().trim() !== userProfile?.email.toLowerCase().trim() ? 'email_update' : 'verification')
+                : 'signup',
           university: selectedUniversity 
         })
       });
@@ -787,20 +965,31 @@ const PremiumAuthModal: React.FC<{
 
     setLoading(true);
     setError(null);
+    setEmailError(false);
 
     try {
       if (mode === 'login') {
-        if (!formData.email.trim() && !formData.username.trim()) throw new Error("Email or Username required.");
+        if (!identifier.trim()) throw new Error("Email or Username required.");
         if (!formData.password.trim()) throw new Error("Password required.");
+
+        if (identifier.includes('@') && !validateEmail(identifier.trim())) {
+          setEmailError(true);
+          throw new Error("Please enter a valid email address.");
+        }
         
-        const result = await NexusServer.signIn(formData.email || formData.username, formData.password);
+        const result = await NexusServer.signIn(identifier.trim(), formData.password);
         if (result.error) throw result.error;
         onClose();
       } else if (mode === 'signup') {
         if (step === 'form') {
-          if (!formData.email.trim() || !validateEmail(formData.email.trim())) throw new Error("Valid email required.");
+          if (!formData.email.trim() || !validateEmail(formData.email.trim())) {
+            setEmailError(true);
+            throw new Error("Valid email required.");
+          }
           if (formData.regNo.replace(/[^0-9]/g, '').length !== 8) throw new Error("Registration number must be 8 digits.");
           if (formData.username.length < 3) throw new Error("Username too short.");
+          if (usernameStatus === 'taken') throw new Error("This username is already claimed.");
+          if (regNoStatus === 'taken') throw new Error("This registration number is already linked to another account.");
           if (formData.password.length < 6) throw new Error("Password must be at least 6 characters.");
 
           const response = await fetch('/api/send-otp', {
@@ -857,7 +1046,10 @@ const PremiumAuthModal: React.FC<{
         }
       } else if (mode === 'forgot_password') {
         if (step === 'form') {
-          if (!formData.email.trim() || !validateEmail(formData.email.trim())) throw new Error("Valid email required.");
+          if (!formData.email.trim() || !validateEmail(formData.email.trim())) {
+            setEmailError(true);
+            throw new Error("Valid email required.");
+          }
           const response = await fetch('/api/send-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -875,28 +1067,8 @@ const PremiumAuthModal: React.FC<{
           setResendTimer(60);
         } else if (step === 'otp') {
           if (otpValue.length !== 6) throw new Error("6-digit code required.");
-          const verifyRes = await fetch('/api/verify-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              email: formData.email.toLowerCase().trim(), 
-              otp: otpValue, 
-              type: 'password_reset',
-              university: selectedUniversity
-            })
-          });
-
-          let verifyData: any = {};
-          const verifyText = await verifyRes.text();
-          if (verifyText) {
-            try { verifyData = JSON.parse(verifyText); } catch (e) { console.error("JSON parse error:", e); }
-          }
-
-          if (!verifyRes.ok) throw new Error(verifyData.error || "Verification failed. Check the code.");
-          setStep('reset');
-        } else if (step === 'reset') {
           if (formData.password.length < 6) throw new Error("New password must be at least 6 characters.");
-
+          
           const resetRes = await fetch('/api/reset-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -921,6 +1093,65 @@ const PremiumAuthModal: React.FC<{
           setStep('form');
           setError(null);
         }
+      } else if (mode === 'verify_email' && userProfile) {
+        if (step === 'form') {
+          if (!formData.email.trim() || !validateEmail(formData.email.trim())) {
+            setEmailError(true);
+            throw new Error("Please enter a valid email address.");
+          }
+
+          const isEmailChanged = formData.email.toLowerCase().trim() !== userProfile.email.toLowerCase().trim();
+          
+          const response = await fetch('/api/send-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              email: formData.email.toLowerCase().trim(), 
+              username: userProfile.username, 
+              type: isEmailChanged ? 'email_update' : 'verification',
+              university: selectedUniversity
+            })
+          });
+
+          let data: any = {};
+          const text = await response.text();
+          if (text) {
+            try { data = JSON.parse(text); } catch (e) { console.error("JSON parse error:", e); }
+          }
+
+          if (!response.ok) throw new Error(data.error || "Failed to send verification code.");
+          setStep('otp');
+          setResendTimer(60);
+        } else if (step === 'otp') {
+          if (otpValue.length !== 6) throw new Error("6-digit verification code is required.");
+
+          const isEmailChanged = formData.email.toLowerCase().trim() !== userProfile.email.toLowerCase().trim();
+
+          const verifyResponse = await fetch('/api/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              email: formData.email.toLowerCase().trim(), 
+              otp: otpValue, 
+              type: isEmailChanged ? 'email_update' : 'verification',
+              oldEmail: isEmailChanged ? userProfile.email : undefined,
+              userId: userProfile.id
+            })
+          });
+
+          let verifyData: any = {};
+          const verifyText = await verifyResponse.text();
+          if (verifyText) {
+            try { verifyData = JSON.parse(verifyText); } catch (e) { console.error("JSON parse error:", e); }
+          }
+
+          if (!verifyResponse.ok) throw new Error(verifyData.error || "Verification failed. Check the code.");
+
+          setStep('verified');
+          setTimeout(() => {
+            window.location.reload();
+          }, 1200);
+        }
       }
     } catch (err: any) {
       console.error("Auth Error:", err);
@@ -930,6 +1161,9 @@ const PremiumAuthModal: React.FC<{
     }
   };
 
+  const isSubmitDisabled = loading || 
+    (mode === 'signup' && (usernameStatus === 'taken' || usernameStatus === 'checking' || regNoStatus === 'taken' || regNoStatus === 'checking'));
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -938,7 +1172,7 @@ const PremiumAuthModal: React.FC<{
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={mode === 'verify_email' ? undefined : onClose}
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
           />
 
@@ -953,6 +1187,7 @@ const PremiumAuthModal: React.FC<{
 
           {/* Modal Container */}
           <motion.div
+            ref={modalRef}
             initial={{ opacity: 0, scale: 0.98, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 10 }}
@@ -962,12 +1197,14 @@ const PremiumAuthModal: React.FC<{
             }}
             className="relative w-full max-w-[1100px] h-full sm:h-auto max-h-[100%] sm:max-h-[720px] bg-white dark:bg-zinc-950 border border-black/5 dark:border-white/10 rounded-2xl sm:rounded-[32px] overflow-hidden flex flex-col sm:flex-row shadow-3xl text-zinc-900 dark:text-white"
           >
-            <button 
-              onClick={onClose}
-              className="absolute top-4 right-4 sm:top-8 sm:right-8 z-50 p-2 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all hover:bg-black/10 dark:hover:bg-white/10"
-            >
-              <X size={20} />
-            </button>
+            {mode !== 'verify_email' && (
+              <button 
+                onClick={onClose}
+                className="absolute top-4 right-4 sm:top-8 sm:right-8 z-50 p-2 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all hover:bg-black/10 dark:hover:bg-white/10"
+              >
+                <X size={20} />
+              </button>
+            )}
 
             {/* LEFT SECTION - Brand Experience */}
             <div className="hidden lg:flex w-[45%] relative flex-col p-12 overflow-hidden border-r border-black/5 dark:border-white/5 bg-zinc-950">
@@ -1031,40 +1268,50 @@ const PremiumAuthModal: React.FC<{
             </div>
 
             <div className="flex-1 flex flex-col p-6 sm:p-12 lg:p-16 relative overflow-y-auto no-scrollbar bg-white dark:bg-zinc-950">
-
-
               <motion.div
-                key={mode}
+                key={mode + '_' + step}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
                 className="w-full max-w-[400px] mx-auto space-y-6 sm:space-y-8 my-auto relative z-10"
               >
-
-                {/* Header */}
-                <div className="space-y-2">
-                  <h2 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
-                    {mode === 'login' ? 'Welcome Back' : mode === 'signup' ? 'Get Started' : mode === 'forgot_password' ? 'Reset Password' : 'Check Email'}
-                  </h2>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400 font-bold">
-                    {mode === 'login' ? 'Glad to see you again!' : mode === 'signup' ? (step === 'otp' ? 'Enter verification code' : 'Create your student account') : mode === 'forgot_password' ? (step === 'otp' ? 'Verify identity' : 'Account Recovery') : 'We sent a verification link'}
-                  </p>
-                </div>
-
-                {/* Error Message */}
-                {error && (
-                  <motion.div 
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="p-4 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl text-[11px] font-bold"
-                  >
-                    {error}
-                  </motion.div>
-                )}
-
-                {/* Form Fields */}
-                {mode !== 'verify_email' && (
+                {step === 'verified' ? (
+                  <div className="text-center space-y-6 py-8">
+                    <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto">
+                      <CheckCircle2 size={40} className="text-emerald-500 animate-bounce" />
+                    </div>
+                    <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Email Verified!</h3>
+                    <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">
+                      Your identity has been successfully synchronized. Preparing your dashboard...
+                    </p>
+                  </div>
+                ) : (
                   <>
+                    {/* Header */}
+                    <div className="space-y-2">
+                      <h2 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
+                        {mode === 'login' ? 'Welcome Back' : mode === 'signup' ? 'Get Started' : mode === 'forgot_password' ? 'Reset Password' : 'Verify Email'}
+                      </h2>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 font-bold">
+                        {mode === 'login' ? 'Glad to see you again!' 
+                          : mode === 'signup' ? (step === 'otp' ? 'Enter verification code' : 'Create your student account') 
+                          : mode === 'forgot_password' ? (step === 'otp' ? 'Verify identity & reset' : 'Account Recovery') 
+                          : (step === 'otp' ? 'Enter the verification code' : 'Confirm or update your email address')}
+                      </p>
+                    </div>
+
+                    {/* Error Message */}
+                    {error && (
+                      <motion.div 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="p-4 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl text-[11px] font-bold"
+                      >
+                        {error}
+                      </motion.div>
+                    )}
+
+                    {/* Form Fields */}
                     <div className="space-y-4">
                       {step === 'form' ? (
                         <>
@@ -1079,27 +1326,47 @@ const PremiumAuthModal: React.FC<{
                                 icon={<User size={18} />} 
                                 placeholder="alex_smith" 
                                 value={formData.username}
-                                onChange={(val) => setFormData({...formData, username: val})}
+                                onChange={handleUsernameChange}
+                                status={usernameStatus}
+                                autoComplete="username"
                               />
                               <AuthInput 
                                 label="Reg No" 
                                 icon={<CheckCircle2 size={18} />} 
                                 placeholder="1220...." 
                                 value={formData.regNo}
-                                onChange={(val) => setFormData({...formData, regNo: val})}
+                                onChange={handleRegNoChange}
+                                status={regNoStatus}
+                                autoComplete="off"
                               />
                             </motion.div>
                           )}
 
-                          <AuthInput 
-                            label="Email Address" 
-                            icon={<Mail size={18} />} 
-                            placeholder="name@university.edu" 
-                            value={formData.email}
-                            onChange={(val) => setFormData({...formData, email: val})}
-                          />
+                          {mode === 'login' ? (
+                            <AuthInput 
+                              label="Email or Username" 
+                              icon={<Mail size={18} />} 
+                              placeholder="name@university.edu or username" 
+                              value={identifier}
+                              onChange={setIdentifier}
+                              autoComplete="username"
+                            />
+                          ) : (
+                            <AuthInput 
+                              label="Email Address" 
+                              icon={<Mail size={18} />} 
+                              placeholder="name@university.edu" 
+                              value={formData.email}
+                              onChange={(val) => {
+                                setFormData({...formData, email: val});
+                                setEmailError(val.trim() !== '' && !validateEmail(val.trim()));
+                              }}
+                              error={emailError}
+                              autoComplete="email"
+                            />
+                          )}
                           
-                          {mode !== 'forgot_password' && (
+                          {mode !== 'forgot_password' && mode !== 'verify_email' && (
                             <div className="space-y-1">
                               <AuthInput 
                                 label="Password"
@@ -1108,13 +1375,41 @@ const PremiumAuthModal: React.FC<{
                                 placeholder="••••••••" 
                                 value={formData.password}
                                 onChange={(val) => setFormData({...formData, password: val})}
+                                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                               />
+                              
+                              {mode === 'signup' && formData.password && (
+                                <div className="space-y-1.5 pt-1 px-1">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Password Strength</span>
+                                    <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
+                                      getPasswordStrength(formData.password).score <= 2 ? 'text-red-500' :
+                                      getPasswordStrength(formData.password).score <= 3 ? 'text-yellow-500' : 'text-emerald-500'
+                                    }`}>
+                                      {getPasswordStrength(formData.password).label}
+                                    </span>
+                                  </div>
+                                  <div className="grid grid-cols-5 gap-1">
+                                    {[1, 2, 3, 4, 5].map((level) => (
+                                      <div
+                                        key={level}
+                                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                                          level <= getPasswordStrength(formData.password).score
+                                            ? getPasswordStrength(formData.password).color
+                                            : 'bg-zinc-200 dark:bg-zinc-800'
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
                               {mode === 'login' && (
-                                <div className="flex justify-end">
+                                <div className="flex justify-end pt-1">
                                   <button 
                                     type="button"
                                     onClick={() => { setMode('forgot_password'); setStep('form'); setError(null); }}
-                                    className="text-[10px] font-bold text-accent hover:text-accent-2 tracking-wider transition-colors uppercase"
+                                    className="text-[10px] font-bold text-accent hover:text-accent-2 tracking-wider transition-colors uppercase border-none bg-transparent outline-none cursor-pointer"
                                   >
                                     Forgot Password?
                                   </button>
@@ -1124,116 +1419,130 @@ const PremiumAuthModal: React.FC<{
                           )}
                         </>
                       ) : step === 'otp' ? (
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                           <AuthInput 
                             label="Verification Code" 
                             icon={<Rocket size={18} />} 
                             placeholder="6-digit code" 
                             value={otpValue}
                             onChange={(val) => setOtpValue(val.replace(/[^0-9]/g, '').slice(0, 6))}
+                            autoComplete="one-time-code"
                           />
-                          <div className="flex justify-between items-center px-1">
+                          
+                          {mode === 'forgot_password' && (
+                            <div className="space-y-1">
+                              <AuthInput 
+                                label="New Password"
+                                type="password" 
+                                icon={<Lock size={18} />} 
+                                placeholder="••••••••" 
+                                value={formData.password}
+                                onChange={(val) => setFormData({...formData, password: val})}
+                                autoComplete="new-password"
+                              />
+                              {formData.password && (
+                                <div className="space-y-1.5 pt-1 px-1">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Password Strength</span>
+                                    <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
+                                      getPasswordStrength(formData.password).score <= 2 ? 'text-red-500' :
+                                      getPasswordStrength(formData.password).score <= 3 ? 'text-yellow-500' : 'text-emerald-500'
+                                    }`}>
+                                      {getPasswordStrength(formData.password).label}
+                                    </span>
+                                  </div>
+                                  <div className="grid grid-cols-5 gap-1">
+                                    {[1, 2, 3, 4, 5].map((level) => (
+                                      <div
+                                        key={level}
+                                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                                          level <= getPasswordStrength(formData.password).score
+                                            ? getPasswordStrength(formData.password).color
+                                            : 'bg-zinc-200 dark:bg-zinc-800'
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          <div className="flex justify-between items-center px-1 pt-2">
                             <button 
+                              type="button"
                               onClick={handleResendOTP}
                               disabled={resendTimer > 0 || loading}
-                              className="text-[10px] font-bold text-accent uppercase tracking-widest disabled:opacity-50 hover:text-accent-2 transition-colors"
+                              className="text-[10px] font-bold text-accent uppercase tracking-widest disabled:opacity-50 hover:text-accent-2 transition-colors border-none bg-transparent outline-none cursor-pointer"
                             >
                               {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code'}
                             </button>
                             <button 
                               type="button"
                               onClick={() => { setStep('form'); setError(null); }}
-                              className="text-[10px] font-bold text-zinc-400 hover:text-zinc-900 dark:hover:text-white uppercase tracking-widest transition-colors"
+                              className="text-[10px] font-bold text-zinc-400 hover:text-zinc-900 dark:hover:text-white uppercase tracking-widest transition-colors border-none bg-transparent outline-none cursor-pointer"
                             >
                               Edit Details
                             </button>
                           </div>
                         </div>
-                      ) : step === 'reset' ? (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="space-y-4"
-                        >
-                          <AuthInput 
-                            label="New Password"
-                            type="password" 
-                            icon={<Lock size={18} />} 
-                            placeholder="••••••••" 
-                            value={formData.password}
-                            onChange={(val) => setFormData({...formData, password: val})}
-                          />
-                          <p className="text-[10px] text-zinc-500 font-medium px-1">
-                            Create a strong password to secure your account.
-                          </p>
-                        </motion.div>
                       ) : null}
                     </div>
 
                     {/* CTA Button */}
                     <div className="space-y-6 pt-2">
                       <motion.button
-                        whileHover={!loading ? { scale: 1.02, y: -2 } : {}}
-                        whileTap={!loading ? { scale: 0.98 } : {}}
+                        whileHover={!isSubmitDisabled ? { scale: 1.02, y: -2 } : {}}
+                        whileTap={!isSubmitDisabled ? { scale: 0.98 } : {}}
                         onClick={() => handleSubmit()}
-                        disabled={loading}
-                        className="w-full bg-gradient-to-r from-accent to-accent-2 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(255,122,24,0.15)] hover:shadow-[0_20px_40px_rgba(255,122,24,0.3)] transition-all group disabled:opacity-70 disabled:cursor-not-allowed"
+                        disabled={isSubmitDisabled}
+                        className="w-full bg-gradient-to-r from-accent to-accent-2 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(255,122,24,0.15)] hover:shadow-[0_20px_40px_rgba(255,122,24,0.3)] transition-all group disabled:opacity-70 disabled:cursor-not-allowed border-none outline-none text-center cursor-pointer"
                       >
                         {loading ? (
                           <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         ) : (
                           <>
                             <span className="tracking-wider text-sm">
-                                                            {mode === 'login' ? 'Sign In' : mode === 'signup' ? (step === 'otp' ? 'Verify & Join' : 'Create Account') : (step === 'otp' ? 'Verify Code' : step === 'reset' ? 'Update Password' : 'Send Recovery Code')}
+                              {mode === 'login' ? 'Sign In' 
+                                : mode === 'signup' ? (step === 'otp' ? 'Verify & Join' : 'Create Account') 
+                                : mode === 'forgot_password' ? (step === 'otp' ? 'Update Password' : 'Send Recovery Code')
+                                : (step === 'otp' ? 'Verify Code' : 'Send Verification Code')}
                             </span>
                             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                           </>
                         )}
                       </motion.button>
 
-                      <p className="text-center text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                        {mode === 'login' ? "Don't have an account?" : "Already a member?"} {' '}
-                        <button 
-                          type="button"
-                          onClick={handleToggleMode}
-                          className="text-accent hover:text-accent-2 transition-colors underline underline-offset-4"
-                        >
-                          {mode === 'login' ? 'Join Scholix' : 'Sign In'}
-                        </button>
-                      </p>
-                    </div>
-                  </>
-                )}
+                      {mode !== 'verify_email' && (
+                        <p className="text-center text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                          {mode === 'login' ? "Don't have an account?" : "Already a member?"} {' '}
+                          <button 
+                            type="button"
+                            onClick={handleToggleMode}
+                            className="text-accent hover:text-accent-2 transition-colors underline underline-offset-4 border-none bg-transparent outline-none cursor-pointer"
+                          >
+                            {mode === 'login' ? 'Join Scholix' : 'Sign In'}
+                          </button>
+                        </p>
+                      )}
 
-                {mode === 'verify_email' && (
-                  <div className="text-center space-y-6 py-8">
-                    <div className="w-20 h-20 bg-accent/10 rounded-full flex items-center justify-center mx-auto">
-                      <Mail size={40} className="text-accent animate-pulse" />
-                    </div>
-                    <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">
-                      Check your inbox at <span className="text-zinc-900 dark:text-white font-bold">{formData.email || userProfile?.email}</span> and click the link to verify.
-                    </p>
-                    <div className="flex flex-col gap-3">
-                      <button 
-                        onClick={() => setMode('login')}
-                        className="text-accent text-xs font-bold uppercase tracking-widest hover:text-accent-2 transition-colors border-none bg-transparent"
-                      >
-                        Back to Login
-                      </button>
-                      {userProfile && (
-                        <button 
-                          onClick={async () => {
-                            await NexusServer.signOut();
-                            onClose();
-                            window.location.href = '/';
-                          }}
-                          className="text-zinc-500 hover:text-red-500 text-[10px] font-bold uppercase tracking-widest transition-colors border-none bg-transparent"
-                        >
-                          Sign Out
-                        </button>
+                      {mode === 'verify_email' && userProfile && step === 'form' && (
+                        <p className="text-center">
+                          <button 
+                            type="button"
+                            onClick={async () => {
+                              await NexusServer.signOut();
+                              onClose();
+                              window.location.reload();
+                            }}
+                            className="text-zinc-500 hover:text-red-500 text-[10px] font-bold uppercase tracking-widest transition-colors border-none bg-transparent outline-none cursor-pointer"
+                          >
+                            Sign Out
+                          </button>
+                        </p>
                       )}
                     </div>
-                  </div>
+                  </>
                 )}
               </motion.div>
             </div>

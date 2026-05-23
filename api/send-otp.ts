@@ -1,4 +1,6 @@
 
+import crypto from 'crypto';
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -21,7 +23,7 @@ export default async function handler(req: any, res: any) {
   const brevoSenderName = process.env.BREVO_SENDER_NAME || `${shortBrandName} Team`;
   
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!brevoApiKey) {
     console.error('Brevo API key missing');
@@ -55,28 +57,6 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    // If not found in profiles, or if it's a signup (to prevent ghost user conflicts), check Auth Admin
-    if (!userExists || type === 'signup') {
-      try {
-        const authCheckResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users?per_page=1000`, {
-          headers: {
-            'apikey': supabaseServiceKey,
-            'Authorization': `Bearer ${supabaseServiceKey}`,
-          }
-        });
-        
-        if (authCheckResponse.ok) {
-          const authUsersData = await authCheckResponse.json();
-          const authUser = (authUsersData.users || []).find((u: any) => u.email?.toLowerCase() === email.toLowerCase().trim());
-          if (authUser) {
-            userExists = true;
-            // If they are in auth but not profiles, we'll treat them as existing for password reset
-          }
-        }
-      } catch (e) {
-        console.error('Auth Admin Identity check failed:', e);
-      }
-    }
 
     // Final decision based on user presence and requested action
     if (type === 'login' || type === 'password_reset') {
@@ -117,8 +97,9 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate 6-digit OTP using cryptographically secure random
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
 
     // 1. Store/Update OTP in Supabase
@@ -132,7 +113,8 @@ export default async function handler(req: any, res: any) {
       },
       body: JSON.stringify({
         email: email.toLowerCase().trim(),
-        otp: otp,
+        otp: hashedOtp,
+        attempts: 0,
         created_at: new Date().toISOString(),
         expires_at: expiresAt.toISOString()
       }),

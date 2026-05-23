@@ -1,4 +1,6 @@
 
+import crypto from 'crypto';
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -11,7 +13,7 @@ export default async function handler(req: any, res: any) {
   }
 
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseServiceKey) {
     console.error('Supabase configuration missing');
@@ -44,8 +46,25 @@ export default async function handler(req: any, res: any) {
     const now = new Date();
     const expiresAt = new Date(record.expires_at);
 
+    // Check attempts first
+    if (record.attempts && record.attempts >= 10) {
+      return res.status(429).json({ error: 'Too many failed attempts. Please request a new verification code.' });
+    }
+
     // 2. Validate OTP
-    if (record.otp !== otp.trim()) {
+    const hashedInput = crypto.createHash('sha256').update(otp.trim()).digest('hex');
+    if (record.otp !== hashedInput) {
+      // Increment attempts counter
+      const currentAttempts = record.attempts || 0;
+      await fetch(`${supabaseUrl}/rest/v1/registration_otps?email=eq.${encodeURIComponent(email.toLowerCase().trim())}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': supabaseServiceKey,
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ attempts: currentAttempts + 1 })
+      });
       return res.status(401).json({ error: 'Invalid verification code. Please check and try again.' });
     }
 
@@ -62,8 +81,7 @@ export default async function handler(req: any, res: any) {
       try {
         console.log(`Attempting to resolve userId for email: ${searchEmail}`);
         // Use the standard profiles table to find the ID if possible
-        // Try searching with case-insensitive ilike if available, or fetch all then match
-        const profileQuery = await fetch(`${supabaseUrl}/rest/v1/profiles?email=ilike.${encodeURIComponent(searchEmail.trim())}&select=id`, {
+        const profileQuery = await fetch(`${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(searchEmail.toLowerCase().trim())}&select=id`, {
           headers: {
             'apikey': supabaseServiceKey,
             'Authorization': `Bearer ${supabaseServiceKey}`,
@@ -73,22 +91,6 @@ export default async function handler(req: any, res: any) {
         if (profileData && profileData.length > 0) {
           userId = profileData[0].id;
           console.log(`Resolved userId from profiles: ${userId}`);
-        } else {
-          // Fallback to auth admin if not in profiles
-          const userQuery = await fetch(`${supabaseUrl}/auth/v1/admin/users?per_page=1000`, {
-            headers: {
-              'apikey': supabaseServiceKey,
-              'Authorization': `Bearer ${supabaseServiceKey}`,
-            }
-          });
-          const allUsersData = await userQuery.json();
-          if (allUsersData && allUsersData.users) {
-            const user = allUsersData.users.find((u: any) => u.email?.toLowerCase() === searchEmail.toLowerCase().trim());
-            if (user) {
-              userId = user.id;
-              console.log(`Resolved userId from auth admin: ${userId}`);
-            }
-          }
         }
       } catch (e) {
         console.error('Failed to resolve userId:', e);
@@ -147,14 +149,16 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    // 6. Clear the OTP record
-    await fetch(`${supabaseUrl}/rest/v1/registration_otps?email=eq.${encodeURIComponent(email.toLowerCase().trim())}`, {
-      method: 'DELETE',
-      headers: {
-        'apikey': supabaseServiceKey,
-        'Authorization': `Bearer ${supabaseServiceKey}`,
-      },
-    });
+    // 6. Clear the OTP record (except for password_reset where reset-password needs it)
+    if (type !== 'password_reset') {
+      await fetch(`${supabaseUrl}/rest/v1/registration_otps?email=eq.${encodeURIComponent(email.toLowerCase().trim())}`, {
+        method: 'DELETE',
+        headers: {
+          'apikey': supabaseServiceKey,
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+        },
+      });
+    }
 
     // 7. Session generation for login/signup
     if ((type === 'login' || type === 'signup') && userId) {
