@@ -91,6 +91,22 @@ export default async function handler(req: any, res: any) {
         if (profileData && profileData.length > 0) {
           userId = profileData[0].id;
           console.log(`Resolved userId from profiles: ${userId}`);
+        } else {
+          // Fallback to auth admin with targeted filter (ghost user scenario)
+          const adminCheckResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users?filter=${encodeURIComponent(searchEmail.toLowerCase().trim())}`, {
+            headers: {
+              'apikey': supabaseServiceKey,
+              'Authorization': `Bearer ${supabaseServiceKey}`,
+            }
+          });
+          if (adminCheckResponse.ok) {
+            const adminData = await adminCheckResponse.json();
+            const user = (adminData.users || []).find((u: any) => u.email?.toLowerCase() === searchEmail.toLowerCase().trim());
+            if (user) {
+              userId = user.id;
+              console.log(`Resolved userId from auth admin fallback: ${userId}`);
+            }
+          }
         }
       } catch (e) {
         console.error('Failed to resolve userId:', e);

@@ -94,6 +94,27 @@ export default async function handler(req: any, res: any) {
       }
     }
 
+    // Fallback to auth admin with targeted filter (ghost user scenario)
+    if (!userId) {
+      try {
+        const adminCheckResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users?filter=${encodeURIComponent(email.toLowerCase().trim())}`, {
+          headers: {
+            'apikey': supabaseServiceKey,
+            'Authorization': `Bearer ${supabaseServiceKey}`,
+          }
+        });
+        if (adminCheckResponse.ok) {
+          const adminData = await adminCheckResponse.json();
+          const user = (adminData.users || []).find((u: any) => u.email?.toLowerCase() === email.toLowerCase().trim());
+          if (user) {
+            userId = user.id;
+          }
+        }
+      } catch (e) {
+        console.error('Failed fallback admin check:', e);
+      }
+    }
+
     if (!userId) {
       return res.status(404).json({ error: 'No user found with this email protocol.' });
     }

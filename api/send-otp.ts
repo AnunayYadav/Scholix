@@ -57,6 +57,29 @@ export default async function handler(req: any, res: any) {
       }
     }
 
+    // Fallback to auth admin if not in profiles table
+    if (!userExists) {
+      try {
+        const adminCheckResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users?filter=${encodeURIComponent(email.toLowerCase().trim())}`, {
+          headers: {
+            'apikey': supabaseServiceKey,
+            'Authorization': `Bearer ${supabaseServiceKey}`,
+          }
+        });
+        if (adminCheckResponse.ok) {
+          const adminData = await adminCheckResponse.json();
+          const user = (adminData.users || []).find((u: any) => u.email?.toLowerCase() === email.toLowerCase().trim());
+          if (user) {
+            userExists = true;
+            // Ghost users are treated as not fully verified
+            isVerified = false;
+          }
+        }
+      } catch (e) {
+        console.error('Failed fallback admin check:', e);
+      }
+    }
+
 
     // Final decision based on user presence and requested action
     if (type === 'login' || type === 'password_reset') {
