@@ -501,23 +501,27 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       return true;
     });
 
-    const mappedCustomFolders = customFolders.map(dbF => {
+    const mappedCustomFolders = customFolders.flatMap(dbF => {
       if (dbF.parent_id) {
         const dbParent = folders.find(p => p.id === dbF.parent_id);
         if (dbParent) {
-          const matchingVirtual = virtualFolders.find(v => v.type === dbParent.type && (
+          const matchingVirtuals = virtualFolders.filter(v => v.type === dbParent.type && (
             (v.type === 'semester' && matchSemesterName(v.name, dbParent.name)) ||
             (v.type === 'subject' && (
               v.name.toLowerCase() === dbParent.name.toLowerCase() ||
               v.name.split(':')[0].trim().toLowerCase() === dbParent.name.split(':')[0].trim().toLowerCase()
             ))
           ));
-          if (matchingVirtual) {
-            return { ...dbF, parent_id: matchingVirtual.id };
+          if (matchingVirtuals.length > 0) {
+            return matchingVirtuals.map((matchingVirtual, idx) => ({
+              ...dbF,
+              id: idx === 0 ? dbF.id : `${dbF.id}-dup-${idx}`,
+              parent_id: matchingVirtual.id
+            }));
           }
         }
       }
-      return dbF;
+      return [dbF];
     });
 
     return [...virtualFolders, ...mappedCustomFolders];
@@ -550,7 +554,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   const modalCategories = useMemo(() => {
     const sub = modalFolders.find(f => f.name === metaForm.subject && f.type === 'subject');
-    return sub ? modalFolders.filter(f => f.type === 'category' && f.parent_id === sub.id).map(f => f.name) : [];
+    return sub ? Array.from(new Set(modalFolders.filter(f => f.type === 'category' && f.parent_id === sub.id).map(f => f.name))) : [];
   }, [modalFolders, metaForm.subject]);
 
 
@@ -723,8 +727,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     }
 
     // Handle Folder Reordering
-    const oldIndexFolders = folders.findIndex(f => f.id === active.id);
-    const newIndexFolders = folders.findIndex(f => f.id === over.id);
+    const activeBaseId = active.id.split('-dup-')[0];
+    const overBaseId = over.id.split('-dup-')[0];
+    const oldIndexFolders = folders.findIndex(f => f.id === activeBaseId);
+    const newIndexFolders = folders.findIndex(f => f.id === overBaseId);
 
     if (oldIndexFolders !== -1 && newIndexFolders !== -1) {
       const movedFolders = arrayMove(folders, oldIndexFolders, newIndexFolders);
@@ -964,7 +970,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             <div>
               <div className="text-2xl font-semibold text-zinc-800 dark:text-white tracking-tight leading-none mb-1 flex items-center">
                 {activeSubject ? (
-                  <>{activeSubject.name} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Notes</span></>
+                  <>{activeSubject.name.split(':')[0].trim()} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Notes</span></>
                 ) : activeSemester ? (
                   <>{activeSemester.name} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Hub</span></>
                 ) : (
@@ -1092,22 +1098,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 onDragEnd={handleDragEnd}
               >
                 <div className="flex flex-col gap-6">
-                  {/* Subject Details Header & Syllabus Accordion */}
-                  {(() => {
-                    if (!activeSubject) return null;
-                    const activeSubjectMeta = findSubjectMetadata(selectedProgram, activeSubject.name);
-                    if (!activeSubjectMeta) return null;
-
-                    const syllabusKey = Object.keys(SYLLABUS_DATA).find(k => k.split(':')[0].trim().toUpperCase() === activeSubjectMeta.code.toUpperCase());
-                    const syllabusText = syllabusKey ? SYLLABUS_DATA[syllabusKey] : null;
-
-                    return (
-                      <SubjectDetailHeader 
-                        meta={activeSubjectMeta} 
-                        syllabusText={syllabusText} 
-                      />
-                    );
-                  })()}
+                  {/* Subject Details Header & Syllabus Accordion removed */}
 
                   {currentFolders.length > 0 && (
                     <SortableContext

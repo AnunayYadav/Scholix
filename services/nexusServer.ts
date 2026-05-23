@@ -1048,7 +1048,7 @@ class NexusServer {
       if (!client) return;
 
       const updates = folderOrders.map(item =>
-        client.from('folders').update({ display_order: item.order }).eq('id', item.id)
+        client.from('folders').update({ display_order: item.order }).eq('id', item.id.split('-dup-')[0])
       );
 
       const results = await Promise.all(updates);
@@ -1086,16 +1086,17 @@ class NexusServer {
     if (!client) return;
     
     const { id, name: oldName, type, parent_id, program } = folder;
+    const dbId = id.split('-dup-')[0];
     const updateData: any = { name: newName };
     if (is_shining !== undefined) updateData.is_shining = is_shining;
     
     // 1. Rename the folder itself
-    const { error: renameError } = await client.from('folders').update(updateData).eq('id', id);
+    const { error: renameError } = await client.from('folders').update(updateData).eq('id', dbId);
     
     if (renameError) {
       if (renameError.message.includes('column "is_shining" does not exist') || renameError.code === '42703' || renameError.message.includes('column "is_shining" of relation "folders" does not exist')) {
         console.warn("Retrying folder rename without 'is_shining' due to missing column.");
-        const { error: secondError } = await client.from('folders').update({ name: newName }).eq('id', id);
+        const { error: secondError } = await client.from('folders').update({ name: newName }).eq('id', dbId);
         if (secondError) throw new Error(secondError.message);
       } else {
         console.error("Rename Folder Error:", renameError);
@@ -1145,7 +1146,8 @@ class NexusServer {
   static async deleteFolder(id: string) {
     const client = getSupabase();
     if (!client) return;
-    const { error } = await client.from('folders').delete().eq('id', id);
+    const dbId = id.split('-dup-')[0];
+    const { error } = await client.from('folders').delete().eq('id', dbId);
     if (error) {
       console.error("Delete Folder Error:", error);
       throw new Error(error.message);
