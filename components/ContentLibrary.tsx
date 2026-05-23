@@ -1056,34 +1056,32 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             </div>
           </header>
 
-          <div className="flex gap-2 w-full flex-col md:flex-row">
-            <div className="flex-1 flex gap-2">
-              <NexusDropdown
-                options={availablePrograms}
-                value={selectedProgram}
-                onChange={(val) => {
-                  navigate(`${routePrefix}/library/${slugify(val)}`);
-                }}
-                className="flex-shrink-0"
-                buttonClassName="!h-12 !py-0 !rounded-2xl"
-              />
+          <div className="flex gap-2 w-full flex-row items-center">
+            <NexusDropdown
+              options={availablePrograms}
+              value={selectedProgram}
+              onChange={(val) => {
+                navigate(`${routePrefix}/library/${slugify(val)}`);
+              }}
+              className="flex-shrink-0"
+              buttonClassName="!h-12 !py-0 !rounded-2xl !min-w-[110px] sm:!min-w-[180px] !px-3 sm:!px-5 text-[10px] sm:text-xs"
+            />
 
-              <div className="relative flex-1">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-                <input
-                  type="text"
-                  placeholder="Filter files..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  autoComplete="off"
-                  spellCheck="false"
-                  className="w-full pl-11 pr-4 h-12 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-2xl text-[11px] sm:text-xs font-bold outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white"
-                />
-              </div>
+            <div className="relative flex-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+              <input
+                type="text"
+                placeholder="Filter files..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                autoCapitalize="none"
+                autoCorrect="off"
+                autoComplete="off"
+                spellCheck="false"
+                className="w-full pl-11 pr-4 h-12 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-2xl text-[11px] sm:text-xs font-bold outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white"
+              />
             </div>
-            <button onClick={() => fetchFromSource(true)} className="w-12 h-12 flex items-center justify-center bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl text-zinc-400 hover:text-orange-500 transition-colors shadow-sm border-none self-end md:self-auto" title="Refresh List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></button>
+            <button onClick={() => fetchFromSource(true)} className="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl text-zinc-400 hover:text-orange-500 transition-colors shadow-sm border-none" title="Refresh List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></button>
           </div>
 
           {isLoading ? (
