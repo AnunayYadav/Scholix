@@ -1956,7 +1956,7 @@ const AppContent: React.FC = () => {
             </div>
           </header>
         )}
-        <div id="main-content-area" className={`flex-1 ${['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p)) ? 'overflow-hidden' : 'overflow-y-auto'} relative scroll-smooth ${['/', '/lpu', '/iitm'].includes(location.pathname) || ['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p)) ? 'p-0' : 'p-4 md:p-8'} bg-transparent no-scrollbar`}>
+        <div id="main-content-area" className={`flex-1 ${['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p)) ? 'overflow-hidden' : 'overflow-y-auto'} relative scroll-smooth ${['/', '/lpu', '/iitm'].includes(location.pathname) || ['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p)) ? 'mobile-safe-pt-0 px-0 pb-0 md:p-0' : 'mobile-safe-pt-4 px-4 pb-4 md:p-8'} bg-transparent no-scrollbar`}>
           <div className={`relative ${['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p)) ? 'h-full' : ''} ${['/', '/lpu', '/iitm'].includes(location.pathname) || ['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p)) ? 'w-full' : 'max-w-7xl mx-auto'}`}>
             <Routes>
               <Route path="/welcome" element={<ScholixLanding userProfile={userProfile} />} />

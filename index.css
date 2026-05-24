@@ -760,3 +760,13 @@ input[type=number] {
   background: rgba(255, 122, 24, 0.25);
 }
 
+/* Mobile Safe Area Padding Utilities when Top Header is Disabled */
+@media (max-width: 767px) {
+  .mobile-safe-pt-0 {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 20px) !important;
+  }
+  .mobile-safe-pt-4 {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 36px) !important;
+  }
+}
+
