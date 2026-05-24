@@ -54,7 +54,7 @@ interface CGPACalculatorProps {
 }
 
 const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader }) => {
-  const { universityInfo, shortBrandName } = useUniversity();
+  const { universityInfo, shortBrandName, selectedUniversity, uniSlug } = useUniversity();
   const [inputMode, setInputMode] = useState<'marks' | 'grades'>('marks');
   const [currentSemester, setCurrentSemester] = useState<number>(1);
   const [prevCGPA, setPrevCGPA] = useState<number | string>('');
@@ -258,17 +258,38 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20 px-4 md:px-0">
-      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        {!hideHeader ? (
-          <div>
-            <h2 className="text-3xl font-bold text-zinc-800 dark:text-white mb-2 tracking-tighter">
-              SGPA & CGPA <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Hub</span>
-            </h2>
-            <p className="text-zinc-600 dark:text-zinc-400 font-medium text-[11px] sm:text-xs">Precision SGPA & CGPA forecasting based on {shortBrandName} standards.</p>
-          </div>
-        ) : <div />}
+      {!hideHeader && (
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-zinc-800 dark:text-white mb-2 tracking-tighter">
+            SGPA & CGPA <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Hub</span>
+          </h2>
+          <p className="text-zinc-600 dark:text-zinc-400 font-medium text-[11px] sm:text-xs">Precision SGPA & CGPA forecasting based on {shortBrandName} standards.</p>
+        </div>
+      )}
 
-        <div className="flex items-center gap-1.5 ml-auto md:ml-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        {/* Left: Dropdowns */}
+        <div className="flex flex-wrap items-center gap-3">
+          <NexusDropdown
+            options={['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8']}
+            value={`Semester ${currentSemester}`}
+            onChange={(val) => {
+              const sem = parseInt(val.split(' ')[1]);
+              setCurrentSemester(sem);
+              setManualAdjustments({});
+            }}
+          />
+          <NexusDropdown
+            options={['By Marks', 'By Grades']}
+            value={inputMode === 'marks' ? 'By Marks' : 'By Grades'}
+            onChange={(val) => {
+              setInputMode(val === 'By Marks' ? 'marks' : 'grades');
+            }}
+          />
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-1.5 ml-auto sm:ml-0">
           <button
             onClick={() => setIsHistoryOpen(!isHistoryOpen)}
             className={`p-2 rounded-xl transition-all border-none bg-transparent flex items-center justify-center ${isHistoryOpen ? 'text-brand-primary' : 'text-zinc-400 hover:text-brand-primary'}`}
@@ -287,16 +308,25 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
           </button>
 
           <button onClick={() => {
-            const data = { sgpa: currentStats.sgpa.toFixed(2), cgpa: overallCGPA, sem: currentSemester, credits: currentStats.totalCredits, subjects: courses.filter(c => c.name).map(c => ({ n: c.name, c: c.credits, g: c.grade })), ts: Date.now() };
+            const data = { 
+              sgpa: currentStats.sgpa.toFixed(2), 
+              cgpa: overallCGPA, 
+              sem: currentSemester, 
+              credits: currentStats.totalCredits, 
+              subjects: courses.filter(c => c.name).map(c => ({ n: c.name, c: c.credits, g: c.grade })), 
+              ts: Date.now(),
+              uni: selectedUniversity
+            };
             const encoded = btoa(JSON.stringify(data));
             const currentBaseUrl = window.location.origin;
-            setShareUrl(`${currentBaseUrl}/share-cgpa?d=${encoded}`);
+            const linkPrefix = uniSlug ? `/${uniSlug}` : '';
+            setShareUrl(`${currentBaseUrl}${linkPrefix}/share-cgpa?d=${encoded}`);
             setIsShareModalOpen(true);
           }} className="ml-1 px-4 py-2 bg-brand-primary text-white rounded-xl text-[10px] md:text-xs font-semibold shadow-lg shadow-brand-primary/20 active:scale-95 transition-all flex items-center gap-1.5 border-none">
             Generate Link
           </button>
         </div>
-      </header>
+      </div>
 
       {isHistoryOpen && (
         <div ref={historyPanelRef} className="glass-panel p-6 rounded-[32px] border border-brand-primary/20 bg-brand-primary/[0.03] animate-fade-in mb-8">
@@ -316,25 +346,6 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
           )}
         </div>
       )}
-
-      <div className="flex flex-wrap items-center gap-4 mb-8">
-        <NexusDropdown
-          options={['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8']}
-          value={`Semester ${currentSemester}`}
-          onChange={(val) => {
-            const sem = parseInt(val.split(' ')[1]);
-            setCurrentSemester(sem);
-            setManualAdjustments({});
-          }}
-        />
-        <NexusDropdown
-          options={['By Marks', 'By Grades']}
-          value={inputMode === 'marks' ? 'By Marks' : 'By Grades'}
-          onChange={(val) => {
-            setInputMode(val === 'By Marks' ? 'marks' : 'grades');
-          }}
-        />
-      </div>
 
       {currentSemester > 1 && (
         <div className="glass-panel p-8 rounded-[40px] border border-brand-primary/20 bg-brand-primary/[0.02] shadow-sm mb-8 animate-fade-in">

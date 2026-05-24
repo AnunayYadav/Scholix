@@ -82,10 +82,10 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
       <div className="max-w-5xl mx-auto px-4 sm:px-0">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
           <div>
-            <h1 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white tracking-tight leading-none mb-2">
+            <h1 className="text-2xl md:text-3xl font-semibold text-zinc-800 dark:text-white tracking-tight leading-none mb-2">
               Tools <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Hub</span>
             </h1>
-            <p className="text-zinc-500 dark:text-zinc-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">
+            <p className="text-zinc-500 dark:text-zinc-400 font-medium text-[11px] sm:text-xs">
               Essential academic utilities
             </p>
           </div>

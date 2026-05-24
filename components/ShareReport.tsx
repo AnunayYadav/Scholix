@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { useUniversity } from '../hooks/useUniversity.tsx';
+import { useUniversity, UNIVERSITIES } from '../hooks/useUniversity.tsx';
 
 const ShareReport: React.FC = () => {
-  const { university } = useUniversity();
+  const { universityInfo, shortBrandName } = useUniversity();
   const data = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
     const d = params.get('d');
@@ -13,6 +13,14 @@ const ShareReport: React.FC = () => {
       return null;
     }
   }, []);
+
+  const brandName = useMemo(() => {
+    if (data && data.uni) {
+      const found = UNIVERSITIES.find(u => u.id === data.uni);
+      if (found) return found.shortName;
+    }
+    return universityInfo?.shortName || shortBrandName;
+  }, [data, universityInfo, shortBrandName]);
 
   if (!data) {
     return (
@@ -34,12 +42,12 @@ const ShareReport: React.FC = () => {
 
   const academicStanding = useMemo(() => {
     const sgpa = parseFloat(data.sgpa);
-    if (sgpa >= 9.5) return { label: `${university.brand_name} Elite Scholar`, color: "text-orange-500", bg: "bg-orange-500/10" };
+    if (sgpa >= 9.5) return { label: `${brandName} Elite Scholar`, color: "text-orange-500", bg: "bg-orange-500/10" };
     if (sgpa >= 9.0) return { label: "Exceptional Performer", color: "text-amber-500", bg: "bg-amber-500/10" };
     if (sgpa >= 8.5) return { label: "High Achiever", color: "text-orange-600", bg: "bg-orange-600/10" };
     if (sgpa >= 7.5) return { label: "Verified Academic", color: "text-zinc-600", bg: "bg-zinc-500/10" };
     return { label: "Academic Explorer", color: "text-zinc-500", bg: "bg-zinc-500/10" };
-  }, [data.sgpa]);
+  }, [data.sgpa, brandName]);
 
   const timestamp = new Date(data.ts).toLocaleDateString('en-US', {
     month: 'long',
@@ -64,7 +72,7 @@ const ShareReport: React.FC = () => {
                 <div className="w-6 h-6 rounded-lg bg-orange-600 flex items-center justify-center">
                   <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3.5 h-3.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                 </div>
-                <span className="text-[8px] font-medium text-orange-600 dark:text-orange-500">{university.brand_name.toUpperCase()} PROTOCOL</span>
+                <span className="text-[8px] font-medium text-orange-600 dark:text-orange-500">{brandName.toUpperCase()} PROTOCOL</span>
               </div>
               <h1 className="text-xl font-black tracking-tight text-zinc-900 dark:text-white uppercase">VERIFIED INSIGHT</h1>
               <p className="text-[7px] font-bold text-zinc-400 uppercase tracking-widest">NS-{Math.floor(data.ts / 100000)}</p>
@@ -139,7 +147,7 @@ const ShareReport: React.FC = () => {
             <div className="space-y-1.5">
               <p className="text-[7px] font-bold text-zinc-400 uppercase tracking-widest">SYNTHESIZED {timestamp}</p>
               <p className="text-[6px] font-medium text-zinc-300 dark:text-zinc-700 uppercase tracking-widest max-w-[240px] mx-auto leading-relaxed">
-                MATH-VALIDATED BY {university.brand_name.toUpperCase()} PROTOCOL.
+                MATH-VALIDATED BY {brandName.toUpperCase()} PROTOCOL.
               </p>
             </div>
 
@@ -158,7 +166,7 @@ const ShareReport: React.FC = () => {
 
       {/* Impressive Recruitment Hook */}
       <div className="mt-8 text-center">
-        <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.4em] mb-4 opacity-50">{university.brand_name.toUpperCase()} ACADEMIC SUITE</p>
+        <p className="text-[8px] font-black text-zinc-400 uppercase tracking-[0.4em] mb-4 opacity-50">{brandName.toUpperCase()} ACADEMIC SUITE</p>
         <div className="grid grid-cols-3 gap-2 opacity-40">
           <div className="text-center"><p className="text-xs font-black dark:text-white">AI</p><p className="text-[6px] font-bold uppercase tracking-widest">Powered</p></div>
           <div className="text-center border-x border-zinc-200 dark:border-white/10 px-1"><p className="text-xs font-black dark:text-white">100%</p><p className="text-[6px] font-bold uppercase tracking-widest">Free</p></div>

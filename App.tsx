@@ -1819,7 +1819,7 @@ const AppContent: React.FC = () => {
         <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative bg-white dark:bg-[#0a0a0a] md:pl-[72px]">
           <BackgroundEffects />
 
-        {currentModule !== ModuleType.DASHBOARD && (
+        {false && (
           <header className="sticky top-0 h-16 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-2xl border-b border-zinc-200/50 dark:border-white/5 flex items-center px-4 md:px-8 z-[100] transition-all duration-300">
             <div className="flex items-center gap-1 md:gap-4 flex-1 md:flex-none">
               <button 

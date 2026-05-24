@@ -436,7 +436,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               }}
               className={`w-full bg-zinc-100 dark:bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none transition-all font-bold text-xs md:text-sm shadow-inner ${showValidation && !newSub.name.trim()
                 ? 'border-brand-secondary ring-2 ring-brand-secondary/20'
-                : 'border-transparent focus:ring-2 focus:ring-brand-primary'
+                : 'border-zinc-200 dark:border-white/10 focus:ring-2 focus:ring-brand-primary'
                 }`}
             />
           </div>
@@ -446,13 +446,13 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               <input
                 type="number" placeholder="P" value={newSub.present}
                 onChange={(e) => setNewSub({ ...newSub, present: e.target.value })}
-                className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-xl md:rounded-2xl px-2 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
+                className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-xl md:rounded-2xl px-2 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
               />
               <span className="text-zinc-400 font-black">/</span>
               <input
                 type="number" placeholder="T" value={newSub.total}
                 onChange={(e) => setNewSub({ ...newSub, total: e.target.value })}
-                className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-xl md:rounded-2xl px-2 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
+                className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-xl md:rounded-2xl px-2 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
               />
             </div>
           </div>
@@ -461,7 +461,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
             <input
               type="number" placeholder="0" value={newSub.dutyLeaves}
               onChange={(e) => setNewSub({ ...newSub, dutyLeaves: e.target.value })}
-              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-xl md:rounded-2xl px-2 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
+              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-xl md:rounded-2xl px-2 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
             />
           </div>
           <div className="col-span-1 md:col-span-1">
@@ -469,23 +469,23 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
             <input
               type="number" placeholder="75" value={newSub.goal}
               onChange={(e) => setNewSub({ ...newSub, goal: e.target.value })}
-              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent rounded-xl md:rounded-2xl px-2 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
+              className="w-full bg-zinc-100 dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-xl md:rounded-2xl px-2 py-2.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs md:text-sm text-center font-bold shadow-inner"
             />
           </div>
           <div className="col-span-2 md:col-span-4 flex items-end gap-2">
             <button
               onClick={addSubject}
-              className="flex-[2] bg-brand-primary hover:opacity-90 text-white h-11 md:h-14 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm tracking-tight transition-all shadow-lg shadow-brand-primary/20 active:scale-95 flex items-center justify-center whitespace-nowrap"
+              className="flex-1 w-full bg-brand-primary hover:opacity-90 text-white h-11 md:h-14 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm tracking-tight transition-all shadow-lg shadow-brand-primary/20 active:scale-95 flex items-center justify-center whitespace-nowrap"
             >
               Track
             </button>
             
             <button
               onClick={() => setIsUploadModalOpen(true)}
-              className="flex-1 px-3 h-11 md:h-14 rounded-xl md:rounded-2xl transition-all flex items-center justify-center gap-2 border flex-shrink-0 bg-zinc-100 dark:bg-[#0a0a0a] border-zinc-200 dark:border-white/10 text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary active:scale-95"
+              className="flex-1 w-full h-11 md:h-14 rounded-xl md:rounded-2xl transition-all flex items-center justify-center gap-2 border bg-zinc-100 dark:bg-[#0a0a0a] border-zinc-200 dark:border-white/10 text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary active:scale-95 whitespace-nowrap"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
-              <span className="text-[11px] md:text-xs font-bold">Upload</span>
+              <span className="text-xs md:text-sm font-bold">Upload</span>
             </button>
           </div>
         </div>

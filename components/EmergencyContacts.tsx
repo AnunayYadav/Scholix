@@ -64,7 +64,7 @@ const EmergencyContacts: React.FC = () => {
     }, [searchQuery]);
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-fade-in pb-32 focus-visible:outline-none">
+        <div className="max-w-4xl mx-auto px-4 md:px-0 py-8 space-y-8 animate-fade-in pb-32 focus-visible:outline-none">
             {/* Header Section */}
             <header className="text-center space-y-3">
                 <h2 className="text-3xl md:text-5xl font-bold text-zinc-900 dark:text-white tracking-tighter leading-none">
