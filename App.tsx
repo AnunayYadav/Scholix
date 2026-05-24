@@ -1802,6 +1802,8 @@ const AppContent: React.FC = () => {
     );
   }
 
+  const isDashboardPath = ['/', '/lpu', '/iitm'].includes(location.pathname);
+  const isSettingsPath = ['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p));
 
   return (
     <div className="flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden bg-white dark:bg-[#0a0a0a] text-zinc-900 dark:text-zinc-200 fixed inset-0">
@@ -1956,8 +1958,8 @@ const AppContent: React.FC = () => {
             </div>
           </header>
         )}
-        <div id="main-content-area" className={`flex-1 ${['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p)) ? 'overflow-hidden' : 'overflow-y-auto'} relative scroll-smooth ${['/', '/lpu', '/iitm'].includes(location.pathname) || ['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p)) ? 'mobile-safe-pt-0 px-0 pb-0 md:p-0' : 'mobile-safe-pt-4 px-4 pb-4 md:p-8'} bg-transparent no-scrollbar`}>
-          <div className={`relative ${['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p)) ? 'h-full' : ''} ${['/', '/lpu', '/iitm'].includes(location.pathname) || ['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p)) ? 'w-full' : 'max-w-7xl mx-auto'}`}>
+        <div id="main-content-area" className={`flex-1 ${isSettingsPath ? 'overflow-hidden' : 'overflow-y-auto'} relative scroll-smooth ${isDashboardPath || isSettingsPath ? 'mobile-safe-pt-0 px-0 pb-0 md:p-0' : 'mobile-safe-pt-4 px-4 pb-4 md:p-8'} ${isDashboardPath ? 'bg-[#fbfcfd] dark:bg-[#030303]' : isSettingsPath ? 'bg-white dark:bg-dark-950' : 'bg-white dark:bg-[#0a0a0a]'} no-scrollbar`}>
+          <div className={`relative ${isSettingsPath ? 'h-full' : ''} ${isDashboardPath || isSettingsPath ? 'w-full' : 'max-w-7xl mx-auto'}`}>
             <Routes>
               <Route path="/welcome" element={<ScholixLanding userProfile={userProfile} />} />
               <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
