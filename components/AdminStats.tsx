@@ -59,8 +59,6 @@ const GlobalBroadcaster: React.FC = () => {
         try {
             if (audienceMode === 'global') {
                 await NexusServer.sendGlobalAnnouncement(title, message, type, link || undefined);
-                // Also blast to all individual feeds for maximum visibility
-                await NexusServer.sendGlobalNotification(title, message, type, link || undefined);
             } else {
                 await NexusServer.sendGlobalNotification(title, message, type, link || undefined, selectedUserIds);
             }

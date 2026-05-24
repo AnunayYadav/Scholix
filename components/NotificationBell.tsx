@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -42,13 +41,6 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
             personals = await NexusServer.fetchNotifications(userProfile.id);
             setPersonalNotifications(personals);
         }
-
-        // 3. Calculate Unread
-        const lastSeenGlobal = localStorage.getItem('nexus_last_announcement_seen');
-        const unreadGlobals = globals.filter(g => !lastSeenGlobal || new Date(g.created_at) > new Date(lastSeenGlobal)).length;
-        const unreadPersonals = personals.filter(p => !p.read).length;
-
-        setUnreadCount(unreadGlobals + unreadPersonals);
     };
 
     const triggerBrowserNotification = (title: string, body: string) => {
@@ -70,18 +62,22 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
 
         // Subscribe to Global (Everyone)
         const unsubGlobal = NexusServer.subscribeToGlobalAnnouncements((newAnn) => {
-            setGlobalAnnouncements(prev => [newAnn, ...prev]);
-            setUnreadCount(prev => prev + 1);
-            triggerBrowserNotification(newAnn.title, newAnn.message);
+            setGlobalAnnouncements(prev => {
+                if (prev.some(g => g.id === newAnn.id)) return prev;
+                triggerBrowserNotification(newAnn.title, newAnn.message);
+                return [newAnn, ...prev];
+            });
         });
 
         // Subscribe to Personal (If Logged In)
         let unsubPersonal = () => { };
         if (userProfile) {
             unsubPersonal = NexusServer.subscribeToNotifications(userProfile.id, (newNotif) => {
-                setPersonalNotifications(prev => [newNotif, ...prev]);
-                setUnreadCount(prev => prev + 1);
-                triggerBrowserNotification(newNotif.title, newNotif.message);
+                setPersonalNotifications(prev => {
+                    if (prev.some(p => p.id === newNotif.id)) return prev;
+                    triggerBrowserNotification(newNotif.title, newNotif.message);
+                    return [newNotif, ...prev];
+                });
             });
         }
 
@@ -101,6 +97,33 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    // Recalculate unreadCount when announcements or personal notifications change, de-duplicating by title + message
+    useEffect(() => {
+        const lastSeenGlobal = localStorage.getItem('nexus_last_announcement_seen');
+        const combined = [
+            ...globalAnnouncements.map(g => ({ ...g, isGlobal: true })),
+            ...personalNotifications.map(p => ({ ...p, isGlobal: false }))
+        ];
+        
+        const seen = new Set<string>();
+        const unique = combined.filter(item => {
+            const key = `${item.title.trim()}|${item.message.trim()}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+
+        const unread = unique.filter(item => {
+            if (item.isGlobal) {
+                return !lastSeenGlobal || new Date(item.created_at) > new Date(lastSeenGlobal);
+            } else {
+                return !item.read;
+            }
+        }).length;
+
+        setUnreadCount(unread);
+    }, [globalAnnouncements, personalNotifications]);
 
     const handleToggle = () => {
         if (isOpen) {
@@ -125,8 +148,6 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
         if (globalAnnouncements.length > 0) {
             localStorage.setItem('nexus_last_announcement_seen', globalAnnouncements[0].created_at);
         }
-
-        setUnreadCount(0);
     };
 
     const handleNotificationClick = async (item: any, isGlobal: boolean) => {
@@ -137,19 +158,28 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
 
         setSelectedNotification(item);
         setIsDetailModalOpen(true);
-
-        // Refresh count
-        const lastSeen = localStorage.getItem('nexus_last_announcement_seen');
-        const uG = globalAnnouncements.filter(g => !lastSeen || new Date(g.created_at) > new Date(lastSeen)).length;
-        const uP = personalNotifications.filter(p => !p.read).length;
-        setUnreadCount(uG + uP);
     };
 
-    // Combine and sort
-    const allNotifications = [
-        ...globalAnnouncements.map(g => ({ ...g, isGlobal: true })),
-        ...personalNotifications.map(p => ({ ...p, isGlobal: false }))
-    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    // Combine and sort, de-duplicating by title + message
+    const allNotifications = useMemo(() => {
+        const combined = [
+            ...globalAnnouncements.map(g => ({ ...g, isGlobal: true })),
+            ...personalNotifications.map(p => ({ ...p, isGlobal: false }))
+        ];
+        
+        const uniqueNotifications: typeof combined = [];
+        const seen = new Set<string>();
+
+        combined.forEach(item => {
+            const key = `${item.title.trim()}|${item.message.trim()}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueNotifications.push(item);
+            }
+        });
+
+        return uniqueNotifications.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }, [globalAnnouncements, personalNotifications]);
 
     return (
         <>
