@@ -435,7 +435,7 @@ const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.mem
   const displayName = userProfile?.username || 'Verto';
 
   return (
-    <div className="w-full pt-6 md:pt-10 pb-6 md:pb-10 relative z-10">
+    <div className="w-full pt-6 md:pt-10 pb-6 md:pb-10 relative z-50">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="flex flex-col gap-6 md:gap-8">
           {/* Main Header Row */}
