@@ -58,11 +58,12 @@ const PageRenderer = React.memo<{
 
             try {
                 const page = await pdfDoc.getPage(pageNum);
-                const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+                const maxPixelRatio = window.innerWidth < 768 ? 1.5 : 2;
+                const pixelRatio = Math.min(window.devicePixelRatio || 1, maxPixelRatio);
                 const baseViewport = page.getViewport({ scale: 1.0 });
                 setPageInfo({ width: baseViewport.width, height: baseViewport.height });
 
-                const targetScale = Math.min(renderScale, 2.5);
+                const targetScale = Math.min(renderScale, 2.0);
                 const viewport = page.getViewport({ scale: targetScale * pixelRatio });
                 const cssViewport = page.getViewport({ scale: renderScale });
 
@@ -208,9 +209,9 @@ const PageRenderer = React.memo<{
             data-page={pageNum}
             className="relative bg-white dark:bg-[#0a0a0a] rounded-md origin-top-left select-none border border-zinc-200 dark:border-white/5 overflow-visible page-container"
             style={{
-                width: pageInfo ? `calc(${pageInfo.width}px * var(--pdf-scale))` : '100%',
-                height: pageInfo ? `calc(${pageInfo.height}px * var(--pdf-scale))` : '100vh',
-                marginBottom: `calc(24px * var(--pdf-scale))`,
+                width: pageInfo ? `calc(${pageInfo.width}px * ${renderScale})` : '100%',
+                height: pageInfo ? `calc(${pageInfo.height}px * ${renderScale})` : '100vh',
+                marginBottom: `calc(24px * ${renderScale})`,
                 contain: 'layout size',
                 willChange: 'transform'
             } as any}
@@ -222,7 +223,7 @@ const PageRenderer = React.memo<{
                     style={{
                         backfaceVisibility: 'hidden',
                         pointerEvents: 'none',
-                        transform: `scale(calc(var(--pdf-scale) / ${scaleA})) translateZ(0)`,
+                        transform: `scale(calc(${renderScale} / ${scaleA})) translateZ(0)`,
                         transformOrigin: 'top left',
                         width: pageInfo ? `${pageInfo.width * scaleA}px` : 'auto',
                         height: pageInfo ? `${pageInfo.height * scaleA}px` : 'auto',
@@ -234,7 +235,7 @@ const PageRenderer = React.memo<{
                     style={{
                         backfaceVisibility: 'hidden',
                         pointerEvents: 'none',
-                        transform: `scale(calc(var(--pdf-scale) / ${scaleB})) translateZ(0)`,
+                        transform: `scale(calc(${renderScale} / ${scaleB})) translateZ(0)`,
                         transformOrigin: 'top left',
                         width: pageInfo ? `${pageInfo.width * scaleB}px` : 'auto',
                         height: pageInfo ? `${pageInfo.height * scaleB}px` : 'auto',
@@ -270,6 +271,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [renderScale, setRenderScale] = useState(scale);
     const [isClosing, setIsClosing] = useState(false);
+
+    const zoomWrapperRef = useRef<HTMLDivElement>(null);
+    const pageOriginalWidthRef = useRef<number>(612);
+    const animationFrameId = useRef<number | null>(null);
+    const pendingUpdate = useRef<{
+        scale: number;
+        scrollLeft?: number;
+        scrollTop?: number;
+    } | null>(null);
 
     const handleClose = () => {
         setIsClosing(true);
@@ -353,14 +363,30 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
     const [isInteracting, setIsInteracting] = useState(false); 
 
-    // Optimized DOM-only scale update - Synchronous to prevent clamping glitches
+    const getCenteringOffset = useCallback((s: number) => {
+        if (!containerRef.current) return 0;
+        const containerWidth = containerRef.current.clientWidth;
+        const pageWidth = pageOriginalWidthRef.current * s;
+        const padding = window.innerWidth < 768 ? 32 : 64;
+        return Math.max(0, (containerWidth - (pageWidth + padding)) / 2);
+    }, []);
+
+    // Optimized DOM-only scale update via requestAnimationFrame
     const updateDOMScale = useCallback((currentScale: number, scrollLeft?: number, scrollTop?: number) => {
-        if (!containerRef.current) return;
+        pendingUpdate.current = { scale: currentScale, scrollLeft, scrollTop };
         
-        const container = containerRef.current;
-        container.style.setProperty('--pdf-scale', currentScale.toString());
-        if (scrollLeft !== undefined) container.scrollLeft = scrollLeft;
-        if (scrollTop !== undefined) container.scrollTop = scrollTop;
+        if (animationFrameId.current === null) {
+            animationFrameId.current = requestAnimationFrame(() => {
+                if (pendingUpdate.current && containerRef.current) {
+                    const { scale: s, scrollLeft: left, scrollTop: top } = pendingUpdate.current;
+                    containerRef.current.style.setProperty('--pdf-scale', s.toString());
+                    if (left !== undefined) containerRef.current.scrollLeft = left;
+                    if (top !== undefined) containerRef.current.scrollTop = top;
+                }
+                animationFrameId.current = null;
+                pendingUpdate.current = null;
+            });
+        }
 
         // Sync to React only after interaction settles to prevent re-render churn
         if (zoomingTimeoutRef.current) clearTimeout(zoomingTimeoutRef.current);
@@ -377,7 +403,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 const sorted = Array.from(visiblePages.current).sort((a: number, b: number) => a - b);
                 setCurrentPage(sorted[0]);
             }
-        }, 300); 
+        }, 200); 
     }, []);
 
     const handleZoom = useCallback((nextScale: number) => {
@@ -481,6 +507,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 // Get first page to calculate initial scale
                 const firstPage = await pdf.getPage(1);
                 const originalViewport = firstPage.getViewport({ scale: 1.0 });
+                pageOriginalWidthRef.current = originalViewport.width;
                 setScale(window.innerWidth < 768 ? (window.innerWidth - 40) / originalViewport.width : 1.0);
 
                 setIsLoading(false);
@@ -548,6 +575,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             window.removeEventListener('copy', handleCopy);
             window.removeEventListener('beforeprint', handleBeforePrint);
             window.removeEventListener('afterprint', handleAfterPrint);
+            if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
         };
     }, [url, isAdmin]);
 
@@ -600,14 +628,25 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         // Keep scaleRef in sync with state for non-gesture updates (buttons, init)
         scaleRef.current = scale;
 
+        const prevScale = renderScale;
         const timer = setTimeout(() => {
-            setRenderScale(scale);
-            if (containerRef.current) {
-                containerRef.current.style.setProperty('--pdf-scale', scale.toString());
+            if (prevScale !== scale) {
+                const L_old = getCenteringOffset(prevScale);
+                const L_new = getCenteringOffset(scale);
+                const deltaCentering = L_new - L_old;
+
+                setRenderScale(scale);
+                
+                if (containerRef.current) {
+                    containerRef.current.style.setProperty('--pdf-scale', scale.toString());
+                    if (deltaCentering !== 0) {
+                        containerRef.current.scrollLeft += deltaCentering;
+                    }
+                }
             }
-        }, 400); 
+        }, 200); 
         return () => clearTimeout(timer);
-    }, [scale]);
+    }, [scale, renderScale, getCenteringOffset]);
 
     // Simplified focal point logic removed in favor of direct gesture scroll handling
 
@@ -620,6 +659,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             if (e.ctrlKey) {
                 e.preventDefault();
                 isInteractingRef.current = true;
+                setIsInteracting(true);
                 container.classList.add('is-zooming');
 
                 const delta = -e.deltaY * 0.005;
@@ -651,6 +691,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 touchState.current.lastFocalX = (touch1.clientX + touch2.clientX) / 2;
                 touchState.current.lastFocalY = (touch1.clientY + touch2.clientY) / 2;
                 isInteractingRef.current = true;
+                setIsInteracting(true);
                 container.classList.add('is-zooming');
             } else if (e.touches.length === 1) {
                 const touch = e.touches[0];
@@ -1190,8 +1231,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                         </div>
                     ) : (
                         <div 
+                            ref={zoomWrapperRef}
                             className="flex flex-col items-center min-w-max mx-auto px-4 md:px-8"
-                            style={{ paddingTop: 'calc(48px * var(--pdf-scale))', paddingBottom: 'calc(48px * var(--pdf-scale))' }}
+                            style={{
+                                transform: `scale(calc(var(--pdf-scale) / ${renderScale})) translateZ(0)`,
+                                transformOrigin: 'top left',
+                                willChange: 'transform',
+                                paddingTop: `${48 * renderScale}px`,
+                                paddingBottom: `${48 * renderScale}px`,
+                            }}
                         >
                             {Array.from({ length: numPages }).map((_, i) => (
                                 <PageRenderer
