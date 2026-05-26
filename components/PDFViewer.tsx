@@ -305,11 +305,35 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         lastScrollYRef.current = currentScrollY;
     };
 
+    // Touch/Pinch State
+    const touchState = useRef<{
+        lastDist: number;
+        lastTap: number;
+        lastTapX: number;
+        lastTapY: number;
+        lastFocalX: number;
+        lastFocalY: number;
+        isPinching: boolean;
+        wasScrolling: boolean;
+    }>({
+        lastDist: 0,
+        lastTap: 0,
+        lastTapX: 0,
+        lastTapY: 0,
+        lastFocalX: 0,
+        lastFocalY: 0,
+        isPinching: false,
+        wasScrolling: false
+    });
+
     // Search State
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const [currentSearchIndex, setCurrentSearchIndex] = useState(-1);
     const [isSearching, setIsSearching] = useState(false);
+    const [viewMode, setViewMode] = useState<'width' | 'page'>('width');
+    const [isZooming, setIsZooming] = useState(false);
+    const zoomTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const isAdmin = userProfile?.is_admin || false;
     const pdfDocRef = useRef<any>(null);
@@ -317,13 +341,64 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
     const visiblePages = useRef<Set<number>>(new Set());
     const currentPageRef = useRef(1);
+    const scaleRef = useRef(scale);
 
     useEffect(() => {
         currentPageRef.current = currentPage;
     }, [currentPage]);
 
     const isInteractingRef = useRef(false);
+    const zoomingTimeoutRef = useRef<any>(null);
     const observerRef = useRef<IntersectionObserver | null>(null);
+
+    const [isInteracting, setIsInteracting] = useState(false); 
+
+    // Optimized DOM-only scale update - Synchronous to prevent clamping glitches
+    const updateDOMScale = useCallback((currentScale: number, scrollLeft?: number, scrollTop?: number) => {
+        if (!containerRef.current) return;
+        
+        const container = containerRef.current;
+        container.style.setProperty('--pdf-scale', currentScale.toString());
+        if (scrollLeft !== undefined) container.scrollLeft = scrollLeft;
+        if (scrollTop !== undefined) container.scrollTop = scrollTop;
+
+        // Sync to React only after interaction settles to prevent re-render churn
+        if (zoomingTimeoutRef.current) clearTimeout(zoomingTimeoutRef.current);
+        zoomingTimeoutRef.current = setTimeout(() => {
+            isInteractingRef.current = false;
+            if (containerRef.current) {
+                containerRef.current.classList.remove('is-zooming');
+            }
+            setScale(currentScale);
+            setIsInteracting(false);
+            
+            // Sync current page after interaction ends
+            if (visiblePages.current.size > 0) {
+                const sorted = Array.from(visiblePages.current).sort((a: number, b: number) => a - b);
+                setCurrentPage(sorted[0]);
+            }
+        }, 300); 
+    }, []);
+
+    const handleZoom = useCallback((nextScale: number) => {
+        const container = containerRef.current;
+        if (!container) return;
+        if (nextScale === scaleRef.current) return;
+
+        isInteractingRef.current = true;
+        container.classList.add('is-zooming');
+
+        const rect = container.getBoundingClientRect();
+        const focalX = rect.width / 2;
+        const focalY = rect.height / 2;
+        const ratio = nextScale / scaleRef.current;
+
+        const nextLeft = (container.scrollLeft + focalX) * ratio - focalX;
+        const nextTop = (container.scrollTop + focalY) * ratio - focalY;
+
+        scaleRef.current = nextScale;
+        updateDOMScale(nextScale, nextLeft, nextTop);
+    }, [updateDOMScale]);
 
     const registerPageRef = useCallback((pageNum: number, el: HTMLDivElement | null) => {
         pageRefs.current[pageNum] = el;
@@ -406,14 +481,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                 // Get first page to calculate initial scale
                 const firstPage = await pdf.getPage(1);
                 const originalViewport = firstPage.getViewport({ scale: 1.0 });
-                const containerWidth = containerRef.current?.clientWidth || window.innerWidth;
-                const padding = window.innerWidth < 768 ? 32 : 80;
-                let initialScale = (containerWidth - padding) / originalViewport.width;
-                if (window.innerWidth >= 768) {
-                    initialScale = Math.min(initialScale, 1.25);
-                }
-                setScale(initialScale);
-                setRenderScale(initialScale);
+                setScale(window.innerWidth < 768 ? (window.innerWidth - 40) / originalViewport.width : 1.0);
 
                 setIsLoading(false);
             } catch (err: any) {
@@ -495,11 +563,186 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    useEffect(() => {
-        if (containerRef.current) {
-            containerRef.current.style.setProperty('--pdf-scale', scale.toString());
+    const fitToWidth = async () => {
+        if (!pdfDocRef.current) return;
+        const page = await pdfDocRef.current.getPage(1);
+        const originalViewport = page.getViewport({ scale: 1.0 });
+        const containerWidth = containerRef.current?.clientWidth || window.innerWidth;
+        const padding = window.innerWidth < 768 ? 20 : 120; // More padding for desktop centering
+        const newScale = (containerWidth - padding) / originalViewport.width;
+        handleZoom(newScale);
+        setViewMode('page'); // Next click will fit to page
+    };
+
+    const fitToPage = async () => {
+        if (!pdfDocRef.current) return;
+        const page = await pdfDocRef.current.getPage(1);
+        const originalViewport = page.getViewport({ scale: 1.0 });
+        const containerHeight = containerRef.current?.clientHeight || window.innerHeight;
+        // Subtract toolbar (80px) and padding (80px)
+        const availableHeight = containerHeight - 160;
+        const newScale = availableHeight / originalViewport.height;
+        handleZoom(newScale);
+        setViewMode('width'); // Next click will fit to width
+    };
+
+    const toggleFit = () => {
+        if (viewMode === 'width') {
+            fitToWidth();
+        } else {
+            fitToPage();
         }
+    };
+
+    useEffect(() => {
+        if (isInteractingRef.current) return;
+
+        // Keep scaleRef in sync with state for non-gesture updates (buttons, init)
+        scaleRef.current = scale;
+
+        const timer = setTimeout(() => {
+            setRenderScale(scale);
+            if (containerRef.current) {
+                containerRef.current.style.setProperty('--pdf-scale', scale.toString());
+            }
+        }, 400); 
+        return () => clearTimeout(timer);
     }, [scale]);
+
+    // Simplified focal point logic removed in favor of direct gesture scroll handling
+
+    // Native Non-Passive Event Listeners for Touch/Wheel to guarantee smoothness
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const handleWheel = (e: WheelEvent) => {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                isInteractingRef.current = true;
+                container.classList.add('is-zooming');
+
+                const delta = -e.deltaY * 0.005;
+                const nextScale = Math.min(Math.max(0.3, scaleRef.current + delta), 4);
+                
+                const rect = container.getBoundingClientRect();
+                const focalX = e.clientX - rect.left;
+                const focalY = e.clientY - rect.top;
+                const ratio = nextScale / scaleRef.current;
+                
+                const nextLeft = (container.scrollLeft + focalX) * ratio - focalX;
+                const nextTop = (container.scrollTop + focalY) * ratio - focalY;
+
+                scaleRef.current = nextScale;
+                updateDOMScale(nextScale, nextLeft, nextTop);
+            }
+        };
+
+        const onTouchStart = (e: TouchEvent) => {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                touchState.current.isPinching = true;
+                touchState.current.lastDist = Math.hypot(
+                    touch1.pageX - touch2.pageX,
+                    touch1.pageY - touch2.pageY
+                );
+                touchState.current.lastFocalX = (touch1.clientX + touch2.clientX) / 2;
+                touchState.current.lastFocalY = (touch1.clientY + touch2.clientY) / 2;
+                isInteractingRef.current = true;
+                container.classList.add('is-zooming');
+            } else if (e.touches.length === 1) {
+                const touch = e.touches[0];
+                const now = Date.now();
+                const { lastTap, lastTapX, lastTapY } = touchState.current;
+                const dist = Math.hypot(touch.clientX - lastTapX, touch.clientY - lastTapY);
+
+                if (now - lastTap < 300 && dist < 30) {
+                    e.preventDefault();
+                    const rect = container.getBoundingClientRect();
+                    const focalX = touch.clientX - rect.left;
+                    const focalY = touch.clientY - rect.top;
+                    const nextScale = scaleRef.current > 1.2 ? 1.0 : 2.0;
+                    const ratio = nextScale / scaleRef.current;
+
+                    const nextLeft = (container.scrollLeft + focalX) * ratio - focalX;
+                    const nextTop = (container.scrollTop + focalY) * ratio - focalY;
+
+                    scaleRef.current = nextScale;
+                    updateDOMScale(nextScale, nextLeft, nextTop);
+                    touchState.current.lastTap = 0;
+                } else {
+                    touchState.current.lastTap = now;
+                }
+                touchState.current.lastTapX = touch.clientX;
+                touchState.current.lastTapY = touch.clientY;
+                touchState.current.wasScrolling = false;
+            }
+        };
+
+        const onTouchMove = (e: TouchEvent) => {
+            if (touchState.current.isPinching && e.touches.length === 2) {
+                e.preventDefault();
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const dist = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+                const currentFocalX = (touch1.clientX + touch2.clientX) / 2;
+                const currentFocalY = (touch1.clientY + touch2.clientY) / 2;
+
+                if (touchState.current.lastDist > 0) {
+                    const ratio = dist / touchState.current.lastDist;
+                    const nextScale = Math.min(Math.max(0.3, scaleRef.current * ratio), 4);
+                    
+                    const rect = container.getBoundingClientRect();
+                    const localFocalX = currentFocalX - rect.left;
+                    const localFocalY = currentFocalY - rect.top;
+                    
+                    // Pan calculations
+                    const deltaX = currentFocalX - touchState.current.lastFocalX;
+                    const deltaY = currentFocalY - touchState.current.lastFocalY;
+
+                    const translatedScrollLeft = container.scrollLeft - deltaX;
+                    const translatedScrollTop = container.scrollTop - deltaY;
+
+                    const realRatio = nextScale / scaleRef.current;
+
+                    const nextLeft = (translatedScrollLeft + localFocalX) * realRatio - localFocalX;
+                    const nextTop = (translatedScrollTop + localFocalY) * realRatio - localFocalY;
+
+                    scaleRef.current = nextScale;
+                    updateDOMScale(nextScale, nextLeft, nextTop);
+                }
+                touchState.current.lastDist = dist;
+                touchState.current.lastFocalX = currentFocalX;
+                touchState.current.lastFocalY = currentFocalY;
+            } else if (e.touches.length === 1) {
+                touchState.current.wasScrolling = true;
+            }
+        };
+
+        const onTouchEnd = () => {
+            if (touchState.current.wasScrolling) {
+                touchState.current.lastTap = 0;
+            }
+            touchState.current.isPinching = false;
+            touchState.current.lastDist = 0;
+            // No direct isInteractingRef.current = false here, let the timeout handle it
+            // for smoother transition between pinch-stop and redraw
+        };
+
+        container.addEventListener('wheel', handleWheel, { passive: false });
+        container.addEventListener('touchstart', onTouchStart, { passive: false });
+        container.addEventListener('touchmove', onTouchMove, { passive: false });
+        container.addEventListener('touchend', onTouchEnd);
+
+        return () => {
+            container.removeEventListener('wheel', handleWheel);
+            container.removeEventListener('touchstart', onTouchStart);
+            container.removeEventListener('touchmove', onTouchMove);
+            container.removeEventListener('touchend', onTouchEnd);
+        };
+    }, [updateDOMScale]);
 
     // Intersection Observer for lazy loading and current page tracking
     useEffect(() => {
@@ -805,6 +1048,42 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                                 <button onClick={nextSearch} className="text-zinc-400 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3"><path d="m9 18 6-6-6-6" /></svg></button>
                             </div>
                         )}
+                    </div>
+
+                    {/* Scale Controls */}
+                    <div className="flex items-center gap-0.5 md:gap-1 bg-zinc-200 dark:bg-white/5 rounded-xl md:rounded-2xl p-0.5 md:p-1 border border-zinc-300 dark:border-white/10">
+                        <button
+                            onClick={() => handleZoom(Math.max(0.2, scaleRef.current - 0.1))}
+                            className="w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl flex items-center justify-center text-zinc-500 dark:text-white/50 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300 dark:hover:bg-white/10 transition-all border-none bg-transparent"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 md:w-4 md:h-4"><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                        </button>
+                        <span className="text-[10px] md:text-xs font-medium text-zinc-900 dark:text-white px-1 md:px-2 min-w-[40px] md:min-w-[50px] text-center">{Math.round(scale * 100)}%</span>
+                        <button
+                            onClick={() => handleZoom(Math.min(3, scaleRef.current + 0.1))}
+                            className="w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl flex items-center justify-center text-zinc-500 dark:text-white/50 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300 dark:hover:bg-white/10 transition-all border-none bg-transparent"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 md:w-4 md:h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                        </button>
+
+                        <button
+                            onClick={toggleFit}
+                            className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center bg-zinc-300/50 dark:bg-white/5 text-zinc-500 dark:text-white/50 hover:text-zinc-900 dark:hover:text-white pdf-back-btn transition-all border-none"
+                            title={viewMode === 'width' ? "Fit to Width" : "Fit to Page"}
+                        >
+                            {viewMode === 'width' ? (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 md:w-5 md:h-5">
+                                    <path d="M2 12h20" />
+                                    <path d="M7 7l-5 5 5 5" />
+                                    <path d="M17 7l5 5-5 5" />
+                                </svg>
+                            ) : (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 md:w-5 md:h-5">
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m14 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                                </svg>
+                            )}
+                        </button>
+
                     </div>
                 </div>
 
