@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { LibraryFile, UserProfile, Folder } from '../types.ts';
 import NexusServer from '../services/nexusServer.ts';
@@ -486,6 +486,30 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     fetchFromSource(true);
   }, [fetchFromSource]);
 
+  // Dynamically update document title & description meta tag on folder/route changes
+  useEffect(() => {
+    let title = "Content Library Hub | Scholix";
+    let description = "Access university study materials, notes, and previous year papers (PYQs) on Scholix.";
+
+    if (activeSubject) {
+      const categorySuffix = activeCategory ? ` ${activeCategory.name}` : " Notes & PYQs";
+      title = `${activeSubject.name}${categorySuffix} | ${selectedProgram} | Scholix`;
+      description = `Download study materials, handwritten notes, and previous year papers (PYQs) for ${activeSubject.name} (${selectedProgram}) on Scholix.`;
+    } else if (activeSemester) {
+      title = `${activeSemester.name} Library | ${selectedProgram} | Scholix`;
+      description = `Browse subjects, syllabus, notes, and PYQs for ${selectedProgram} ${activeSemester.name} at Scholix.`;
+    } else {
+      title = `Library Hub | ${selectedProgram} | Scholix`;
+      description = `Access university notes, previous year question papers (PYQs), and study resources for ${selectedProgram} on Scholix.`;
+    }
+
+    document.title = title;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', description);
+    }
+  }, [activeSemester, activeSubject, activeCategory, selectedProgram]);
+
   // Helper function to dynamically merge curriculum with DB folders
   const getMergedFolders = useCallback((prog: string, activeSub: Folder | null) => {
     const isBtech = (prog || '').toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
@@ -891,6 +915,18 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     navigate(path);
   };
 
+  const getFolderToPath = (f: Folder) => {
+    let path = `${routePrefix}/library/${slugify(selectedProgram)}`;
+    if (f.type === 'semester') {
+      path += `/${slugify(f.name)}`;
+    } else if (f.type === 'subject') {
+      path += `/${slugify(activeSemester?.name || '')}/${slugify(f.name)}`;
+    } else if (f.type === 'category') {
+      path += `/${slugify(activeSemester?.name || '')}/${slugify(activeSubject?.name || '')}/${slugify(f.name)}`;
+    }
+    return path;
+  };
+
   const handleCreateFolder = async () => {
     if (!newFolderName.trim() || !userProfile?.is_admin) return;
     setIsProcessing(true);
@@ -1094,9 +1130,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               </div>
               {!isAdminView && !searchQuery && viewMode === 'browse' && (
                 <nav className="mt-2 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-zinc-400">
-                  <button onClick={() => navigateTo(null, null, null)} className="hover:text-orange-500 transition-colors border-none bg-transparent cursor-pointer">Root</button>
-                  {activeSemester && <><span className="opacity-30">/</span><button onClick={() => navigateTo(activeSemester, null, null)} className={`border-none bg-transparent cursor-pointer ${!activeSubject ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSemester.name}</button></>}
-                  {activeSubject && <><span className="opacity-30">/</span><button onClick={() => navigateTo(activeSemester, activeSubject, null)} className={`border-none bg-transparent cursor-pointer ${!activeCategory ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSubject.name}</button></>}
+                  <Link to={`${routePrefix}/library/${slugify(selectedProgram)}`} className="hover:text-orange-500 transition-colors border-none bg-transparent cursor-pointer">Root</Link>
+                  {activeSemester && <><span className="opacity-30">/</span><Link to={`${routePrefix}/library/${slugify(selectedProgram)}/${slugify(activeSemester.name)}`} className={`border-none bg-transparent cursor-pointer ${!activeSubject ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSemester.name}</Link></>}
+                  {activeSubject && <><span className="opacity-30">/</span><Link to={`${routePrefix}/library/${slugify(selectedProgram)}/${slugify(activeSemester.name)}/${slugify(activeSubject.name)}`} className={`border-none bg-transparent cursor-pointer ${!activeCategory ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSubject.name}</Link></>}
                   {activeCategory && <><span className="opacity-30">/</span><span className="text-orange-500">{activeCategory.name}</span></>}
                 </nav>
               )}
@@ -1267,11 +1303,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                           handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : '');
                                         }
                                       }}
-                                      onClick={() => {
-                                        if (folder.type === 'semester') navigateTo(folder, null, null);
-                                        else if (folder.type === 'subject') navigateTo(activeSemester, folder, null);
-                                        else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder);
-                                      }}
+                                      toPath={getFolderToPath(folder)}
                                       onRename={() => {
                                         setFolderToManage(folder);
                                         setNewFolderName(folder.name);
@@ -1305,11 +1337,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                   handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : '');
                                 }
                               }}
-                              onClick={() => {
-                                if (folder.type === 'semester') navigateTo(folder, null, null);
-                                else if (folder.type === 'subject') navigateTo(activeSemester, folder, null);
-                                else if (folder.type === 'category') navigateTo(activeSemester, activeSubject, folder);
-                              }}
+                              toPath={getFolderToPath(folder)}
                               onRename={() => {
                                 setFolderToManage(folder);
                                 setNewFolderName(folder.name);
@@ -1846,11 +1874,11 @@ const FolderCard: React.FC<{
   onDragOver: (e: React.DragEvent) => void;
   onDragLeave: () => void;
   onDrop: (e: React.DragEvent) => void;
-  onClick: () => void;
+  toPath: string;
   onRename: () => void;
   onDelete: (e: React.MouseEvent) => void;
   isDraggingOver: boolean;
-}> = ({ folder, selectedProgram, userProfile, fileCount, onDragOver, onDragLeave, onDrop, onClick, onRename, onDelete, isDraggingOver }) => {
+}> = ({ folder, selectedProgram, userProfile, fileCount, onDragOver, onDragLeave, onDrop, toPath, onRename, onDelete, isDraggingOver }) => {
   const isAdmin = userProfile?.is_admin || false;
   const isVirtual = folder.id.startsWith('v-');
 
@@ -1873,13 +1901,14 @@ const FolderCard: React.FC<{
   const meta = folder.type === 'subject' ? findSubjectMetadata(selectedProgram, folder.name) : null;
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
+    <Link
+      to={toPath}
+      ref={setNodeRef as any}
+      style={style as any}
       onDragOver={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDragOver(e); }}
       onDragLeave={onDragLeave}
       onDrop={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDrop(e); }}
-      onClick={onClick}
+      onClick={(e) => { if (isDragging) e.preventDefault(); }}
       className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''} ${isDraggingOver ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-orange-500/50 hover:shadow-lg'} ${isDragging ? 'shadow-2xl border-orange-500' : ''}`}
     >
       {isAdmin && !isVirtual && (
@@ -1921,7 +1950,7 @@ const FolderCard: React.FC<{
         {fileCount} File{fileCount !== 1 ? 's' : ''}
       </p>
       <div className="absolute -right-2 -bottom-2 opacity-5 group-hover:scale-110 transition-transform"><FolderIcon type={folder.type} size="w-24 h-24" /></div>
-    </div>
+    </Link>
   );
 };
 
