@@ -455,49 +455,31 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             try {
                 setIsLoading(true);
                 setLoadProgress(0);
-                // Security: Fetch PDF as binary data to obfuscate URL in network tab
+                
                 // 🔐 Session Token Verification: Get the current user's session token
                 const { data: { session } } = await NexusServer.getSession();
                 
-                const response = await fetch(url, {
-                    headers: {
+                // Load PDF progressively using PDF.js native stream & range-request transport
+                const loadingTask = pdfjsLib.getDocument({
+                    url: url,
+                    httpHeaders: {
                         'Authorization': session ? `Bearer ${session.access_token}` : ''
-                    }
+                    },
+                    disableRange: false,
+                    disableAutoFetch: false,
+                    disableStream: false,
                 });
-                if (!response.ok) throw new Error("Security response failed (Protocol 403)");
 
-                // Stream-based download with progress tracking
-                const contentLength = response.headers.get('content-length');
-                const total = contentLength ? parseInt(contentLength, 10) : 0;
-                const reader = response.body?.getReader();
-                
-                let data: Uint8Array;
-                if (reader && total > 0) {
-                    const chunks: Uint8Array[] = [];
-                    let received = 0;
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
-                        chunks.push(value);
-                        received += value.length;
-                        setLoadProgress(Math.min(Math.round((received / total) * 95), 95));
+                // Track progressive loading progress
+                loadingTask.onProgress = ({ loaded, total }) => {
+                    if (total > 0) {
+                        setLoadProgress(Math.round((loaded / total) * 100));
+                    } else {
+                        // Fallback progress if total size is unknown
+                        setLoadProgress(prev => Math.min(prev + 5, 90));
                     }
-                    const combined = new Uint8Array(received);
-                    let offset = 0;
-                    for (const chunk of chunks) {
-                        combined.set(chunk, offset);
-                        offset += chunk.length;
-                    }
-                    data = combined;
-                } else {
-                    // Fallback if content-length unavailable or no stream
-                    setLoadProgress(30);
-                    const arrayBuffer = await response.arrayBuffer();
-                    data = new Uint8Array(arrayBuffer);
-                    setLoadProgress(80);
-                }
+                };
 
-                const loadingTask = pdfjsLib.getDocument({ data });
                 const pdf = await loadingTask.promise;
                 pdfDocRef.current = pdf;
                 setPdfDoc(pdf);
