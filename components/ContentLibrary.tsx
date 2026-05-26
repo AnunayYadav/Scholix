@@ -897,14 +897,57 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     try {
       let type: 'semester' | 'subject' | 'category' = 'semester';
       let parentId: string | null = null;
-      if (activeSubject) { type = 'category'; parentId = activeSubject.id; }
-      else if (activeSemester) { type = 'subject'; parentId = activeSemester.id; }
-      await NexusServer.createFolder(newFolderName, type, parentId, selectedProgram, isShining);
+
+      // Dynamic materialization of virtual parent folders in the database
+      if (activeSubject) {
+        type = 'category';
+        // 1. Ensure activeSemester (grandparent) exists in the database
+        let semDbFolder = folders.find(f => f.type === 'semester' && f.name.toLowerCase() === activeSemester?.name.toLowerCase() && f.program === selectedProgram);
+        if (!semDbFolder && activeSemester) {
+          await NexusServer.createFolder(activeSemester.name, 'semester', null, selectedProgram);
+          const freshFolders = await NexusServer.fetchFolders(selectedProgram);
+          setFolders(freshFolders);
+          semDbFolder = freshFolders.find(f => f.type === 'semester' && f.name.toLowerCase() === activeSemester.name.toLowerCase() && f.program === selectedProgram);
+        }
+
+        // 2. Ensure activeSubject (parent) exists in the database under that semester
+        if (semDbFolder) {
+          let subjDbFolder = folders.find(f => f.type === 'subject' && f.name.toLowerCase() === activeSubject.name.toLowerCase() && f.parent_id === semDbFolder.id && f.program === selectedProgram);
+          if (!subjDbFolder) {
+            await NexusServer.createFolder(activeSubject.name, 'subject', semDbFolder.id, selectedProgram);
+            const freshFolders = await NexusServer.fetchFolders(selectedProgram);
+            setFolders(freshFolders);
+            subjDbFolder = freshFolders.find(f => f.type === 'subject' && f.name.toLowerCase() === activeSubject.name.toLowerCase() && f.parent_id === semDbFolder.id && f.program === selectedProgram);
+          }
+          if (subjDbFolder) {
+            parentId = subjDbFolder.id;
+          }
+        }
+      } else if (activeSemester) {
+        type = 'subject';
+        // Ensure activeSemester (parent) exists in the database
+        let semDbFolder = folders.find(f => f.type === 'semester' && f.name.toLowerCase() === activeSemester.name.toLowerCase() && f.program === selectedProgram);
+        if (!semDbFolder) {
+          await NexusServer.createFolder(activeSemester.name, 'semester', null, selectedProgram);
+          const freshFolders = await NexusServer.fetchFolders(selectedProgram);
+          setFolders(freshFolders);
+          semDbFolder = freshFolders.find(f => f.type === 'semester' && f.name.toLowerCase() === activeSemester.name.toLowerCase() && f.program === selectedProgram);
+        }
+        if (semDbFolder) {
+          parentId = semDbFolder.id;
+        }
+      }
+
+      await NexusServer.createFolder(newFolderName.trim(), type, parentId, selectedProgram, isShining);
       setNewFolderName('');
       setIsShining(false);
       handleCloseFolder();
       fetchFromSource(false);
-    } catch (e: any) { showToast(e.message, 'error'); } finally { setIsProcessing(false); }
+    } catch (e: any) {
+      showToast(e.message || 'Error creating folder', 'error');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleUpload = async () => {
@@ -1808,6 +1851,9 @@ const FolderCard: React.FC<{
   onDelete: (e: React.MouseEvent) => void;
   isDraggingOver: boolean;
 }> = ({ folder, selectedProgram, userProfile, fileCount, onDragOver, onDragLeave, onDrop, onClick, onRename, onDelete, isDraggingOver }) => {
+  const isAdmin = userProfile?.is_admin || false;
+  const isVirtual = folder.id.startsWith('v-');
+
   const {
     attributes,
     listeners,
@@ -1815,7 +1861,7 @@ const FolderCard: React.FC<{
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: folder.id });
+  } = useSortable({ id: folder.id, disabled: !isAdmin || isVirtual });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -1824,20 +1870,19 @@ const FolderCard: React.FC<{
     opacity: isDragging ? 0.3 : 1,
   };
 
-  const isAdmin = userProfile?.is_admin || false;
   const meta = folder.type === 'subject' ? findSubjectMetadata(selectedProgram, folder.name) : null;
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      onDragOver={(e) => { if (!isAdmin) return; e.preventDefault(); onDragOver(e); }}
+      onDragOver={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDragOver(e); }}
       onDragLeave={onDragLeave}
-      onDrop={(e) => { if (!isAdmin) return; e.preventDefault(); onDrop(e); }}
+      onDrop={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDrop(e); }}
       onClick={onClick}
       className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''} ${isDraggingOver ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-orange-500/50 hover:shadow-lg'} ${isDragging ? 'shadow-2xl border-orange-500' : ''}`}
     >
-      {isAdmin && (
+      {isAdmin && !isVirtual && (
         <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
           <div
             {...attributes}
