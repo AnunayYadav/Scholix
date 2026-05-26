@@ -488,7 +488,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   // Helper function to dynamically merge curriculum with DB folders
   const getMergedFolders = useCallback((prog: string, activeSub: Folder | null) => {
-    const isBtech = prog.toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
+    const isBtech = (prog || '').toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
     if (!isBtech) {
       return folders;
     }
@@ -1328,7 +1328,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                             }}
                             onReject={async () => { const confirmed = await showConfirm("Reject and remove this file?"); if (confirmed) { setIsProcessing(true); NexusServer.rejectFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
                             onDemote={async () => { const confirmed = await showConfirm("Send this file back to pending review?"); if (confirmed) { setIsProcessing(true); NexusServer.demoteFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
-                            onEdit={() => { setSelectedFile(file); setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type }); setShowEditModal(true); }}
+                            onEdit={() => { setSelectedFile(file); setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type, program: file.program || selectedProgram }); setShowEditModal(true); }}
                             onDelete={async () => { const confirmed = await showConfirm("Permanently delete this file?"); if (confirmed) { setIsProcessing(true); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
                             onAccess={() => handleFileAccess(file)}
                             onShowDetails={() => { setSelectedFile(file); setShowDetailsModal(true); }}
