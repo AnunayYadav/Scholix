@@ -4,11 +4,21 @@ import { createClient } from '@supabase/supabase-js';
 import { BTECH_CSE_2025 } from '../data/curriculumData';
 import { slugify } from '../utils/slugify';
 
-// Resolve environment variables from .env.local
+// Resolve environment variables from .env.local if present, or fallback to process.env
 const envLocalPath = path.resolve(process.cwd(), '.env.local');
-const envContent = fs.readFileSync(envLocalPath, 'utf8');
+let envContent = '';
+try {
+  if (fs.existsSync(envLocalPath)) {
+    envContent = fs.readFileSync(envLocalPath, 'utf8');
+  }
+} catch (e) {
+  console.warn("Could not read .env.local, using process.env.");
+}
 
 const getEnvVar = (name: string): string => {
+  if (process.env[name]) {
+    return process.env[name] || '';
+  }
   const match = envContent.match(new RegExp(`^${name}=(?:"([^"]+)"|'([^']+)'|([^\\r\\n]+))`, 'm'));
   if (match) {
     return match[1] || match[2] || match[3] || '';
@@ -20,7 +30,7 @@ const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');
 const supabaseKey = getEnvVar('SUPABASE_SERVICE_ROLE_KEY') || getEnvVar('VITE_SUPABASE_ANON_KEY');
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error("Error: Supabase credentials not found in .env.local");
+  console.error("Error: Supabase credentials not found. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY or SUPABASE_SERVICE_ROLE_KEY env variables.");
   process.exit(1);
 }
 
