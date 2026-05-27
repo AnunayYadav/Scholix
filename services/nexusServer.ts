@@ -856,9 +856,11 @@ class NexusServer {
     const client = getSupabase();
     if (!client) throw new Error("Registry offline.");
 
-
-
-    const { data: existing } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
+    const { data: existing, error: selectError } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
+    if (selectError) {
+      console.error("[NexusServer] Error checking existing profile:", selectError);
+      throw selectError;
+    }
     
     // Aggregate metadata from multiple sources (Supabase stores it differently based on flow)
     const metadata = {
@@ -866,9 +868,7 @@ class NexusServer {
       ...user.user_metadata,
       ...overrides
     };
-    
 
-    
     // Robustly check multiple possible locations and formats for verification status
     const isVerifiedInMeta = 
       !!user.email_confirmed_at || // Supabase native verification
@@ -880,7 +880,6 @@ class NexusServer {
       user.app_metadata?.is_verified === true;
 
     if (existing) {
-
       let needsUpdate = false;
       const updates: any = {};
 
@@ -904,28 +903,27 @@ class NexusServer {
         // Silent update for profile consistency
         const { data: updated, error: updateError } = await client.from('profiles').update(updates).eq('id', user.id).select().single();
         
-          if (updateError) {
-            const isConflict = updateError.code === '23505' || 
-                             updateError.message?.includes('unique_registration_number') ||
-                             updateError.message?.includes('duplicate key');
-            
-            if (isConflict) {
-              console.warn("[NexusServer] Profile sync conflict, retrying without registration_number...");
-              const { registration_number, ...safeUpdates } = updates;
-              if (Object.keys(safeUpdates).length > 0) {
-                const { data: retryUpdated, error: retryError } = await client.from('profiles').update(safeUpdates).eq('id', user.id).select().maybeSingle();
-                if (!retryError && retryUpdated) return retryUpdated;
-                if (retryError) console.error("[NexusServer] Profile sync retry failed:", retryError);
-              }
-            } else {
-              console.error("[NexusServer] Profile sync update error:", updateError);
+        if (updateError) {
+          const isConflict = updateError.code === '23505' || 
+                           updateError.message?.includes('unique_registration_number') ||
+                           updateError.message?.includes('duplicate key');
+          
+          if (isConflict) {
+            console.warn("[NexusServer] Profile sync conflict, retrying without registration_number...");
+            const { registration_number, ...safeUpdates } = updates;
+            if (Object.keys(safeUpdates).length > 0) {
+              const { data: retryUpdated, error: retryError } = await client.from('profiles').update(safeUpdates).eq('id', user.id).select().maybeSingle();
+              if (!retryError && retryUpdated) return retryUpdated;
+              if (retryError) console.error("[NexusServer] Profile sync retry failed:", retryError);
             }
+          } else {
+            console.error("[NexusServer] Profile sync update error:", updateError);
           }
+        }
         if (updated) return updated;
       }
       return existing;
     }
-    
 
     const newProfile = {
       id: user.id,
@@ -943,41 +941,46 @@ class NexusServer {
     };
 
     let { data, error } = await client.from('profiles')
-      .upsert(newProfile, { onConflict: 'id' })
+      .insert(newProfile)
       .select()
       .maybeSingle();
 
-    if (error && (error.code === 'PGRST204' || error.message.includes('column'))) {
-      console.warn(`[NexusServer] ensureProfile failed (missing columns), trying minimal...`);
-      const minimalNewProfile = {
-        id: user.id,
-        email: user.email!,
-        username: newProfile.username,
-        registration_number: newProfile.registration_number,
-        is_verified: isVerifiedInMeta ? 'yes' : 'no'
-      };
-      const fallback = await client.from('profiles').upsert(minimalNewProfile, { onConflict: 'id' }).select().maybeSingle();
-      data = fallback.data;
-      error = fallback.error;
-    }
-      
     if (error) {
-      if (error.code === '23505' || error.message?.includes('unique_registration_number')) {
-        console.warn("[NexusServer] Profile creation conflict on registration_number, retrying without it...");
-        const { registration_number, ...safeProfile } = newProfile;
-        const { data: retryData, error: retryError } = await client.from('profiles').upsert(safeProfile, { onConflict: 'id' }).select().maybeSingle();
+      if (error.code === '23505' || error.message?.includes('duplicate key') || error.message?.includes('unique_registration_number')) {
+        console.warn("[NexusServer] Profile already exists (conflict), fetching...");
+        const { data: retryData, error: retryError } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
         if (!retryError && retryData) return retryData;
         if (retryError) {
           console.error("[NexusServer] Profile creation retry failed:", retryError);
           throw retryError;
         }
+      } else if (error.code === 'PGRST204' || error.message.includes('column')) {
+        console.warn(`[NexusServer] ensureProfile failed (missing columns), trying minimal...`);
+        const minimalNewProfile = {
+          id: user.id,
+          email: user.email!,
+          username: newProfile.username,
+          registration_number: newProfile.registration_number,
+          is_verified: isVerifiedInMeta ? 'yes' : 'no'
+        };
+        const fallback = await client.from('profiles').insert(minimalNewProfile).select().maybeSingle();
+        if (fallback.error) {
+          if (fallback.error.code === '23505' || fallback.error.message?.includes('duplicate key')) {
+            const { data: retryData, error: retryError } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
+            if (!retryError && retryData) return retryData;
+          }
+          console.error("[NexusServer] Minimal profile fallback failed:", fallback.error);
+          throw fallback.error;
+        }
+        data = fallback.data;
       } else {
         console.error("[NexusServer] Profile creation error:", error);
         throw error;
       }
     }
+    
     console.log(`[NexusServer] Profile created successfully for ${user.id}`);
-    return data;
+    return data || newProfile;
   }
 
   static async collectReward(userId: string, frameId: string) {
@@ -1008,7 +1011,7 @@ class NexusServer {
   static async updateProfile(userId: string, updates: Partial<UserProfile>): Promise<void> {
     const client = getSupabase();
     if (!client || !userId) return;
-    const { error } = await client.from('profiles').upsert({ id: userId, ...updates });
+    const { error } = await client.from('profiles').update(updates).eq('id', userId);
     if (error) throw error;
   }
 

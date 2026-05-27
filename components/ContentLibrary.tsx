@@ -1917,15 +1917,15 @@ const FolderCard: React.FC<{
             {...attributes}
             {...listeners}
             className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-zinc-300 hover:text-orange-500 cursor-grab active:cursor-grabbing transition-colors shadow-sm"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
             title="Drag to reorder"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><circle cx="9" cy="5" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="9" cy="19" r="1" /><circle cx="15" cy="5" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="19" r="1" /></svg>
           </div>
-          <button onClick={(e) => { e.stopPropagation(); onRename(); }} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-orange-500 hover:bg-orange-50 dark:hover:bg-zinc-900 transition-colors shadow-sm border-none">
+          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRename(); }} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-orange-500 hover:bg-orange-50 dark:hover:bg-zinc-900 transition-colors shadow-sm border-none">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
           </button>
-          <button onClick={onDelete} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red dark:hover:bg-zinc-900 transition-colors shadow-sm border-none">
+          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(e); }} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red dark:hover:bg-zinc-900 transition-colors shadow-sm border-none">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
           </button>
         </div>

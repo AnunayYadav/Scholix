@@ -1557,6 +1557,11 @@ const AppContent: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const userProfileRef = useRef<UserProfile | null>(null);
+
+  useEffect(() => {
+    userProfileRef.current = userProfile;
+  }, [userProfile]);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup' | 'verify_email'>('login');
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -1743,7 +1748,7 @@ const AppContent: React.FC = () => {
     const unsubscribe = NexusServer.onAuthStateChange(async (user) => {
       if (user) {
         // Skip redundant profile sync if we already handled this user ID
-        if (lastHandledUserRef.current === user.id && userProfile) {
+        if (lastHandledUserRef.current === user.id && userProfileRef.current) {
           setAuthIsReady(true);
           return;
         }
