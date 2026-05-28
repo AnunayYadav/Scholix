@@ -1130,6 +1130,29 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     navigate(`${routePrefix}/library/${slugify(userProfile?.program || availablePrograms[0])}`);
   };
 
+  const handleShareFile = async (file: LibraryFile) => {
+    const shareUrl = `${window.location.origin}${routePrefix}/library/view/${file.id}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: file.name,
+          text: `Check out this document on Scholix: ${file.name}`,
+          url: shareUrl,
+        });
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          navigator.clipboard.writeText(shareUrl)
+            .then(() => showToast("Share link copied to clipboard!", "success"))
+            .catch(() => showToast("Failed to copy link.", "error"));
+        }
+      }
+    } else {
+      navigator.clipboard.writeText(shareUrl)
+        .then(() => showToast("Share link copied to clipboard!", "success"))
+        .catch(() => showToast("Failed to copy link.", "error"));
+    }
+  };
+
   const handleFileAccess = async (file: LibraryFile) => {
     if (!userProfile) {
       showToast("Please login to access documents.", "info");
@@ -1573,9 +1596,15 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               </div>
 
               <footer className="p-6 md:p-8 bg-zinc-50 dark:bg-[#0a0a0a]/20 border-t border-zinc-100 dark:border-white/5 flex gap-4">
-                <button onClick={handleCloseDetails} className="flex-1 py-3 text-[11px] sm:text-xs text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors">Discard</button>
+                <button onClick={handleCloseDetails} className="flex-1 py-3 text-[11px] sm:text-xs text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent">Discard</button>
                 {selectedFile.status === 'approved' && (
-                  <button onClick={() => { handleCloseDetails(); handleFileAccess(selectedFile); }} className="flex-[2] py-3 bg-orange-500 text-white rounded-xl font-semibold text-[11px] sm:text-xs shadow-xl active:scale-95 transition-all border-none">View Document ↗</button>
+                  <>
+                    <button onClick={() => handleShareFile(selectedFile)} className="flex-1 py-3 border border-orange-500/20 bg-orange-500/5 text-orange-500 hover:bg-orange-500/10 rounded-xl font-semibold text-[11px] sm:text-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" /></svg>
+                      Share
+                    </button>
+                    <button onClick={() => { handleCloseDetails(); handleFileAccess(selectedFile); }} className="flex-[2] py-3 bg-orange-500 text-white rounded-xl font-semibold text-[11px] sm:text-xs shadow-xl active:scale-95 transition-all border-none cursor-pointer">View Document ↗</button>
+                  </>
                 )}
               </footer>
             </div>
