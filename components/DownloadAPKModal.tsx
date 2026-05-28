@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import NexusServer from '../services/nexusServer';
@@ -10,7 +10,9 @@ interface DownloadAPKModalProps {
 
 const DownloadAPKModal: React.FC<DownloadAPKModalProps> = ({ isOpen, onClose }) => {
   const [downloadCount, setDownloadCount] = useState<number>(40);
+  const [animatedCount, setAnimatedCount] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
+  const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -31,6 +33,48 @@ const DownloadAPKModal: React.FC<DownloadAPKModalProps> = ({ isOpen, onClose }) 
     return () => { isMounted = false; };
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setAnimatedCount(0);
+      hasAnimatedRef.current = false;
+      return;
+    }
+
+    if (hasAnimatedRef.current) {
+      setAnimatedCount(downloadCount);
+      return;
+    }
+
+    const duration = 2500; // 2.5 seconds
+    const startTime = performance.now();
+    const target = downloadCount;
+
+    let animationFrameId: number;
+
+    const updateCount = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Easing function: easeOutExpo
+      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      const currentCount = Math.floor(easeProgress * target);
+
+      setAnimatedCount(currentCount);
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(updateCount);
+      } else {
+        hasAnimatedRef.current = true;
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(updateCount);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [isOpen, downloadCount]);
+
   const handleDownload = async () => {
     try {
       setIsDownloading(true);
@@ -40,7 +84,7 @@ const DownloadAPKModal: React.FC<DownloadAPKModalProps> = ({ isOpen, onClose }) 
       await NexusServer.trackEvent('apk_download');
       
       const link = document.createElement('a');
-      link.href = 'https://raw.githubusercontent.com/AnunayYadav/LPU-Nexus/main/Scholix.apk';
+      link.href = '/Scholix.apk';
       link.download = 'Scholix.apk';
       document.body.appendChild(link);
       link.click();
@@ -111,7 +155,7 @@ const DownloadAPKModal: React.FC<DownloadAPKModalProps> = ({ isOpen, onClose }) 
               <div className="bg-zinc-50/50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center">
                 <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.1em] mb-1.5">Downloads</span>
                 <span className="text-xl font-semibold text-zinc-900 dark:text-white tabular-nums">
-                  {downloadCount.toLocaleString()}
+                  {animatedCount.toLocaleString()}
                 </span>
               </div>
               <div className="bg-zinc-50/50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center">
