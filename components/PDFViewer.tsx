@@ -1003,7 +1003,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                     size: watermarkSize,
                     font: helveticaBoldFont,
                     color: rgb(0.7, 0.7, 0.7),
-                    opacity: 0.12,
+                    opacity: 0.19,
                     rotate: degrees(45),
                 });
 
