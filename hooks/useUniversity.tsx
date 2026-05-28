@@ -52,7 +52,8 @@ export const UNIVERSITIES: University[] = [
         ModuleType.EMERGENCY,
         ModuleType.HELP,
         ModuleType.ABOUT,
-        ModuleType.TIMETABLE
+        ModuleType.TIMETABLE,
+        ModuleType.FRESHERS
       ],
       campusTabs: ['mess', 'map']
     }
@@ -78,11 +79,11 @@ export const UNIVERSITIES: University[] = [
         ModuleType.LIBRARY,
         ModuleType.CAMPUS,
         ModuleType.EMERGENCY,
-
         ModuleType.QUIZ,
         ModuleType.HELP,
         ModuleType.ABOUT,
-        ModuleType.TIMETABLE
+        ModuleType.TIMETABLE,
+        ModuleType.FRESHERS
       ],
       campusTabs: ['map'] // IITM doesn't have the messy LPU mess menu logic yet
     }
