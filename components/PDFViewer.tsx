@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
 import { UserProfile } from '../types.ts';
 import { showToast } from './Toast.tsx';
 import NexusServer from '../services/nexusServer.ts';
@@ -968,6 +968,58 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             if (remainingIndices.length > 0) {
                 const remainingPages = await finalPdf.copyPages(originalPdf, remainingIndices);
                 remainingPages.forEach(page => finalPdf.addPage(page));
+            }
+
+            // 6.5. Apply watermark to all content pages (except the cover page at index 1)
+            const helveticaBoldFont = await finalPdf.embedFont(StandardFonts.HelveticaBold);
+            const helveticaFont = await finalPdf.embedFont(StandardFonts.Helvetica);
+            const watermarkText = 'SCHOLIX';
+            const watermarkSize = 60;
+            const pages = finalPdf.getPages();
+            
+            for (let i = 0; i < pages.length; i++) {
+                if (i === 1) continue; // Skip cover page
+                
+                const page = pages[i];
+                const { width, height } = page.getSize();
+                
+                // Center-aligned diagonal watermark text
+                const textWidth = helveticaBoldFont.widthOfTextAtSize(watermarkText, watermarkSize);
+                const textHeight = watermarkSize;
+                
+                const rad = 45 * Math.PI / 180;
+                const cosTheta = Math.cos(rad);
+                const sinTheta = Math.sin(rad);
+                
+                const cxRel = (textWidth / 2) * cosTheta - (textHeight / 2) * sinTheta;
+                const cyRel = (textWidth / 2) * sinTheta + (textHeight / 2) * cosTheta;
+                
+                const x0 = (width / 2) - cxRel;
+                const y0 = (height / 2) - cyRel;
+                
+                page.drawText(watermarkText, {
+                    x: x0,
+                    y: y0,
+                    size: watermarkSize,
+                    font: helveticaBoldFont,
+                    color: rgb(0.7, 0.7, 0.7),
+                    opacity: 0.12,
+                    rotate: degrees(45),
+                });
+
+                // Subtle footer branding at the bottom center of each page
+                const footerText = 'Downloaded from scholix.app | Secure Learning Platform';
+                const footerSize = 8;
+                const footerWidth = helveticaFont.widthOfTextAtSize(footerText, footerSize);
+                
+                page.drawText(footerText, {
+                    x: (width - footerWidth) / 2,
+                    y: 20,
+                    size: footerSize,
+                    font: helveticaFont,
+                    color: rgb(0.5, 0.5, 0.5),
+                    opacity: 0.4,
+                });
             }
 
             // 6. Serialize and download
