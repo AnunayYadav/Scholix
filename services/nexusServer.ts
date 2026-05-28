@@ -1178,6 +1178,40 @@ class NexusServer {
     }));
   }
 
+  static async fetchFileById(id: string): Promise<LibraryFile | null> {
+    const client = getSupabase();
+    if (!client || !id) return null;
+    const { data, error } = await client
+      .from('documents')
+      .select('*, uploader:profiles(username, is_admin)')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) {
+      console.error(`Fetch File By Id Error (${id}):`, error);
+      return null;
+    }
+    if (!data) return null;
+
+    return {
+      id: data.id,
+      name: data.name,
+      subject: data.subject,
+      semester: data.semester,
+      type: data.type,
+      uploadDate: new Date(data.created_at).getTime(),
+      size: data.size,
+      status: data.status,
+      storage_path: data.storage_path,
+      uploader_username: (data.uploader as any)?.username || "Anonymous Verto",
+      uploader_is_admin: (data.uploader as any)?.is_admin || false,
+      description: data.description,
+      admin_notes: data.admin_notes,
+      display_order: data.display_order,
+      program: data.program
+    };
+  }
+
   static async uploadFile(file: File, name: string, desc: string, sub: string, sem: string, type: string, uid: string, admin: boolean, program: string) {
     const client = getSupabase();
     if (!client) return;

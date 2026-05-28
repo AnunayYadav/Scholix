@@ -282,7 +282,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
-  const { program, semester, subject, category } = useParams();
+  const { program, semester, subject, category, fileId } = useParams();
   const navigate = useNavigate();
   const routePrefix = uniSlug ? `/${uniSlug}` : '';
 
@@ -388,7 +388,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [draggingOverId, setDraggingOverId] = useState<string | null>(null);
 
-  const [viewerInfo, setViewerInfo] = useState<{ show: boolean, url: string, name: string }>({ show: false, url: '', name: '' });
+  const [viewerInfo, setViewerInfo] = useState<{ show: boolean, url: string, name: string, file?: LibraryFile }>({ show: false, url: '', name: '' });
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -486,12 +486,73 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     fetchFromSource(true);
   }, [fetchFromSource]);
 
+  // Handle direct file link /view/:fileId routing
+  useEffect(() => {
+    if (!fileId) {
+      if (viewerInfo.show) {
+        setViewerInfo({ show: false, url: '', name: '' });
+      }
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadDirectFile = async () => {
+      if (!userProfile) {
+        showToast("Please login to view this document.", "info");
+        onAuthRequired?.();
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const file = await NexusServer.fetchFileById(fileId);
+        if (!file) {
+          showToast("Document not found.", "error");
+          navigate(`${routePrefix}/library`);
+          return;
+        }
+
+        if (!isMounted) return;
+
+        NexusServer.saveRecord(userProfile.id, 'file_access', `Opened ${file.name}`, { fileId: file.id, fileName: file.name, path: file.storage_path });
+        const url = await NexusServer.getFileUrl(file.storage_path);
+
+        if (!isMounted) return;
+
+        if (file.storage_path.toLowerCase().endsWith('.pdf')) {
+          setViewerInfo({ show: true, url, name: file.name, file });
+        } else {
+          if (url) {
+            window.open(url, '_blank');
+            const folderPath = `${routePrefix}/library/${slugify(file.program)}/${slugify(file.semester)}/${slugify(file.subject)}/${slugify(file.type)}`;
+            navigate(folderPath);
+          }
+        }
+      } catch (err) {
+        console.error("Direct File View Error:", err);
+        showToast("Failed to load document.", "error");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    loadDirectFile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fileId, userProfile, navigate, routePrefix, onAuthRequired]);
+
   // Dynamically update document title & description meta tag on folder/route changes
   useEffect(() => {
     let title = "Content Library Hub | Scholix";
     let description = "Access university study materials, notes, and previous year papers (PYQs) on Scholix.";
 
-    if (activeSubject) {
+    if (viewerInfo.show && viewerInfo.name) {
+      title = `${viewerInfo.name} | Scholix`;
+      description = `View and download ${viewerInfo.name} on Scholix.`;
+    } else if (activeSubject) {
       const categorySuffix = activeCategory ? ` ${activeCategory.name}` : " Notes & PYQs";
       title = `${activeSubject.name}${categorySuffix} | ${selectedProgram} | Scholix`;
       description = `Download study materials, handwritten notes, and previous year papers (PYQs) for ${activeSubject.name} (${selectedProgram}) on Scholix.`;
@@ -508,7 +569,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     if (metaDesc) {
       metaDesc.setAttribute('content', description);
     }
-  }, [activeSemester, activeSubject, activeCategory, selectedProgram]);
+  }, [activeSemester, activeSubject, activeCategory, selectedProgram, viewerInfo]);
 
   // Helper function to dynamically merge curriculum with DB folders
   const getMergedFolders = useCallback((prog: string, activeSub: Folder | null) => {
@@ -1076,16 +1137,15 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       return;
     }
 
-    try {
-      NexusServer.saveRecord(userProfile?.id || null, 'file_access', `Opened ${file.name}`, { fileId: file.id, fileName: file.name, path: file.storage_path });
-      const url = await NexusServer.getFileUrl(file.storage_path);
-      if (file.storage_path.toLowerCase().endsWith('.pdf')) {
-        setViewerInfo({ show: true, url, name: file.name });
-      } else {
+    if (file.storage_path.toLowerCase().endsWith('.pdf')) {
+      navigate(`${routePrefix}/library/view/${file.id}`);
+    } else {
+      try {
+        const url = await NexusServer.getFileUrl(file.storage_path);
         if (url) window.open(url, '_blank');
+      } catch (err) {
+        console.error("Access Error:", err);
       }
-    } catch (err) {
-      console.error("Access Error:", err);
     }
   };
 
@@ -1857,7 +1917,16 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             url={viewerInfo.url}
             fileName={viewerInfo.name}
             userProfile={userProfile}
-            onClose={() => setViewerInfo({ show: false, url: '', name: '' })}
+            onClose={() => {
+              setViewerInfo({ show: false, url: '', name: '' });
+              if (fileId) {
+                const file = viewerInfo.file;
+                const folderPath = file
+                  ? `${routePrefix}/library/${slugify(file.program)}/${slugify(file.semester)}/${slugify(file.subject)}/${slugify(file.type)}`
+                  : `${routePrefix}/library`;
+                navigate(folderPath);
+              }
+            }}
           />
         )
       }
