@@ -270,9 +270,10 @@ interface ContentLibraryProps {
   userProfile: UserProfile | null;
   initialView?: 'browse' | 'my-uploads';
   onAuthRequired?: () => void;
+  authIsReady?: boolean;
 }
 
-const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialView = 'browse', onAuthRequired }) => {
+const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialView = 'browse', onAuthRequired, authIsReady = true }) => {
   const { shortBrandName, uniSlug, universityInfo } = useUniversity();
   const [allFiles, setAllFiles] = useState<LibraryFile[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -497,11 +498,17 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       return;
     }
 
-    // If userProfile is null, auth may still be loading.
-    // Don't show login prompt yet — this effect will re-run when userProfile changes
-    // (it's in the dependency array). If auth resolves with a user, it'll proceed;
-    // if it truly resolves as null, the user stays on the library page.
-    if (!userProfile) return;
+    // Wait until authentication status is known (ready)
+    if (!authIsReady) return;
+
+    // If user is not logged in after auth resolves, show toast and prompt login
+    if (!userProfile) {
+      showToast("Please login to view this file.", "info");
+      if (onAuthRequired) {
+        onAuthRequired();
+      }
+      return;
+    }
 
     let isMounted = true;
 
@@ -544,7 +551,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     return () => {
       isMounted = false;
     };
-  }, [fileId, userProfile, navigate, routePrefix, onAuthRequired]);
+  }, [fileId, userProfile, authIsReady, navigate, routePrefix, onAuthRequired]);
 
 
   // Dynamically update document title & description meta tag on folder/route changes

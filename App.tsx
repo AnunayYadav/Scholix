@@ -1975,8 +1975,8 @@ const AppContent: React.FC = () => {
               {/* Internal routes (for app users) */}
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
-              <Route path="/:uniKey/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} onOpenAuth={openAuth} authModalOpen={showAuthModal} />} />
-              <Route path="/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} onOpenAuth={openAuth} authModalOpen={showAuthModal} />} />
+              <Route path="/:uniKey/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} onOpenAuth={openAuth} authModalOpen={showAuthModal} authIsReady={authIsReady} />} />
+              <Route path="/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} onOpenAuth={openAuth} authModalOpen={showAuthModal} authIsReady={authIsReady} />} />
             </Routes>
           </div>
         </div>
@@ -2046,20 +2046,21 @@ const FeatureRoutes: React.FC<{
   toggleTheme: () => void,
   onOpenSignup: () => void,
   onOpenAuth: () => void,
-  authModalOpen: boolean
-}> = ({ userProfile, setUserProfile, navigateToModule, theme, toggleTheme, onOpenSignup, onOpenAuth, authModalOpen }) => {
+  authModalOpen: boolean,
+  authIsReady: boolean
+}> = ({ userProfile, setUserProfile, navigateToModule, theme, toggleTheme, onOpenSignup, onOpenAuth, authModalOpen, authIsReady }) => {
   const { selectedUniversity } = useUniversity();
   const navigate = useNavigate();
 
   return (
     <Routes>
       <Route path="/" element={<Dashboard userProfile={userProfile} />} />
-      <Route path="/library/view/:fileId" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
-      <Route path="/library" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
-      <Route path="/library/:program" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
-      <Route path="/library/:program/:semester" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
-      <Route path="/library/:program/:semester/:subject" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
-      <Route path="/library/:program/:semester/:subject/:category" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/library/view/:fileId" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
+      <Route path="/library" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
+      <Route path="/library/:program" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
+      <Route path="/library/:program/:semester" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
+      <Route path="/library/:program/:semester/:subject" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
+      <Route path="/library/:program/:semester/:subject/:category" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
       
       <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
       <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
