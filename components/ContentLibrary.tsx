@@ -483,7 +483,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   }, [isAdminView, viewMode, userProfile, searchQuery, selectedProgram]);
 
   useEffect(() => {
-    fetchFromSource(true);
+    // When fileId is present (direct file view), skip showing skeleton for the background list
+    // The file will be loaded by the fileId effect below
+    fetchFromSource(!fileId);
   }, [fetchFromSource]);
 
   // Handle direct file link /view/:fileId routing
@@ -495,15 +497,15 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       return;
     }
 
+    // If userProfile is null, auth may still be loading.
+    // Don't show login prompt yet — this effect will re-run when userProfile changes
+    // (it's in the dependency array). If auth resolves with a user, it'll proceed;
+    // if it truly resolves as null, the user stays on the library page.
+    if (!userProfile) return;
+
     let isMounted = true;
 
     const loadDirectFile = async () => {
-      if (!userProfile) {
-        showToast("Please login to view this document.", "info");
-        onAuthRequired?.();
-        return;
-      }
-
       setIsLoading(true);
       try {
         const file = await NexusServer.fetchFileById(fileId);
@@ -543,6 +545,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       isMounted = false;
     };
   }, [fileId, userProfile, navigate, routePrefix, onAuthRequired]);
+
 
   // Dynamically update document title & description meta tag on folder/route changes
   useEffect(() => {
@@ -701,6 +704,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   // Sync state with URL params
   useEffect(() => {
+    // When fileId is present, we're in direct file view mode.
+    // Don't reset folder state — it causes a flash of the file list before the PDF viewer opens.
+    if (fileId) return;
+
     if (finalFolders.length > 0) {
       let matchedProgram = selectedProgram;
       if (program) {
@@ -761,7 +768,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         }
       }
     }
-  }, [program, semester, subject, category, finalFolders, availablePrograms, selectedProgram, viewMode]);
+  }, [program, semester, subject, category, finalFolders, availablePrograms, selectedProgram, viewMode, fileId]);
 
   const displayFiles = useMemo(() => {
     let data = [...allFiles];
