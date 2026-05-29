@@ -2055,12 +2055,7 @@ const FeatureRoutes: React.FC<{
   return (
     <Routes>
       <Route path="/" element={<Dashboard userProfile={userProfile} />} />
-      <Route path="/library/view/:fileId" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
-      <Route path="/library" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
-      <Route path="/library/:program" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
-      <Route path="/library/:program/:semester" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
-      <Route path="/library/:program/:semester/:subject" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
-      <Route path="/library/:program/:semester/:subject/:category" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
+      <Route path="/library/*" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
       
       <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
       <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />

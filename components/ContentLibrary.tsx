@@ -283,7 +283,23 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
-  const { program, semester, subject, category, fileId } = useParams();
+  const params = useParams();
+  const wildcard = params['*'] || '';
+  let fileId: string | undefined;
+  let program: string | undefined;
+  let semester: string | undefined;
+  let subject: string | undefined;
+  let category: string | undefined;
+
+  if (wildcard.startsWith('view/')) {
+    fileId = wildcard.substring(5);
+  } else if (wildcard) {
+    const parts = wildcard.split('/');
+    program = parts[0] || undefined;
+    semester = parts[1] || undefined;
+    subject = parts[2] || undefined;
+    category = parts[3] || undefined;
+  }
   const navigate = useNavigate();
   const routePrefix = uniSlug ? `/${uniSlug}` : '';
 
