@@ -1353,11 +1353,15 @@ class NexusServer {
     if (client) await client.from('feedback').insert([{ text: sanitizedText, user_id: uid, user_email: email }]);
   }
 
-  static getFileUrl(path: string) {
+  static getFileUrl(path: string, token?: string) {
     if (!path) return '';
     if (path.startsWith('http')) return path;
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-    return `${baseUrl}/api/vault?path=${encodeURIComponent(path)}`;
+    let url = `${baseUrl}/api/vault?path=${encodeURIComponent(path)}`;
+    if (token) {
+      url += `&token=${encodeURIComponent(token)}`;
+    }
+    return url;
   }
 
   static async deleteFile(id: string, path: string) {

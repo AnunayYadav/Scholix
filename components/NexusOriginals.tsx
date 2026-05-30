@@ -227,7 +227,9 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
             );
             let syllabusText = "General academic context for " + initialSubject;
             if (syllabusFile) {
-                const url = await NexusServer.getFileUrl(syllabusFile.storage_path);
+                const sessionRes = await NexusServer.getSession();
+                const token = sessionRes?.data?.session?.access_token;
+                const url = NexusServer.getFileUrl(syllabusFile.storage_path, token);
                 const res = await fetch(url);
                 const blob = await res.blob();
                 syllabusText = await extractTextFromPdf(new File([blob], "syllabus.pdf"));

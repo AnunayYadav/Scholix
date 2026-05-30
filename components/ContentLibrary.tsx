@@ -546,7 +546,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         if (!isMounted) return;
 
         NexusServer.saveRecord(userProfile.id, 'file_access', `Opened ${file.name}`, { fileId: file.id, fileName: file.name, path: file.storage_path });
-        const url = await NexusServer.getFileUrl(file.storage_path);
+        const sessionRes = await NexusServer.getSession();
+        const token = sessionRes?.data?.session?.access_token;
+        const url = NexusServer.getFileUrl(file.storage_path, token);
 
         if (!isMounted) return;
 
@@ -1195,6 +1197,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       return;
     }
 
+    const sessionRes = await NexusServer.getSession();
+    const token = sessionRes?.data?.session?.access_token;
+
     if (file.storage_path.toLowerCase().endsWith('.pdf')) {
       // Open the viewer instantly in a loading state and navigate
       setViewerInfo({ show: true, url: '', name: file.name, file });
@@ -1203,7 +1208,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       // Fetch URL in the background
       NexusServer.saveRecord(userProfile.id, 'file_access', `Opened ${file.name}`, { fileId: file.id, fileName: file.name, path: file.storage_path });
       try {
-        const url = await NexusServer.getFileUrl(file.storage_path);
+        const url = NexusServer.getFileUrl(file.storage_path, token);
         if (url) {
           setViewerInfo(prev => prev.file?.id === file.id ? { ...prev, url } : prev);
         }
@@ -1212,7 +1217,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       }
     } else {
       try {
-        const url = await NexusServer.getFileUrl(file.storage_path);
+        const url = NexusServer.getFileUrl(file.storage_path, token);
         if (url) window.open(url, '_blank');
       } catch (err) {
         console.error("Access Error:", err);
