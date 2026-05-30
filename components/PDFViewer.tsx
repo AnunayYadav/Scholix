@@ -448,6 +448,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         };
 
         const initPdf = async () => {
+            if (!url) return;
             const pdfjsLib = (window as any).pdfjsLib;
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
             setPdfjsLibState(pdfjsLib);
