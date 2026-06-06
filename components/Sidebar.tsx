@@ -201,6 +201,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   width="32"
                   height="32"
                   className={`w-full h-full rounded-lg transition-transform cursor-pointer object-contain ${universityInfo?.logo ? '' : 'dark:hidden'}`}
+                  data-nosnippet="true"
                   onClick={() => setModule(ModuleType.DASHBOARD)}
                 />
                 {!universityInfo?.logo && (

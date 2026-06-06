@@ -121,7 +121,7 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
                     <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center transition-all duration-700 overflow-hidden ${
                       uni.comingSoon || isLocked ? 'bg-zinc-200/50 dark:bg-white/5 grayscale saturate-50' : 'bg-white dark:bg-[#111] shadow-sm p-2.5 md:p-3 border border-zinc-100 dark:border-white/5'
                     }`}>
-                      <img src={uni.logo} alt={uni.name} width="56" height="56" loading="eager" className="w-full h-full object-contain" />
+                      <img src={uni.logo} alt={uni.name} width="56" height="56" loading="eager" data-nosnippet="true" className="w-full h-full object-contain" />
                     </div>
                     <div className="space-y-1">
                       <h3 className={`text-lg md:text-2xl font-black text-zinc-900 dark:text-white tracking-tight transition-colors duration-500 ${!isDisabled && 'group-hover:text-brand-primary'}`}>
@@ -307,7 +307,7 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
               />
               <div className="p-6 bg-white/[0.03] rounded-full border border-white/10">
                 {UNIVERSITIES.find(u => u.id === selectedId)?.logo && (
-                  <img src={UNIVERSITIES.find(u => u.id === selectedId)?.logo} width="128" height="128" className="w-20 h-20 md:w-32 md:h-32 object-contain" alt="University Logo" />
+                  <img src={UNIVERSITIES.find(u => u.id === selectedId)?.logo} width="128" height="128" data-nosnippet="true" className="w-20 h-20 md:w-32 md:h-32 object-contain" alt="University Logo" />
                 )}
               </div>
             </div>

@@ -6,8 +6,16 @@ Allow: /about-scholix
 Allow: /contact
 Allow: /privacy-policy
 Allow: /terms
+Disallow: /IIT_Madras_Logo.png
+Disallow: /IIT_Madras_Logo.webp
+Disallow: /LPU_logo.png
+Disallow: /LPU_logo.webp
 
 User-agent: Googlebot
 Allow: /
+Disallow: /IIT_Madras_Logo.png
+Disallow: /IIT_Madras_Logo.webp
+Disallow: /LPU_logo.png
+Disallow: /LPU_logo.webp
 
 Sitemap: https://scholix.app/sitemap.xml
