@@ -35,7 +35,6 @@ import VerifiedBadge from './components/VerifiedBadge.tsx';
 import BuyMeACoffee from './components/BuyMeACoffee.tsx';
 import CookieBanner from './components/CookieBanner.tsx';
 import ScholixLanding from './components/ScholixLanding.tsx';
-import AnnouncementBand from './components/AnnouncementBand.tsx';
 import AnnouncementModal from './components/AnnouncementModal.tsx';
 import { SkeletonPage } from './components/SkeletonLoader.tsx';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -1900,7 +1899,6 @@ const AppContent: React.FC = () => {
     return (
       <>
         <TopProgressBar />
-        <AnnouncementBand />
         <ScholixLanding userProfile={userProfile} />
         <ToastContainer />
         <AnnouncementModal />
@@ -1917,7 +1915,6 @@ const AppContent: React.FC = () => {
     <div className="flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden bg-white dark:bg-[#0a0a0a] text-zinc-900 dark:text-zinc-200 fixed inset-0">
       <TopProgressBar />
       <SEOHelmet currentModule={currentModule} />
-      <AnnouncementBand />
       <div className="flex flex-1 overflow-hidden relative min-h-0">
         <Sidebar
           currentModule={currentModule}
