@@ -75,7 +75,7 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
               <img src="/Scholix_dark.webp" alt="Scholix" width="300" height="101" fetchPriority="high" loading="eager" className="h-16 md:h-20 w-auto object-contain hidden dark:block relative z-10" />
             </div>
             <p className="text-sm md:text-base text-zinc-500 dark:text-zinc-400 font-medium max-w-lg mx-auto leading-relaxed mt-4 md:mt-6 px-4">
-              Transforming the university experience with <span className="text-zinc-900 dark:text-white font-bold">AI-driven</span> intelligence and a unified student ecosystem.
+              The <span className="text-zinc-900 dark:text-white font-bold">free, AI-powered</span> student hub for LPU & IITM. Notes, PYQs, CGPA calculator, attendance tracker & more.
             </p>
           </div>
         </div>
@@ -171,9 +171,9 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
           
           <div className="grid grid-cols-1 lg:grid-cols-[1fr,1.6fr] gap-12 mb-20 items-center">
             <div className="space-y-4">
-              <h3 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">The academic operating system.</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">Your LPU & IITM academic companion.</h3>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                Scholix is an all-in-one student utility hub designed to eliminate the friction of university life. From AI-powered resume analysis to centralized study materials, we provide the tools you need to excel.
+                Scholix (LPU Nexus) is a free, all-in-one student hub built for Vertos. Download LPU notes, PYQs, calculate CGPA, track attendance, check mess menus, and prep for placements — everything you need in one place.
               </p>
             </div>
             <div className={`grid grid-cols-1 ${userProfile?.is_admin ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-3`}>
@@ -194,20 +194,20 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
             <h3 className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight">Frequently Asked Questions</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-200">What is Scholix?</h4>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">A free, AI-powered student utility hub providing study materials, attendance tracking, and placement tools for university students.</p>
+                <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-200">What is Scholix (LPU Nexus)?</h4>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Scholix is a free, AI-powered student hub for LPU (Lovely Professional University) and IITM students. Access LPU notes, PYQs, CGPA calculator, attendance tracker, bunk calculator, mess menu, AI quiz generator, and placement prep tools.</p>
               </div>
               <div className="space-y-2">
-                <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-200">How do I access notes?</h4>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Select your university gateway and log in to access the Content Library, where materials are organized by subject and semester.</p>
+                <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-200">How to download LPU notes and PYQs for free?</h4>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Select the LPU gateway and browse the Content Library. LPU notes, handwritten PDFs, and previous year question papers are organized by program (BTech CSE, BCA, MCA, MBA), semester, and subject.</p>
               </div>
               <div className="space-y-2">
-                <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-200">Is it free?</h4>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Yes, Scholix is completely free. We sustain the platform through community contributions and non-intrusive advertising.</p>
+                <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-200">Is Scholix free for all LPU students?</h4>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Yes, Scholix is 100% free for every Verto. We sustain the platform through non-intrusive ads and community contributions. No paywalls, no premium tiers.</p>
               </div>
               <div className="space-y-2">
-                <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-200">Can I contribute?</h4>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Absolutely. Students can upload their own notes and PYQs through the library interface to help their peers.</p>
+                <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-200">How to upload LPU notes, PYQs & study materials?</h4>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">Create an account and use the Content Library upload feature. Share your handwritten notes, PYQs, lab records, and study materials to help fellow Vertos succeed.</p>
               </div>
             </div>
           </div>
@@ -224,7 +224,7 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
                 <img src="/Scholix_dark.webp" alt="Scholix" width="100" height="34" loading="lazy" className="h-8 w-auto hidden dark:block" />
               </div>
               <p className="text-[10px] md:text-xs font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-xs mx-auto md:mx-0">
-                The high-performance student utility hub. Built for the next generation of academic excellence.
+                Free LPU notes, PYQs, CGPA calculator, attendance tracker & student tools. The LPU Nexus for every Verto.
               </p>
             </div>
 

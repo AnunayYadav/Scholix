@@ -1,4 +1,13 @@
 User-agent: *
 Allow: /
+Allow: /lpu/
+Allow: /iitm/
+Allow: /about-scholix
+Allow: /contact
+Allow: /privacy-policy
+Allow: /terms
+
+User-agent: Googlebot
+Allow: /
 
 Sitemap: https://scholix.app/sitemap.xml
