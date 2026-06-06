@@ -1,29 +1,43 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate, useParams } from 'react-router-dom';
 import Sidebar from './components/Sidebar.tsx';
-import ContentLibrary from './components/ContentLibrary.tsx';
-import CampusNavigator from './components/CampusNavigator.tsx';
-import HelpSection from './components/HelpSection.tsx';
-import FreshersKit from './components/FreshersKit.tsx';
-import SettingsHub from './components/SettingsHub.tsx';
-import ShareReport from './components/ShareReport.tsx';
-import ToolsHub from './components/ToolsHub.tsx';
-import AboutUs from './components/AboutUs.tsx';
+
+// Helper for lazy loading components with preloading capability
+function lazyWithPreload<T extends React.ComponentType<any>>(
+  factory: () => Promise<{ default: T }>
+) {
+  const Component = lazy(factory);
+  (Component as any).preload = factory;
+  return Component as React.LazyExoticComponent<T> & { preload: () => Promise<{ default: T }> };
+}
+
+// Lazy load route components with preloading
+const ContentLibrary = lazyWithPreload(() => import('./components/ContentLibrary.tsx'));
+const CampusNavigator = lazyWithPreload(() => import('./components/CampusNavigator.tsx'));
+const HelpSection = lazyWithPreload(() => import('./components/HelpSection.tsx'));
+const FreshersKit = lazyWithPreload(() => import('./components/FreshersKit.tsx'));
+const SettingsHub = lazyWithPreload(() => import('./components/SettingsHub.tsx'));
+const ShareReport = lazyWithPreload(() => import('./components/ShareReport.tsx'));
+const AboutUs = lazyWithPreload(() => import('./components/AboutUs.tsx'));
+const ProfileSection = lazyWithPreload(() => import('./components/ProfileSection.tsx'));
+const TimetableHub = lazyWithPreload(() => import('./components/TimetableHub.tsx'));
+const QuizTaker = lazyWithPreload(() => import('./components/QuizTaker.tsx'));
+const MarketplaceHub = lazyWithPreload(() => import('./components/MarketplaceHub.tsx'));
+const RoommateFinder = lazyWithPreload(() => import('./components/RoommateFinder.tsx'));
+const EmergencyContacts = lazyWithPreload(() => import('./components/EmergencyContacts.tsx'));
+const AdminStats = lazyWithPreload(() => import('./components/AdminStats.tsx'));
+const PaymentSuccess = lazyWithPreload(() => import('./components/PaymentSuccess.tsx'));
+const PrivacyPolicy = lazyWithPreload(() => import('./components/PrivacyPolicy.tsx'));
+const ToolsHub = lazyWithPreload(() => import('./components/ToolsHub.tsx'));
+
+// Eager/static imports for shared/immediate layout components
 import VerifiedBadge from './components/VerifiedBadge.tsx';
-import ProfileSection from './components/ProfileSection.tsx';
-import TimetableHub from './components/TimetableHub.tsx';
-import QuizTaker from './components/QuizTaker.tsx';
-import MarketplaceHub from './components/MarketplaceHub.tsx';
-import RoommateFinder from './components/RoommateFinder.tsx';
-import EmergencyContacts from './components/EmergencyContacts.tsx';
-import AdminStats from './components/AdminStats.tsx';
 import BuyMeACoffee from './components/BuyMeACoffee.tsx';
-import PaymentSuccess from './components/PaymentSuccess.tsx';
-import PrivacyPolicy from './components/PrivacyPolicy.tsx';
 import CookieBanner from './components/CookieBanner.tsx';
 import ScholixLanding from './components/ScholixLanding.tsx';
 import AnnouncementBand from './components/AnnouncementBand.tsx';
 import AnnouncementModal from './components/AnnouncementModal.tsx';
+import { SkeletonPage } from './components/SkeletonLoader.tsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, 
@@ -64,6 +78,8 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { ToastContainer } from './components/Toast.tsx';
 import NotificationBell from './components/NotificationBell.tsx';
+import { useNotificationStore } from './stores/notificationStore.ts';
+import { useLoadingStore } from './stores/loadingStore.ts';
 import UniversalSearch from './components/UniversalSearch.tsx';
 import StudyHeartbeat from './components/StudyHeartbeat.tsx';
 import { useOnlineStatus } from './hooks/useOnlineStatus.ts';
@@ -521,7 +537,7 @@ const FeatureCard = React.memo(({ f, navigate }: { f: any, navigate: any }) => {
       </div>
 
       {/* Large Outline Background Icon */}
-      <div className={`absolute -bottom-2 -right-2 ${f.iconColor} opacity-[0.05] dark:opacity-[0.08] transform transition-all duration-700 group-hover:scale-110 group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:opacity-[0.1]`}>
+      <div className={`absolute -bottom-2 -right-2 ${f.iconColor} opacity-[0.05] dark:opacity-[0.08] transform transition-[transform,opacity] duration-700 group-hover:scale-110 group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:opacity-[0.1]`}>
         {React.cloneElement(f.icon as React.ReactElement, { size: 72, strokeWidth: 1 })}
       </div>
 
@@ -547,6 +563,36 @@ const FeatureCard = React.memo(({ f, navigate }: { f: any, navigate: any }) => {
     </button>
   );
 });
+
+const TopProgressBar: React.FC = () => {
+  const { progress, visible } = useLoadingStore();
+
+  return (
+    <div 
+      className="fixed top-0 left-0 h-[3px] bg-gradient-to-r from-brand-primary to-brand-secondary z-[99999] transition-[width,opacity] duration-300 ease-out pointer-events-none"
+      style={{ 
+        width: `${progress}%`,
+        opacity: visible ? 1 : 0,
+        boxShadow: '0 0 10px rgba(249, 115, 22, 0.4), 0 0 5px rgba(249, 115, 22, 0.4)'
+      }}
+    >
+      <div className="absolute right-0 top-0 h-full w-[100px] bg-gradient-to-r from-transparent to-white/40 blur-[1px]" />
+    </div>
+  );
+};
+
+const SuspenseLoader: React.FC = () => {
+  const { start, finish } = useLoadingStore();
+
+  useEffect(() => {
+    start();
+    return () => {
+      finish();
+    };
+  }, [start, finish]);
+
+  return <SkeletonPage />;
+};
 
 const StaticRedirect: React.FC<{ to: string }> = ({ to }) => {
   useEffect(() => {
@@ -617,7 +663,7 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
                     Sync your timetable once and it will automatically show up here every morning. No manual entry needed.
                   </p>
                 </div>
-                <button onClick={() => navigate('/timetable')} className="w-fit px-4 py-2 bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-primary rounded-xl text-[10px] font-bold flex items-center gap-2 transition-all shadow-sm">
+                <button onClick={() => navigate('/timetable')} className="w-fit px-4 py-2 bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-primary rounded-xl text-[10px] font-bold flex items-center gap-2 transition-colors duration-200 shadow-sm">
                   Sync now <ArrowRight size={12} />
                 </button>
               </div>
@@ -1629,6 +1675,17 @@ const AppContent: React.FC = () => {
     if (location.pathname !== '/login' && location.pathname !== '/signup') {
       localStorage.setItem('last_active_path', location.pathname);
     }
+
+    // Trigger snappy top horizontal loader on route change
+    const { start, finish } = useLoadingStore.getState();
+    start();
+    const timeout = setTimeout(() => {
+      finish();
+    }, 200);
+
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [location.pathname]);
 
   // Auth modal path sync
@@ -1780,6 +1837,51 @@ const AppContent: React.FC = () => {
     };
   }, []);
 
+  // Subscribe to notifications & announcements globally
+  useEffect(() => {
+    if (!authIsReady) return;
+    useNotificationStore.getState().fetchAndSubscribe(userProfile ? userProfile.id : null);
+  }, [userProfile?.id, authIsReady]);
+
+  // Clean up notification subscriptions on unmount
+  useEffect(() => {
+    return () => {
+      useNotificationStore.getState().unsubscribe();
+    };
+  }, []);
+
+  // Preload critical lazy routes on idle/idle-timeout to eliminate dynamic load freezes
+  useEffect(() => {
+    const criticalPreloads = [
+      ContentLibrary,
+      ToolsHub,
+      TimetableHub,
+      CampusNavigator,
+      QuizTaker,
+      SettingsHub
+    ];
+    
+    const timer = setTimeout(() => {
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(() => {
+          criticalPreloads.forEach(comp => {
+            try {
+              comp.preload().catch(() => {});
+            } catch (e) {}
+          });
+        });
+      } else {
+        criticalPreloads.forEach(comp => {
+          try {
+            comp.preload().catch(() => {});
+          } catch (e) {}
+        });
+      }
+    }, 1500); // Trigger 1.5s after app load
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const toggleTheme = React.useCallback(() => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
@@ -1797,6 +1899,7 @@ const AppContent: React.FC = () => {
   if (isWelcomePage) {
     return (
       <>
+        <TopProgressBar />
         <AnnouncementBand />
         <ScholixLanding userProfile={userProfile} />
         <ToastContainer />
@@ -1812,6 +1915,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden bg-white dark:bg-[#0a0a0a] text-zinc-900 dark:text-zinc-200 fixed inset-0">
+      <TopProgressBar />
       <SEOHelmet currentModule={currentModule} />
       <AnnouncementBand />
       <div className="flex flex-1 overflow-hidden relative min-h-0">
@@ -1840,9 +1944,11 @@ const AppContent: React.FC = () => {
               </button>
               <div className="flex-1 md:hidden flex justify-center">
                 <img 
-                  src={theme === 'dark' ? '/Scholix_dark.png' : '/Scholix_light.png'} 
+                  src={theme === 'dark' ? '/Scholix_dark.webp' : '/Scholix_light.webp'} 
                   alt="Scholix" 
-                  className="h-7 sm:h-8 md:h-9 object-contain cursor-pointer active:scale-95 transition-transform"
+                  width="108"
+                  height="36"
+                  className="h-7 sm:h-8 md:h-9 w-auto object-contain cursor-pointer active:scale-95 transition-transform"
                   onClick={() => navigate('/')}
                 />
               </div>
@@ -1965,19 +2071,21 @@ const AppContent: React.FC = () => {
         )}
         <div id="main-content-area" className={`flex-1 ${isSettingsPath ? 'overflow-hidden' : 'overflow-y-auto'} relative scroll-smooth ${isDashboardPath || isSettingsPath ? 'mobile-safe-pt-0 px-0 pb-0 md:p-0' : 'mobile-safe-pt-4 px-4 pb-4 md:p-8'} ${isDashboardPath ? 'bg-[#fbfcfd] dark:bg-[#030303]' : isSettingsPath ? 'bg-white dark:bg-dark-950' : 'bg-white dark:bg-[#0a0a0a]'} no-scrollbar`}>
           <div className={`relative ${isSettingsPath ? 'h-full' : ''} ${isDashboardPath || isSettingsPath ? 'w-full' : 'max-w-7xl mx-auto'}`}>
-            <Routes>
-              <Route path="/welcome" element={<ScholixLanding userProfile={userProfile} />} />
-              <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
-              <Route path="/privacy-policy" element={<StaticRedirect to="/privacy-policy.html" />} />
-              <Route path="/terms" element={<StaticRedirect to="/terms.html" />} />
-              <Route path="/about-scholix" element={<StaticRedirect to="/about-scholix.html" />} />
-              <Route path="/contact" element={<StaticRedirect to="/contact.html" />} />
-              {/* Internal routes (for app users) */}
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
-              <Route path="/:uniKey/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} onOpenAuth={openAuth} authModalOpen={showAuthModal} authIsReady={authIsReady} />} />
-              <Route path="/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} onOpenAuth={openAuth} authModalOpen={showAuthModal} authIsReady={authIsReady} />} />
-            </Routes>
+            <Suspense fallback={<SuspenseLoader />}>
+              <Routes>
+                <Route path="/welcome" element={<ScholixLanding userProfile={userProfile} />} />
+                <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
+                <Route path="/privacy-policy" element={<StaticRedirect to="/privacy-policy.html" />} />
+                <Route path="/terms" element={<StaticRedirect to="/terms.html" />} />
+                <Route path="/about-scholix" element={<StaticRedirect to="/about-scholix.html" />} />
+                <Route path="/contact" element={<StaticRedirect to="/contact.html" />} />
+                {/* Internal routes (for app users) */}
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
+                <Route path="/:uniKey/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} onOpenAuth={openAuth} authModalOpen={showAuthModal} authIsReady={authIsReady} />} />
+                <Route path="/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} onOpenAuth={openAuth} authModalOpen={showAuthModal} authIsReady={authIsReady} />} />
+              </Routes>
+            </Suspense>
           </div>
         </div>
         {/* Premium Mobile Search Bottom Sheet */}
@@ -2053,48 +2161,50 @@ const FeatureRoutes: React.FC<{
   const navigate = useNavigate();
 
   return (
-    <Routes>
-      <Route path="/" element={<Dashboard userProfile={userProfile} />} />
-      <Route path="/library/*" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
-      
-      <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
-      <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
-      
-      <Route path="/freshers" element={<FeatureGuard module={ModuleType.FRESHERS}><FreshersKit /></FeatureGuard>} />
-      <Route path="/tools" element={<ToolsHub userProfile={userProfile} />} />
-      <Route path="/share-cgpa" element={<ShareReport />} />
-      <Route path="/placement" element={<FeatureGuard module={ModuleType.PLACEMENT}><Navigate to="/tools?tab=placement" replace /></FeatureGuard>} />
-      <Route path="/placement/:reportId" element={<PlacementRedirect />} />
-      <Route path="/attendance" element={<FeatureGuard module={ModuleType.ATTENDANCE}><Navigate to="/tools?tab=attendance" replace /></FeatureGuard>} />
-      <Route path="/cgpa" element={<FeatureGuard module={ModuleType.CGPA}><Navigate to="/tools?tab=cgpa" replace /></FeatureGuard>} />
-      
-
-      <Route path="/timetable" element={<FeatureGuard module={ModuleType.TIMETABLE}><TimetableHub userProfile={userProfile} /></FeatureGuard>} />
-      
-      <Route path="/quiz" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
-      <Route path="/quiz/:subjectName" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
-      <Route path="/quiz/:subjectName/:quizId" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
-      
-      <Route path="/market" element={<Navigate to="/campus/market" replace />} />
-      <Route path="/market/:category" element={<Navigate to="/campus/market" replace />} />
-      <Route path="/market/item/:itemId" element={<Navigate to="/campus/market" replace />} />
-
-      
-      <Route path="/roommate" element={<FeatureGuard module={ModuleType.ROOMMATE}><RoommateFinder userProfile={userProfile} /></FeatureGuard>} />
-      <Route path="/emergency" element={<FeatureGuard module={ModuleType.EMERGENCY}><EmergencyContacts /></FeatureGuard>} />
-
-      <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
-      <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
-      <Route path="/settings" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
-      <Route path="/settings/profile" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="profile" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
-      <Route path="/settings/privacy" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="privacy" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
-      <Route path="/settings/about" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="about" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
-      <Route path="/settings/help" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="help_center" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
-      <Route path="/settings/theme" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="theme" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
-      <Route path="/login" element={<Dashboard userProfile={userProfile} />} />
-      <Route path="/signup" element={<Dashboard userProfile={userProfile} />} />
-      <Route path="*" element={<Dashboard userProfile={userProfile} />} />
-    </Routes>
+    <Suspense fallback={<SuspenseLoader />}>
+      <Routes>
+        <Route path="/" element={<Dashboard userProfile={userProfile} />} />
+        <Route path="/library/*" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
+        
+        <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
+        <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
+        
+        <Route path="/freshers" element={<FeatureGuard module={ModuleType.FRESHERS}><FreshersKit /></FeatureGuard>} />
+        <Route path="/tools" element={<ToolsHub userProfile={userProfile} />} />
+        <Route path="/share-cgpa" element={<ShareReport />} />
+        <Route path="/placement" element={<FeatureGuard module={ModuleType.PLACEMENT}><Navigate to="/tools?tab=placement" replace /></FeatureGuard>} />
+        <Route path="/placement/:reportId" element={<PlacementRedirect />} />
+        <Route path="/attendance" element={<FeatureGuard module={ModuleType.ATTENDANCE}><Navigate to="/tools?tab=attendance" replace /></FeatureGuard>} />
+        <Route path="/cgpa" element={<FeatureGuard module={ModuleType.CGPA}><Navigate to="/tools?tab=cgpa" replace /></FeatureGuard>} />
+        
+  
+        <Route path="/timetable" element={<FeatureGuard module={ModuleType.TIMETABLE}><TimetableHub userProfile={userProfile} /></FeatureGuard>} />
+        
+        <Route path="/quiz" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+        <Route path="/quiz/:subjectName" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+        <Route path="/quiz/:subjectName/:quizId" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+        
+        <Route path="/market" element={<Navigate to="/campus/market" replace />} />
+        <Route path="/market/:category" element={<Navigate to="/campus/market" replace />} />
+        <Route path="/market/item/:itemId" element={<Navigate to="/campus/market" replace />} />
+  
+        
+        <Route path="/roommate" element={<FeatureGuard module={ModuleType.ROOMMATE}><RoommateFinder userProfile={userProfile} /></FeatureGuard>} />
+        <Route path="/emergency" element={<FeatureGuard module={ModuleType.EMERGENCY}><EmergencyContacts /></FeatureGuard>} />
+  
+        <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
+        <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
+        <Route path="/settings" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+        <Route path="/settings/profile" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="profile" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+        <Route path="/settings/privacy" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="privacy" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+        <Route path="/settings/about" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="about" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+        <Route path="/settings/help" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="help_center" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+        <Route path="/settings/theme" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="theme" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+        <Route path="/login" element={<Dashboard userProfile={userProfile} />} />
+        <Route path="/signup" element={<Dashboard userProfile={userProfile} />} />
+        <Route path="*" element={<Dashboard userProfile={userProfile} />} />
+      </Routes>
+    </Suspense>
   );
 };
 

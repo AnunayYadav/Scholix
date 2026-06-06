@@ -2,22 +2,30 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import NexusServer from '../services/nexusServer';
-import { NexusNotification, UserProfile } from '../types';
+import { useNotificationStore } from '../stores/notificationStore';
+import { UserProfile } from '../types';
 
 interface NotificationBellProps {
     userProfile: UserProfile | null;
 }
 
-
 const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
-    const [personalNotifications, setPersonalNotifications] = useState<NexusNotification[]>([]);
-    const [globalAnnouncements, setGlobalAnnouncements] = useState<any[]>([]);
+    const { 
+        personalNotifications, 
+        globalAnnouncements, 
+        markAllAsRead, 
+        markNotificationAsRead 
+    } = useNotificationStore();
+
     const [isOpen, setIsOpen] = useState(false);
-    const [isClosing, setIsClosing] = useState(false);
+    const [, setIsClosing] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [selectedNotification, setSelectedNotification] = useState<any | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const detailModalRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
 
     const handleClose = () => {
         setIsClosing(true);
@@ -26,66 +34,6 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
             setIsClosing(false);
         }, 250);
     };
-    const dropdownRef = useRef<HTMLDivElement>(null);
-    const detailModalRef = useRef<HTMLDivElement>(null);
-    const navigate = useNavigate();
-
-    const loadData = async () => {
-        // 1. Fetch Global (Everyone)
-        const globals = await NexusServer.fetchGlobalAnnouncements();
-        setGlobalAnnouncements(globals);
-
-        // 2. Fetch Personal (If Logged In)
-        let personals: NexusNotification[] = [];
-        if (userProfile) {
-            personals = await NexusServer.fetchNotifications(userProfile.id);
-            setPersonalNotifications(personals);
-        }
-    };
-
-    const triggerBrowserNotification = (title: string, body: string) => {
-        if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(title, {
-                body: body,
-                icon: '/logo.png' // Matches your site icon
-            });
-        }
-    };
-
-    useEffect(() => {
-        // Request permission on mount
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission();
-        }
-
-        loadData();
-
-        // Subscribe to Global (Everyone)
-        const unsubGlobal = NexusServer.subscribeToGlobalAnnouncements((newAnn) => {
-            setGlobalAnnouncements(prev => {
-                if (prev.some(g => g.id === newAnn.id)) return prev;
-                triggerBrowserNotification(newAnn.title, newAnn.message);
-                return [newAnn, ...prev];
-            });
-        });
-
-        // Subscribe to Personal (If Logged In)
-        let unsubPersonal = () => { };
-        if (userProfile) {
-            unsubPersonal = NexusServer.subscribeToNotifications(userProfile.id, (newNotif) => {
-                setPersonalNotifications(prev => {
-                    if (prev.some(p => p.id === newNotif.id)) return prev;
-                    triggerBrowserNotification(newNotif.title, newNotif.message);
-                    return [newNotif, ...prev];
-                });
-            });
-        }
-
-        return () => {
-            unsubGlobal();
-            unsubPersonal();
-        };
-    }, [userProfile]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -139,10 +87,9 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
         }
     };
 
-    const markAllAsRead = async () => {
+    const handleMarkAllAsRead = async () => {
         if (userProfile) {
-            await NexusServer.markAllNotificationsAsRead(userProfile.id);
-            setPersonalNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            await markAllAsRead(userProfile.id);
         }
 
         if (globalAnnouncements.length > 0) {
@@ -152,8 +99,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
 
     const handleNotificationClick = async (item: any, isGlobal: boolean) => {
         if (!isGlobal && !item.read) {
-            await NexusServer.markNotificationAsRead(item.id);
-            setPersonalNotifications(prev => prev.map(n => n.id === item.id ? { ...n, read: true } : n));
+            await markNotificationAsRead(item.id);
         }
 
         setSelectedNotification(item);
@@ -204,13 +150,13 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        className={`absolute right-[-10px] sm:right-0 mt-3 w-[280px] sm:w-[300px] bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-[28px] shadow-[0_32px_64px_rgba(0,0,0,0.15)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.6)] overflow-hidden py-3 z-[60] backdrop-blur-xl`}
+                        className="absolute right-[-10px] sm:right-0 mt-3 w-[280px] sm:w-[300px] bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-[28px] shadow-[0_32px_64px_rgba(0,0,0,0.15)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.6)] overflow-hidden py-3 z-[60] backdrop-blur-xl"
                     >
                     <div className="px-5 py-3 border-b border-zinc-100 dark:border-white/5 mb-2 flex items-center justify-between">
                         <h3 className="text-[11px] font-bold text-zinc-800 dark:text-white tracking-tight">Updates</h3>
                         {unreadCount > 0 && (
                             <button
-                                onClick={markAllAsRead}
+                                onClick={handleMarkAllAsRead}
                                 className="text-[10px] font-bold text-orange-600 hover:underline bg-transparent border-none p-0 cursor-pointer"
                             >
                                 Clear All

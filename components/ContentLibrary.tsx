@@ -57,6 +57,8 @@ const matchSemesterName = (nameA: string, nameB: string): boolean => {
   return norm(nameA) === norm(nameB);
 };
 
+import { FileIcon } from './FileIcon.tsx';
+
 const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' | 'category' | 'root', size?: string }) => {
 
   const colors = {
@@ -72,61 +74,6 @@ const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' |
   );
 };
 
-export const FileIcon = ({ fileName, size = "w-5 h-5", className = "" }: { fileName: string, size?: string, className?: string }) => {
-  const ext = fileName.split('.').pop()?.toLowerCase() || '';
-
-  let colorClass = 'text-zinc-400 dark:text-zinc-500';
-  let label = '';
-
-  if (ext === 'pdf') {
-    colorClass = 'text-red-500';
-    label = 'PDF';
-  } else if (['doc', 'docx'].includes(ext)) {
-    colorClass = 'text-blue-500';
-    label = 'DOC';
-  } else if (['xls', 'xlsx', 'csv'].includes(ext)) {
-    colorClass = 'text-emerald-500';
-    label = 'XLS';
-  } else if (['ppt', 'pptx'].includes(ext)) {
-    colorClass = 'text-orange-500';
-    label = 'PPT';
-  } else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
-    colorClass = 'text-amber-500';
-    label = 'ZIP';
-  } else if (['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif'].includes(ext)) {
-    colorClass = 'text-purple-500';
-    label = 'IMG';
-  } else if (['txt', 'md'].includes(ext)) {
-    colorClass = 'text-teal-500';
-    label = 'TXT';
-  }
-
-  const mergedClassName = className.includes('text-')
-    ? `${size} ${className}`
-    : `${size} ${colorClass} ${className}`;
-
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={mergedClassName}>
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      {label && (
-        <text
-          x="12"
-          y="15.5"
-          fill="currentColor"
-          fontSize="6"
-          fontWeight="bold"
-          fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-          textAnchor="middle"
-          dominantBaseline="middle"
-          stroke="none"
-        >
-          {label}
-        </text>
-      )}
-    </svg>
-  );
-};
 
 const SkeletonCard = () => (
   <div className="group p-5 rounded-[30px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 relative overflow-hidden flex flex-col min-h-[140px]">
@@ -357,6 +304,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     setTimeout(() => {
       setShowDetailsModal(false);
       setIsClosingDetails(false);
+      if (fileId) {
+        const file = selectedFile;
+        const folderPath = file
+          ? `${routePrefix}/library/${slugify(file.program)}/${slugify(file.semester)}/${slugify(file.subject)}/${slugify(file.type)}`
+          : `${routePrefix}/library`;
+        navigate(folderPath);
+      }
     }, 250);
   };
 
@@ -1539,6 +1493,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                             onDelete={async () => { const confirmed = await showConfirm("Permanently delete this file?"); if (confirmed) { setIsProcessing(true); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
                             onAccess={() => handleFileAccess(file)}
                             onShowDetails={() => { setSelectedFile(file); setShowDetailsModal(true); }}
+                            toPath={`${routePrefix}/library/view/${file.id}`}
                           />
                         ))}
                       </div>
@@ -2149,7 +2104,8 @@ const FileCard: React.FC<{
   onDelete?: () => void;
   onAccess: () => void;
   onShowDetails: () => void;
-}> = ({ file, userProfile, isAdminMode, isPersonal, onApprove, onReject, onDemote, onEdit, onDelete, onAccess, onShowDetails }) => {
+  toPath: string;
+}> = ({ file, userProfile, isAdminMode, isPersonal, onApprove, onReject, onDemote, onEdit, onDelete, onAccess, onShowDetails, toPath }) => {
   const {
     attributes,
     listeners,
@@ -2175,11 +2131,17 @@ const FileCard: React.FC<{
   const status = statusConfig[file.status] || statusConfig.pending;
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      onClick={onShowDetails}
-      className={`group p-4 rounded-[30px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a] hover:border-orange-500 hover:shadow-xl transition-all relative overflow-hidden flex flex-col min-h-[140px] cursor-pointer ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
+    <Link
+      to={toPath}
+      ref={setNodeRef as any}
+      style={style as any}
+      onClick={(e) => {
+        const target = e.target as HTMLElement;
+        if (target.closest('button') || target.closest('[draggable]')) {
+          e.preventDefault();
+        }
+      }}
+      className={`group p-4 rounded-[30px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a] hover:border-orange-500 hover:shadow-xl transition-all relative overflow-hidden flex flex-col min-h-[140px] cursor-pointer no-underline text-current ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
     >
       <div className="flex items-start justify-between mb-2">
         <div className="w-9 h-9 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center transition-colors">
@@ -2235,7 +2197,7 @@ const FileCard: React.FC<{
           )}
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

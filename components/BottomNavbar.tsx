@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { ModuleType } from '../types';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 
@@ -103,7 +103,7 @@ const BottomNavbar: React.FC<BottomNavbarProps> = ({ currentModule }) => {
           <path
             fillRule="evenodd"
             clipRule="evenodd"
-            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z M12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 1 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z M12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"
           />
         </svg>
       ),
@@ -125,10 +125,10 @@ const BottomNavbar: React.FC<BottomNavbarProps> = ({ currentModule }) => {
 
       <div className="bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-3xl border-t border-zinc-200/50 dark:border-white/10 rounded-t-[24px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.4)] flex items-center h-[80px] px-4 relative overflow-hidden pb-safe">
         {navItems.map((item) => (
-          <button
+          <Link
             key={item.id}
-            onClick={() => navigate(item.path)}
-            className="flex-1 flex flex-col items-center justify-center transition-all duration-300 border-none bg-transparent relative h-full group outline-none"
+            to={item.path}
+            className="flex-1 flex flex-col items-center justify-center transition-all duration-300 border-none bg-transparent relative h-full group outline-none text-current no-underline"
           >
             {/* Top Indicator Pill */}
             <div className={`absolute top-0 w-12 h-1.5 rounded-b-[6px] bg-brand-primary transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) transform ${item.active ? 'translate-y-0 opacity-100 scale-x-100' : '-translate-y-full opacity-0 scale-x-50'
@@ -164,7 +164,7 @@ const BottomNavbar: React.FC<BottomNavbarProps> = ({ currentModule }) => {
                 {item.label}
               </span>
             </div>
-          </button>
+          </Link>
         ))}
       </div>
     </div>

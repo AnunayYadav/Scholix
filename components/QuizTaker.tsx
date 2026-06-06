@@ -353,15 +353,36 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null, onAuthRequired?: ()
   };
 
   useEffect(() => {
+    const loadPyodideScript = (): Promise<any> => {
+      return new Promise((resolve, reject) => {
+        if ((window as any).loadPyodide) return resolve((window as any).loadPyodide);
+        const existingScript = document.querySelector('script[src="https://cdn.jsdelivr.net/npm/pyodide@0.23.4/pyodide.js"]');
+        if (existingScript) {
+          existingScript.addEventListener('load', () => resolve((window as any).loadPyodide));
+          existingScript.addEventListener('error', reject);
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/pyodide@0.23.4/pyodide.js';
+        script.async = true;
+        script.onload = () => resolve((window as any).loadPyodide);
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    };
+
     const initPyodide = async () => {
-      if (window.loadPyodide && !pyodide) {
+      if (!pyodide) {
         try {
-          const loadedPyodide = await window.loadPyodide({
-            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
-          });
-          setPyodide(loadedPyodide);
+          const loadPyodideFn = await loadPyodideScript();
+          if (loadPyodideFn) {
+            const loadedPyodide = await loadPyodideFn({
+              indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
+            });
+            setPyodide(loadedPyodide);
+          }
         } catch (err) {
-          console.error("Pyodide failed to load", err);
+          console.error("Pyodide failed to load dynamically", err);
         }
       }
     };

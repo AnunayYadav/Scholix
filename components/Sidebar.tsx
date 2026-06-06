@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LogOut, User, Shield, ChevronRight, Edit2 } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { Link } from 'react-router-dom';
 import { ModuleType, UserProfile } from '../types';
 import NexusServer from '../services/nexusServer.ts';
 import { showToast } from './Toast.tsx';
@@ -32,7 +33,37 @@ const Sidebar: React.FC<SidebarProps> = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const { selectedUniversity, universityInfo, fullBrandName, shortBrandName, studentTerm } = useUniversity();
+  const { selectedUniversity, universityInfo, fullBrandName, shortBrandName, studentTerm, uniSlug } = useUniversity();
+
+  const getPathFromModule = (module: ModuleType, slug: string): string => {
+    const prefix = slug && slug !== 'none' ? `/${slug}` : '';
+
+    switch (module) {
+      case ModuleType.ATTENDANCE: return `${prefix}/attendance`;
+      case ModuleType.TIMETABLE: return `${prefix}/timetable`;
+      case ModuleType.QUIZ: return `${prefix}/quiz`;
+      case ModuleType.CGPA: return `${prefix}/cgpa`;
+      case ModuleType.PLACEMENT: return `${prefix}/placement`;
+      case ModuleType.LIBRARY: return `${prefix}/library`;
+      case ModuleType.CAMPUS: return `${prefix}/campus`;
+      case ModuleType.FRESHERS: return `${prefix}/freshers`;
+      case ModuleType.HELP: return `${prefix}/settings/help`;
+      case ModuleType.ABOUT: return `${prefix}/settings/about`;
+      case ModuleType.PROFILE: return `${prefix}/settings/profile`;
+      case ModuleType.DASHBOARD: return prefix || '/';
+      case ModuleType.SHARE_CGPA: return `/share-cgpa`;
+      case ModuleType.MARKETPLACE: return `${prefix}/campus/market`;
+      case ModuleType.ROOMMATE: return `${prefix}/campus/roommate`;
+      case ModuleType.EMERGENCY: return `${prefix}/emergency`;
+      case ModuleType.TOOLS: return `${prefix}/tools`;
+      case ModuleType.ADMIN_STATS: return `${prefix}/admin-stats`;
+      case ModuleType.PRIVACY: return `${prefix}/settings/privacy`;
+      case ModuleType.LOGIN: return `${prefix}/login`;
+      case ModuleType.SIGNUP: return `${prefix}/signup`;
+      case ModuleType.SETTINGS: return `${prefix}/settings`;
+      default: return prefix || '/';
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -165,15 +196,19 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div className="w-[72px] flex-shrink-0 flex items-center justify-center">
               <div className="relative w-8 h-8">
                 <img
-                  src={universityInfo?.logo || "/Scholix_light.png"}
+                  src={universityInfo?.logo || "/Scholix_light.webp"}
                   alt="Platform Logo"
+                  width="32"
+                  height="32"
                   className={`w-full h-full rounded-lg transition-transform cursor-pointer object-contain ${universityInfo?.logo ? '' : 'dark:hidden'}`}
                   onClick={() => setModule(ModuleType.DASHBOARD)}
                 />
                 {!universityInfo?.logo && (
                   <img
-                    src="/Scholix_dark.png"
+                    src="/Scholix_dark.webp"
                     alt="Platform Logo"
+                    width="32"
+                    height="32"
                     className="w-full h-full rounded-lg transition-transform cursor-pointer object-contain hidden dark:block"
                     onClick={() => setModule(ModuleType.DASHBOARD)}
                   />
@@ -191,8 +226,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex-1 overflow-hidden relative group/nav">
           <nav className="h-full px-3 py-4 space-y-1 overflow-y-auto no-scrollbar overflow-x-hidden relative z-10">
             {navItems.map((item) => (
-              <button
+              <Link
                 key={item.id}
+                to={getPathFromModule(item.id, uniSlug)}
                 onClick={() => {
                   setModule(item.id);
                   if (window.innerWidth < 768) toggleMobileMenu();
@@ -206,9 +242,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               >
                 <div className="flex items-center w-full h-full text-zinc-900/90 dark:text-zinc-100/90">
                   <div className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) flex-shrink-0 flex items-center justify-center ${isHovered || isMobileMenuOpen ? 'w-12' : 'w-12'}`}>
-                    <span className={`flex-shrink-0 flex items-center justify-center transition-all duration-500 group-hover:scale-110 ${(currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE)) ? 'scale-110 active-icon-glow' : ''}`}>
+                    <span className={`flex-shrink-0 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 ${(currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE)) ? 'scale-110 active-icon-glow' : ''}`}>
                       {React.cloneElement(item.icon as React.ReactElement, {
-                        className: `w-5 h-5 sm:w-[22px] sm:h-[22px] transition-all duration-300 ${(currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE)) ? '' : 'text-zinc-500 dark:text-zinc-400'}`,
+                        className: `w-5 h-5 sm:w-[22px] sm:h-[22px] transition-colors duration-300 ${(currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE)) ? '' : 'text-zinc-500 dark:text-zinc-400'}`,
                         children: React.Children.map((item.icon as React.ReactElement).props.children, (child: any, idx: number) => {
                           if (!React.isValidElement(child)) return child;
                           const isActive = currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE);
@@ -234,7 +270,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     {item.label}
                   </div>
                 )}
-              </button>
+              </Link>
             ))}
           </nav>
         </div>

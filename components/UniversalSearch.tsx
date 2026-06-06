@@ -5,7 +5,7 @@ import NexusServer from '../services/nexusServer.ts';
 import { allDirectory } from '../data/emergencyData.ts';
 import { slugify } from '../utils/slugify.ts';
 import { useUniversity } from '../hooks/useUniversity.tsx';
-import { FileIcon } from './ContentLibrary.tsx';
+import { FileIcon } from './FileIcon.tsx';
 
 interface SearchResult {
   id: string;

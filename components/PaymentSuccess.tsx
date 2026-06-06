@@ -182,7 +182,7 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
 
           {/* PRINT HEADER */}
           <div className="print-show hidden items-center justify-between mb-8 pb-6 border-b-2 border-zinc-200">
-            <img src="/Scholix_light.png" alt="Scholix" className="h-9" />
+            <img src="/Scholix_light.webp" alt="Scholix" width="108" height="36" className="h-9 w-auto object-contain" />
             <div className="text-right">
               <div className="inline-block px-4 py-1.5 rounded-lg" style={{ background: 'linear-gradient(135deg, #f97316, #ef4444)', WebkitPrintColorAdjust: 'exact' } as any}>
                 <span className="ps-text-white text-[10px] font-black uppercase tracking-widest">Transaction Receipt</span>
@@ -195,8 +195,8 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
 
             {/* SCREEN LOGO */}
             <div className="no-print flex items-center">
-              <img src="/Scholix_light.png" alt="Scholix" className="h-6 dark:hidden" />
-              <img src="/Scholix_dark.png" alt="Scholix" className="h-6 hidden dark:block" />
+              <img src="/Scholix_light.webp" alt="Scholix" width="72" height="24" className="h-6 w-auto object-contain dark:hidden" />
+              <img src="/Scholix_dark.webp" alt="Scholix" width="72" height="24" className="h-6 w-auto object-contain hidden dark:block" />
             </div>
 
             {/* SUCCESS ICON — screen */}
@@ -292,7 +292,7 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ userProfile }) => {
             {/* PRINT FOOTER */}
             <div className="print-show hidden w-full items-center justify-between pt-6 mt-2 border-t-2 border-zinc-200">
               <div className="flex items-center gap-3">
-                <img src="/Scholix_light.png" alt="Scholix" className="h-5" />
+                <img src="/Scholix_light.webp" alt="Scholix" width="60" height="20" className="h-5 w-auto object-contain" />
                 <div className="w-px h-5 bg-zinc-300"></div>
                 <span className="ps-text-muted text-[10px] font-semibold">scholix.app</span>
               </div>

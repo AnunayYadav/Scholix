@@ -31,7 +31,7 @@ export const UNIVERSITIES: University[] = [
     name: 'Lovely Professional University', 
     shortName: 'LPU', 
     campusMapUrl: 'https://iviewd.com/lpu2/',
-    logo: '/LPU_logo.png',
+    logo: '/LPU_logo.webp',
     theme: {
       primary: '#f97316', // Orange 500
       secondary: '#dc2626', // Red 600
@@ -65,7 +65,7 @@ export const UNIVERSITIES: University[] = [
     comingSoon: false, 
     adminOnly: true,
     campusMapUrl: 'https://www.iitm.ac.in/it-at-iitm-bs/campus-map',
-    logo: '/IIT_Madras_Logo.png',
+    logo: '/IIT_Madras_Logo.webp',
     theme: {
       primary: '#800000', // Deep Institutional Maroon (Refined)
       secondary: '#b91c1c', // Vibrant Terracotta

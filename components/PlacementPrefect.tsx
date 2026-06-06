@@ -843,7 +843,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
         <div style="display: flex; flex-direction: column; gap: 32px;">
           <!-- Header -->
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid ${borderColor}; padding-bottom: 20px;">
-            <img src="/Scholix_light.png" style="height: 32px; width: auto;" />
+            <img src="/Scholix_light.webp" width="96" height="32" style="height: 32px; width: auto;" />
             <div style="text-align: right;">
               <p style="font-size: 10px; font-weight: 700; color: ${subTextColor}; margin: 0; text-transform: uppercase; letter-spacing: 0.1em;">Placement Diagnostic Report • ${new Date().toLocaleDateString()}</p>
             </div>

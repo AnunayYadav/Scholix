@@ -438,6 +438,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
         const loadPdfJs = async () => {
             if (!(window as any).pdfjsLib) {
+                const existingScript = document.querySelector('script[src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"]');
+                if (existingScript) {
+                    existingScript.addEventListener('load', () => initPdf());
+                    return;
+                }
                 const script = document.createElement('script');
                 script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
                 script.onload = () => initPdf();

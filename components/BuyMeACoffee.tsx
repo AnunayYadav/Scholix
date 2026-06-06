@@ -19,21 +19,20 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className, com
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Load Razorpay script
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      // Clean up script if needed, though usually fine to keep
-      const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
-      if (existingScript) {
-        document.body.removeChild(existingScript);
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
       }
-    };
-  }, []);
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
 
   const handlePayment = async (selectedAmount: number) => {
     if (loading || isProcessing) return;
@@ -41,6 +40,14 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className, com
     setIsProcessing(true);
 
     try {
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        alert("Failed to load Razorpay SDK. Please check your internet connection.");
+        setLoading(false);
+        setIsProcessing(false);
+        return;
+      }
+
       // 1. Create order on the server
       const response = await fetch('/api/razorpay', {
         method: 'POST',
@@ -228,7 +235,7 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className, com
 
             <div className="flex justify-center gap-2">
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-50 dark:bg-[#111111] border border-zinc-100 dark:border-white/10 shadow-sm">
-                <img src="/Razorpay_logo.svg" alt="Razorpay" className="h-3 w-auto dark:brightness-150 dark:contrast-125" />
+                <img src="/Razorpay_logo.svg" alt="Razorpay" width={57} height={12} className="h-3 w-auto dark:brightness-150 dark:contrast-125" />
               </div>
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50/50 dark:bg-[#0d1a14] border border-emerald-100 dark:border-emerald-500/20 shadow-sm">
                 <ShieldCheck className="w-3 h-3 text-emerald-500" />
@@ -270,7 +277,7 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className, com
                 key={amt}
                 disabled={loading}
                 onClick={() => { setAmount(amt); setCustomAmount(''); }}
-                className={`relative py-4 rounded-xl text-base font-bold transition-all border ${amount === amt && !customAmount 
+                className={`relative py-4 rounded-xl text-base font-bold transition-colors border ${amount === amt && !customAmount 
                   ? 'bg-brand-primary/5 text-brand-primary border-brand-primary/40 ring-1 ring-brand-primary/20' 
                   : 'bg-white dark:bg-white/[0.03] text-zinc-600 dark:text-zinc-400 border-zinc-100 dark:border-white/5 hover:bg-zinc-100 dark:hover:bg-white/10 shadow-sm'}`}
               >
@@ -335,7 +342,7 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className, com
 
             <div className="flex flex-wrap justify-center gap-3">
               <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-white dark:bg-[#111111] border border-zinc-200 dark:border-white/10 shadow-sm transition-all hover:border-blue-500/30">
-                <img src="/Razorpay_logo.svg" alt="Razorpay" className="h-4.5 w-auto dark:brightness-150 dark:contrast-125" />
+                <img src="/Razorpay_logo.svg" alt="Razorpay" width={85} height={18} className="h-4.5 w-auto dark:brightness-150 dark:contrast-125" />
               </div>
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-50 dark:bg-[#0d1a14] border border-emerald-100 dark:border-emerald-500/20 shadow-sm transition-all hover:border-emerald-500/40">
                 <ShieldCheck className="w-4.5 h-4.5 text-emerald-500" />

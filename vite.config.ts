@@ -19,6 +19,14 @@ export default defineConfig(({ mode }) => {
     build: {
       target: 'es2020',
       cssTarget: 'safari13',
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
+            lucide: ['lucide-react'],
+          }
+        }
+      }
     }
 
   };

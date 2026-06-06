@@ -200,9 +200,9 @@ export function SettingsHub({
                       `}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`shrink-0 transition-all duration-300 ${activeTab === item.id ? 'scale-110 active-icon-glow' : ''} ${item.color || 'text-zinc-500 dark:text-zinc-400'}`}>
+                        <div className={`shrink-0 transition-transform duration-300 ${activeTab === item.id ? 'scale-110 active-icon-glow' : ''} ${item.color || 'text-zinc-500 dark:text-zinc-400'}`}>
                           {React.cloneElement(item.icon as React.ReactElement, {
-                            className: `w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] transition-all duration-300`,
+                            className: `w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] transition-colors duration-300`,
                             stroke: activeTab === item.id ? 'url(#settings-icon-gradient)' : 'currentColor',
                             strokeWidth: 1.5,
                           })}

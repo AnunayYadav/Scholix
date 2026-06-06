@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import NexusServer from '../services/nexusServer.ts';
 import { useUniversity, UNIVERSITIES, UniversityId } from '../hooks/useUniversity.tsx';
 import { UserProfile } from '../types.ts';
@@ -71,8 +71,8 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
           <div className="flex flex-col items-center justify-center">
             <div className="relative group">
               <div className="absolute inset-0 bg-brand-primary/10 blur-3xl rounded-full scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-              <img src="/Scholix_light.png" alt="Scholix" className="h-16 md:h-20 w-auto object-contain dark:hidden relative z-10" />
-              <img src="/Scholix_dark.png" alt="Scholix" className="h-16 md:h-20 w-auto object-contain hidden dark:block relative z-10" />
+              <img src="/Scholix_light.webp" alt="Scholix" width="300" height="101" fetchPriority="high" loading="eager" className="h-16 md:h-20 w-auto object-contain dark:hidden relative z-10" />
+              <img src="/Scholix_dark.webp" alt="Scholix" width="300" height="101" fetchPriority="high" loading="eager" className="h-16 md:h-20 w-auto object-contain hidden dark:block relative z-10" />
             </div>
             <p className="text-sm md:text-base text-zinc-500 dark:text-zinc-400 font-medium max-w-lg mx-auto leading-relaxed mt-4 md:mt-6 px-4">
               Transforming the university experience with <span className="text-zinc-900 dark:text-white font-bold">AI-driven</span> intelligence and a unified student ecosystem.
@@ -94,11 +94,21 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
               const isDisabled = uni.comingSoon || (isLocked && !userProfile?.is_admin);
 
               return (
-                <button
+                <Link
                   key={uni.id}
+                  to={uni.comingSoon || isLocked ? "#" : `/${uni.id === 'iitm_bs' ? 'iitm' : uni.id}`}
                   onMouseEnter={() => setHoveredId(uni.id)}
                   onMouseLeave={() => setHoveredId(null)}
-                  onClick={() => handleSelect(uni.id, uni.comingSoon, uni.adminOnly)}
+                  onClick={(e) => {
+                    if (uni.comingSoon || isLocked) {
+                      e.preventDefault();
+                      handleSelect(uni.id, uni.comingSoon, uni.adminOnly);
+                    } else {
+                      // Prevent immediate default routing to allow exit portal transition animation to play
+                      e.preventDefault();
+                      handleSelect(uni.id, uni.comingSoon, uni.adminOnly);
+                    }
+                  }}
                   className={`group relative p-6 md:p-8 rounded-[32px] border transition-all duration-700 text-left overflow-hidden backdrop-blur-2xl ${
                     uni.comingSoon 
                       ? 'border-zinc-200/50 dark:border-white/5 opacity-40 cursor-not-allowed bg-zinc-50/20 dark:bg-white/[0.01]' 
@@ -111,7 +121,7 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
                     <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center transition-all duration-700 overflow-hidden ${
                       uni.comingSoon || isLocked ? 'bg-zinc-200/50 dark:bg-white/5 grayscale saturate-50' : 'bg-white dark:bg-[#111] shadow-sm p-2.5 md:p-3 border border-zinc-100 dark:border-white/5'
                     }`}>
-                      <img src={uni.logo} alt={uni.name} className="w-full h-full object-contain" />
+                      <img src={uni.logo} alt={uni.name} width="56" height="56" loading="eager" className="w-full h-full object-contain" />
                     </div>
                     <div className="space-y-1">
                       <h3 className={`text-lg md:text-2xl font-black text-zinc-900 dark:text-white tracking-tight transition-colors duration-500 ${!isDisabled && 'group-hover:text-brand-primary'}`}>
@@ -146,7 +156,7 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
                       </div>
                     )}
                   </div>
-                </button>
+                </Link>
               );
             })}
           </div>
@@ -210,8 +220,8 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 w-full max-w-5xl text-center md:text-left mb-16">
             <div className="space-y-6 md:col-span-1">
               <div className="flex items-center justify-center md:justify-start">
-                <img src="/Scholix_light.png" alt="Scholix" className="h-8 w-auto dark:hidden" />
-                <img src="/Scholix_dark.png" alt="Scholix" className="h-8 w-auto hidden dark:block" />
+                <img src="/Scholix_light.webp" alt="Scholix" width="100" height="34" loading="lazy" className="h-8 w-auto dark:hidden" />
+                <img src="/Scholix_dark.webp" alt="Scholix" width="100" height="34" loading="lazy" className="h-8 w-auto hidden dark:block" />
               </div>
               <p className="text-[10px] md:text-xs font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-xs mx-auto md:mx-0">
                 The high-performance student utility hub. Built for the next generation of academic excellence.
@@ -297,7 +307,7 @@ const ScholixLanding: React.FC<ScholixLandingProps> = ({ userProfile }) => {
               />
               <div className="p-6 bg-white/[0.03] rounded-full border border-white/10">
                 {UNIVERSITIES.find(u => u.id === selectedId)?.logo && (
-                  <img src={UNIVERSITIES.find(u => u.id === selectedId)?.logo} className="w-20 h-20 md:w-32 md:h-32 object-contain" alt="University Logo" />
+                  <img src={UNIVERSITIES.find(u => u.id === selectedId)?.logo} width="128" height="128" className="w-20 h-20 md:w-32 md:h-32 object-contain" alt="University Logo" />
                 )}
               </div>
             </div>
