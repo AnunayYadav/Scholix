@@ -359,7 +359,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [draggingOverId, setDraggingOverId] = useState<string | null>(null);
 
-  const [viewerInfo, setViewerInfo] = useState<{ show: boolean, url: string, name: string, file?: LibraryFile }>({ show: false, url: '', name: '' });
+  const [viewerInfo, setViewerInfo] = useState<{ show: boolean, url: string, name: string, file?: LibraryFile }>(() => {
+    if (fileId) {
+      return { show: true, url: '', name: 'Loading Document...', file: undefined };
+    }
+    return { show: false, url: '', name: '' };
+  });
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -488,7 +493,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     let isMounted = true;
 
     const loadDirectFile = async () => {
-      setIsLoading(true);
+      const shouldShowPageSkeleton = !viewerInfo.show;
+      if (shouldShowPageSkeleton) setIsLoading(true);
       try {
         const file = await NexusServer.fetchFileById(fileId);
         if (!file) {
@@ -519,7 +525,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         console.error("Direct File View Error:", err);
         showToast("Failed to load document.", "error");
       } finally {
-        if (isMounted) setIsLoading(false);
+        if (isMounted && shouldShowPageSkeleton) setIsLoading(false);
       }
     };
 
@@ -2139,6 +2145,13 @@ const FileCard: React.FC<{
         const target = e.target as HTMLElement;
         if (target.closest('button') || target.closest('[draggable]')) {
           e.preventDefault();
+          return;
+        }
+
+        // Intercept normal left-clicks to open PDF viewer overlay instantly
+        if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button !== 1) {
+          e.preventDefault();
+          onAccess();
         }
       }}
       className={`group p-4 rounded-[30px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a] hover:border-orange-500 hover:shadow-xl transition-all relative overflow-hidden flex flex-col min-h-[140px] cursor-pointer no-underline text-current ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}

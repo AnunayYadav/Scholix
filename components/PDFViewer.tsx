@@ -270,7 +270,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
 
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [renderScale, setRenderScale] = useState(scale);
-    const [isClosing, setIsClosing] = useState(false);
+    const [active, setActive] = useState(false);
+
+    useEffect(() => {
+        const raf = requestAnimationFrame(() => {
+            setActive(true);
+        });
+        return () => cancelAnimationFrame(raf);
+    }, []);
 
     const zoomWrapperRef = useRef<HTMLDivElement>(null);
     const pageOriginalWidthRef = useRef<number>(612);
@@ -282,11 +289,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     } | null>(null);
 
     const handleClose = () => {
-        setIsClosing(true);
+        setActive(false);
         setTimeout(() => {
             onClose();
-            setIsClosing(false);
-        }, 250);
+        }, 300);
     };
 
     const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
@@ -1088,7 +1094,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     }
 
     return createPortal(
-        <div className={`fixed inset-0 z-[9999] flex flex-col bg-zinc-100 dark:bg-[#0a0a0a] animate-fade-in overflow-hidden transition-all duration-300 ${isClosing ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'} ${isFullscreen ? 'p-0' : ''}`}>
+        <div className={`fixed inset-0 z-[9999] flex flex-col bg-zinc-100 dark:bg-[#0a0a0a] overflow-hidden pdf-viewer-overlay ${active ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-[0.98] pointer-events-none'} ${isFullscreen ? 'p-0' : ''}`}>
             {/* Toolbar */}
             <div className={`absolute top-0 left-0 right-0 flex items-center justify-between px-2 md:px-6 h-12 md:h-20 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-2xl border-b border-zinc-200 dark:border-white/5 z-50 transition-transform duration-300 ${showToolbar ? 'translate-y-0' : '-translate-y-full'}`}>
                 <div className="flex items-center gap-1 md:gap-4 overflow-hidden">
@@ -1308,6 +1314,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             </div>
 
             <style>{`
+                .pdf-viewer-overlay {
+                    transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1), transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+                }
                 .pdf-back-btn:hover {
                     background-color: var(--brand-primary) !important;
                     color: white !important;
