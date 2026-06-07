@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
-import { UserProfile } from '../types.ts';
+import { LibraryFile, UserProfile } from '../types.ts';
 import { showToast } from './Toast.tsx';
 import NexusServer from '../services/nexusServer.ts';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 
 interface PDFViewerProps {
-    url: string;
-    onClose: () => void;
+    url?: string;
+    fileId?: string;
+    file?: LibraryFile;
+    onClose: (resolvedFile?: LibraryFile) => void;
     fileName: string;
     userProfile?: UserProfile | null;
+    onAuthRequired?: () => void;
 }
 
 interface SearchResult {
@@ -254,7 +257,7 @@ const PageRenderer = React.memo<{
     );
 });
 
-const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfile }) => {
+const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileName, userProfile, onAuthRequired }) => {
     const { fullBrandName } = useUniversity();
 
     const [numPages, setNumPages] = useState<number>(0);
@@ -271,6 +274,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [renderScale, setRenderScale] = useState(scale);
     const [active, setActive] = useState(false);
+    const [displayFileName, setDisplayFileName] = useState(fileName);
+
+    useEffect(() => {
+        setDisplayFileName(fileName);
+    }, [fileName]);
 
     useEffect(() => {
         const raf = requestAnimationFrame(() => {
@@ -288,10 +296,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         scrollTop?: number;
     } | null>(null);
 
-    const handleClose = () => {
+    const handleClose = (resolvedFile?: any) => {
         setActive(false);
         setTimeout(() => {
-            onClose();
+            const fileObj = (resolvedFile && typeof resolvedFile === 'object' && 'id' in resolvedFile) ? resolvedFile as LibraryFile : undefined;
+            onClose(fileObj);
         }, 300);
     };
 
@@ -459,7 +468,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
         };
 
         const initPdf = async () => {
-            if (!url) return;
             const pdfjsLib = (window as any).pdfjsLib;
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
             setPdfjsLibState(pdfjsLib);
@@ -467,13 +475,70 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
             try {
                 setIsLoading(true);
                 setLoadProgress(0);
+                setError(null);
+
+                let targetUrl = url;
+
+                // If no direct url is provided, resolve fileId, session, and url inside PDFViewer itself
+                if (!targetUrl && fileId) {
+                    const fileObj = file || await NexusServer.fetchFileById(fileId);
+                    if (!fileObj) {
+                        setError('Document not found.');
+                        setIsLoading(false);
+                        return;
+                    }
+                    setDisplayFileName(fileObj.name);
+
+                    // Check if it is a PDF first
+                    if (!fileObj.storage_path.toLowerCase().endsWith('.pdf')) {
+                        const sessionRes = await NexusServer.getSession();
+                        const session = sessionRes?.data?.session;
+                        if (!session) {
+                            showToast("Please login to view this file.", "info");
+                            handleClose();
+                            onAuthRequired?.();
+                            return;
+                        }
+                        const token = session.access_token;
+                        const resolvedUrl = NexusServer.getFileUrl(fileObj.storage_path, token);
+                        if (resolvedUrl) {
+                            window.open(resolvedUrl, '_blank');
+                        }
+                        handleClose(fileObj);
+                        return;
+                    }
+
+                    const sessionRes = await NexusServer.getSession();
+                    const session = sessionRes?.data?.session;
+
+                    if (!session) {
+                        showToast("Please login to view this file.", "info");
+                        handleClose();
+                        onAuthRequired?.();
+                        return;
+                    }
+
+                    NexusServer.saveRecord(session.user.id, 'file_access', `Opened ${fileObj.name}`, { fileId: fileObj.id, fileName: fileObj.name, path: fileObj.storage_path });
+                    const token = session.access_token;
+                    const resolvedUrl = NexusServer.getFileUrl(fileObj.storage_path, token);
+                    if (!resolvedUrl) {
+                        setError('Failed to retrieve secure download link.');
+                        setIsLoading(false);
+                        return;
+                    }
+                    targetUrl = resolvedUrl;
+                }
+
+                if (!targetUrl) {
+                    return;
+                }
                 
                 // 🔐 Session Token Verification: Get the current user's session token
                 const { data: { session } } = await NexusServer.getSession();
                 
                 // Load PDF progressively using PDF.js native stream & range-request transport
                 const loadingTask = pdfjsLib.getDocument({
-                    url: url,
+                    url: targetUrl,
                     httpHeaders: {
                         'Authorization': session ? `Bearer ${session.access_token}` : ''
                     },
@@ -1105,7 +1170,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, onClose, fileName, userProfi
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-0.5 transition-transform"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                     </button>
                     <div className="hidden sm:block truncate">
-                        <h3 className="text-[13px] font-medium text-zinc-900 dark:text-white tracking-tight truncate max-w-[200px]">{fileName}</h3>
+                        <h3 className="text-[13px] font-medium text-zinc-900 dark:text-white tracking-tight truncate max-w-[200px]">{displayFileName}</h3>
                         <p className="text-[10px] font-medium tracking-wide leading-none mt-1" style={{ color: 'var(--brand-primary)' }}>{fullBrandName} Secure Protocol</p>
                     </div>
                 </div>

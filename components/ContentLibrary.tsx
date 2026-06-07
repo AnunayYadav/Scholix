@@ -222,14 +222,6 @@ interface ContentLibraryProps {
 
 const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialView = 'browse', onAuthRequired, authIsReady = true }) => {
   const { shortBrandName, uniSlug, universityInfo } = useUniversity();
-  const [allFiles, setAllFiles] = useState<LibraryFile[]>([]);
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [viewMode, setViewMode] = useState<'browse' | 'my-uploads' | 'originals'>(initialView);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('newest');
-
   const params = useParams();
   const wildcard = params['*'] || '';
   let fileId: string | undefined;
@@ -247,6 +239,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     subject = parts[2] || undefined;
     category = parts[3] || undefined;
   }
+
+  const [allFiles, setAllFiles] = useState<LibraryFile[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [viewMode, setViewMode] = useState<'browse' | 'my-uploads' | 'originals'>(initialView);
+  const [isLoading, setIsLoading] = useState(() => !fileId);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
   const navigate = useNavigate();
   const routePrefix = uniSlug ? `/${uniSlug}` : '';
 
@@ -473,68 +473,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       return;
     }
 
-    // If we already have the viewer info showing this file, don't trigger the fetch
-    if (viewerInfo.show && viewerInfo.file?.id === fileId) {
-      return;
+    if (!viewerInfo.show || (viewerInfo.file && viewerInfo.file.id !== fileId)) {
+      setViewerInfo({ show: true, url: '', name: 'Loading Document...', file: undefined });
     }
-
-    // Wait until authentication status is known (ready)
-    if (!authIsReady) return;
-
-    // If user is not logged in after auth resolves, show toast and prompt login
-    if (!userProfile) {
-      showToast("Please login to view this file.", "info");
-      if (onAuthRequired) {
-        onAuthRequired();
-      }
-      return;
-    }
-
-    let isMounted = true;
-
-    const loadDirectFile = async () => {
-      const shouldShowPageSkeleton = !viewerInfo.show;
-      if (shouldShowPageSkeleton) setIsLoading(true);
-      try {
-        const file = await NexusServer.fetchFileById(fileId);
-        if (!file) {
-          showToast("Document not found.", "error");
-          navigate(`${routePrefix}/library`);
-          return;
-        }
-
-        if (!isMounted) return;
-
-        NexusServer.saveRecord(userProfile.id, 'file_access', `Opened ${file.name}`, { fileId: file.id, fileName: file.name, path: file.storage_path });
-        const sessionRes = await NexusServer.getSession();
-        const token = sessionRes?.data?.session?.access_token;
-        const url = NexusServer.getFileUrl(file.storage_path, token);
-
-        if (!isMounted) return;
-
-        if (file.storage_path.toLowerCase().endsWith('.pdf')) {
-          setViewerInfo({ show: true, url, name: file.name, file });
-        } else {
-          if (url) {
-            window.open(url, '_blank');
-            const folderPath = `${routePrefix}/library/${slugify(file.program)}/${slugify(file.semester)}/${slugify(file.subject)}/${slugify(file.type)}`;
-            navigate(folderPath);
-          }
-        }
-      } catch (err) {
-        console.error("Direct File View Error:", err);
-        showToast("Failed to load document.", "error");
-      } finally {
-        if (isMounted && shouldShowPageSkeleton) setIsLoading(false);
-      }
-    };
-
-    loadDirectFile();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [fileId, userProfile, authIsReady, navigate, routePrefix, onAuthRequired]);
+  }, [fileId]);
 
 
   // Dynamically update document title & description meta tag on folder/route changes
@@ -1150,38 +1092,56 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     }
   };
 
-  const handleFileAccess = async (file: LibraryFile) => {
-    if (!userProfile) {
-      showToast("Please login to access documents.", "info");
-      onAuthRequired?.();
-      return;
-    }
-
-    const sessionRes = await NexusServer.getSession();
-    const token = sessionRes?.data?.session?.access_token;
-
+  const handleFileAccess = (file: LibraryFile) => {
     if (file.storage_path.toLowerCase().endsWith('.pdf')) {
-      // Open the viewer instantly in a loading state and navigate
+      // 1. Open the viewer instantly in a loading state and navigate
       setViewerInfo({ show: true, url: '', name: file.name, file });
       navigate(`${routePrefix}/library/view/${file.id}`);
       
-      // Fetch URL in the background
-      NexusServer.saveRecord(userProfile.id, 'file_access', `Opened ${file.name}`, { fileId: file.id, fileName: file.name, path: file.storage_path });
-      try {
-        const url = NexusServer.getFileUrl(file.storage_path, token);
-        if (url) {
-          setViewerInfo(prev => prev.file?.id === file.id ? { ...prev, url } : prev);
+      // 2. Resolve authentication and file URL in the background
+      (async () => {
+        if (!userProfile) {
+          // If not logged in, close viewer instantly, show toast, and trigger login modal
+          setViewerInfo({ show: false, url: '', name: '' });
+          showToast("Please login to view this file.", "info");
+          onAuthRequired?.();
+          const folderPath = file
+            ? `${routePrefix}/library/${slugify(file.program)}/${slugify(file.semester)}/${slugify(file.subject)}/${slugify(file.type)}`
+            : `${routePrefix}/library`;
+          navigate(folderPath);
+          return;
         }
-      } catch (err) {
-        console.error("Access Error:", err);
-      }
+
+        try {
+          const sessionRes = await NexusServer.getSession();
+          const token = sessionRes?.data?.session?.access_token;
+          
+          NexusServer.saveRecord(userProfile.id, 'file_access', `Opened ${file.name}`, { fileId: file.id, fileName: file.name, path: file.storage_path });
+          
+          const url = NexusServer.getFileUrl(file.storage_path, token);
+          if (url) {
+            setViewerInfo(prev => prev.file?.id === file.id ? { ...prev, url } : prev);
+          }
+        } catch (err) {
+          console.error("Access Error:", err);
+        }
+      })();
     } else {
-      try {
-        const url = NexusServer.getFileUrl(file.storage_path, token);
-        if (url) window.open(url, '_blank');
-      } catch (err) {
-        console.error("Access Error:", err);
+      if (!userProfile) {
+        showToast("Please login to access documents.", "info");
+        onAuthRequired?.();
+        return;
       }
+      (async () => {
+        try {
+          const sessionRes = await NexusServer.getSession();
+          const token = sessionRes?.data?.session?.access_token;
+          const url = NexusServer.getFileUrl(file.storage_path, token);
+          if (url) window.open(url, '_blank');
+        } catch (err) {
+          console.error("Access Error:", err);
+        }
+      })();
     }
   };
 
@@ -1958,18 +1918,21 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         viewerInfo.show && (
           <PDFViewer
             url={viewerInfo.url}
+            fileId={viewerInfo.file?.id || fileId}
+            file={viewerInfo.file}
             fileName={viewerInfo.name}
             userProfile={userProfile}
-            onClose={() => {
+            onClose={(resolvedFile) => {
               setViewerInfo({ show: false, url: '', name: '' });
               if (fileId) {
-                const file = viewerInfo.file;
+                const file = resolvedFile || viewerInfo.file;
                 const folderPath = file
                   ? `${routePrefix}/library/${slugify(file.program)}/${slugify(file.semester)}/${slugify(file.subject)}/${slugify(file.type)}`
                   : `${routePrefix}/library`;
                 navigate(folderPath);
               }
             }}
+            onAuthRequired={onAuthRequired}
           />
         )
       }

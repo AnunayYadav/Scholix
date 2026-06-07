@@ -582,6 +582,7 @@ const TopProgressBar: React.FC = () => {
 
 const SuspenseLoader: React.FC = () => {
   const { start, finish } = useLoadingStore();
+  const location = useLocation();
 
   useEffect(() => {
     start();
@@ -589,6 +590,37 @@ const SuspenseLoader: React.FC = () => {
       finish();
     };
   }, [start, finish]);
+
+  if (location.pathname.includes('/view/')) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full h-full min-h-[60vh] bg-zinc-100 dark:bg-[#0a0a0a] fixed inset-0 z-[9999]">
+        <div className="flex flex-col items-center gap-6 m-auto">
+          {/* Animated ring spinner */}
+          <div className="relative w-20 h-20">
+            <svg className="w-full h-full pdf-loader-ring animate-spin" viewBox="0 0 80 80" style={{ animationDuration: '1.5s' }}>
+              <circle cx="40" cy="40" r="34" fill="none" stroke="currentColor" strokeWidth="3" className="text-zinc-200 dark:text-white/5" />
+              <circle cx="40" cy="40" r="34" fill="none" stroke="url(#loaderGradientSuspense)" strokeWidth="3" strokeLinecap="round" strokeDasharray="160 54" />
+              <defs>
+                <linearGradient id="loaderGradientSuspense" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#ea580c" />
+                  <stop offset="100%" stopColor="#f97316" />
+                </linearGradient>
+              </defs>
+            </svg>
+            {/* Center icon */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7 text-orange-500/80 animate-pulse">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 tracking-tight">
+            Establishing secure connection…
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return <SkeletonPage />;
 };
