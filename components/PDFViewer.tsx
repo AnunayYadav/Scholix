@@ -636,7 +636,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
             window.removeEventListener('afterprint', handleAfterPrint);
             if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
         };
-    }, [url, isAdmin]);
+    }, [url, isAdmin, fileId, file]);
 
 
     // Handle Resize

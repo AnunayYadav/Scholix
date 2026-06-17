@@ -1097,35 +1097,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       // 1. Open the viewer instantly in a loading state and navigate
       setViewerInfo({ show: true, url: '', name: file.name, file });
       navigate(`${routePrefix}/library/view/${file.id}`);
-      
-      // 2. Resolve authentication and file URL in the background
-      (async () => {
-        if (!userProfile) {
-          // If not logged in, close viewer instantly, show toast, and trigger login modal
-          setViewerInfo({ show: false, url: '', name: '' });
-          showToast("Please login to view this file.", "info");
-          onAuthRequired?.();
-          const folderPath = file
-            ? `${routePrefix}/library/${slugify(file.program)}/${slugify(file.semester)}/${slugify(file.subject)}/${slugify(file.type)}`
-            : `${routePrefix}/library`;
-          navigate(folderPath);
-          return;
-        }
-
-        try {
-          const sessionRes = await NexusServer.getSession();
-          const token = sessionRes?.data?.session?.access_token;
-          
-          NexusServer.saveRecord(userProfile.id, 'file_access', `Opened ${file.name}`, { fileId: file.id, fileName: file.name, path: file.storage_path });
-          
-          const url = NexusServer.getFileUrl(file.storage_path, token);
-          if (url) {
-            setViewerInfo(prev => prev.file?.id === file.id ? { ...prev, url } : prev);
-          }
-        } catch (err) {
-          console.error("Access Error:", err);
-        }
-      })();
     } else {
       if (!userProfile) {
         showToast("Please login to access documents.", "info");
