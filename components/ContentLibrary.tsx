@@ -359,12 +359,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [draggingOverId, setDraggingOverId] = useState<string | null>(null);
 
-  const [viewerInfo, setViewerInfo] = useState<{ show: boolean, url: string, name: string, file?: LibraryFile }>(() => {
-    if (fileId) {
-      return { show: true, url: '', name: 'Loading Document...', file: undefined };
-    }
-    return { show: false, url: '', name: '' };
-  });
+  // Removed viewerInfo state. PDFViewer rendering is driven directly by Route parameter fileId.
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -464,19 +459,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     fetchFromSource(!fileId);
   }, [fetchFromSource]);
 
-  // Handle direct file link /view/:fileId routing
-  useEffect(() => {
-    if (!fileId) {
-      if (viewerInfo.show) {
-        setViewerInfo({ show: false, url: '', name: '' });
-      }
-      return;
-    }
-
-    if (!viewerInfo.show || (viewerInfo.file && viewerInfo.file.id !== fileId)) {
-      setViewerInfo({ show: true, url: '', name: 'Loading Document...', file: undefined });
-    }
-  }, [fileId]);
+  // Handle direct file link /view/:fileId routing (State transitions removed, now fully handled by route-driven rendering)
 
 
   // Dynamically update document title & description meta tag on folder/route changes
@@ -484,9 +467,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     let title = "Content Library Hub | Scholix";
     let description = "Access university study materials, notes, and previous year papers (PYQs) on Scholix.";
 
-    if (viewerInfo.show && viewerInfo.name) {
-      title = `${viewerInfo.name} | Scholix`;
-      description = `View and download ${viewerInfo.name} on Scholix.`;
+    const activeFile = allFiles.find(f => f.id === fileId);
+    if (fileId) {
+      const activeName = activeFile?.name || 'Loading Document...';
+      title = `${activeName} | Scholix`;
+      description = `View and download ${activeName} on Scholix.`;
     } else if (activeSubject) {
       const categorySuffix = activeCategory ? ` ${activeCategory.name}` : " Notes & PYQs";
       title = `${activeSubject.name}${categorySuffix} | ${selectedProgram} | Scholix`;
@@ -504,7 +489,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     if (metaDesc) {
       metaDesc.setAttribute('content', description);
     }
-  }, [activeSemester, activeSubject, activeCategory, selectedProgram, viewerInfo]);
+  }, [activeSemester, activeSubject, activeCategory, selectedProgram, fileId, allFiles]);
 
   // Helper function to dynamically merge curriculum with DB folders
   const getMergedFolders = useCallback((prog: string, activeSub: Folder | null) => {
@@ -1094,8 +1079,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   const handleFileAccess = (file: LibraryFile) => {
     if (file.storage_path.toLowerCase().endsWith('.pdf')) {
-      // 1. Open the viewer instantly in a loading state and navigate
-      setViewerInfo({ show: true, url: '', name: file.name, file });
+      // 1. Navigate to the viewer instantly
       navigate(`${routePrefix}/library/view/${file.id}`);
     } else {
       if (!userProfile) {
@@ -1886,17 +1870,15 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       <input type="file" ref={fileInputRef} className="hidden" multiple onChange={e => { const files = e.target.files; if (files && files.length > 0) handleFilesSelected(files); }} />
 
       {
-        viewerInfo.show && (
+        fileId && (
           <PDFViewer
-            url={viewerInfo.url}
-            fileId={viewerInfo.file?.id || fileId}
-            file={viewerInfo.file}
-            fileName={viewerInfo.name}
+            fileId={fileId}
+            file={allFiles.find(f => f.id === fileId)}
+            fileName={allFiles.find(f => f.id === fileId)?.name || 'Loading Document...'}
             userProfile={userProfile}
             onClose={(resolvedFile) => {
-              setViewerInfo({ show: false, url: '', name: '' });
               if (fileId) {
-                const file = resolvedFile || viewerInfo.file;
+                const file = resolvedFile || allFiles.find(f => f.id === fileId);
                 const folderPath = file
                   ? `${routePrefix}/library/${slugify(file.program)}/${slugify(file.semester)}/${slugify(file.subject)}/${slugify(file.type)}`
                   : `${routePrefix}/library`;
