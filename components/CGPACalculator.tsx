@@ -48,6 +48,27 @@ const getGradeFromMarks = (marks: number): string => {
   return 'F';
 };
 
+const serializePayload = (data: any): string => {
+  const subjectsStr = data.subjects.map((s: any) => {
+    const escapedName = encodeURIComponent(s.n);
+    return `${escapedName}:${s.c}:${s.g}:${s.m}`;
+  }).join(',');
+  
+  const parts = [
+    'v1',
+    encodeURIComponent(data.vName),
+    encodeURIComponent(data.uni),
+    data.sem,
+    data.sgpa,
+    data.cgpa,
+    data.credits,
+    data.ts,
+    subjectsStr
+  ];
+  return parts.join('|');
+};
+
+
 interface CGPACalculatorProps {
   userProfile?: UserProfile | null;
   hideHeader?: boolean;
@@ -103,7 +124,8 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
       uni: selectedUniversity,
       vName: vertoName.trim() || 'Verto Student'
     };
-    const encoded = btoa(JSON.stringify(data));
+    const serialized = serializePayload(data);
+    const encoded = btoa(encodeURIComponent(serialized));
     const currentBaseUrl = window.location.origin;
     const linkPrefix = uniSlug ? `/${uniSlug}` : '';
     setShareUrl(`${currentBaseUrl}${linkPrefix}/share-cgpa?d=${encoded}`);

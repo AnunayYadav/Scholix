@@ -1,6 +1,47 @@
 import React, { useMemo } from 'react';
 import { useUniversity, UNIVERSITIES } from '../hooks/useUniversity.tsx';
 
+const deserializePayload = (str: string): any => {
+  const trimmed = str.trim();
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+    return JSON.parse(trimmed);
+  }
+  
+  const parts = trimmed.split('|');
+  if (parts[0] === 'v1') {
+    const vName = decodeURIComponent(parts[1] || 'Verto Student');
+    const uni = decodeURIComponent(parts[2] || '');
+    const sem = parseInt(parts[3]) || 1;
+    const sgpa = parts[4] || '0.00';
+    const cgpa = parts[5] || '0.00';
+    const credits = parseInt(parts[6]) || 0;
+    const ts = parseInt(parts[7]) || Date.now();
+    const subjectsStr = parts[8] || '';
+    
+    const subjects = subjectsStr ? subjectsStr.split(',').map((sub: string) => {
+      const subParts = sub.split(':');
+      return {
+        n: decodeURIComponent(subParts[0] || 'Subject'),
+        c: parseInt(subParts[1]) || 0,
+        g: subParts[2] || 'F',
+        m: parseInt(subParts[3]) || 0
+      };
+    }) : [];
+    
+    return {
+      vName,
+      uni,
+      sem,
+      sgpa,
+      cgpa,
+      credits,
+      ts,
+      subjects
+    };
+  }
+  throw new Error("Unknown payload version");
+};
+
 const ShareReport: React.FC = () => {
   const { universityInfo, shortBrandName } = useUniversity();
   const data = useMemo(() => {
@@ -8,9 +49,14 @@ const ShareReport: React.FC = () => {
     const d = params.get('d');
     if (!d) return null;
     try {
-      return JSON.parse(atob(d));
+      const decodedStr = decodeURIComponent(atob(d));
+      return deserializePayload(decodedStr);
     } catch (e) {
-      return null;
+      try {
+        return JSON.parse(atob(d));
+      } catch (innerErr) {
+        return null;
+      }
     }
   }, []);
 
