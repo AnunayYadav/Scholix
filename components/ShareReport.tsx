@@ -75,6 +75,11 @@ const ShareReport: React.FC = () => {
                 <span className="text-[8px] font-medium text-orange-600 dark:text-orange-500">{brandName.toUpperCase()} PROTOCOL</span>
               </div>
               <h1 className="text-xl font-black tracking-tight text-zinc-900 dark:text-white uppercase">VERIFIED INSIGHT</h1>
+              {data.vName && (
+                <p className="text-[10px] font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-tight mt-0.5">
+                  SCHOLAR: <span className="text-orange-600 dark:text-orange-500 font-extrabold">{data.vName}</span>
+                </p>
+              )}
               <p className="text-[7px] font-bold text-zinc-400 uppercase tracking-widest">NS-{Math.floor(data.ts / 100000)}</p>
             </div>
 
@@ -115,15 +120,26 @@ const ShareReport: React.FC = () => {
                 LEDGER
                 <span className="h-px bg-zinc-100 dark:bg-white/5 flex-1" />
               </h4>
-              <div className="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto no-scrollbar pr-1">
+              <div className="grid grid-cols-1 gap-2 pr-1">
                 {data.subjects.map((sub: any, idx: number) => (
-                  <div key={idx} className="p-3 bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl flex items-center justify-between group">
-                    <div className="max-w-[80%]">
-                      <p className="text-[9px] font-black text-zinc-800 dark:text-white uppercase tracking-tight truncate">{sub.n}</p>
-                      <p className="text-[7px] font-bold text-zinc-400 uppercase mt-0.5">{sub.c} Credits Protocol</p>
+                  <div key={idx} className="p-3.5 bg-zinc-50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 rounded-2xl flex items-center justify-between gap-4 transition-all hover:bg-zinc-100/50 dark:hover:bg-white/[0.04]">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-zinc-800 dark:text-white uppercase tracking-tight truncate">{sub.n}</p>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <span className="text-[9px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{sub.c} Credits</span>
+                        {sub.m !== undefined && sub.m > 0 && (
+                          <>
+                            <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+                            <span className="text-[9px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{sub.m} Marks</span>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <div className="w-8 h-8 rounded-xl bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-white/10 flex items-center justify-center">
-                      <span className="font-black text-orange-600 text-[10px]">{sub.g}</span>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="w-10 h-10 rounded-[14px] bg-orange-600/5 dark:bg-orange-500/10 border border-orange-600/20 dark:border-orange-500/20 flex flex-col items-center justify-center shadow-sm">
+                        <span className="text-[7px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest leading-none mb-0.5">Grade</span>
+                        <span className="font-extrabold text-orange-600 dark:text-orange-500 text-xs leading-none">{sub.g}</span>
+                      </div>
                     </div>
                   </div>
                 ))}

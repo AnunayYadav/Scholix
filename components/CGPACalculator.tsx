@@ -66,6 +66,9 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isClosingShare, setIsClosingShare] = useState(false);
+  const [isNameModalOpen, setIsNameModalOpen] = useState(false);
+  const [isClosingName, setIsClosingName] = useState(false);
+  const [vertoName, setVertoName] = useState('');
   const [shareUrl, setShareUrl] = useState('');
 
   const handleCloseShare = () => {
@@ -75,10 +78,56 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
       setIsClosingShare(false);
     }, 250);
   };
+
+  const handleCloseName = () => {
+    setIsClosingName(true);
+    setTimeout(() => {
+      setIsNameModalOpen(false);
+      setIsClosingName(false);
+    }, 250);
+  };
+
+  const handleGenerateLink = () => {
+    const data = { 
+      sgpa: currentStats.sgpa.toFixed(2), 
+      cgpa: overallCGPA, 
+      sem: currentSemester, 
+      credits: currentStats.totalCredits, 
+      subjects: courses.map((c, idx) => ({ 
+        n: c.name.trim() || `Subject ${idx + 1}`, 
+        c: c.credits, 
+        g: c.grade,
+        m: c.marks || 0
+      })), 
+      ts: Date.now(),
+      uni: selectedUniversity,
+      vName: vertoName.trim() || 'Verto Student'
+    };
+    const encoded = btoa(JSON.stringify(data));
+    const currentBaseUrl = window.location.origin;
+    const linkPrefix = uniSlug ? `/${uniSlug}` : '';
+    setShareUrl(`${currentBaseUrl}${linkPrefix}/share-cgpa?d=${encoded}`);
+    
+    setIsClosingName(true);
+    setTimeout(() => {
+      setIsNameModalOpen(false);
+      setIsClosingName(false);
+      setIsShareModalOpen(true);
+    }, 250);
+  };
+
   const [isSaving, setIsSaving] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
 
   const historyPanelRef = useRef<HTMLDivElement>(null);
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     loadHistory();
@@ -256,6 +305,184 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
     });
   };
 
+  const courseEntriesEl = (
+    <div className="glass-panel p-8 rounded-[40px] space-y-6 shadow-sm border dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 relative">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h3 className="text-[11px] sm:text-xs text-zinc-400">Course entries</h3>
+          {courses.length > 0 && (
+            <span className="text-[9px] sm:text-[10px] font-bold bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded-full">
+              {courses.length} {courses.length === 1 ? 'subject' : 'subjects'}
+            </span>
+          )}
+        </div>
+        <button onClick={addCourse} className="text-[11px] sm:text-xs font-medium text-brand-primary bg-brand-primary/5 hover:bg-brand-primary/10 px-6 py-2.5 rounded-xl border border-brand-primary/20 transition-all border-none">+ Add field</button>
+      </div>
+      {courses.length === 0 ? <div className="py-16 text-center border-4 border-dashed border-zinc-100 dark:border-white/5 rounded-[40px] opacity-40 text-[11px] sm:text-xs">No courses added yet</div> : (
+        <div className="space-y-4">{courses.map((c) => (
+          <div key={c.id} className="flex flex-col md:flex-row items-center gap-4 bg-zinc-50 dark:bg-[#0a0a0a]/40 p-5 rounded-[32px] border border-zinc-100 dark:border-white/5 transition-all hover:border-brand-primary/20">
+            <div className="flex-1 w-full">
+              <input type="text" placeholder="Course Name" value={c.name} onChange={(e) => updateCourse(c.id, 'name', e.target.value)} className="w-full bg-white dark:bg-white/5 border dark:border-white/10 rounded-2xl px-5 py-3 text-sm font-medium dark:text-white outline-none focus:ring-2 focus:ring-brand-primary/50" />
+            </div>
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <div className="space-y-1">
+                <p className="text-[11px] sm:text-xs text-zinc-400 text-center">Credits</p>
+                <input type="number" min="0" max="20" value={c.credits} onChange={(e) => updateCourse(c.id, 'credits', parseInt(e.target.value) || 0)} className="w-16 bg-white dark:bg-white/5 border dark:border-white/10 rounded-2xl px-3 py-3 text-xs text-center font-semibold dark:text-white outline-none" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-[11px] sm:text-xs text-zinc-400 text-center">{inputMode === 'marks' ? 'Marks' : 'Grade'}</p>
+                {inputMode === 'marks' ? (
+                  <input type="number" min="0" max="100" value={c.marks} onChange={(e) => updateCourse(c.id, 'marks', parseInt(e.target.value) || 0)} className="w-20 bg-white dark:bg-white/5 border dark:border-white/10 rounded-2xl px-3 py-3 text-xs text-center font-semibold dark:text-white outline-none" />
+                ) : (
+                  <NexusDropdown
+                    options={GRADELIST}
+                    value={c.grade}
+                    onChange={(val) => updateCourse(c.id, 'grade', val)}
+                    className="w-24"
+                  />
+                )}
+              </div>
+              <button onClick={() => removeCourse(c.id)} className="p-3 text-brand-secondary opacity-20 hover:opacity-100 border-none bg-transparent mt-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+            </div>
+          </div>
+        ))}</div>
+      )}
+    </div>
+  );
+
+  const degreeTargetEl = (
+    <div className="glass-panel p-10 rounded-[56px] space-y-10 shadow-2xl border border-brand-primary/20 bg-brand-primary/[0.03]">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h3 className="text-[11px] sm:text-xs font-medium text-brand-primary">Degree target</h3>
+          <p className="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-widest mt-1">Forecast individual semester performance</p>
+        </div>
+        <div className="relative">
+          <input type="number" step="0.1" max="10" value={targetCGPA} onChange={(e) => setTargetCGPA(e.target.value)} className="w-28 bg-white dark:bg-[#0a0a0a]/60 border border-brand-primary/30 rounded-2xl px-4 py-3 text-base text-center font-bold text-brand-primary outline-none focus:ring-4 focus:ring-brand-primary/10" placeholder="9.0" />
+          <span className="absolute -top-2 -right-2 w-4 h-4 bg-brand-primary rounded-full flex items-center justify-center text-white text-[11px] sm:text-xs font-black">!</span>
+        </div>
+      </header>
+
+      {Number(targetCGPA) > 0 && roadmapData.summary ? (
+        <div className="space-y-8 animate-fade-in">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {roadmapData.roadmap.map((item) => (
+              <div key={item.sem} className={`p-4 sm:p-5 rounded-[32px] border transition-all flex flex-col items-center justify-center text-center relative overflow-hidden ${item.isManual ? 'bg-brand-primary/10 border-brand-primary/30 shadow-lg' : 'bg-white dark:bg-[#0a0a0a] border-zinc-100 dark:border-white/5'}`}>
+                <p className="text-[11px] sm:text-xs text-zinc-400 mb-3">Sem {item.sem} • {LPU_BTECH_CREDITS[item.sem] || 20} Cr</p>
+
+                <div className="flex items-center gap-1 sm:gap-3 relative z-10">
+                  <button onClick={() => adjustSemTarget(item.sem, -0.1)} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-brand-primary hover:text-white transition-all border-none">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 sm:w-3.5 sm:h-3.5"><path d="M5 12h14" /></svg>
+                  </button>
+                  <span className={`text-xl sm:text-2xl font-bold tracking-tight ${item.isManual ? 'text-brand-primary' : 'text-brand-primary'}`}>{item.sgpa.toFixed(1)}</span>
+                  <button onClick={() => adjustSemTarget(item.sem, 0.1)} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-brand-primary hover:text-white transition-all border-none">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 sm:w-3.5 sm:h-3.5"><path d="M12 5v14M5 12h14" /></svg>
+                  </button>
+                </div>
+
+                {item.isManual ? (
+                  <button onClick={() => resetManual(item.sem)} className="mt-3 text-[11px] sm:text-xs text-brand-primary hover:underline border-none bg-transparent flex items-center gap-1">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2 h-2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                    Locked • Reset
+                  </button>
+                ) : (
+                  <p className="mt-3 text-[11px] sm:text-xs text-zinc-400">Auto balancing</p>
+                )}
+
+                {item.isManual && <div className="absolute top-0 right-0 w-2 h-2 bg-brand-primary rounded-bl-lg" />}
+              </div>
+            ))}
+          </div>
+
+          <div className={`p-6 rounded-[32px] border flex items-center gap-4 ${roadmapData.summary.isImpossible ? 'bg-brand-secondary/10 border-brand-secondary/20' : 'bg-brand-primary/5 border-brand-primary/10'}`}>
+            <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center flex-shrink-0 font-black text-xs ${roadmapData.summary.isImpossible ? 'bg-brand-secondary' : 'bg-brand-primary'}`}>
+              {roadmapData.summary.isImpossible ? '!' : 'i'}
+            </div>
+            <p className="text-[11px] sm:text-xs font-bold text-zinc-600 dark:text-zinc-300 leading-relaxed">
+              {roadmapData.summary.isImpossible
+                ? "Target mathematically unreachable. Reduce manual locks or lower target CGPA."
+                : <>Auto-balancing: Remaining unlocked semesters now require an average of <strong className="text-brand-primary">{roadmapData.summary.avgNeeded.toFixed(2)} SGPA</strong> to maintain your <strong className="text-brand-primary">{targetCGPA}</strong> goal.</>
+              }
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="py-16 text-center border-4 border-dashed border-zinc-100 dark:border-white/5 rounded-[48px] opacity-40">
+          <p className="text-[11px] sm:text-xs text-zinc-500">Enter target CGPA to run simulation</p>
+        </div>
+      )}
+    </div>
+  );
+
+  const sgpaCgpaBoxesEl = (
+    <div className="grid grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-6">
+      <div className="p-6 sm:p-8 lg:p-10 rounded-[32px] sm:rounded-[48px] lg:rounded-[56px] text-center shadow-2xl bg-gradient-to-br from-brand-primary to-brand-secondary text-white relative overflow-hidden group border-none flex flex-col min-h-[160px] sm:min-h-[200px] lg:min-h-[240px]">
+        <h3 className="text-[10px] sm:text-xs font-medium opacity-85 relative z-10 mb-1">Current SGPA</h3>
+        <div className="flex-1 flex items-center justify-center my-2 sm:my-3">
+          <p className="text-4xl sm:text-5xl font-bold tracking-tight relative z-10 leading-none">{currentStats.sgpa.toFixed(2)}</p>
+        </div>
+        <div className="w-full mt-2 sm:mt-3">
+          <div className="h-1.5 sm:h-2 bg-white/20 rounded-full overflow-hidden relative z-10">
+            <div className="h-full bg-white transition-all duration-1000" style={{ width: `${(currentStats.sgpa / 10) * 100}%` }} />
+          </div>
+        </div>
+        <div className="absolute -bottom-10 -right-10 w-32 h-32 sm:w-40 sm:h-40 bg-white/10 blur-[50px] sm:blur-[60px] rounded-full group-hover:scale-125 transition-transform pointer-events-none" />
+      </div>
+
+      <div className="glass-panel p-6 sm:p-8 lg:p-10 rounded-[32px] sm:rounded-[48px] lg:rounded-[56px] text-center shadow-2xl bg-white dark:bg-[#0a0a0a] text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 relative overflow-hidden group flex flex-col min-h-[160px] sm:min-h-[200px] lg:min-h-[240px]">
+        <h3 className="text-[10px] sm:text-xs font-medium opacity-80 relative z-10 text-zinc-500 dark:text-white/60 mb-1">Overall CGPA</h3>
+        <div className="flex-1 flex items-center justify-center my-2 sm:my-3">
+          <p className="text-4xl sm:text-5xl font-bold tracking-tight relative z-10 leading-none">{overallCGPA}</p>
+        </div>
+        <div className="w-full mt-2 sm:mt-3">
+          <div className="h-1.5 sm:h-2 bg-zinc-100 dark:bg-white/10 rounded-full overflow-hidden relative z-10">
+            <div className="h-full bg-brand-primary transition-all duration-1000" style={{ width: `${(parseFloat(overallCGPA) / 10) * 100}%` }} />
+          </div>
+        </div>
+        <div className="absolute -top-10 -left-10 w-32 h-32 sm:w-40 sm:h-40 bg-brand-primary/5 blur-[50px] sm:blur-[60px] rounded-full group-hover:scale-125 transition-transform pointer-events-none" />
+      </div>
+    </div>
+  );
+
+  const gradePulseEl = (
+    <div className="glass-panel p-8 rounded-[40px] border border-zinc-200 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/20">
+      <h3 className="text-[11px] sm:text-xs text-zinc-400 mb-6 border-b border-zinc-100 dark:border-white/5 pb-4">Grade pulse</h3>
+      <div className="space-y-4">
+        {/* Fix: Explicitly cast count to number as Object.entries value might be inferred as unknown */}
+        {Object.entries(currentStats.gradeCounts).filter(([_, count]) => (count as number) > 0).map(([grade, count]) => (
+          <div key={grade} className="flex items-center justify-between">
+            <span className="text-sm font-semibold dark:text-white">Grade {grade}</span>
+            <div className="flex items-center gap-3">
+              <div className="h-1.5 w-24 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
+                {/* Fix: Explicitly cast count to number for arithmetic operations */}
+                <div className="h-full bg-brand-primary" style={{ width: `${((count as number) / courses.length) * 100}%` }} />
+              </div>
+              <span className="text-xs font-semibold text-brand-primary">{count}</span>
+            </div>
+          </div>
+        ))}
+        {courses.length === 0 && <p className="text-[11px] sm:text-xs font-bold text-zinc-500 uppercase italic">Awaiting grade input...</p>}
+      </div>
+    </div>
+  );
+
+  const shareInfoEl = (
+    <div className="p-4 sm:p-5 rounded-3xl border border-brand-primary/10 bg-brand-primary/[0.02] flex items-center gap-3 sm:gap-4 animate-fade-in">
+      <div className="w-8 h-8 rounded-2xl bg-brand-primary/10 flex items-center justify-center text-brand-primary flex-shrink-0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
+          <circle cx="18" cy="5" r="3" />
+          <circle cx="6" cy="12" r="3" />
+          <circle cx="18" cy="19" r="3" />
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+        </svg>
+      </div>
+      <p className="text-[11px] sm:text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
+        You can share your CGPA report in the form of a link to your friends by pressing the <strong className="text-brand-primary font-semibold">Generate Link</strong> button at the top.
+      </p>
+    </div>
+  );
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20 px-4 md:px-0">
       {!hideHeader && (
@@ -308,20 +535,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
           </button>
 
           <button onClick={() => {
-            const data = { 
-              sgpa: currentStats.sgpa.toFixed(2), 
-              cgpa: overallCGPA, 
-              sem: currentSemester, 
-              credits: currentStats.totalCredits, 
-              subjects: courses.filter(c => c.name).map(c => ({ n: c.name, c: c.credits, g: c.grade })), 
-              ts: Date.now(),
-              uni: selectedUniversity
-            };
-            const encoded = btoa(JSON.stringify(data));
-            const currentBaseUrl = window.location.origin;
-            const linkPrefix = uniSlug ? `/${uniSlug}` : '';
-            setShareUrl(`${currentBaseUrl}${linkPrefix}/share-cgpa?d=${encoded}`);
-            setIsShareModalOpen(true);
+            setIsNameModalOpen(true);
           }} className="ml-1 px-4 py-2 bg-brand-primary text-white rounded-xl text-[10px] md:text-xs font-semibold shadow-lg shadow-brand-primary/20 active:scale-95 transition-all flex items-center gap-1.5 border-none">
             Generate Link
           </button>
@@ -375,147 +589,27 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="glass-panel p-8 rounded-[40px] space-y-6 shadow-sm border dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 relative">
-            <div className="flex items-center justify-between">
-              <h3 className="text-[11px] sm:text-xs text-zinc-400">Course entries</h3>
-              <button onClick={addCourse} className="text-[11px] sm:text-xs font-medium text-brand-primary bg-brand-primary/5 hover:bg-brand-primary/10 px-6 py-2.5 rounded-xl border border-brand-primary/20 transition-all border-none">+ Add field</button>
-            </div>
-            {courses.length === 0 ? <div className="py-16 text-center border-4 border-dashed border-zinc-100 dark:border-white/5 rounded-[40px] opacity-40 text-[11px] sm:text-xs">No courses added yet</div> : (
-              <div className="space-y-4">{courses.map((c) => (
-                <div key={c.id} className="flex flex-col md:flex-row items-center gap-4 bg-zinc-50 dark:bg-[#0a0a0a]/40 p-5 rounded-[32px] border border-zinc-100 dark:border-white/5 transition-all hover:border-brand-primary/20">
-                  <div className="flex-1 w-full">
-                    <input type="text" placeholder="Course Name" value={c.name} onChange={(e) => updateCourse(c.id, 'name', e.target.value)} className="w-full bg-white dark:bg-white/5 border dark:border-white/10 rounded-2xl px-5 py-3 text-sm font-medium dark:text-white outline-none focus:ring-2 focus:ring-brand-primary/50" />
-                  </div>
-                  <div className="flex items-center gap-3 w-full md:w-auto">
-                    <div className="space-y-1">
-                      <p className="text-[11px] sm:text-xs text-zinc-400 text-center">Credits</p>
-                      <input type="number" min="0" max="20" value={c.credits} onChange={(e) => updateCourse(c.id, 'credits', parseInt(e.target.value) || 0)} className="w-16 bg-white dark:bg-white/5 border dark:border-white/10 rounded-2xl px-3 py-3 text-xs text-center font-semibold dark:text-white outline-none" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[11px] sm:text-xs text-zinc-400 text-center">{inputMode === 'marks' ? 'Marks' : 'Grade'}</p>
-                      {inputMode === 'marks' ? (
-                        <input type="number" min="0" max="100" value={c.marks} onChange={(e) => updateCourse(c.id, 'marks', parseInt(e.target.value) || 0)} className="w-20 bg-white dark:bg-white/5 border dark:border-white/10 rounded-2xl px-3 py-3 text-xs text-center font-semibold dark:text-white outline-none" />
-                      ) : (
-                        <NexusDropdown
-                          options={GRADELIST}
-                          value={c.grade}
-                          onChange={(val) => updateCourse(c.id, 'grade', val)}
-                          className="w-24"
-                        />
-                      )}
-                    </div>
-                    <button onClick={() => removeCourse(c.id)} className="p-3 text-brand-secondary opacity-20 hover:opacity-100 border-none bg-transparent mt-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
-                  </div>
-                </div>
-              ))}</div>
-            )}
+      {isMobile ? (
+        <div className="flex flex-col gap-6">
+          {courseEntriesEl}
+          {sgpaCgpaBoxesEl}
+          {shareInfoEl}
+          {degreeTargetEl}
+          {gradePulseEl}
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-6 items-start">
+          <div className="col-span-2 space-y-6">
+            {courseEntriesEl}
+            {shareInfoEl}
+            {degreeTargetEl}
           </div>
-
-          <div className="glass-panel p-10 rounded-[56px] space-y-10 shadow-2xl border border-brand-primary/20 bg-brand-primary/[0.03]">
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div>
-                <h3 className="text-[11px] sm:text-xs font-medium text-brand-primary">Degree target</h3>
-                <p className="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-widest mt-1">Forecast individual semester performance</p>
-              </div>
-              <div className="relative">
-                <input type="number" step="0.1" max="10" value={targetCGPA} onChange={(e) => setTargetCGPA(e.target.value)} className="w-28 bg-white dark:bg-[#0a0a0a]/60 border border-brand-primary/30 rounded-2xl px-4 py-3 text-base text-center font-bold text-brand-primary outline-none focus:ring-4 focus:ring-brand-primary/10" placeholder="9.0" />
-                <span className="absolute -top-2 -right-2 w-4 h-4 bg-brand-primary rounded-full flex items-center justify-center text-white text-[11px] sm:text-xs font-black">!</span>
-              </div>
-            </header>
-
-            {Number(targetCGPA) > 0 && roadmapData.summary ? (
-              <div className="space-y-8 animate-fade-in">
-                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {roadmapData.roadmap.map((item) => (
-                    <div key={item.sem} className={`p-4 sm:p-5 rounded-[32px] border transition-all flex flex-col items-center justify-center text-center relative overflow-hidden ${item.isManual ? 'bg-brand-primary/10 border-brand-primary/30 shadow-lg' : 'bg-white dark:bg-[#0a0a0a] border-zinc-100 dark:border-white/5'}`}>
-                      <p className="text-[11px] sm:text-xs text-zinc-400 mb-3">Sem {item.sem} • {LPU_BTECH_CREDITS[item.sem] || 20} Cr</p>
-
-                      <div className="flex items-center gap-1 sm:gap-3 relative z-10">
-                        <button onClick={() => adjustSemTarget(item.sem, -0.1)} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-brand-primary hover:text-white transition-all border-none">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 sm:w-3.5 sm:h-3.5"><path d="M5 12h14" /></svg>
-                        </button>
-                        <span className={`text-xl sm:text-2xl font-bold tracking-tight ${item.isManual ? 'text-brand-primary' : 'text-brand-primary'}`}>{item.sgpa.toFixed(1)}</span>
-                        <button onClick={() => adjustSemTarget(item.sem, 0.1)} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-brand-primary hover:text-white transition-all border-none">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 sm:w-3.5 sm:h-3.5"><path d="M12 5v14M5 12h14" /></svg>
-                        </button>
-                      </div>
-
-                      {item.isManual ? (
-                        <button onClick={() => resetManual(item.sem)} className="mt-3 text-[11px] sm:text-xs text-brand-primary hover:underline border-none bg-transparent flex items-center gap-1">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2 h-2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                          Locked • Reset
-                        </button>
-                      ) : (
-                        <p className="mt-3 text-[11px] sm:text-xs text-zinc-400">Auto balancing</p>
-                      )}
-
-                      {item.isManual && <div className="absolute top-0 right-0 w-2 h-2 bg-brand-primary rounded-bl-lg" />}
-                    </div>
-                  ))}
-                </div>
-
-                <div className={`p-6 rounded-[32px] border flex items-center gap-4 ${roadmapData.summary.isImpossible ? 'bg-brand-secondary/10 border-brand-secondary/20' : 'bg-brand-primary/5 border-brand-primary/10'}`}>
-                  <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center flex-shrink-0 font-black text-xs ${roadmapData.summary.isImpossible ? 'bg-brand-secondary' : 'bg-brand-primary'}`}>
-                    {roadmapData.summary.isImpossible ? '!' : 'i'}
-                  </div>
-                  <p className="text-[11px] sm:text-xs font-bold text-zinc-600 dark:text-zinc-300 leading-relaxed">
-                    {roadmapData.summary.isImpossible
-                      ? "Target mathematically unreachable. Reduce manual locks or lower target CGPA."
-                      : <>Auto-balancing: Remaining unlocked semesters now require an average of <strong className="text-brand-primary">{roadmapData.summary.avgNeeded.toFixed(2)} SGPA</strong> to maintain your <strong className="text-brand-primary">{targetCGPA}</strong> goal.</>
-                    }
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="py-16 text-center border-4 border-dashed border-zinc-100 dark:border-white/5 rounded-[48px] opacity-40">
-                <p className="text-[11px] sm:text-xs text-zinc-500">Enter target CGPA to run simulation</p>
-              </div>
-            )}
+          <div className="col-span-1 space-y-6">
+            {sgpaCgpaBoxesEl}
+            {gradePulseEl}
           </div>
         </div>
-
-        <div className="space-y-6">
-          <div className="p-10 rounded-[56px] text-center shadow-2xl bg-gradient-to-br from-brand-primary to-brand-secondary text-white relative overflow-hidden group border-none">
-            <h3 className="text-[11px] sm:text-xs font-medium opacity-80 mb-4 relative z-10">Current SGPA</h3>
-            <p className="text-6xl font-bold tracking-tight mb-6 relative z-10">{currentStats.sgpa.toFixed(2)}</p>
-            <div className="h-2 bg-white/20 rounded-full overflow-hidden relative z-10">
-              <div className="h-full bg-white transition-all duration-1000" style={{ width: `${(currentStats.sgpa / 10) * 100}%` }} />
-            </div>
-            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 blur-[60px] rounded-full group-hover:scale-125 transition-transform" />
-          </div>
-
-          <div className="glass-panel p-10 rounded-[56px] text-center shadow-2xl bg-white dark:bg-[#0a0a0a] text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 relative overflow-hidden group">
-            <h3 className="text-[11px] sm:text-xs font-medium opacity-80 mb-4 relative z-10 text-zinc-500 dark:text-white/60">Overall CGPA</h3>
-            <p className="text-6xl font-bold tracking-tight mb-6 relative z-10">{overallCGPA}</p>
-            <div className="h-2 bg-zinc-100 dark:bg-white/10 rounded-full overflow-hidden relative z-10">
-              <div className="h-full bg-brand-primary transition-all duration-1000" style={{ width: `${(parseFloat(overallCGPA) / 10) * 100}%` }} />
-            </div>
-            <div className="absolute -top-10 -left-10 w-40 h-40 bg-brand-primary/5 blur-[60px] rounded-full group-hover:scale-125 transition-transform" />
-          </div>
-
-          <div className="glass-panel p-8 rounded-[40px] border border-zinc-200 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/20">
-            <h3 className="text-[11px] sm:text-xs text-zinc-400 mb-6 border-b border-zinc-100 dark:border-white/5 pb-4">Grade pulse</h3>
-            <div className="space-y-4">
-              {/* Fix: Explicitly cast count to number as Object.entries value might be inferred as unknown */}
-              {Object.entries(currentStats.gradeCounts).filter(([_, count]) => (count as number) > 0).map(([grade, count]) => (
-                <div key={grade} className="flex items-center justify-between">
-                  <span className="text-sm font-semibold dark:text-white">Grade {grade}</span>
-                  <div className="flex items-center gap-3">
-                    <div className="h-1.5 w-24 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
-                      {/* Fix: Explicitly cast count to number for arithmetic operations */}
-                      <div className="h-full bg-brand-primary" style={{ width: `${((count as number) / courses.length) * 100}%` }} />
-                    </div>
-                    <span className="text-xs font-semibold text-brand-primary">{count}</span>
-                  </div>
-                </div>
-              ))}
-              {courses.length === 0 && <p className="text-[11px] sm:text-xs font-bold text-zinc-500 uppercase italic">Awaiting grade input...</p>}
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
 
       <div className="glass-panel p-8 rounded-[40px] border border-zinc-200 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/60 shadow-sm overflow-hidden">
         <header className="flex items-center justify-between mb-8">
@@ -558,7 +652,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
             <h3 className="text-3xl font-bold tracking-tight mb-2 text-zinc-900 dark:text-white leading-none">Share Report</h3>
             <p className="text-zinc-500 text-[11px] sm:text-xs mb-8">Encrypted link generated for your academic snapshot.</p>
 
-            <div className="bg-zinc-50 dark:bg-[#0a0a0a]/50 border border-zinc-200 dark:border-white/10 rounded-3xl p-6 mb-8 select-all break-all text-[11px] font-mono text-zinc-600 dark:text-zinc-400 leading-relaxed shadow-inner">
+            <div className="bg-zinc-50 dark:bg-[#0a0a0a]/50 border border-zinc-200 dark:border-white/10 rounded-3xl p-6 mb-8 select-all break-all text-[11px] font-mono text-zinc-600 dark:text-zinc-400 leading-relaxed shadow-inner max-h-32 overflow-y-auto custom-scrollbar">
               {shareUrl}
             </div>
 
@@ -573,6 +667,54 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
               className="w-full py-5 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-[24px] font-bold text-sm shadow-xl shadow-brand-primary/20 active:scale-95 transition-all border-none"
             >
               Copy Link
+            </button>
+          </div>
+        </div>,
+        document.getElementById('modal-root') || document.body
+      )}
+      {isNameModalOpen && createPortal(
+        <div
+          className={`modal-overlay ${isClosingName ? 'closing' : ''}`}
+          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) handleCloseName(); }}
+        >
+          <div className={`nexus-modal w-full max-w-sm p-10 ${isClosingName ? 'closing' : ''}`}>
+            <button onClick={handleCloseName} className="absolute top-8 right-8 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            </button>
+
+            <div className="w-20 h-20 bg-brand-primary/10 rounded-[32px] flex items-center justify-center mb-8 border border-brand-primary/20 relative group/icon">
+              <div className="absolute inset-0 bg-brand-primary/20 blur-2xl rounded-full opacity-0 group-hover/icon:opacity-100 transition-opacity" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-brand-primary relative z-10">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+
+            <h3 className="text-3xl font-bold tracking-tight mb-2 text-zinc-900 dark:text-white leading-none">Verto Identity</h3>
+            <p className="text-zinc-500 text-[11px] sm:text-xs mb-8">Enter your name to personalize the verified report.</p>
+
+            <div className="space-y-4 mb-8">
+              <input
+                type="text"
+                placeholder="Enter Verto's Name"
+                value={vertoName}
+                onChange={(e) => setVertoName(e.target.value)}
+                className="w-full bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-sm font-semibold dark:text-white outline-none focus:ring-2 focus:ring-brand-primary"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleGenerateLink();
+                  }
+                }}
+              />
+            </div>
+
+            <button
+              onClick={handleGenerateLink}
+              className="w-full py-5 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-[24px] font-bold text-sm shadow-xl shadow-brand-primary/20 active:scale-95 transition-all border-none"
+            >
+              Generate Protocol
             </button>
           </div>
         </div>,
