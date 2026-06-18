@@ -563,22 +563,7 @@ const FeatureCard = React.memo(({ f, navigate }: { f: any, navigate: any }) => {
   );
 });
 
-const TopProgressBar: React.FC = () => {
-  const { progress, visible } = useLoadingStore();
-
-  return (
-    <div 
-      className="fixed top-0 left-0 h-[3px] bg-gradient-to-r from-brand-primary to-brand-secondary z-[99999] transition-[width,opacity] duration-300 ease-out pointer-events-none"
-      style={{ 
-        width: `${progress}%`,
-        opacity: visible ? 1 : 0,
-        boxShadow: '0 0 10px rgba(249, 115, 22, 0.4), 0 0 5px rgba(249, 115, 22, 0.4)'
-      }}
-    >
-      <div className="absolute right-0 top-0 h-full w-[100px] bg-gradient-to-r from-transparent to-white/40 blur-[1px]" />
-    </div>
-  );
-};
+// TopProgressBar removed
 
 const SuspenseLoader: React.FC = () => {
   const { start, finish } = useLoadingStore();
@@ -1903,7 +1888,6 @@ const AppContent: React.FC = () => {
   if (isWelcomePage) {
     return (
       <>
-        <TopProgressBar />
         <ScholixLanding userProfile={userProfile} />
         <ToastContainer />
         <AnnouncementModal />
@@ -1918,7 +1902,6 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden bg-white dark:bg-[#0a0a0a] text-zinc-900 dark:text-zinc-200 fixed inset-0">
-      <TopProgressBar />
       <SEOHelmet currentModule={currentModule} />
       <div className="flex flex-1 overflow-hidden relative min-h-0">
         <Sidebar
