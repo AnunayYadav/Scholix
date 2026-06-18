@@ -438,58 +438,6 @@ async function prerender() {
     });
   }
 
-  // 5. Load database files (documents)
-  const { data: dbFiles } = await supabase
-    .from('documents')
-    .select('*')
-    .eq('status', 'approved')
-    .order('created_at', { ascending: false });
-
-  if (dbFiles) {
-    console.log(`Prerendering metadata from ${dbFiles.length} database files...`);
-    dbFiles.forEach(file => {
-      const uniSlug = getUniversitySlug(file.program);
-      const uniName = getUniversityName(uniSlug);
-      const filePath = `/${uniSlug}/library/view/${file.id}`;
-      
-      routes.push({
-        path: filePath,
-        title: `${file.name} | ${file.subject} notes - Scholix`,
-        description: `Download and view ${file.name} notes file. Uploaded for ${uniName} ${file.program} ${file.semester} ${file.subject} by ${file.uploader_username || 'Anonymous'}.`,
-        contentHtml: `
-          <div style="padding: 40px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto;">
-            <header style="margin-bottom: 40px;">
-              <a href="/${uniSlug}/library" style="text-decoration: none; color: #f97316; font-weight: 600;">← Back to Library</a>
-              <h1 style="font-size: 2.2rem; color: #111; margin-top: 20px;">${file.name}</h1>
-              <p style="color: #666; font-size: 1.1rem; line-height: 1.6; margin-top: 10px;">Subject: ${file.subject} | Semester: ${file.semester} | Program: ${file.program}</p>
-            </header>
-            <main>
-              <div style="background: #fafafa; border: 1px solid #eaeaea; border-radius: 16px; padding: 30px; margin-bottom: 40px;">
-                <h2 style="font-size: 1.2rem; margin-top: 0; color: #222;">Document Details</h2>
-                <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95rem;">
-                  <tr>
-                    <td style="padding: 8px 0; font-weight: 600; color: #666;">Size:</td>
-                    <td style="padding: 8px 0; color: #222;">${file.size || 'N/A'}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; font-weight: 600; color: #666;">Category:</td>
-                    <td style="padding: 8px 0; color: #222;">${file.type || 'N/A'}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; font-weight: 600; color: #666;">Description:</td>
-                    <td style="padding: 8px 0; color: #222; font-style: italic;">${file.description || 'No description provided.'}</td>
-                  </tr>
-                </table>
-              </div>
-              <div style="text-align: center;">
-                <a href="${filePath}" style="display: inline-block; padding: 14px 28px; background: #f97316; color: white; text-decoration: none; border-radius: 12px; font-weight: 700;">Open & Download PDF File</a>
-              </div>
-            </main>
-          </div>
-        `
-      });
-    });
-  }
 
   // 6. Write routes to dist/
   routes.forEach(route => {

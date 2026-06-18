@@ -224,7 +224,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const { shortBrandName, uniSlug, universityInfo } = useUniversity();
   const params = useParams();
   const wildcard = params['*'] || '';
-  let fileId: string | undefined = undefined;
   let program: string | undefined;
   let semester: string | undefined;
   let subject: string | undefined;
@@ -232,14 +231,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   if (wildcard) {
     const parts = wildcard.split('/');
-    if (parts[0] === 'view' && parts[1]) {
-      fileId = parts[1];
-    } else {
-      program = parts[0] || undefined;
-      semester = parts[1] || undefined;
-      subject = parts[2] || undefined;
-      category = parts[3] || undefined;
-    }
+    program = parts[0] || undefined;
+    semester = parts[1] || undefined;
+    subject = parts[2] || undefined;
+    category = parts[3] || undefined;
   }
 
   const [allFiles, setAllFiles] = useState<LibraryFile[]>([]);
@@ -306,13 +301,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     setTimeout(() => {
       setShowDetailsModal(false);
       setIsClosingDetails(false);
-      if (fileId) {
-        const file = selectedFile;
-        const folderPath = file
-          ? `${routePrefix}/library/${slugify(file.program)}/${slugify(file.semester)}/${slugify(file.subject)}/${slugify(file.type)}`
-          : `${routePrefix}/library`;
-        navigate(folderPath);
-      }
     }, 250);
   };
 
@@ -616,9 +604,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   // Sync state with URL params
   useEffect(() => {
-    // When fileId is present, we're in direct file view mode.
-    // Don't reset folder state — it causes a flash of the file list before the PDF viewer opens.
-    if (fileId) return;
 
     if (finalFolders.length > 0) {
       let matchedProgram = selectedProgram;
@@ -680,39 +665,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         }
       }
     }
-  }, [program, semester, subject, category, finalFolders, availablePrograms, selectedProgram, viewMode, fileId]);
+  }, [program, semester, subject, category, finalFolders, availablePrograms, selectedProgram, viewMode]);
 
-  // Fetch file details if URL specifies fileId directly (deep linking / sitemap view)
-  useEffect(() => {
-    if (fileId && authIsReady) {
-      if (!userProfile) {
-        showToast("Please login to view this file.", "info");
-        onAuthRequired?.();
-        navigate(`${routePrefix}/library`);
-        return;
-      }
 
-      (async () => {
-        try {
-          setIsLoading(true);
-          const file = await NexusServer.fetchFileById(fileId);
-          if (file) {
-            if (file.program && file.program !== selectedProgram) {
-              setSelectedProgram(file.program);
-            }
-            setActivePdfFile(file);
-          } else {
-            showToast("Document not found.", "error");
-            navigate(`${routePrefix}/library`);
-          }
-        } catch (e) {
-          console.error("Error fetching file for deep-link view:", e);
-        } finally {
-          setIsLoading(false);
-        }
-      })();
-    }
-  }, [fileId, authIsReady, userProfile, navigate, routePrefix]);
 
   const displayFiles = useMemo(() => {
     let data = [...allFiles];
@@ -1907,15 +1862,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             file={activePdfFile}
             fileName={activePdfFile.name}
             userProfile={userProfile}
-            onClose={(closedFile) => {
+            onClose={() => {
               setActivePdfFile(null);
-              if (fileId) {
-                const finalFile = closedFile || activePdfFile;
-                const folderPath = finalFile
-                  ? `${routePrefix}/library/${slugify(finalFile.program)}/${slugify(finalFile.semester)}/${slugify(finalFile.subject)}/${slugify(finalFile.type || '')}`
-                  : `${routePrefix}/library`;
-                navigate(folderPath);
-              }
             }}
             onAuthRequired={onAuthRequired}
           />

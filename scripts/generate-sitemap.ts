@@ -198,20 +198,6 @@ async function generate() {
     });
   }
 
-  // 4.5 Load database files (documents)
-  const { data: dbFiles } = await supabase
-    .from('documents')
-    .select('*')
-    .eq('status', 'approved')
-    .order('created_at', { ascending: false });
-
-  if (dbFiles) {
-    console.log(`Fetched ${dbFiles.length} files from Supabase.`);
-    dbFiles.forEach(file => {
-      const uniSlug = getUniversitySlug(file.program);
-      urls.push(buildUrlNode(`https://scholix.app/${uniSlug}/library/view/${file.id}`, currentDate, 'weekly', '0.6'));
-    });
-  }
 
   // 5. Build sitemap.xml content
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
