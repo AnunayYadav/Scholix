@@ -9,7 +9,7 @@ import NexusOriginals from './NexusOriginals.tsx';
 import NexusDropdown from './NexusDropdown.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import { showToast, showConfirm } from './Toast.tsx';
-import { slugify } from '../utils/slugify.ts';
+import { slugify, librarySlug, matchLibrarySlug } from '../utils/slugify.ts';
 import NexusAd from './NexusAd.tsx';
 
 import {
@@ -38,21 +38,12 @@ import { BTECH_CSE_2025, findSubjectMetadata } from '../data/curriculumData.ts';
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
 
 const matchFolderSlug = (folderName: string, paramSlug: string): boolean => {
-  if (!folderName || !paramSlug) return false;
-  const standardSlug = slugify(folderName);
-  if (standardSlug === paramSlug) return true;
-  
-  // Extract subject code from the beginning (e.g. "ECE249: Basic ...")
-  const codeMatch = folderName.match(/^([A-Za-z]+\d{3})/);
-  if (codeMatch) {
-    const codeSlug = slugify(codeMatch[1]);
-    if (codeSlug === paramSlug) return true;
-  }
-  return false;
+  return matchLibrarySlug(folderName, paramSlug, 'subject');
 };
 
 const matchSemesterName = (nameA: string, nameB: string): boolean => {
   if (!nameA || !nameB) return false;
+  // Normalize both to compare: strip to just letters+digits, unify semester/term/sem
   const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').replace('semester', 'term').replace('sem', 'term');
   return norm(nameA) === norm(nameB);
 };
@@ -256,7 +247,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [availablePrograms, setAvailablePrograms] = useState(initialPrograms);
   const [selectedProgram, setSelectedProgram] = useState(() => {
     if (program) {
-      const found = initialPrograms.find(p => slugify(p) === program);
+      const found = initialPrograms.find(p => matchLibrarySlug(p, program, 'program'));
       if (found) return found;
       if (initialPrograms.includes(decodeURIComponent(program))) return decodeURIComponent(program);
     }
@@ -608,7 +599,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     if (finalFolders.length > 0) {
       let matchedProgram = selectedProgram;
       if (program) {
-        const found = availablePrograms.find(p => slugify(p) === program);
+        const found = availablePrograms.find(p => matchLibrarySlug(p, program, 'program'));
         if (found) matchedProgram = found;
         else matchedProgram = decodeURIComponent(program);
       }
@@ -624,7 +615,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       }
 
       if (semester) {
-        const sem = finalFolders.find(f => f.type === 'semester' && (slugify(f.name) === semester || matchSemesterName(f.name, semester.replace('-', ' '))) && f.program === matchedProgram);
+        const sem = finalFolders.find(f => f.type === 'semester' && matchLibrarySlug(f.name, semester, 'semester') && f.program === matchedProgram);
         if (activeSemester?.id !== (sem?.id || null)) {
           setActiveSemester(sem || null);
         }
@@ -636,7 +627,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
           }
           
           if (category && subj) {
-            const cat = finalFolders.find(f => f.type === 'category' && slugify(f.name) === category && f.parent_id === subj.id);
+            const cat = finalFolders.find(f => f.type === 'category' && matchLibrarySlug(f.name, category, 'category') && f.parent_id === subj.id);
             if (activeCategory?.id !== (cat?.id || null)) {
               setActiveCategory(cat || null);
             }
@@ -869,13 +860,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [isCreatingNew, setIsCreatingNew] = useState({ program: false, semester: false, subject: false, type: false });
 
   const navigateTo = (sem: Folder | null, subj: Folder | null, cat: Folder | null) => {
-    let path = `${routePrefix}/library/${slugify(selectedProgram)}`;
+    let path = `${routePrefix}/library/${librarySlug(selectedProgram, 'program')}`;
     if (sem) {
-      path += `/${slugify(sem.name)}`;
+      path += `/${librarySlug(sem.name, 'semester')}`;
       if (subj) {
-        path += `/${slugify(subj.name)}`;
+        path += `/${librarySlug(subj.name, 'subject')}`;
         if (cat) {
-          path += `/${slugify(cat.name)}`;
+          path += `/${librarySlug(cat.name, 'category')}`;
         }
       }
     }
@@ -883,13 +874,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   };
 
   const getFolderToPath = (f: Folder) => {
-    let path = `${routePrefix}/library/${slugify(selectedProgram)}`;
+    let path = `${routePrefix}/library/${librarySlug(selectedProgram, 'program')}`;
     if (f.type === 'semester') {
-      path += `/${slugify(f.name)}`;
+      path += `/${librarySlug(f.name, 'semester')}`;
     } else if (f.type === 'subject') {
-      path += `/${slugify(activeSemester?.name || '')}/${slugify(f.name)}`;
+      path += `/${librarySlug(activeSemester?.name || '', 'semester')}/${librarySlug(f.name, 'subject')}`;
     } else if (f.type === 'category') {
-      path += `/${slugify(activeSemester?.name || '')}/${slugify(activeSubject?.name || '')}/${slugify(f.name)}`;
+      path += `/${librarySlug(activeSemester?.name || '', 'semester')}/${librarySlug(activeSubject?.name || '', 'subject')}/${librarySlug(f.name, 'category')}`;
     }
     return path;
   };
@@ -1033,13 +1024,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     }
     setViewMode('browse');
     setSearchQuery('');
-    navigate(`${routePrefix}/library/${slugify(userProfile?.program || availablePrograms[0])}`);
+    navigate(`${routePrefix}/library/${librarySlug(userProfile?.program || availablePrograms[0], 'program')}`);
   };
 
   const handleShareFile = async (file: LibraryFile) => {
-    let folderPath = `${routePrefix}/library/${slugify(file.program)}/${slugify(file.semester)}/${slugify(file.subject)}`;
+    let folderPath = `${routePrefix}/library/${librarySlug(file.program, 'program')}/${librarySlug(file.semester, 'semester')}/${librarySlug(file.subject, 'subject')}`;
     if (file.type && file.type.trim()) {
-      folderPath += `/${slugify(file.type)}`;
+      folderPath += `/${librarySlug(file.type, 'category')}`;
     }
     const shareUrl = `${window.location.origin}${folderPath}`;
     if (navigator.share) {
@@ -1128,9 +1119,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               </div>
               {!isAdminView && !searchQuery && viewMode === 'browse' && (
                 <nav className="mt-2 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-zinc-400">
-                  <Link to={`${routePrefix}/library/${slugify(selectedProgram)}`} className="hover:text-orange-500 transition-colors border-none bg-transparent cursor-pointer">Root</Link>
-                  {activeSemester && <><span className="opacity-30">/</span><Link to={`${routePrefix}/library/${slugify(selectedProgram)}/${slugify(activeSemester.name)}`} className={`border-none bg-transparent cursor-pointer ${!activeSubject ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSemester.name}</Link></>}
-                  {activeSubject && <><span className="opacity-30">/</span><Link to={`${routePrefix}/library/${slugify(selectedProgram)}/${slugify(activeSemester.name)}/${slugify(activeSubject.name)}`} className={`border-none bg-transparent cursor-pointer ${!activeCategory ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSubject.name}</Link></>}
+                  <Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}`} className="hover:text-orange-500 transition-colors border-none bg-transparent cursor-pointer">Root</Link>
+                  {activeSemester && <><span className="opacity-30">/</span><Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester.name, 'semester')}`} className={`border-none bg-transparent cursor-pointer ${!activeSubject ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSemester.name}</Link></>}
+                  {activeSubject && <><span className="opacity-30">/</span><Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester.name, 'semester')}/${librarySlug(activeSubject.name, 'subject')}`} className={`border-none bg-transparent cursor-pointer ${!activeCategory ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSubject.name}</Link></>}
                   {activeCategory && <><span className="opacity-30">/</span><span className="text-orange-500">{activeCategory.name}</span></>}
                 </nav>
               )}
@@ -1196,7 +1187,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               options={availablePrograms}
               value={selectedProgram}
               onChange={(val) => {
-                navigate(`${routePrefix}/library/${slugify(val)}`);
+                navigate(`${routePrefix}/library/${librarySlug(val, 'program')}`);
               }}
               className="flex-shrink-0"
               buttonClassName="!h-12 !py-0 !rounded-2xl !min-w-[110px] sm:!min-w-[180px] !px-3 sm:!px-5 text-[10px] sm:text-xs"

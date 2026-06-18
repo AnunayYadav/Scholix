@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { BTECH_CSE_2025 } from '../data/curriculumData';
-import { slugify } from '../utils/slugify';
+import { slugify, librarySlug } from '../utils/slugify';
 
 // Resolve environment variables from .env.local if present, or fallback to process.env
 const envLocalPath = path.resolve(process.cwd(), '.env.local');
@@ -231,7 +231,7 @@ async function prerender() {
   allPrograms.forEach(prog => {
     const uniSlug = getUniversitySlug(prog);
     const uniName = getUniversityName(uniSlug);
-    const progSlug = slugify(prog);
+    const progSlug = librarySlug(prog, 'program');
     const routePath = `/${uniSlug}/library/${progSlug}`;
     
     routes.push({
@@ -252,7 +252,7 @@ async function prerender() {
             <h2 style="font-size: 1.4rem; color: #222; margin-bottom: 15px;">Available Terms / Semesters</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
               ${BTECH_CSE_2025.terms.map(t => {
-                const termSlug = slugify(t.termName);
+                const termSlug = librarySlug(t.termName, 'semester');
                 return `
                   <a href="${routePath}/${termSlug}" style="display: block; padding: 15px; border: 1px solid #eaeaea; border-radius: 12px; text-decoration: none; color: #333; font-weight: 600; text-align: center;">
                     ${t.termName}
@@ -268,8 +268,8 @@ async function prerender() {
 
   // 3. Virtual BTech CSE Semesters & Subject Pages
   BTECH_CSE_2025.terms.forEach(term => {
-    const termSlug = slugify(term.termName);
-    const termPath = `/lpu/library/btech-cse/${termSlug}`;
+    const termSlug = librarySlug(term.termName, 'semester');
+    const termPath = `/lpu/library/btechcse/${termSlug}`;
     
     // Semester route
     routes.push({
@@ -279,7 +279,7 @@ async function prerender() {
       contentHtml: `
         <div style="padding: 40px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto;">
           <header style="margin-bottom: 40px;">
-            <a href="/lpu/library/btech-cse" style="text-decoration: none; color: #f97316; font-weight: 600;">← BTech CSE Library</a>
+            <a href="/lpu/library/btechcse" style="text-decoration: none; color: #f97316; font-weight: 600;">← BTech CSE Library</a>
             <h1 style="font-size: 2.2rem; color: #111; margin-top: 20px;">${term.termName} Course Resources</h1>
             <p style="color: #666; font-size: 1.1rem; line-height: 1.6; margin-top: 10px;">Select a subject below to download study materials, lecture records, and previous semester question papers.</p>
           </header>
@@ -304,7 +304,7 @@ async function prerender() {
     // Subject route inside semester
     const addSubjectRoute = (sub: any) => {
       const subjectName = `${sub.code}: ${sub.title}`;
-      const subjSlug = slugify(subjectName);
+      const subjSlug = librarySlug(subjectName, 'subject');
       const subjectPath = `${termPath}/${subjSlug}`;
       
       routes.push({
@@ -387,10 +387,10 @@ async function prerender() {
     dbFolders.forEach(f => {
       const uniSlug = getUniversitySlug(f.program);
       const uniName = getUniversityName(uniSlug);
-      const progSlug = slugify(f.program);
+      const progSlug = librarySlug(f.program, 'program');
       
       if (f.type === 'semester') {
-        const semSlug = slugify(f.name);
+        const semSlug = librarySlug(f.name, 'semester');
         const semPath = `/${uniSlug}/library/${progSlug}/${semSlug}`;
         routes.push({
           path: semPath,
@@ -412,10 +412,10 @@ async function prerender() {
         let parentSemSlug = '';
         if (f.parent_id) {
           const parent = folderMap.get(f.parent_id);
-          if (parent) parentSemSlug = slugify(parent.name);
+          if (parent) parentSemSlug = librarySlug(parent.name, 'semester');
         }
         if (parentSemSlug) {
-          const subjSlug = slugify(f.name);
+          const subjSlug = librarySlug(f.name, 'subject');
           const subjPath = `/${uniSlug}/library/${progSlug}/${parentSemSlug}/${subjSlug}`;
           routes.push({
             path: subjPath,

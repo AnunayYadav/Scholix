@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { BTECH_CSE_2025 } from '../data/curriculumData';
-import { slugify } from '../utils/slugify';
+import { slugify, librarySlug } from '../utils/slugify';
 
 // Resolve environment variables from .env.local if present, or fallback to process.env
 const envLocalPath = path.resolve(process.cwd(), '.env.local');
@@ -96,7 +96,7 @@ async function generate() {
   const allPrograms = Array.from(new Set([...LPU_PROGRAMS, ...IITM_PROGRAMS]));
   allPrograms.forEach(prog => {
     const uniSlug = getUniversitySlug(prog);
-    urls.push(buildUrlNode(`https://scholix.app/${uniSlug}/library/${slugify(prog)}`, currentDate, 'daily', '0.8'));
+    urls.push(buildUrlNode(`https://scholix.app/${uniSlug}/library/${librarySlug(prog, 'program')}`, currentDate, 'daily', '0.8'));
   });
 
   // 3. Add Virtual Curriculum folders for BTech CSE
@@ -104,19 +104,19 @@ async function generate() {
   const btechSubjMap = new Map<string, { termSlug: string; nameSlug: string }>(); // virtual subj ID -> term & subj slug
 
   BTECH_CSE_2025.terms.forEach(term => {
-    const termSlug = slugify(term.termName);
+    const termSlug = librarySlug(term.termName, 'semester');
     btechTermMap.set(`v-sem-${term.termNumber}`, termSlug);
     
     // Add term URL
-    urls.push(buildUrlNode(`https://scholix.app/lpu/library/btech-cse/${termSlug}`, currentDate, 'weekly', '0.7'));
+    urls.push(buildUrlNode(`https://scholix.app/lpu/library/btechcse/${termSlug}`, currentDate, 'weekly', '0.7'));
 
     const addSubject = (subj: any) => {
       const subjectName = `${subj.code}: ${subj.title}`;
-      const subjSlug = slugify(subjectName);
+      const subjSlug = librarySlug(subjectName, 'subject');
       btechSubjMap.set(`v-sub-${term.termNumber}-${subj.code.toLowerCase()}`, { termSlug, nameSlug: subjSlug });
       
       // Add subject URL
-      urls.push(buildUrlNode(`https://scholix.app/lpu/library/btech-cse/${termSlug}/${subjSlug}`, currentDate, 'daily', '0.6'));
+      urls.push(buildUrlNode(`https://scholix.app/lpu/library/btechcse/${termSlug}/${subjSlug}`, currentDate, 'daily', '0.6'));
     };
 
     term.coreSubjects.forEach(addSubject);
@@ -144,10 +144,10 @@ async function generate() {
 
     dbFolders.forEach(f => {
       const uniSlug = getUniversitySlug(f.program);
-      const progSlug = slugify(f.program);
+      const progSlug = librarySlug(f.program, 'program');
 
       if (f.type === 'semester') {
-        const semSlug = slugify(f.name);
+        const semSlug = librarySlug(f.name, 'semester');
         urls.push(buildUrlNode(`https://scholix.app/${uniSlug}/library/${progSlug}/${semSlug}`, currentDate, 'weekly', '0.7'));
       } else if (f.type === 'subject') {
         let parentSemSlug = '';
@@ -156,11 +156,11 @@ async function generate() {
             parentSemSlug = btechTermMap.get(f.parent_id) || '';
           } else {
             const parent = folderMap.get(f.parent_id);
-            if (parent) parentSemSlug = slugify(parent.name);
+            if (parent) parentSemSlug = librarySlug(parent.name, 'semester');
           }
         }
         if (parentSemSlug) {
-          const subjSlug = slugify(f.name);
+          const subjSlug = librarySlug(f.name, 'subject');
           urls.push(buildUrlNode(`https://scholix.app/${uniSlug}/library/${progSlug}/${parentSemSlug}/${subjSlug}`, currentDate, 'daily', '0.6'));
         }
       } else if (f.type === 'category') {
@@ -177,13 +177,13 @@ async function generate() {
           } else {
             const parentSubj = folderMap.get(f.parent_id);
             if (parentSubj) {
-              parentSubjSlug = slugify(parentSubj.name);
+              parentSubjSlug = librarySlug(parentSubj.name, 'subject');
               if (parentSubj.parent_id) {
                 if (parentSubj.parent_id.startsWith('v-sem-')) {
                   grandparentSemSlug = btechTermMap.get(parentSubj.parent_id) || '';
                 } else {
                   const grandparentSem = folderMap.get(parentSubj.parent_id);
-                  if (grandparentSem) grandparentSemSlug = slugify(grandparentSem.name);
+                  if (grandparentSem) grandparentSemSlug = librarySlug(grandparentSem.name, 'semester');
                 }
               }
             }
@@ -191,7 +191,7 @@ async function generate() {
         }
 
         if (parentSubjSlug && grandparentSemSlug) {
-          const catSlug = slugify(f.name);
+          const catSlug = librarySlug(f.name, 'category');
           urls.push(buildUrlNode(`https://scholix.app/${uniSlug}/library/${progSlug}/${grandparentSemSlug}/${parentSubjSlug}/${catSlug}`, currentDate, 'daily', '0.5'));
         }
       }
