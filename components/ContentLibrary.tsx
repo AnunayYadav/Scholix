@@ -1046,7 +1046,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   };
 
   const handleShareFile = async (file: LibraryFile) => {
-    const shareUrl = `${window.location.origin}${routePrefix}/library/view/${file.id}`;
+    let folderPath = `${routePrefix}/library/${slugify(file.program)}/${slugify(file.semester)}/${slugify(file.subject)}`;
+    if (file.type && file.type.trim()) {
+      folderPath += `/${slugify(file.type)}`;
+    }
+    const shareUrl = `${window.location.origin}${folderPath}`;
     if (navigator.share) {
       try {
         await navigator.share({
