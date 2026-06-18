@@ -479,14 +479,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
                 let targetUrl = url;
 
-                // If no direct url is provided, resolve fileId, session, and url inside PDFViewer itself
-                if (!targetUrl && fileId) {
-                    const fileObj = file || await NexusServer.fetchFileById(fileId);
-                    if (!fileObj) {
-                        setError('Document not found.');
-                        setIsLoading(false);
-                        return;
-                    }
+                if (!targetUrl && file) {
+                    const fileObj = file;
                     setDisplayFileName(fileObj.name);
 
                     // Check if it is a PDF first
@@ -636,7 +630,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
             window.removeEventListener('afterprint', handleAfterPrint);
             if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
         };
-    }, [url, isAdmin, fileId, file]);
+    }, [file, isAdmin]);
 
 
     // Handle Resize
@@ -1301,46 +1295,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     className="flex-1 overflow-auto bg-zinc-100 dark:bg-[#0a0a0a] relative select-none touch-auto overscroll-none pt-16 md:pt-20"
                     style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'none' }}
                 >
-                    {isLoading ? (
-                        <div className="flex flex-col items-center justify-center w-full h-full min-h-[60vh]">
-                            <div className="flex flex-col items-center gap-6">
-                                {/* Animated ring spinner */}
-                                <div className="relative w-20 h-20">
-                                    <svg className="w-full h-full pdf-loader-ring" viewBox="0 0 80 80">
-                                        <circle cx="40" cy="40" r="34" fill="none" stroke="currentColor" strokeWidth="3" className="text-zinc-200 dark:text-white/5" />
-                                        <circle cx="40" cy="40" r="34" fill="none" stroke="url(#loaderGradient)" strokeWidth="3" strokeLinecap="round" strokeDasharray="160 54" className="pdf-loader-arc" />
-                                        <defs>
-                                            <linearGradient id="loaderGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                <stop offset="0%" stopColor="#ea580c" />
-                                                <stop offset="100%" stopColor="#f97316" />
-                                            </linearGradient>
-                                        </defs>
-                                    </svg>
-                                    {/* Center icon */}
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7 text-orange-500/80 pdf-loader-pulse">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
-                                        </svg>
-                                    </div>
-                                </div>
-
-                                {/* Progress text */}
-                                <div className="flex flex-col items-center gap-1.5">
-                                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 tracking-tight">
-                                        {loadProgress > 0 ? `Loading document — ${loadProgress}%` : 'Establishing secure connection…'}
-                                    </p>
-                                    {loadProgress > 0 && (
-                                        <div className="w-48 h-1 bg-zinc-200 dark:bg-white/5 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-300 ease-out"
-                                                style={{ width: `${loadProgress}%` }}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
                         <div 
                             ref={zoomWrapperRef}
                             className="flex flex-col items-center min-w-max mx-auto px-4 md:px-8"
@@ -1369,7 +1323,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
                             ))}
                         </div>
-                    )}
                 </main>
 
                 {/* Floating Page Indicator (Mobile) */}

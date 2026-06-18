@@ -224,15 +224,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const { shortBrandName, uniSlug, universityInfo } = useUniversity();
   const params = useParams();
   const wildcard = params['*'] || '';
-  let fileId: string | undefined;
+  let fileId: string | undefined = undefined;
   let program: string | undefined;
   let semester: string | undefined;
   let subject: string | undefined;
   let category: string | undefined;
 
-  if (wildcard.startsWith('view/')) {
-    fileId = wildcard.substring(5);
-  } else if (wildcard) {
+  if (wildcard) {
     const parts = wildcard.split('/');
     program = parts[0] || undefined;
     semester = parts[1] || undefined;
@@ -243,7 +241,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [allFiles, setAllFiles] = useState<LibraryFile[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [viewMode, setViewMode] = useState<'browse' | 'my-uploads' | 'originals'>(initialView);
-  const [isLoading, setIsLoading] = useState(() => !fileId);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
@@ -359,7 +357,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [draggingOverId, setDraggingOverId] = useState<string | null>(null);
 
-  // Removed viewerInfo state. PDFViewer rendering is driven directly by Route parameter fileId.
+  const [activePdfFile, setActivePdfFile] = useState<LibraryFile | null>(null);
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -454,24 +452,17 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   }, [isAdminView, viewMode, userProfile, searchQuery, selectedProgram]);
 
   useEffect(() => {
-    // When fileId is present (direct file view), skip showing skeleton for the background list
-    // The file will be loaded by the fileId effect below
-    fetchFromSource(!fileId);
+    fetchFromSource(true);
   }, [fetchFromSource]);
-
-  // Handle direct file link /view/:fileId routing (State transitions removed, now fully handled by route-driven rendering)
-
 
   // Dynamically update document title & description meta tag on folder/route changes
   useEffect(() => {
     let title = "Content Library Hub | Scholix";
     let description = "Access university study materials, notes, and previous year papers (PYQs) on Scholix.";
 
-    const activeFile = allFiles.find(f => f.id === fileId);
-    if (fileId) {
-      const activeName = activeFile?.name || 'Loading Document...';
-      title = `${activeName} | Scholix`;
-      description = `View and download ${activeName} on Scholix.`;
+    if (activePdfFile) {
+      title = `${activePdfFile.name} | Scholix`;
+      description = `View and download ${activePdfFile.name} on Scholix.`;
     } else if (activeSubject) {
       const categorySuffix = activeCategory ? ` ${activeCategory.name}` : " Notes & PYQs";
       title = `${activeSubject.name}${categorySuffix} | ${selectedProgram} | Scholix`;
@@ -489,7 +480,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     if (metaDesc) {
       metaDesc.setAttribute('content', description);
     }
-  }, [activeSemester, activeSubject, activeCategory, selectedProgram, fileId, allFiles]);
+  }, [activeSemester, activeSubject, activeCategory, selectedProgram, activePdfFile]);
 
   // Helper function to dynamically merge curriculum with DB folders
   const getMergedFolders = useCallback((prog: string, activeSub: Folder | null) => {
@@ -1079,8 +1070,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   const handleFileAccess = (file: LibraryFile) => {
     if (file.storage_path.toLowerCase().endsWith('.pdf')) {
-      // 1. Navigate to the viewer instantly
-      navigate(`${routePrefix}/library/view/${file.id}`);
+      // 1. Open the viewer instantly
+      setActivePdfFile(file);
     } else {
       if (!userProfile) {
         showToast("Please login to access documents.", "info");
@@ -1414,7 +1405,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                             onDelete={async () => { const confirmed = await showConfirm("Permanently delete this file?"); if (confirmed) { setIsProcessing(true); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
                             onAccess={() => handleFileAccess(file)}
                             onShowDetails={() => { setSelectedFile(file); setShowDetailsModal(true); }}
-                            toPath={`${routePrefix}/library/view/${file.id}`}
+                            toPath="#"
                           />
                         ))}
                       </div>
@@ -1870,20 +1861,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       <input type="file" ref={fileInputRef} className="hidden" multiple onChange={e => { const files = e.target.files; if (files && files.length > 0) handleFilesSelected(files); }} />
 
       {
-        fileId && (
+        activePdfFile && (
           <PDFViewer
-            fileId={fileId}
-            file={allFiles.find(f => f.id === fileId)}
-            fileName={allFiles.find(f => f.id === fileId)?.name || 'Loading Document...'}
+            file={activePdfFile}
+            fileName={activePdfFile.name}
             userProfile={userProfile}
-            onClose={(resolvedFile) => {
-              if (fileId) {
-                const file = resolvedFile || allFiles.find(f => f.id === fileId);
-                const folderPath = file
-                  ? `${routePrefix}/library/${slugify(file.program)}/${slugify(file.semester)}/${slugify(file.subject)}/${slugify(file.type)}`
-                  : `${routePrefix}/library`;
-                navigate(folderPath);
-              }
+            onClose={() => {
+              setActivePdfFile(null);
             }}
             onAuthRequired={onAuthRequired}
           />
