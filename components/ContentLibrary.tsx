@@ -1401,7 +1401,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                             onDelete={async () => { const confirmed = await showConfirm("Permanently delete this file?"); if (confirmed) { setIsProcessing(true); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
                             onAccess={() => handleFileAccess(file)}
                             onShowDetails={() => { setSelectedFile(file); setShowDetailsModal(true); }}
-                            toPath="#"
                           />
                         ))}
                       </div>
@@ -2006,8 +2005,7 @@ const FileCard: React.FC<{
   onDelete?: () => void;
   onAccess: () => void;
   onShowDetails: () => void;
-  toPath: string;
-}> = ({ file, userProfile, isAdminMode, isPersonal, onApprove, onReject, onDemote, onEdit, onDelete, onAccess, onShowDetails, toPath }) => {
+}> = ({ file, userProfile, isAdminMode, isPersonal, onApprove, onReject, onDemote, onEdit, onDelete, onAccess, onShowDetails }) => {
   const {
     attributes,
     listeners,
@@ -2033,22 +2031,17 @@ const FileCard: React.FC<{
   const status = statusConfig[file.status] || statusConfig.pending;
 
   return (
-    <Link
-      to={toPath}
+    <div
       ref={setNodeRef as any}
       style={style as any}
       onClick={(e) => {
         const target = e.target as HTMLElement;
         if (target.closest('button') || target.closest('[draggable]')) {
-          e.preventDefault();
           return;
         }
 
-        // Intercept normal left-clicks to open PDF viewer overlay instantly
-        if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button !== 1) {
-          e.preventDefault();
-          onAccess();
-        }
+        // Open PDF viewer overlay directly — no navigation needed
+        onAccess();
       }}
       className={`group p-4 rounded-[30px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a] hover:border-orange-500 hover:shadow-xl transition-all relative overflow-hidden flex flex-col min-h-[140px] cursor-pointer no-underline text-current ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
     >
@@ -2106,7 +2099,7 @@ const FileCard: React.FC<{
           )}
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 
