@@ -452,24 +452,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
     useEffect(() => {
         document.body.style.overflow = 'hidden';
 
-        const loadPdfJs = async () => {
-            if (!(window as any).pdfjsLib) {
-                const existingScript = document.querySelector('script[src="/pdf.min.js"]');
-                if (existingScript) {
-                    existingScript.addEventListener('load', () => initPdf());
-                    return;
-                }
-                const script = document.createElement('script');
-                script.src = '/pdf.min.js';
-                script.onload = () => initPdf();
-                document.head.appendChild(script);
-            } else {
-                initPdf();
-            }
-        };
-
         const initPdf = async () => {
             const pdfjsLib = (window as any).pdfjsLib;
+            if (!pdfjsLib) {
+                console.error("PDF.js library is not loaded.");
+                setError("Failed to load PDF viewer engine.");
+                setIsLoading(false);
+                return;
+            }
             pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
             setPdfjsLibState(pdfjsLib);
 
@@ -578,7 +568,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
             }
         };
 
-        loadPdfJs();
+        initPdf();
 
         // Security: Enhanced Event Blocking
         const handleContextMenu = (e: MouseEvent) => e.preventDefault();
@@ -1306,6 +1296,20 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     className="flex-1 overflow-auto bg-zinc-100 dark:bg-[#0a0a0a] relative select-none touch-auto overscroll-none pt-16 md:pt-20"
                     style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'none' }}
                 >
+                    {isLoading ? (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-100/50 dark:bg-[#0a0a0a]/50 backdrop-blur-sm z-30 transition-all duration-500">
+                            <div className="relative w-20 h-20 mb-4 flex items-center justify-center">
+                                <svg className="absolute w-full h-full pdf-loader-ring" viewBox="0 0 80 80">
+                                    <circle cx="40" cy="40" r="34" fill="none" stroke="currentColor" className="text-zinc-200 dark:text-zinc-800" strokeWidth="6" />
+                                    <circle cx="40" cy="40" r="34" fill="none" stroke="var(--brand-primary)" className="pdf-loader-arc" strokeWidth="6" strokeLinecap="round" />
+                                </svg>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-8 h-8 text-orange-500 pdf-loader-pulse">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
+                                </svg>
+                            </div>
+                            <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest animate-pulse">Decrypting File... {loadProgress > 0 && `${loadProgress}%`}</h4>
+                        </div>
+                    ) : (
                         <div 
                             ref={zoomWrapperRef}
                             className="flex flex-col items-center min-w-max mx-auto px-4 md:px-8"
@@ -1331,9 +1335,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                                     registerRef={registerPageRef}
                                     isInteractingRef={isInteractingRef}
                                 />
-
                             ))}
                         </div>
+                    )}
                 </main>
 
                 {/* Floating Page Indicator (Mobile) */}

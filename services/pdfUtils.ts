@@ -1,22 +1,26 @@
 const ensurePdfJs = async (): Promise<any> => {
-  if ((window as any).pdfjsLib) return (window as any).pdfjsLib;
+  const pdfjsLib = (window as any).pdfjsLib;
+  if (pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+    return pdfjsLib;
+  }
   return new Promise((resolve, reject) => {
-    const existingScript = document.querySelector('script[src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"]');
+    const existingScript = document.querySelector('script[src="/pdf.min.js"]');
     if (existingScript) {
       existingScript.addEventListener('load', () => {
-        const pdfjsLib = (window as any).pdfjsLib;
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        resolve(pdfjsLib);
+        const lib = (window as any).pdfjsLib;
+        lib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+        resolve(lib);
       });
       existingScript.addEventListener('error', reject);
       return;
     }
     const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    script.src = '/pdf.min.js';
     script.onload = () => {
-      const pdfjsLib = (window as any).pdfjsLib;
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      resolve(pdfjsLib);
+      const lib = (window as any).pdfjsLib;
+      lib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+      resolve(lib);
     };
     script.onerror = reject;
     document.head.appendChild(script);

@@ -232,10 +232,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   if (wildcard) {
     const parts = wildcard.split('/');
-    program = parts[0] || undefined;
-    semester = parts[1] || undefined;
-    subject = parts[2] || undefined;
-    category = parts[3] || undefined;
+    if (parts[0] === 'view' && parts[1]) {
+      fileId = parts[1];
+    } else {
+      program = parts[0] || undefined;
+      semester = parts[1] || undefined;
+      subject = parts[2] || undefined;
+      category = parts[3] || undefined;
+    }
   }
 
   const [allFiles, setAllFiles] = useState<LibraryFile[]>([]);
@@ -678,6 +682,38 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     }
   }, [program, semester, subject, category, finalFolders, availablePrograms, selectedProgram, viewMode, fileId]);
 
+  // Fetch file details if URL specifies fileId directly (deep linking / sitemap view)
+  useEffect(() => {
+    if (fileId && authIsReady) {
+      if (!userProfile) {
+        showToast("Please login to view this file.", "info");
+        onAuthRequired?.();
+        navigate(`${routePrefix}/library`);
+        return;
+      }
+
+      (async () => {
+        try {
+          setIsLoading(true);
+          const file = await NexusServer.fetchFileById(fileId);
+          if (file) {
+            if (file.program && file.program !== selectedProgram) {
+              setSelectedProgram(file.program);
+            }
+            setActivePdfFile(file);
+          } else {
+            showToast("Document not found.", "error");
+            navigate(`${routePrefix}/library`);
+          }
+        } catch (e) {
+          console.error("Error fetching file for deep-link view:", e);
+        } finally {
+          setIsLoading(false);
+        }
+      })();
+    }
+  }, [fileId, authIsReady, userProfile, navigate, routePrefix]);
+
   const displayFiles = useMemo(() => {
     let data = [...allFiles];
 
@@ -1073,15 +1109,16 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   };
 
   const handleFileAccess = (file: LibraryFile) => {
+    if (!userProfile) {
+      showToast("Please login to view this file.", "info");
+      onAuthRequired?.();
+      return;
+    }
+
     if (file.storage_path.toLowerCase().endsWith('.pdf')) {
       // 1. Open the viewer instantly
       setActivePdfFile(file);
     } else {
-      if (!userProfile) {
-        showToast("Please login to access documents.", "info");
-        onAuthRequired?.();
-        return;
-      }
       (async () => {
         try {
           const sessionRes = await NexusServer.getSession();
@@ -1870,8 +1907,15 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             file={activePdfFile}
             fileName={activePdfFile.name}
             userProfile={userProfile}
-            onClose={() => {
+            onClose={(closedFile) => {
               setActivePdfFile(null);
+              if (fileId) {
+                const finalFile = closedFile || activePdfFile;
+                const folderPath = finalFile
+                  ? `${routePrefix}/library/${slugify(finalFile.program)}/${slugify(finalFile.semester)}/${slugify(finalFile.subject)}/${slugify(finalFile.type || '')}`
+                  : `${routePrefix}/library`;
+                navigate(folderPath);
+              }
             }}
             onAuthRequired={onAuthRequired}
           />
