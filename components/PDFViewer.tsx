@@ -448,19 +448,19 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
             observerRef.current.observe(el);
         }
     }, []);
-// Load PDF.js from CDN
+// Load PDF.js locally to bypass COEP restrictions
     useEffect(() => {
         document.body.style.overflow = 'hidden';
 
         const loadPdfJs = async () => {
             if (!(window as any).pdfjsLib) {
-                const existingScript = document.querySelector('script[src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"]');
+                const existingScript = document.querySelector('script[src="/pdf.min.js"]');
                 if (existingScript) {
                     existingScript.addEventListener('load', () => initPdf());
                     return;
                 }
                 const script = document.createElement('script');
-                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+                script.src = '/pdf.min.js';
                 script.onload = () => initPdf();
                 document.head.appendChild(script);
             } else {
@@ -470,7 +470,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
         const initPdf = async () => {
             const pdfjsLib = (window as any).pdfjsLib;
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
             setPdfjsLibState(pdfjsLib);
 
             try {
