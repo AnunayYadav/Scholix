@@ -289,6 +289,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
     const zoomWrapperRef = useRef<HTMLDivElement>(null);
     const pageOriginalWidthRef = useRef<number>(612);
+    const objectUrlRef = useRef<string | null>(null);
     const animationFrameId = useRef<number | null>(null);
     const pendingUpdate = useRef<{
         scale: number;
@@ -513,14 +514,17 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     }
 
                     NexusServer.saveRecord(session.user.id, 'file_access', `Opened ${fileObj.name}`, { fileId: fileObj.id, fileName: fileObj.name, path: fileObj.storage_path });
-                    const token = session.access_token;
-                    const resolvedUrl = NexusServer.getFileUrl(fileObj.storage_path, token);
-                    if (!resolvedUrl) {
-                        setError('Failed to retrieve secure download link.');
+                    try {
+                        const fileBlob = await NexusServer.downloadFile(fileObj.storage_path);
+                        const localUrl = URL.createObjectURL(fileBlob);
+                        objectUrlRef.current = localUrl;
+                        targetUrl = localUrl;
+                    } catch (err: any) {
+                        console.error("Failed to download PDF blob:", err);
+                        setError('Failed to retrieve document from storage.');
                         setIsLoading(false);
                         return;
                     }
-                    targetUrl = resolvedUrl;
                 }
 
                 if (!targetUrl) {
@@ -531,15 +535,18 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                 const { data: { session } } = await NexusServer.getSession();
                 
                 // Load PDF progressively using PDF.js native stream & range-request transport
-                const loadingTask = pdfjsLib.getDocument({
+                const docParams: any = {
                     url: targetUrl,
-                    httpHeaders: {
+                    disableRange: targetUrl.startsWith('blob:'),
+                    disableAutoFetch: targetUrl.startsWith('blob:'),
+                    disableStream: targetUrl.startsWith('blob:'),
+                };
+                if (!targetUrl.startsWith('blob:')) {
+                    docParams.httpHeaders = {
                         'Authorization': session ? `Bearer ${session.access_token}` : ''
-                    },
-                    disableRange: false,
-                    disableAutoFetch: false,
-                    disableStream: false,
-                });
+                    };
+                }
+                const loadingTask = pdfjsLib.getDocument(docParams);
 
                 // Track progressive loading progress
                 loadingTask.onProgress = ({ loaded, total }) => {
@@ -629,6 +636,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
             window.removeEventListener('beforeprint', handleBeforePrint);
             window.removeEventListener('afterprint', handleAfterPrint);
             if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
+            if (objectUrlRef.current) {
+                URL.revokeObjectURL(objectUrlRef.current);
+                objectUrlRef.current = null;
+            }
         };
     }, [file, isAdmin]);
 

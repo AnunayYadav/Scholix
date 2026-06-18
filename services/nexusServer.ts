@@ -1353,6 +1353,14 @@ class NexusServer {
     if (client) await client.from('feedback').insert([{ text: sanitizedText, user_id: uid, user_email: email }]);
   }
 
+  static async downloadFile(path: string): Promise<Blob> {
+    const client = getSupabase();
+    if (!client) throw new Error("Registry is offline.");
+    const { data, error } = await client.storage.from('nexus-documents').download(path);
+    if (error) throw error;
+    return data;
+  }
+
   static getFileUrl(path: string, token?: string) {
     if (!path) return '';
     if (path.startsWith('http')) return path;

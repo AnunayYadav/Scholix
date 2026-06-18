@@ -591,7 +591,9 @@ const SuspenseLoader: React.FC = () => {
     };
   }, [start, finish]);
 
-
+  if (location.pathname.includes('/library')) {
+    return <SkeletonPage cards={8} columns="grid-cols-2 md:grid-cols-3 lg:grid-cols-4" />;
+  }
 
   return <SkeletonPage />;
 };
