@@ -157,13 +157,13 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse</loc>
+    <loc>https://scholix.app/lpu/library/btechcse</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-it</loc>
+    <loc>https://scholix.app/lpu/library/btechit</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -199,1513 +199,1513 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scholix.app/iitm/library/bs-data-science</loc>
+    <loc>https://scholix.app/iitm/library/bsdatascience</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/cse111-orientation-to-computing-i</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/cse111</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/cse326-internet-programming-laboratory</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/cse326</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/int108-python-programming</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/int108</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/mth165-mathematics-for-engineers</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/mth165</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/ece249-basic-electrical-and-electronics-engineering</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/ece249</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/mec136-engineering-drawing-with-autocad</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/mec136</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/che110-environmental-studies</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/che110</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/phy110-engineering-physics</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/phy110</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/ece279-basic-electrical-and-electronics-engineering-laboratory</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/ece279</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse101-computer-programming</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse121-orientation-to-computing-ii</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse320-software-engineering</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/int306-database-management-systems</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/mth166-differential-equations-and-vector-calculus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/ece249-basic-electrical-and-electronics-engineering</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/mec136-engineering-drawing-with-autocad</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/che110-environmental-studies</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/phy110-engineering-physics</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/ece279-basic-electrical-and-electronics-engineering-laboratory</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/frn601-french-language-skills-i</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/ger601-german-language-skills-i</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/jap601-japanese-language-skills-i</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel121-communication-skills-i</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel125-upper-intermediate-communication-skills-i</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel130-advanced-communication-skills-i</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/spa601-spanish-language-skills-i</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/cse202-object-oriented-programming</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse101</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/cse205-data-structures-and-algorithms</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse121</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/cse306-computer-networks</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse320</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/cse307-internetworking-essentials</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/int306</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/cse423-virtualization-and-cloud-computing</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/mth166</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/gen231-community-development-project</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/ece249</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/int335-design-thinking</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/mec136</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/mth401-discrete-mathematics</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/che110</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/frn602-french-language-skills-ii</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/phy110</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/ger602-german-language-skills-ii</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/ece279</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/jap602-japanese-language-skills-ii</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/frn601</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/pel132-communication-skills-ii</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/ger601</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/pel134-upper-intermediate-communication-skills-ii</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/jap601</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/pel136-advanced-communication-skills-ii</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel121</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/spa602-spanish-language-skills-ii</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel125</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/cse211-computer-organization-and-design</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel130</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/cse310-programming-in-java</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/spa601</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/cse316-operating-systems</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/cse325-operating-systems-laboratory</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/int428-artificial-intelligence-essentials</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/mth302-probability-and-statistics</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/pea305-analytical-skills-i</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/pea307-advanced-analytical-skills-i</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/int330-managing-cloud-solutions-cloud</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/int242-cyber-security-essentials-cyber</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/int217-introduction-to-data-management-data-science</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/int219-front-end-web-developer-full-stack</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/ece217-introduction-to-internet-of-things-iot</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/cse273-foundations-of-machine-learning-ml</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/cse374-advance-software-engineering-quality-eng</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/cse332-industry-ethics-and-legal-issues</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/cse202</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/cse408-design-and-analysis-of-algorithms</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/cse205</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/int362-cloud-architecture-and-implementation-i-cloud</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/cse306</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/int249-system-administration-cyber</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/cse307</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/int232-data-science-toolbox-r-programming-data-science</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/cse423</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/int222-advanced-web-development-full-stack</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/gen231</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/ece341-programming-iot-iot</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/int335</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/cse274-applied-machine-learning-ml</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/mth401</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/cse375-software-testing-quality-eng</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/frn602</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/int363-cloud-microservices-cloud</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/ger602</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/int250-digital-evidence-analysis-cyber</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/jap602</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/int374-data-analytics-with-power-bi-data-science</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/pel132</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/int252-web-app-development-with-reactjs-full-stack</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/pel134</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/ece128-introduction-to-iot-networking-protocols-iot</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/pel136</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/cse471-deep-learning-for-computer-vision-ml</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/spa602</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/cse376-automated-testing-quality-eng</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/int301-open-minor-1</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/pea306-analytical-skills-ii-govt-jobs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/pea308-advanced-analytical-skills-ii-govt-jobs-higher-studies-service-based</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/cse329-prelude-to-competitive-coding-product-based</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/cse333-combinatorial-studies-i-govt-jobs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/cse330-competitive-coding-approaches-techniques-product-based</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/frn603-french-language-skills-iii-service-based</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/ger603-german-language-skills-iii-service-based</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/jap603-japanese-language-skills-iii-service-based</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/pev301-verbal-ability-service-based</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/spa603-spanish-language-skills-iii-service-based</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/cse343-training-in-programming</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5/cse443-seminar-on-summer-training</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/cse322-formal-languages-and-automation-theory</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/cse211</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/int364-cloud-architecture-and-implementation-ii-cloud</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/cse310</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/int244-securing-computing-systems-cyber</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/cse316</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/int234-predictive-analytics-data-science</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/cse325</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/int220-server-side-scripting-full-stack</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/int428</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/ece237-architecting-smart-iot-devices-iot</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/mth302</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/cse472-deep-learning-for-natural-language-processing-ml</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/pea305</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/cse377-advance-testing-technologies-quality-eng</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/pea307</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/int327-cloud-infrastructure-and-resource-management-cloud</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/int330</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/int245-penetration-testing-cyber</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/int242</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/int312-big-data-fundamentals-data-science</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/int217</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/int221-mvc-programming-full-stack</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/int219</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/ece129-iot-for-digital-society-iot</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/ece217</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/cse473-large-language-models-and-agentic-ai-ml</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/cse273</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/cse378-web-services-api-automation-testing-quality-eng</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/cse374</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/int302-open-minor-2</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/cse334-combinatorial-studies-ii-govt-jobs-higher-studies</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/cse331-coding-pearls-product-based</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/cse357-combinatorial-studies-service-based</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6/pes390-soft-skills-product-based</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-7</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-7/cse339-capstone-project-i</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/cse332</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-7/cse393-online-academic-course</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/cse408</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-7/cse496-foundations-of-indian-knowledge-systems</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/int362</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-7/int328-network-virtualization-and-cloud-security-cloud</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/int249</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-7/int251-malware-analysis-and-cyber-defence-cyber</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/int232</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-7/int315-cluster-computing-data-science</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/int222</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-7/int253-web-development-in-python-using-django-full-stack</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/ece341</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-7/ece140-workshop-on-iot-for-digital-society-iot</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/cse274</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-7/cse470-applied-artificial-intelligence-systems-ml</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/cse375</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-7/cse379-mobile-automated-testing-quality-eng</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/int363</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-7/int303-open-minor-3</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/int250</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-7/cse447-industry-co-op-project-i</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/int374</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/int252</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/ece128</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/cse471</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/cse376</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/int301</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/pea306</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/pea308</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/cse329</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/cse333</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/cse330</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/frn603</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/ger603</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/jap603</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/pev301</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/spa603</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/cse343</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5/cse443</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/cse435-comprehensive-seminar</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/cse322</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/cse439-capstone-project-ii</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/int364</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/int411-software-project-management</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/int244</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/int402-modern-web-programming-tools-and-techniques</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/int234</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/cse504-storage-technology-foundation</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/int220</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/cse493-linux-system-administration</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/ece237</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/cse436-blockchain</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/cse472</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/cse434-game-development-in-3d</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/cse377</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/cse406-advanced-java-programming</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/int327</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/cse403-network-security-and-cryptography</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/int245</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/cse327-simulation-and-modelling</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/int312</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/cse304-computer-graphics-and-visualization</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/int221</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/int416-software-project-management-laboratory</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/ece129</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/int304-open-minor-4</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/cse473</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/cse441-industry-internship-project</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/cse378</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8/cse448-industry-co-op-project-ii</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/int302</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/cse334</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/cse331</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/cse357</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6/pes390</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem7</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem7/cse339</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem7/cse393</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem7/cse496</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem7/int328</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem7/int251</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem7/int315</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem7/int253</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem7/ece140</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem7/cse470</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem7/cse379</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem7/int303</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem7/cse447</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/cse435</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/cse439</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/int411</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/int402</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/cse504</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/cse493</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/cse436</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/cse434</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/cse406</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/cse403</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/cse327</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/cse304</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/int416</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/int304</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/cse441</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8/cse448</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse121</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse121/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse121/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse121/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/cse111</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/cse326</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/mec136</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/phy110</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse320</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse320/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-5</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-6</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-7</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse121</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse121/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse121/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse121/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/cse111</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/cse326</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/mec136</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/phy110</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse320</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse320/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem5</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-8</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem6</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse101</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/ece279</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/ece249</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/che110</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel130</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel121</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel125</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/mth166</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/int306</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/int108</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/mth165</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/che110/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/che110/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/che110/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/che110/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse101/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse101/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse101/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse101/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse320/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse320/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse320/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/mth165/dr-ayush-sir-notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/mth165/lecture</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/mth165/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/mth165/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/phy110/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/phy110/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/phy110/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/ece249/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/ece249/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/ece249/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/ece249/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/ece279/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/ece279/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/ece279/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/ece279/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/int306/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/int306/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/int306/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/int306/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/mth166/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/mth166/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/mth166/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/mth166/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel121/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel121/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel121/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel121/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel125/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel125/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel125/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel125/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel130/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel130/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel130/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel130/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/cse111/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/cse111/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/cse111/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/cse111/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/cse326/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/cse326/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/cse326/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/cse326/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/int108/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/int108/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/int108/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/int108/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/mec136/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/mec136/notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/mec136/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/mec136/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/all/semester-2</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem7</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/all/semester-2/che110</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem8</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse101</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/all/semester-2/che110/asbghhgsa</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/all/semester-2/ece249</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/ece279</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/all/semester-2/ece249/pyqs</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-1/phy110/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse320/nexus-originals-premium</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/che110/scholix-starnotes-premium</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel125/nexus-originals-premium</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel130/nexus-originals-premium</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/pel121/nexus-originals-premium</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse121/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/mth166/dr-ayush-sir-notes</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/mth401-discrete-mathematics</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/ece249</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-3/mth401-discrete-mathematics/syllabus</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/cse273-foundations-of-machine-learning-ml</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/che110</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-4/cse273-foundations-of-machine-learning-ml/lectures</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse121-orientation-to-computing-ii</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel130</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://scholix.app/lpu/library/btech-cse/semester-2/cse121-orientation-to-computing-ii/scholix-originals</loc>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel121</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel125</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/mth166</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/int306</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/int108</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/mth165</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/che110/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/che110/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/che110/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/che110/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse101/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse101/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse101/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse101/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse320/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse320/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse320/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/mth165/drayushsirnotes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/mth165/lecture</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/mth165/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/mth165/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/phy110/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/phy110/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/phy110/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/ece249/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/ece249/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/ece249/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/ece249/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/ece279/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/ece279/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/ece279/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/ece279/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/int306/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/int306/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/int306/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/int306/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/mth166/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/mth166/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/mth166/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/mth166/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel121/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel121/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel121/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel121/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel125/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel125/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel125/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel125/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel130/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel130/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel130/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel130/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/cse111/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/cse111/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/cse111/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/cse111/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/cse326/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/cse326/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/cse326/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/cse326/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/int108/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/int108/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/int108/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/int108/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/mec136/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/mec136/notes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/mec136/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/mec136/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/all/sem2</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/all/sem2/che110</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/all/sem2/che110/asbghhgsa</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/all/sem2/ece249</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/all/sem2/ece249/pyqs</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem1/phy110/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse320/nexusoriginalspremium</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/che110/scholixstarnotespremium</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel125/nexusoriginalspremium</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel130/nexusoriginalspremium</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/pel121/nexusoriginalspremium</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse121/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/mth166/drayushsirnotes</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/mth401</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem3/mth401/syllabus</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/cse273</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem4/cse273/lectures</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse121</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scholix.app/lpu/library/btechcse/sem2/cse121/scholixoriginals</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
