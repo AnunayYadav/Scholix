@@ -503,17 +503,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                         return;
                     }
 
-                    const sessionRes = await NexusServer.getSession();
-                    const session = sessionRes?.data?.session;
-
-                    if (!session) {
+                    if (!userProfile) {
                         showToast("Please login to view this file.", "info");
                         handleClose();
                         onAuthRequired?.();
                         return;
                     }
 
-                    NexusServer.saveRecord(session.user.id, 'file_access', `Opened ${fileObj.name}`, { fileId: fileObj.id, fileName: fileObj.name, path: fileObj.storage_path });
+                    NexusServer.saveRecord(userProfile.id, 'file_access', `Opened ${fileObj.name}`, { fileId: fileObj.id, fileName: fileObj.name, path: fileObj.storage_path });
                     try {
                         const fileBlob = await NexusServer.downloadFile(fileObj.storage_path);
                         const localUrl = URL.createObjectURL(fileBlob);
@@ -531,8 +528,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     return;
                 }
                 
-                // 🔐 Session Token Verification: Get the current user's session token
-                const { data: { session } } = await NexusServer.getSession();
+                let session = null;
+                if (!targetUrl.startsWith('blob:')) {
+                    const sessionRes = await NexusServer.getSession();
+                    session = sessionRes?.data?.session;
+                }
                 
                 // Load PDF progressively using PDF.js native stream & range-request transport
                 const docParams: any = {
