@@ -289,7 +289,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
     const zoomWrapperRef = useRef<HTMLDivElement>(null);
     const pageOriginalWidthRef = useRef<number>(612);
-    const objectUrlRef = useRef<string | null>(null);
+    const pdfBytesRef = useRef<Uint8Array | null>(null);
     const animationFrameId = useRef<number | null>(null);
     const pendingUpdate = useRef<{
         scale: number;
@@ -469,6 +469,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                 setError(null);
 
                 let targetUrl = url;
+                let pdfBytes: Uint8Array | null = null;
 
                 if (!targetUrl && file) {
                     const fileObj = file;
@@ -503,40 +504,63 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     NexusServer.saveRecord(userProfile.id, 'file_access', `Opened ${fileObj.name}`, { fileId: fileObj.id, fileName: fileObj.name, path: fileObj.storage_path });
                     try {
                         const fileBlob = await NexusServer.downloadFile(fileObj.storage_path);
-                        const localUrl = URL.createObjectURL(fileBlob);
-                        objectUrlRef.current = localUrl;
-                        targetUrl = localUrl;
+                        const arrayBuffer = await fileBlob.arrayBuffer();
+                        pdfBytes = new Uint8Array(arrayBuffer);
+                        pdfBytesRef.current = pdfBytes;
                     } catch (err: any) {
                         console.error("Failed to download PDF blob:", err);
                         setError('Failed to retrieve document from storage.');
                         setIsLoading(false);
                         return;
                     }
+                } else if (targetUrl) {
+                    try {
+                        let session = null;
+                        if (!targetUrl.startsWith('blob:')) {
+                            const sessionRes = await NexusServer.getSession();
+                            session = sessionRes?.data?.session;
+                        }
+                        const response = await fetch(targetUrl, {
+                            headers: !targetUrl.startsWith('blob:') && session ? {
+                                'Authorization': `Bearer ${session.access_token}`
+                            } : {}
+                        });
+                        const arrayBuffer = await response.arrayBuffer();
+                        pdfBytes = new Uint8Array(arrayBuffer);
+                        pdfBytesRef.current = pdfBytes;
+                    } catch (err: any) {
+                        console.error("Failed to fetch targetUrl bytes:", err);
+                    }
                 }
 
-                if (!targetUrl) {
+                let loadingTask;
+                if (pdfBytes) {
+                    loadingTask = pdfjsLib.getDocument({
+                        data: pdfBytes
+                    });
+                } else if (targetUrl) {
+                    let session = null;
+                    if (!targetUrl.startsWith('blob:')) {
+                        const sessionRes = await NexusServer.getSession();
+                        session = sessionRes?.data?.session;
+                    }
+                    
+                    // Load PDF progressively using PDF.js native stream & range-request transport
+                    const docParams: any = {
+                        url: targetUrl,
+                        disableRange: targetUrl.startsWith('blob:'),
+                        disableAutoFetch: targetUrl.startsWith('blob:'),
+                        disableStream: targetUrl.startsWith('blob:'),
+                    };
+                    if (!targetUrl.startsWith('blob:')) {
+                        docParams.httpHeaders = {
+                            'Authorization': session ? `Bearer ${session.access_token}` : ''
+                        };
+                    }
+                    loadingTask = pdfjsLib.getDocument(docParams);
+                } else {
                     return;
                 }
-                
-                let session = null;
-                if (!targetUrl.startsWith('blob:')) {
-                    const sessionRes = await NexusServer.getSession();
-                    session = sessionRes?.data?.session;
-                }
-                
-                // Load PDF progressively using PDF.js native stream & range-request transport
-                const docParams: any = {
-                    url: targetUrl,
-                    disableRange: targetUrl.startsWith('blob:'),
-                    disableAutoFetch: targetUrl.startsWith('blob:'),
-                    disableStream: targetUrl.startsWith('blob:'),
-                };
-                if (!targetUrl.startsWith('blob:')) {
-                    docParams.httpHeaders = {
-                        'Authorization': session ? `Bearer ${session.access_token}` : ''
-                    };
-                }
-                const loadingTask = pdfjsLib.getDocument(docParams);
 
                 // Track progressive loading progress
                 loadingTask.onProgress = ({ loaded, total }) => {
@@ -626,10 +650,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
             window.removeEventListener('beforeprint', handleBeforePrint);
             window.removeEventListener('afterprint', handleAfterPrint);
             if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
-            if (objectUrlRef.current) {
-                URL.revokeObjectURL(objectUrlRef.current);
-                objectUrlRef.current = null;
-            }
         };
     }, [file, isAdmin]);
 
@@ -965,8 +985,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
     // 💾 Authenticated Download with Cover Page
     const handleDownload = async () => {
-        const downloadUrl = url || objectUrlRef.current;
-        if (!downloadUrl || isDownloading) return;
+        if (isDownloading) return;
+        if (!url && !pdfBytesRef.current) return;
 
         const STORAGE_KEY = 'nexus_pdf_downloads';
         const today = new Date().toISOString().split('T')[0];
@@ -989,18 +1009,25 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
         try {
             showToast('Preparing Secure Download...', 'info');
             
-            const { data: { session } } = await NexusServer.getSession();
+            let originalPdfBytes: Uint8Array | ArrayBuffer;
+            if (pdfBytesRef.current) {
+                originalPdfBytes = pdfBytesRef.current;
+            } else {
+                const downloadUrl = url;
+                if (!downloadUrl) throw new Error("No source URL available.");
+                const { data: { session } } = await NexusServer.getSession();
 
-            // 1. Fetch the original PDF bytes
-            const fetchOptions: RequestInit = {};
-            if (!downloadUrl.startsWith('blob:')) {
-                fetchOptions.headers = {
-                    'Authorization': session ? `Bearer ${session.access_token}` : ''
-                };
+                // 1. Fetch the original PDF bytes
+                const fetchOptions: RequestInit = {};
+                if (!downloadUrl.startsWith('blob:')) {
+                    fetchOptions.headers = {
+                        'Authorization': session ? `Bearer ${session.access_token}` : ''
+                    };
+                }
+                const pdfResponse = await fetch(downloadUrl, fetchOptions);
+                if (!pdfResponse.ok) throw new Error("Vault re-verification failed.");
+                originalPdfBytes = await pdfResponse.arrayBuffer();
             }
-            const pdfResponse = await fetch(downloadUrl, fetchOptions);
-            if (!pdfResponse.ok) throw new Error("Vault re-verification failed.");
-            const originalPdfBytes = await pdfResponse.arrayBuffer();
 
             // 2. Fetch the cover page image
             const coverResponse = await fetch('/pdfcover.png');
