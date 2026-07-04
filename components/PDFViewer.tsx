@@ -992,16 +992,27 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
         const today = new Date().toISOString().split('T')[0];
         if (!isAdmin) {
             try {
+                const records = await NexusServer.fetchRecords(userProfile ? userProfile.id : null, 'pdf_download');
+                const todayStr = new Date().toDateString();
+                const todayDownloads = records.filter(r => {
+                    if (!r.created_at) return false;
+                    return new Date(r.created_at).toDateString() === todayStr;
+                });
+                
+                if (todayDownloads.length >= 3) {
+                    showToast('Daily limit (3 downloads) reached. Please try again tomorrow.', 'error');
+                    return;
+                }
+            } catch (e) {
+                console.warn("Could not check download history from registry, falling back to local cache", e);
                 const stored = localStorage.getItem(STORAGE_KEY);
                 if (stored) {
                     const parsed = JSON.parse(stored);
-                    if (parsed.date === today && parsed.count >= 2) {
-                        showToast('Daily limit (2 downloads) reached. Please try again tomorrow.', 'error');
+                    if (parsed.date === today && parsed.count >= 3) {
+                        showToast('Daily limit (3 downloads) reached. Please try again tomorrow.', 'error');
                         return;
                     }
                 }
-            } catch (e) {
-                console.warn("Could not parse download history", e);
             }
         }
 
@@ -1141,6 +1152,17 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
             setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
             
             if (!isAdmin) {
+                try {
+                    await NexusServer.saveRecord(
+                        userProfile ? userProfile.id : null,
+                        'pdf_download',
+                        `Downloaded ${fileName}`,
+                        { fileId: fileId || (file ? file.id : undefined), fileName: fileName }
+                    );
+                } catch (dbErr) {
+                    console.error("Failed to save download record to registry:", dbErr);
+                }
+
                 try {
                     const stored = localStorage.getItem('nexus_pdf_downloads');
                     let count = 0;
