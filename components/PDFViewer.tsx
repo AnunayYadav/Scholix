@@ -94,7 +94,7 @@ const PageRenderer = React.memo<{
                 while (textLayerRef.current.firstChild) textLayerRef.current.removeChild(textLayerRef.current.firstChild);
                 const textContent = await page.getTextContent();
                 await pdfjsLib.renderTextLayer({
-                    textContent: textContent,
+                    textContentSource: textContent,
                     container: textLayerRef.current,
                     viewport: cssViewport,
                     textDivs: []
@@ -248,6 +248,9 @@ const PageRenderer = React.memo<{
                 <div
                     ref={textLayerRef}
                     className="textLayer absolute inset-0 pointer-events-none select-text z-20 opacity-20 transition-opacity duration-200"
+                    style={{
+                        '--scale-factor': renderScale
+                    } as React.CSSProperties}
                 />
 
                 {/* Optimized Watermark */}

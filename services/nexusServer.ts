@@ -224,7 +224,14 @@ class NexusServer {
     }
 
     return data.map(q => {
-      const options = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || []);
+      let options = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || []);
+      if (!Array.isArray(options)) {
+        if (options && typeof options === 'object') {
+          options = Object.values(options);
+        } else {
+          options = [];
+        }
+      }
       
       // Robust mapping for correctAnswer index
       let finalCorrectIdx: number | undefined = undefined;

@@ -40,6 +40,14 @@
 
 })();
 
+// Automatically reload page when a dynamically imported asset fails to load (e.g. after a redeployment)
+if (typeof window !== 'undefined') {
+  window.addEventListener('vite:preloadError', (event) => {
+    console.warn('Vite preload error detected, reloading page to fetch latest assets:', event);
+    window.location.reload();
+  });
+}
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
