@@ -50,16 +50,56 @@ const matchSemesterName = (nameA: string, nameB: string): boolean => {
 
 import { FileIcon } from './FileIcon.tsx';
 
-const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' | 'category' | 'root', size?: string }) => {
-
+const FolderIcon = ({ type, name = '', size = "w-7 h-7" }: { type: 'semester' | 'subject' | 'category' | 'root', name?: string, size?: string }) => {
   const colors = {
     root: 'text-zinc-400',
     semester: 'text-orange-500',
     subject: 'text-orange-500',
     category: 'text-orange-500'
   };
+  
+  const className = `${size} ${colors[type]} mb-2 transition-colors`;
+  const lowerName = name.toLowerCase().trim();
+
+  if (lowerName === 'lectures') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.0" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+        <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
+      </svg>
+    );
+  }
+
+  if (lowerName === 'notes') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.0" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+        <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+      </svg>
+    );
+  }
+
+  if (lowerName === 'pyqs') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.0" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+      </svg>
+    );
+  }
+
+  if (lowerName === 'syllabus') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.0" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <circle cx="12" cy="12" r="10" />
+        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+      </svg>
+    );
+  }
+
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`${size} ${colors[type]} mb-2 transition-colors`}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.0" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
     </svg>
   );
@@ -2098,7 +2138,7 @@ const FolderCard: React.FC<{
       )}
 
       <div className="flex items-center justify-between w-full mb-3">
-        <FolderIcon type={folder.type} size="w-10 h-10" />
+        <FolderIcon type={folder.type} name={folder.name} size="w-10 h-10" />
         {meta && (
           <div className="flex flex-col items-end gap-1 z-10">
             <span className="px-1.5 py-0.5 rounded-lg text-[9px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/5 whitespace-nowrap">
@@ -2115,7 +2155,7 @@ const FolderCard: React.FC<{
       <p className="text-[10px] sm:text-xs text-zinc-400 dark:text-zinc-500 mt-1 z-10">
         {fileCount} File{fileCount !== 1 ? 's' : ''}
       </p>
-      <div className="absolute -right-2 -bottom-2 opacity-5 group-hover:scale-110 transition-transform"><FolderIcon type={folder.type} size="w-24 h-24" /></div>
+      <div className="absolute -right-2 -bottom-2 opacity-5 group-hover:scale-110 transition-transform"><FolderIcon type={folder.type} name={folder.name} size="w-24 h-24" /></div>
     </Link>
   );
 };
@@ -2129,7 +2169,7 @@ const StaticFolderCard: React.FC<{
   return (
     <div className={`p-5 rounded-[30px] border border-orange-500 bg-white dark:bg-[#0a0a0a] flex flex-col justify-center min-h-[140px] relative overflow-hidden ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''}`}>
       <div className="flex items-center justify-between w-full mb-3">
-        <FolderIcon type={folder.type} size="w-10 h-10" />
+        <FolderIcon type={folder.type} name={folder.name} size="w-10 h-10" />
         {meta && (
           <div className="flex flex-col items-end gap-1">
             <span className="px-1.5 py-0.5 rounded-lg text-[9px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/5 whitespace-nowrap">
@@ -2146,7 +2186,7 @@ const StaticFolderCard: React.FC<{
       <p className="text-[10px] sm:text-xs text-zinc-400 dark:text-zinc-500 mt-1">
         {fileCount} File{fileCount !== 1 ? 's' : ''}
       </p>
-      <div className="absolute -right-2 -bottom-2 opacity-5"><FolderIcon type={folder.type} size="w-24 h-24" /></div>
+      <div className="absolute -right-2 -bottom-2 opacity-5"><FolderIcon type={folder.type} name={folder.name} size="w-24 h-24" /></div>
     </div>
   );
 };

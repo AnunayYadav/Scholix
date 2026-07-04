@@ -275,99 +275,49 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
           </div>
 
           {/* Dashboard Insights Section */}
-          <div className="w-full max-w-3xl mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
-            {/* Column 1: Academic Quick Stats */}
-            <div className="md:col-span-2 space-y-4">
-              <h2 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Academic Overview</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Stat 1: Attendance */}
-                <div className="p-5 rounded-2xl border border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01] flex items-center justify-between">
-                  <div className="space-y-1">
-                    <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase">Avg Attendance</span>
-                    <h4 className="text-lg font-bold text-zinc-800 dark:text-zinc-200">
-                      {attendanceStats.hasData ? `${attendanceStats.avg}%` : 'N/A'}
-                    </h4>
-                    <span className={`text-[10px] font-semibold ${attendanceStats.hasData ? (attendanceStats.safe ? 'text-emerald-500' : 'text-red-500') : 'text-zinc-400'}`}>
-                      {attendanceStats.hasData 
-                        ? `${attendanceStats.safe ? 'Safe' : 'Critical'} (${attendanceStats.safe ? '+' : '-'}${attendanceStats.margin}% margin)` 
-                        : 'No active courses'}
-                    </span>
-                  </div>
-                  <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center text-[10px] font-bold ${attendanceStats.hasData ? (attendanceStats.safe ? 'border-emerald-500/20 border-t-emerald-500 text-emerald-500' : 'border-red-500/20 border-t-red-500 text-red-500') : 'border-zinc-200 dark:border-white/10 text-zinc-400'}`}>
-                    {attendanceStats.hasData ? `${Math.round(attendanceStats.avg)}%` : '0%'}
-                  </div>
+          <div className="w-full max-w-3xl mt-12 space-y-6 animate-fade-in">
+            <h2 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2 px-1">Pro Capabilities</h2>
+            
+            <div className="glass-panel p-8 rounded-[40px] border border-zinc-200 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/20 divide-y divide-zinc-100 dark:divide-white/5 space-y-6">
+              {/* Feature 1 */}
+              <div className="flex flex-col sm:flex-row items-start gap-4 pt-1">
+                <div className="flex items-center gap-2 flex-shrink-0 w-28">
+                  <span className="text-2xl font-black text-emerald-500 dark:text-emerald-400 tracking-tighter font-mono">01</span>
+                  <span className="text-[10px] font-extrabold bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full uppercase tracking-wider">Track</span>
                 </div>
-
-                {/* Stat 2: CGPA */}
-                <div className="p-5 rounded-2xl border border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01] flex items-center justify-between">
-                  <div className="space-y-1">
-                    <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase">Current CGPA</span>
-                    <h4 className="text-lg font-bold text-zinc-800 dark:text-zinc-200">
-                      {cgpaStats.hasData ? cgpaStats.cgpa.toFixed(2) : 'N/A'}
-                    </h4>
-                    <span className="text-[10px] text-orange-500 font-semibold">
-                      {cgpaStats.hasData ? `Targeting ${cgpaStats.target.toFixed(1)}` : 'No reports archived'}
-                    </span>
-                  </div>
-                  <div className={`w-10 h-10 rounded-full border-2 border-orange-500/20 border-t-orange-500 flex items-center justify-center text-orange-500 text-[10px] font-bold`}>
-                    {cgpaStats.hasData ? cgpaStats.cgpa.toFixed(1) : '0.0'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick tip notification box */}
-              <div className="p-5 rounded-3xl border border-brand-primary/10 bg-brand-primary/[0.02] flex items-start gap-4">
-                <div className="w-8 h-8 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary flex-shrink-0 mt-0.5">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Hub Smart Forecast</h4>
+                <div className="space-y-1 flex-1">
+                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Smart Attendance Tracking</h4>
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
-                    {attendanceStats.hasData 
-                      ? `Your attendance is currently ${attendanceStats.safe ? 'safe' : 'under goal'} across subjects. Try simulating your upcoming exam grades in the CGPA Hub to see how your overall score will be affected.`
-                      : 'Add your subjects in the Attendance Tracker to monitor class goals, safety margin requirements, and overall status.'}
+                    Calculates exact class safety margins, tracks how many lectures you can safely skip, and logs attendance histories with automatic threshold alerts.
                   </p>
                 </div>
               </div>
-            </div>
 
-            {/* Column 2: Placement Prep Status */}
-            <div className="space-y-4">
-              <h2 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Placement Readiness</h2>
-              <div className="p-5 rounded-2xl border border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01] space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase">Profile Completion</span>
-                  <span className="text-[11px] font-bold text-blue-500">{placementStats.completion}%</span>
+              {/* Feature 2 */}
+              <div className="flex flex-col sm:flex-row items-start gap-4 pt-6">
+                <div className="flex items-center gap-2 flex-shrink-0 w-28">
+                  <span className="text-2xl font-black text-orange-500 dark:text-orange-400 tracking-tighter font-mono">02</span>
+                  <span className="text-[10px] font-extrabold bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full uppercase tracking-wider">Simulate</span>
                 </div>
-                {/* Progress bar */}
-                <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-full" style={{ width: `${placementStats.completion}%` }} />
+                <div className="space-y-1 flex-1">
+                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">CGPA & TGPA Forecasts</h4>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
+                    Predicts term TGPA based on marks or grades, references official LPU grading standards, and includes collapsible degree forecasts to model future semesters.
+                  </p>
                 </div>
-                <div className="space-y-2 pt-2">
-                  <div className="flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-3.5 h-3.5 ${placementStats.resumeUploaded ? 'text-emerald-500' : 'text-zinc-400'}`}>
-                      {placementStats.resumeUploaded ? (
-                        <polyline points="20 6 9 17 4 12" />
-                      ) : (
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                      )}
-                    </svg>
-                    Resume Uploaded
-                  </div>
-                  <div className="flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-3.5 h-3.5 ${placementStats.preferencesSet ? 'text-emerald-500' : 'text-zinc-400'}`}>
-                      {placementStats.preferencesSet ? (
-                        <polyline points="20 6 9 17 4 12" />
-                      ) : (
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                      )}
-                    </svg>
-                    Preferences Set
-                  </div>
-                  <div className="flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-3.5 h-3.5 ${placementStats.pendingCount > 0 ? 'text-orange-500' : 'text-zinc-400'}`}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
-                    {placementStats.pendingCount} Pending Application{placementStats.pendingCount !== 1 ? 's' : ''}
-                  </div>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="flex flex-col sm:flex-row items-start gap-4 pt-6">
+                <div className="flex items-center gap-2 flex-shrink-0 w-28">
+                  <span className="text-2xl font-black text-blue-500 dark:text-blue-400 tracking-tighter font-mono">03</span>
+                  <span className="text-[10px] font-extrabold bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-wider">Prepare</span>
+                </div>
+                <div className="space-y-1 flex-1">
+                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Placement Readiness Analyzer</h4>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
+                    Evaluates resume ATS compatibility score, tracks active job applications, and builds custom placement readiness reports to target profiles.
+                  </p>
                 </div>
               </div>
             </div>
