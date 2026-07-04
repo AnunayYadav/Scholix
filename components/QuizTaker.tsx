@@ -26,7 +26,6 @@ import XPBreakdown from './quiz/XPBreakdown.tsx';
 import LevelUpOverlay from './quiz/LevelUpOverlay.tsx';
 import StreakToast from './quiz/StreakToast.tsx';
 import HistorySection from './quiz/HistorySection.tsx';
-import LeaderboardSection from './quiz/Leaderboard.tsx';
 
 
 // Dashboard hooks & store
@@ -247,7 +246,6 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null, onAuthRequired?: ()
   // Track what type of quiz is currently active
   const [activeQuizType, setActiveQuizType] = useState<'custom' | 'featured' | 'challenge'>('custom');
   const [activeChallengeId, setActiveChallengeId] = useState<string | null>(null);
-  const [leaderboardRefreshKey, setLeaderboardRefreshKey] = useState(0);
 
   const [subjectsWithSyllabi, setSubjectsWithSyllabi] = useState<SubjectWithSyllabus[]>([]);
   const [showProgressModal, setShowProgressModal] = useState(false);
@@ -1122,9 +1120,6 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     } else if (activeQuizType === 'challenge' && activeChallengeId) {
       markChallengeCompleted(activeChallengeId);
     }
-
-    // Trigger leaderboard refresh
-    setLeaderboardRefreshKey(prev => prev + 1);
 
     // Save solved question IDs
     if (activeQuizType === 'custom' && !isPracticeMode) {
@@ -2936,11 +2931,6 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             onCustomQuiz={() => setShowCustomQuizBuilder(true)}
             onMyHistory={() => setDashboardView('history')}
           />
-        </div>
-        
-        {/* Study Leaderboard - Moved below Quick Start */}
-        <div className="space-y-3">
-          <LeaderboardSection currentUserId={userId} refreshTrigger={leaderboardRefreshKey} />
         </div>
 
 
