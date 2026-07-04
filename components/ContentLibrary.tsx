@@ -65,6 +65,137 @@ const FolderIcon = ({ type, size = "w-7 h-7" }: { type: 'semester' | 'subject' |
   );
 };
 
+interface FileStyleConfig {
+  iconBg: string;
+  iconText: string;
+  badgeBg: string;
+  badgeText: string;
+  hoverBorder: string;
+  hoverText: string;
+  label: string;
+  glowColor: string;
+  actionText: string;
+  actionHoverBg: string;
+}
+
+const getFileStyle = (fileName: string): FileStyleConfig => {
+  const ext = fileName.split('.').pop()?.toLowerCase() || '';
+  
+  const configs: Record<string, FileStyleConfig> = {
+    pdf: {
+      iconBg: 'bg-rose-500/10 dark:bg-rose-500/10',
+      iconText: 'text-rose-500 dark:text-rose-400',
+      badgeBg: 'bg-rose-500/10 dark:bg-rose-500/20',
+      badgeText: 'text-rose-600 dark:text-rose-300',
+      hoverBorder: 'hover:border-rose-500/40 dark:hover:border-rose-500/30',
+      hoverText: 'group-hover:text-rose-500 dark:group-hover:text-rose-400',
+      label: 'PDF',
+      glowColor: 'rgba(244, 63, 94, 0.15)',
+      actionText: 'text-rose-500 dark:text-rose-400',
+      actionHoverBg: 'hover:bg-rose-500 dark:hover:bg-rose-500'
+    },
+    ppt: {
+      iconBg: 'bg-amber-500/10 dark:bg-amber-500/10',
+      iconText: 'text-amber-500 dark:text-amber-400',
+      badgeBg: 'bg-amber-500/10 dark:bg-amber-500/20',
+      badgeText: 'text-amber-600 dark:text-amber-300',
+      hoverBorder: 'hover:border-amber-500/40 dark:hover:border-amber-500/30',
+      hoverText: 'group-hover:text-amber-500 dark:group-hover:text-amber-400',
+      label: 'PPT',
+      glowColor: 'rgba(245, 158, 11, 0.15)',
+      actionText: 'text-amber-500 dark:text-amber-400',
+      actionHoverBg: 'hover:bg-amber-500 dark:hover:bg-amber-500'
+    },
+    pptx: {
+      iconBg: 'bg-amber-500/10 dark:bg-amber-500/10',
+      iconText: 'text-amber-500 dark:text-amber-400',
+      badgeBg: 'bg-amber-500/10 dark:bg-amber-500/20',
+      badgeText: 'text-amber-600 dark:text-amber-300',
+      hoverBorder: 'hover:border-amber-500/40 dark:hover:border-amber-500/30',
+      hoverText: 'group-hover:text-amber-500 dark:group-hover:text-amber-400',
+      label: 'PPTX',
+      glowColor: 'rgba(245, 158, 11, 0.15)',
+      actionText: 'text-amber-500 dark:text-amber-400',
+      actionHoverBg: 'hover:bg-amber-500 dark:hover:bg-amber-500'
+    },
+    doc: {
+      iconBg: 'bg-blue-500/10 dark:bg-blue-500/10',
+      iconText: 'text-blue-500 dark:text-blue-400',
+      badgeBg: 'bg-blue-500/10 dark:bg-blue-500/20',
+      badgeText: 'text-blue-600 dark:text-blue-300',
+      hoverBorder: 'hover:border-blue-500/40 dark:hover:border-blue-500/30',
+      hoverText: 'group-hover:text-blue-500 dark:group-hover:text-blue-400',
+      label: 'DOC',
+      glowColor: 'rgba(59, 130, 246, 0.15)',
+      actionText: 'text-blue-500 dark:text-blue-400',
+      actionHoverBg: 'hover:bg-blue-500 dark:hover:bg-blue-500'
+    },
+    docx: {
+      iconBg: 'bg-blue-500/10 dark:bg-blue-500/10',
+      iconText: 'text-blue-500 dark:text-blue-400',
+      badgeBg: 'bg-blue-500/10 dark:bg-blue-500/20',
+      badgeText: 'text-blue-600 dark:text-blue-300',
+      hoverBorder: 'hover:border-blue-500/40 dark:hover:border-blue-500/30',
+      hoverText: 'group-hover:text-blue-500 dark:group-hover:text-blue-400',
+      label: 'DOCX',
+      glowColor: 'rgba(59, 130, 246, 0.15)',
+      actionText: 'text-blue-500 dark:text-blue-400',
+      actionHoverBg: 'hover:bg-blue-500 dark:hover:bg-blue-500'
+    },
+    xls: {
+      iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/10',
+      iconText: 'text-emerald-500 dark:text-emerald-400',
+      badgeBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
+      badgeText: 'text-emerald-600 dark:text-emerald-300',
+      hoverBorder: 'hover:border-emerald-500/40 dark:hover:border-emerald-500/30',
+      hoverText: 'group-hover:text-emerald-500 dark:group-hover:text-emerald-400',
+      label: 'XLS',
+      glowColor: 'rgba(16, 185, 129, 0.15)',
+      actionText: 'text-emerald-500 dark:text-emerald-400',
+      actionHoverBg: 'hover:bg-emerald-500 dark:hover:bg-emerald-500'
+    },
+    xlsx: {
+      iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/10',
+      iconText: 'text-emerald-500 dark:text-emerald-400',
+      badgeBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
+      badgeText: 'text-emerald-600 dark:text-emerald-300',
+      hoverBorder: 'hover:border-emerald-500/40 dark:hover:border-emerald-500/30',
+      hoverText: 'group-hover:text-emerald-500 dark:group-hover:text-emerald-400',
+      label: 'XLSX',
+      glowColor: 'rgba(16, 185, 129, 0.15)',
+      actionText: 'text-emerald-500 dark:text-emerald-400',
+      actionHoverBg: 'hover:bg-emerald-500 dark:hover:bg-emerald-500'
+    },
+    csv: {
+      iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/10',
+      iconText: 'text-emerald-500 dark:text-emerald-400',
+      badgeBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
+      badgeText: 'text-emerald-600 dark:text-emerald-300',
+      hoverBorder: 'hover:border-emerald-500/40 dark:hover:border-emerald-500/30',
+      hoverText: 'group-hover:text-emerald-500 dark:group-hover:text-emerald-400',
+      label: 'CSV',
+      glowColor: 'rgba(16, 185, 129, 0.15)',
+      actionText: 'text-emerald-500 dark:text-emerald-400',
+      actionHoverBg: 'hover:bg-emerald-500 dark:hover:bg-emerald-500'
+    }
+  };
+
+  const defaultConfig: FileStyleConfig = {
+    iconBg: 'bg-zinc-500/10 dark:bg-zinc-500/10',
+    iconText: 'text-zinc-500 dark:text-zinc-400',
+    badgeBg: 'bg-zinc-500/10 dark:bg-zinc-500/20',
+    badgeText: 'text-zinc-600 dark:text-zinc-300',
+    hoverBorder: 'hover:border-zinc-500/40 dark:hover:border-zinc-500/30',
+    hoverText: 'group-hover:text-zinc-500 dark:group-hover:text-zinc-400',
+    label: ext.toUpperCase() || 'FILE',
+    glowColor: 'rgba(113, 113, 122, 0.15)',
+    actionText: 'text-zinc-500 dark:text-zinc-400',
+    actionHoverBg: 'hover:bg-zinc-500 dark:hover:bg-zinc-500'
+  };
+
+  return configs[ext] || defaultConfig;
+};
+
 
 const SkeletonCard = () => (
   <div className="group p-5 rounded-[30px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 relative overflow-hidden flex flex-col min-h-[140px]">
@@ -1440,83 +1571,120 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       )}
 
       {
-        showDetailsModal && selectedFile && createPortal(
-          <div className={`modal-overlay ${isClosingDetails ? 'closing' : ''}`}
-            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
-            onClick={(e) => { if (e.target === e.currentTarget) handleCloseDetails(); }}>
-            <div ref={modalRef} className={`nexus-modal w-full max-w-lg ${isClosingDetails ? 'closing' : ''}`}>
-              <header className="p-6 md:p-8 border-b border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-[#0a0a0a]/20 flex items-start justify-between">
-                <div className="space-y-4">
+        showDetailsModal && selectedFile && (() => {
+          const fileStyle = getFileStyle(selectedFile.storage_path || selectedFile.name);
+          return createPortal(
+            <div className={`modal-overlay ${isClosingDetails ? 'closing' : ''}`}
+              style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+              onClick={(e) => { if (e.target === e.currentTarget) handleCloseDetails(); }}>
+              <div ref={modalRef} className={`nexus-modal w-full max-w-md bg-white dark:bg-[#0c0c0e] border border-zinc-100 dark:border-white/5 rounded-[28px] shadow-2xl relative overflow-hidden flex flex-col ${isClosingDetails ? 'closing' : ''}`}>
+                {/* Aurora glow */}
+                <div 
+                  className="absolute -right-24 -top-24 w-48 h-48 rounded-full blur-3xl opacity-20 pointer-events-none z-0"
+                  style={{ backgroundColor: fileStyle.glowColor }}
+                />
+                {/* Giant background faint logo */}
+                <div className="absolute -right-6 -bottom-6 opacity-[0.04] dark:opacity-[0.02] pointer-events-none z-0">
+                  <FileIcon fileName={selectedFile.storage_path} size="w-36 h-36" className={fileStyle.iconText} />
+                </div>
+
+                <header className="p-6 md:p-8 border-b border-zinc-100 dark:border-white/5 bg-transparent flex flex-col gap-4 relative z-10">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center border border-zinc-200 dark:border-white/5">
-                      <FileIcon fileName={selectedFile.storage_path} size="w-4 h-4" />
+                    <div className={`w-9 h-9 ${fileStyle.iconBg} rounded-xl flex items-center justify-center`}>
+                      <FileIcon fileName={selectedFile.storage_path} size="w-5 h-5" className={fileStyle.iconText} />
                     </div>
+                    <span className={`px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase rounded-md ${fileStyle.badgeBg} ${fileStyle.badgeText}`}>
+                      {fileStyle.label}
+                    </span>
                   </div>
-                  <h3 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-900 dark:text-white leading-tight">{selectedFile.name}</h3>
-                </div>
-                <button onClick={handleCloseDetails} className="p-2 text-white/30 hover:text-white transition-colors border-none bg-transparent">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                </button>
-              </header>
+                  <h3 className="text-lg md:text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 leading-snug pr-8">{selectedFile.name}</h3>
+                  <button onClick={handleCloseDetails} className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-600 dark:text-white/30 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer z-20">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </header>
 
-              <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 no-scrollbar">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { label: 'Semester', val: selectedFile.semester },
-                    { label: 'Subject', val: selectedFile.subject },
-                    { label: 'Category', val: selectedFile.type },
-                    { label: 'File Size', val: selectedFile.size }
-                  ].map((item, i) => (
-                    <div key={i} className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                      <p className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500 mb-1">{item.label}</p>
-                      <p className="text-[11px] sm:text-xs font-medium text-zinc-800 dark:text-white">{item.val || 'N/A'}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="space-y-4">
-                  <h4 className="text-[11px] sm:text-xs font-medium text-zinc-400">Description</h4>
-                  <p className="text-[11px] sm:text-xs font-medium text-zinc-600 dark:text-zinc-300 leading-relaxed italic bg-zinc-50 dark:bg-[#0a0a0a]/5 p-6 rounded-3xl border border-zinc-100 dark:border-white/5">
-                    {selectedFile.description || "No description provided."}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between p-6 bg-orange-500/5 border border-orange-500/20 rounded-3xl">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center font-bold text-[11px] sm:text-xs">
-                      {selectedFile.uploader_username?.[0] || 'V'}
-                    </div>
-                    <div>
-                      <p className="text-[11px] sm:text-xs text-orange-500">Uploader</p>
-                      <div className="flex items-center gap-1.5">
-                        <p className="text-[11px] sm:text-xs font-medium">@{selectedFile.uploader_username}</p>
-                        <VerifiedBadge isAdmin={selectedFile.uploader_is_admin} size="w-3.5 h-3.5" />
+                <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 no-scrollbar relative z-10">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {[
+                      { label: 'Semester', val: selectedFile.semester },
+                      { label: 'Subject', val: selectedFile.subject },
+                      { label: 'Category', val: selectedFile.type },
+                      { label: 'File Size', val: selectedFile.size }
+                    ].map((item, i) => (
+                      <div key={i} className="p-3 bg-zinc-50 dark:bg-white/5 rounded-2xl border border-zinc-100 dark:border-white/5">
+                        <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mb-0.5">{item.label}</p>
+                        <p className="text-[11px] sm:text-xs font-semibold text-zinc-800 dark:text-zinc-200">{item.val || 'N/A'}</p>
                       </div>
+                    ))}
+                  </div>
 
+                  <div className="space-y-2">
+                    <h4 className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Description</h4>
+                    <p className="text-[11px] sm:text-xs font-medium text-zinc-600 dark:text-zinc-300 leading-relaxed italic bg-zinc-50/50 dark:bg-white/5 p-4 rounded-2xl border border-zinc-100 dark:border-white/5">
+                      {selectedFile.description || "No description provided."}
+                    </p>
+                  </div>
+
+                  <div 
+                    className="flex items-center justify-between p-4 rounded-2xl border"
+                    style={{ 
+                      backgroundColor: fileStyle.glowColor.replace('0.15', '0.04'),
+                      borderColor: fileStyle.glowColor.replace('0.15', '0.15') 
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-[11px] sm:text-xs text-white"
+                        style={{ backgroundColor: fileStyle.glowColor.replace('0.15', '0.85') }}
+                      >
+                        {selectedFile.uploader_username?.[0] || 'V'}
+                      </div>
+                      <div>
+                        <p className={`text-[10px] font-semibold ${fileStyle.iconText}`}>Uploader</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-[11px] sm:text-xs font-semibold text-zinc-800 dark:text-zinc-200">@{selectedFile.uploader_username}</p>
+                          <VerifiedBadge isAdmin={selectedFile.uploader_is_admin} size="w-3.5 h-3.5" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[11px] sm:text-xs font-medium text-zinc-400 dark:text-zinc-500">{new Date(selectedFile.uploadDate).toLocaleDateString()}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[11px] sm:text-xs font-medium text-zinc-800 dark:text-white">{new Date(selectedFile.uploadDate).toLocaleDateString()}</p>
-                  </div>
                 </div>
-              </div>
 
-              <footer className="p-6 md:p-8 bg-zinc-50 dark:bg-[#0a0a0a]/20 border-t border-zinc-100 dark:border-white/5 flex gap-4">
-                <button onClick={handleCloseDetails} className="flex-1 py-3 text-[11px] sm:text-xs text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent">Discard</button>
-                {selectedFile.status === 'approved' && (
-                  <>
-                    <button onClick={() => handleShareFile(selectedFile)} className="flex-1 py-3 border border-orange-500/20 bg-orange-500/5 text-orange-500 hover:bg-orange-500/10 rounded-xl font-semibold text-[11px] sm:text-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" /></svg>
-                      Share
-                    </button>
-                    <button onClick={() => { handleCloseDetails(); handleFileAccess(selectedFile); }} className="flex-[2] py-3 bg-orange-500 text-white rounded-xl font-semibold text-[11px] sm:text-xs shadow-xl active:scale-95 transition-all border-none cursor-pointer">View Document ↗</button>
-                  </>
-                )}
-              </footer>
-            </div>
-          </div>,
-          document.getElementById('modal-root') || document.body
-        )
+                <footer className="p-6 bg-transparent border-t border-zinc-100 dark:border-white/5 flex gap-3 relative z-10">
+                  <button onClick={handleCloseDetails} className="flex-1 py-2.5 text-[11px] sm:text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer font-medium">Discard</button>
+                  {selectedFile.status === 'approved' && (
+                    <>
+                      <button 
+                        onClick={() => handleShareFile(selectedFile)} 
+                        className={`flex-1 py-2.5 rounded-xl font-semibold text-[11px] sm:text-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer border ${fileStyle.iconText}`}
+                        style={{
+                          backgroundColor: fileStyle.glowColor.replace('0.15', '0.05'),
+                          borderColor: fileStyle.glowColor.replace('0.15', '0.2')
+                        }}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" /></svg>
+                        Share
+                      </button>
+                      <button 
+                        onClick={() => { handleCloseDetails(); handleFileAccess(selectedFile); }} 
+                        className="flex-[2] py-2.5 text-white rounded-xl font-semibold text-[11px] sm:text-xs shadow-md active:scale-95 transition-all border-none cursor-pointer"
+                        style={{
+                          backgroundColor: fileStyle.glowColor.replace('0.15', '0.85')
+                        }}
+                      >
+                        View Document ↗
+                      </button>
+                    </>
+                  )}
+                </footer>
+              </div>
+            </div>,
+            document.getElementById('modal-root') || document.body
+          );
+        })()
       }
 
       {
@@ -2021,6 +2189,8 @@ const FileCard: React.FC<{
   };
   const status = statusConfig[file.status] || statusConfig.pending;
 
+  const fileStyle = getFileStyle(file.storage_path || file.name);
+
   return (
     <div
       ref={setNodeRef as any}
@@ -2031,62 +2201,82 @@ const FileCard: React.FC<{
           return;
         }
 
-        // Open PDF viewer overlay directly — no navigation needed
-        onAccess();
+        // Open file details modal
+        onShowDetails();
       }}
-      className={`group p-4 rounded-[30px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a] hover:border-orange-500 hover:shadow-xl transition-all relative overflow-hidden flex flex-col min-h-[140px] cursor-pointer no-underline text-current ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
+      className={`group p-4 rounded-[24px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0c0c0e] ${fileStyle.hoverBorder} hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden flex flex-col min-h-[148px] cursor-pointer no-underline text-current ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
     >
-      <div className="flex items-start justify-between mb-2">
-        <div className="w-9 h-9 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center transition-colors">
-          <FileIcon fileName={file.storage_path} size="w-5 h-5" className="group-hover:scale-110 transition-transform" />
-        </div>
-        {isAdmin && (
-          <div
-            {...attributes}
-            {...listeners}
-            className="p-2 -mr-2 text-zinc-300 hover:text-orange-500 cursor-grab active:cursor-grabbing transition-colors"
-            onClick={(e) => e.stopPropagation()}
-            title="Drag to reorder"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="9" cy="5" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="9" cy="19" r="1" /><circle cx="15" cy="5" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="19" r="1" /></svg>
-          </div>
-        )}
+      {/* Aurora glow on hover */}
+      <div 
+        className="absolute -right-12 -top-12 w-24 h-24 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{ backgroundColor: fileStyle.glowColor }}
+      />
+
+      {/* Giant faint background logo */}
+      <div className="absolute -right-4 -bottom-4 opacity-[0.05] dark:opacity-[0.03] pointer-events-none z-0">
+        <FileIcon fileName={file.storage_path} size="w-28 h-28" className={fileStyle.iconText} />
       </div>
-      <div className="text-[11px] md:text-[13px] font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2 group-hover:text-orange-500 transition-colors">{file.name}</div>
-      <div className="pt-3 mt-auto border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
-        <span className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500">{file.size}</span>
+
+      <div className="flex items-center justify-between mb-3 relative z-10">
+        <div className={`w-9 h-9 ${fileStyle.iconBg} rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-105`}>
+          <FileIcon fileName={file.storage_path} size="w-5 h-5" className={fileStyle.iconText} />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className={`px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase rounded-md ${fileStyle.badgeBg} ${fileStyle.badgeText} transition-colors`}>
+            {fileStyle.label}
+          </span>
+          {isAdmin && (
+            <div
+              {...attributes}
+              {...listeners}
+              className="p-1 text-zinc-400 dark:text-zinc-500 hover:text-orange-500 cursor-grab active:cursor-grabbing transition-colors"
+              onClick={(e) => e.stopPropagation()}
+              title="Drag to reorder"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="9" cy="5" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="9" cy="19" r="1" /><circle cx="15" cy="5" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="19" r="1" /></svg>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className={`text-[12px] md:text-[14px] font-medium text-zinc-700 dark:text-zinc-200 tracking-tight leading-snug line-clamp-2 mb-2 ${fileStyle.hoverText} transition-colors duration-300 relative z-10`}>
+        {file.name}
+      </div>
+
+      <div className="pt-3 mt-auto border-t border-zinc-100 dark:border-white/5 flex items-center justify-between relative z-10">
+        <span className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500 font-normal">{file.size}</span>
         <div className="flex gap-1.5 peer">
           {isAdminMode ? (
             <div className="flex gap-1.5">
               {file.status !== 'approved' && (
-                <button onClick={(e) => { e.stopPropagation(); onApprove?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white transition-all border-none" title="Approve">
+                <button onClick={(e) => { e.stopPropagation(); onApprove?.(); }} className="w-8 h-8 bg-transparent dark:bg-transparent text-emerald-500 border border-transparent hover:border-emerald-500/20 rounded-lg flex items-center justify-center hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-all" title="Approve">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><polyline points="20 6 9 17 4 12" /></svg>
                 </button>
               )}
-              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white transition-all border-none" title="Edit Metadata">
+              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-transparent dark:bg-transparent text-orange-500 border border-transparent hover:border-orange-500/20 rounded-lg flex items-center justify-center hover:bg-orange-500/10 dark:hover:bg-orange-500/20 transition-all" title="Edit Metadata">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
               </button>
-              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-blue-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-blue-500 hover:text-white dark:hover:bg-blue-500 dark:hover:text-white transition-all border-none" title="View Document">
+              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-transparent dark:bg-transparent text-blue-500 border border-transparent hover:border-blue-500/20 rounded-lg flex items-center justify-center hover:bg-blue-500/10 dark:hover:bg-blue-500/20 transition-all" title="View Document">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
               </button>
               {file.status === 'approved' ? (
-                <button onClick={(e) => { e.stopPropagation(); onDemote?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white transition-all border-none" title="Demote to Pending">
+                <button onClick={(e) => { e.stopPropagation(); onDemote?.(); }} className="w-8 h-8 bg-transparent dark:bg-transparent text-orange-500 border border-transparent hover:border-orange-500/20 rounded-lg flex items-center justify-center hover:bg-orange-500/10 dark:hover:bg-orange-500/20 transition-all" title="Demote to Pending">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                 </button>
               ) : (
-                <button onClick={(e) => { e.stopPropagation(); onReject?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white dark:hover:bg-red-500 dark:hover:text-white transition-all border-none" title="Reject & Remove">
+                <button onClick={(e) => { e.stopPropagation(); onReject?.(); }} className="w-8 h-8 bg-transparent dark:bg-transparent text-red-500 border border-transparent hover:border-red-500/20 rounded-lg flex items-center justify-center hover:bg-red-500/10 dark:hover:bg-red-500/20 transition-all" title="Reject & Remove">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                 </button>
               )}
             </div>
           ) : isAdmin ? (
             <div className="flex gap-1.5">
-              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white transition-all border-none" title="Edit Metadata"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
-              <button onClick={(e) => { e.stopPropagation(); onDelete?.(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-red-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-red-500 hover:text-white dark:hover:bg-red-500 dark:hover:text-white transition-all border-none" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
-              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-zinc-100 dark:bg-[#0a0a0a] text-emerald-500 rounded-lg flex items-center justify-center shadow-lg hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white transition-all border-none" title="Access File"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
+              <button onClick={(e) => { e.stopPropagation(); onEdit?.(); }} className="w-8 h-8 bg-transparent dark:bg-transparent text-orange-500 border border-transparent hover:border-orange-500/20 rounded-lg flex items-center justify-center hover:bg-orange-500/10 dark:hover:bg-orange-500/20 transition-all" title="Edit Metadata"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
+              <button onClick={(e) => { e.stopPropagation(); onDelete?.(); }} className="w-8 h-8 bg-transparent dark:bg-transparent text-red-500 border border-transparent hover:border-red-500/20 rounded-lg flex items-center justify-center hover:bg-red-500/10 dark:hover:bg-red-500/20 transition-all" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+              <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="w-8 h-8 bg-transparent dark:bg-transparent text-emerald-500 border border-transparent hover:border-emerald-500/20 rounded-lg flex items-center justify-center hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-all" title="Access File"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
             </div>
           ) : (
-            <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className="bg-zinc-100 dark:bg-[#0a0a0a] text-orange-500 px-4 py-1.5 rounded-xl font-medium text-[11px] sm:text-xs flex items-center gap-1.5 hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white transition-all shadow-md border-none">Access <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
+            <button onClick={(e) => { e.stopPropagation(); onAccess(); }} className={`bg-transparent dark:bg-transparent ${fileStyle.actionText} border border-transparent hover:border-current px-4 py-1.5 rounded-xl font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 ${fileStyle.actionHoverBg} hover:text-white dark:hover:text-white transition-all`}>Access <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></button>
           )}
         </div>
       </div>
@@ -2101,21 +2291,31 @@ const StaticFileCard: React.FC<{
   isAdminMode: boolean;
 }> = ({ file, userProfile, isAdminMode }) => {
   const isAdmin = userProfile?.is_admin || false;
+  const fileStyle = getFileStyle(file.storage_path || file.name);
   return (
-    <div className="p-4 rounded-[30px] border border-orange-500 bg-white dark:bg-[#0a0a0a] flex flex-col min-h-[140px]">
-      <div className="flex items-start justify-between mb-2">
-        <div className="w-9 h-9 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center">
-          <FileIcon fileName={file.storage_path} size="w-5 h-5" />
-        </div>
-        {isAdmin && (
-          <div className="p-2 -mr-2 text-orange-500">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="9" cy="5" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="9" cy="19" r="1" /><circle cx="15" cy="5" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="19" r="1" /></svg>
-          </div>
-        )}
+    <div className="p-4 rounded-[24px] border border-orange-500 bg-white dark:bg-[#0c0c0e] flex flex-col min-h-[148px] relative overflow-hidden">
+      {/* Giant faint background logo */}
+      <div className="absolute -right-4 -bottom-4 opacity-[0.05] dark:opacity-[0.03] pointer-events-none z-0">
+        <FileIcon fileName={file.storage_path} size="w-28 h-28" className={fileStyle.iconText} />
       </div>
-      <div className="text-[11px] md:text-[13px] font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight line-clamp-2 mb-2">{file.name}</div>
+      <div className="flex items-center justify-between mb-3">
+        <div className={`w-9 h-9 ${fileStyle.iconBg} rounded-xl flex items-center justify-center`}>
+          <FileIcon fileName={file.storage_path} size="w-5 h-5" className={fileStyle.iconText} />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className={`px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase rounded-md ${fileStyle.badgeBg} ${fileStyle.badgeText}`}>
+            {fileStyle.label}
+          </span>
+          {isAdmin && (
+            <div className="p-1 text-orange-500">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="9" cy="5" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="9" cy="19" r="1" /><circle cx="15" cy="5" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="19" r="1" /></svg>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="text-[12px] md:text-[14px] font-medium text-zinc-700 dark:text-zinc-200 tracking-tight leading-snug line-clamp-2 mb-2">{file.name}</div>
       <div className="pt-3 mt-auto border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
-        <span className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500">{file.size}</span>
+        <span className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500 font-normal">{file.size}</span>
       </div>
     </div>
   );
