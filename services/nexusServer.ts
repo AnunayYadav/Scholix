@@ -67,16 +67,14 @@ class NexusServer {
    * Timetable: Community Presets
    */
   static async fetchCommunityTimetables(): Promise<any[]> {
-    const client = getSupabase();
-    if (!client) return [];
-    const { data, error } = await client
-      .from('community_timetables')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (error) {
-      throw new Error("Failed to sync community presets.");
+    try {
+      const response = await fetch('/api/timetables');
+      if (!response.ok) throw new Error("Failed to sync community presets.");
+      return await response.json();
+    } catch (e) {
+      console.error(e);
+      return [];
     }
-    return data || [];
   }
 
   static async shareTimetable(data: TimetableData, metadata: any) {
@@ -1643,17 +1641,20 @@ class NexusServer {
    * Marketplace Methods
    */
   static async fetchMarketplaceItems(): Promise<any[]> {
-    const client = getSupabase();
-    if (!client) return [];
-    const { data, error } = await client.from('marketplace_items').select('*, seller:profiles(username, avatar_url, is_admin)').order('created_at', { ascending: false });
-    if (error) { console.error("Marketplace fetch error:", error); return []; }
-    return (data || []).map(item => ({
-      ...item,
-      seller_username: (item.seller as any)?.username,
-      seller_avatar: (item.seller as any)?.avatar_url,
-      seller_is_admin: (item.seller as any)?.is_admin
-    }));
-
+    try {
+      const response = await fetch('/api/marketplace');
+      if (!response.ok) throw new Error("Failed to fetch marketplace.");
+      const data = await response.json();
+      return (data || []).map((item: any) => ({
+        ...item,
+        seller_username: item.seller?.username || 'Nexus Scholar',
+        seller_avatar: item.seller?.avatar_url,
+        seller_is_admin: false
+      }));
+    } catch (e) {
+      console.error("Marketplace fetch error:", e);
+      return [];
+    }
   }
 
   static async createMarketplaceItem(item: any) {
@@ -1697,17 +1698,20 @@ class NexusServer {
    * Roommate Finder Methods
    */
   static async fetchRoommateRequests(): Promise<any[]> {
-    const client = getSupabase();
-    if (!client) return [];
-    const { data, error } = await client.from('roommate_requests').select('*, user:profiles(username, avatar_url, is_admin)').order('created_at', { ascending: false });
-    if (error) { console.error("Roommate fetch error:", error); return []; }
-    return (data || []).map(item => ({
-      ...item,
-      user_username: (item.user as any)?.username,
-      user_avatar: (item.user as any)?.avatar_url,
-      user_is_admin: (item.user as any)?.is_admin
-    }));
-
+    try {
+      const response = await fetch('/api/roommates');
+      if (!response.ok) throw new Error("Failed to fetch roommate requests.");
+      const data = await response.json();
+      return (data || []).map((item: any) => ({
+        ...item,
+        user_username: item.user?.username || 'Nexus Scholar',
+        user_avatar: item.user?.avatar_url,
+        user_is_admin: false
+      }));
+    } catch (e) {
+      console.error("Roommate fetch error:", e);
+      return [];
+    }
   }
 
   static async createRoommateRequest(request: any) {
@@ -1854,24 +1858,28 @@ class NexusServer {
   static async fetchAllProfiles(): Promise<Partial<UserProfile>[]> {
     const client = getSupabase();
     if (!client) return [];
-    const { data, error } = await client
-      .from('profiles')
-      .select('id, username, avatar_url, is_admin, total_xp, level, private:user_private_info(email, registration_number)')
-      .order('username', { ascending: true });
-      
-    if (error) {
+
+    try {
+      const { data: { session } } = await client.auth.getSession();
+      if (!session) throw new Error("No active session found.");
+
+      const response = await fetch('/api/admin-profiles', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || "Failed to fetch administrative profiles.");
+      }
+
+      return await response.json();
+    } catch (error: any) {
       console.error('Fetch All Profiles Error:', error);
       return [];
     }
-    
-    return (data || []).map(p => {
-      const { private: privateInfo, ...rest } = p as any;
-      return {
-        ...rest,
-        email: privateInfo?.[0]?.email || privateInfo?.email || null,
-        registration_number: privateInfo?.[0]?.registration_number || privateInfo?.registration_number || null
-      };
-    });
   }
 
   // Keep this for individual/targeted blasts if needed
