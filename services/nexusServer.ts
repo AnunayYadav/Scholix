@@ -68,7 +68,7 @@ class NexusServer {
    */
   static async fetchCommunityTimetables(): Promise<any[]> {
     try {
-      const response = await fetch('/api/timetables');
+      const response = await fetch('/api/gateway?action=timetables');
       if (!response.ok) throw new Error("Failed to sync community presets.");
       return await response.json();
     } catch (e) {
@@ -1642,7 +1642,7 @@ class NexusServer {
    */
   static async fetchMarketplaceItems(): Promise<any[]> {
     try {
-      const response = await fetch('/api/marketplace');
+      const response = await fetch('/api/gateway?action=marketplace');
       if (!response.ok) throw new Error("Failed to fetch marketplace.");
       const data = await response.json();
       return (data || []).map((item: any) => ({
@@ -1699,7 +1699,7 @@ class NexusServer {
    */
   static async fetchRoommateRequests(): Promise<any[]> {
     try {
-      const response = await fetch('/api/roommates');
+      const response = await fetch('/api/gateway?action=roommates');
       if (!response.ok) throw new Error("Failed to fetch roommate requests.");
       const data = await response.json();
       return (data || []).map((item: any) => ({
@@ -1863,7 +1863,7 @@ class NexusServer {
       const { data: { session } } = await client.auth.getSession();
       if (!session) throw new Error("No active session found.");
 
-      const response = await fetch('/api/admin-profiles', {
+      const response = await fetch('/api/gateway?action=admin-profiles', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${session.access_token}`
