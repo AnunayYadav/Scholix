@@ -965,7 +965,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
     // 💾 Authenticated Download with Cover Page
     const handleDownload = async () => {
-        if (!url || isDownloading) return;
+        const downloadUrl = url || objectUrlRef.current;
+        if (!downloadUrl || isDownloading) return;
 
         const STORAGE_KEY = 'nexus_pdf_downloads';
         const today = new Date().toISOString().split('T')[0];
@@ -991,11 +992,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
             const { data: { session } } = await NexusServer.getSession();
 
             // 1. Fetch the original PDF bytes
-            const pdfResponse = await fetch(url, {
-                headers: {
+            const fetchOptions: RequestInit = {};
+            if (!downloadUrl.startsWith('blob:')) {
+                fetchOptions.headers = {
                     'Authorization': session ? `Bearer ${session.access_token}` : ''
-                }
-            });
+                };
+            }
+            const pdfResponse = await fetch(downloadUrl, fetchOptions);
             if (!pdfResponse.ok) throw new Error("Vault re-verification failed.");
             const originalPdfBytes = await pdfResponse.arrayBuffer();
 
