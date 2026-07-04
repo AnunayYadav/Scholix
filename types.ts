@@ -19,6 +19,7 @@ export enum ModuleType {
 
   ADMIN_STATS = 'ADMIN_STATS',
   PRIVACY = 'PRIVACY',
+  SECURITY = 'SECURITY',
   LOGIN = 'LOGIN',
   SIGNUP = 'SIGNUP',
   TOOLS = 'TOOLS',

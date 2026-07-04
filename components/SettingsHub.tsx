@@ -13,6 +13,7 @@ import ProfileSection from './ProfileSection.tsx';
 import HelpSection from './HelpSection.tsx';
 import AboutUs from './AboutUs.tsx';
 import PrivacyPolicy from './PrivacyPolicy.tsx';
+import SecurityHallOfFame from './SecurityHallOfFame.tsx';
 import DownloadAPKModal from './DownloadAPKModal.tsx';
 
 
@@ -32,6 +33,7 @@ interface SettingsHubProps {
 const getTabToRoute = (prefix: string): Record<string, string> => ({
   'profile': `${prefix}/settings/profile`,
   'privacy': `${prefix}/settings/privacy`,
+  'security': `${prefix}/settings/security`,
   'about': `${prefix}/settings/about`,
   'help_center': `${prefix}/settings/help`,
   'theme': `${prefix}/settings/theme`,
@@ -61,6 +63,7 @@ const SECTIONS = (userProfile: UserProfile | null) => [
     title: 'Who can see your content',
     items: [
       { id: 'privacy', label: 'Privacy Policy', color: 'text-rose-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg> },
+      { id: 'security', label: 'Security & Hall of Fame', color: 'text-orange-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg> },
     ]
   },
   {
@@ -127,6 +130,8 @@ export function SettingsHub({
         return <AboutUs userProfile={userProfile} />;
       case 'privacy':
         return <PrivacyPolicy />;
+      case 'security':
+        return <SecurityHallOfFame />;
       default:
         return null;
     }

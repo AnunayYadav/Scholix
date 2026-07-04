@@ -28,6 +28,7 @@ const EmergencyContacts = lazyWithPreload(() => import('./components/EmergencyCo
 const AdminStats = lazyWithPreload(() => import('./components/AdminStats.tsx'));
 const PaymentSuccess = lazyWithPreload(() => import('./components/PaymentSuccess.tsx'));
 const PrivacyPolicy = lazyWithPreload(() => import('./components/PrivacyPolicy.tsx'));
+const SecurityHallOfFame = lazyWithPreload(() => import('./components/SecurityHallOfFame.tsx'));
 const ToolsHub = lazyWithPreload(() => import('./components/ToolsHub.tsx'));
 
 // Eager/static imports for shared/immediate layout components
@@ -2066,6 +2067,7 @@ const AppContent: React.FC = () => {
                 <Route path="/contact" element={<StaticRedirect to="/contact.html" />} />
                 {/* Internal routes (for app users) */}
                 <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/security" element={<SecurityHallOfFame />} />
                 <Route path="/about" element={<AboutUs userProfile={userProfile} />} />
                 <Route path="/:uniKey/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} onOpenAuth={openAuth} authModalOpen={showAuthModal} authIsReady={authIsReady} />} />
                 <Route path="/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} onOpenAuth={openAuth} authModalOpen={showAuthModal} authIsReady={authIsReady} />} />
@@ -2182,6 +2184,7 @@ const FeatureRoutes: React.FC<{
         <Route path="/settings" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
         <Route path="/settings/profile" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="profile" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
         <Route path="/settings/privacy" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="privacy" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+        <Route path="/settings/security" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="security" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
         <Route path="/settings/about" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="about" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
         <Route path="/settings/help" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="help_center" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
         <Route path="/settings/theme" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="theme" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
