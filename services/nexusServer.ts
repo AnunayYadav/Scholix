@@ -643,8 +643,13 @@ class NexusServer {
   static async resolveEmailByUsername(username: string): Promise<string | null> {
     const client = getSupabase();
     if (!client) return null;
-    const { data } = await client.from('profiles').select('email').eq('username', username.toLowerCase().trim()).maybeSingle();
-    return data?.email || null;
+    const { data } = await client
+      .from('profiles')
+      .select('private:user_private_info(email)')
+      .eq('username', username.toLowerCase().trim())
+      .maybeSingle();
+    const privateInfo = data?.private as any;
+    return privateInfo?.email || privateInfo?.[0]?.email || null;
   }
 
   static async signIn(identifier: string, pass: string) {
@@ -718,11 +723,9 @@ class NexusServer {
       try {
         // Create full profile immediately to avoid race conditions
         // We use a safe upsert: if some columns don't exist (400 error), we fall back to a minimal profile
-        const fullProfile = {
+        const publicProfile = {
           id: result.data.user.id,
-          email: cleanEmail,
           username: cleanUsername,
-          registration_number: cleanRegNo,
           is_verified: 'yes',
           is_admin: false,
           total_xp: 0,
@@ -732,37 +735,28 @@ class NexusServer {
           longest_streak: 0,
           last_active_date: new Date().toISOString().split('T')[0]
         };
-        
 
-        const { error: fullError } = await client.from('profiles').upsert(fullProfile, { onConflict: 'id' });
-        
-        if (fullError) {
-          if (fullError.code === '23505' || fullError.message.includes('unique_registration_number')) {
+        const { error: profileError } = await client.from('profiles').upsert(publicProfile, { onConflict: 'id' });
+        if (profileError) {
+          console.error("[NexusServer] Public profile upsert failed:", profileError);
+        }
+
+        const privateProfile: any = {
+          id: result.data.user.id,
+          email: cleanEmail,
+        };
+        if (cleanRegNo) {
+          privateProfile.registration_number = cleanRegNo;
+        }
+
+        const { error: privateError } = await client.from('user_private_info').upsert(privateProfile, { onConflict: 'id' });
+        if (privateError) {
+          if (privateError.code === '23505' || privateError.message?.includes('unique_registration_number')) {
             console.warn("[NexusServer] Registration number conflict, retrying without it...");
-            const { registration_number, ...profileWithoutReg } = fullProfile;
-            // Ensure is_verified is definitely 'yes' in the retry
-            profileWithoutReg.is_verified = 'yes';
-            const { error: retryError } = await client.from('profiles').upsert(profileWithoutReg, { onConflict: 'id' });
-            if (retryError) console.error("[NexusServer] Profile upsert retry failed:", retryError);
-          } else if (fullError.code === 'PGRST204' || fullError.message.includes('column')) {
-            const minimalProfile: any = {
-              id: result.data.user.id,
-              email: cleanEmail,
-              username: cleanUsername,
-              registration_number: cleanRegNo,
-              is_verified: 'yes'
-            };
-            const { error: minError } = await client.from('profiles').upsert(minimalProfile, { onConflict: 'id' });
-            if (minError) {
-              if (minError.code === '23505') {
-                 const { registration_number, ...minWithoutReg } = minimalProfile;
-                 await client.from('profiles').upsert(minWithoutReg, { onConflict: 'id' });
-              } else {
-                 console.error("[NexusServer] Minimal profile fallback also failed:", minError);
-              }
-            }
+            const { registration_number, ...privateWithoutReg } = privateProfile;
+            await client.from('user_private_info').upsert(privateWithoutReg, { onConflict: 'id' });
           } else {
-            console.error("[NexusServer] Initial profile upsert failed:", fullError);
+            console.error("[NexusServer] Private profile upsert failed:", privateError);
           }
         }
       } catch (e) {
@@ -851,34 +845,40 @@ class NexusServer {
   static async getProfile(userId: string): Promise<UserProfile | null> {
     const client = getSupabase();
     if (!client || !userId) return null;
-    const { data, error } = await client.from('profiles').select('*').eq('id', userId).maybeSingle();
+    const { data: profile, error } = await client.from('profiles').select('*').eq('id', userId).maybeSingle();
     if (error) {
       console.error('Get Profile Error:', error);
       throw error;
     }
-    return data;
+    if (!profile) return null;
+    const { data: privateInfo } = await client.from('user_private_info').select('email, registration_number').eq('id', userId).maybeSingle();
+    return { ...profile, ...privateInfo };
   }
 
   static async ensureProfile(user: User, overrides?: { username?: string, registration_number?: string }): Promise<UserProfile> {
     const client = getSupabase();
     if (!client) throw new Error("Registry offline.");
 
-    const { data: existing, error: selectError } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
-    if (selectError) {
-      console.error("[NexusServer] Error checking existing profile:", selectError);
-      throw selectError;
+    const [profileRes, privateRes] = await Promise.all([
+      client.from('profiles').select('*').eq('id', user.id).maybeSingle(),
+      client.from('user_private_info').select('email, registration_number').eq('id', user.id).maybeSingle()
+    ]);
+
+    if (profileRes.error) {
+      console.error("[NexusServer] Error checking existing profile:", profileRes.error);
+      throw profileRes.error;
     }
+
+    const existing = profileRes.data ? { ...profileRes.data, ...(privateRes.data || {}) } : null;
     
-    // Aggregate metadata from multiple sources (Supabase stores it differently based on flow)
     const metadata = {
       ...(user as any).raw_user_meta_data,
       ...user.user_metadata,
       ...overrides
     };
 
-    // Robustly check multiple possible locations and formats for verification status
     const isVerifiedInMeta = 
-      !!user.email_confirmed_at || // Supabase native verification
+      !!user.email_confirmed_at || 
       metadata.is_verified === 'yes' || 
       metadata.is_verified === true || 
       metadata.isVerified === 'yes' || 
@@ -887,56 +887,43 @@ class NexusServer {
       user.app_metadata?.is_verified === true;
 
     if (existing) {
-      let needsUpdate = false;
-      const updates: any = {};
+      let needsProfileUpdate = false;
+      let needsPrivateUpdate = false;
+      const profileUpdates: any = {};
+      const privateUpdates: any = {};
 
       if ((!existing.is_verified || existing.is_verified === 'no') && isVerifiedInMeta) {
-        updates.is_verified = 'yes';
-        needsUpdate = true;
+        profileUpdates.is_verified = 'yes';
+        needsProfileUpdate = true;
       }
 
-      // If existing profile has a fallback username but metadata has a better one, update it
       if ((!existing.username || existing.username.startsWith('verto_')) && metadata.username) {
-        updates.username = metadata.username;
-        needsUpdate = true;
+        profileUpdates.username = metadata.username;
+        needsProfileUpdate = true;
       }
       
       if (!existing.registration_number && metadata.registration_number) {
-        updates.registration_number = metadata.registration_number;
-        needsUpdate = true;
+        privateUpdates.registration_number = metadata.registration_number;
+        needsPrivateUpdate = true;
       }
 
-      if (needsUpdate) {
-        // Silent update for profile consistency
-        const { data: updated, error: updateError } = await client.from('profiles').update(updates).eq('id', user.id).select().single();
-        
-        if (updateError) {
-          const isConflict = updateError.code === '23505' || 
-                           updateError.message?.includes('unique_registration_number') ||
-                           updateError.message?.includes('duplicate key');
-          
-          if (isConflict) {
-            console.warn("[NexusServer] Profile sync conflict, retrying without registration_number...");
-            const { registration_number, ...safeUpdates } = updates;
-            if (Object.keys(safeUpdates).length > 0) {
-              const { data: retryUpdated, error: retryError } = await client.from('profiles').update(safeUpdates).eq('id', user.id).select().maybeSingle();
-              if (!retryError && retryUpdated) return retryUpdated;
-              if (retryError) console.error("[NexusServer] Profile sync retry failed:", retryError);
-            }
-          } else {
-            console.error("[NexusServer] Profile sync update error:", updateError);
-          }
-        }
-        if (updated) return updated;
+      if (needsProfileUpdate) {
+        await client.from('profiles').update(profileUpdates).eq('id', user.id);
       }
-      return existing;
+      if (needsPrivateUpdate) {
+        await client.from('user_private_info').update(privateUpdates).eq('id', user.id);
+      }
+
+      return {
+        ...existing,
+        ...profileUpdates,
+        ...privateUpdates
+      };
     }
 
-    const newProfile = {
+    const publicNew = {
       id: user.id,
-      email: user.email!,
       username: metadata.username || user.email?.split('@')[0] || `verto_${user.id.slice(0, 5)}`,
-      registration_number: metadata.registration_number || null,
       is_admin: false,
       total_xp: 0,
       level: 1,
@@ -947,47 +934,28 @@ class NexusServer {
       is_verified: isVerifiedInMeta ? 'yes' : 'no'
     };
 
-    let { data, error } = await client.from('profiles')
-      .insert(newProfile)
-      .select()
-      .maybeSingle();
+    const privateNew = {
+      id: user.id,
+      email: user.email!,
+      registration_number: metadata.registration_number || null
+    };
 
-    if (error) {
-      if (error.code === '23505' || error.message?.includes('duplicate key') || error.message?.includes('unique_registration_number')) {
-        console.warn("[NexusServer] Profile already exists (conflict), fetching...");
-        const { data: retryData, error: retryError } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
-        if (!retryError && retryData) return retryData;
-        if (retryError) {
-          console.error("[NexusServer] Profile creation retry failed:", retryError);
-          throw retryError;
-        }
-      } else if (error.code === 'PGRST204' || error.message.includes('column')) {
-        console.warn(`[NexusServer] ensureProfile failed (missing columns), trying minimal...`);
-        const minimalNewProfile = {
-          id: user.id,
-          email: user.email!,
-          username: newProfile.username,
-          registration_number: newProfile.registration_number,
-          is_verified: isVerifiedInMeta ? 'yes' : 'no'
-        };
-        const fallback = await client.from('profiles').insert(minimalNewProfile).select().maybeSingle();
-        if (fallback.error) {
-          if (fallback.error.code === '23505' || fallback.error.message?.includes('duplicate key')) {
-            const { data: retryData, error: retryError } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
-            if (!retryError && retryData) return retryData;
-          }
-          console.error("[NexusServer] Minimal profile fallback failed:", fallback.error);
-          throw fallback.error;
-        }
-        data = fallback.data;
-      } else {
-        console.error("[NexusServer] Profile creation error:", error);
-        throw error;
-      }
+    const { data: finalProfile, error: pError } = await client.from('profiles').insert(publicNew).select().maybeSingle();
+    if (pError) {
+      console.error("[NexusServer] Profile creation error:", pError);
+      throw pError;
     }
-    
+
+    const { error: privError } = await client.from('user_private_info').insert(privateNew);
+    if (privError) {
+      console.error("[NexusServer] Private info creation error:", privError);
+    }
+
     console.log(`[NexusServer] Profile created successfully for ${user.id}`);
-    return data || newProfile;
+    return {
+      ...(finalProfile || publicNew),
+      ...privateNew
+    };
   }
 
   static async collectReward(userId: string, frameId: string) {
@@ -1018,8 +986,22 @@ class NexusServer {
   static async updateProfile(userId: string, updates: Partial<UserProfile>): Promise<void> {
     const client = getSupabase();
     if (!client || !userId) return;
-    const { error } = await client.from('profiles').update(updates).eq('id', userId);
-    if (error) throw error;
+
+    const { registration_number, email, ...profileUpdates } = updates as any;
+
+    if (Object.keys(profileUpdates).length > 0) {
+      const { error } = await client.from('profiles').update(profileUpdates).eq('id', userId);
+      if (error) throw error;
+    }
+
+    const privateUpdates: any = {};
+    if (registration_number !== undefined) privateUpdates.registration_number = registration_number;
+    if (email !== undefined) privateUpdates.email = email;
+
+    if (Object.keys(privateUpdates).length > 0) {
+      const { error } = await client.from('user_private_info').update(privateUpdates).eq('id', userId);
+      if (error) throw error;
+    }
   }
 
   static sanitizeStoragePath(name: string): string {
@@ -1349,7 +1331,7 @@ class NexusServer {
     if (!client) return true;
     const cleanRegNo = regNo.replace(/[^0-9]/g, '');
     if (cleanRegNo.length === 0) return true;
-    const { data } = await client.from('profiles').select('registration_number').eq('registration_number', cleanRegNo).maybeSingle();
+    const { data } = await client.from('user_private_info').select('registration_number').eq('registration_number', cleanRegNo).maybeSingle();
     return !data;
   }
 
@@ -1872,12 +1854,24 @@ class NexusServer {
   static async fetchAllProfiles(): Promise<Partial<UserProfile>[]> {
     const client = getSupabase();
     if (!client) return [];
-    const { data, error } = await client.from('profiles').select('id, username, email, registration_number, avatar_url, is_admin, total_xp, level').order('username', { ascending: true });
+    const { data, error } = await client
+      .from('profiles')
+      .select('id, username, avatar_url, is_admin, total_xp, level, private:user_private_info(email, registration_number)')
+      .order('username', { ascending: true });
+      
     if (error) {
       console.error('Fetch All Profiles Error:', error);
       return [];
     }
-    return data || [];
+    
+    return (data || []).map(p => {
+      const { private: privateInfo, ...rest } = p as any;
+      return {
+        ...rest,
+        email: privateInfo?.[0]?.email || privateInfo?.email || null,
+        registration_number: privateInfo?.[0]?.registration_number || privateInfo?.registration_number || null
+      };
+    });
   }
 
   // Keep this for individual/targeted blasts if needed
@@ -1966,8 +1960,8 @@ class NexusServer {
     if (!client) return [];
     const { data, error } = await client
       .from('profiles')
-      .select('id, username, registration_number, avatar_url, total_xp, level')
-      .or(`username.ilike.%${query}%,registration_number.ilike.%${query}%`)
+      .select('id, username, avatar_url, total_xp, level')
+      .ilike('username', `%${query}%`)
       .limit(5);
     if (error) {
       console.error("Search Users Error:", error);
@@ -1981,13 +1975,15 @@ class NexusServer {
     if (!client) return null;
     
     // Fetch profile, attempts, reports, feedback, and history records
-    const [profile, attempts, reports, feedback, history] = await Promise.all([
+    const [profileRes, privateRes, attempts, reports, feedback, history] = await Promise.all([
       client.from('profiles').select('*').eq('id', userId).maybeSingle(),
+      client.from('user_private_info').select('email, registration_number').eq('id', userId).maybeSingle(),
       client.from('quiz_attempts').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
       client.from('question_reports').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
       client.from('feedback').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
       client.from('user_history').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(5000)
     ]);
+    const profile = profileRes.data ? { ...profileRes.data, ...(privateRes.data || {}) } : null;
 
     // Aggregate stats from history records
     const stats = {
