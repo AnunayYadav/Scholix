@@ -556,6 +556,27 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
     const [feedback, setFeedback] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+    // Secure Entrance States
+    const [isPasscodeVerified, setIsPasscodeVerified] = useState<boolean>(() => {
+        return sessionStorage.getItem('admin_stats_verified') === 'true';
+    });
+    const [passcode, setPasscode] = useState<string[]>(Array(6).fill(''));
+    const [shake, setShake] = useState(false);
+    const [attempts, setAttempts] = useState<number>(() => {
+        return parseInt(localStorage.getItem('admin_attempts') || '0', 10);
+    });
+    const [lockoutUntil, setLockoutUntil] = useState<number | null>(() => {
+        const stored = localStorage.getItem('admin_lockout_until');
+        if (stored) {
+            const time = parseInt(stored, 10);
+            if (time > Date.now()) {
+                return time;
+            }
+        }
+        return null;
+    });
+    const [lockoutTimeLeft, setLockoutTimeLeft] = useState<number>(0);
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [replyText, setReplyText] = useState('');
     const [isSendingReply, setIsSendingReply] = useState(false);
@@ -606,20 +627,109 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
         }
     };
 
+    // Lockout timer handler
     useEffect(() => {
-        loadCoreData();
-        loadReports();
-        loadFeedback();
-    }, [activeTab]);
+        if (!lockoutUntil) return;
+        
+        const updateTimer = () => {
+            const left = Math.ceil((lockoutUntil - Date.now()) / 1000);
+            if (left <= 0) {
+                setLockoutUntil(null);
+                setAttempts(0);
+                localStorage.removeItem('admin_lockout_until');
+                localStorage.setItem('admin_attempts', '0');
+            } else {
+                setLockoutTimeLeft(left);
+            }
+        };
+
+        updateTimer();
+        const interval = setInterval(updateTimer, 1000);
+        return () => clearInterval(interval);
+    }, [lockoutUntil]);
+
+    // Handle passcode verification and navigation focus
+    const handlePasscodeChange = async (index: number, value: string) => {
+        if (lockoutUntil) return;
+        
+        const newPasscode = [...passcode];
+        if (value && !/^\d$/.test(value)) return;
+        
+        newPasscode[index] = value;
+        setPasscode(newPasscode);
+
+        if (value && index < 5) {
+            const nextInput = document.getElementById(`pin-${index + 1}`);
+            if (nextInput) nextInput.focus();
+        }
+
+        if (newPasscode.every(digit => digit !== '')) {
+            const enteredCode = newPasscode.join('');
+            try {
+                const encoder = new TextEncoder();
+                const dataBytes = encoder.encode(enteredCode);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', dataBytes);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const enteredHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                
+                const expectedHash = import.meta.env.VITE_ADMIN_PASSCODE_HASH || '4a20678d7125244ada7cf0f8b03ef8256fcedeaf7a30b0daf4e05a9e995d367e';
+                
+                if (enteredHash === expectedHash) {
+                    setIsPasscodeVerified(true);
+                    sessionStorage.setItem('admin_stats_verified', 'true');
+                    localStorage.setItem('admin_attempts', '0');
+                    setAttempts(0);
+                } else {
+                    const newAttempts = attempts + 1;
+                    setAttempts(newAttempts);
+                    localStorage.setItem('admin_attempts', newAttempts.toString());
+                    setShake(true);
+                    setPasscode(Array(6).fill(''));
+                    
+                    setTimeout(() => {
+                        const firstInput = document.getElementById('pin-0');
+                        if (firstInput) firstInput.focus();
+                    }, 50);
+                    
+                    setTimeout(() => setShake(false), 500);
+
+                    if (newAttempts >= 5) {
+                        const lockoutEndTime = Date.now() + 15 * 60 * 1000;
+                        setLockoutUntil(lockoutEndTime);
+                        localStorage.setItem('admin_lockout_until', lockoutEndTime.toString());
+                    }
+                }
+            } catch (err) {
+                console.error("Verification error:", err);
+            }
+        }
+    };
+
+    const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Backspace' && !passcode[index] && index > 0) {
+            const newPasscode = [...passcode];
+            newPasscode[index - 1] = '';
+            setPasscode(newPasscode);
+            const prevInput = document.getElementById(`pin-${index - 1}`);
+            if (prevInput) prevInput.focus();
+        }
+    };
+
+    useEffect(() => {
+        if (isPasscodeVerified && userProfile?.is_admin) {
+            loadCoreData();
+            loadReports();
+            loadFeedback();
+        }
+    }, [activeTab, isPasscodeVerified, userProfile]);
 
     // Load All Profiles for Tracker
     useEffect(() => {
-        if (reportSubTab === 'tracker' && allProfiles.length === 0) {
+        if (isPasscodeVerified && userProfile?.is_admin && reportSubTab === 'tracker' && allProfiles.length === 0) {
             const fetchProfiles = async () => {
                 setIsLoadingProfiles(true);
                 try {
                     const profiles = await NexusServer.fetchAllProfiles();
-                    // We no longer eager-fetch stats for every profile here to prevent rate limits
                     setAllProfiles(profiles);
                 } catch (err) {
                     console.error("Profile Fetch Error:", err);
@@ -629,7 +739,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
             };
             fetchProfiles();
         }
-    }, [reportSubTab, allProfiles.length]);
+    }, [reportSubTab, allProfiles.length, isPasscodeVerified, userProfile]);
 
     // Sorting and Filtering Logic
     const processedProfiles = useMemo(() => {
@@ -849,6 +959,147 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                     <h2 className="text-2xl font-bold text-white mb-3">Access Restricted</h2>
                     <p className="text-neutral-400 font-medium leading-relaxed">Administrator level authentication required to access the Command Center.</p>
                 </div>
+            </div>
+        );
+    }
+
+    if (!isPasscodeVerified) {
+        const formatTime = (seconds: number) => {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        };
+
+        return (
+            <div className="flex items-center justify-center min-h-[70vh] px-4">
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className={`glass-panel w-full max-w-md p-8 rounded-[40px] border border-neutral-200 dark:border-white/10 shadow-2xl relative overflow-hidden bg-white dark:bg-[#0a0a0a] text-center ${shake ? 'animate-shake' : ''}`}
+                    style={{
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                    }}
+                >
+                    <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 to-amber-500" />
+                    
+                    <div className="w-16 h-16 bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/5">
+                        {lockoutUntil ? (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7 animate-pulse text-red-500"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                        ) : (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-7 h-7"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                        )}
+                    </div>
+
+                    <h2 className="text-2xl font-black text-neutral-900 dark:text-white uppercase tracking-tight mb-2">
+                        {lockoutUntil ? 'Terminal Locked' : 'Secure Entrance'}
+                    </h2>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-wider mb-8">
+                        {lockoutUntil 
+                            ? 'Too many failed authorization attempts' 
+                            : 'Command Center passcode authorization required'
+                        }
+                    </p>
+
+                    {lockoutUntil ? (
+                        <div className="space-y-6">
+                            <div className="p-6 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 rounded-2xl text-center">
+                                <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-2">Temporary Lockdown</p>
+                                <span className="text-3xl font-mono font-bold text-red-500 tracking-wider">
+                                    {formatTime(lockoutTimeLeft)}
+                                </span>
+                            </div>
+                            <p className="text-xs text-neutral-400 font-medium">Please wait for the lockout countdown to expire before trying again.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-8">
+                            <div className="flex justify-center gap-3">
+                                {passcode.map((digit, idx) => (
+                                    <input
+                                        key={idx}
+                                        id={`pin-${idx}`}
+                                        type="password"
+                                        maxLength={1}
+                                        value={digit}
+                                        onChange={e => handlePasscodeChange(idx, e.target.value)}
+                                        onKeyDown={e => handleKeyDown(idx, e)}
+                                        autoFocus={idx === 0}
+                                        className="w-12 h-14 bg-neutral-100 dark:bg-white/5 border-2 border-neutral-200 dark:border-white/10 rounded-2xl text-center text-xl font-bold text-neutral-900 dark:text-white focus:outline-none focus:border-orange-500 dark:focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all"
+                                    />
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-3 max-w-[280px] mx-auto">
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                                    <button
+                                        key={num}
+                                        type="button"
+                                        onClick={() => {
+                                            const emptyIdx = passcode.indexOf('');
+                                            if (emptyIdx !== -1) {
+                                                handlePasscodeChange(emptyIdx, num.toString());
+                                            }
+                                        }}
+                                        className="h-12 rounded-xl bg-neutral-50 dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white font-bold text-base hover:bg-neutral-100 dark:hover:bg-white/5 hover:scale-105 active:scale-95 transition-all"
+                                    >
+                                        {num}
+                                    </button>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => setPasscode(Array(6).fill(''))}
+                                    className="h-12 rounded-xl bg-neutral-100 dark:bg-red-500/10 border border-neutral-200 dark:border-red-500/20 text-red-500 font-bold text-xs hover:bg-red-500/20 hover:scale-105 active:scale-95 transition-all"
+                                >
+                                    Clear
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const emptyIdx = passcode.indexOf('');
+                                        if (emptyIdx !== -1) {
+                                            handlePasscodeChange(emptyIdx, '0');
+                                        }
+                                    }}
+                                    className="h-12 rounded-xl bg-neutral-50 dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white font-bold text-base hover:bg-neutral-100 dark:hover:bg-white/5 hover:scale-105 active:scale-95 transition-all"
+                                >
+                                    0
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const filledIdx = passcode.map(x => x !== '').lastIndexOf(true);
+                                        if (filledIdx !== -1) {
+                                            const newPasscode = [...passcode];
+                                            newPasscode[filledIdx] = '';
+                                            setPasscode(newPasscode);
+                                            const prevInput = document.getElementById(`pin-${filledIdx}`);
+                                            if (prevInput) prevInput.focus();
+                                        }
+                                    }}
+                                    className="h-12 rounded-xl bg-neutral-50 dark:bg-white/[0.02] border border-neutral-200 dark:border-white/5 text-neutral-500 dark:text-white/40 flex items-center justify-center hover:bg-neutral-100 dark:hover:bg-white/5 hover:scale-105 active:scale-95 transition-all"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" /><line x1="18" y1="9" x2="12" y2="15" /><line x1="12" y1="9" x2="18" y2="15" /></svg>
+                                </button>
+                            </div>
+
+                            {attempts > 0 && (
+                                <p className="text-[10px] text-red-500 font-bold uppercase tracking-wider">
+                                    Incorrect Passcode. {5 - attempts} attempts remaining.
+                                </p>
+                            )}
+                        </div>
+                    )}
+                    <style>{`
+                        @keyframes shake {
+                            0%, 100% { transform: translateX(0); }
+                            10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+                            20%, 40%, 60%, 80% { transform: translateX(6px); }
+                        }
+                        .animate-shake {
+                            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+                            border-color: #ef4444 !important;
+                        }
+                    `}</style>
+                </motion.div>
             </div>
         );
     }
