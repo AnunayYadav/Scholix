@@ -472,11 +472,41 @@ async function prerender() {
     fileHtml = fileHtml.replace('</head>', `${ogTitleMeta}${ogDescMeta}</head>`);
     
     // Inject Pre-rendered Content into root div
+    const brandLoadingScreenHtml = `
+<div class="pre-renderer-loading-screen" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; transition: background-color 0.3s; margin: 0; padding: 0; position: fixed; inset: 0; z-index: 99999;">
+  <div style="animation: pulse 1.8s ease-in-out infinite;">
+    <img src="/Scholix_light.webp" alt="Scholix" class="light-logo" style="height: 60px; object-fit: contain;" />
+    <img src="/Scholix_dark.webp" alt="Scholix" class="dark-logo" style="height: 60px; object-fit: contain; display: none;" />
+  </div>
+  <style>
+    .pre-renderer-loading-screen {
+      background-color: #fdfdfd;
+    }
+    .dark .pre-renderer-loading-screen {
+      background-color: #050505 !important;
+    }
+    .dark .light-logo {
+      display: none !important;
+    }
+    .dark .dark-logo {
+      display: block !important;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; transform: scale(0.98); }
+      50% { opacity: 1; transform: scale(1.02); }
+    }
+  </style>
+</div>
+<div class="seo-hidden-content" style="display: none;" aria-hidden="true">
+  ${route.contentHtml}
+</div>
+    `;
+
     if (fileHtml.includes('<div id="root"></div>')) {
-      fileHtml = fileHtml.replace('<div id="root"></div>', `<div id="root">${route.contentHtml}</div>`);
+      fileHtml = fileHtml.replace('<div id="root"></div>', `<div id="root">${brandLoadingScreenHtml}</div>`);
     } else if (fileHtml.includes('<div id="root"')) {
       // Handles cases where there's attributes in root div
-      fileHtml = fileHtml.replace(/(<div id="root"[^>]*>)(<\/div>)/i, `$1${route.contentHtml}$2`);
+      fileHtml = fileHtml.replace(/(<div id="root"[^>]*>)(<\/div>)/i, `$1${brandLoadingScreenHtml}$2`);
     }
     
     // Write index.html

@@ -1591,7 +1591,7 @@ const PremiumAuthModal: React.FC<{
 
 const AppContent: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('theme') as 'light' | 'dark') || 'dark');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const userProfileRef = useRef<UserProfile | null>(null);
 
@@ -1883,6 +1883,24 @@ const AppContent: React.FC = () => {
     const path = getPathFromModule(module, selectedUniversity);
     navigate(path);
   }, [navigate, selectedUniversity]);
+
+  if (!authIsReady) {
+    const bgColor = theme === 'dark' ? '#050505' : '#fdfdfd';
+    const logoSrc = theme === 'dark' ? '/Scholix_dark.webp' : '/Scholix_light.webp';
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[100dvh]" style={{ backgroundColor: bgColor, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
+        <div style={{ animation: 'pulse 1.8s ease-in-out infinite' }}>
+          <img src={logoSrc} alt="Scholix" style={{ height: '60px', objectFit: 'contain' }} />
+        </div>
+        <style>{`
+          @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1.02); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   const isWelcomePage = location.pathname === '/welcome';
 
