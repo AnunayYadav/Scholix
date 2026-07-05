@@ -1,5 +1,6 @@
 
 import { createClient } from '@supabase/supabase-js';
+import { encryptBytes } from '../utils/crypto';
 
 function getMimeType(filename: string, defaultType: string = 'application/octet-stream'): string {
   const ext = filename.split('.').pop()?.toLowerCase();
@@ -88,17 +89,33 @@ export default async function handler(req: any, res: any) {
     // Set appropriate headers to hide origin and prevent direct browser download/exec
     const filename = (typeof path === 'string' ? path : '').split('/').pop() || 'document';
     const contentType = getMimeType(filename, data.type);
+    const isPdf = (typeof path === 'string' ? path : '').toLowerCase().endsWith('.pdf');
 
-    res.setHeader('Content-Type', contentType);
+    if (isPdf) {
+      res.setHeader('Content-Type', 'application/octet-stream'); // Obfuscate type
+    } else {
+      res.setHeader('Content-Type', contentType);
+    }
     res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(filename)}"`);
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     
-    // Convert Blob to Buffer and send
-    const buffer = Buffer.from(await data.arrayBuffer());
-    res.status(200).send(buffer);
+    // Convert Blob to Buffer, encrypt if PDF, and send
+    const arrayBuffer = await data.arrayBuffer();
+    const rawBytes = new Uint8Array(arrayBuffer);
+    let finalBuffer: Buffer;
+
+    if (isPdf) {
+      const key = `scholix_secure_vault_key_secret_2026_${path}`;
+      const encryptedBytes = encryptBytes(key, rawBytes);
+      finalBuffer = Buffer.from(encryptedBytes.buffer, encryptedBytes.byteOffset, encryptedBytes.byteLength);
+    } else {
+      finalBuffer = Buffer.from(rawBytes.buffer, rawBytes.byteOffset, rawBytes.byteLength);
+    }
+
+    res.status(200).send(finalBuffer);
 
   } catch (err: any) {
     console.error("Proxy error:", err);

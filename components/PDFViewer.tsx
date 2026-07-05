@@ -5,6 +5,7 @@ import { LibraryFile, UserProfile } from '../types.ts';
 import { showToast } from './Toast.tsx';
 import NexusServer from '../services/nexusServer.ts';
 import { useUniversity } from '../hooks/useUniversity.tsx';
+import { decryptBytes } from '../utils/crypto';
 
 interface PDFViewerProps {
     url?: string;
@@ -506,12 +507,25 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
                     NexusServer.saveRecord(userProfile.id, 'file_access', `Opened ${fileObj.name}`, { fileId: fileObj.id, fileName: fileObj.name, path: fileObj.storage_path });
                     try {
-                        const fileBlob = await NexusServer.downloadFile(fileObj.storage_path);
-                        const arrayBuffer = await fileBlob.arrayBuffer();
-                        pdfBytes = new Uint8Array(arrayBuffer);
+                        const sessionRes = await NexusServer.getSession();
+                        const session = sessionRes?.data?.session;
+                        if (!session) throw new Error("Authentication session not found.");
+                        
+                        const token = session.access_token;
+                        const resolvedUrl = NexusServer.getFileUrl(fileObj.storage_path, token);
+                        const response = await fetch(resolvedUrl, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                        if (!response.ok) throw new Error("Vault access denied.");
+                        const arrayBuffer = await response.arrayBuffer();
+                        const encryptedBytes = new Uint8Array(arrayBuffer);
+                        const key = `scholix_secure_vault_key_secret_2026_${fileObj.storage_path}`;
+                        pdfBytes = decryptBytes(key, encryptedBytes);
                         pdfBytesRef.current = pdfBytes;
                     } catch (err: any) {
-                        console.error("Failed to download PDF blob:", err);
+                        console.error("Failed to fetch/decrypt PDF from vault:", err);
                         setError('Failed to retrieve document from storage.');
                         setIsLoading(false);
                         return;
@@ -528,11 +542,24 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                                 'Authorization': `Bearer ${session.access_token}`
                             } : {}
                         });
+                        if (!response.ok) throw new Error("Failed to fetch document bytes.");
                         const arrayBuffer = await response.arrayBuffer();
-                        pdfBytes = new Uint8Array(arrayBuffer);
+                        const fetchedBytes = new Uint8Array(arrayBuffer);
+
+                        if (targetUrl.includes('/api/vault')) {
+                            const urlObj = new URL(targetUrl, window.location.origin);
+                            const filePath = urlObj.searchParams.get('path') || '';
+                            const key = `scholix_secure_vault_key_secret_2026_${filePath}`;
+                            pdfBytes = decryptBytes(key, fetchedBytes);
+                        } else {
+                            pdfBytes = fetchedBytes;
+                        }
                         pdfBytesRef.current = pdfBytes;
                     } catch (err: any) {
-                        console.error("Failed to fetch targetUrl bytes:", err);
+                        console.error("Failed to fetch/decrypt targetUrl bytes:", err);
+                        setError('Failed to retrieve document.');
+                        setIsLoading(false);
+                        return;
                     }
                 }
 
@@ -1023,7 +1050,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
         try {
             showToast('Preparing Secure Download...', 'info');
             
-            let originalPdfBytes: Uint8Array | ArrayBuffer;
+            let originalPdfBytes: Uint8Array;
             if (pdfBytesRef.current) {
                 originalPdfBytes = pdfBytesRef.current;
             } else {
@@ -1040,7 +1067,17 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                 }
                 const pdfResponse = await fetch(downloadUrl, fetchOptions);
                 if (!pdfResponse.ok) throw new Error("Vault re-verification failed.");
-                originalPdfBytes = await pdfResponse.arrayBuffer();
+                const fetchedArrayBuffer = await pdfResponse.arrayBuffer();
+                const fetchedBytes = new Uint8Array(fetchedArrayBuffer);
+
+                if (downloadUrl.includes('/api/vault')) {
+                    const urlObj = new URL(downloadUrl, window.location.origin);
+                    const filePath = urlObj.searchParams.get('path') || '';
+                    const key = `scholix_secure_vault_key_secret_2026_${filePath}`;
+                    originalPdfBytes = decryptBytes(key, fetchedBytes);
+                } else {
+                    originalPdfBytes = fetchedBytes;
+                }
             }
 
             // 2. Fetch the cover page image
