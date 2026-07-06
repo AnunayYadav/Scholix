@@ -102,23 +102,34 @@ export default async function handler(req: any, res: any) {
     res.setHeader('Expires', '0');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     
-    // Convert Blob to Buffer, encrypt if PDF, and send
-    const arrayBuffer = await data.arrayBuffer();
-    const rawBytes = new Uint8Array(arrayBuffer);
-    let finalBuffer: Buffer;
+    // Convert download data to Uint8Array safely (handles Blob, Buffer, or Uint8Array)
+    let rawBytes: Uint8Array;
+    if (data && typeof data.arrayBuffer === 'function') {
+      const arrayBuffer = await data.arrayBuffer();
+      rawBytes = new Uint8Array(arrayBuffer);
+    } else if (Buffer.isBuffer(data) || data instanceof Uint8Array) {
+      rawBytes = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+    } else {
+      throw new Error(`Downloaded storage object has unsupported data type: ${data ? data.constructor.name : typeof data}`);
+    }
 
+    let finalBuffer: Buffer;
     if (isPdf) {
       const key = `scholix_secure_vault_key_secret_2026_${path}`;
       const encryptedBytes = encryptBytes(key, rawBytes);
-      finalBuffer = Buffer.from(encryptedBytes.buffer, encryptedBytes.byteOffset, encryptedBytes.byteLength);
+      finalBuffer = Buffer.from(encryptedBytes);
     } else {
-      finalBuffer = Buffer.from(rawBytes.buffer, rawBytes.byteOffset, rawBytes.byteLength);
+      finalBuffer = Buffer.from(rawBytes);
     }
 
     res.status(200).send(finalBuffer);
 
   } catch (err: any) {
     console.error("Proxy error:", err);
-    return res.status(500).json({ error: "Secure Tunneling Interrupted." });
+    return res.status(500).json({ 
+      error: "Secure Tunneling Interrupted.", 
+      message: err.message,
+      stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
+    });
   }
 }
