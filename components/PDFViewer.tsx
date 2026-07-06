@@ -518,7 +518,16 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                                 'Authorization': `Bearer ${token}`
                             }
                         });
-                        if (!response.ok) throw new Error("Vault access denied.");
+                        if (!response.ok) {
+                            let errorMsg = "Vault access denied.";
+                            try {
+                                const errJson = await response.json();
+                                if (errJson && errJson.message) {
+                                    errorMsg = `Vault error: ${errJson.message}`;
+                                }
+                            } catch (_) {}
+                            throw new Error(errorMsg);
+                        }
                         const arrayBuffer = await response.arrayBuffer();
                         const encryptedBytes = new Uint8Array(arrayBuffer);
                         const key = `scholix_secure_vault_key_secret_2026_${fileObj.storage_path}`;
@@ -542,7 +551,16 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                                 'Authorization': `Bearer ${session.access_token}`
                             } : {}
                         });
-                        if (!response.ok) throw new Error("Failed to fetch document bytes.");
+                        if (!response.ok) {
+                            let errorMsg = "Failed to fetch document bytes.";
+                            try {
+                                const errJson = await response.json();
+                                if (errJson && errJson.message) {
+                                    errorMsg = `Vault error: ${errJson.message}`;
+                                }
+                            } catch (_) {}
+                            throw new Error(errorMsg);
+                        }
                         const arrayBuffer = await response.arrayBuffer();
                         const fetchedBytes = new Uint8Array(arrayBuffer);
 
@@ -557,7 +575,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                         pdfBytesRef.current = pdfBytes;
                     } catch (err: any) {
                         console.error("Failed to fetch/decrypt targetUrl bytes:", err);
-                        setError('Failed to retrieve document.');
+                        setError(err.message || 'Failed to retrieve document.');
                         setIsLoading(false);
                         return;
                     }
@@ -1066,7 +1084,16 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     };
                 }
                 const pdfResponse = await fetch(downloadUrl, fetchOptions);
-                if (!pdfResponse.ok) throw new Error("Vault re-verification failed.");
+                if (!pdfResponse.ok) {
+                    let errorMsg = "Vault re-verification failed.";
+                    try {
+                        const errJson = await pdfResponse.json();
+                        if (errJson && errJson.message) {
+                            errorMsg = `Vault error: ${errJson.message}`;
+                        }
+                    } catch (_) {}
+                    throw new Error(errorMsg);
+                }
                 const fetchedArrayBuffer = await pdfResponse.arrayBuffer();
                 const fetchedBytes = new Uint8Array(fetchedArrayBuffer);
 

@@ -102,15 +102,33 @@ export default async function handler(req: any, res: any) {
     res.setHeader('Expires', '0');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     
-    // Convert download data to Uint8Array safely (handles Blob, Buffer, or Uint8Array)
+    // Convert download data to Uint8Array safely across all environments (Blob, Buffer, or Stream)
     let rawBytes: Uint8Array;
-    if (data && typeof data.arrayBuffer === 'function') {
-      const arrayBuffer = await data.arrayBuffer();
-      rawBytes = new Uint8Array(arrayBuffer);
-    } else if (Buffer.isBuffer(data) || data instanceof Uint8Array) {
-      rawBytes = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
-    } else {
-      throw new Error(`Downloaded storage object has unsupported data type: ${data ? data.constructor.name : typeof data}`);
+    try {
+      if (data instanceof Uint8Array) {
+        rawBytes = data;
+      } else if (Buffer.isBuffer(data)) {
+        rawBytes = new Uint8Array(data);
+      } else if (data && typeof data.arrayBuffer === 'function') {
+        rawBytes = new Uint8Array(await data.arrayBuffer());
+      } else if (data && typeof (data as any).buffer !== 'undefined') {
+        rawBytes = new Uint8Array((data as any).buffer);
+      } else if (typeof Response !== 'undefined' && data) {
+        const response = new Response(data);
+        rawBytes = new Uint8Array(await response.arrayBuffer());
+      } else if (data && typeof (data as any).stream === 'function') {
+        const chunks: any[] = [];
+        for await (const chunk of (data as any).stream()) {
+          chunks.push(chunk);
+        }
+        const buffer = Buffer.concat(chunks);
+        rawBytes = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+      } else {
+        throw new Error(`Downloaded storage object has unsupported data type: ${data ? data.constructor.name : typeof data}`);
+      }
+    } catch (convErr: any) {
+      console.error("Data conversion error in vault:", convErr);
+      throw new Error(`Failed to convert downloaded storage data: ${convErr.message}`);
     }
 
     let finalBuffer: Buffer;
@@ -129,7 +147,7 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({ 
       error: "Secure Tunneling Interrupted.", 
       message: err.message,
-      stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
+      stack: err.stack
     });
   }
 }
