@@ -1,6 +1,5 @@
 
 import { createClient } from '@supabase/supabase-js';
-import { encryptBytes } from '../utils/crypto';
 
 function getMimeType(filename: string, defaultType: string = 'application/octet-stream'): string {
   const ext = filename.split('.').pop()?.toLowerCase();
@@ -131,14 +130,7 @@ export default async function handler(req: any, res: any) {
       throw new Error(`Failed to convert downloaded storage data: ${convErr.message}`);
     }
 
-    let finalBuffer: Buffer;
-    if (isPdf) {
-      const key = `scholix_secure_vault_key_secret_2026_${path}`;
-      const encryptedBytes = encryptBytes(key, rawBytes);
-      finalBuffer = Buffer.from(encryptedBytes);
-    } else {
-      finalBuffer = Buffer.from(rawBytes);
-    }
+    const finalBuffer = Buffer.from(rawBytes);
 
     res.status(200).send(finalBuffer);
 

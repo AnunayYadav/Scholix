@@ -5,7 +5,6 @@ import { LibraryFile, UserProfile } from '../types.ts';
 import { showToast } from './Toast.tsx';
 import NexusServer from '../services/nexusServer.ts';
 import { useUniversity } from '../hooks/useUniversity.tsx';
-import { decryptBytes } from '../utils/crypto';
 
 interface PDFViewerProps {
     url?: string;
@@ -529,12 +528,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                             throw new Error(errorMsg);
                         }
                         const arrayBuffer = await response.arrayBuffer();
-                        const encryptedBytes = new Uint8Array(arrayBuffer);
-                        const key = `scholix_secure_vault_key_secret_2026_${fileObj.storage_path}`;
-                        pdfBytes = decryptBytes(key, encryptedBytes);
+                        pdfBytes = new Uint8Array(arrayBuffer);
                         pdfBytesRef.current = pdfBytes;
                     } catch (err: any) {
-                        console.error("Failed to fetch/decrypt PDF from vault:", err);
+                        console.error("Failed to fetch PDF from vault:", err);
                         setError('Failed to retrieve document from storage.');
                         setIsLoading(false);
                         return;
@@ -562,19 +559,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                             throw new Error(errorMsg);
                         }
                         const arrayBuffer = await response.arrayBuffer();
-                        const fetchedBytes = new Uint8Array(arrayBuffer);
-
-                        if (targetUrl.includes('/api/vault')) {
-                            const urlObj = new URL(targetUrl, window.location.origin);
-                            const filePath = urlObj.searchParams.get('path') || '';
-                            const key = `scholix_secure_vault_key_secret_2026_${filePath}`;
-                            pdfBytes = decryptBytes(key, fetchedBytes);
-                        } else {
-                            pdfBytes = fetchedBytes;
-                        }
+                        pdfBytes = new Uint8Array(arrayBuffer);
                         pdfBytesRef.current = pdfBytes;
                     } catch (err: any) {
-                        console.error("Failed to fetch/decrypt targetUrl bytes:", err);
+                        console.error("Failed to fetch targetUrl bytes:", err);
                         setError(err.message || 'Failed to retrieve document.');
                         setIsLoading(false);
                         return;
@@ -635,7 +623,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                 setIsLoading(false);
             } catch (err: any) {
                 console.error('Error loading PDF:', err);
-                setError('Failed to load document. The encryption handshake failed.');
+                setError('Failed to load document.');
                 setIsLoading(false);
             }
         };
@@ -1095,16 +1083,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     throw new Error(errorMsg);
                 }
                 const fetchedArrayBuffer = await pdfResponse.arrayBuffer();
-                const fetchedBytes = new Uint8Array(fetchedArrayBuffer);
-
-                if (downloadUrl.includes('/api/vault')) {
-                    const urlObj = new URL(downloadUrl, window.location.origin);
-                    const filePath = urlObj.searchParams.get('path') || '';
-                    const key = `scholix_secure_vault_key_secret_2026_${filePath}`;
-                    originalPdfBytes = decryptBytes(key, fetchedBytes);
-                } else {
-                    originalPdfBytes = fetchedBytes;
-                }
+                originalPdfBytes = new Uint8Array(fetchedArrayBuffer);
             }
 
             // 2. Fetch the cover page image
@@ -1426,7 +1405,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
                                 </svg>
                             </div>
-                            <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest animate-pulse">Decrypting File... {loadProgress > 0 && `${loadProgress}%`}</h4>
+                            <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest animate-pulse">Loading Document... {loadProgress > 0 && `${loadProgress}%`}</h4>
                         </div>
                     ) : (
                         <div 

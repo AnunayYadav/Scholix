@@ -5,7 +5,6 @@ import NexusServer from '../services/nexusServer.ts';
 import { generateSubjectOriginals } from '../services/geminiService.ts';
 import { extractTextFromPdf } from '../services/pdfUtils.ts';
 import { showToast } from './Toast.tsx';
-import { decryptBytes } from '../utils/crypto';
 import { nexusOriginalsData as staticOriginals } from '../data/nexusOriginalsData.ts';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import 'katex/dist/katex.min.css';
@@ -234,8 +233,7 @@ const NexusOriginals: React.FC<NexusOriginalsProps> = ({
                 const res = await fetch(url);
                 const arrayBuffer = await res.arrayBuffer();
                 const fileBytes = new Uint8Array(arrayBuffer);
-                const decryptedBytes = decryptBytes(`scholix_secure_vault_key_secret_2026_${syllabusFile.storage_path}`, fileBytes);
-                const blob = new Blob([decryptedBytes as any], { type: 'application/pdf' });
+                const blob = new Blob([fileBytes as any], { type: 'application/pdf' });
                 syllabusText = await extractTextFromPdf(new File([blob], "syllabus.pdf"));
             }
             const generated = await generateSubjectOriginals(initialSubject, syllabusText);
