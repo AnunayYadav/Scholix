@@ -691,6 +691,12 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
         if (savedRecord?.id) {
           setCurrentRecordId(savedRecord.id);
         }
+        // Increment robust study analytics for resume analysis
+        if (userProfile?.id) {
+          NexusServer.incrementStudyStats({ resumesAnalyzed: 1 }).catch(err => 
+            console.error("Failed to update resume stats:", err)
+          );
+        }
       } catch (saveErr) {
         console.error("Failed to persist analysis for sharing", saveErr);
       }

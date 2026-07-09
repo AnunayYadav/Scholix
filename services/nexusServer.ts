@@ -2003,7 +2003,7 @@ class NexusServer {
       attendanceUpdates: 0,
       marketplacePosts: 0,
       roommateRequests: 0,
-      placementAnalyses: 0,
+      placementAnalyses: studyStats ? (studyStats.resumes_analyzed || 0) : 0,
       history: history.data || []
     };
 
@@ -2032,7 +2032,7 @@ class NexusServer {
             stats.roommateRequests += 1;
             break;
           case 'placement_analysis':
-            stats.placementAnalyses += 1;
+            // Deprecated, now using study_analytics
             break;
         }
       });
@@ -2080,6 +2080,7 @@ class NexusServer {
     pdfStudyTime?: number;
     quizStudyTime?: number;
     questionsAttempted?: number;
+    resumesAnalyzed?: number;
   }) {
     try {
       const sessionRes = await this.getSession();
@@ -2096,7 +2097,8 @@ class NexusServer {
           action: 'increment',
           pdfStudyTime: params.pdfStudyTime || 0,
           quizStudyTime: params.quizStudyTime || 0,
-          questionsAttempted: params.questionsAttempted || 0
+          questionsAttempted: params.questionsAttempted || 0,
+          resumesAnalyzed: params.resumesAnalyzed || 0
         })
       });
 

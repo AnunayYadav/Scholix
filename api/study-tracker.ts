@@ -33,14 +33,15 @@ export default async function handler(req: any, res: any) {
     // 2. Use service role to interact with study_analytics (bypass RLS)
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { action, pdfStudyTime, quizStudyTime, questionsAttempted, targetUserId } = req.body || {};
+    const { action, pdfStudyTime, quizStudyTime, questionsAttempted, resumesAnalyzed, targetUserId } = req.body || {};
 
     if (action === 'increment') {
       const pdfInc = Number(pdfStudyTime) || 0;
       const quizInc = Number(quizStudyTime) || 0;
       const questionsInc = Number(questionsAttempted) || 0;
+      const resumesInc = Number(resumesAnalyzed) || 0;
 
-      if (pdfInc === 0 && quizInc === 0 && questionsInc === 0) {
+      if (pdfInc === 0 && quizInc === 0 && questionsInc === 0 && resumesInc === 0) {
         return res.status(200).json({ success: true, message: 'No increments provided.' });
       }
 
@@ -72,6 +73,7 @@ export default async function handler(req: any, res: any) {
             pdf_study_time: Math.max(0, pdfInc),
             quiz_study_time: Math.max(0, quizInc),
             questions_attempted: Math.max(0, questionsInc),
+            resumes_analyzed: Math.max(0, resumesInc),
             username: username,
             email: email
           })
@@ -88,6 +90,7 @@ export default async function handler(req: any, res: any) {
             pdf_study_time: Math.max(0, (existing.pdf_study_time || 0) + pdfInc),
             quiz_study_time: Math.max(0, (existing.quiz_study_time || 0) + quizInc),
             questions_attempted: Math.max(0, (existing.questions_attempted || 0) + questionsInc),
+            resumes_analyzed: Math.max(0, (existing.resumes_analyzed || 0) + resumesInc),
             updated_at: new Date().toISOString()
           })
           .eq('user_id', userId)
@@ -128,7 +131,8 @@ export default async function handler(req: any, res: any) {
         user_id: targetId,
         pdf_study_time: 0,
         quiz_study_time: 0,
-        questions_attempted: 0
+        questions_attempted: 0,
+        resumes_analyzed: 0
       });
     } else {
       return res.status(400).json({ error: 'Invalid action' });
