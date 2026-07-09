@@ -20,18 +20,17 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // 1. Verify user identity using user token
-    const clientUser = createClient(supabaseUrl, process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '');
-    const { data: { user }, error: authError } = await clientUser.auth.getUser(token);
+    // 1. Initialize Supabase service client (service role bypasses RLS)
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // 2. Verify user identity using user token via service client
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
     if (authError || !user) {
       return res.status(401).json({ error: 'Invalid or expired session' });
     }
 
     const userId = user.id;
-
-    // 2. Use service role to interact with study_analytics (bypass RLS)
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { action, pdfStudyTime, quizStudyTime, questionsAttempted, resumesAnalyzed, targetUserId } = req.body || {};
 
