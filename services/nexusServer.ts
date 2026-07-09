@@ -423,82 +423,87 @@ class NexusServer {
   }
 
   static async recordVisit(): Promise<void> {
-    const client = getSupabase();
-    if (!client) return;
-
-    // 1. Raw View Tracking (Every reload/view)
-    try {
-      const { error } = await client.from('site_views').insert([{}]);
-      if (error) console.warn("site_views tracking failed:", error.message);
-    } catch (e) {
-      console.warn("site_views tracking exception:", e);
-    }
-
-    // 2. Session-based Visitor Tracking
-    const SESSION_KEY = 'nexus_session_logged';
-    if (!sessionStorage.getItem(SESSION_KEY)) {
-      try {
-        const { error } = await client.from('site_visits').insert([{}]);
-        if (error) {
-          console.warn("site_visits tracking failed:", error.message);
-        } else {
-          sessionStorage.setItem(SESSION_KEY, 'true');
-        }
-      } catch (e) {
-        console.warn("site_visits tracking exception:", e);
-      }
-    }
+    // Deprecated: visit tracking is now handled atomically inside trackPageView
   }
 
   static async getSiteStats(): Promise<{ registered: number; visitors: number; totalViews: number; rawHits: number }> {
     const client = getSupabase();
     if (!client) return { registered: 0, visitors: 0, totalViews: 0, rawHits: 0 };
 
-    // Fetch counts individually to prevent one RLS failure from wiping all results
-    const fetchCount = async (table: string) => {
-      try {
-        const { count, error } = await client.from(table).select('*', { count: 'exact', head: true });
-        if (error) {
-          console.warn(`Stat fetch error for ${table}:`, error.message);
-          return 0;
-        }
-        return count || 0;
-      } catch (e) {
-        return 0;
-      }
-    };
+    try {
+      const [regRes, metricsRes] = await Promise.all([
+        client.from('profiles').select('*', { count: 'exact', head: true }),
+        client.from('system_metrics').select('metric_key, count').eq('metric_type', 'site')
+      ]);
 
-    const [reg, vis, raw, pageData] = await Promise.all([
-      fetchCount('profiles'),
-      fetchCount('site_visits'),
-      fetchCount('site_views'),
-      client.from('page_stats').select('views')
-    ]);
+      const registered = regRes.count || 0;
+      const metrics = metricsRes.data || [];
+      
+      const viewsMetric = metrics.find(m => m.metric_key === 'views');
+      const visitsMetric = metrics.find(m => m.metric_key === 'visits');
 
-    const totalViews = (pageData.data || []).reduce((acc, curr) => acc + (Number(curr.views) || 0), 0);
+      const rawHits = viewsMetric ? Number(viewsMetric.count) : 0;
+      const visitors = visitsMetric ? Number(visitsMetric.count) : 0;
 
-    return { registered: reg, visitors: vis, rawHits: raw, totalViews };
+      // Calculate total views from page route metrics in system_metrics
+      const pageMetricsRes = await client.from('system_metrics').select('count').eq('metric_type', 'page');
+      const totalViews = (pageMetricsRes.data || []).reduce((acc, curr) => acc + (Number(curr.count) || 0), 0);
+
+      return { registered, visitors, rawHits, totalViews };
+    } catch (e) {
+      console.error("Error fetching site stats:", e);
+      return { registered: 0, visitors: 0, totalViews: 0, rawHits: 0 };
+    }
   }
 
   static async trackPageView(path: string): Promise<void> {
     const client = getSupabase();
     if (!client) return;
 
-    const SESSION_KEY = `viewed_${path}`;
-    const isNewVisitor = !sessionStorage.getItem(SESSION_KEY);
+    const pathSessionKey = `viewed_${path}`;
+    const isNewPathVisitor = !sessionStorage.getItem(pathSessionKey);
+
+    const globalSessionKey = 'nexus_session_logged';
+    const isNewGlobalVisitor = !sessionStorage.getItem(globalSessionKey);
 
     try {
-      const { error } = await client.rpc('increment_page_stat', { p_path: path, p_is_new_visitor: isNewVisitor });
-      if (error) {
-        console.warn("Page tracking legacy fallback (RPC error):", error.message);
-        await this.recordVisit();
-      } else if (isNewVisitor) {
-        sessionStorage.setItem(SESSION_KEY, 'true');
-      }
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      await Promise.all([
+        // 1. Increment page stats
+        client.rpc('increment_metric', { 
+          p_type: 'page', 
+          p_key: path, 
+          p_views_inc: 1, 
+          p_visitors_inc: isNewPathVisitor ? 1 : 0 
+        }),
+        // 2. Increment daily time-series
+        client.rpc('increment_metric', { 
+          p_type: 'daily', 
+          p_key: todayStr, 
+          p_views_inc: 1, 
+          p_visitors_inc: isNewPathVisitor ? 1 : 0 
+        }),
+        // 3. Increment total site views
+        client.rpc('increment_metric', { 
+          p_type: 'site', 
+          p_key: 'views', 
+          p_views_inc: 1, 
+          p_visitors_inc: 0 
+        }),
+        // 4. Increment total site visits if new global visitor
+        isNewGlobalVisitor ? client.rpc('increment_metric', { 
+          p_type: 'site', 
+          p_key: 'visits', 
+          p_views_inc: 0, 
+          p_visitors_inc: 1 
+        }) : Promise.resolve()
+      ]);
+
+      if (isNewPathVisitor) sessionStorage.setItem(pathSessionKey, 'true');
+      if (isNewGlobalVisitor) sessionStorage.setItem(globalSessionKey, 'true');
     } catch (e) {
-      console.warn("Page tracking legacy fallback exception:", e);
-      // Fallback if RPC is not available (simple insert into site_views)
-      await this.recordVisit();
+      console.warn("Telemetry page tracking failed:", e);
     }
   }
 
@@ -506,30 +511,14 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return;
     try {
-      const { error } = await client.rpc('increment_event_stat', { p_event_name: eventName });
-      
-      if (error) {
-        console.warn("Event tracking RPC failed, using fallback:", error.message);
-        // Fallback: Direct table manipulation
-        const { data: existing } = await client
-          .from('event_stats')
-          .select('count')
-          .eq('event_name', eventName)
-          .maybeSingle();
-
-        if (existing) {
-          await client
-            .from('event_stats')
-            .update({ count: (existing.count || 0) + 1 })
-            .eq('event_name', eventName);
-        } else {
-          await client
-            .from('event_stats')
-            .insert([{ event_name: eventName, count: 1 }]);
-        }
-      }
+      await client.rpc('increment_metric', { 
+        p_type: 'event', 
+        p_key: eventName, 
+        p_views_inc: 1, 
+        p_visitors_inc: 0 
+      });
     } catch (e) {
-      console.warn("Event tracking failed:", e);
+      console.warn("Telemetry event tracking failed:", e);
     }
   }
 
@@ -538,12 +527,13 @@ class NexusServer {
     if (!client) return 0;
     try {
       const { data, error } = await client
-        .from('event_stats')
+        .from('system_metrics')
         .select('count')
-        .eq('event_name', eventName)
+        .eq('metric_type', 'event')
+        .eq('metric_key', eventName)
         .maybeSingle();
       if (error) return 0;
-      return data?.count || 0;
+      return data ? Number(data.count) : 0;
     } catch (e) {
       return 0;
     }
@@ -553,10 +543,42 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return [];
 
+    // 1. If views or visitors, query pre-aggregated data from system_metrics
+    if (type === 'views' || type === 'visitors') {
+      try {
+        let query = client
+          .from('system_metrics')
+          .select('metric_key, count, unique_visitors')
+          .eq('metric_type', 'daily')
+          .order('metric_key', { ascending: false });
+
+        if (days > 0) {
+          const dateLimit = new Date();
+          dateLimit.setDate(dateLimit.getDate() - days);
+          const limitStr = dateLimit.toISOString().split('T')[0];
+          query = query.gte('metric_key', limitStr);
+        }
+
+        const { data, error } = await query;
+        if (error || !data) return [];
+
+        return data.map((item: any) => {
+          // Format date string back to local date format for charting compat
+          const localDate = new Date(item.metric_key).toLocaleDateString();
+          return {
+            date: localDate,
+            count: type === 'views' ? Number(item.count) : Number(item.unique_visitors)
+          };
+        }).reverse();
+      } catch (e) {
+        console.error(`Error loading time series stats for ${type}:`, e);
+        return [];
+      }
+    }
+
+    // 2. Otherwise (feedback or reports), query raw records and aggregate
     let table = '';
     switch (type) {
-      case 'views': table = 'site_views'; break;
-      case 'visitors': table = 'site_visits'; break;
       case 'feedback': table = 'feedback'; break;
       case 'reports': table = 'question_reports'; break;
     }
