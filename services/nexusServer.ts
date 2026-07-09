@@ -1982,20 +1982,21 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return null;
     
-    // Fetch profile, attempts, reports, feedback, and history records
-    const [profileRes, privateRes, attempts, reports, feedback, history] = await Promise.all([
+    // Fetch profile, attempts, reports, feedback, history records, and study stats
+    const [profileRes, privateRes, attempts, reports, feedback, history, studyStats] = await Promise.all([
       client.from('profiles').select('*').eq('id', userId).maybeSingle(),
       client.from('user_private_info').select('email, registration_number').eq('id', userId).maybeSingle(),
       client.from('quiz_attempts').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
       client.from('question_reports').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
       client.from('feedback').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
-      client.from('user_history').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(5000)
+      client.from('user_history').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(5000),
+      this.fetchStudyStats(userId)
     ]);
     const profile = profileRes.data ? { ...profileRes.data, ...(privateRes.data || {}) } : null;
 
     // Aggregate stats from history records
     const stats = {
-      studyTime: 0,
+      studyTime: studyStats ? ((studyStats.pdf_study_time || 0) + (studyStats.quiz_study_time || 0)) : 0,
       filesAccessed: 0,
       cgpaCalculations: 0,
       quizzesCompleted: 0,
@@ -2010,7 +2011,7 @@ class NexusServer {
       history.data.forEach((record: any) => {
         switch (record.type) {
           case 'study_session':
-            if (record.content?.duration) stats.studyTime += Number(record.content.duration);
+            // Deprecated path tracking, now using study_analytics
             break;
           case 'file_access':
             stats.filesAccessed += 1;
@@ -2038,12 +2039,76 @@ class NexusServer {
     }
 
     return {
-      profile: profile.data,
+      profile: profile,
       attempts: attempts.data || [],
       reports: reports.data || [],
       feedback: feedback.data || [],
       historyStats: stats
     };
+  }
+
+  static async fetchStudyStats(targetUserId?: string) {
+    try {
+      const sessionRes = await this.getSession();
+      const token = sessionRes?.data?.session?.access_token;
+      if (!token) return null;
+
+      const response = await fetch('/api/study-tracker', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'get_stats',
+          targetUserId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch study statistics');
+      }
+
+      return await response.json();
+    } catch (e) {
+      console.error('[NexusServer] fetchStudyStats failed:', e);
+      return null;
+    }
+  }
+
+  static async incrementStudyStats(params: {
+    pdfStudyTime?: number;
+    quizStudyTime?: number;
+    questionsAttempted?: number;
+  }) {
+    try {
+      const sessionRes = await this.getSession();
+      const token = sessionRes?.data?.session?.access_token;
+      if (!token) return null;
+
+      const response = await fetch('/api/study-tracker', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'increment',
+          pdfStudyTime: params.pdfStudyTime || 0,
+          quizStudyTime: params.quizStudyTime || 0,
+          questionsAttempted: params.questionsAttempted || 0
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update study statistics');
+      }
+
+      return await response.json();
+    } catch (e) {
+      console.error('[NexusServer] incrementStudyStats failed:', e);
+      return null;
+    }
   }
 
   static async getStudyLeaderboard() {

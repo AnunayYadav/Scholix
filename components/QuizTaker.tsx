@@ -1111,6 +1111,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         correctAnswers: correctCount,
         breakdown: xpResult.breakdown || []
       }).catch(err => console.error("Failed to save quiz attempt:", err));
+
+      NexusServer.incrementStudyStats({
+        quizStudyTime: totalTimeTaken as number,
+        questionsAttempted: quizQuestions.length
+      }).catch(err => console.error("Failed to update quiz study stats:", err));
     }
 
     // Mark featured/challenge as completed

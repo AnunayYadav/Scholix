@@ -290,6 +290,40 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
         return () => cancelAnimationFrame(raf);
     }, []);
 
+    // Track study time spent viewing this file
+    const lastTrackTimeRef = useRef<number>(Date.now());
+    const TRACK_INTERVAL = 30000; // 30 seconds
+
+    useEffect(() => {
+        if (!userProfile?.id) return;
+
+        // Set up the periodic interval to update backend
+        const intervalId = setInterval(async () => {
+            const now = Date.now();
+            const elapsedSeconds = Math.floor((now - lastTrackTimeRef.current) / 1000);
+            if (elapsedSeconds > 0) {
+                lastTrackTimeRef.current = now;
+                try {
+                    await NexusServer.incrementStudyStats({ pdfStudyTime: elapsedSeconds });
+                } catch (e) {
+                    console.error("Failed to update PDF study time heartbeat:", e);
+                }
+            }
+        }, TRACK_INTERVAL);
+
+        // Final cleanup to capture remaining seconds
+        return () => {
+            clearInterval(intervalId);
+            const now = Date.now();
+            const elapsedSeconds = Math.floor((now - lastTrackTimeRef.current) / 1000);
+            if (elapsedSeconds > 0) {
+                NexusServer.incrementStudyStats({ pdfStudyTime: elapsedSeconds }).catch(e => 
+                    console.error("Failed to save final PDF study time:", e)
+                );
+            }
+        };
+    }, [userProfile?.id]);
+
     const zoomWrapperRef = useRef<HTMLDivElement>(null);
     const pageOriginalWidthRef = useRef<number>(612);
     const pdfBytesRef = useRef<Uint8Array | null>(null);

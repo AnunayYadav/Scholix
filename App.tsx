@@ -81,7 +81,6 @@ import NotificationBell from './components/NotificationBell.tsx';
 import { useNotificationStore } from './stores/notificationStore.ts';
 import { useLoadingStore } from './stores/loadingStore.ts';
 import UniversalSearch from './components/UniversalSearch.tsx';
-import StudyHeartbeat from './components/StudyHeartbeat.tsx';
 import { useOnlineStatus } from './hooks/useOnlineStatus.ts';
 import OfflineOverlay from './components/OfflineOverlay.tsx';
 
@@ -2141,7 +2140,6 @@ const AppContent: React.FC = () => {
       userProfile={userProfile || undefined} 
     />
       <CookieBanner />
-      {userProfile && <StudyHeartbeat userId={userProfile.id} />}
       <Analytics />
       <SpeedInsights />
       <ToastContainer />
