@@ -427,29 +427,12 @@ class NexusServer {
   }
 
   static async getSiteStats(): Promise<{ registered: number; visitors: number; totalViews: number; rawHits: number }> {
-    const client = getSupabase();
-    if (!client) return { registered: 0, visitors: 0, totalViews: 0, rawHits: 0 };
-
     try {
-      const [regRes, metricsRes] = await Promise.all([
-        client.from('profiles').select('*', { count: 'exact', head: true }),
-        client.from('system_metrics').select('metric_key, count').eq('metric_type', 'site')
-      ]);
-
-      const registered = regRes.count || 0;
-      const metrics = metricsRes.data || [];
-      
-      const viewsMetric = metrics.find(m => m.metric_key === 'views');
-      const visitsMetric = metrics.find(m => m.metric_key === 'visits');
-
-      const rawHits = viewsMetric ? Number(viewsMetric.count) : 0;
-      const visitors = visitsMetric ? Number(visitsMetric.count) : 0;
-
-      // Calculate total views from page route metrics in system_metrics
-      const pageMetricsRes = await client.from('system_metrics').select('count').eq('metric_type', 'page');
-      const totalViews = (pageMetricsRes.data || []).reduce((acc, curr) => acc + (Number(curr.count) || 0), 0);
-
-      return { registered, visitors, rawHits, totalViews };
+      const response = await fetch('/api/gateway?action=site-stats');
+      if (!response.ok) {
+        throw new Error('Failed to fetch site statistics from gateway');
+      }
+      return await response.json();
     } catch (e) {
       console.error("Error fetching site stats:", e);
       return { registered: 0, visitors: 0, totalViews: 0, rawHits: 0 };

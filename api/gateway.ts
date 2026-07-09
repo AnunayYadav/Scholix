@@ -96,6 +96,29 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json(sanitized);
     } 
     
+    if (action === 'site-stats') {
+      if (req.method !== 'GET') return res.status(405).end();
+      
+      const [regRes, metricsRes] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('system_metrics').select('metric_key, count').eq('metric_type', 'site')
+      ]);
+
+      const registered = regRes.count || 0;
+      const metrics = metricsRes.data || [];
+      
+      const viewsMetric = metrics.find(m => m.metric_key === 'views');
+      const visitsMetric = metrics.find(m => m.metric_key === 'visits');
+
+      const rawHits = viewsMetric ? Number(viewsMetric.count) : 0;
+      const visitors = visitsMetric ? Number(visitsMetric.count) : 0;
+
+      const pageMetricsRes = await supabase.from('system_metrics').select('count').eq('metric_type', 'page');
+      const totalViews = (pageMetricsRes.data || []).reduce((acc, curr) => acc + (Number(curr.count) || 0), 0);
+
+      return res.status(200).json({ registered, visitors, rawHits, totalViews });
+    }
+
     if (action === 'admin-profiles') {
       if (req.method !== 'GET') return res.status(405).end();
       const authHeader = req.headers['authorization'];
