@@ -1227,94 +1227,207 @@ class NexusServer {
   }
 
   static async fetchRecords(uid: string | null, type: string) {
-    const client = getSupabase();
-    const targetUid = uid || this.getAnonSessionId();
-    if (client && targetUid) {
-      const { data, error } = await client.from('user_history')
-        .select('*')
-        .or(`user_id.eq.${targetUid},session_id.eq.${targetUid}`)
-        .eq('type', type)
-        .order('created_at', { ascending: false });
-      if (error) {
-        console.error(`Fetch Records Error (${type}):`, error);
-        throw error;
+    if (!uid) {
+      // Guest User: read from localStorage
+      try {
+        const localData = localStorage.getItem('nexus_local_records');
+        const list = localData ? JSON.parse(localData) : [];
+        return list.filter((r: any) => r.type === type);
+      } catch (e) {
+        console.error('Error parsing local guest records:', e);
+        return [];
       }
-      return data || [];
+    }
+
+    try {
+      const stats = await this.fetchStudyStats(uid);
+      if (stats && stats.recent_activities && Array.isArray(stats.recent_activities)) {
+        return stats.recent_activities.filter((r: any) => r.type === type);
+      }
+    } catch (e) {
+      console.error('Error fetching records via study tracker:', e);
     }
     return [];
   }
 
   static async fetchRecordById(id: string): Promise<any | null> {
-    const client = getSupabase();
-    if (!client) return null;
-    const { data, error } = await client.from('user_history').select('*').eq('id', id).maybeSingle();
-    if (error) {
-      console.error(`Fetch Record Error (${id}):`, error);
-      return null;
+    // 1. Try to check local guest storage first
+    try {
+      const localData = localStorage.getItem('nexus_local_records');
+      const list = localData ? JSON.parse(localData) : [];
+      const localMatch = list.find((r: any) => r.id === id);
+      if (localMatch) return localMatch;
+    } catch (e) {
+      console.error('Error checking local guest records:', e);
     }
-    return data;
+
+    // 2. Fetch authenticated user stats and search array
+    try {
+      const sessionRes = await this.getSession();
+      const userId = sessionRes?.data?.session?.user?.id;
+      if (userId) {
+        const stats = await this.fetchStudyStats(userId);
+        if (stats && stats.recent_activities && Array.isArray(stats.recent_activities)) {
+          return stats.recent_activities.find((r: any) => r.id === id) || null;
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching record by ID via study tracker:', e);
+    }
+    return null;
   }
 
   static async saveRecord(uid: string | null, type: string, label: string, content: any): Promise<any | null> {
-    const client = getSupabase();
-    if (!client) return null;
-
     const session_id = this.getAnonSessionId();
-    const recordId = crypto.randomUUID();
-
-    const record: any = {
+    const recordId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
+      ? crypto.randomUUID() 
+      : Math.random().toString(36).substring(2) + Date.now().toString(36);
+    const record = {
       id: recordId,
       user_id: uid || null,
       session_id: session_id,
       type,
       label,
-      content
+      content,
+      created_at: new Date().toISOString()
     };
 
-    try {
-      // Use .select() and check data[0] instead of .single() to be more resilient to RLS/empty returns
-      const { data, error } = await client.from('user_history').insert([record]).select();
-      
-      if (error) {
-        console.error(`[NexusServer] Save Record Error (${type}):`, error);
-        // Even if select fails, if there was no error on insert, we can return our local record
-        // But here 'error' usually means the insert itself failed.
-        return null;
+    if (!uid) {
+      // Guest: Save locally
+      try {
+        const localData = localStorage.getItem('nexus_local_records');
+        const list = localData ? JSON.parse(localData) : [];
+        if (type === 'timetable_main') {
+          // Keep only one timetable for guests
+          const filtered = list.filter((r: any) => r.type !== 'timetable_main');
+          filtered.unshift(record);
+          localStorage.setItem('nexus_local_records', JSON.stringify(filtered.slice(0, 50)));
+        } else {
+          list.unshift(record);
+          localStorage.setItem('nexus_local_records', JSON.stringify(list.slice(0, 50)));
+        }
+        return record;
+      } catch (e) {
+        console.error('Error saving local guest record:', e);
+        return record;
       }
-
-      // If we got data back, use it. Otherwise return our constructed record.
-      return (data && data.length > 0) ? data[0] : record;
-    } catch (e) {
-      console.error('[NexusServer] Save Record Exception:', e);
-      return null;
     }
+
+    try {
+      const sessionRes = await this.getSession();
+      const token = sessionRes?.data?.session?.access_token;
+      if (!token) return record;
+
+      const response = await fetch('/api/study-tracker', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'save_record',
+          type,
+          label,
+          content
+        })
+      });
+
+      if (response.ok) {
+        const resData = await response.json();
+        return resData?.data || record;
+      }
+    } catch (e) {
+      console.error('Failed to save record via study tracker:', e);
+    }
+    return record;
   }
 
   static async updateRecord(id: string, content: any): Promise<any | null> {
-    const client = getSupabase();
-    if (!client || !id) return null;
+    // 1. Try local guest storage first
+    try {
+      const localData = localStorage.getItem('nexus_local_records');
+      if (localData) {
+        const list = JSON.parse(localData);
+        let found = false;
+        const updatedList = list.map((r: any) => {
+          if (r.id === id) {
+            found = true;
+            return { ...r, content, updated_at: new Date().toISOString() };
+          }
+          return r;
+        });
+        if (found) {
+          localStorage.setItem('nexus_local_records', JSON.stringify(updatedList));
+          return updatedList.find((r: any) => r.id === id);
+        }
+      }
+    } catch (e) {
+      console.error('Error updating local guest record:', e);
+    }
 
     try {
-      const { data, error } = await client
-        .from('user_history')
-        .update({ content })
-        .eq('id', id)
-        .select();
+      const sessionRes = await this.getSession();
+      const token = sessionRes?.data?.session?.access_token;
+      if (!token) return null;
 
-      if (error) {
-        console.error('[NexusServer] Update Record Error:', error);
-        return null;
+      const response = await fetch('/api/study-tracker', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'update_record',
+          id,
+          content
+        })
+      });
+
+      if (response.ok) {
+        const resData = await response.json();
+        return resData?.data || null;
       }
-      return data && data.length > 0 ? data[0] : null;
     } catch (e) {
-      console.error('[NexusServer] Update Record Exception:', e);
-      return null;
+      console.error('Failed to update record via study tracker:', e);
     }
+    return null;
   }
 
   static async deleteRecord(id: string, type: string, uid: string | null) {
-    const client = getSupabase();
-    if (client && uid) await client.from('user_history').delete().eq('id', id);
+    if (!uid) {
+      // Guest: Delete locally
+      try {
+        const localData = localStorage.getItem('nexus_local_records');
+        if (localData) {
+          const list = JSON.parse(localData);
+          const filtered = list.filter((r: any) => r.id !== id);
+          localStorage.setItem('nexus_local_records', JSON.stringify(filtered));
+        }
+      } catch (e) {
+        console.error('Error deleting local guest record:', e);
+      }
+      return;
+    }
+
+    try {
+      const sessionRes = await this.getSession();
+      const token = sessionRes?.data?.session?.access_token;
+      if (!token) return;
+
+      await fetch('/api/study-tracker', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'delete_record',
+          id
+        })
+      });
+    } catch (e) {
+      console.error('Failed to delete record via study tracker:', e);
+    }
   }
 
   static async checkUsernameAvailability(username: string): Promise<boolean> {
@@ -1982,61 +2095,29 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return null;
     
-    // Fetch profile, attempts, reports, feedback, history records, and study stats
-    const [profileRes, privateRes, attempts, reports, feedback, history, studyStats] = await Promise.all([
+    // Fetch profile, attempts, reports, feedback, and study stats (bypassing user_history)
+    const [profileRes, privateRes, attempts, reports, feedback, studyStats] = await Promise.all([
       client.from('profiles').select('*').eq('id', userId).maybeSingle(),
       client.from('user_private_info').select('email, registration_number').eq('id', userId).maybeSingle(),
       client.from('quiz_attempts').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
       client.from('question_reports').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
       client.from('feedback').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
-      client.from('user_history').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(5000),
       this.fetchStudyStats(userId)
     ]);
     const profile = profileRes.data ? { ...profileRes.data, ...(privateRes.data || {}) } : null;
 
-    // Aggregate stats from history records
+    // Aggregate stats from studyStats directly
     const stats = {
       studyTime: studyStats ? ((studyStats.pdf_study_time || 0) + (studyStats.quiz_study_time || 0)) : 0,
-      filesAccessed: 0,
-      cgpaCalculations: 0,
-      quizzesCompleted: 0,
-      attendanceUpdates: 0,
-      marketplacePosts: 0,
-      roommateRequests: 0,
+      filesAccessed: studyStats ? (studyStats.files_accessed || 0) : 0,
+      cgpaCalculations: studyStats ? (studyStats.cgpa_calculations || 0) : 0,
+      quizzesCompleted: attempts.data ? attempts.data.length : 0,
+      attendanceUpdates: studyStats ? (studyStats.attendance_updates || 0) : 0,
+      marketplacePosts: studyStats ? (studyStats.marketplace_posts_count || 0) : 0,
+      roommateRequests: studyStats ? (studyStats.roommate_requests_count || 0) : 0,
       placementAnalyses: studyStats ? (studyStats.resumes_analyzed || 0) : 0,
-      history: history.data || []
+      history: studyStats?.recent_activities || []
     };
-
-    if (history.data) {
-      history.data.forEach((record: any) => {
-        switch (record.type) {
-          case 'study_session':
-            // Deprecated path tracking, now using study_analytics
-            break;
-          case 'file_access':
-            stats.filesAccessed += 1;
-            break;
-          case 'cgpa_calc':
-            stats.cgpaCalculations += 1;
-            break;
-          case 'quiz_complete':
-            stats.quizzesCompleted += 1;
-            break;
-          case 'attendance_update':
-            stats.attendanceUpdates += 1;
-            break;
-          case 'marketplace_post':
-            stats.marketplacePosts += 1;
-            break;
-          case 'roommate_post':
-            stats.roommateRequests += 1;
-            break;
-          case 'placement_analysis':
-            // Deprecated, now using study_analytics
-            break;
-        }
-      });
-    }
 
     return {
       profile: profile,

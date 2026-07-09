@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
+
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -141,6 +143,192 @@ export default async function handler(req: any, res: any) {
         correct_questions: 0,
         wrong_questions: 0
       });
+    } else if (action === 'save_record') {
+      const { type, label, content } = req.body || {};
+      if (!type || !label) {
+        return res.status(400).json({ error: 'Missing type or label' });
+      }
+
+      // Fetch current stats
+      const { data: existing, error: fetchErr } = await supabase
+        .from('study_analytics')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (fetchErr) throw fetchErr;
+
+      let currentActivities = [];
+      if (existing && existing.recent_activities) {
+        currentActivities = Array.isArray(existing.recent_activities) ? existing.recent_activities : [];
+      }
+
+      // Filter out older timetable_main or cgpa_snapshot if they are identical in label/type to keep it clean
+      if (type === 'timetable_main') {
+        currentActivities = currentActivities.filter((a: any) => a.type !== 'timetable_main');
+      }
+
+      const newRecord = {
+        id: crypto.randomUUID(),
+        type,
+        label,
+        content: content || null,
+        created_at: new Date().toISOString()
+      };
+
+      // Add to beginning of array
+      currentActivities.unshift(newRecord);
+      // Keep only the last 50 activities
+      if (currentActivities.length > 50) {
+        currentActivities = currentActivities.slice(0, 50);
+      }
+
+      // Determine increment counters
+      const fileAccessInc = type === 'file_access' ? 1 : 0;
+      const cgpaInc = type === 'cgpa_calc' ? 1 : 0;
+      const attendanceInc = type === 'attendance_update' ? 1 : 0;
+      const roommateInc = type === 'roommate_request' ? 1 : 0;
+      const marketplaceInc = type === 'marketplace_post' ? 1 : 0;
+
+      let result;
+      if (!existing) {
+        // Fetch profile details
+        const [profileRes, privateRes] = await Promise.all([
+          supabase.from('profiles').select('username').eq('id', userId).maybeSingle(),
+          supabase.from('user_private_info').select('email').eq('id', userId).maybeSingle()
+        ]);
+        const username = profileRes.data?.username || 'Nexus Scholar';
+        const email = privateRes.data?.email || null;
+
+        const { data, error: insertErr } = await supabase
+          .from('study_analytics')
+          .insert({
+            user_id: userId,
+            recent_activities: currentActivities,
+            files_accessed: fileAccessInc,
+            cgpa_calculations: cgpaInc,
+            attendance_updates: attendanceInc,
+            roommate_requests_count: roommateInc,
+            marketplace_posts_count: marketplaceInc,
+            pdf_study_time: 0,
+            quiz_study_time: 0,
+            questions_attempted: 0,
+            resumes_analyzed: 0,
+            correct_questions: 0,
+            wrong_questions: 0,
+            username,
+            email
+          })
+          .select()
+          .maybeSingle();
+
+        if (insertErr) throw insertErr;
+        result = data;
+      } else {
+        const { data, error: updateErr } = await supabase
+          .from('study_analytics')
+          .update({
+            recent_activities: currentActivities,
+            files_accessed: (existing.files_accessed || 0) + fileAccessInc,
+            cgpa_calculations: (existing.cgpa_calculations || 0) + cgpaInc,
+            attendance_updates: (existing.attendance_updates || 0) + attendanceInc,
+            roommate_requests_count: (existing.roommate_requests_count || 0) + roommateInc,
+            marketplace_posts_count: (existing.marketplace_posts_count || 0) + marketplaceInc,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId)
+          .select()
+          .maybeSingle();
+
+        if (updateErr) throw updateErr;
+        result = data;
+      }
+
+      return res.status(200).json({ success: true, data: newRecord });
+
+    } else if (action === 'update_record') {
+      const { id: recordId, content } = req.body || {};
+      if (!recordId) {
+        return res.status(400).json({ error: 'Missing record id' });
+      }
+
+      const { data: existing, error: fetchErr } = await supabase
+        .from('study_analytics')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (fetchErr) throw fetchErr;
+      if (!existing) {
+        return res.status(404).json({ error: 'Analytics record not found' });
+      }
+
+      let currentActivities = Array.isArray(existing.recent_activities) ? existing.recent_activities : [];
+      let updated = false;
+      let targetRecord = null;
+
+      currentActivities = currentActivities.map((a: any) => {
+        if (a.id === recordId) {
+          updated = true;
+          targetRecord = { ...a, content: content, updated_at: new Date().toISOString() };
+          return targetRecord;
+        }
+        return a;
+      });
+
+      if (!updated) {
+        return res.status(404).json({ error: 'Activity log not found in recent logs' });
+      }
+
+      const { error: updateErr } = await supabase
+        .from('study_analytics')
+        .update({
+          recent_activities: currentActivities,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId);
+
+      if (updateErr) throw updateErr;
+
+      return res.status(200).json({ success: true, data: targetRecord });
+
+    } else if (action === 'delete_record') {
+      const { id: recordId } = req.body || {};
+      if (!recordId) {
+        return res.status(400).json({ error: 'Missing record id' });
+      }
+
+      const { data: existing, error: fetchErr } = await supabase
+        .from('study_analytics')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (fetchErr) throw fetchErr;
+      if (!existing) {
+        return res.status(404).json({ error: 'Analytics record not found' });
+      }
+
+      let currentActivities = Array.isArray(existing.recent_activities) ? existing.recent_activities : [];
+      const originalLength = currentActivities.length;
+      currentActivities = currentActivities.filter((a: any) => a.id !== recordId);
+
+      if (currentActivities.length === originalLength) {
+        return res.status(404).json({ error: 'Activity log not found in recent logs' });
+      }
+
+      const { error: updateErr } = await supabase
+        .from('study_analytics')
+        .update({
+          recent_activities: currentActivities,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId);
+
+      if (updateErr) throw updateErr;
+
+      return res.status(200).json({ success: true });
+
     } else {
       return res.status(400).json({ error: 'Invalid action' });
     }
