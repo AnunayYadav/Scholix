@@ -138,7 +138,7 @@ export function SettingsHub({
   };
 
   return (
-    <div className="flex h-full w-full bg-white dark:bg-dark-950 overflow-hidden lg:pl-16">
+    <div className="flex h-full w-full bg-white dark:bg-dark-950 overflow-hidden">
       {/* Settings Navigation Sidebar */}
       <div className={`
         flex-shrink-0 w-full md:w-[320px] lg:w-[350px] h-full border-r border-zinc-200 dark:border-white/10 bg-white dark:bg-dark-950 transition-all duration-300

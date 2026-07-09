@@ -2100,7 +2100,7 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return null;
     
-    // Fetch profile, attempts, reports, feedback, and study stats (bypassing user_history)
+    // Fetch profile, attempts, reports, feedback, and study stats
     const [profileRes, privateRes, attempts, reports, feedback, studyStats] = await Promise.all([
       client.from('profiles').select('*').eq('id', userId).maybeSingle(),
       client.from('user_private_info').select('email, registration_number').eq('id', userId).maybeSingle(),
