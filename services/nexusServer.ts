@@ -2081,6 +2081,8 @@ class NexusServer {
     quizStudyTime?: number;
     questionsAttempted?: number;
     resumesAnalyzed?: number;
+    correctQuestions?: number;
+    wrongQuestions?: number;
   }) {
     try {
       const sessionRes = await this.getSession();
@@ -2098,7 +2100,9 @@ class NexusServer {
           pdfStudyTime: params.pdfStudyTime || 0,
           quizStudyTime: params.quizStudyTime || 0,
           questionsAttempted: params.questionsAttempted || 0,
-          resumesAnalyzed: params.resumesAnalyzed || 0
+          resumesAnalyzed: params.resumesAnalyzed || 0,
+          correctQuestions: params.correctQuestions || 0,
+          wrongQuestions: params.wrongQuestions || 0
         })
       });
 

@@ -32,15 +32,17 @@ export default async function handler(req: any, res: any) {
 
     const userId = user.id;
 
-    const { action, pdfStudyTime, quizStudyTime, questionsAttempted, resumesAnalyzed, targetUserId } = req.body || {};
+    const { action, pdfStudyTime, quizStudyTime, questionsAttempted, resumesAnalyzed, correctQuestions, wrongQuestions, targetUserId } = req.body || {};
 
     if (action === 'increment') {
       const pdfInc = Number(pdfStudyTime) || 0;
       const quizInc = Number(quizStudyTime) || 0;
       const questionsInc = Number(questionsAttempted) || 0;
       const resumesInc = Number(resumesAnalyzed) || 0;
+      const correctInc = Number(correctQuestions) || 0;
+      const wrongInc = Number(wrongQuestions) || 0;
 
-      if (pdfInc === 0 && quizInc === 0 && questionsInc === 0 && resumesInc === 0) {
+      if (pdfInc === 0 && quizInc === 0 && questionsInc === 0 && resumesInc === 0 && correctInc === 0 && wrongInc === 0) {
         return res.status(200).json({ success: true, message: 'No increments provided.' });
       }
 
@@ -73,6 +75,8 @@ export default async function handler(req: any, res: any) {
             quiz_study_time: Math.max(0, quizInc),
             questions_attempted: Math.max(0, questionsInc),
             resumes_analyzed: Math.max(0, resumesInc),
+            correct_questions: Math.max(0, correctInc),
+            wrong_questions: Math.max(0, wrongInc),
             username: username,
             email: email
           })
@@ -90,6 +94,8 @@ export default async function handler(req: any, res: any) {
             quiz_study_time: Math.max(0, (existing.quiz_study_time || 0) + quizInc),
             questions_attempted: Math.max(0, (existing.questions_attempted || 0) + questionsInc),
             resumes_analyzed: Math.max(0, (existing.resumes_analyzed || 0) + resumesInc),
+            correct_questions: Math.max(0, (existing.correct_questions || 0) + correctInc),
+            wrong_questions: Math.max(0, (existing.wrong_questions || 0) + wrongInc),
             updated_at: new Date().toISOString()
           })
           .eq('user_id', userId)
@@ -131,7 +137,9 @@ export default async function handler(req: any, res: any) {
         pdf_study_time: 0,
         quiz_study_time: 0,
         questions_attempted: 0,
-        resumes_analyzed: 0
+        resumes_analyzed: 0,
+        correct_questions: 0,
+        wrong_questions: 0
       });
     } else {
       return res.status(400).json({ error: 'Invalid action' });

@@ -1114,7 +1114,9 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
       NexusServer.incrementStudyStats({
         quizStudyTime: totalTimeTaken as number,
-        questionsAttempted: quizQuestions.length
+        questionsAttempted: quizQuestions.length,
+        correctQuestions: correctCount,
+        wrongQuestions: Math.max(0, quizQuestions.length - correctCount)
       }).catch(err => console.error("Failed to update quiz study stats:", err));
     }
 
