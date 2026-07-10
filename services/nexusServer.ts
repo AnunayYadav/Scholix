@@ -1057,9 +1057,41 @@ class NexusServer {
     }
   }
 
-  static async fetchLeaderboard(): Promise<any[]> {
+  static async fetchLeaderboard(subjectId?: string): Promise<any[]> {
     const client = getSupabase();
     if (!client) return [];
+    
+    if (subjectId) {
+      const { data, error } = await client
+        .from('profiles')
+        .select('username, avatar_url, level, level_title, subject_contributions')
+        .not('subject_contributions', 'is', null);
+        
+      if (error) {
+        console.error('Fetch Subject Leaderboard Error:', error);
+        return [];
+      }
+      
+      return (data || [])
+        .map(row => {
+          const contribs = row.subject_contributions || {};
+          const subjectData = contribs[subjectId] || {};
+          return {
+            username: row.username,
+            avatar_url: row.avatar_url,
+            level: row.level,
+            level_title: row.level_title,
+            total_xp: Number(subjectData.xp || 0),
+            posts_count: Number(subjectData.posts_count || 0),
+            requests_count: Number(subjectData.requests_count || 0),
+            files_count: Number(subjectData.files_count || 0)
+          };
+        })
+        .filter(item => item.total_xp > 0)
+        .sort((a, b) => b.total_xp - a.total_xp)
+        .slice(0, 10);
+    }
+
     const { data, error } = await client
       .from('profiles')
       .select('username, total_xp, level, level_title')

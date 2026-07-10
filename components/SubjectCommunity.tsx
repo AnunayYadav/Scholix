@@ -489,7 +489,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         CommunityService.fetchSubjectRequests(subjectId),
         CommunityService.fetchSubjectStudyPacks(subjectId),
         CommunityService.fetchSubjectWiki(subjectId),
-        NexusServer.fetchLeaderboard(),
+        NexusServer.fetchLeaderboard(subjectId),
         NexusServer.fetchModerators(),
         NexusServer.fetchMembersCount(selectedProgram)
       ]);
@@ -1780,7 +1780,14 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     </div>
                     <div>
                       <div className="text-xs sm:text-sm font-semibold text-zinc-800 dark:text-zinc-200">{s.username || 'Anonymous Verto'}</div>
-                      <div className="text-[9px] text-zinc-400 dark:text-zinc-500 font-medium">{s.level_title || 'Scholar'} • Lv.{s.level || 1}</div>
+                      <div className="text-[9px] text-zinc-400 dark:text-zinc-500 font-medium">
+                        {s.level_title || 'Scholar'} • Lv.{s.level || 1}
+                        {s.files_count !== undefined && (
+                          <span className="ml-1.5 opacity-80">
+                            • {s.files_count} {s.files_count === 1 ? 'file' : 'files'} • {s.posts_count} {s.posts_count === 1 ? 'post' : 'posts'} • {s.requests_count} {s.requests_count === 1 ? 'request' : 'requests'}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="text-xs sm:text-sm font-bold" style={{ color: theme.rawColor }}>
@@ -1867,13 +1874,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
             </div>
           </div>
 
-          {/* Members list */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> Members ({liveMembersCount.toLocaleString()} Enrolled)</h3>
-            <div className="p-4 bg-zinc-50 dark:bg-white/[0.005] border border-zinc-150 dark:border-white/5 rounded-2xl text-[11px] sm:text-xs text-zinc-450 leading-relaxed font-medium">
-              All students enrolled in <strong>{selectedProgram}</strong> are automatically members of this subject community. Enrolled members receive course announcements and exam notifications.
-            </div>
-          </div>
+
         </div>
       )}
 
