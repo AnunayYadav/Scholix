@@ -231,12 +231,12 @@ const SkeletonFolderCard = () => (
       <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl shrink-0 skeleton-pulse" />
       <div className="min-w-0 flex-1 space-y-2">
         <div className="h-4 w-1/3 rounded-md skeleton-pulse" />
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-12 rounded-md skeleton-pulse" />
-          <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
-          <div className="h-3 w-16 rounded-md skeleton-pulse" />
-          <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
-          <div className="h-3 w-16 rounded-md skeleton-pulse" />
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <div className="h-3 w-12 rounded-md skeleton-pulse shrink-0" />
+          <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+          <div className="h-3 w-16 rounded-md skeleton-pulse shrink-0" />
+          <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+          <div className="h-3 w-16 rounded-md skeleton-pulse shrink-0" />
         </div>
       </div>
     </div>
@@ -1543,21 +1543,21 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
                       className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99]"
                     >
-                      <div className="flex items-center gap-3.5 min-w-0">
+<div className="flex items-center gap-3.5 min-w-0">
                         <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: color }}>
                           <Landmark className="w-5 h-5 text-white" />
                         </div>
                         <div className="min-w-0">
                           <h4 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white leading-snug">{prog}</h4>
-                          <div className="flex items-center gap-2 mt-1 text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
-                            <span>{subtitle}</span>
-                            <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
-                            <span className="flex items-center gap-0.5">
-                              <BookOpen className="w-3.5 h-3.5 text-zinc-450 dark:text-zinc-500" />
+                          <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+                            <span className="whitespace-nowrap shrink-0">{subtitle}</span>
+                            <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+                            <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
+                              <BookOpen className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
                               {pSubjects} Subjects
                             </span>
-                            <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
-                            <span className="flex items-center gap-0.5">
+                            <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+                            <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
                               <FileText className="w-3.5 h-3.5 text-zinc-450 dark:text-zinc-500" />
                               {pResources} Resources
                             </span>
@@ -2939,15 +2939,15 @@ const FolderCard: React.FC<{
           </div>
           <div className="min-w-0">
             <h4 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white leading-snug">{folder.name}</h4>
-            <div className="flex items-center gap-2 mt-1 text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
-              <span>{subtitle}</span>
-              <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
-              <span className="flex items-center gap-0.5">
-                <BookOpen className="w-3.5 h-3.5 text-zinc-450 dark:text-zinc-500" />
+            <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+              <span className="whitespace-nowrap shrink-0">{subtitle}</span>
+              <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+              <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
+                <BookOpen className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
                 {subjectsCount || 0} Subjects
               </span>
-              <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
-              <span className="flex items-center gap-0.5">
+              <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+              <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
                 <FileText className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
                 {fileCount} Resources
               </span>
@@ -3003,21 +3003,21 @@ const FolderCard: React.FC<{
           </div>
           <div className="min-w-0">
             <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white leading-snug truncate pr-6">{subjectName}</h4>
-            <div className="flex items-center gap-2 mt-1 text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
-              <span className="font-semibold" style={{ color: rawTheme.rawColor }}>{subjectCode}</span>
-              <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
+            <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+              <span className="font-semibold whitespace-nowrap shrink-0" style={{ color: rawTheme.rawColor }}>{subjectCode}</span>
+              <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
               {searchMatchText ? (
-                <span className="flex items-center gap-1 font-bold text-orange-500 bg-orange-500/5 dark:bg-orange-500/10 px-2 py-0.5 rounded-lg border border-orange-500/10">
+                <span className="flex items-center gap-1 font-bold text-orange-500 bg-orange-500/5 dark:bg-orange-500/10 px-2 py-0.5 rounded-lg border border-orange-500/10 whitespace-nowrap shrink-0">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-orange-500 shrink-0"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
                   {searchMatchText}
                 </span>
               ) : (
                 <>
-                  <span>{creditsText}</span>
-                  <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
-                  <span>{ltpText}</span>
-                  <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
-                  <span className="flex items-center gap-0.5">
+                  <span className="whitespace-nowrap shrink-0">{creditsText}</span>
+                  <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+                  <span className="whitespace-nowrap shrink-0">{ltpText}</span>
+                  <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+                  <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
                     <FileText className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
                     {fileCount} Resources
                   </span>
@@ -3082,14 +3082,14 @@ const StaticFolderCard: React.FC<{
         </div>
         <div className="min-w-0">
           <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white truncate pr-6">{subjectName}</h4>
-          <div className="flex items-center gap-2 mt-1 text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
-            <span className="font-semibold" style={{ color: rawTheme.rawColor }}>{subjectCode}</span>
-            <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
-            <span>{creditsText}</span>
-            <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
-            <span>{ltpText}</span>
-            <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
-            <span className="flex items-center gap-0.5">
+          <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+            <span className="font-semibold whitespace-nowrap shrink-0" style={{ color: rawTheme.rawColor }}>{subjectCode}</span>
+            <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+            <span className="whitespace-nowrap shrink-0">{creditsText}</span>
+            <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+            <span className="whitespace-nowrap shrink-0">{ltpText}</span>
+            <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+            <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
               <FileText className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
               {fileCount} Resources
             </span>
