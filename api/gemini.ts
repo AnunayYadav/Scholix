@@ -94,6 +94,18 @@ export default async function handler(req: any, res: any) {
         break;
       }
 
+      case "ASK_GEMINI": {
+        const response = await ai.models.generateContent({
+          model: "gemini-3.1-flash-lite-preview",
+          contents: [{ role: 'user', parts: [{ text: payload.prompt }] }],
+          config: {
+            temperature: payload.temperature ?? 0.7,
+          },
+        });
+        responseText = response.text || "";
+        break;
+      }
+
       default:
         return res.status(400).json({ error: "Invalid protocol action requested." });
     }

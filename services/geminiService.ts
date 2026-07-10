@@ -148,6 +148,18 @@ const callGeminiProxy = async (action: string, payload: any, retries = 2, delay 
             break;
           }
 
+          case "ASK_GEMINI": {
+            const response = await ai.models.generateContent({
+              model: "gemini-3.1-flash-lite-preview",
+              contents: [{ role: 'user', parts: [{ text: payload.prompt }] }],
+              config: {
+                temperature: payload.temperature ?? 0.7,
+              },
+            });
+            responseText = response.text || "";
+            break;
+          }
+
           default:
             throw new Error("Invalid protocol action requested.");
         }
@@ -664,3 +676,17 @@ export const generateJobDescription = async (rolePrompt: string): Promise<string
   const data = await callGeminiProxy("GENERATE_JD", { prompt });
   return data.text;
 };
+
+/**
+ * Custom general text generation for study summaries, chat Q&A, and MCQs
+ */
+export const askGeminiText = async (prompt: string, temperature: number = 0.7): Promise<string> => {
+  try {
+    const data = await callGeminiProxy("ASK_GEMINI", { prompt, temperature });
+    return data?.text || "";
+  } catch (error) {
+    console.error("Gemini AI API Error:", error);
+    return "Error communicating with AI Assistant: " + (error instanceof Error ? error.message : String(error));
+  }
+};
+

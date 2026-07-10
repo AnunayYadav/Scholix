@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useXP } from '../hooks/useXP.ts';
 import { useStreak } from '../hooks/useStreak.ts';
 import { useQuizDashboardStore } from '../stores/quizStore.ts';
-import { getFrameConfig } from '../data/frameConfigs.ts';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import { showToast } from './Toast.tsx';
 
@@ -157,7 +156,6 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
 
 const userId = userProfile?.id || null;
   const { totalXP, level: levelInfo } = useXP(userId);
-  const frameConfig = getFrameConfig(userProfile?.avatar_frame || '');
 
   useEffect(() => {
     if (userProfile) {
@@ -254,27 +252,9 @@ const userId = userProfile?.id || null;
             {/* Ambient Glow */}
             <div className="absolute -inset-4 bg-gradient-to-tr from-brand-primary/30 to-brand-secondary/30 rounded-full blur-2xl opacity-40 group-hover:opacity-60 animate-pulse transition-opacity" />
             
-            {/* Frame Layer */}
-            <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
-              {userProfile?.avatar_frame && (
-                <img 
-                  src={`/Nexus-Journey/${userProfile.avatar_frame}`}
-                  alt="Frame"
-                  className="w-full h-full object-contain"
-                  style={{ 
-                    transform: `scale(${frameConfig.scale || 1.4}) translateY(${frameConfig.translateY || '0%'})`,
-                    filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
-                  }}
-                />
-              )}
-            </div>
-
             {/* Avatar Image Layer */}
-            <div 
-              className={`relative w-full h-full rounded-full flex items-center justify-center z-10 transition-all duration-300 ${!userProfile?.avatar_frame ? 'bg-white dark:bg-zinc-800 border-[3px] border-white dark:border-zinc-800 shadow-2xl' : 'bg-white dark:bg-zinc-900 shadow-xl'}`}
-              style={{ padding: userProfile?.avatar_frame ? frameConfig.padding : '2px' }}
-            >
-              <div className={`w-full h-full rounded-full overflow-hidden flex items-center justify-center transition-all ${userProfile?.avatar_frame ? 'ring-2 ring-white/10' : 'bg-zinc-100 dark:bg-zinc-900'}`}>
+            <div className="relative w-full h-full rounded-full flex items-center justify-center z-10 transition-all duration-300 bg-white dark:bg-zinc-800 border-[3px] border-white dark:border-zinc-800 shadow-2xl p-[2px]">
+              <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-zinc-100 dark:bg-zinc-900">
                 {userProfile.avatar_url ? (
                   <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover rounded-full" />
                 ) : (
@@ -312,6 +292,75 @@ const userId = userProfile?.id || null;
           </div>
         </div>
       </header>
+
+      {/* Default Face Avatars Chooser */}
+      <div className="mb-8 p-5 bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-150 dark:border-white/5 rounded-3xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-amber-500"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707" /></svg> Choose Adventurer Avatar
+            </h3>
+            <p className="text-[11px] text-zinc-450 dark:text-zinc-500 font-semibold mt-0.5">
+              Select one of our premium adventurer faces or roll a random face.
+            </p>
+          </div>
+          <button
+            onClick={async () => {
+              const randomSeed = Math.floor(Math.random() * 10000000).toString();
+              const url = `https://api.dicebear.com/7.x/adventurer/svg?seed=${randomSeed}`;
+              setIsUploading(true);
+              try {
+                await NexusServer.updateProfile(userProfile.id, { avatar_url: url });
+                setUserProfile({ ...userProfile, avatar_url: url });
+                showToast("Avatar face rolled!", "success");
+              } catch (err: any) {
+                showToast("Failed to update avatar: " + err.message, "error");
+              } finally {
+                setIsUploading(false);
+              }
+            }}
+            className="self-start sm:self-auto px-3.5 py-2 bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-650 dark:text-zinc-305 rounded-xl text-xs font-bold border border-zinc-200 dark:border-white/10 flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-sm"
+          >
+            🎲 Roll Random Face
+          </button>
+        </div>
+
+        {/* Grid of faces */}
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 pt-1">
+          {[
+            'Anunay', 'Rahul', 'Neha', 'Priya', 'Karan', 'Aman'
+          ].map((seedName) => {
+            const url = `https://api.dicebear.com/7.x/adventurer/svg?seed=${seedName}`;
+            const active = userProfile.avatar_url === url;
+            return (
+              <button
+                key={seedName}
+                type="button"
+                onClick={async () => {
+                  if (active) return;
+                  setIsUploading(true);
+                  try {
+                    await NexusServer.updateProfile(userProfile.id, { avatar_url: url });
+                    setUserProfile({ ...userProfile, avatar_url: url });
+                    showToast("Avatar updated!", "success");
+                  } catch (err: any) {
+                    showToast("Failed to update avatar: " + err.message, "error");
+                  } finally {
+                    setIsUploading(false);
+                  }
+                }}
+                className={`aspect-square p-1.5 rounded-2xl bg-zinc-100/50 dark:bg-white/[0.005] border-2 flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer ${
+                  active 
+                    ? 'border-brand-primary bg-brand-primary/10 ring-2 ring-brand-primary/20 shadow-md shadow-brand-primary/10' 
+                    : 'border-zinc-250 dark:border-white/5 hover:border-zinc-350 dark:hover:border-white/20'
+                }`}
+              >
+                <img src={url} alt={seedName} className="w-full h-full object-cover rounded-xl" />
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Settings Sections */}
       <Section title="Academic Info">
@@ -400,55 +449,6 @@ const userId = userProfile?.id || null;
         </div>
       </Section>
 
-      <Section title="Unlocked Frames">
-        <div className="py-6 px-1">
-          <div className="grid grid-cols-4 sm:grid-cols-5 gap-4">
-            {/* None Option */}
-            <motion.div 
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                NexusServer.updateProfile(userProfile.id, { avatar_frame: '' });
-                setUserProfile({ ...userProfile, avatar_frame: '' });
-                updateUserQuizProfile({ avatar_frame: '' });
-              }}
-              className={`aspect-square rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all border-2 ${!userProfile?.avatar_frame ? 'border-brand-primary bg-brand-primary/5' : 'border-zinc-100 dark:border-white/5 grayscale opacity-40 hover:grayscale-0 hover:opacity-100'}`}
-            >
-              <div className="w-10 h-10 rounded-full border-2 border-dotted border-zinc-200 dark:border-white/10 flex items-center justify-center text-[8px] font-bold text-zinc-300">None</div>
-            </motion.div>
-
-            {/* Unlocked */}
-            {(userProfile.unlocked_frames || []).map(frame => {
-              const isActive = userProfile.avatar_frame === frame;
-              return (
-                <motion.div 
-                   key={frame}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    NexusServer.updateProfile(userProfile.id, { avatar_frame: frame });
-                    setUserProfile({ ...userProfile, avatar_frame: frame });
-                    updateUserQuizProfile({ avatar_frame: frame });
-                  }}
-                  className={`aspect-square rounded-[24px] flex items-center justify-center cursor-pointer transition-all border-2 ${isActive ? 'border-brand-primary bg-brand-primary/5' : 'border-zinc-100 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 opacity-70 hover:opacity-100'}`}
-                >
-                  <img src={`/Nexus-Journey/${frame}`} alt="Frame" className="w-16 h-16 object-contain" />
-                </motion.div>
-              );
-            })}
-          </div>
-          
-          {(!userProfile.unlocked_frames || userProfile.unlocked_frames.length === 0) && (
-            <div className="mt-4 p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.02] border border-dashed border-zinc-200 dark:border-white/10 text-center">
-              <p className="text-[11px] font-medium text-zinc-400">No frames unlocked yet. Complete quizzes to earn them!</p>
-              <button 
-                onClick={() => navigateToModule(ModuleType.QUIZ)}
-                className="mt-2 text-[10px] font-bold text-brand-primary uppercase tracking-wider"
-              >
-                Go to Scholix Learning
-              </button>
-            </div>
-          )}
-        </div>
-      </Section>
 
       <Section title="Security & Account" footer="Manage your password and account status.">
         <button

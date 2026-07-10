@@ -36,4 +36,10 @@ dist-ssr
 
 # Backups
 backup_telemetry/
+backup_documents.json
+backup_profiles.json
+backup_folders.json
+scripts/backup_data.cjs
 
+# Database / Supabase Schemas
+*.sql

@@ -260,8 +260,18 @@ export interface LibraryFile {
   uploader_is_admin?: boolean;
   admin_notes?: string;
   isUserUploaded?: boolean;
+  faculty_name?: string;
+  faculty_id?: string;
+  verified_status?: 'none' | 'faculty' | 'admin' | 'community';
+  difficulty?: 'easy' | 'medium' | 'hard';
+  exam_type?: 'midterm' | 'endterm' | 'quiz' | 'assignment' | 'lab' | 'general';
+  tags?: string[];
+  upvoted_by?: string[];
+  downvoted_by?: string[];
+  downloads?: number;
   program: string;
   display_order?: number;
+  folder_id?: string;
   pending_update?: {
     name: string;
     description: string;
@@ -270,6 +280,7 @@ export interface LibraryFile {
     type: string;
     admin_notes?: string;
   } | null;
+  user_progress?: { [userId: string]: { progress_percentage: number; last_read_page: number; updated_at: string } };
 }
 
 export interface Folder {
@@ -278,7 +289,8 @@ export interface Folder {
   type: 'semester' | 'subject' | 'category';
   parent_id: string | null;
   program: string;
-  is_shining?: boolean;
+  icon_name?: string;
+  color?: string;
   display_order?: number;
 }
 

@@ -25,7 +25,6 @@ interface SearchResult {
 const PageRenderer = React.memo<{
     pageNum: number;
     pdfDoc: any;
-    renderScale: number;
     userProfile: UserProfile | null | undefined;
     searchQuery: string;
     currentSearchIndex: number;
@@ -33,27 +32,19 @@ const PageRenderer = React.memo<{
     pdfjsLib: any;
     registerRef: (pageNum: number, el: HTMLDivElement | null) => void;
     isInteractingRef: React.MutableRefObject<boolean>;
-}>(({ pageNum, pdfDoc, renderScale, userProfile, searchQuery, currentSearchIndex, searchResults, pdfjsLib, registerRef, isInteractingRef }) => {
+}>(({ pageNum, pdfDoc, userProfile, searchQuery, currentSearchIndex, searchResults, pdfjsLib, registerRef, isInteractingRef }) => {
 
     const containerRef = useRef<HTMLDivElement>(null);
-    const [renderTarget, setRenderTarget] = useState<{
-        activeCanvas: 'A' | 'B';
-        scaleA: number;
-        scaleB: number;
-    }>({ activeCanvas: 'A', scaleA: renderScale || 1, scaleB: 0 });
-
-    const canvasARef = useRef<HTMLCanvasElement>(null);
-    const canvasBRef = useRef<HTMLCanvasElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     const textLayerRef = useRef<HTMLDivElement>(null);
     const renderTaskRef = useRef<any>(null);
     const [pageInfo, setPageInfo] = useState<{ width: number; height: number } | null>(null);
+    const [isRendered, setIsRendered] = useState(false);
 
     useEffect(() => {
+        let active = true;
         const render = async () => {
-            if (isInteractingRef.current) return;
-            const targetId = renderTarget.activeCanvas === 'A' ? 'B' : 'A';
-            const targetCanvas = targetId === 'A' ? canvasARef.current : canvasBRef.current;
-            if (!pdfDoc || !targetCanvas || !textLayerRef.current || !pdfjsLib) return;
+            if (!pdfDoc || !canvasRef.current || !textLayerRef.current || !pdfjsLib) return;
 
             if (renderTaskRef.current) {
                 renderTaskRef.current.cancel();
@@ -61,22 +52,22 @@ const PageRenderer = React.memo<{
 
             try {
                 const page = await pdfDoc.getPage(pageNum);
-                const maxPixelRatio = window.innerWidth < 768 ? 1.5 : 2;
-                const pixelRatio = Math.min(window.devicePixelRatio || 1, maxPixelRatio);
                 const baseViewport = page.getViewport({ scale: 1.0 });
+                if (!active) return;
                 setPageInfo({ width: baseViewport.width, height: baseViewport.height });
 
-                const targetScale = Math.min(renderScale, 2.0);
-                const viewport = page.getViewport({ scale: targetScale * pixelRatio });
-                const cssViewport = page.getViewport({ scale: renderScale });
+                // Render canvas at a high-quality fixed scale (1.6x base scale * devicePixelRatio)
+                const renderResolution = 1.6;
+                const maxPixelRatio = window.innerWidth < 768 ? 1.5 : 2;
+                const pixelRatio = Math.min(window.devicePixelRatio || 1, maxPixelRatio);
+                const viewport = page.getViewport({ scale: renderResolution * pixelRatio });
+                
+                const canvas = canvasRef.current;
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
 
-                targetCanvas.height = viewport.height;
-                targetCanvas.width = viewport.width;
-                targetCanvas.style.width = `${cssViewport.width}px`;
-                targetCanvas.style.height = `${cssViewport.height}px`;
-
-                const context = targetCanvas.getContext('2d', { alpha: false });
-                if (!context) return;
+                const context = canvas.getContext('2d', { alpha: false });
+                if (!context || !active) return;
 
                 renderTaskRef.current = page.render({
                     canvasContext: context,
@@ -84,31 +75,22 @@ const PageRenderer = React.memo<{
                 });
 
                 await renderTaskRef.current.promise;
+                if (!active) return;
 
-                setRenderTarget(prev => ({
-                    activeCanvas: targetId,
-                    scaleA: targetId === 'A' ? renderScale : prev.scaleA,
-                    scaleB: targetId === 'B' ? renderScale : prev.scaleB
-                }));
+                setIsRendered(true);
 
+                // Render text layer at 1.0 base scale
                 while (textLayerRef.current.firstChild) textLayerRef.current.removeChild(textLayerRef.current.firstChild);
                 const textContent = await page.getTextContent();
+                if (!active) return;
+
                 await pdfjsLib.renderTextLayer({
                     textContentSource: textContent,
                     container: textLayerRef.current,
-                    viewport: cssViewport,
+                    viewport: baseViewport,
                     textDivs: []
                 }).promise;
 
-                if (searchQuery.trim()) {
-                    const spans = textLayerRef.current.querySelectorAll('span');
-                    const query = searchQuery.toLowerCase();
-                    spans.forEach(span => {
-                        if (span.textContent?.toLowerCase().includes(query)) {
-                            span.classList.add('search-match');
-                        }
-                    });
-                }
             } catch (err: any) {
                 if (err.name !== 'RenderingCancelledException') {
                     console.error('Page render error:', err);
@@ -118,24 +100,26 @@ const PageRenderer = React.memo<{
 
         const observer = new IntersectionObserver(
             (entries) => {
-                if (entries[0].isIntersecting && !isInteractingRef.current) {
+                if (entries[0].isIntersecting && active) {
                     render();
+                    observer.disconnect(); // Render once and cache forever!
                 }
             },
-            { threshold: 0.1 }
+            { threshold: 0.01 }
         );
 
         if (containerRef.current) observer.observe(containerRef.current);
 
         return () => {
+            active = false;
             observer.disconnect();
             if (renderTaskRef.current) renderTaskRef.current.cancel();
         };
-    }, [renderScale, pageNum, pdfDoc, pdfjsLib]);
+    }, [pageNum, pdfDoc, pdfjsLib]);
 
     // Independent search highlighting effect
     useEffect(() => {
-        if (isInteractingRef.current || !textLayerRef.current) return;
+        if (!isRendered || !textLayerRef.current) return;
 
         const marks = textLayerRef.current.querySelectorAll('mark.pdf-search-match');
         marks.forEach(mark => {
@@ -180,9 +164,9 @@ const PageRenderer = React.memo<{
                 span.appendChild(fragment);
             }
         });
-    }, [searchQuery, currentSearchIndex, searchResults, pageNum, renderScale]);
+    }, [searchQuery, currentSearchIndex, searchResults, pageNum, isRendered]);
 
-    // Dedicated effect for scrolling to match - Only trigger on index change, not scale
+    // Dedicated effect for scrolling to match
     const lastScrollMatchRef = useRef<number>(-1);
     useEffect(() => {
         if (currentSearchIndex !== lastScrollMatchRef.current && textLayerRef.current) {
@@ -197,10 +181,6 @@ const PageRenderer = React.memo<{
         }
     }, [currentSearchIndex, searchResults, pageNum]);
 
-    const activeScale = renderTarget.activeCanvas === 'A' ? renderTarget.scaleA : renderTarget.scaleB;
-    const scaleA = renderTarget.scaleA || activeScale || 1;
-    const scaleB = renderTarget.scaleB || activeScale || 1;
-
     return (
         <div
             ref={el => {
@@ -210,52 +190,47 @@ const PageRenderer = React.memo<{
                 }
             }}
             data-page={pageNum}
-            className="relative bg-white dark:bg-[#0a0a0a] rounded-md origin-top-left select-none border border-zinc-200 dark:border-white/5 overflow-visible page-container"
+            className="relative bg-white dark:bg-[#0a0a0a] rounded-xl origin-top-left select-none border border-zinc-200 dark:border-white/5 overflow-visible page-container shadow-md"
             style={{
-                width: pageInfo ? `calc(${pageInfo.width}px * ${renderScale})` : '100%',
-                height: pageInfo ? `calc(${pageInfo.height}px * ${renderScale})` : '100vh',
-                marginBottom: `calc(24px * ${renderScale})`,
+                width: pageInfo ? `${pageInfo.width}px` : '100%',
+                height: pageInfo ? `${pageInfo.height}px` : '100%',
+                marginBottom: '24px',
                 contain: 'layout size',
                 willChange: 'transform'
             } as any}
         >
-            <div className="absolute inset-0 overflow-hidden rounded-md">
+            <div className="absolute inset-0 overflow-hidden rounded-xl">
                 <canvas
-                    ref={canvasARef}
-                    className={`absolute inset-0 block rounded-md transition-opacity duration-200 ${renderTarget.activeCanvas === 'A' ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                    ref={canvasRef}
+                    className="absolute inset-0 block w-full h-full rounded-xl"
                     style={{
                         backfaceVisibility: 'hidden',
                         pointerEvents: 'none',
-                        transform: `scale(calc(${renderScale} / ${scaleA})) translateZ(0)`,
-                        transformOrigin: 'top left',
-                        width: pageInfo ? `${pageInfo.width * scaleA}px` : 'auto',
-                        height: pageInfo ? `${pageInfo.height * scaleA}px` : 'auto',
-                    }}
-                />
-                <canvas
-                    ref={canvasBRef}
-                    className={`absolute inset-0 block rounded-md transition-opacity duration-200 ${renderTarget.activeCanvas === 'B' ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-                    style={{
-                        backfaceVisibility: 'hidden',
-                        pointerEvents: 'none',
-                        transform: `scale(calc(${renderScale} / ${scaleB})) translateZ(0)`,
-                        transformOrigin: 'top left',
-                        width: pageInfo ? `${pageInfo.width * scaleB}px` : 'auto',
-                        height: pageInfo ? `${pageInfo.height * scaleB}px` : 'auto',
                     }}
                 />
 
                 <div
                     ref={textLayerRef}
-                    className="textLayer absolute inset-0 pointer-events-none select-text z-20 opacity-20 transition-opacity duration-200"
+                    className="textLayer absolute pointer-events-none select-text z-20 opacity-20 transition-opacity duration-200"
                     style={{
-                        '--scale-factor': renderScale
-                    } as React.CSSProperties}
+                        width: pageInfo ? `${pageInfo.width}px` : '100%',
+                        height: pageInfo ? `${pageInfo.height}px` : '100%',
+                        transform: 'scale(1.0)',
+                        transformOrigin: 'top left',
+                        '--scale-factor': '1.0'
+                    } as any}
                 />
 
                 {/* Optimized Watermark */}
                 <div className="absolute inset-0 pointer-events-none opacity-[0.03] select-none z-30 watermark-overlay" />
             </div>
+            {!isRendered && (
+                <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 dark:bg-[#060606] rounded-xl z-30">
+                    <svg className="w-6 h-6 animate-spin text-zinc-300 dark:text-zinc-800" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" />
+                    </svg>
+                </div>
+            )}
         </div>
     );
 });
@@ -275,8 +250,12 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
     const [isDownloading, setIsDownloading] = useState(false);
 
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [renderScale, setRenderScale] = useState(scale);
     const [active, setActive] = useState(false);
+    const targetFileId = fileId || file?.id;
+    const [progressPercent, setProgressPercent] = useState(0);
+    const [hasRestoredPage, setHasRestoredPage] = useState(false);
+    const lastSavedProgress = useRef(0);
+    const lastSavedPage = useRef(1);
     const [displayFileName, setDisplayFileName] = useState(fileName);
 
     useEffect(() => {
@@ -468,15 +447,12 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
         container.classList.add('is-zooming');
 
         const rect = container.getBoundingClientRect();
-        const focalX = rect.width / 2;
         const focalY = rect.height / 2;
         const ratio = nextScale / scaleRef.current;
-
-        const nextLeft = (container.scrollLeft + focalX) * ratio - focalX;
         const nextTop = (container.scrollTop + focalY) * ratio - focalY;
 
         scaleRef.current = nextScale;
-        updateDOMScale(nextScale, nextLeft, nextTop);
+        updateDOMScale(nextScale, undefined, nextTop);
     }, [updateDOMScale]);
 
     const registerPageRef = useCallback((pageNum: number, el: HTMLDivElement | null) => {
@@ -514,6 +490,20 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
                     // Check if it is a PDF first
                     if (!fileObj.storage_path.toLowerCase().endsWith('.pdf')) {
+                        const client = NexusServer.getClient();
+                        if (client) {
+                            try {
+                                const { data, error } = await client.storage.from('nexus-documents').download(fileObj.storage_path);
+                                if (error) throw error;
+                                const blobUrl = URL.createObjectURL(data);
+                                window.open(blobUrl, '_blank');
+                                handleClose(fileObj);
+                                return;
+                            } catch (e) {
+                                console.warn("Direct download failed, falling back to proxy...", e);
+                            }
+                        }
+
                         const sessionRes = await NexusServer.getSession();
                         const session = sessionRes?.data?.session;
                         if (!session) {
@@ -540,35 +530,51 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
                     NexusServer.saveRecord(userProfile.id, 'file_access', `Opened ${fileObj.name}`, { fileId: fileObj.id, fileName: fileObj.name, path: fileObj.storage_path });
                     try {
-                        const sessionRes = await NexusServer.getSession();
-                        const session = sessionRes?.data?.session;
-                        if (!session) throw new Error("Authentication session not found.");
-                        
-                        const token = session.access_token;
-                        const resolvedUrl = NexusServer.getFileUrl(fileObj.storage_path, token);
-                        const response = await fetch(resolvedUrl, {
-                            headers: {
-                                'Authorization': `Bearer ${token}`
+                        const client = NexusServer.getClient();
+                        if (client) {
+                            const { data, error } = await client.storage.from('nexus-documents').download(fileObj.storage_path);
+                            if (error) {
+                                console.warn("Direct storage download failed, trying proxy fallback...", error);
+                                throw error;
                             }
-                        });
-                        if (!response.ok) {
-                            let errorMsg = "Vault access denied.";
-                            try {
-                                const errJson = await response.json();
-                                if (errJson && errJson.message) {
-                                    errorMsg = `Vault error: ${errJson.message}`;
-                                }
-                            } catch (_) {}
-                            throw new Error(errorMsg);
+                            const arrayBuffer = await data.arrayBuffer();
+                            pdfBytes = new Uint8Array(arrayBuffer);
+                            pdfBytesRef.current = pdfBytes;
+                        } else {
+                            throw new Error("Supabase client not initialized.");
                         }
-                        const arrayBuffer = await response.arrayBuffer();
-                        pdfBytes = new Uint8Array(arrayBuffer);
-                        pdfBytesRef.current = pdfBytes;
-                    } catch (err: any) {
-                        console.error("Failed to fetch PDF from vault:", err);
-                        setError('Failed to retrieve document from storage.');
-                        setIsLoading(false);
-                        return;
+                    } catch (directErr) {
+                        try {
+                            const sessionRes = await NexusServer.getSession();
+                            const session = sessionRes?.data?.session;
+                            if (!session) throw new Error("Authentication session not found.");
+                            
+                            const token = session.access_token;
+                            const resolvedUrl = NexusServer.getFileUrl(fileObj.storage_path, token);
+                            const response = await fetch(resolvedUrl, {
+                                headers: {
+                                    'Authorization': `Bearer ${token}`
+                                }
+                            });
+                            if (!response.ok) {
+                                let errorMsg = "Vault access denied.";
+                                try {
+                                    const errJson = await response.json();
+                                    if (errJson && errJson.message) {
+                                        errorMsg = `Vault error: ${errJson.message}`;
+                                    }
+                                } catch (_) {}
+                                throw new Error(errorMsg);
+                            }
+                            const arrayBuffer = await response.arrayBuffer();
+                            pdfBytes = new Uint8Array(arrayBuffer);
+                            pdfBytesRef.current = pdfBytes;
+                        } catch (err: any) {
+                            console.error("Failed to fetch PDF from vault:", err);
+                            setError('Failed to retrieve document from storage.');
+                            setIsLoading(false);
+                            return;
+                        }
                     }
                 } else if (targetUrl) {
                     try {
@@ -767,30 +773,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
     };
 
     useEffect(() => {
-        if (isInteractingRef.current) return;
-
-        // Keep scaleRef in sync with state for non-gesture updates (buttons, init)
         scaleRef.current = scale;
-
-        const prevScale = renderScale;
-        const timer = setTimeout(() => {
-            if (prevScale !== scale) {
-                const L_old = getCenteringOffset(prevScale);
-                const L_new = getCenteringOffset(scale);
-                const deltaCentering = L_new - L_old;
-
-                setRenderScale(scale);
-                
-                if (containerRef.current) {
-                    containerRef.current.style.setProperty('--pdf-scale', scale.toString());
-                    if (deltaCentering !== 0) {
-                        containerRef.current.scrollLeft += deltaCentering;
-                    }
-                }
-            }
-        }, 200); 
-        return () => clearTimeout(timer);
-    }, [scale, renderScale, getCenteringOffset]);
+        if (containerRef.current) {
+            containerRef.current.style.setProperty('--pdf-scale', scale.toString());
+        }
+    }, [scale]);
 
     // Simplified focal point logic removed in favor of direct gesture scroll handling
 
@@ -806,19 +793,18 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                 setIsInteracting(true);
                 container.classList.add('is-zooming');
 
-                const delta = -e.deltaY * 0.005;
-                const nextScale = Math.min(Math.max(0.3, scaleRef.current + delta), 4);
-                
+                // Normalize delta to keep trackpads fast/sensitive and mice capped/smooth
+                const deltaY = Math.min(Math.max(e.deltaY, -25), 25);
+                const factor = Math.exp(-deltaY * 0.015);
+                const nextScale = Math.min(Math.max(0.3, scaleRef.current * factor), 4);
+
                 const rect = container.getBoundingClientRect();
-                const focalX = e.clientX - rect.left;
                 const focalY = e.clientY - rect.top;
                 const ratio = nextScale / scaleRef.current;
-                
-                const nextLeft = (container.scrollLeft + focalX) * ratio - focalX;
                 const nextTop = (container.scrollTop + focalY) * ratio - focalY;
 
                 scaleRef.current = nextScale;
-                updateDOMScale(nextScale, nextLeft, nextTop);
+                updateDOMScale(nextScale, undefined, nextTop);
             }
         };
 
@@ -846,16 +832,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                 if (now - lastTap < 300 && dist < 30) {
                     e.preventDefault();
                     const rect = container.getBoundingClientRect();
-                    const focalX = touch.clientX - rect.left;
                     const focalY = touch.clientY - rect.top;
                     const nextScale = scaleRef.current > 1.2 ? 1.0 : 2.0;
                     const ratio = nextScale / scaleRef.current;
-
-                    const nextLeft = (container.scrollLeft + focalX) * ratio - focalX;
                     const nextTop = (container.scrollTop + focalY) * ratio - focalY;
 
                     scaleRef.current = nextScale;
-                    updateDOMScale(nextScale, nextLeft, nextTop);
+                    updateDOMScale(nextScale, undefined, nextTop);
                     touchState.current.lastTap = 0;
                 } else {
                     touchState.current.lastTap = now;
@@ -872,34 +855,24 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                 const touch1 = e.touches[0];
                 const touch2 = e.touches[1];
                 const dist = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
-                const currentFocalX = (touch1.clientX + touch2.clientX) / 2;
                 const currentFocalY = (touch1.clientY + touch2.clientY) / 2;
 
                 if (touchState.current.lastDist > 0) {
                     const ratio = dist / touchState.current.lastDist;
                     const nextScale = Math.min(Math.max(0.3, scaleRef.current * ratio), 4);
-                    
+
                     const rect = container.getBoundingClientRect();
-                    const localFocalX = currentFocalX - rect.left;
                     const localFocalY = currentFocalY - rect.top;
-                    
-                    // Pan calculations
-                    const deltaX = currentFocalX - touchState.current.lastFocalX;
+
                     const deltaY = currentFocalY - touchState.current.lastFocalY;
-
-                    const translatedScrollLeft = container.scrollLeft - deltaX;
                     const translatedScrollTop = container.scrollTop - deltaY;
-
                     const realRatio = nextScale / scaleRef.current;
-
-                    const nextLeft = (translatedScrollLeft + localFocalX) * realRatio - localFocalX;
                     const nextTop = (translatedScrollTop + localFocalY) * realRatio - localFocalY;
 
                     scaleRef.current = nextScale;
-                    updateDOMScale(nextScale, nextLeft, nextTop);
+                    updateDOMScale(nextScale, undefined, nextTop);
                 }
                 touchState.current.lastDist = dist;
-                touchState.current.lastFocalX = currentFocalX;
                 touchState.current.lastFocalY = currentFocalY;
             } else if (e.touches.length === 1) {
                 touchState.current.wasScrolling = true;
@@ -974,6 +947,78 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
             target.scrollIntoView({ behavior: 'smooth' });
         }
     };
+
+    // 1. Fetch initial progress and last read page from Supabase
+    useEffect(() => {
+        if (!userProfile?.id || !targetFileId) return;
+
+        let active = true;
+        const loadInitialProgress = async () => {
+            try {
+                const data = await NexusServer.fetchDocumentProgress(targetFileId);
+                if (data && active) {
+                    setProgressPercent(data.progress_percentage || 0);
+                    lastSavedProgress.current = data.progress_percentage || 0;
+                    if (data.last_read_page) {
+                        lastSavedPage.current = data.last_read_page;
+                    }
+                }
+            } catch (e) {
+                console.error("Error loading initial document progress:", e);
+            }
+        };
+
+        loadInitialProgress();
+        return () => {
+            active = false;
+        };
+    }, [targetFileId, userProfile?.id]);
+
+    // 2. Restore reading scroll position once pdfDoc is loaded
+    useEffect(() => {
+        if (pdfDoc && !hasRestoredPage && targetFileId && userProfile?.id) {
+            const restorePage = async () => {
+                try {
+                    const data = await NexusServer.fetchDocumentProgress(targetFileId);
+                    if (data && data.last_read_page && data.last_read_page > 1) {
+                        // Wait slightly for canvas/page nodes to register in DOM, then scroll
+                        setTimeout(() => {
+                            jumpToPage(data.last_read_page);
+                        }, 800);
+                    }
+                    setHasRestoredPage(true);
+                } catch (e) {
+                    console.error("Error restoring page:", e);
+                    setHasRestoredPage(true);
+                }
+            };
+            restorePage();
+        }
+    }, [pdfDoc, targetFileId, userProfile?.id, hasRestoredPage]);
+
+    // 3. Debounced tracking of page scroll to save reading progress
+    useEffect(() => {
+        if (!targetFileId || numPages <= 0 || !userProfile?.id) return;
+
+        const calculatedProgress = Math.round((currentPage / numPages) * 100);
+        setProgressPercent(calculatedProgress);
+
+        const delayDbSave = setTimeout(async () => {
+            // Only upsert if progress has increased OR the current page has changed
+            if (calculatedProgress !== lastSavedProgress.current || currentPage !== lastSavedPage.current) {
+                lastSavedProgress.current = calculatedProgress;
+                lastSavedPage.current = currentPage;
+
+                try {
+                    await NexusServer.updateDocumentProgress(targetFileId, calculatedProgress, currentPage);
+                } catch (e) {
+                    console.error("Failed to save document reading progress:", e);
+                }
+            }
+        }, 2000); // 2 second debounce to prevent network write spam
+
+        return () => clearTimeout(delayDbSave);
+    }, [currentPage, numPages, targetFileId, userProfile?.id]);
 
     const toggleFullscreen = () => {
         if (!document.fullscreenElement) {
@@ -1288,25 +1333,25 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
     return createPortal(
         <div className={`fixed inset-0 z-[9999] flex flex-col bg-zinc-100 dark:bg-[#0a0a0a] overflow-hidden pdf-viewer-overlay ${active ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-[0.98] pointer-events-none'} ${isFullscreen ? 'p-0' : ''}`}>
             {/* Toolbar */}
-            <div className={`absolute top-0 left-0 right-0 flex items-center justify-between px-2 md:px-6 h-12 md:h-20 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-2xl border-b border-zinc-200 dark:border-white/5 z-50 transition-transform duration-300 ${showToolbar ? 'translate-y-0' : '-translate-y-full'}`}>
-                <div className="flex items-center gap-1 md:gap-4 overflow-hidden">
+            <div className={`absolute top-0 left-0 right-0 flex items-center justify-between px-2 md:px-5 h-12 md:h-14 bg-white/95 dark:bg-[#060606]/95 backdrop-blur-2xl border-b border-zinc-200 dark:border-white/5 z-50 transition-transform duration-300 ${showToolbar ? 'translate-y-0' : '-translate-y-full'}`}>
+                <div className="flex items-center gap-1 overflow-hidden">
                     <button
                         onClick={handleClose}
-                        className="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-zinc-200 dark:bg-white/5 text-zinc-600 dark:text-white transition-all border-none group pdf-back-btn"
+                        className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-transparent text-zinc-500 dark:text-white/60 hover:text-zinc-900 dark:hover:text-white transition-all border-none group pdf-back-btn animate-fade-in"
                     >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-0.5 transition-transform"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                     </button>
                     <div className="hidden sm:block truncate">
-                        <h3 className="text-[13px] font-medium text-zinc-900 dark:text-white tracking-tight truncate max-w-[200px]">{displayFileName}</h3>
-                        <p className="text-[10px] font-medium tracking-wide leading-none mt-1" style={{ color: 'var(--brand-primary)' }}>{fullBrandName} Secure Protocol</p>
+                        <h3 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 tracking-tight truncate max-w-[180px]">{displayFileName}</h3>
+                        <p className="text-[9px] font-semibold tracking-wide leading-none mt-0.5" style={{ color: 'var(--brand-primary)' }}>{fullBrandName} Secure Protocol</p>
                     </div>
                 </div>
 
                 {/* Center: Search & Zoom */}
-                <div className="flex items-center gap-1 md:gap-6">
+                <div className="flex items-center gap-1 md:gap-4">
                     {/* Search Bar */}
-                    <div className="hidden sm:flex items-center bg-zinc-200 dark:bg-white/5 rounded-2xl border border-zinc-300 dark:border-white/10 px-3 py-1.5 focus-within:border-orange-600 transition-all group">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-zinc-400 dark:text-white/30 group-focus-within:text-orange-500"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                    <div className="hidden sm:flex items-center bg-zinc-100 dark:bg-white/5 rounded-xl border border-zinc-200/50 dark:border-white/5 px-2.5 h-8 md:h-9 focus-within:border-orange-600/50 transition-all group">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-zinc-400 dark:text-white/20 group-focus-within:text-orange-500"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
                         <input
                             type="text"
                             placeholder="Find..."
@@ -1317,100 +1362,110 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                             autoCorrect="off"
                             autoComplete="off"
                             spellCheck="false"
-                            className="bg-transparent border-none outline-none text-xs font-normal text-zinc-900 dark:text-white px-2 w-24 md:w-32 placeholder:text-zinc-400 dark:placeholder:text-white/20"
+                            className="bg-transparent border-none outline-none text-xs font-medium text-zinc-900 dark:text-white px-2 w-20 md:w-28 placeholder:text-zinc-400 dark:placeholder:text-white/20"
                         />
                         {searchResults.length > 0 && (
-                            <div className="flex items-center gap-2 pr-2">
-                                <span className="text-[10px] font-medium text-orange-500 whitespace-nowrap">{currentSearchIndex + 1} / {searchResults.length}</span>
-                                <div className="h-4 w-px bg-zinc-300 dark:bg-white/10 mx-1" />
-                                <button onClick={prevSearch} className="text-zinc-400 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3"><path d="m15 18-6-6 6-6" /></svg></button>
-                                <button onClick={nextSearch} className="text-zinc-400 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-3 h-3"><path d="m9 18 6-6-6-6" /></svg></button>
+                            <div className="flex items-center gap-1.5 pr-1">
+                                <span className="text-[9px] font-black text-orange-500 whitespace-nowrap">{currentSearchIndex + 1} / {searchResults.length}</span>
+                                <div className="h-3 w-px bg-zinc-200 dark:bg-white/10 mx-0.5" />
+                                <button onClick={prevSearch} className="text-zinc-400 dark:text-white/35 hover:text-zinc-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5"><path d="m15 18-6-6 6-6" /></svg></button>
+                                <button onClick={nextSearch} className="text-zinc-400 dark:text-white/35 hover:text-zinc-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5"><path d="m9 18 6-6-6-6" /></svg></button>
                             </div>
                         )}
                     </div>
 
                     {/* Scale Controls */}
-                    <div className="flex items-center gap-0.5 md:gap-1 bg-zinc-200 dark:bg-white/5 rounded-xl md:rounded-2xl p-0.5 md:p-1 border border-zinc-300 dark:border-white/10">
+                    <div className="flex items-center bg-zinc-100 dark:bg-white/5 rounded-xl h-8 md:h-9 p-0.5 border border-zinc-200/50 dark:border-white/5">
                         <button
                             onClick={() => handleZoom(Math.max(0.2, scaleRef.current - 0.1))}
-                            className="w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl flex items-center justify-center text-zinc-500 dark:text-white/50 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300 dark:hover:bg-white/10 transition-all border-none bg-transparent"
+                            className="w-6.5 h-6.5 rounded-lg flex items-center justify-center text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 transition-all border-none bg-transparent"
                         >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 md:w-4 md:h-4"><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="5" y1="12" x2="19" y2="12" /></svg>
                         </button>
-                        <span className="text-[10px] md:text-xs font-medium text-zinc-900 dark:text-white px-1 md:px-2 min-w-[40px] md:min-w-[50px] text-center">{Math.round(scale * 100)}%</span>
+                        <span className="text-[10px] font-bold text-zinc-900 dark:text-white px-1.5 min-w-[32px] md:min-w-[38px] text-center select-none">{Math.round(scale * 100)}%</span>
                         <button
                             onClick={() => handleZoom(Math.min(3, scaleRef.current + 0.1))}
-                            className="w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl flex items-center justify-center text-zinc-500 dark:text-white/50 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300 dark:hover:bg-white/10 transition-all border-none bg-transparent"
+                            className="w-6.5 h-6.5 rounded-lg flex items-center justify-center text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 transition-all border-none bg-transparent"
                         >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 md:w-4 md:h-4"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                         </button>
+
+                        <div className="w-px h-4 bg-zinc-200 dark:bg-white/10 mx-0.5" />
 
                         <button
                             onClick={toggleFit}
-                            className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center bg-zinc-300/50 dark:bg-white/5 text-zinc-500 dark:text-white/50 hover:text-zinc-900 dark:hover:text-white pdf-back-btn transition-all border-none"
+                            className="w-6.5 h-6.5 rounded-lg flex items-center justify-center text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 transition-all border-none bg-transparent"
                             title={viewMode === 'width' ? "Fit to Width" : "Fit to Page"}
                         >
                             {viewMode === 'width' ? (
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 md:w-5 md:h-5">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
                                     <path d="M2 12h20" />
                                     <path d="M7 7l-5 5 5 5" />
                                     <path d="M17 7l5 5-5 5" />
                                 </svg>
                             ) : (
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 md:w-5 md:h-5">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
                                     <path d="M8 3H5a2 2 0 0 0-2 2v3m14 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                                 </svg>
                             )}
                         </button>
-
                     </div>
                 </div>
 
                 {/* Right: Actions */}
-                <div className="flex items-center gap-1 md:gap-2">
-                    <div className="hidden sm:flex items-center bg-zinc-200 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-2xl px-4 py-3 gap-3">
+                <div className="flex items-center gap-1.5 md:gap-2">
+                    <div className="hidden sm:flex items-center h-8 md:h-9 bg-zinc-100 dark:bg-white/5 border border-zinc-200/50 dark:border-white/5 rounded-xl px-2 gap-1">
                         <input
                             type="number"
                             min={1}
                             max={numPages}
                             value={currentPage}
                             onChange={e => jumpToPage(parseInt(e.target.value) || 1)}
-                            className="w-10 bg-transparent border-none outline-none text-center text-xs font-medium text-zinc-900 dark:text-white"
+                            className="w-7 bg-transparent border-none outline-none text-center text-xs font-bold text-zinc-900 dark:text-white"
                         />
-                        <span className="text-xs font-medium text-zinc-400 dark:text-white/20 tracking-wide">/ {numPages}</span>
+                        <span className="text-[10px] font-semibold text-zinc-400 dark:text-white/30 tracking-wide select-none">/ {numPages}</span>
+                    </div>
+
+                    {/* Circular progress bar percentage indicator */}
+                    <div className="hidden sm:flex relative w-8.5 h-8.5 md:w-9 md:h-9 items-center justify-center shrink-0 select-none cursor-default" title={`${progressPercent}% Read`}>
+                        <svg className="w-7 h-7 -rotate-90" viewBox="0 0 32 32">
+                            <circle cx="16" cy="16" r="13" className="stroke-zinc-200 dark:stroke-white/10" strokeWidth="2.5" fill="transparent" />
+                            <circle cx="16" cy="16" r="13" className="stroke-orange-500" strokeWidth="2.5" fill="transparent" strokeDasharray={2 * Math.PI * 13} strokeDashoffset={2 * Math.PI * 13 - (progressPercent / 100) * (2 * Math.PI * 13)} strokeLinecap="round" />
+                        </svg>
+                        <span className="absolute text-[7.5px] md:text-[8px] font-black tracking-tighter text-zinc-800 dark:text-zinc-200">{progressPercent}%</span>
                     </div>
 
                     <button
                         onClick={toggleTheme}
-                        className="hidden md:flex w-10 h-10 rounded-xl items-center justify-center bg-zinc-200 dark:bg-white/5 text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white border-none group"
+                        className="hidden md:flex w-8 h-8 md:w-9 md:h-9 rounded-xl items-center justify-center bg-zinc-100 dark:bg-white/5 border border-zinc-200/50 dark:border-white/5 text-zinc-500 dark:text-white/35 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 transition-all border-none group"
                         title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
                     >
                         {isDarkMode ? (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 group-hover:text-amber-400 transition-colors"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 group-hover:text-amber-400 transition-colors"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
                         ) : (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 group-hover:text-blue-500 transition-colors"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 group-hover:text-blue-500 transition-colors"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
                         )}
                     </button>
 
                     <button
                         onClick={toggleFullscreen}
-                        className="hidden md:flex w-10 h-10 rounded-xl items-center justify-center bg-zinc-200 dark:bg-white/5 text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white border-none group"
+                        className="hidden md:flex w-8 h-8 md:w-9 md:h-9 rounded-xl items-center justify-center bg-zinc-100 dark:bg-white/5 border border-zinc-200/50 dark:border-white/5 text-zinc-500 dark:text-white/35 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 transition-all border-none group"
                         title="Toggle Fullscreen"
                     >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 group-hover:scale-110 transition-transform"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" /></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 group-hover:scale-110 transition-transform"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" /></svg>
                     </button>
 
                     <button
                         onClick={handleDownload}
                         disabled={isDownloading}
-                        className={`w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center border-none transition-all shadow-lg ${isDownloading ? 'opacity-60 cursor-wait' : 'text-white hover:scale-110 active:scale-95'}`}
-                        style={{ backgroundColor: 'var(--brand-primary)', boxShadow: '0 10px 15px -3px var(--brand-glow)' }}
+                        className={`w-8 h-8 md:w-9 md:h-9 rounded-xl flex items-center justify-center border-none transition-all shadow-lg ${isDownloading ? 'opacity-60 cursor-wait' : 'text-white hover:scale-105 active:scale-95'}`}
+                        style={{ backgroundColor: 'var(--brand-primary)', boxShadow: '0 8px 12px -3px var(--brand-glow)' }}
                         title={isDownloading ? 'Preparing download...' : 'Download PDF'}
                     >
                         {isDownloading ? (
-                            <svg className="w-4 h-4 md:w-5 md:h-5 animate-spin text-white" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" /></svg>
+                            <svg className="w-4 h-4 animate-spin text-white" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" /></svg>
                         ) : (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 md:w-5 md:h-5 text-white"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
                         )}
                     </button>
                 </div>
@@ -1425,7 +1480,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     onContextMenu={(e) => !isAdmin && e.preventDefault()}
                     onDragStart={(e) => !isAdmin && e.preventDefault()}
                     onSelectStart={(e) => !isAdmin && e.preventDefault()}
-                    className="flex-1 overflow-auto bg-zinc-100 dark:bg-[#0a0a0a] relative select-none touch-auto overscroll-none pt-16 md:pt-20"
+                    className="flex-1 overflow-auto bg-zinc-100 dark:bg-[#0a0a0a] relative select-none touch-auto overscroll-none pt-12 md:pt-14 animate-fade-in"
                     style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'none' }}
                 >
                     {isLoading ? (
@@ -1446,11 +1501,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                             ref={zoomWrapperRef}
                             className="flex flex-col items-center min-w-max mx-auto px-4 md:px-8"
                             style={{
-                                transform: `scale(calc(var(--pdf-scale) / ${renderScale})) translateZ(0)`,
-                                transformOrigin: 'top left',
+                                transform: 'scale(var(--pdf-scale)) translateZ(0)',
+                                transformOrigin: 'top center',
                                 willChange: 'transform',
-                                paddingTop: `${48 * renderScale}px`,
-                                paddingBottom: `${48 * renderScale}px`,
+                                paddingTop: '0px',
+                                paddingBottom: 'calc(48px * var(--pdf-scale))',
                             }}
                         >
                             {Array.from({ length: numPages }).map((_, i) => (
@@ -1458,7 +1513,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                                     key={i}
                                     pageNum={i + 1}
                                     pdfDoc={pdfDoc}
-                                    renderScale={renderScale}
                                     userProfile={userProfile}
                                     searchQuery={searchQuery}
                                     currentSearchIndex={currentSearchIndex}
@@ -1473,8 +1527,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                 </main>
 
                 {/* Floating Page Indicator (Mobile) */}
-                <div className="md:hidden fixed bottom-10 right-8 z-50 text-white px-4 py-2 rounded-full font-black text-[10px] shadow-2xl animate-fade-in uppercase tracking-widest" style={{ backgroundColor: 'var(--brand-primary)' }}>
-                    {currentPage} / {numPages}
+                <div className="md:hidden fixed bottom-10 right-8 z-50 text-white px-4 py-2 rounded-full font-black text-[10px] shadow-2xl animate-fade-in uppercase tracking-widest flex items-center gap-1.5" style={{ backgroundColor: 'var(--brand-primary)' }}>
+                    <span>{currentPage} / {numPages}</span>
+                    <span className="opacity-40">•</span>
+                    <span>{progressPercent}% Read</span>
                 </div>
             </div>
 

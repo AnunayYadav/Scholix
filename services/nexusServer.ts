@@ -63,6 +63,10 @@ const getSupabase = () => {
 class NexusServer {
   static isConfigured(): boolean { return !!getSupabase(); }
 
+  static getClient() {
+    return getSupabase();
+  }
+
   /**
    * Timetable: Community Presets
    */
@@ -123,12 +127,29 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return [];
 
-    const { data, error } = await client
-      .from('question_banks')
-      .select('*')
-      .eq('subject_name', subject)
-      .in('unit_number', units);
+    const subjectMatch = (subject || '').match(/[A-Za-z]+[0-9]+/);
+    const subjectCode = subjectMatch ? subjectMatch[0].toUpperCase() : (subject || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
 
+    // Resolve subject folder
+    const { data: subFolders } = await client
+      .from('library_items')
+      .select('id, name')
+      .eq('type', 'subject');
+
+    const subFolder = (subFolders || []).find(f => {
+      const match = f.name.match(/[A-Za-z]+[0-9]+/);
+      const code = match ? match[0].toUpperCase() : f.name.toUpperCase().trim();
+      return code === subjectCode;
+    });
+
+    let query = client.from('question_banks').select('*');
+    if (subFolder) {
+      query = query.eq('subject_id', subFolder.id);
+    } else {
+      query = query.eq('subject_name', subject); // fallback
+    }
+
+    const { data, error } = await query.in('unit_number', units);
     if (error || !data) return [];
 
     let combined: QuizQuestion[] = [];
@@ -155,9 +176,23 @@ class NexusServer {
     // Extract core subject code (e.g., CHE110) consistently
     const subjectMatch = (subject || '').match(/[A-Za-z]+[0-9]+/);
     const subjectCode = subjectMatch ? subjectMatch[0].toUpperCase() : (subject || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+
+    // Resolve subject folder
+    const { data: subFolders } = await client
+      .from('library_items')
+      .select('id, name')
+      .eq('type', 'subject');
+
+    const subFolder = (subFolders || []).find(f => {
+      const match = f.name.match(/[A-Za-z]+[0-9]+/);
+      const code = match ? match[0].toUpperCase() : f.name.toUpperCase().trim();
+      return code === subjectCode;
+    });
+
     // Transform from app format to DB format (snake_case)
     const dbRows = questions.map(q => ({
       id: q.id,
+      subject_id: subFolder?.id || null,
       subject: subjectCode,
       unit,
       topic: q.topic,
@@ -195,10 +230,24 @@ class NexusServer {
     const subjectMatch = (subject || '').match(/[A-Za-z]+[0-9]+/);
     const subjectCode = subjectMatch ? subjectMatch[0].toUpperCase() : (subject || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
     
-    let query = client
-      .from('questions')
-      .select('*')
-      .eq('subject', subjectCode);
+    // Resolve subject folder
+    const { data: subFolders } = await client
+      .from('library_items')
+      .select('id, name')
+      .eq('type', 'subject');
+
+    const subFolder = (subFolders || []).find(f => {
+      const match = f.name.match(/[A-Za-z]+[0-9]+/);
+      const code = match ? match[0].toUpperCase() : f.name.toUpperCase().trim();
+      return code === subjectCode;
+    });
+
+    let query = client.from('questions').select('*');
+    if (subFolder) {
+      query = query.eq('subject_id', subFolder.id);
+    } else {
+      query = query.eq('subject', subjectCode); // fallback
+    }
 
     if (unitOrUnits !== undefined) {
       if (Array.isArray(unitOrUnits)) {
@@ -927,6 +976,7 @@ class NexusServer {
     const publicNew = {
       id: user.id,
       username: metadata.username || user.email?.split('@')[0] || `verto_${user.id.slice(0, 5)}`,
+      avatar_url: metadata.avatar_url || `https://api.dicebear.com/7.x/adventurer/svg?seed=${metadata.username || user.id || Math.random().toString()}`,
       is_admin: false,
       total_xp: 0,
       level: 1,
@@ -1007,6 +1057,50 @@ class NexusServer {
     }
   }
 
+  static async fetchLeaderboard(): Promise<any[]> {
+    const client = getSupabase();
+    if (!client) return [];
+    const { data, error } = await client
+      .from('profiles')
+      .select('username, total_xp, level, level_title')
+      .gt('total_xp', 0)
+      .order('total_xp', { ascending: false })
+      .limit(10);
+    if (error) {
+      console.error('Fetch Leaderboard Error:', error);
+      return [];
+    }
+    return data || [];
+  }
+
+  static async fetchModerators(): Promise<any[]> {
+    const client = getSupabase();
+    if (!client) return [];
+    const { data, error } = await client
+      .from('profiles')
+      .select('username, is_admin')
+      .eq('is_admin', true)
+      .limit(10);
+    if (error) {
+      console.error('Fetch Moderators Error:', error);
+      return [];
+    }
+    return data || [];
+  }
+
+  static async fetchMembersCount(program: string): Promise<number> {
+    const client = getSupabase();
+    if (!client) return 0;
+    const { count, error } = await client
+      .from('profiles')
+      .select('*', { count: 'exact', head: true });
+    if (error) {
+      console.error('Fetch Members Count Error:', error);
+      return 2430;
+    }
+    return count || 0;
+  }
+
   static sanitizeStoragePath(name: string): string {
     return name.replace(/[^a-zA-Z0-9._-]/g, '_');
   }
@@ -1026,7 +1120,7 @@ class NexusServer {
   static async fetchFolders(program: string): Promise<Folder[]> {
     const client = getSupabase();
     if (!client) return [];
-    let query = client.from('folders').select('*');
+    let query = client.from('library_items').select('*').neq('type', 'file');
     if (program && program !== 'All') query = query.eq('program', program);
     
     // Primary sort: display_order, Secondary sort: name
@@ -1043,98 +1137,51 @@ class NexusServer {
       if (!client) return;
 
       const updates = folderOrders.map(item =>
-        client.from('folders').update({ display_order: item.order }).eq('id', item.id.split('-dup-')[0])
+        client.from('library_items').update({ display_order: item.order }).eq('id', item.id.split('-dup-')[0])
       );
 
       const results = await Promise.all(updates);
       const firstError = results.find(r => r.error);
       if (firstError) {
-        console.warn("Folder reorder failed (likely missing column):", firstError.error);
+        console.warn("Folder reorder failed:", firstError.error);
       }
     } catch (e) {
       console.warn("Folder reorder exception:", e);
     }
   }
 
-  static async createFolder(name: string, type: 'semester' | 'subject' | 'category', parentId: string | null, program: string, is_shining: boolean = false) {
+  static async createFolder(name: string, type: 'semester' | 'subject' | 'category', parentId: string | null, program: string, iconName?: string, color?: string) {
     const client = getSupabase();
     if (!client) return;
     
-    // Attempt with is_shining first
-    const { error: firstError } = await client.from('folders').insert([{ name, type, parent_id: parentId, program, is_shining }]);
+    const { error } = await client.from('library_items').insert([{
+      name,
+      type,
+      parent_id: parentId,
+      program,
+      icon_name: iconName || 'Folder',
+      color: color || '#ff7a00'
+    }]);
     
-    if (firstError) {
-      // If error sounds like missing column, retry without is_shining
-      if (firstError.message.includes('column "is_shining" does not exist') || firstError.code === '42703' || firstError.message.includes('column "is_shining" of relation "folders" does not exist')) {
-        console.warn("Retrying folder creation without 'is_shining' due to missing column.");
-        const { error: secondError } = await client.from('folders').insert([{ name, type, parent_id: parentId, program }]);
-        if (secondError) throw new Error(secondError.message);
-      } else {
-        console.error("Create Folder Error:", firstError);
-        throw new Error(firstError.message);
-      }
+    if (error) {
+      console.error("Create Folder Error:", error);
+      throw new Error(error.message);
     }
   }
 
-  static async renameFolder(folder: Folder, newName: string, is_shining?: boolean, allFolders: Folder[] = []) {
+  static async renameFolder(folder: Folder, newName: string, iconName?: string, color?: string, allFolders: Folder[] = []) {
     const client = getSupabase();
     if (!client) return;
     
-    const { id, name: oldName, type, parent_id, program } = folder;
-    const dbId = id.split('-dup-')[0];
+    const dbId = folder.id.split('-dup-')[0];
     const updateData: any = { name: newName };
-    if (is_shining !== undefined) updateData.is_shining = is_shining;
+    if (iconName !== undefined) updateData.icon_name = iconName;
+    if (color !== undefined) updateData.color = color;
     
-    // 1. Rename the folder itself
-    const { error: renameError } = await client.from('folders').update(updateData).eq('id', dbId);
-    
-    if (renameError) {
-      if (renameError.message.includes('column "is_shining" does not exist') || renameError.code === '42703' || renameError.message.includes('column "is_shining" of relation "folders" does not exist')) {
-        console.warn("Retrying folder rename without 'is_shining' due to missing column.");
-        const { error: secondError } = await client.from('folders').update({ name: newName }).eq('id', dbId);
-        if (secondError) throw new Error(secondError.message);
-      } else {
-        console.error("Rename Folder Error:", renameError);
-        throw new Error(renameError.message);
-      }
-    }
-    
-    // 2. Cascade update to documents (files)
-    // We update files whose metadata matches the old folder structure to keep them linked
-    try {
-      if (type === 'semester') {
-        // If a semester is renamed, update ALL files identifying with the old semester name
-        await client.from('documents')
-          .update({ semester: newName })
-          .eq('semester', oldName)
-          .eq('program', program);
-      } else if (type === 'subject') {
-        // If a subject is renamed, update files in that specific subject under its parent semester
-        const parentSem = allFolders.find(f => f.id === parent_id);
-        if (parentSem) {
-          await client.from('documents')
-            .update({ subject: newName })
-            .eq('semester', parentSem.name)
-            .eq('subject', oldName)
-            .eq('program', program);
-        }
-      } else if (type === 'category') {
-        // If a category (type) is renamed, update files with that specific type/subject/semester triad
-        const parentSub = allFolders.find(f => f.id === parent_id);
-        if (parentSub) {
-          const grandParentSem = allFolders.find(f => f.id === parentSub.parent_id);
-          if (grandParentSem) {
-            await client.from('documents')
-              .update({ type: newName })
-              .eq('semester', grandParentSem.name)
-              .eq('subject', parentSub.name)
-              .eq('type', oldName)
-              .eq('program', program);
-          }
-        }
-      }
-    } catch (err) {
-      console.warn("Folder rename file sync partial failure:", err);
+    const { error } = await client.from('library_items').update(updateData).eq('id', dbId);
+    if (error) {
+      console.error("Rename Folder Error:", error);
+      throw new Error(error.message);
     }
   }
 
@@ -1142,7 +1189,7 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return;
     const dbId = id.split('-dup-')[0];
-    const { error } = await client.from('folders').delete().eq('id', dbId);
+    const { error } = await client.from('library_items').delete().eq('id', dbId);
     if (error) {
       console.error("Delete Folder Error:", error);
       throw new Error(error.message);
@@ -1152,7 +1199,7 @@ class NexusServer {
   static async fetchFiles(program: string, q?: string): Promise<LibraryFile[]> {
     const client = getSupabase();
     if (!client) return [];
-    let query = client.from('documents').select('*, uploader:profiles(username, is_admin)').eq('status', 'approved');
+    let query = client.from('documents').select('*, uploader:profiles!uploader_id(username, is_admin)').eq('status', 'approved');
     if (program && program !== 'All') query = query.eq('program', program);
     if (q) query = query.ilike('name', `%${q}%`);
     const { data, error } = await query
@@ -1166,7 +1213,17 @@ class NexusServer {
       uploader_is_admin: (item.uploader as any)?.is_admin || false,
       description: item.description,
       admin_notes: item.admin_notes,
-      display_order: item.display_order
+      display_order: item.display_order,
+      folder_id: item.folder_id,
+      faculty_name: item.faculty_name,
+      faculty_id: item.faculty_id,
+      verified_status: item.verified_status,
+      difficulty: item.difficulty,
+      exam_type: item.exam_type,
+      tags: item.tags,
+      upvoted_by: item.upvoted_by,
+      downvoted_by: item.downvoted_by,
+      downloads: item.downloads
     }));
   }
 
@@ -1175,7 +1232,7 @@ class NexusServer {
     if (!client || !id) return null;
     const { data, error } = await client
       .from('documents')
-      .select('*, uploader:profiles(username, is_admin)')
+      .select('*, uploader:profiles!uploader_id(username, is_admin)')
       .eq('id', id)
       .maybeSingle();
 
@@ -1200,19 +1257,52 @@ class NexusServer {
       description: data.description,
       admin_notes: data.admin_notes,
       display_order: data.display_order,
-      program: data.program
+      program: data.program,
+      folder_id: data.folder_id,
+      faculty_name: data.faculty_name,
+      faculty_id: data.faculty_id,
+      verified_status: data.verified_status,
+      difficulty: data.difficulty,
+      exam_type: data.exam_type,
+      tags: data.tags,
+      upvoted_by: data.upvoted_by,
+      downvoted_by: data.downvoted_by,
+      downloads: data.downloads
     };
   }
 
   static async uploadFile(file: File, name: string, desc: string, sub: string, sem: string, type: string, uid: string, admin: boolean, program: string) {
     const client = getSupabase();
     if (!client) return;
+
+    // Resolve category folder dynamically
+    const allFolders = await this.fetchFolders(program);
+    let semFolder = allFolders.find(f => f.type === 'semester' && f.name.trim() === sem.trim() && f.program === program);
+    if (!semFolder) {
+      await this.createFolder(sem.trim(), 'semester', null, program);
+      const fresh = await this.fetchFolders(program);
+      semFolder = fresh.find(f => f.type === 'semester' && f.name.trim() === sem.trim() && f.program === program);
+    }
+    let subjFolder = allFolders.find(f => f.type === 'subject' && f.name.trim() === sub.trim() && f.parent_id === semFolder?.id);
+    if (!subjFolder && semFolder) {
+      await this.createFolder(sub.trim(), 'subject', semFolder.id, program);
+      const fresh = await this.fetchFolders(program);
+      subjFolder = fresh.find(f => f.type === 'subject' && f.name.trim() === sub.trim() && f.parent_id === semFolder.id);
+    }
+    let catFolder = allFolders.find(f => f.type === 'category' && f.name.trim() === type.trim() && f.parent_id === subjFolder?.id);
+    if (!catFolder && subjFolder) {
+      await this.createFolder(type.trim(), 'category', subjFolder.id, program);
+      const fresh = await this.fetchFolders(program);
+      catFolder = fresh.find(f => f.type === 'category' && f.name.trim() === type.trim() && f.parent_id === subjFolder.id);
+    }
+
     const cleanName = this.sanitizeStoragePath(file.name);
     const path = `community/${Math.random().toString(36).substring(7)}_${cleanName}`;
     const { error: storageErr } = await client.storage.from('nexus-documents').upload(path, file);
     if (storageErr) throw storageErr;
-    const { error: dbErr } = await client.from('documents').insert([{
-      name, description: desc, subject: sub, semester: sem, type,
+
+    const { error: dbErr } = await client.from('library_items').insert([{
+      name, description: desc, parent_id: catFolder?.id || null, type: 'file',
       size: `${(file.size / 1024 / 1024).toFixed(2)} MB`, storage_path: path,
       uploader_id: uid, status: admin ? 'approved' : 'pending',
       program: program.trim()
@@ -1480,35 +1570,35 @@ class NexusServer {
   static async deleteFile(id: string, path: string) {
     const client = getSupabase();
     if (client) {
-      await client.from('documents').delete().eq('id', id);
+      await client.from('library_items').delete().eq('id', id);
       await client.storage.from('nexus-documents').remove([path]);
     }
   }
 
   static async approveFile(id: string) {
     const client = getSupabase();
-    if (client) await client.from('documents').update({ status: 'approved' }).eq('id', id);
+    if (client) await client.from('library_items').update({ status: 'approved' }).eq('id', id);
   }
 
   static async rejectFile(id: string) {
     const client = getSupabase();
-    if (client) await client.from('documents').delete().eq('id', id);
+    if (client) await client.from('library_items').delete().eq('id', id);
   }
 
   static async demoteFile(id: string) {
     const client = getSupabase();
-    if (client) await client.from('documents').update({ status: 'pending' }).eq('id', id);
+    if (client) await client.from('library_items').update({ status: 'pending' }).eq('id', id);
   }
 
   static async requestUpdate(id: string, metadata: any, admin: boolean) {
     const client = getSupabase();
-    if (client) await client.from('documents').update(admin ? metadata : { pending_update: metadata }).eq('id', id);
+    if (client) await client.from('library_items').update(admin ? metadata : { pending_update: metadata }).eq('id', id);
   }
 
   static async fetchPendingFiles(program: string, q?: string): Promise<LibraryFile[]> {
     const client = getSupabase();
     if (!client) return [];
-    let query = client.from('documents').select('*, uploader:profiles(username, is_admin)').eq('status', 'pending');
+    let query = client.from('documents').select('*, uploader:profiles!uploader_id(username, is_admin)').eq('status', 'pending');
     if (program && program !== 'All') query = query.eq('program', program);
     if (q) query = query.ilike('name', `%${q}%`);
     const { data, error } = await query.order('created_at', { ascending: false });
@@ -1519,14 +1609,24 @@ class NexusServer {
       uploader_username: (item.uploader as any)?.username || "Anonymous Verto",
       description: item.description,
       admin_notes: item.admin_notes,
-      program: item.program
+      program: item.program,
+      folder_id: item.folder_id,
+      faculty_name: item.faculty_name,
+      faculty_id: item.faculty_id,
+      verified_status: item.verified_status,
+      difficulty: item.difficulty,
+      exam_type: item.exam_type,
+      tags: item.tags,
+      upvoted_by: item.upvoted_by,
+      downvoted_by: item.downvoted_by,
+      downloads: item.downloads
     }));
   }
 
   static async fetchUserFiles(uid: string): Promise<LibraryFile[]> {
     const client = getSupabase();
     if (!client) return [];
-    const { data, error } = await client.from('documents').select('*, uploader:profiles(username, is_admin)').eq('uploader_id', uid).order('created_at', { ascending: false });
+    const { data, error } = await client.from('documents').select('*, uploader:profiles!uploader_id(username, is_admin)').eq('uploader_id', uid).order('created_at', { ascending: false });
     if (error) { console.error("Fetch User Files Error:", error); return []; }
     return (data || []).map(item => ({
       id: item.id, name: item.name, subject: item.subject, semester: item.semester, type: item.type,
@@ -1534,7 +1634,17 @@ class NexusServer {
       uploader_username: (item.uploader as any)?.username || "Anonymous Verto",
       description: item.description,
       admin_notes: item.admin_notes,
-      program: item.program
+      program: item.program,
+      folder_id: item.folder_id,
+      faculty_name: item.faculty_name,
+      faculty_id: item.faculty_id,
+      verified_status: item.verified_status,
+      difficulty: item.difficulty,
+      exam_type: item.exam_type,
+      tags: item.tags,
+      upvoted_by: item.upvoted_by,
+      downvoted_by: item.downvoted_by,
+      downloads: item.downloads
     }));
   }
 
@@ -1544,13 +1654,13 @@ class NexusServer {
       if (!client) return;
 
       const updates = fileOrders.map(item =>
-        client.from('documents').update({ display_order: item.order }).eq('id', item.id)
+        client.from('library_items').update({ display_order: item.order }).eq('id', item.id)
       );
 
       const results = await Promise.all(updates);
       const firstError = results.find(r => r.error);
       if (firstError) {
-        console.warn("Reorder failed (likely missing column):", firstError.error);
+        console.warn("Reorder failed:", firstError.error);
       }
     } catch (e) {
       console.warn("Reorder exception:", e);
@@ -1931,14 +2041,18 @@ class NexusServer {
     const client = getSupabase();
     if (!client) return [];
     const { data, error } = await client
-      .from('global_announcements')
+      .from('announcements')
       .select('*')
+      .eq('scope', 'global')
       .order('created_at', { ascending: false })
       .limit(20);
     if (error) {
       return [];
     }
-    return data || [];
+    return (data || []).map(item => ({
+      ...item,
+      message: item.content
+    }));
   }
 
   static subscribeToGlobalAnnouncements(onAnnouncement: (payload: any) => void) {
@@ -1949,8 +2063,8 @@ class NexusServer {
       .channel('public_announcements')
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'global_announcements' },
-        (payload) => onAnnouncement(payload.new)
+        { event: 'INSERT', schema: 'public', table: 'announcements', filter: 'scope=eq.global' },
+        (payload) => onAnnouncement({ ...payload.new, message: payload.new.content })
       )
       .subscribe();
 
@@ -1968,8 +2082,8 @@ class NexusServer {
     const sanitizedMessage = sanitizeInput(message, 2000);
     const sanitizedLink = link ? sanitizeInput(link, 500) : undefined;
     const { error } = await client
-      .from('global_announcements')
-      .insert([{ title: sanitizedTitle, message: sanitizedMessage, type, link: sanitizedLink }]);
+      .from('announcements')
+      .insert([{ scope: 'global', title: sanitizedTitle, content: sanitizedMessage, type, link: sanitizedLink }]);
     if (error) throw error;
   }
 
@@ -2203,6 +2317,111 @@ class NexusServer {
     }
   }
 
+  static async updateDocumentProgress(documentId: string, progress: number, lastReadPage: number = 1): Promise<void> {
+    try {
+      const client = getSupabase();
+      if (!client) return;
+      const sessionRes = await this.getSession();
+      const userId = sessionRes?.data?.session?.user?.id;
+      if (!userId) return;
+
+      // Fetch existing user_progress mapping
+      const { data: item } = await client
+        .from('library_items')
+        .select('user_progress')
+        .eq('id', documentId)
+        .maybeSingle();
+
+      const progressMap = item?.user_progress || {};
+      progressMap[userId] = {
+        progress_percentage: Math.min(100, Math.max(0, progress)),
+        last_read_page: Math.max(1, lastReadPage),
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await client
+        .from('library_items')
+        .update({ user_progress: progressMap })
+        .eq('id', documentId);
+
+      if (error) {
+        console.error('[NexusServer] updateDocumentProgress failed:', error);
+      }
+    } catch (e) {
+      console.error('[NexusServer] updateDocumentProgress exception:', e);
+    }
+  }
+
+  static async fetchUserDocumentProgress(): Promise<{ document_id: string; progress_percentage: number; last_read_page: number }[]> {
+    try {
+      const client = getSupabase();
+      if (!client) return [];
+      const sessionRes = await this.getSession();
+      const userId = sessionRes?.data?.session?.user?.id;
+      if (!userId) return [];
+
+      const { data, error } = await client
+        .from('library_items')
+        .select('id, user_progress')
+        .eq('type', 'file')
+        .not('user_progress', 'is', null);
+
+      if (error) {
+        console.error('[NexusServer] fetchUserDocumentProgress failed:', error);
+        return [];
+      }
+
+      const results: { document_id: string; progress_percentage: number; last_read_page: number }[] = [];
+      if (Array.isArray(data)) {
+        data.forEach(item => {
+          if (item.user_progress && item.user_progress[userId]) {
+            results.push({
+              document_id: item.id,
+              progress_percentage: item.user_progress[userId].progress_percentage || 0,
+              last_read_page: item.user_progress[userId].last_read_page || 1
+            });
+          }
+        });
+      }
+      return results;
+    } catch (e) {
+      console.error('[NexusServer] fetchUserDocumentProgress exception:', e);
+      return [];
+    }
+  }
+
+  static async fetchDocumentProgress(documentId: string): Promise<{ progress_percentage: number; last_read_page: number } | null> {
+    try {
+      const client = getSupabase();
+      if (!client) return null;
+      const sessionRes = await this.getSession();
+      const userId = sessionRes?.data?.session?.user?.id;
+      if (!userId) return null;
+
+      const { data, error } = await client
+        .from('library_items')
+        .select('user_progress')
+        .eq('id', documentId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('[NexusServer] fetchDocumentProgress failed:', error);
+        return null;
+      }
+
+      if (data && data.user_progress && data.user_progress[userId]) {
+        return {
+          progress_percentage: data.user_progress[userId].progress_percentage || 0,
+          last_read_page: data.user_progress[userId].last_read_page || 1
+        };
+      }
+      return null;
+    } catch (e) {
+      console.error('[NexusServer] fetchDocumentProgress exception:', e);
+      return null;
+    }
+  }
+
   static async getStudyLeaderboard() {
     try {
       // Use the server-side API route to bypass RLS and allow public users to view the leaderboard
@@ -2295,8 +2514,9 @@ class NexusServer {
     const bufferPast = new Date(now.getTime() - 5 * 60 * 1000).toISOString(); // 5 min in past for gte
 
     const { data, error } = await client
-      .from('app_announcements')
+      .from('announcements')
       .select('*')
+      .eq('scope', 'app_banner')
       .eq('is_active', true)
       .lte('start_at', bufferNow)
       .gte('end_at', bufferPast)
@@ -2306,22 +2526,31 @@ class NexusServer {
       console.error('Fetch Active Announcements Error:', error);
       return [];
     }
-    return data || [];
+    return (data || []).map(item => ({
+      ...item,
+      description: item.content,
+      link_url: item.link
+    }));
   }
 
   static async fetchAllAppAnnouncements(): Promise<any[]> {
     const client = getSupabase();
     if (!client) return [];
     const { data, error } = await client
-      .from('app_announcements')
+      .from('announcements')
       .select('*')
+      .eq('scope', 'app_banner')
       .order('created_at', { ascending: false });
     
     if (error) {
       console.error('Fetch All Announcements Error:', error);
       return [];
     }
-    return data || [];
+    return (data || []).map(item => ({
+      ...item,
+      description: item.content,
+      link_url: item.link
+    }));
   }
 
   static async createAppAnnouncement(announcement: any, file?: File) {
@@ -2337,9 +2566,15 @@ class NexusServer {
       imageUrl = publicUrl;
     }
 
-    const { error } = await client.from('app_announcements').insert([{
-      ...announcement,
-      image_url: imageUrl
+    const { error } = await client.from('announcements').insert([{
+      scope: 'app_banner',
+      title: announcement.title,
+      content: announcement.description,
+      link: announcement.link_url,
+      image_url: imageUrl,
+      is_active: announcement.is_active,
+      start_at: announcement.start_at,
+      end_at: announcement.end_at
     }]);
     if (error) throw error;
   }
@@ -2347,14 +2582,23 @@ class NexusServer {
   static async updateAppAnnouncement(id: string, updates: any) {
     const client = getSupabase();
     if (!client) return;
-    const { error } = await client.from('app_announcements').update(updates).eq('id', id);
+    const mapped: any = {};
+    if (updates.title !== undefined) mapped.title = updates.title;
+    if (updates.description !== undefined) mapped.content = updates.description;
+    if (updates.link_url !== undefined) mapped.link = updates.link_url;
+    if (updates.image_url !== undefined) mapped.image_url = updates.image_url;
+    if (updates.is_active !== undefined) mapped.is_active = updates.is_active;
+    if (updates.start_at !== undefined) mapped.start_at = updates.start_at;
+    if (updates.end_at !== undefined) mapped.end_at = updates.end_at;
+
+    const { error } = await client.from('announcements').update(mapped).eq('id', id);
     if (error) throw error;
   }
 
   static async deleteAppAnnouncement(id: string) {
     const client = getSupabase();
     if (!client) return;
-    const { error } = await client.from('app_announcements').delete().eq('id', id);
+    const { error } = await client.from('announcements').delete().eq('id', id);
     if (error) throw error;
   }
 }

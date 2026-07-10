@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useQuizDashboardStore, getLevelInfo } from '../../stores/quizStore';
-import { getFrameConfig } from '../../data/frameConfigs.ts';
 
 interface UserCardProps {
   username: string;
@@ -35,38 +34,18 @@ const UserCard: React.FC<UserCardProps> = ({
       <div className="flex flex-row items-center justify-between gap-3 md:gap-8 min-w-0">
         {/* Avatar + Info */}
         <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-          <div className="relative flex-shrink-0 flex items-center justify-center w-14 h-14">
-            {(() => {
-              const frameConfig = getFrameConfig(userQuizProfile.avatar_frame);
-              return (
-                <>
-                  {userQuizProfile.avatar_frame && (
-                    <img 
-                      src={`/Nexus-Journey/${userQuizProfile.avatar_frame}`} 
-                      alt="Frame" 
-                      className="absolute inset-0 w-full h-full object-contain pointer-events-none z-20" 
-                      style={{ transform: `scale(${frameConfig.navbarScale}) translateY(${frameConfig.translateY || '0%'})` }} 
-                    />
-                  )}
-                  <div 
-                    className={`w-full h-full rounded-full overflow-hidden flex items-center justify-center`}
-                    style={{ padding: frameConfig.padding }}
-                  >
-                    {avatarUrl ? (
-                      <img
-                        src={avatarUrl}
-                        alt={username}
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-semibold text-lg shadow-lg shadow-orange-500/20">
-                        {initials}
-                      </div>
-                    )}
-                  </div>
-                </>
-              );
-            })()}
+          <div className="relative flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-full overflow-hidden bg-nexus-darker border-2 border-white/15">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={username}
+                className="w-full h-full rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-semibold text-lg shadow-lg shadow-orange-500/20">
+                {initials}
+              </div>
+            )}
             
             {/* Level badge on avatar */}
             <div className="absolute -bottom-1.5 -right-1.5 bg-white dark:bg-dark-950 rounded-full p-0.5 shadow-sm z-30">

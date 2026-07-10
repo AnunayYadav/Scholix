@@ -30,12 +30,14 @@ const PaymentSuccess = lazyWithPreload(() => import('./components/PaymentSuccess
 const PrivacyPolicy = lazyWithPreload(() => import('./components/PrivacyPolicy.tsx'));
 const SecurityHallOfFame = lazyWithPreload(() => import('./components/SecurityHallOfFame.tsx'));
 const ToolsHub = lazyWithPreload(() => import('./components/ToolsHub.tsx'));
+const FacultyDetail = lazyWithPreload(() => import('./components/FacultyDetail.tsx'));
 
 // Eager/static imports for shared/immediate layout components
 import VerifiedBadge from './components/VerifiedBadge.tsx';
 import BuyMeACoffee from './components/BuyMeACoffee.tsx';
 import CookieBanner from './components/CookieBanner.tsx';
 import ScholixLanding from './components/ScholixLanding.tsx';
+import DailyFeed from './components/DailyFeed.tsx';
 import AnnouncementModal from './components/AnnouncementModal.tsx';
 import { SkeletonPage } from './components/SkeletonLoader.tsx';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -73,7 +75,6 @@ import { ModuleType, UserProfile, TimetableData } from './types.ts';
 
 import NexusServer from './services/nexusServer.ts';
 import { useQuizDashboardStore, getLevelInfo } from './stores/quizStore.ts';
-import { getFrameConfig } from './data/frameConfigs.ts';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { ToastContainer } from './components/Toast.tsx';
@@ -629,6 +630,10 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
               {allFeatures.map((f) => (
                 <FeatureCard key={f.id} f={f} navigate={() => navigate(f.customPath || getPathFromModule(f.id as any, selectedUniversity))} />
               ))}
+            </div>
+
+            <div className="mt-8">
+              <DailyFeed userProfile={userProfile} />
             </div>
           </div>
 
@@ -1989,39 +1994,21 @@ const AppContent: React.FC = () => {
                   <>
                     <button 
                       onClick={() => isProfileMenuOpen ? handleProfileClose() : setIsProfileMenuOpen(true)} 
-                      className={`w-11 h-11 transition-all relative group text-left border-none cursor-pointer flex items-center justify-center rounded-full ${!userProfile.avatar_frame ? 'bg-gradient-to-tr from-brand-primary to-brand-secondary p-[1.5px] shadow-[0_8px_20px_var(--brand-glow)] hover:scale-105 active:scale-95' : ''}`}
+                      className="w-11 h-11 transition-all relative group text-left border-none cursor-pointer flex items-center justify-center rounded-full bg-gradient-to-tr from-brand-primary to-brand-secondary p-[1.5px] shadow-[0_8px_20px_var(--brand-glow)] hover:scale-105 active:scale-95"
                     >
-                      {(() => {
-                        const frameConfig = getFrameConfig(userProfile.avatar_frame);
-                        return (
-                          <div className="relative w-10 h-10 flex items-center justify-center">
-                            {userProfile.avatar_frame && (
-                              <img
-                                src={`/Nexus-Journey/${userProfile.avatar_frame}`}
-                                alt="Avatar Frame"
-                                className="absolute inset-0 w-full h-full object-contain pointer-events-none z-20"
-                                style={{ transform: `scale(${frameConfig.navbarScale}) translateY(${frameConfig.translateY || '0%'})` }}
-                              />
-                            )}
-                            <div 
-                              className={`w-full h-full rounded-full overflow-hidden bg-nexus-darker flex items-center justify-center`}
-                              style={{ padding: frameConfig.padding }}
-                            >
-                              {userProfile.avatar_url ? (
-                                <img
-                                  src={userProfile.avatar_url}
-                                  alt="Avatar"
-                                  className="w-full h-full object-cover rounded-full"
-                                />
-                              ) : (
-                                <span className="text-zinc-900 dark:text-brand-primary font-bold text-xs">
-                                  {userProfile.username?.[0] || userProfile.email[0]}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })()}
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-nexus-darker flex items-center justify-center">
+                        {userProfile.avatar_url ? (
+                          <img
+                            src={userProfile.avatar_url}
+                            alt="Avatar"
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                        ) : (
+                          <span className="text-zinc-900 dark:text-brand-primary font-bold text-xs uppercase">
+                            {userProfile.username?.[0] || userProfile.email[0]}
+                          </span>
+                        )}
+                      </div>
                     </button>
                     {isProfileMenuOpen && (
                       <>
@@ -2168,6 +2155,7 @@ const FeatureRoutes: React.FC<{
       <Routes>
         <Route path="/" element={<Dashboard userProfile={userProfile} />} />
         <Route path="/library/*" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
+        <Route path="/faculty/:facultyName" element={<FacultyDetail userProfile={userProfile} />} />
         
         <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
         <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />

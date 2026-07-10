@@ -3,15 +3,25 @@ import { create } from 'zustand';
 // ═══════════════════════════════════════
 // Level System Constants
 // ═══════════════════════════════════════
-export const LEVEL_THRESHOLDS = [
-  { level: 1, minXP: 0, maxXP: 199, title: 'Beginner', icon: '🌱', rewardFrame: 'Beginner.png', rarity: 'Common' },
-  { level: 2, minXP: 200, maxXP: 499, title: 'Learner', icon: '📘', rewardFrame: 'Learner.png', rarity: 'Common' },
+export interface LevelThreshold {
+  level: number;
+  minXP: number;
+  maxXP: number;
+  title: string;
+  icon: string;
+  rewardFrame?: string;
+  rarity?: string;
+}
+
+export const LEVEL_THRESHOLDS: LevelThreshold[] = [
+  { level: 1, minXP: 0, maxXP: 199, title: 'Beginner', icon: '🌱' },
+  { level: 2, minXP: 200, maxXP: 499, title: 'Learner', icon: '📘' },
   { level: 3, minXP: 500, maxXP: 999, title: 'Scholar', icon: '⭐' },
   { level: 4, minXP: 1000, maxXP: 1999, title: 'Expert', icon: '🔥' },
-  { level: 5, minXP: 2000, maxXP: 3499, title: 'Master', icon: '👑', rewardFrame: 'Master.png', rarity: 'Epic' },
-  { level: 6, minXP: 3500, maxXP: 6499, title: 'Legend', icon: '🏆', rewardFrame: 'Legend.png', rarity: 'Mythic' },
-  { level: 7, minXP: 6500, maxXP: 9999, title: 'Grandmaster', icon: '🎖️', rewardFrame: 'Grandmaster.png', rarity: 'Mythic' },
-  { level: 8, minXP: 10000, maxXP: Infinity, title: 'Immortal', icon: '♾️', rewardFrame: 'Immortal.png', rarity: 'Legendary' },
+  { level: 5, minXP: 2000, maxXP: 3499, title: 'Master', icon: '👑' },
+  { level: 6, minXP: 3500, maxXP: 6499, title: 'Legend', icon: '🏆' },
+  { level: 7, minXP: 6500, maxXP: 9999, title: 'Grandmaster', icon: '🎖️' },
+  { level: 8, minXP: 10000, maxXP: Infinity, title: 'Immortal', icon: '♾️' },
 ];
 
 export const STREAK_MILESTONES = [

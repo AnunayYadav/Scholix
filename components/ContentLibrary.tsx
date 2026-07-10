@@ -11,6 +11,7 @@ import { useUniversity } from '../hooks/useUniversity.tsx';
 import { showToast, showConfirm } from './Toast.tsx';
 import { slugify, librarySlug, matchLibrarySlug } from '../utils/slugify.ts';
 import NexusAd from './NexusAd.tsx';
+import SubjectCommunity from './SubjectCommunity.tsx';
 
 import {
   DndContext,
@@ -34,6 +35,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 import VerifiedBadge from './VerifiedBadge.tsx';
+import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft } from 'lucide-react';
 import { BTECH_CSE_2025, findSubjectMetadata } from '../data/curriculumData.ts';
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
 
@@ -50,59 +52,45 @@ const matchSemesterName = (nameA: string, nameB: string): boolean => {
 
 import { FileIcon } from './FileIcon.tsx';
 
-const FolderIcon = ({ type, name = '', size = "w-7 h-7" }: { type: 'semester' | 'subject' | 'category' | 'root', name?: string, size?: string }) => {
-  const colors = {
-    root: 'text-zinc-400',
-    semester: 'text-orange-500',
-    subject: 'text-orange-500',
-    category: 'text-orange-500'
+const FolderIcon = ({ type, name = '', size = "w-7 h-7", iconName, color }: { type: 'semester' | 'subject' | 'category' | 'root', name?: string, size?: string, iconName?: string, color?: string }) => {
+  const IconMap: { [key: string]: any } = {
+    Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark,
+    BookOpen, FileText, Cpu, Monitor, Sigma, Folder: FolderIconLucide, HelpCircle, Video
   };
-  
-  const className = `${size} ${colors[type]} mb-2 transition-colors`;
+
+  const className = `${size} mb-2 transition-colors`;
+  const iconColor = color || '#ff7a00';
+
+  if (iconName && IconMap[iconName]) {
+    const IconComponent = IconMap[iconName];
+    // If the icon is rendered inside a white background container (e.g. subject card), we might override its color to white.
+    // However, style={{ color: iconColor }} is generally perfect.
+    return <IconComponent className={className} style={{ color: iconColor }} strokeWidth={2.0} />;
+  }
+
   const lowerName = name.toLowerCase().trim();
 
   if (lowerName === 'lectures') {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.0" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-        <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
-      </svg>
-    );
+    return <Video className={className} style={{ color: iconColor }} strokeWidth={2.0} />;
   }
 
   if (lowerName === 'notes') {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.0" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-        <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
-      </svg>
-    );
+    return <BookOpen className={className} style={{ color: iconColor }} strokeWidth={2.0} />;
   }
 
   if (lowerName === 'pyqs') {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.0" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <circle cx="12" cy="12" r="10" />
-        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-        <line x1="12" y1="17" x2="12.01" y2="17" />
-      </svg>
-    );
+    return <HelpCircle className={className} style={{ color: iconColor }} strokeWidth={2.0} />;
   }
 
   if (lowerName === 'syllabus') {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.0" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <circle cx="12" cy="12" r="10" />
-        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
-      </svg>
-    );
+    return <FileText className={className} style={{ color: iconColor }} strokeWidth={2.0} />;
   }
 
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.0" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-    </svg>
-  );
+  if (type === 'semester') {
+    return <Landmark className={className} style={{ color: iconColor }} strokeWidth={2.0} />;
+  }
+
+  return <FolderIconLucide className={className} style={{ color: iconColor }} strokeWidth={2.0} />;
 };
 
 interface FileStyleConfig {
@@ -237,11 +225,39 @@ const getFileStyle = (fileName: string): FileStyleConfig => {
 };
 
 
-const SkeletonCard = () => (
-  <div className="group p-5 rounded-[30px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 relative overflow-hidden flex flex-col min-h-[140px]">
-    <div className="w-10 h-10 skeleton-pulse rounded-xl mb-4" />
-    <div className="h-4 w-3/4 skeleton-pulse rounded-md mb-2" />
-    <div className="h-3 w-1/2 skeleton-pulse rounded-md" />
+const SkeletonFolderCard = () => (
+  <div className="flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] relative overflow-hidden">
+    <div className="flex items-center gap-3.5 min-w-0 w-full">
+      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl shrink-0 skeleton-pulse" />
+      <div className="min-w-0 flex-1 space-y-2">
+        <div className="h-4 w-1/3 rounded-md skeleton-pulse" />
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-12 rounded-md skeleton-pulse" />
+          <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
+          <div className="h-3 w-16 rounded-md skeleton-pulse" />
+          <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
+          <div className="h-3 w-16 rounded-md skeleton-pulse" />
+        </div>
+      </div>
+    </div>
+    <div className="w-4 h-4 rounded skeleton-pulse shrink-0 ml-4" />
+  </div>
+);
+
+const SkeletonFileCard = () => (
+  <div className="p-4 rounded-[24px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0c0c0e] relative overflow-hidden flex flex-col min-h-[148px]">
+    <div className="flex items-center justify-between mb-3">
+      <div className="w-9 h-9 rounded-xl skeleton-pulse" />
+      <div className="w-10 h-4 rounded-md skeleton-pulse" />
+    </div>
+    <div className="space-y-1.5 mb-2 flex-1">
+      <div className="h-4 w-5/6 rounded-md skeleton-pulse" />
+      <div className="h-4 w-2/3 rounded-md skeleton-pulse" />
+    </div>
+    <div className="pt-3 mt-auto border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
+      <div className="h-3 w-12 rounded skeleton-pulse" />
+      <div className="h-7 w-20 rounded-xl skeleton-pulse" />
+    </div>
   </div>
 );
 
@@ -401,6 +417,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   const [allFiles, setAllFiles] = useState<LibraryFile[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
+  const [userProgressList, setUserProgressList] = useState<{ document_id: string; progress_percentage: number; last_read_page: number }[]>([]);
   const [viewMode, setViewMode] = useState<'browse' | 'my-uploads' | 'originals'>(initialView);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -422,11 +439,32 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       if (found) return found;
       if (initialPrograms.includes(decodeURIComponent(program))) return decodeURIComponent(program);
     }
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('selected_library_program') : null;
+    if (saved && initialPrograms.includes(saved)) {
+      return saved;
+    }
     if (userProfile?.program && initialPrograms.includes(userProfile.program)) return userProfile.program;
     return initialPrograms[0];
   });
 
+  // Save selected program to localStorage
+  useEffect(() => {
+    if (selectedProgram) {
+      localStorage.setItem('selected_library_program', selectedProgram);
+    }
+  }, [selectedProgram]);
 
+  // Redirect to saved program if visiting the root library view without explicit override
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const isChange = searchParams.get('change') === 'true';
+    if (viewMode === 'browse' && !program && !isChange) {
+      const savedProgram = localStorage.getItem('selected_library_program');
+      if (savedProgram && availablePrograms.includes(savedProgram)) {
+        navigate(`${routePrefix}/library/${librarySlug(savedProgram, 'program')}`, { replace: true });
+      }
+    }
+  }, [program, viewMode, routePrefix, navigate, availablePrograms]);
 
   const [isAdminView, setIsAdminView] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -436,9 +474,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<LibraryFile | null>(null);
+  const [activeMenuFileId, setActiveMenuFileId] = useState<string | null>(null);
   const [folderToManage, setFolderToManage] = useState<Folder | null>(null);
   const [newFolderName, setNewFolderName] = useState('');
-  const [isShining, setIsShining] = useState(false);
+  const [folderIcon, setFolderIcon] = useState('Folder');
+  const [folderColor, setFolderColor] = useState('#ff7a00');
 
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [pendingUploads, setPendingUploads] = useState<{
@@ -598,6 +638,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
       setFolders(folderList);
       setAllFiles(filesFromDb);
+      console.log("[ContentLibrary] fetchFromSource successfully loaded:", {
+        selectedProgram,
+        foldersCount: folderList.length,
+        filesCount: filesFromDb.length,
+        sampleFiles: filesFromDb.slice(0, 3)
+      });
     } catch (e: any) {
       console.error("Library load error:", e);
     } finally {
@@ -608,6 +654,26 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   useEffect(() => {
     fetchFromSource(true);
   }, [fetchFromSource]);
+
+  useEffect(() => {
+    const handleDocClick = () => setActiveMenuFileId(null);
+    document.addEventListener('click', handleDocClick);
+    return () => document.removeEventListener('click', handleDocClick);
+  }, []);
+
+  const fetchProgress = useCallback(async () => {
+    if (!userProfile) return;
+    try {
+      const progressData = await NexusServer.fetchUserDocumentProgress();
+      setUserProgressList(progressData);
+    } catch (e) {
+      console.error("Failed to fetch user document progress:", e);
+    }
+  }, [userProfile]);
+
+  useEffect(() => {
+    fetchProgress();
+  }, [fetchProgress]);
 
   // Dynamically update document title & description meta tag on folder/route changes
   useEffect(() => {
@@ -969,7 +1035,35 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     
     const filtered = finalFolders.filter(f => {
       if (!activeSemester) return f.type === 'semester';
-      if (!activeSubject) return f.type === 'subject' && f.parent_id === activeSemester.id;
+      if (!activeSubject) {
+        // We are listing subjects
+        const isSubject = f.type === 'subject' && f.parent_id === activeSemester.id;
+        if (!isSubject) return false;
+        
+        // If there's a search query, check if the subject matches
+        if (searchQuery && searchQuery.trim() !== '') {
+          const q = searchQuery.trim().toLowerCase();
+          const nameMatches = f.name.toLowerCase().includes(q);
+          
+          // Count matching files
+          const isBtech = selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
+          let matchingFilesCount = 0;
+          if (isBtech) {
+            const codeMatch = f.name.match(/^([A-Za-z]+\d{3})/);
+            const code = codeMatch ? codeMatch[1].toUpperCase() : f.name.toUpperCase().trim();
+            matchingFilesCount = allFiles.filter(file => file.subject?.toUpperCase().includes(code) && file.name.toLowerCase().includes(q)).length;
+          } else {
+            matchingFilesCount = allFiles.filter(file => file.semester?.toLowerCase() === activeSemester.name.toLowerCase() && file.subject?.toLowerCase() === f.name.toLowerCase() && file.name.toLowerCase().includes(q)).length;
+          }
+          
+          // Count matching category folders
+          const matchingCategoriesCount = finalFolders.filter(c => c.type === 'category' && c.parent_id === f.id && c.name.toLowerCase().includes(q)).length;
+          
+          return nameMatches || matchingFilesCount > 0 || matchingCategoriesCount > 0;
+        }
+        
+        return true;
+      }
       if (!activeCategory) return f.type === 'category' && f.parent_id === activeSubject.id;
       return false;
     });
@@ -980,7 +1074,40 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       if (orderA !== orderB) return orderA - orderB;
       return a.name.localeCompare(b.name);
     });
-  }, [finalFolders, activeSemester, activeSubject, activeCategory, isAdminView]);
+  }, [finalFolders, activeSemester, activeSubject, activeCategory, isAdminView, selectedProgram, allFiles, searchQuery]);
+
+  const getSubjectSearchMatchText = (folder: Folder) => {
+    if (!searchQuery || searchQuery.trim() === '' || folder.type !== 'subject') return null;
+    const q = searchQuery.trim().toLowerCase();
+    
+    // Count matching files
+    const isBtech = selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
+    let matchingFilesCount = 0;
+    if (isBtech) {
+      const codeMatch = folder.name.match(/^([A-Za-z]+\d{3})/);
+      const code = codeMatch ? codeMatch[1].toUpperCase() : folder.name.toUpperCase().trim();
+      matchingFilesCount = allFiles.filter(file => file.subject?.toUpperCase().includes(code) && file.name.toLowerCase().includes(q)).length;
+    } else {
+      const parentSem = finalFolders.find(f => f.id === folder.parent_id);
+      if (parentSem) {
+        matchingFilesCount = allFiles.filter(file => file.semester?.toLowerCase() === parentSem.name.toLowerCase() && file.subject?.toLowerCase() === folder.name.toLowerCase() && file.name.toLowerCase().includes(q)).length;
+      }
+    }
+    
+    // Count matching category folders
+    const matchingCategoriesCount = finalFolders.filter(c => c.type === 'category' && c.parent_id === folder.id && c.name.toLowerCase().includes(q)).length;
+    
+    if (matchingFilesCount > 0 && matchingCategoriesCount > 0) {
+      return `${matchingFilesCount} file${matchingFilesCount > 1 ? 's' : ''}, ${matchingCategoriesCount} category${matchingCategoriesCount > 1 ? 'ies' : ''} matched`;
+    } else if (matchingFilesCount > 0) {
+      return `${matchingFilesCount} file${matchingFilesCount > 1 ? 's' : ''} matched`;
+    } else if (matchingCategoriesCount > 0) {
+      return `${matchingCategoriesCount} category${matchingCategoriesCount > 1 ? 'ies' : ''} matched`;
+    } else if (folder.name.toLowerCase().includes(q)) {
+      return 'Subject matches by name';
+    }
+    return null;
+  };
 
   const dropdownLists = useMemo(() => {
     const sems = Array.from(new Set(folders.filter(f => f.type === 'semester').map(f => f.name)));
@@ -1103,9 +1230,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         }
       }
 
-      await NexusServer.createFolder(newFolderName.trim(), type, parentId, selectedProgram, isShining);
+      await NexusServer.createFolder(newFolderName.trim(), type, parentId, selectedProgram, folderIcon, folderColor);
       setNewFolderName('');
-      setIsShining(false);
+      setFolderIcon('Folder');
+      setFolderColor('#ff7a00');
       handleCloseFolder();
       fetchFromSource(false);
     } catch (e: any) {
@@ -1164,9 +1292,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     if (!folderToManage || !newFolderName.trim() || !userProfile?.is_admin) return;
     setIsProcessing(true);
     try {
-      await NexusServer.renameFolder(folderToManage, newFolderName.trim(), isShining, folders);
+      await NexusServer.renameFolder(folderToManage, newFolderName.trim(), folderIcon, folderColor, folders);
       setNewFolderName('');
-      setIsShining(false);
+      setFolderIcon('Folder');
+      setFolderColor('#ff7a00');
       setFolderToManage(null);
       handleCloseRename();
       fetchFromSource(false);
@@ -1237,6 +1366,23 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       setActivePdfFile(file);
     } else {
       (async () => {
+        // Try direct download first via Supabase client
+        try {
+          const client = NexusServer.getClient();
+          if (client) {
+            const { data, error } = await client.storage.from('nexus-documents').download(file.storage_path);
+            if (!error && data) {
+              const blobUrl = URL.createObjectURL(data);
+              window.open(blobUrl, '_blank');
+              showToast("Opening file...", "success");
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn("Direct download failed, trying proxy route...", e);
+        }
+
+        // Fallback to proxy route
         try {
           const sessionRes = await NexusServer.getSession();
           const token = sessionRes?.data?.session?.access_token;
@@ -1261,82 +1407,83 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         />
       ) : (
         <div className="space-y-6 animate-fade-in">
-          <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div className="text-2xl font-semibold text-zinc-800 dark:text-white tracking-tight leading-none mb-1 flex items-center">
-                {viewMode === 'my-uploads' ? (
-                  <>My Vault <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Hub</span></>
-                ) : activeSubject ? (
-                  <>{activeSubject.name.split(':')[0].trim()} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Notes</span></>
-                ) : activeSemester ? (
-                  <>{activeSemester.name} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Hub</span></>
-                ) : (
-                  <>Content <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600 ml-1.5 mr-1.5">Library</span> Hub</>
-                )}
-                <div className="relative group ml-2 mb-1">
-                  <button className="flex items-center justify-center text-zinc-300 dark:text-white/20 hover:text-orange-500 dark:hover:text-orange-500 bg-transparent border-none transition-colors">
-                    <svg viewBox="0 0 16 16" fill="currentColor" className="w-5 h-5">
-                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                      <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
-                    </svg>
-                  </button>
-                  <div className="absolute left-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-64 p-3 bg-white dark:bg-[#1a1a1a] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100]">
-                    <p className="text-[10px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium whitespace-normal">
-                      <span style={{ color: 'var(--brand-primary)' }} className="font-bold block mb-1 uppercase tracking-wider text-[9px]">Disclaimer</span>
-                      Resources not explicitly marked as <strong className="text-zinc-800 dark:text-white font-bold">{shortBrandName}</strong> (e.g. {shortBrandName} Originals, {shortBrandName} Official) are crowdsourced (WhatsApp, Telegram, etc.) and not owned by us.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              {!isAdminView && !searchQuery && viewMode === 'browse' && (
-                <nav className="mt-2 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-zinc-400">
-                  <Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}`} className="hover:text-orange-500 transition-colors border-none bg-transparent cursor-pointer">Root</Link>
-                  {activeSemester && <><span className="opacity-30">/</span><Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester.name, 'semester')}`} className={`border-none bg-transparent cursor-pointer ${!activeSubject ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSemester.name}</Link></>}
-                  {activeSubject && <><span className="opacity-30">/</span><Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester.name, 'semester')}/${librarySlug(activeSubject.name, 'subject')}`} className={`border-none bg-transparent cursor-pointer ${!activeCategory ? 'text-orange-500' : 'hover:text-orange-500'}`}>{activeSubject.name}</Link></>}
-                  {activeCategory && <><span className="opacity-30">/</span><span className="text-orange-500">{activeCategory.name}</span></>}
+          {!(activeSubject && !activeCategory && viewMode === 'browse' && !searchQuery) && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              {/* Left Side: Breadcrumb */}
+              <div className="flex items-center gap-3.5 w-full sm:w-auto min-w-0">
+                <nav className="flex items-center gap-1.5 text-[11px] sm:text-xs text-zinc-400 font-medium min-w-0 flex-wrap">
+                  {program ? (
+                    <>
+                      <Link to={`${routePrefix}/library?change=true`} className="hover:text-orange-500 transition-colors border-none bg-transparent cursor-pointer font-semibold text-zinc-500 dark:text-zinc-400 shrink-0">Programs</Link>
+                      <span className="opacity-40 text-[9px] mx-0.5 shrink-0">&gt;</span>
+                      <Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}`} className={`hover:text-orange-500 transition-colors border-none bg-transparent cursor-pointer font-semibold shrink-0 ${!activeSemester ? 'text-zinc-800 dark:text-zinc-200' : 'text-zinc-500 dark:text-zinc-400'}`}>{selectedProgram}</Link>
+                    </>
+                  ) : (
+                    <span className="font-semibold text-zinc-800 dark:text-zinc-200 shrink-0">Programs</span>
+                  )}
+                  {activeSemester && (
+                    <>
+                      <span className="opacity-40 text-[9px] mx-0.5 shrink-0">&gt;</span>
+                      <Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester.name, 'semester')}`} className={`border-none bg-transparent cursor-pointer hover:text-orange-500 transition-colors font-semibold ${!activeSubject ? 'text-zinc-800 dark:text-zinc-200' : ''}`}>{activeSemester.name}</Link>
+                    </>
+                  )}
+                  {activeSubject && (
+                    <>
+                      <span className="opacity-40 text-[9px] mx-0.5 shrink-0">&gt;</span>
+                      <Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester.name, 'semester')}/${librarySlug(activeSubject.name, 'subject')}`} className={`border-none bg-transparent cursor-pointer hover:text-orange-500 transition-colors font-semibold truncate ${!activeCategory ? 'text-zinc-800 dark:text-zinc-200' : ''}`}>{activeSubject.name.split(':')[0].trim()}</Link>
+                    </>
+                  )}
+                  {activeCategory && (
+                    <>
+                      <span className="opacity-40 text-[9px] mx-0.5 shrink-0">&gt;</span>
+                      <span className="text-zinc-800 dark:text-zinc-200 font-semibold truncate">{activeCategory.name}</span>
+                    </>
+                  )}
                 </nav>
-              )}
-            </div>
-            <div className="flex gap-2">
-              {userProfile?.is_admin && (
-                <>
-                  <button onClick={toggleAdminView} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${isAdminView ? 'bg-orange-500 text-white shadow-lg' : 'bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400'}`} title={isAdminView ? "Exit Review Hub" : "Enter Review Hub"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></button>
-                  <button onClick={() => { setNewFolderName(''); setShowFolderModal(true); }} className="w-10 h-10 bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl flex items-center justify-center text-orange-500 hover:scale-110 active:scale-95 transition-all shadow-sm border-none" title="Create Folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg></button>
-                </>
-              )}
-              <button
-                onClick={() => {
-                  if (!userProfile) {
-                    showToast(`Please login to access ${shortBrandName} Originals.`, "info");
-                    onAuthRequired?.();
-                    return;
-                  }
-                  setViewMode('originals'); 
-                  navigateTo(null, null, null); 
-                  setIsAdminView(false); 
-                }}
-                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400 hover:text-orange-500"
-                title={`${shortBrandName} Originals`}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-              </button>
-               <button 
-                onClick={() => { 
-                  if (!userProfile) {
-                    showToast("Please login to access your personal vault.", "info");
-                    onAuthRequired?.();
-                    return;
-                  }
-                  setViewMode(viewMode === 'my-uploads' ? 'browse' : 'my-uploads'); 
-                  navigateTo(null, null, null); 
-                  setIsAdminView(false); 
-                }} 
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none ${viewMode === 'my-uploads' ? 'bg-orange-500 text-white shadow-lg' : 'bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-400 hover:text-orange-500'}`} 
-                title={viewMode === 'my-uploads' ? "Exit Vault" : "My Vault"}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-              </button>
-               <button 
+              </div>
+
+              {/* Center: Search box */}
+              <div className="relative flex-1 max-w-md w-full">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                <input
+                  type="text"
+                  placeholder="Search subjects, resources, PYQs..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  autoComplete="off"
+                  spellCheck="false"
+                  className="w-full pl-10 pr-4 h-10 bg-zinc-100/80 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/[0.06] rounded-xl text-[11px] sm:text-xs font-medium outline-none focus:ring-1 focus:ring-orange-500 transition-all dark:text-white"
+                />
+              </div>
+
+              {/* Right Side: Actions */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                {userProfile?.is_admin && (
+                  <button onClick={toggleAdminView} className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all border shrink-0 hover:scale-[1.02] active:scale-[0.98] ${isAdminView ? 'bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/20' : 'bg-zinc-100/80 dark:bg-white/[0.03] text-zinc-450 dark:text-zinc-500 border-zinc-200/80 dark:border-white/[0.06] hover:bg-zinc-200/50 dark:hover:bg-white/[0.06]'}`} title="Review Hub">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                  </button>
+                )}
+
+                <button 
+                  onClick={() => { 
+                    if (!userProfile) {
+                      showToast("Please login to access your personal vault.", "info");
+                      onAuthRequired?.();
+                      return;
+                    }
+                    setViewMode(viewMode === 'my-uploads' ? 'browse' : 'my-uploads'); 
+                    navigateTo(null, null, null); 
+                    setIsAdminView(false); 
+                  }} 
+                  className={`px-3.5 h-10 rounded-2xl flex items-center justify-center gap-1.5 transition-all text-xs font-extrabold border flex-1 sm:flex-initial hover:scale-[1.02] active:scale-[0.98] ${viewMode === 'my-uploads' ? 'bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/20' : 'bg-zinc-100/80 dark:bg-white/[0.03] text-zinc-600 dark:text-zinc-350 border-zinc-250/80 dark:border-white/[0.07] hover:bg-zinc-200/50 dark:hover:bg-white/[0.06]'}`}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                  Vault
+                </button>
+
+                <button 
                   onClick={() => { 
                     if (!userProfile) { 
                       showToast("Please sign in to contribute materials.", "info"); 
@@ -1345,55 +1492,272 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     } 
                     fileInputRef.current?.click(); 
                   }} 
-                  className="px-5 py-2 bg-orange-500 text-white rounded-xl font-bold text-[11px] sm:text-xs shadow-lg shadow-orange-500/20 border-none hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                  className="px-4.5 h-10 bg-orange-500 text-white rounded-2xl font-extrabold text-xs shadow-md shadow-orange-500/10 border-none hover:scale-[1.02] active:scale-[0.98] hover:bg-orange-600 transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial"
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-                  Contribute {pendingUploads.length > 0 && `(${pendingUploads.length})`}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="w-3.5 h-3.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  Upload {pendingUploads.length > 0 && `(${pendingUploads.length})`}
                 </button>
+              </div>
             </div>
-          </header>
-
-          <div className="flex gap-2 w-full flex-row items-center">
-            <NexusDropdown
-              options={availablePrograms}
-              value={selectedProgram}
-              onChange={(val) => {
-                navigate(`${routePrefix}/library/${librarySlug(val, 'program')}`);
-              }}
-              className="flex-shrink-0"
-              buttonClassName="!h-12 !py-0 !rounded-2xl !min-w-[110px] sm:!min-w-[180px] !px-3 sm:!px-5 text-[10px] sm:text-xs"
-            />
-
-            <div className="relative flex-1">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-              <input
-                type="text"
-                placeholder="Filter files..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                autoCapitalize="none"
-                autoCorrect="off"
-                autoComplete="off"
-                spellCheck="false"
-                className="w-full pl-11 pr-4 h-12 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-2xl text-[11px] sm:text-xs font-bold outline-none focus:ring-2 focus:ring-orange-500 transition-all dark:text-white"
-              />
-            </div>
-            <button onClick={() => fetchFromSource(true)} className="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-zinc-100 dark:bg-[#0a0a0a] rounded-xl text-zinc-400 hover:text-orange-500 transition-colors shadow-sm border-none" title="Refresh List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></button>
-          </div>
+          )}
 
           {isLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">{Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}</div>
+            (!activeSubject && viewMode === 'browse') ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <SkeletonFolderCard key={i} />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-fade-in">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <SkeletonFileCard key={i} />
+                ))}
+              </div>
+            )
+          ) : !program && viewMode === 'browse' ? (
+            // Screen 1: Program Selection Screen (Root)
+            <div className="space-y-4 animate-fade-in">
+              <div className="flex items-center justify-between border-b border-zinc-150 dark:border-white/5 pb-2 mt-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-3 rounded-full bg-orange-500" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-555 dark:text-zinc-400">Select Academic Program</span>
+                </div>
+                <span className="px-2 py-0.5 bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5 rounded-full text-[9px] font-medium text-zinc-555 dark:text-zinc-400">{availablePrograms.length} Programs</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                {availablePrograms.map((prog, idx) => {
+                  const progColors = ['#ff7a00', '#a855f7', '#0ea5e9', '#22c55e', '#f43f5e', '#eab308', '#14b8a6', '#6366f1'];
+                  const color = progColors[idx % progColors.length];
+                  
+                  const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
+                  const pResources = allFiles.filter(f => f.program === prog).length;
+                  
+                  let subtitle = "3 Years Program";
+                  if (prog.includes("BTech")) subtitle = "4 Years Program";
+                  else if (prog.includes("MCA") || prog.includes("MBA")) subtitle = "2 Years Program";
+                  
+                  return (
+                    <Link
+                      key={prog}
+                      to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
+                      className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99]"
+                    >
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: color }}>
+                          <Landmark className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white leading-snug">{prog}</h4>
+                          <div className="flex items-center gap-2 mt-1 text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+                            <span>{subtitle}</span>
+                            <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
+                            <span className="flex items-center gap-0.5">
+                              <BookOpen className="w-3.5 h-3.5 text-zinc-450 dark:text-zinc-500" />
+                              {pSubjects} Subjects
+                            </span>
+                            <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
+                            <span className="flex items-center gap-0.5">
+                              <FileText className="w-3.5 h-3.5 text-zinc-450 dark:text-zinc-500" />
+                              {pResources} Resources
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-300 dark:text-zinc-600 group-hover:translate-x-0.5 transition-transform shrink-0" style={{ color: color }}><path d="M9 18l6-6-6-6" /></svg>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ) : activeSubject && !activeCategory && viewMode === 'browse' && searchQuery.trim() === '' ? (
+            <SubjectCommunity
+              activeSubject={activeSubject}
+              activeSemester={activeSemester}
+              selectedProgram={selectedProgram}
+              userProfile={userProfile as any}
+              categories={finalFolders.filter(f => f.type === 'category' && f.parent_id === activeSubject.id)}
+              allFiles={allFiles}
+              userProgressList={userProgressList}
+              onFileAccess={handleFileAccess}
+              onUploadClick={() => fileInputRef.current?.click()}
+              onBack={() => {
+                navigate(`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester?.name || '', 'semester')}`);
+              }}
+              searchQuery={searchQuery}
+            />
+          ) : activeSubject && searchQuery.trim() !== '' ? (
+            <div className="space-y-4 animate-fade-in">
+              <div className="flex items-center justify-between gap-4">
+                <button
+                  onClick={() => {
+                    navigate(`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${activeSemester ? librarySlug(activeSemester.name, 'semester') : ''}`);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-50/50 dark:bg-white/5 border border-zinc-150 dark:border-white/5 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-800 dark:hover:text-white cursor-pointer transition-colors"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  Back to Search Results
+                </button>
+                <div className="text-xs font-bold text-zinc-455 dark:text-zinc-500">
+                  Showing matches in <span className="text-zinc-850 dark:text-zinc-200 font-extrabold">{activeSubject.name.split(':')[1]?.trim() || activeSubject.name}</span>
+                </div>
+              </div>
+
+              {(() => {
+                const isBtech = selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
+                let subjFiles = [];
+                if (isBtech) {
+                  const codeMatch = activeSubject.name.match(/^([A-Za-z]+\d{3})/);
+                  const code = codeMatch ? codeMatch[1].toUpperCase() : activeSubject.name.toUpperCase().trim();
+                  subjFiles = allFiles.filter(f => f.subject.toUpperCase().includes(code));
+                } else {
+                  subjFiles = allFiles.filter(f => f.semester === activeSemester?.name && f.subject === activeSubject.name);
+                }
+                const matchedFiles = subjFiles.filter(f => f.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
+
+                if (matchedFiles.length === 0) {
+                  return (
+                    <div className="p-8 text-center bg-zinc-50 dark:bg-white/[0.005] border border-zinc-150 dark:border-white/5 rounded-2xl text-xs text-zinc-400">
+                      No matching files found inside this subject.
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="w-full overflow-hidden border border-zinc-150 dark:border-white/5 rounded-3xl bg-white dark:bg-[#0c0c0e] shadow-sm animate-fade-in">
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse text-left">
+                        <thead>
+                          <tr className="border-b border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01]">
+                            <th className="py-3 pl-4 pr-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider min-w-[200px]">Name</th>
+                            <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider w-36">Subject</th>
+                            <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-center w-24">Category</th>
+                            <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider hidden sm:table-cell w-28">Updated On</th>
+                            <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-center w-24">Rating</th>
+                            <th className="py-3 pr-4 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-right w-36">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
+                          {matchedFiles.map((file) => {
+                            const getRealFileName = (f: LibraryFile) => {
+                              if (f.storage_path) {
+                                const base = f.storage_path.split('/').pop() || '';
+                                const clean = base.replace(/^[a-z0-9]+_/, '');
+                                if (clean) {
+                                  try { return decodeURIComponent(clean); } catch (e) { return clean; }
+                                }
+                              }
+                              return f.name;
+                            };
+                            const cleanName = getRealFileName(file);
+                            const timestamp = file.uploadDate || (file.created_at ? Date.parse(file.created_at) : Date.now());
+                            const formattedDate = new Date(timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                            
+                            const ratingVal = (() => {
+                              if (file.rating_votes) {
+                                const votes = Object.values(file.rating_votes as Record<string, number>);
+                                if (votes.length > 0) return (votes.reduce((a, b) => a + b, 0) / votes.length).toFixed(1);
+                              }
+                              return null;
+                            })();
+
+                            return (
+                              <tr key={file.id} className="hover:bg-zinc-50/50 dark:hover:bg-white/[0.006] transition-colors group/row">
+                                <td className="py-3 pl-4 pr-3 min-w-[200px]">
+                                  <div className="flex items-center gap-3">
+                                    <div 
+                                      onClick={() => handleFileAccess(file)}
+                                      className="w-8 h-8 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-105"
+                                    >
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-orange-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <button 
+                                        onClick={() => handleFileAccess(file)}
+                                        className="text-xs font-bold text-zinc-800 dark:text-zinc-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors truncate max-w-[180px] sm:max-w-[240px] text-left block bg-transparent border-none cursor-pointer p-0"
+                                      >
+                                        {cleanName}
+                                      </button>
+                                      <div className="flex items-center gap-1.5 mt-0.5">
+                                        <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">{file.size || '0.00 MB'}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="py-3 px-3 w-36">
+                                  <div className="min-w-0">
+                                    <div className="text-xs font-extrabold text-zinc-650 dark:text-zinc-300 truncate max-w-[120px]" title={file.subject}>
+                                      {file.subject.split(':')[0].trim()}
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="py-3 px-3 text-center w-24">
+                                  <span className="px-2 py-0.5 rounded-lg text-[9px] font-extrabold text-zinc-500 bg-zinc-100 dark:bg-white/[0.04] dark:text-zinc-400 uppercase tracking-wide">
+                                    {file.type || 'Notes'}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-3 hidden sm:table-cell w-28">
+                                  <span className="text-xs font-bold text-zinc-455 dark:text-zinc-555">{formattedDate}</span>
+                                </td>
+                                <td className="py-3 px-3 text-center w-24">
+                                  {ratingVal ? (
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-black text-zinc-800 dark:text-zinc-200">
+                                      {ratingVal} <Star size={11} className="text-amber-500" fill="currentColor" />
+                                    </span>
+                                  ) : (
+                                    <span className="text-zinc-300 dark:text-zinc-700 font-bold">-</span>
+                                  )}
+                                </td>
+                                <td className="py-3 pr-4 text-right w-36 relative">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveMenuFileId(activeMenuFileId === file.id ? null : file.id);
+                                    }}
+                                    className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl text-zinc-455 dark:text-zinc-350 hover:text-zinc-800 dark:hover:text-white bg-transparent border-none cursor-pointer transition-all hover:scale-105 active:scale-95"
+                                    title="Actions"
+                                  >
+                                    <MoreHorizontal size={18} />
+                                  </button>
+
+                                  {activeMenuFileId === file.id && (
+                                    <div 
+                                      className="absolute right-4 mt-1 w-36 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/5 py-1.5 shadow-xl z-50 text-left overflow-hidden animate-fade-in"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <button
+                                        onClick={() => {
+                                          setActiveMenuFileId(null);
+                                          setSelectedFile(file);
+                                          setShowDetailsModal(true);
+                                        }}
+                                        className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-655 dark:text-zinc-350 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                      >
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                                        Details
+                                      </button>
+                                    </div>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
           ) : (
             <div className="relative">
               <DndContext
-
                 sensors={sensors}
                 collisionDetection={closestCenter}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
               >
                 <div className="flex flex-col gap-6">
-                  {/* Subject Details Header & Syllabus Accordion removed */}
 
                   {currentFolders.length > 0 && (
                     <SortableContext
@@ -1442,11 +1806,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
                             return groups.map(group => (
                               <div key={group.name} className="space-y-4">
-                                <div className="flex items-center gap-3 border-b border-zinc-100 dark:border-white/5 pb-2">
-                                  <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">{group.name}</div>
-                                  <span className="px-2 py-0.5 bg-zinc-100 dark:bg-white/5 rounded-full text-[9px] font-bold text-zinc-500">{group.items.length} Course{group.items.length !== 1 ? 's' : ''}</span>
+                                <div className="flex items-center justify-between border-b border-zinc-150 dark:border-white/5 pb-2.5 mb-2 mt-4">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-1 h-3 rounded-full bg-orange-500" />
+                                    <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{group.name}</span>
+                                  </div>
+                                  <span className="px-2 py-0.5 bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5 rounded-full text-[9px] font-medium text-zinc-500 dark:text-zinc-400">{group.items.length} Course{group.items.length !== 1 ? 's' : ''}</span>
                                 </div>
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                   {group.items.map(folder => (
                                     <FolderCard
                                       key={folder.id}
@@ -1467,11 +1834,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                       onRename={() => {
                                         setFolderToManage(folder);
                                         setNewFolderName(folder.name);
-                                        setIsShining(folder.is_shining || false);
+                                        setFolderIcon(folder.icon_name || 'Folder');
+                                        setFolderColor(folder.color || '#ff7a00');
                                         setShowRenameModal(true);
                                       }}
-                                      onDelete={(e) => handleDeleteFolder(folder, e)}
                                       isDraggingOver={draggingOverId === folder.id}
+                                      subjectsCount={finalFolders.filter(f => f.type === 'subject' && f.parent_id === folder.id).length}
+                                      searchMatchText={getSubjectSearchMatchText(folder)}
                                     />
                                   ))}
                                 </div>
@@ -1480,7 +1849,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           })()}
                         </div>
                       ) : (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {currentFolders.map(folder => (
                             <FolderCard
                               key={folder.id}
@@ -1501,11 +1870,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                               onRename={() => {
                                 setFolderToManage(folder);
                                 setNewFolderName(folder.name);
-                                setIsShining(folder.is_shining || false);
+                                setFolderIcon(folder.icon_name || 'Folder');
+                                setFolderColor(folder.color || '#ff7a00');
                                 setShowRenameModal(true);
                               }}
                               onDelete={(e) => handleDeleteFolder(folder, e)}
                               isDraggingOver={draggingOverId === folder.id}
+                              subjectsCount={finalFolders.filter(f => f.type === 'subject' && f.parent_id === folder.id).length}
+                              searchMatchText={getSubjectSearchMatchText(folder)}
                             />
                           ))}
                         </div>
@@ -1513,60 +1885,315 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     </SortableContext>
                   )}
 
-                  {displayFiles.length > 0 ? (
-                    <SortableContext
-                      items={displayFiles.map(f => f.id)}
-                      strategy={rectSortingStrategy}
-                      disabled={!userProfile?.is_admin}
-                    >
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                        {displayFiles.map(file => (
-                          <FileCard
-                            key={file.id}
-                            file={file}
-                            userProfile={userProfile}
-                            isAdminMode={isAdminView}
-                            isPersonal={viewMode === 'my-uploads'}
-                            onApprove={async () => {
-                              setIsProcessing(true);
-                              try {
-                                const allFolders = await NexusServer.fetchFolders('All');
-                                let semFolder = allFolders.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && f.program === file.program);
-                                if (!semFolder) {
-                                  await NexusServer.createFolder(file.semester.trim(), 'semester', null, file.program);
-                                  const fresh = await NexusServer.fetchFolders('All');
-                                  semFolder = fresh.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && (f.program === file.program || f.program === 'All'));
-                                }
-                                let subjFolder = allFolders.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder?.id && f.program === file.program);
-                                if (!subjFolder && semFolder) {
-                                  await NexusServer.createFolder(file.subject.trim(), 'subject', semFolder.id, file.program);
-                                  const fresh = await NexusServer.fetchFolders('All');
-                                  subjFolder = fresh.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder.id && (f.program === file.program || f.program === 'All'));
-                                }
-                                if (file.type && file.type.trim()) {
-                                  let catFolder = allFolders.find(f => f.type === 'category' && f.name.trim() === file.type.trim() && f.parent_id === subjFolder?.id && f.program === file.program);
-                                  if (!catFolder && subjFolder) {
-                                    await NexusServer.createFolder(file.type.trim(), 'category', subjFolder.id, file.program);
+                  {displayFiles.length > 0 && searchQuery.trim() === '' ? (
+                    (isAdminView || viewMode === 'my-uploads') ? (
+                      <div className="w-full overflow-hidden border border-zinc-150 dark:border-white/5 rounded-3xl bg-white dark:bg-[#0c0c0e] shadow-sm animate-fade-in">
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse text-left">
+                            <thead>
+                              <tr className="border-b border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01]">
+                                <th className="py-3 pl-4 pr-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider min-w-[200px]">Name</th>
+                                {isAdminView && (
+                                  <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider hidden md:table-cell w-32">Uploader</th>
+                                )}
+                                <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider w-36">Subject</th>
+                                {viewMode === 'my-uploads' ? (
+                                  <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-center w-28">Status</th>
+                                ) : (
+                                  <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-center w-24">Category</th>
+                                )}
+                                <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider hidden sm:table-cell w-28">Updated On</th>
+                                <th className="py-3 pr-4 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-right w-36">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
+                              {displayFiles.map((file) => {
+                                const getRealFileName = (f: LibraryFile) => {
+                                  if (f.storage_path) {
+                                    const base = f.storage_path.split('/').pop() || '';
+                                    const clean = base.replace(/^[a-z0-9]+_/, '');
+                                    if (clean) {
+                                      try { return decodeURIComponent(clean); } catch (e) { return clean; }
+                                    }
                                   }
-                                }
-                                await NexusServer.approveFile(file.id);
-                                fetchFromSource(false);
-                              } catch (e: any) {
-                                showToast("Approval error: " + e.message, 'error');
-                              } finally {
-                                setIsProcessing(false);
-                              }
-                            }}
-                            onReject={async () => { const confirmed = await showConfirm("Reject and remove this file?"); if (confirmed) { setIsProcessing(true); NexusServer.rejectFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
-                            onDemote={async () => { const confirmed = await showConfirm("Send this file back to pending review?"); if (confirmed) { setIsProcessing(true); NexusServer.demoteFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
-                            onEdit={() => { setSelectedFile(file); setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type, program: file.program || selectedProgram }); setShowEditModal(true); }}
-                            onDelete={async () => { const confirmed = await showConfirm("Permanently delete this file?"); if (confirmed) { setIsProcessing(true); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
-                            onAccess={() => handleFileAccess(file)}
-                            onShowDetails={() => { setSelectedFile(file); setShowDetailsModal(true); }}
-                          />
-                        ))}
+                                  return f.name;
+                                };
+
+                                const realNameWithExt = getRealFileName(file);
+                                const cleanName = realNameWithExt.replace(/\.[^/.]+$/, "");
+                                const fileStyle = getFileStyle(file.storage_path || file.name);
+
+                                const statusConfig = {
+                                  pending: { label: 'Queued', color: 'text-orange-500', bg: 'bg-orange-500/10' },
+                                  approved: { label: 'Verified', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                                  rejected: { label: 'Redacted', color: 'text-red-500', bg: 'bg-red-500/10' }
+                                };
+                                const status = statusConfig[file.status] || statusConfig.pending;
+
+                                const formattedDate = file.created_at
+                                  ? new Date(file.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                                  : 'N/A';
+
+                                const uploaderName = file.uploader_username || "Anonymous Verto";
+                                const avatarSeed = file.uploader_id || file.name;
+
+                                return (
+                                  <tr key={file.id} className="hover:bg-zinc-50/50 dark:hover:bg-white/[0.006] transition-colors group/row">
+                                    <td className="py-3 pl-4 pr-3 min-w-[200px]">
+                                      <div className="flex items-center gap-3">
+                                        <div 
+                                          onClick={() => handleFileAccess(file)}
+                                          className={`w-8 h-8 rounded-xl ${fileStyle.iconBg} flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-105`}
+                                        >
+                                          <FileIcon fileName={file.storage_path} size="w-4 h-4" className={fileStyle.iconText} />
+                                        </div>
+                                        <div className="min-w-0">
+                                          <button 
+                                            onClick={() => handleFileAccess(file)}
+                                            className="text-xs font-bold text-zinc-800 dark:text-zinc-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors truncate max-w-[180px] sm:max-w-[240px] text-left block bg-transparent border-none cursor-pointer p-0"
+                                          >
+                                            {cleanName}
+                                          </button>
+                                          <div className="flex items-center gap-1.5 mt-0.5">
+                                            <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">{file.size || '0.00 MB'}</span>
+                                            <span className="text-[10px] text-zinc-300 dark:text-zinc-700">•</span>
+                                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide ${fileStyle.badgeBg} ${fileStyle.badgeText}`}>
+                                              {fileStyle.label}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </td>
+
+                                    {isAdminView && (
+                                      <td className="py-3 px-3 hidden md:table-cell w-32">
+                                        <div className="flex items-center gap-2">
+                                          <img 
+                                            src={`https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(avatarSeed)}`}
+                                            alt={uploaderName}
+                                            className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 shrink-0"
+                                          />
+                                          <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 truncate max-w-[90px]">{uploaderName}</span>
+                                        </div>
+                                      </td>
+                                    )}
+
+                                    <td className="py-3 px-3 w-36">
+                                      <div className="min-w-0">
+                                        <div className="text-xs font-extrabold text-zinc-650 dark:text-zinc-300 truncate max-w-[120px]" title={file.subject}>
+                                          {file.subject.split(':')[0].trim()}
+                                        </div>
+                                        <div className="text-[9px] font-bold text-zinc-450 dark:text-zinc-500 truncate max-w-[120px]">
+                                          {file.program || 'BTech CSE'} • {file.semester}
+                                        </div>
+                                      </div>
+                                    </td>
+
+                                    {viewMode === 'my-uploads' ? (
+                                      <td className="py-3 px-3 text-center w-28">
+                                        <span className={`px-2.5 py-1 rounded-xl text-[9px] font-black tracking-wider uppercase inline-block ${status.bg} ${status.color}`}>
+                                          {status.label}
+                                        </span>
+                                      </td>
+                                    ) : (
+                                      <td className="py-3 px-3 text-center w-24">
+                                        <span className="px-2 py-0.5 rounded-lg text-[9px] font-extrabold text-zinc-500 bg-zinc-100 dark:bg-white/[0.04] dark:text-zinc-400 uppercase tracking-wide">
+                                          {file.type || 'Notes'}
+                                        </span>
+                                      </td>
+                                    )}
+
+                                    <td className="py-3 px-3 hidden sm:table-cell w-28">
+                                      <span className="text-xs font-bold text-zinc-450 dark:text-zinc-550">{formattedDate}</span>
+                                    </td>
+
+                                    <td className="py-3 pr-4 text-right w-36 relative">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setActiveMenuFileId(activeMenuFileId === file.id ? null : file.id);
+                                        }}
+                                        className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl text-zinc-455 dark:text-zinc-350 hover:text-zinc-800 dark:hover:text-white bg-transparent border-none cursor-pointer transition-all hover:scale-105 active:scale-95"
+                                        title="Actions"
+                                      >
+                                        <MoreHorizontal size={18} />
+                                      </button>
+
+                                      {activeMenuFileId === file.id && (
+                                        <>
+                                          <div 
+                                            className="absolute right-4 mt-1 w-36 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/5 py-1.5 shadow-xl z-50 text-left overflow-hidden animate-fade-in"
+                                            onClick={(e) => e.stopPropagation()}
+                                          >
+                                            {/* Details */}
+                                            <button
+                                              onClick={() => {
+                                                setActiveMenuFileId(null);
+                                                setSelectedFile(file);
+                                                setShowDetailsModal(true);
+                                              }}
+                                              className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-655 dark:text-zinc-350 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                            >
+                                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                                              Details
+                                            </button>
+
+                                            {/* Edit */}
+                                            <button
+                                              onClick={() => {
+                                                setActiveMenuFileId(null);
+                                                setSelectedFile(file);
+                                                setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type, program: file.program || selectedProgram });
+                                                setShowEditModal(true);
+                                              }}
+                                              className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-655 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                            >
+                                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+                                              Edit Metadata
+                                            </button>
+
+                                            {/* Delete / Reject / Approve */}
+                                            {viewMode === 'my-uploads' ? (
+                                              <button
+                                                onClick={async () => {
+                                                  setActiveMenuFileId(null);
+                                                  const confirmed = await showConfirm("Permanently delete this file?");
+                                                  if (confirmed) {
+                                                    setIsProcessing(true);
+                                                    NexusServer.deleteFile(file.id, file.storage_path)
+                                                      .then(() => fetchFromSource(false))
+                                                      .finally(() => setIsProcessing(false));
+                                                  }
+                                                }}
+                                                className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                              >
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                                                Delete File
+                                              </button>
+                                            ) : (
+                                              <>
+                                                <button
+                                                  onClick={async () => {
+                                                    setActiveMenuFileId(null);
+                                                    const confirmed = await showConfirm("Reject and remove this file?");
+                                                    if (confirmed) {
+                                                      setIsProcessing(true);
+                                                      NexusServer.rejectFile(file.id)
+                                                        .then(() => fetchFromSource(false))
+                                                        .finally(() => setIsProcessing(false));
+                                                    }
+                                                  }}
+                                                  className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                                >
+                                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                                                  Reject File
+                                                </button>
+
+                                                <button
+                                                  onClick={async () => {
+                                                    setActiveMenuFileId(null);
+                                                    setIsProcessing(true);
+                                                    try {
+                                                      const allFolders = await NexusServer.fetchFolders('All');
+                                                      let semFolder = allFolders.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && f.program === file.program);
+                                                      if (!semFolder) {
+                                                        await NexusServer.createFolder(file.semester.trim(), 'semester', null, file.program);
+                                                        const fresh = await NexusServer.fetchFolders('All');
+                                                        semFolder = fresh.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && (f.program === file.program || f.program === 'All'));
+                                                      }
+                                                      let subjFolder = allFolders.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder?.id && f.program === file.program);
+                                                      if (!subjFolder && semFolder) {
+                                                        await NexusServer.createFolder(file.subject.trim(), 'subject', semFolder.id, file.program);
+                                                        const fresh = await NexusServer.fetchFolders('All');
+                                                        subjFolder = fresh.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder.id && (f.program === file.program || f.program === 'All'));
+                                                      }
+                                                      if (file.type && file.type.trim()) {
+                                                        let catFolder = allFolders.find(f => f.type === 'category' && f.name.trim() === file.type.trim() && f.parent_id === subjFolder?.id && f.program === file.program);
+                                                        if (!catFolder && subjFolder) {
+                                                          await NexusServer.createFolder(file.type.trim(), 'category', subjFolder.id, file.program);
+                                                        }
+                                                      }
+                                                      await NexusServer.approveFile(file.id);
+                                                      fetchFromSource(false);
+                                                    } catch (e: any) {
+                                                      showToast("Approval error: " + e.message, 'error');
+                                                    } finally {
+                                                      setIsProcessing(false);
+                                                    }
+                                                  }}
+                                                  className="w-full px-4 py-2.5 text-left text-xs font-bold text-emerald-500 hover:bg-emerald-500/10 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                                >
+                                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><polyline points="20 6 9 17 4 12" /></svg>
+                                                  Approve File
+                                                </button>
+                                              </>
+                                            )}
+                                          </div>
+                                        </>
+                                      )}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </SortableContext>
+                    ) : (
+                      <SortableContext
+                        items={displayFiles.map(f => f.id)}
+                        strategy={rectSortingStrategy}
+                        disabled={!userProfile?.is_admin}
+                      >
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                          {displayFiles.map(file => (
+                            <FileCard
+                              key={file.id}
+                              file={file}
+                              userProfile={userProfile}
+                              isAdminMode={isAdminView}
+                              isPersonal={viewMode === 'my-uploads'}
+                              onApprove={async () => {
+                                setIsProcessing(true);
+                                try {
+                                  const allFolders = await NexusServer.fetchFolders('All');
+                                  let semFolder = allFolders.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && f.program === file.program);
+                                  if (!semFolder) {
+                                    await NexusServer.createFolder(file.semester.trim(), 'semester', null, file.program);
+                                    const fresh = await NexusServer.fetchFolders('All');
+                                    semFolder = fresh.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && (f.program === file.program || f.program === 'All'));
+                                  }
+                                  let subjFolder = allFolders.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder?.id && f.program === file.program);
+                                  if (!subjFolder && semFolder) {
+                                    await NexusServer.createFolder(file.subject.trim(), 'subject', semFolder.id, file.program);
+                                    const fresh = await NexusServer.fetchFolders('All');
+                                    subjFolder = fresh.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder.id && (f.program === file.program || f.program === 'All'));
+                                  }
+                                  if (file.type && file.type.trim()) {
+                                    let catFolder = allFolders.find(f => f.type === 'category' && f.name.trim() === file.type.trim() && f.parent_id === subjFolder?.id && f.program === file.program);
+                                    if (!catFolder && subjFolder) {
+                                      await NexusServer.createFolder(file.type.trim(), 'category', subjFolder.id, file.program);
+                                    }
+                                  }
+                                  await NexusServer.approveFile(file.id);
+                                  fetchFromSource(false);
+                                } catch (e: any) {
+                                  showToast("Approval error: " + e.message, 'error');
+                                } finally {
+                                  setIsProcessing(false);
+                                }
+                              }}
+                              onReject={async () => { const confirmed = await showConfirm("Reject and remove this file?"); if (confirmed) { setIsProcessing(true); NexusServer.rejectFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
+                              onDemote={async () => { const confirmed = await showConfirm("Send this file back to pending review?"); if (confirmed) { setIsProcessing(true); NexusServer.demoteFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
+                              onEdit={() => { setSelectedFile(file); setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type, program: file.program || selectedProgram }); setShowEditModal(true); }}
+                              onDelete={async () => { const confirmed = await showConfirm("Permanently delete this file?"); if (confirmed) { setIsProcessing(true); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
+                              onAccess={() => handleFileAccess(file)}
+                              onShowDetails={() => { setSelectedFile(file); setShowDetailsModal(true); }}
+                            />
+                          ))}
+                        </div>
+                      </SortableContext>
+                    )
                   ) : currentFolders.length === 0 && !isLoading && (
                     <div className="col-span-full py-20 text-center text-zinc-400 text-[11px] sm:text-xs opacity-40">No files found.</div>
                   )}
@@ -1737,23 +2364,44 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               <div className="p-6 space-y-4">
                 <input autoFocus placeholder="Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#0a0a0a]/60 p-4 rounded-xl font-bold border dark:border-white/10 text-[11px] sm:text-xs dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
                 
-                <div className="flex items-center justify-between p-4 bg-zinc-100 dark:bg-[#0a0a0a]/40 rounded-xl border border-transparent dark:border-white/5 transition-all">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isShining ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-zinc-200 dark:bg-white/5 text-zinc-400'}`}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 dark:text-white">Shining Effect</p>
-                      <p className="text-[8px] text-zinc-400 font-medium">Adds a continuous shimmer anim</p>
-                    </div>
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Choose Icon Logo</p>
+                  <div className="grid grid-cols-6 gap-2 bg-zinc-100 dark:bg-[#0a0a0a]/40 p-3 rounded-xl border border-transparent dark:border-white/5">
+                    {['Folder', 'Landmark', 'Sigma', 'Code', 'Cpu', 'Monitor', 'Globe', 'Database', 'Terminal', 'BookOpen', 'HelpCircle', 'Video'].map(ico => {
+                      const IconMap: { [key: string]: any } = { Folder: FolderIconLucide, Landmark, Sigma, Code, Cpu, Monitor, Globe, Database, Terminal, BookOpen, HelpCircle, Video };
+                      const IconComponent = IconMap[ico];
+                      const isSel = folderIcon === ico;
+                      return (
+                        <button
+                          key={ico}
+                          type="button"
+                          onClick={() => setFolderIcon(ico)}
+                          className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all ${isSel ? 'bg-orange-500 text-white border-orange-500' : 'bg-zinc-200 dark:bg-white/5 text-zinc-400 hover:bg-zinc-300 dark:hover:bg-white/10 border-transparent'}`}
+                          title={ico}
+                        >
+                          <IconComponent className="w-4 h-4" />
+                        </button>
+                      );
+                    })}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsShining(!isShining)}
-                    className={`w-10 h-6 rounded-full relative transition-all duration-300 border-none px-0 ${isShining ? 'bg-orange-500' : 'bg-zinc-300 dark:bg-white/10'}`}
-                  >
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${isShining ? 'left-5 shadow-sm' : 'left-1'}`} />
-                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Choose Brand Color</p>
+                  <div className="flex gap-2.5 bg-zinc-100 dark:bg-[#0a0a0a]/40 p-3 rounded-xl border border-transparent dark:border-white/5">
+                    {['#ff7a00', '#22c55e', '#0ea5e9', '#f43f5e', '#a855f7', '#10b981', '#6366f1'].map(hex => {
+                      const isSel = folderColor === hex;
+                      return (
+                        <button
+                          key={hex}
+                          type="button"
+                          onClick={() => setFolderColor(hex)}
+                          className={`w-6 h-6 rounded-full border-2 transition-all active:scale-90 ${isSel ? 'border-zinc-900 dark:border-white scale-110 shadow-md' : 'border-transparent hover:scale-105'}`}
+                          style={{ backgroundColor: hex }}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <button onClick={handleCreateFolder} disabled={isProcessing} className="w-full bg-orange-500 text-white py-4 rounded-xl font-semibold text-[11px] sm:text-xs shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Saving...' : 'Create Folder'}</button>
@@ -1779,23 +2427,44 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               <div className="p-6 space-y-4">
                 <input autoFocus placeholder="New Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#0a0a0a]/60 p-4 rounded-xl font-bold border dark:border-white/10 text-[11px] sm:text-xs dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
 
-                <div className="flex items-center justify-between p-4 bg-zinc-100 dark:bg-[#0a0a0a]/40 rounded-xl border border-transparent dark:border-white/5 transition-all">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isShining ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-zinc-200 dark:bg-white/5 text-zinc-400'}`}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 dark:text-white">Shining Effect</p>
-                      <p className="text-[8px] text-zinc-400 font-medium">Adds a continuous shimmer anim</p>
-                    </div>
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Choose Icon Logo</p>
+                  <div className="grid grid-cols-6 gap-2 bg-zinc-100 dark:bg-[#0a0a0a]/40 p-3 rounded-xl border border-transparent dark:border-white/5">
+                    {['Folder', 'Landmark', 'Sigma', 'Code', 'Cpu', 'Monitor', 'Globe', 'Database', 'Terminal', 'BookOpen', 'HelpCircle', 'Video'].map(ico => {
+                      const IconMap: { [key: string]: any } = { Folder: FolderIconLucide, Landmark, Sigma, Code, Cpu, Monitor, Globe, Database, Terminal, BookOpen, HelpCircle, Video };
+                      const IconComponent = IconMap[ico];
+                      const isSel = folderIcon === ico;
+                      return (
+                        <button
+                          key={ico}
+                          type="button"
+                          onClick={() => setFolderIcon(ico)}
+                          className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all ${isSel ? 'bg-orange-500 text-white border-orange-500' : 'bg-zinc-200 dark:bg-white/5 text-zinc-400 hover:bg-zinc-300 dark:hover:bg-white/10 border-transparent'}`}
+                          title={ico}
+                        >
+                          <IconComponent className="w-4 h-4" />
+                        </button>
+                      );
+                    })}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsShining(!isShining)}
-                    className={`w-10 h-6 rounded-full relative transition-all duration-300 border-none px-0 ${isShining ? 'bg-orange-500' : 'bg-zinc-300 dark:bg-white/10'}`}
-                  >
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${isShining ? 'left-5 shadow-sm' : 'left-1'}`} />
-                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Choose Brand Color</p>
+                  <div className="flex gap-2.5 bg-zinc-100 dark:bg-[#0a0a0a]/40 p-3 rounded-xl border border-transparent dark:border-white/5">
+                    {['#ff7a00', '#22c55e', '#0ea5e9', '#f43f5e', '#a855f7', '#10b981', '#6366f1'].map(hex => {
+                      const isSel = folderColor === hex;
+                      return (
+                        <button
+                          key={hex}
+                          type="button"
+                          onClick={() => setFolderColor(hex)}
+                          className={`w-6 h-6 rounded-full border-2 transition-all active:scale-90 ${isSel ? 'border-zinc-900 dark:border-white scale-110 shadow-md' : 'border-transparent hover:scale-105'}`}
+                          style={{ backgroundColor: hex }}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <button onClick={handleRenameFolder} disabled={isProcessing} className="w-full bg-orange-500 text-white py-4 rounded-xl font-semibold text-[11px] sm:text-xs shadow-lg active:scale-95 disabled:opacity-50 transition-all border-none">{isProcessing ? 'Updating...' : 'Save Changes'}</button>
@@ -2062,6 +2731,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             userProfile={userProfile}
             onClose={() => {
               setActivePdfFile(null);
+              fetchProgress();
             }}
             onAuthRequired={onAuthRequired}
           />
@@ -2070,6 +2740,138 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       
     </div>
   );
+};
+
+const getSubjectTheme = (nameOrCode: string) => {
+  const c = nameOrCode.toUpperCase().trim();
+  
+  // 1. Math / Calculus subjects
+  if (c.includes('MTH') || c.includes('MATH') || c.includes('CALCULUS') || c.includes('STATISTICS')) {
+    return {
+      text: 'text-emerald-500',
+      bg: 'bg-emerald-500',
+      lightBg: 'bg-emerald-500/10 dark:bg-emerald-500/10',
+      border: 'border-emerald-500/20',
+      gradient: 'from-emerald-500 to-teal-500',
+      icon: <Sigma className="w-5 h-5 text-white" strokeWidth={3} />,
+      rawColor: '#22c55e'
+    };
+  }
+
+  // 2. Coding / Programming / Development / Web labs
+  if (
+    c.includes('PROGRAMMING') || 
+    c.includes('PYTHON') || 
+    c.includes('CSE101') || 
+    c.includes('CSE326') || 
+    c.includes('INT108') || 
+    c.includes('JAVA') || 
+    c.includes('CPP') || 
+    c.includes('DEVELOPMENT') || 
+    c.includes('WEB')
+  ) {
+    return {
+      text: 'text-orange-500',
+      bg: 'bg-orange-500',
+      lightBg: 'bg-orange-500/10 dark:bg-orange-500/10',
+      border: 'border-orange-500/20',
+      gradient: 'from-orange-500 to-amber-500',
+      icon: <Code className="w-5 h-5 text-white" strokeWidth={3} />,
+      rawColor: '#ff7a00'
+    };
+  }
+
+  // 3. Electrical / Electronics / Hardware subjects
+  if (
+    c.includes('ECE') || 
+    c.includes('EEE') || 
+    c.includes('ELECTRICAL') || 
+    c.includes('ELECTRONICS') || 
+    c.includes('HARDWARE') || 
+    c.includes('DIGITAL ELECTRONICS')
+  ) {
+    return {
+      text: 'text-blue-500',
+      bg: 'bg-blue-500',
+      lightBg: 'bg-blue-500/10 dark:bg-blue-500/10',
+      border: 'border-blue-500/20',
+      gradient: 'from-blue-500 to-indigo-500',
+      icon: <Cpu className="w-5 h-5 text-white" strokeWidth={3} />,
+      rawColor: '#0ea5e9'
+    };
+  }
+
+  // 4. Other CSE Theory / Computing / Systems / Architecture
+  if (
+    c.includes('CSE') || 
+    c.includes('COMPUTING') || 
+    c.includes('ORIENTATION') || 
+    c.includes('INT') || 
+    c.includes('CAP') ||
+    c.includes('OPERATING') ||
+    c.includes('NETWORKS') ||
+    c.includes('SECURITY')
+  ) {
+    return {
+      text: 'text-teal-500',
+      bg: 'bg-teal-500',
+      lightBg: 'bg-teal-500/10 dark:bg-teal-500/10',
+      border: 'border-teal-500/20',
+      gradient: 'from-teal-500 to-emerald-500',
+      icon: <Monitor className="w-5 h-5 text-white" strokeWidth={3} />,
+      rawColor: '#14b8a6'
+    };
+  }
+
+  // 5. Database / DBMS subjects
+  if (c.includes('DATABASE') || c.includes('DBMS') || c.includes('SQL')) {
+    return {
+      text: 'text-purple-500',
+      bg: 'bg-purple-500',
+      lightBg: 'bg-purple-500/10 dark:bg-purple-500/10',
+      border: 'border-purple-500/20',
+      gradient: 'from-purple-500 to-pink-500',
+      icon: <Database className="w-5 h-5 text-white" strokeWidth={3} />,
+      rawColor: '#a855f7'
+    };
+  }
+
+  // 6. Languages / Communication / Soft Skills
+  if (
+    c.includes('FRN') || 
+    c.includes('GER') || 
+    c.includes('JAP') || 
+    c.includes('SPA') || 
+    c.includes('FRENCH') || 
+    c.includes('GERMAN') || 
+    c.includes('JAPANESE') || 
+    c.includes('SPANISH') || 
+    c.includes('LANG') ||
+    c.includes('COMMUNICATION') ||
+    c.includes('COMM') ||
+    c.includes('PEL')
+  ) {
+    return {
+      text: 'text-pink-500',
+      bg: 'bg-pink-500',
+      lightBg: 'bg-pink-500/10 dark:bg-pink-500/10',
+      border: 'border-pink-500/20',
+      gradient: 'from-pink-500 to-rose-500',
+      icon: <Languages className="w-5 h-5 text-white" strokeWidth={3} />,
+      rawColor: '#ec4899'
+    };
+  }
+
+  // 7. General Fallback
+  return {
+    text: 'text-indigo-500',
+    bg: 'bg-indigo-500',
+    lightBg: 'bg-indigo-500/10 dark:bg-indigo-500/10',
+    border: 'border-indigo-500/20',
+    gradient: 'from-indigo-500 to-purple-500',
+    icon: <Globe className="w-5 h-5 text-white" strokeWidth={3} />,
+    rawColor: '#6366f1'
+  };
 };
 
 const FolderCard: React.FC<{
@@ -2084,7 +2886,9 @@ const FolderCard: React.FC<{
   onRename: () => void;
   onDelete: (e: React.MouseEvent) => void;
   isDraggingOver: boolean;
-}> = ({ folder, selectedProgram, userProfile, fileCount, onDragOver, onDragLeave, onDrop, toPath, onRename, onDelete, isDraggingOver }) => {
+  subjectsCount?: number;
+  searchMatchText?: string | null;
+}> = ({ folder, selectedProgram, userProfile, fileCount, onDragOver, onDragLeave, onDrop, toPath, onRename, onDelete, isDraggingOver, subjectsCount, searchMatchText }) => {
   const isAdmin = userProfile?.is_admin || false;
   const isVirtual = folder.id.startsWith('v-');
 
@@ -2106,6 +2910,127 @@ const FolderCard: React.FC<{
 
   const meta = folder.type === 'subject' ? findSubjectMetadata(selectedProgram, folder.name) : null;
 
+  // Semester color palette matching the reference design
+  const semesterColors = ['#ff7a00', '#a855f7', '#0ea5e9', '#22c55e', '#f43f5e', '#eab308', '#14b8a6', '#6366f1'];
+
+  if (folder.type === 'semester') {
+    const semNum = folder.name.match(/\d+/)?.[0] || '1';
+    const semIdx = (parseInt(semNum) - 1) % semesterColors.length;
+    const semColor = folder.color || semesterColors[semIdx];
+    
+    let subtitle = "Upcoming";
+    if (semNum === '1') subtitle = "Foundation";
+    else if (semNum === '2') subtitle = "In Progress";
+
+    return (
+      <Link
+        to={toPath}
+        ref={setNodeRef as any}
+        style={style as any}
+        onDragOver={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDragOver(e); }}
+        onDragLeave={onDragLeave}
+        onDrop={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDrop(e); }}
+        onClick={(e) => { if (isDragging) e.preventDefault(); }}
+        className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99]"
+      >
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: semColor }}>
+            <FolderIcon type="semester" name={folder.name} size="w-5 h-5 text-white" iconName={folder.icon_name} color="#ffffff" />
+          </div>
+          <div className="min-w-0">
+            <h4 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white leading-snug">{folder.name}</h4>
+            <div className="flex items-center gap-2 mt-1 text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+              <span>{subtitle}</span>
+              <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
+              <span className="flex items-center gap-0.5">
+                <BookOpen className="w-3.5 h-3.5 text-zinc-450 dark:text-zinc-500" />
+                {subjectsCount || 0} Subjects
+              </span>
+              <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
+              <span className="flex items-center gap-0.5">
+                <FileText className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
+                {fileCount} Resources
+              </span>
+            </div>
+          </div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-300 dark:text-zinc-600 group-hover:translate-x-0.5 transition-transform shrink-0" style={{ color: semColor }}><path d="M9 18l6-6-6-6" /></svg>
+      </Link>
+    );
+  }
+
+  if (folder.type === 'subject') {
+    const subjectCodeMatch = folder.name.match(/^([A-Za-z]+\d{3})/);
+    const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : folder.name.split(':')[0].trim();
+    const subjectName = folder.name.split(':')[1]?.trim() || folder.name;
+    const rawTheme = {
+      rawColor: folder.color || getSubjectTheme(folder.name).rawColor,
+      icon: folder.icon_name ? (
+        <FolderIcon type="subject" name={folder.name} size="w-5 h-5" iconName={folder.icon_name} color="#ffffff" />
+      ) : (
+        getSubjectTheme(folder.name).icon
+      )
+    };
+    const metadata = findSubjectMetadata(selectedProgram, folder.name);
+    const creditsText = metadata ? `${metadata.credits} Credits` : "4 Credits";
+    const ltpText = metadata ? `L-T-P: ${metadata.l}-${metadata.t}-${metadata.p}` : "L-T-P: 3-0-2";
+
+    return (
+      <Link
+        to={toPath}
+        ref={setNodeRef as any}
+        style={style}
+        onDragOver={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDragOver(e); }}
+        onDragLeave={onDragLeave}
+        onDrop={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDrop(e); }}
+        onClick={(e) => { if (isDragging) e.preventDefault(); }}
+        className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden"
+      >
+        {isAdmin && !isVirtual && (
+          <div className="absolute top-2.5 right-2.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRename(); }} className="p-1 bg-white dark:bg-[#0a0a0a] rounded-lg text-orange-500 hover:bg-orange-50 transition-colors shadow-sm border border-zinc-100 dark:border-white/5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+            </button>
+            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(e); }} className="p-1 bg-white dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red-50 transition-colors shadow-sm border border-zinc-100 dark:border-white/5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
+            </button>
+          </div>
+        )}
+
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white animate-fade-in" style={{ backgroundColor: rawTheme.rawColor }}>
+            {React.isValidElement(rawTheme.icon) ? React.cloneElement(rawTheme.icon as React.ReactElement, { className: 'w-5 h-5 text-white' }) : rawTheme.icon}
+          </div>
+          <div className="min-w-0">
+            <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white leading-snug truncate pr-6">{subjectName}</h4>
+            <div className="flex items-center gap-2 mt-1 text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+              <span className="font-semibold" style={{ color: rawTheme.rawColor }}>{subjectCode}</span>
+              <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
+              {searchMatchText ? (
+                <span className="flex items-center gap-1 font-bold text-orange-500 bg-orange-500/5 dark:bg-orange-500/10 px-2 py-0.5 rounded-lg border border-orange-500/10">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-orange-500 shrink-0"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                  {searchMatchText}
+                </span>
+              ) : (
+                <>
+                  <span>{creditsText}</span>
+                  <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
+                  <span>{ltpText}</span>
+                  <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
+                  <span className="flex items-center gap-0.5">
+                    <FileText className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
+                    {fileCount} Resources
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-300 dark:text-zinc-600 group-hover:translate-x-0.5 transition-transform shrink-0" style={{ color: rawTheme.rawColor }}><path d="M9 18l6-6-6-6" /></svg>
+      </Link>
+    );
+  }
+
   return (
     <Link
       to={toPath}
@@ -2115,47 +3040,16 @@ const FolderCard: React.FC<{
       onDragLeave={onDragLeave}
       onDrop={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDrop(e); }}
       onClick={(e) => { if (isDragging) e.preventDefault(); }}
-      className={`group p-5 rounded-[30px] border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-center min-h-[140px] ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''} ${isDraggingOver ? 'border-orange-500 bg-orange-500/10 scale-105 shadow-xl z-10' : 'border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 hover:border-orange-500/50 hover:shadow-lg'} ${isDragging ? 'shadow-2xl border-orange-500' : ''}`}
+      className="group flex items-center justify-between p-4 rounded-2xl border border-zinc-150 dark:border-white/5 bg-white dark:bg-[#121214] hover:bg-zinc-50/50 dark:hover:bg-[#18181c] hover:shadow-md hover:border-zinc-200 dark:hover:border-white/10 transition-all duration-200 active:scale-[0.99]"
     >
-      {isAdmin && !isVirtual && (
-        <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-          <div
-            {...attributes}
-            {...listeners}
-            className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-zinc-300 hover:text-orange-500 cursor-grab active:cursor-grabbing transition-colors shadow-sm"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            title="Drag to reorder"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><circle cx="9" cy="5" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="9" cy="19" r="1" /><circle cx="15" cy="5" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="19" r="1" /></svg>
-          </div>
-          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRename(); }} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-orange-500 hover:bg-orange-50 dark:hover:bg-zinc-900 transition-colors shadow-sm border-none">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-          </button>
-          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(e); }} className="p-1.5 bg-zinc-100 dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red dark:hover:bg-zinc-900 transition-colors shadow-sm border-none">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
-          </button>
+      <div className="flex items-center gap-3">
+        <FolderIcon type={folder.type} name={folder.name} size="w-8 h-8" iconName={folder.icon_name} color={folder.color} />
+        <div>
+          <h4 className="text-xs sm:text-sm font-semibold text-zinc-800 dark:text-zinc-100">{folder.name}</h4>
+          <p className="text-[9px] text-zinc-400 dark:text-zinc-500 font-medium">{fileCount} resources</p>
         </div>
-      )}
-
-      <div className="flex items-center justify-between w-full mb-3">
-        <FolderIcon type={folder.type} name={folder.name} size="w-10 h-10" />
-        {meta && (
-          <div className="flex flex-col items-end gap-1 z-10">
-            <span className="px-1.5 py-0.5 rounded-lg text-[9px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/5 whitespace-nowrap">
-              L:{meta.l} T:{meta.t} P:{meta.p}
-            </span>
-            <span className="px-1.5 py-0.5 rounded-lg text-[9px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/5 whitespace-nowrap">
-              {meta.credits} Credits
-            </span>
-          </div>
-        )}
       </div>
-
-      <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight mt-1 z-10">{folder.name}</div>
-      <p className="text-[10px] sm:text-xs text-zinc-400 dark:text-zinc-500 mt-1 z-10">
-        {fileCount} File{fileCount !== 1 ? 's' : ''}
-      </p>
-      <div className="absolute -right-2 -bottom-2 opacity-5 group-hover:scale-110 transition-transform"><FolderIcon type={folder.type} name={folder.name} size="w-24 h-24" /></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-600 group-hover:translate-x-0.5 transition-all"><path d="M9 18l6-6-6-6" /></svg>
     </Link>
   );
 };
@@ -2165,28 +3059,44 @@ const StaticFolderCard: React.FC<{
   selectedProgram: string;
   fileCount: number;
 }> = ({ folder, selectedProgram, fileCount }) => {
-  const meta = folder.type === 'subject' ? findSubjectMetadata(selectedProgram, folder.name) : null;
+  const rawTheme = {
+    rawColor: folder.color || getSubjectTheme(folder.name).rawColor,
+    icon: folder.icon_name ? (
+      <FolderIcon type="subject" name={folder.name} size="w-5 h-5" iconName={folder.icon_name} color="#ffffff" />
+    ) : (
+      getSubjectTheme(folder.name).icon
+    )
+  };
+  const subjectCodeMatch = folder.name.match(/^([A-Za-z]+\d{3})/);
+  const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : folder.name.split(':')[0].trim();
+  const subjectName = folder.name.split(':')[1]?.trim() || folder.name;
+  const metadata = findSubjectMetadata(selectedProgram, folder.name);
+  const creditsText = metadata ? `${metadata.credits} Credits` : "4 Credits";
+  const ltpText = metadata ? `L-T-P: ${metadata.l}-${metadata.t}-${metadata.p}` : "L-T-P: 3-0-2";
+
   return (
-    <div className={`p-5 rounded-[30px] border border-orange-500 bg-white dark:bg-[#0a0a0a] flex flex-col justify-center min-h-[140px] relative overflow-hidden ${folder.is_shining ? 'shimmer-wrapper shimmer-effect' : ''}`}>
-      <div className="flex items-center justify-between w-full mb-3">
-        <FolderIcon type={folder.type} name={folder.name} size="w-10 h-10" />
-        {meta && (
-          <div className="flex flex-col items-end gap-1">
-            <span className="px-1.5 py-0.5 rounded-lg text-[9px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/5 whitespace-nowrap">
-              L:{meta.l} T:{meta.t} P:{meta.p}
-            </span>
-            <span className="px-1.5 py-0.5 rounded-lg text-[9px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/5 whitespace-nowrap">
-              {meta.credits} Credits
+    <div className="p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] flex items-center justify-between min-h-[70px] relative overflow-hidden">
+      <div className="flex items-center gap-3.5 min-w-0">
+        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: rawTheme.rawColor }}>
+          {React.isValidElement(rawTheme.icon) ? React.cloneElement(rawTheme.icon as React.ReactElement, { className: 'w-5 h-5 text-white' }) : rawTheme.icon}
+        </div>
+        <div className="min-w-0">
+          <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white truncate pr-6">{subjectName}</h4>
+          <div className="flex items-center gap-2 mt-1 text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+            <span className="font-semibold" style={{ color: rawTheme.rawColor }}>{subjectCode}</span>
+            <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
+            <span>{creditsText}</span>
+            <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
+            <span>{ltpText}</span>
+            <span className="text-zinc-300 dark:text-zinc-700 font-bold">•</span>
+            <span className="flex items-center gap-0.5">
+              <FileText className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
+              {fileCount} Resources
             </span>
           </div>
-        )}
+        </div>
       </div>
-
-      <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight mt-1">{folder.name}</div>
-      <p className="text-[10px] sm:text-xs text-zinc-400 dark:text-zinc-500 mt-1">
-        {fileCount} File{fileCount !== 1 ? 's' : ''}
-      </p>
-      <div className="absolute -right-2 -bottom-2 opacity-5"><FolderIcon type={folder.type} name={folder.name} size="w-24 h-24" /></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-300 dark:text-zinc-600 shrink-0" style={{ color: rawTheme.rawColor }}><path d="M9 18l6-6-6-6" /></svg>
     </div>
   );
 };

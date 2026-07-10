@@ -33,7 +33,7 @@ import { useXP } from '../hooks/useXP.ts';
 import { useStreak } from '../hooks/useStreak.ts';
 import { useDashboard } from '../hooks/useDashboard.ts';
 import { useQuizDashboardStore, getLevelInfo, LEVEL_THRESHOLDS } from '../stores/quizStore.ts';
-import { FRAME_CONFIGS, getFrameConfig } from '../data/frameConfigs.ts';
+
 
 const parseText = (text: string | undefined) => {
   if (!text) return null;
@@ -3119,8 +3119,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           const nextTier = LEVEL_THRESHOLDS[index + 1];
                           const isRewardUnlocked = userQuizProfile.total_xp >= tier.minXP;
                           const isCurrent = level.level === tier.level;
-                          const isCollected = (userQuizProfile.unlocked_frames || []).includes(tier.rewardFrame!);
-                          const frameConfig = tier.rewardFrame ? getFrameConfig(tier.rewardFrame) : null;
+                          const isCollected = false;
+                          const frameConfig = null;
                           
                           // Calculate exact progress to next level for the connector
                           const connectorProgress = nextTier 
