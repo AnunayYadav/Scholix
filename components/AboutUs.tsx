@@ -9,8 +9,8 @@ const StatCounter: React.FC<{ target: number; label: string; subLabel: string; a
   const animationRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (isVisible && target > 0) {
-      const duration = 4000; // Updated to 4 seconds
+    if (target > 0) {
+      const duration = 2500; // Smoother 2.5 second duration
       const startTime = performance.now();
 
       const updateCount = (currentTime: number) => {
@@ -35,7 +35,7 @@ const StatCounter: React.FC<{ target: number; label: string; subLabel: string; a
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [isVisible, target]);
+  }, [target]);
 
   return (
     <div className="space-y-1">

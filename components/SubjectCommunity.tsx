@@ -6,7 +6,7 @@ import {
   Search, Shield, Check, Flame, Trophy, Map, ArrowRight, ArrowLeft,
   Sparkles, Send, Edit, FileText, Download, Award, Code, Database,
   Terminal, Globe, Book, Video, FlaskConical, ClipboardList, Scroll, Folder, MessageCircle, Pin,
-  Languages, Bell, BellOff, MoreHorizontal, Cpu, Monitor, Sigma
+  Languages, Bell, BellOff, MoreHorizontal, Cpu, Monitor, Sigma, ChevronDown
 } from 'lucide-react';
 import { Folder as FolderType, LibraryFile, UserProfile } from '../types';
 import {
@@ -348,6 +348,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const [postCategory, setPostCategory] = useState<'discussion' | 'doubt' | 'poll' | 'question' | 'resource'>('discussion');
   const [postContent, setPostContent] = useState('');
   const [postTags, setPostTags] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [pollOptions, setPollOptions] = useState<string[]>(['', '']);
 
   const [reqTitle, setReqTitle] = useState('');
@@ -1104,21 +1105,22 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
             // Category drilldown (File List View grouped by Unit)
             <div className="space-y-4 animate-fade-in">
               <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => setActiveCategoryFolder(null)}
-                    className="px-2.5 py-1.5 bg-zinc-50 dark:bg-white/5 border border-zinc-150 dark:border-white/5 rounded-xl text-xs font-bold text-zinc-400 hover:text-zinc-800 dark:hover:text-white cursor-pointer"
+                    className="p-1 bg-transparent border-none text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer transition-colors flex items-center justify-center"
                   >
-                    Back to Sections
+                    <ArrowLeft size={16} />
                   </button>
-                  <div className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 capitalize">
-                    Viewing: {activeCategoryFolder.name}
+                  <div className="text-xs font-bold text-zinc-800 dark:text-white capitalize">
+                    {activeCategoryFolder.name}
                   </div>
                 </div>
                 {userProfile?.is_admin && (
                   <button
                     onClick={onUploadClick}
-                    className="px-3.5 py-1.5 bg-orange-500 text-white rounded-xl text-xs font-bold hover:scale-105 active:scale-95 transition-all border-none cursor-pointer flex items-center gap-1.5"
+                    style={{ backgroundColor: theme.rawColor }}
+                    className="px-3.5 py-1.5 text-white rounded-xl text-xs font-bold hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all border-none cursor-pointer flex items-center gap-1.5"
                   >
                     <Plus size={14} /> Upload File
                   </button>
@@ -1936,17 +1938,64 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Category</label>
-                      <select
-                        value={postCategory}
-                        onChange={(e) => setPostCategory(e.target.value as any)}
-                        className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold outline-none text-zinc-955 dark:text-white transition-all"
-                      >
-                        <option value="discussion">General Discussion</option>
-                        <option value="doubt">Doubt / Question</option>
-                        <option value="poll">Poll</option>
-                        <option value="question">Midterm/Exam Prep</option>
-                        <option value="resource">Reference resource</option>
-                      </select>
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                          className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold outline-none text-zinc-955 dark:text-white transition-all flex items-center justify-between cursor-pointer"
+                        >
+                          <span>
+                            {postCategory === 'discussion' && 'General Discussion'}
+                            {postCategory === 'doubt' && 'Doubt / Question'}
+                            {postCategory === 'poll' && 'Poll'}
+                            {postCategory === 'question' && 'Midterm/Exam Prep'}
+                            {postCategory === 'resource' && 'Reference resource'}
+                          </span>
+                          <ChevronDown size={14} className={`transition-transform duration-200 ${showCategoryDropdown ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {showCategoryDropdown && (
+                          <>
+                            {/* Overlay to close the dropdown when clicking outside */}
+                            <div className="fixed inset-0 z-30" onClick={() => setShowCategoryDropdown(false)} />
+                            <div className="absolute left-0 right-0 z-40 mt-1.5 bg-white dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1.5 animate-in fade-in slide-in-from-top-2 duration-150">
+                              {[
+                                { value: 'discussion', label: 'General Discussion' },
+                                { value: 'doubt', label: 'Doubt / Question' },
+                                { value: 'poll', label: 'Poll' },
+                                { value: 'question', label: 'Midterm/Exam Prep' },
+                                { value: 'resource', label: 'Reference resource' }
+                              ].map((opt) => {
+                                const isSelected = postCategory === opt.value;
+                                return (
+                                  <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => {
+                                      setPostCategory(opt.value as any);
+                                      setShowCategoryDropdown(false);
+                                    }}
+                                    style={isSelected ? {
+                                      backgroundColor: `${theme.rawColor}12`,
+                                      color: theme.rawColor
+                                    } : undefined}
+                                    className={`w-full text-left px-4 py-2.5 text-xs font-semibold transition-all border-none bg-transparent cursor-pointer flex items-center justify-between ${
+                                      isSelected
+                                        ? ''
+                                        : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03]'
+                                    }`}
+                                  >
+                                    <span>{opt.label}</span>
+                                    {isSelected && (
+                                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: theme.rawColor }} />
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
 

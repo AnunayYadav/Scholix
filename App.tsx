@@ -274,8 +274,8 @@ const TodaysSchedule: React.FC = () => {
   });
 
   return (
-    <div className="w-full lg:h-full animate-fade-in">
-      <div className="bg-white dark:bg-[#0a0a0a] rounded-[24px] border border-zinc-100/80 dark:border-white/5 p-5 lg:p-6 shadow-sm transition-all duration-500 overflow-hidden lg:h-full flex flex-col">
+    <div className="w-full animate-fade-in">
+      <div className="bg-white dark:bg-[#0a0a0a] rounded-[24px] border border-zinc-100/80 dark:border-white/5 p-5 lg:p-6 shadow-sm transition-all duration-500 overflow-hidden flex flex-col">
         {/* Header Section */}
         <div className="flex items-center justify-between mb-6 lg:mb-8">
           <div className="flex items-center gap-3">
@@ -616,7 +616,7 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
       <DashboardHeader userProfile={userProfile} />
       
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 items-start">
           
           {/* Left Side: Tools */}
           <div className="lg:col-span-8 order-2 lg:order-1 space-y-6">
@@ -631,38 +631,20 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
                 <FeatureCard key={f.id} f={f} navigate={() => navigate(f.customPath || getPathFromModule(f.id as any, selectedUniversity))} />
               ))}
             </div>
-
-            <div className="mt-8">
-              <DailyFeed userProfile={userProfile} />
-            </div>
           </div>
 
-          <div className="lg:col-span-4 order-1 lg:order-2 relative lg:min-h-0">
-            <div className="lg:absolute lg:inset-0 lg:h-full overflow-y-auto no-scrollbar">
-              <TodaysSchedule />
-            </div>
+          <div className="lg:col-span-4 order-1 lg:order-2">
+            <TodaysSchedule />
           </div>
+        </div>
+
+        {/* Full-Width Scholix Daily Feed */}
+        <div className="mt-10">
+          <DailyFeed userProfile={userProfile} />
         </div>
 
         <div className="flex flex-col gap-12 md:gap-16 mt-12 md:mt-16">
 
-          {/* Bottom Banner */}
-          <div className="w-full">
-            <div className="p-4 bg-gradient-to-br from-brand-primary/5 to-brand-secondary/5 rounded-2xl border border-brand-primary/10 relative overflow-hidden group shadow-sm">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-brand-primary/10 blur-3xl -translate-y-1/2 translate-x-1/2" />
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <h4 className="text-[10px] font-bold text-brand-primary tracking-tight uppercase">Pro tip</h4>
-                  <p className="text-[10px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
-                    Sync your timetable once and it will automatically show up here every morning. No manual entry needed.
-                  </p>
-                </div>
-                <button onClick={() => navigate('/timetable')} className="w-fit px-4 py-2 bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-primary rounded-xl text-[10px] font-bold flex items-center gap-2 transition-colors duration-200 shadow-sm">
-                  Sync now <ArrowRight size={12} />
-                </button>
-              </div>
-            </div>
-          </div>
 
           {/* Buy Me A Coffee Section */}
           <div className="w-full">

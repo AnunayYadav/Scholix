@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, Upload, HelpCircle, Trophy, MessageSquare, Download, ArrowRight, Star } from 'lucide-react';
+import { Flame, Upload, HelpCircle, Trophy, MessageSquare, Download, ArrowRight, Star, ThumbsUp } from 'lucide-react';
 import CommunityService from '../services/communityService';
 import NexusServer from '../services/nexusServer';
 import { CommunityPost, MaterialRequest } from '../types/communityTypes';
@@ -23,57 +23,44 @@ const DailyFeed: React.FC<DailyFeedProps> = ({ userProfile }) => {
     const loadFeedData = async () => {
       try {
         setIsLoading(true);
-        // Load CSE101 and INT306 data as representative seeds
-        const [posts1, posts2, reqs1, reqs2, allFiles] = await Promise.all([
-          CommunityService.fetchSubjectDiscussions('CSE101'),
-          CommunityService.fetchSubjectDiscussions('INT306'),
-          CommunityService.fetchSubjectRequests('CSE101'),
-          CommunityService.fetchSubjectRequests('INT306'),
-          NexusServer.fetchFiles('All')
+        const client = NexusServer.getClient();
+        if (!client) {
+          setIsLoading(false);
+          return;
+        }
+
+        // Fetch global posts, active requests, latest files, and leaderboard in parallel
+        const [postsRes, reqsRes, filesRes, leaderboard] = await Promise.all([
+          client.from('community_hub').select('*').eq('type', 'post').order('created_at', { ascending: false }).limit(20),
+          client.from('community_hub').select('*').eq('type', 'request').eq('status', 'open').order('created_at', { ascending: false }).limit(10),
+          NexusServer.fetchFiles('All'),
+          NexusServer.fetchLeaderboard()
         ]);
 
-        // Merge posts
-        const mergedPosts = [...posts1, ...posts2].sort((a, b) => {
-          const aVotes = (a.reactions.helpful.length + a.reactions.quality.length + a.reactions.important.length);
-          const bVotes = (b.reactions.helpful.length + b.reactions.quality.length + b.reactions.important.length);
-          return bVotes - aVotes; // Sort by popularity
+        const postsData = postsRes.data || [];
+        const reqsData = reqsRes.data || [];
+        const allFiles = filesRes || [];
+
+        // Sort posts by popularity (total reactions)
+        const sortedPosts = [...postsData].sort((a, b) => {
+          const aVotes = ((a.reactions?.helpful?.length || 0) + (a.reactions?.quality?.length || 0) + (a.reactions?.important?.length || 0));
+          const bVotes = ((b.reactions?.helpful?.length || 0) + (b.reactions?.quality?.length || 0) + (b.reactions?.important?.length || 0));
+          return bVotes - aVotes;
         }).slice(0, 4);
 
-        setTrendingPosts(mergedPosts);
+        setTrendingPosts(sortedPosts);
+        setRecentUploads(allFiles.slice(0, 4));
+        setOpenRequests(reqsData.slice(0, 3));
 
-        // Filter files uploaded in last few days or just take the latest approved files
-        const latestApproved = allFiles.slice(0, 4);
-        setRecentUploads(latestApproved);
-
-        // Merge and filter open requests
-        const mergedReqs = [...reqs1, ...reqs2].filter(r => r.status === 'open').slice(0, 3);
-        setOpenRequests(mergedReqs);
-
-        // Load mock top contributors
-        const mockContributors = [
-          { username: 'Anunay', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80', xp: 840, level: 4, rank: 1 },
-          { username: 'Rahul Sharma', avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=80&h=80&q=80', xp: 520, level: 3, rank: 2 },
-          { username: 'Priya Patel', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&h=80&q=80', xp: 380, level: 2, rank: 3 }
-        ];
-        
-        // If current user is logged in, we place them on the list dynamically if they have XP
-        if (userProfile) {
-          const userXP = userProfile.total_xp || 0;
-          const userLevel = userProfile.level || 1;
-          const userExists = mockContributors.some(c => c.username === userProfile.username);
-          if (!userExists && userXP > 0) {
-            mockContributors.push({
-              username: userProfile.username || 'You',
-              avatar: userProfile.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80',
-              xp: userXP,
-              level: userLevel,
-              rank: mockContributors.length + 1
-            });
-            mockContributors.sort((a, b) => b.xp - a.xp);
-            mockContributors.forEach((c, idx) => c.rank = idx + 1);
-          }
-        }
-        setTopContributors(mockContributors.slice(0, 4));
+        // Map real leaderboard contributors from Supabase
+        const contributors = leaderboard.map((user, idx) => ({
+          username: user.username || 'Anonymous Verto',
+          avatar: user.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(user.username || 'Contributor')}`,
+          xp: user.total_xp || 0,
+          level: user.level || 1,
+          rank: idx + 1
+        }));
+        setTopContributors(contributors.slice(0, 4));
 
       } catch (err) {
         console.error("Failed to load feed", err);
@@ -125,26 +112,26 @@ const DailyFeed: React.FC<DailyFeedProps> = ({ userProfile }) => {
   }
 
   return (
-    <div className="bg-white dark:bg-[#08080a] border border-zinc-100 dark:border-white/5 rounded-3xl p-5 md:p-6 space-y-8 shadow-sm">
+    <div className="bg-white dark:bg-[#08080a] border border-zinc-100 dark:border-white/5 rounded-2xl p-4 md:p-5 space-y-5 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
-          <h3 className="text-base md:text-lg font-bold text-zinc-900 dark:text-white tracking-tight flex items-center gap-2">
-            🔥 Scholix <span className="text-brand-primary">Daily Feed</span>
+          <h3 className="text-sm md:text-base font-bold text-zinc-900 dark:text-white tracking-tight flex items-center gap-2">
+            Scholix <span className="text-brand-primary">Daily Feed</span>
           </h3>
-          <p className="text-[10px] md:text-xs text-zinc-400 font-medium">Trending activity in your courses</p>
+          <p className="text-[9px] md:text-[10px] text-zinc-400 font-medium">Trending activity in your courses</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Left Column: Trending & Requests */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Trending Discussions */}
-          <div className="space-y-3.5">
-            <div className="flex items-center gap-2 text-xs font-bold text-zinc-400 uppercase tracking-wider">
-              <Flame className="w-4 h-4 text-orange-500" />
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+              <Flame className="w-3.5 h-3.5 text-orange-500" />
               <span>Trending Discussions</span>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2 max-h-[170px] overflow-y-auto pr-1.5 custom-scrollbar">
               {trendingPosts.length > 0 ? (
                 trendingPosts.map((post) => {
                   const reactionsCount = (post.reactions.helpful?.length || 0) + (post.reactions.quality?.length || 0) + (post.reactions.important?.length || 0);
@@ -152,90 +139,90 @@ const DailyFeed: React.FC<DailyFeedProps> = ({ userProfile }) => {
                     <div 
                       key={post.id} 
                       onClick={() => handlePostClick(post)}
-                      className="p-3.5 bg-zinc-50/50 dark:bg-white/[0.01] hover:bg-zinc-100/50 dark:hover:bg-white/[0.03] border border-zinc-100 dark:border-white/5 hover:border-brand-primary/20 rounded-2xl cursor-pointer transition-all duration-200 group flex items-start gap-3.5"
+                      className="p-2.5 bg-zinc-50/50 dark:bg-white/[0.01] hover:bg-zinc-100/50 dark:hover:bg-white/[0.03] border border-zinc-100 dark:border-white/5 hover:border-brand-primary/20 rounded-xl cursor-pointer transition-all duration-200 group flex items-start gap-2.5"
                     >
-                      <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary text-xs font-bold shrink-0">
+                      <div className="w-7 h-7 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary text-[10px] font-bold shrink-0">
                         {post.subject_id.substring(0, 2)}
                       </div>
-                      <div className="flex-1 min-w-0 space-y-1">
-                        <div className="text-xs font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-brand-primary transition-colors truncate">
+                      <div className="flex-1 min-w-0 space-y-0.5">
+                        <div className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-brand-primary transition-colors truncate">
                           {post.title}
                         </div>
-                        <div className="text-[10px] text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
+                        <div className="text-[9px] text-zinc-400 dark:text-zinc-500 flex items-center gap-1.5">
                           <span>{post.subject_id}</span>
                           <span>•</span>
                           <span>by {post.user_username}</span>
                           <span>•</span>
-                          <span className="flex items-center gap-1"><MessageSquare size={10} /> {post.comments.length}</span>
+                          <span className="flex items-center gap-0.5"><MessageSquare size={9} /> {post.comments.length}</span>
                           <span>•</span>
-                          <span className="flex items-center gap-1">👍 {reactionsCount}</span>
+                          <span className="flex items-center gap-0.5"><ThumbsUp size={9} /> {reactionsCount}</span>
                         </div>
                       </div>
-                      <ArrowRight size={14} className="text-zinc-300 dark:text-zinc-600 group-hover:translate-x-1 transition-transform self-center shrink-0" />
+                      <ArrowRight size={12} className="text-zinc-300 dark:text-zinc-600 group-hover:translate-x-1 transition-transform self-center shrink-0" />
                     </div>
                   );
                 })
               ) : (
-                <div className="text-xs text-zinc-400 py-2">No active discussions today. Start one!</div>
+                <div className="text-[10px] text-zinc-400 py-1">No active discussions today. Start one!</div>
               )}
             </div>
           </div>
 
           {/* Open Material Requests */}
-          <div className="space-y-3.5">
-            <div className="flex items-center gap-2 text-xs font-bold text-zinc-400 uppercase tracking-wider">
-              <HelpCircle className="w-4 h-4 text-brand-secondary" />
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+              <HelpCircle className="w-3.5 h-3.5 text-brand-secondary" />
               <span>Active Bounties (Requests)</span>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2 max-h-[170px] overflow-y-auto pr-1.5 custom-scrollbar">
               {openRequests.length > 0 ? (
                 openRequests.map((req) => (
                   <div 
                     key={req.id} 
                     onClick={() => handleRequestClick(req)}
-                    className="p-3.5 bg-zinc-50/50 dark:bg-white/[0.01] hover:bg-zinc-100/50 dark:hover:bg-white/[0.03] border border-zinc-100 dark:border-white/5 hover:border-brand-secondary/20 rounded-2xl cursor-pointer transition-all duration-200 group flex items-center justify-between gap-4"
+                    className="p-2.5 bg-zinc-50/50 dark:bg-white/[0.01] hover:bg-zinc-100/50 dark:hover:bg-white/[0.03] border border-zinc-100 dark:border-white/5 hover:border-brand-secondary/20 rounded-xl cursor-pointer transition-all duration-200 group flex items-center justify-between gap-3"
                   >
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <div className="text-xs font-bold text-zinc-800 dark:text-zinc-200 truncate">
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <div className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200 truncate">
                         {req.title}
                       </div>
-                      <div className="text-[10px] text-zinc-400 dark:text-zinc-500">
+                      <div className="text-[9px] text-zinc-400 dark:text-zinc-500">
                         Requested in <span className="font-semibold text-zinc-500">{req.subject_id}</span> • by {req.user_username}
                       </div>
                     </div>
-                    <div className="px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-xl text-[10px] font-black shrink-0 flex items-center gap-1">
+                    <div className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-lg text-[9px] font-black shrink-0 flex items-center gap-1">
                       +{req.bounty_xp} XP
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-xs text-zinc-400 py-2">All requests resolved! Nice job.</div>
+                <div className="text-[10px] text-zinc-400 py-1">All requests resolved! Nice job.</div>
               )}
             </div>
           </div>
         </div>
 
         {/* Right Column: Uploads & Leaderboard */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Recent Uploads */}
-          <div className="space-y-3.5">
-            <div className="flex items-center gap-2 text-xs font-bold text-zinc-400 uppercase tracking-wider">
-              <Upload className="w-4 h-4 text-emerald-500" />
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+              <Upload className="w-3.5 h-3.5 text-emerald-500" />
               <span>Recently Uploaded</span>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2 max-h-[170px] overflow-y-auto pr-1.5 custom-scrollbar">
               {recentUploads.length > 0 ? (
                 recentUploads.map((file) => (
                   <div 
                     key={file.id} 
                     onClick={() => handleUploadClick(file)}
-                    className="p-3.5 bg-zinc-50/50 dark:bg-white/[0.01] hover:bg-zinc-100/50 dark:hover:bg-white/[0.03] border border-zinc-100 dark:border-white/5 hover:border-emerald-500/20 rounded-2xl cursor-pointer transition-all duration-200 group flex items-start justify-between gap-3"
+                    className="p-2.5 bg-zinc-50/50 dark:bg-white/[0.01] hover:bg-zinc-100/50 dark:hover:bg-white/[0.03] border border-zinc-100 dark:border-white/5 hover:border-emerald-500/20 rounded-xl cursor-pointer transition-all duration-200 group flex items-start justify-between gap-3"
                   >
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <div className="text-xs font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-brand-primary transition-colors truncate">
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <div className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-brand-primary transition-colors truncate">
                         {file.name}
                       </div>
-                      <div className="text-[10px] text-zinc-400 dark:text-zinc-500 flex items-center gap-2 flex-wrap">
+                      <div className="text-[9px] text-zinc-400 dark:text-zinc-500 flex items-center gap-1.5 flex-wrap">
                         <span className="font-semibold text-zinc-500">{file.subject}</span>
                         <span>•</span>
                         <span>{file.type}</span>
@@ -243,47 +230,47 @@ const DailyFeed: React.FC<DailyFeedProps> = ({ userProfile }) => {
                           <>
                             <span>•</span>
                             <span className="text-emerald-500 font-semibold flex items-center gap-0.5">
-                              <Star size={10} fill="currentColor" /> {file.faculty_name}
+                              <Star size={9} fill="currentColor" /> {file.faculty_name}
                             </span>
                           </>
                         )}
                       </div>
                     </div>
-                    <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-zinc-500 group-hover:bg-emerald-500/10 group-hover:text-emerald-500 transition-colors">
-                      <Download size={14} />
+                    <div className="shrink-0 flex items-center justify-center w-7 h-7 rounded-lg bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-zinc-500 group-hover:bg-emerald-500/10 group-hover:text-emerald-500 transition-colors">
+                      <Download size={12} />
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-xs text-zinc-400 py-2">No new files uploaded recently.</div>
+                <div className="text-[10px] text-zinc-400 py-1">No new files uploaded recently.</div>
               )}
             </div>
           </div>
 
           {/* Top Contributors */}
-          <div className="space-y-3.5">
-            <div className="flex items-center gap-2 text-xs font-bold text-zinc-400 uppercase tracking-wider">
-              <Trophy className="w-4 h-4 text-amber-500" />
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+              <Trophy className="w-3.5 h-3.5 text-amber-500" />
               <span>Top Contributors this week</span>
             </div>
-            <div className="bg-zinc-50/30 dark:bg-white/[0.005] border border-zinc-100 dark:border-white/5 rounded-2xl p-3.5 space-y-3">
+            <div className="bg-zinc-50/30 dark:bg-white/[0.005] border border-zinc-100 dark:border-white/5 rounded-xl p-2.5 space-y-2 max-h-[170px] overflow-y-auto pr-1.5 custom-scrollbar">
               {topContributors.map((c) => (
-                <div key={c.username} className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
+                <div key={c.username} className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
                     <div className="relative shrink-0">
-                      <img src={c.avatar} alt={c.username} className="w-8 h-8 rounded-full border border-zinc-200 dark:border-white/10" />
-                      <div className="absolute -top-1 -left-1 w-4 h-4 bg-brand-primary text-white text-[8px] font-black rounded-full flex items-center justify-center border border-white dark:border-[#08080a]">
+                      <img src={c.avatar} alt={c.username} className="w-7 h-7 rounded-full border border-zinc-200 dark:border-white/10" />
+                      <div className="absolute -top-1 -left-1 w-3.5 h-3.5 bg-brand-primary text-white text-[7px] font-black rounded-full flex items-center justify-center border border-white dark:border-[#08080a]">
                         {c.rank}
                       </div>
                     </div>
                     <div className="min-w-0">
-                      <div className="text-xs font-bold text-zinc-800 dark:text-zinc-200 truncate flex items-center gap-1.5">
+                      <div className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200 truncate flex items-center gap-1.5">
                         {c.username}
-                        <span className="text-[9px] font-semibold px-1.5 py-0.2 bg-zinc-100 dark:bg-white/5 rounded text-zinc-400">Lv.{c.level}</span>
+                        <span className="text-[8px] font-semibold px-1 py-0.5 bg-zinc-100 dark:bg-white/5 rounded text-zinc-400">Lv.{c.level}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 shrink-0">
+                  <div className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400 shrink-0">
                     +{c.xp} XP
                   </div>
                 </div>
