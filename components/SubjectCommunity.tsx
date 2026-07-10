@@ -291,6 +291,14 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   // Navigation / Tabs
   const [activeTab, setActiveTab] = useState<'files' | 'discussions' | 'requests' | 'packs' | 'leaderboard' | 'people'>('files');
   const [joined, setJoined] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Scoped subject data
   const [stats, setStats] = useState<SubjectStats | null>(null);
@@ -750,63 +758,70 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Back button & Scoped Breadcrumb */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-xs font-bold text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 bg-transparent border-none cursor-pointer transition-colors"
-        >
-          <ArrowLeft size={16} /> Back to Semesters
-        </button>
-        <div className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
-          Communities &gt; {selectedProgram} &gt; {activeSemester?.name || 'All'}
+      {/* Header block (unified tinted section on mobile, box on desktop) */}
+      <div 
+        className="mx-[-32px] sm:mx-0 px-8 sm:px-0 pt-0 pb-3 sm:py-0 bg-gradient-to-b sm:bg-none relative overflow-hidden sm:overflow-visible"
+        style={isMobile ? {
+          background: `linear-gradient(to bottom, ${theme.rawColor}1c, transparent)`,
+          marginTop: 'calc(env(safe-area-inset-top, 0px) * -1 - 36px)',
+          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 36px + 16px)'
+        } : undefined}
+      >
+        {/* Back button */}
+        <div className="mb-4 sm:mb-6">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-xs font-bold text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 bg-transparent border-none cursor-pointer transition-colors"
+          >
+            <ArrowLeft size={16} /> Back to Semesters
+          </button>
         </div>
-      </div>
 
-      {/* Subject Header Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-zinc-50 to-zinc-100/50 dark:from-white/[0.01] dark:to-transparent border border-zinc-150 dark:border-white/5 rounded-3xl p-4 sm:p-6 flex flex-row items-center justify-between gap-3 sm:gap-6 shadow-sm">
-        <div className="absolute top-0 right-0 w-32 h-32 blur-3xl opacity-20 rounded-full pointer-events-none" style={{ backgroundColor: theme.rawColor }} />
+        {/* Subject Header Banner Box */}
+        <div className="relative overflow-hidden bg-transparent sm:bg-gradient-to-br sm:from-zinc-50 sm:to-zinc-100/50 sm:dark:from-white/[0.01] sm:dark:to-transparent border-0 sm:border border-zinc-150 dark:border-white/5 rounded-none sm:rounded-3xl p-0 sm:p-6 flex flex-row items-center justify-between gap-3 sm:gap-6 shadow-none sm:shadow-sm">
+          <div className="absolute top-0 right-0 w-32 h-32 blur-3xl opacity-20 rounded-full pointer-events-none hidden sm:block" style={{ backgroundColor: theme.rawColor }} />
 
-        {/* Course Logo & Info */}
-        <div className="flex items-center gap-3 sm:gap-5 min-w-0">
-          <div className="w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm shrink-0 text-white" style={{ backgroundColor: theme.rawColor }}>
-            {React.cloneElement(theme.icon as React.ReactElement, { className: 'w-5 h-5 sm:w-6.5 sm:h-6.5 text-white' })}
-          </div>
-          <div className="min-w-0 space-y-0.5 sm:space-y-1">
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-              <span className="px-1.5 py-0.5 rounded-md sm:rounded-lg text-[8px] sm:text-[9px] font-black text-white" style={{ backgroundColor: theme.rawColor }}>
-                {subjectCode}
-              </span>
-              <span className="text-[8px] sm:text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">
-                {onlineCount} studying now
-              </span>
+          {/* Course Logo & Info */}
+          <div className="flex items-center gap-3 sm:gap-5 min-w-0">
+            <div className="w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm shrink-0 text-white" style={{ backgroundColor: theme.rawColor }}>
+              {React.cloneElement(theme.icon as React.ReactElement, { className: 'w-5 h-5 sm:w-6.5 sm:h-6.5 text-white' })}
             </div>
-            <h2 className="text-sm xs:text-base md:text-lg lg:text-xl font-black text-zinc-900 dark:text-white leading-tight truncate">
-              {subjectName}
-            </h2>
+            <div className="min-w-0 space-y-0.5 sm:space-y-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <span className="px-1.5 py-0.5 rounded-md sm:rounded-lg text-[8px] sm:text-[9px] font-black text-white" style={{ backgroundColor: theme.rawColor }}>
+                  {subjectCode}
+                </span>
+                <span className="text-[8px] sm:text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">
+                  {onlineCount} studying now
+                </span>
+              </div>
+              <h2 className="text-sm xs:text-base md:text-lg lg:text-xl font-black text-zinc-900 dark:text-white leading-tight truncate">
+                {subjectName}
+              </h2>
+            </div>
           </div>
-        </div>
 
-        {/* Notifications & Options Controls */}
-        <div className="flex items-center gap-1 shrink-0">
-          <button
-            onClick={handleJoinToggle}
-            title={joined ? "Notifications are ON" : "Notifications are OFF"}
-            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-none bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 focus:bg-zinc-150 dark:focus:bg-white/10 outline-none text-zinc-500 dark:text-zinc-400 active:scale-95 shrink-0"
-          >
-            {joined ? (
-              <Bell className="w-5 h-5" strokeWidth={2.5} style={{ color: theme.rawColor }} />
-            ) : (
-              <BellOff className="w-5 h-5" strokeWidth={2.5} />
-            )}
-          </button>
-          
-          <button
-            title="Options"
-            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-none bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 focus:bg-zinc-150 dark:focus:bg-white/10 outline-none text-zinc-500 dark:text-zinc-400 active:scale-95 shrink-0"
-          >
-            <MoreHorizontal className="w-5 h-5" strokeWidth={2.5} />
-          </button>
+          {/* Notifications & Options Controls */}
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={handleJoinToggle}
+              title={joined ? "Notifications are ON" : "Notifications are OFF"}
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-none bg-transparent sm:hover:bg-zinc-100 sm:dark:hover:bg-white/5 outline-none text-zinc-500 dark:text-zinc-400 active:scale-95 shrink-0"
+            >
+              {joined ? (
+                <Bell className="w-5 h-5" strokeWidth={2.5} style={{ color: theme.rawColor }} />
+              ) : (
+                <BellOff className="w-5 h-5" strokeWidth={2.5} />
+              )}
+            </button>
+            
+            <button
+              title="Options"
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-none bg-transparent sm:hover:bg-zinc-100 sm:dark:hover:bg-white/5 outline-none text-zinc-500 dark:text-zinc-400 active:scale-95 shrink-0"
+            >
+              <MoreHorizontal className="w-5 h-5" strokeWidth={2.5} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -889,7 +904,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     }, 0);
                     const averagePercent = filesInCat.length > 0 ? Math.round(totalPercent / filesInCat.length) : 0;
                     
-                    const strokeDasharray = 2 * Math.PI * 12;
+                    const strokeDasharray = 2 * Math.PI * 16;
                     const strokeDashoffset = strokeDasharray - (averagePercent / 100) * strokeDasharray;
 
                     return (
@@ -912,12 +927,12 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                             </h4>
                             
                             {/* SVG Progress Ring */}
-                            <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
-                              <svg className="w-8 h-8 -rotate-90">
-                                <circle cx="16" cy="16" r="12" className="stroke-zinc-100 dark:stroke-white/5" strokeWidth="2" fill="transparent" />
-                                <circle cx="16" cy="16" r="12" style={{ stroke: meta.color }} strokeWidth="2" fill="transparent" strokeDasharray={strokeDasharray} strokeDashoffset={strokeDashoffset} strokeLinecap="round" />
+                            <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
+                              <svg className="w-10 h-10 -rotate-90">
+                                <circle cx="20" cy="20" r="16" className="stroke-zinc-100 dark:stroke-white/5" strokeWidth="2.5" fill="transparent" />
+                                <circle cx="20" cy="20" r="16" style={{ stroke: meta.color }} strokeWidth="2.5" fill="transparent" strokeDasharray={strokeDasharray} strokeDashoffset={strokeDashoffset} strokeLinecap="round" />
                               </svg>
-                              <span className="absolute text-[8px] font-extrabold text-zinc-800 dark:text-zinc-200">{averagePercent}%</span>
+                              <span className="absolute text-[10px] font-black text-zinc-800 dark:text-zinc-200">{averagePercent}%</span>
                             </div>
                           </div>
 
