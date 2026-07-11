@@ -6,7 +6,7 @@ import {
   Search, Shield, Check, Flame, Trophy, Map, ArrowRight, ArrowLeft,
   Sparkles, Send, Edit, FileText, Download, Award, Code, Database,
   Terminal, Globe, Book, Video, FlaskConical, ClipboardList, Scroll, Folder, MessageCircle, Pin,
-  Languages, Bell, BellOff, MoreHorizontal, Cpu, Monitor, Sigma, ChevronDown
+  Languages, Bell, BellOff, MoreHorizontal, Cpu, Monitor, Sigma, ChevronDown, ChevronRight, Compass, Landmark
 } from 'lucide-react';
 import { Folder as FolderType, LibraryFile, UserProfile } from '../types';
 import {
@@ -31,11 +31,50 @@ interface SubjectCommunityProps {
   onUploadClick: () => void;
   onBack: () => void;
   searchQuery?: string;
+  onRefresh?: () => void;
 }
 
-const getSubjectTheme = (nameOrCode: string) => {
+const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: string) => {
   const c = nameOrCode.toUpperCase().trim();
   
+  // Resolve raw color
+  const rawColor = folderColor || '#ff7a00';
+  
+  // Resolve icon component
+  const IconMap: { [key: string]: any } = {
+    Code: <Code className="w-5 h-5 text-white" strokeWidth={3} />,
+    Database: <Database className="w-5 h-5 text-white" strokeWidth={3} />,
+    Compass: <Compass className="w-5 h-5 text-white" strokeWidth={3} />,
+    Terminal: <Terminal className="w-5 h-5 text-white" strokeWidth={3} />,
+    Globe: <Globe className="w-5 h-5 text-white" strokeWidth={3} />,
+    Languages: <Languages className="w-5 h-5 text-white" strokeWidth={3} />,
+    MessageSquare: <MessageSquare className="w-5 h-5 text-white" strokeWidth={3} />,
+    Landmark: <Landmark className="w-5 h-5 text-white" strokeWidth={3} />,
+    BookOpen: <BookOpen className="w-5 h-5 text-white" strokeWidth={3} />,
+    FileText: <FileText className="w-5 h-5 text-white" strokeWidth={3} />,
+    Cpu: <Cpu className="w-5 h-5 text-white" strokeWidth={3} />,
+    Monitor: <Monitor className="w-5 h-5 text-white" strokeWidth={3} />,
+    Sigma: <Sigma className="w-5 h-5 text-white" strokeWidth={3} />,
+    Folder: <Folder className="w-5 h-5 text-white" strokeWidth={3} />,
+    HelpCircle: <HelpCircle className="w-5 h-5 text-white" strokeWidth={3} />,
+    Video: <Video className="w-5 h-5 text-white" strokeWidth={3} />
+  };
+
+  const icon = folderIcon && IconMap[folderIcon] ? IconMap[folderIcon] : null;
+
+  // If custom color and icon are present, return custom theme properties
+  if (folderColor || icon) {
+    return {
+      text: `text-[${rawColor}]`,
+      bg: `bg-[${rawColor}]`,
+      lightBg: `${rawColor}10`,
+      border: `border-[${rawColor}]/20`,
+      gradient: `from-[${rawColor}] to-[${rawColor}]`,
+      icon: icon || <Folder className="w-5 h-5 text-white" strokeWidth={3} />,
+      rawColor: rawColor
+    };
+  }
+
   // 1. Math / Calculus subjects
   if (c.includes('MTH') || c.includes('MATH') || c.includes('CALCULUS') || c.includes('STATISTICS')) {
     return {
@@ -171,15 +210,19 @@ const getCategoryMetadata = (catName: string) => {
     return {
       description: "All handwritten & digital notes",
       color: "#3b82f6",
-      lightColorBg: "bg-blue-50/70 dark:bg-blue-500/10 text-blue-500",
-      percent: 98,
+      lightColorBg: "bg-blue-500/10 text-blue-500 dark:text-blue-400",
+      gradientBgClass: "from-blue-500/10 dark:from-blue-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-blue-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(59,130,246,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-blue-500 dark:text-blue-400",
+      progressRingColor: "stroke-blue-500 dark:stroke-blue-400",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-blue-500 shrink-0">
-          <path d="M4 2h11l5 5v15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="currentColor" />
-          <path d="M15 2v5h5" fill="#93c5fd" opacity="0.8" />
-          <line x1="7" y1="11" x2="17" y2="11" stroke="white" strokeWidth="2" strokeLinecap="round" />
-          <line x1="7" y1="15" x2="17" y2="15" stroke="white" strokeWidth="2" strokeLinecap="round" />
-          <line x1="7" y1="19" x2="13" y2="19" stroke="white" strokeWidth="2" strokeLinecap="round" />
+        <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10 9 9 9 8 9" />
         </svg>
       )
     };
@@ -188,14 +231,17 @@ const getCategoryMetadata = (catName: string) => {
     return {
       description: "Previous year question papers",
       color: "#a855f7",
-      lightColorBg: "bg-purple-50/70 dark:bg-purple-500/10 text-purple-500",
-      percent: 76,
+      lightColorBg: "bg-purple-500/10 text-purple-500 dark:text-purple-400",
+      gradientBgClass: "from-purple-500/10 dark:from-purple-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-purple-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(168,85,247,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-purple-500 dark:text-purple-400",
+      progressRingColor: "stroke-purple-500 dark:stroke-purple-400",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-purple-500 shrink-0">
-          <path d="M4 2h11l5 5v15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="currentColor" />
-          <path d="M15 2v5h5" fill="#c084fc" opacity="0.8" />
-          <path d="M8 12l2 2 4-4" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-          <line x1="7" y1="17" x2="17" y2="17" stroke="white" strokeWidth="2" strokeLinecap="round" />
+        <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <path d="M9 15l2 2 4-4" />
         </svg>
       )
     };
@@ -204,64 +250,70 @@ const getCategoryMetadata = (catName: string) => {
     return {
       description: "Slides, videos & recordings",
       color: "#ef4444",
-      lightColorBg: "bg-red-50/70 dark:bg-red-500/10 text-red-500",
-      percent: 92,
+      lightColorBg: "bg-red-500/10 text-red-500 dark:text-red-400",
+      gradientBgClass: "from-red-500/10 dark:from-red-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-red-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(239,68,68,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-red-500 dark:text-red-400",
+      progressRingColor: "stroke-red-500 dark:stroke-red-400",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-red-500 shrink-0">
-          <path d="M4 2h11l5 5v15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="currentColor" />
-          <path d="M15 2v5h5" fill="#fca5a5" opacity="0.8" />
-          <path d="M10 10l5 3-5 3V10z" fill="white" />
+        <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M23 7l-7 5 7 5V7z" />
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
         </svg>
       )
     };
   }
-  // Syllabus & Others (prioritized before labs so "syllab-us" doesn't match "lab"!)
   if (n.includes('syllabus') || n.includes('syllabi') || n.includes('roadmap') || n.includes('curriculum')) {
     return {
       description: "Syllabus, docs & misc",
       color: "#4b5563",
-      lightColorBg: "bg-zinc-100/70 dark:bg-zinc-500/10 text-zinc-500",
-      percent: 80,
+      lightColorBg: "bg-zinc-500/10 text-zinc-500 dark:text-zinc-400",
+      gradientBgClass: "from-zinc-500/10 dark:from-zinc-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-zinc-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(107,114,128,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-zinc-550 dark:text-zinc-400",
+      progressRingColor: "stroke-zinc-500 dark:stroke-zinc-400",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-zinc-500 shrink-0">
-          <path d="M4 2h11l5 5v15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="currentColor" />
-          <path d="M15 2v5h5" fill="#cbd5e1" opacity="0.8" />
-          <line x1="7" y1="11" x2="17" y2="11" stroke="white" strokeWidth="2" />
-          <line x1="7" y1="15" x2="13" y2="15" stroke="white" strokeWidth="2" />
-          <circle cx="15.5" cy="15.5" r="1.5" fill="white" />
+        <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
         </svg>
       )
     };
   }
-  // Labs
   const isLabCategory = n === 'lab' || n === 'labs' || n.startsWith('lab ') || n.endsWith(' lab') || n.includes('laboratory') || n.includes('manual') || n.includes('practical');
   if (isLabCategory) {
     return {
       description: "Lab manuals & practical files",
       color: "#f97316",
-      lightColorBg: "bg-orange-50/70 dark:bg-orange-500/10 text-orange-500",
-      percent: 90,
+      lightColorBg: "bg-orange-500/10 text-orange-500 dark:text-orange-400",
+      gradientBgClass: "from-orange-500/10 dark:from-orange-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-orange-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(249,115,22,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-orange-500 dark:text-orange-400",
+      progressRingColor: "stroke-orange-500 dark:stroke-orange-400",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-orange-500 shrink-0">
-          <rect x="9" y="2" width="6" height="1.5" rx="0.75" fill="currentColor" />
-          <path d="M10 3.5h4v14a2 2 0 0 1-4 0v-14z" fill="currentColor" />
-          <path d="M10 9.5h4v8a2 2 0 0 1-4 0v-8z" fill="#fed7aa" opacity="0.7" />
-          <ellipse cx="12" cy="9.5" rx="2" ry="0.5" fill="#fed7aa" />
-          <circle cx="11.5" cy="12" r="0.5" fill="white" />
-          <circle cx="12.5" cy="14" r="0.75" fill="white" opacity="0.8" />
-          <circle cx="11.8" cy="16" r="0.4" fill="white" />
+        <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 3h12" />
+          <path d="M9 3v8L4.3 19.3A2 2 0 0 0 6 22h12a2 2 0 0 0 1.7-2.7L15 11V3" />
         </svg>
       )
     };
   }
-  // Books & Fallback Default block (Green Open Book Icon!)
   return {
-    description: "Syllabus, docs & misc",
+    description: "Reference books & materials",
     color: "#22c55e",
-    lightColorBg: "bg-emerald-50/70 dark:bg-emerald-500/10 text-emerald-500",
-    percent: 85,
+    lightColorBg: "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400",
+    gradientBgClass: "from-emerald-500/10 dark:from-emerald-500/15 to-transparent",
+    borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-emerald-500/20",
+    glowShadowClass: "hover:shadow-[0_12px_30px_rgba(34,197,94,0.06)] hover:-translate-y-0.5",
+    iconColor: "text-emerald-500 dark:text-emerald-400",
+    progressRingColor: "stroke-emerald-500 dark:stroke-emerald-400",
     icon: (
-      <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" className="w-5.5 h-5.5 text-emerald-500 shrink-0">
+      <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2V3z" />
         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7V3z" />
       </svg>
@@ -280,13 +332,14 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   onFileAccess,
   onUploadClick,
   onBack,
-  searchQuery
+  searchQuery,
+  onRefresh
 }) => {
   const subjectCodeMatch = activeSubject.name.match(/^([A-Za-z]+\d{3})/);
   const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : activeSubject.name.split(':')[0].trim();
   const subjectName = activeSubject.name.split(':')[1]?.trim() || activeSubject.name;
 
-  const theme = useMemo(() => getSubjectTheme(activeSubject.name), [activeSubject.name]);
+  const theme = useMemo(() => getSubjectTheme(activeSubject.name, activeSubject.color, activeSubject.icon_name), [activeSubject.name, activeSubject.color, activeSubject.icon_name]);
 
   // Navigation / Tabs
   const [activeTab, setActiveTab] = useState<'files' | 'discussions' | 'requests' | 'packs' | 'leaderboard' | 'people'>('files');
@@ -355,6 +408,76 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const [reqContent, setReqContent] = useState('');
   const [reqBounty, setReqBounty] = useState(50);
 
+  // Subject Options & Editing
+  const [showSubjectOptions, setShowSubjectOptions] = useState(false);
+  const [showEditSubjectModal, setShowEditSubjectModal] = useState(false);
+  const [editSubjectCode, setEditSubjectCode] = useState(subjectCode);
+  const [editSubjectName, setEditSubjectName] = useState(subjectName);
+  const [editSemesterId, setEditSemesterId] = useState(activeSemester?.id || '');
+  const [editProgram, setEditProgram] = useState(selectedProgram);
+  const [editColor, setEditColor] = useState(activeSubject.color || '#ff7a00');
+  const [editIcon, setEditIcon] = useState(activeSubject.icon_name || 'Code');
+  const [semestersList, setSemestersList] = useState<FolderType[]>([]);
+  const [isSavingSubject, setIsSavingSubject] = useState(false);
+  const [menuAnchorRect, setMenuAnchorRect] = useState<DOMRect | null>(null);
+
+  useEffect(() => {
+    if (!activeMenuFileId) return;
+    const handleClose = () => {
+      setActiveMenuFileId(null);
+      setMenuAnchorRect(null);
+    };
+    
+    // Delay adding the scroll listener to prevent focus/layout adjustments from closing it immediately
+    const scrollTimer = setTimeout(() => {
+      window.addEventListener('scroll', handleClose, true);
+    }, 100);
+    
+    window.addEventListener('resize', handleClose);
+    
+    return () => {
+      clearTimeout(scrollTimer);
+      window.removeEventListener('scroll', handleClose, true);
+      window.removeEventListener('resize', handleClose);
+    };
+  }, [activeMenuFileId]);
+
+  useEffect(() => {
+    setEditSubjectCode(subjectCode);
+    setEditSubjectName(subjectName);
+    setEditSemesterId(activeSemester?.id || '');
+    setEditProgram(selectedProgram);
+    setEditColor(activeSubject.color || '#ff7a00');
+    setEditIcon(activeSubject.icon_name || 'Code');
+  }, [activeSubject, activeSemester, selectedProgram, subjectCode, subjectName]);
+
+  useEffect(() => {
+    if (!showEditSubjectModal) return;
+    const loadSemesters = async () => {
+      try {
+        const client = NexusServer.getClient();
+        if (!client) return;
+        const { data, error } = await client
+          .from('library_items')
+          .select('*')
+          .eq('type', 'semester')
+          .eq('program', editProgram)
+          .order('display_order', { ascending: true });
+        
+        if (!error && data) {
+          setSemestersList(data);
+          const hasCurrentSem = data.some(s => s.id === editSemesterId);
+          if (!hasCurrentSem && data.length > 0) {
+            setEditSemesterId(data[0].id);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load semesters for program", err);
+      }
+    };
+    loadSemesters();
+  }, [editProgram, showEditSubjectModal]);
+
   const [packTitle, setPackTitle] = useState('');
   const [packContent, setPackContent] = useState('');
   const [packFiles, setPackFiles] = useState<string[]>([]);
@@ -368,6 +491,48 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
   // Selected Section inside Files tab (null means listing categories, Folder means viewing files inside that category)
   const [activeCategoryFolder, setActiveCategoryFolder] = useState<FolderType | null>(null);
+
+  const handleSaveSubjectDetails = async () => {
+    if (!editSubjectCode.trim() || !editSubjectName.trim()) {
+      showToast("Subject code and name are required", "error");
+      return;
+    }
+    if (!editSemesterId) {
+      showToast("Please select a semester", "error");
+      return;
+    }
+    setIsSavingSubject(true);
+    try {
+      const selectedSemester = semestersList.find(s => s.id === editSemesterId) || activeSemester;
+      const semName = selectedSemester ? selectedSemester.name : '';
+
+      await NexusServer.updateSubjectDetails(
+        activeSubject.id,
+        activeSubject.name,
+        editSubjectCode.trim().toUpperCase(),
+        editSubjectName.trim(),
+        editSemesterId,
+        semName,
+        editProgram,
+        editColor,
+        editIcon
+      );
+
+      showToast("Subject details updated successfully!", "success");
+      setShowEditSubjectModal(false);
+      
+      if (editSemesterId !== activeSemester?.id || editProgram !== selectedProgram) {
+        onBack();
+      } else if (onRefresh) {
+        onRefresh();
+      }
+    } catch (e: any) {
+      console.error(e);
+      showToast(e.message || "Failed to update subject details", "error");
+    } finally {
+      setIsSavingSubject(false);
+    }
+  };
 
   // Robust subject code extractor
   const getSubjectCode = (nameOrCode: string) => {
@@ -757,9 +922,405 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     return subjectFiles.filter(f => isFileTypeMatchingCategory(f.type, activeCategoryFolder.name));
   }, [activeCategoryFolder, subjectFiles]);
 
+  // Render helper for files tab detail view or category folder view
+  let mainContent = null;
+  if (activeTab === 'files' && selectedFileDetail) {
+    mainContent = (
+      <div className="space-y-6 animate-fade-in">
+        <FileDetailPage
+          file={selectedFileDetail}
+          userProfile={userProfile}
+          onClose={() => setSelectedFileDetail(null)}
+          onRefresh={loadCommunityData}
+          themeColor={theme.rawColor}
+        />
+      </div>
+    );
+  }
+
+  // 2. Files Tab Category Folder opened view (replaces subject banner and tabs with category details)
+  else if (activeTab === 'files' && activeCategoryFolder) {
+    const catMeta = getCategoryMetadata(activeCategoryFolder.name);
+    const catFilesCount = categoryFiles.length;
+    
+    mainContent = (
+      <div className="space-y-6 animate-fade-in">
+        {/* Back Link to Subject */}
+        <div className="mb-4 sm:mb-6">
+          <button
+            onClick={() => setActiveCategoryFolder(null)}
+            className="flex items-center gap-2 text-xs font-bold text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 bg-transparent border-none cursor-pointer transition-colors"
+          >
+            <ArrowLeft size={16} /> Back to {subjectName}
+          </button>
+        </div>
+
+        {/* Category Header Banner Box */}
+        <div className="relative overflow-visible bg-transparent sm:bg-gradient-to-br sm:from-zinc-50 sm:to-zinc-100/50 sm:dark:from-white/[0.01] sm:dark:to-transparent border-0 sm:border border-zinc-150 dark:border-white/5 rounded-none sm:rounded-3xl p-0 sm:p-6 flex flex-row items-center justify-between gap-3 sm:gap-6 shadow-none sm:shadow-sm">
+          <div className="absolute top-0 right-0 w-32 h-32 blur-3xl opacity-20 rounded-full pointer-events-none hidden sm:block" style={{ backgroundColor: theme.rawColor }} />
+
+          {/* Category Logo & Info */}
+          <div className="flex items-center gap-3 sm:gap-5 min-w-0">
+            <div 
+              className={`w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm shrink-0 border border-white/20 dark:border-white/10 overflow-hidden backdrop-blur-md ${catMeta.lightColorBg}`}
+            >
+              {React.cloneElement(catMeta.icon as React.ReactElement, { className: `w-5 h-5 sm:w-6.5 sm:h-6.5 ${catMeta.iconColor}` })}
+            </div>
+            <div className="min-w-0 space-y-0.5 sm:space-y-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <span className="px-1.5 py-0.5 rounded-md sm:rounded-lg text-[8px] sm:text-[9px] font-black text-white capitalize" style={{ backgroundColor: theme.rawColor }}>
+                  {activeCategoryFolder.name}
+                </span>
+                <span className="text-[8px] sm:text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">
+                  {catFilesCount} {catFilesCount === 1 ? 'Resource' : 'Resources'}
+                </span>
+              </div>
+              <h2 className="text-sm xs:text-base md:text-lg lg:text-xl font-black text-zinc-900 dark:text-white leading-tight truncate capitalize">
+                {activeCategoryFolder.name} Material
+              </h2>
+            </div>
+          </div>
+
+          {/* Upload Button */}
+          <div className="flex items-center gap-1 shrink-0">
+            {userProfile?.is_admin && (
+              <button
+                onClick={onUploadClick}
+                style={{ backgroundColor: theme.rawColor }}
+                className="px-3.5 py-2 text-white rounded-xl text-xs font-bold hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all border-none cursor-pointer flex items-center gap-1.5"
+              >
+                <Plus size={14} /> Upload File
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Files List View */}
+        <div className="space-y-4 pt-2">
+          {categoryFiles.length === 0 ? (
+            <div className="text-center py-10 bg-zinc-50/50 dark:bg-white/[0.005] border border-dashed border-zinc-250 dark:border-white/5 rounded-3xl space-y-4">
+              <div className="space-y-1">
+                <BookOpen className="w-8 h-8 text-zinc-300 dark:text-zinc-700 mx-auto" />
+                <p className="text-xs text-zinc-400">No resources uploaded in this section yet.</p>
+              </div>
+              {userProfile?.is_admin && (
+                <button
+                  onClick={onUploadClick}
+                  className="px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold hover:scale-105 active:scale-95 transition-all border-none cursor-pointer inline-flex items-center gap-1.5"
+                  style={{ backgroundColor: theme.rawColor }}
+                >
+                  <Plus size={14} /> Upload File
+                </button>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden sm:block w-full overflow-hidden border border-zinc-150 dark:border-white/5 rounded-3xl bg-white dark:bg-[#111113] shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01]">
+                        <th className="py-3 pl-4 pr-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider min-w-[220px]">
+                          Name
+                        </th>
+                        <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-center w-20">
+                          Unit
+                        </th>
+                        <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider hidden md:table-cell w-28">
+                          Added By
+                        </th>
+                        <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider hidden sm:table-cell w-28">
+                          Updated On
+                        </th>
+                        <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-right hidden sm:table-cell w-24">
+                          Downloads
+                        </th>
+                        <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-right w-24">
+                          Rating
+                        </th>
+                        <th className="py-3 pr-4 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-right w-12"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
+                      {categoryFiles.map((file) => {
+                        const getRealFileName = (f: LibraryFile) => {
+                          if (f.storage_path) {
+                            const base = f.storage_path.split('/').pop() || '';
+                            const clean = base.replace(/^[a-z0-9]+_/, '');
+                            if (clean) {
+                              try {
+                                return decodeURIComponent(clean);
+                              } catch (e) {
+                                return clean;
+                              }
+                            }
+                          }
+                          return f.name;
+                        };
+
+                        const realNameWithExt = getRealFileName(file);
+                        const ext = realNameWithExt.split('.').pop()?.toLowerCase() || '';
+                        const cleanName = realNameWithExt.replace(/\.[^/.]+$/, "");
+
+                        const ratingVal = (() => {
+                          if (file.rating_votes) {
+                            const votes = Object.values(file.rating_votes as Record<string, number>);
+                            if (votes.length > 0) return (votes.reduce((a, b) => a + b, 0) / votes.length).toFixed(1);
+                          }
+                          return null;
+                        })();
+                        
+                        const downloadCountVal = file.downloads || 0;
+
+                        const timeAgoVal = (() => {
+                          const timestamp = file.uploadDate || (file.created_at ? Date.parse(file.created_at) : Date.now());
+                          return getRelativeTime(timestamp);
+                        })();
+
+                        const avatarSeed = file.uploader_username || file.uploader_id || file.name;
+                        const uploaderName = file.uploader_username || file.faculty_name || "Faculty";
+
+                        return (
+                          <tr 
+                            key={file.id}
+                            onClick={() => handleOpenFile(file)}
+                            className="hover:bg-zinc-50 dark:hover:bg-white/[0.01] transition-colors cursor-pointer group"
+                          >
+                            <td className="py-3.5 pl-4 pr-3 min-w-[220px]">
+                              <div className="flex items-center gap-3">
+                                <div className="relative w-8 h-9 shrink-0 flex items-center justify-center">
+                                  {(() => {
+                                    let fillCol = "text-zinc-500";
+                                    let label = "FILE";
+                                    let foldBg = "#cbd5e1";
+                                    
+                                    if (ext === 'pdf') { fillCol = "text-red-500"; label = "PDF"; foldBg = "#fca5a5"; }
+                                    else if (ext === 'docx' || ext === 'doc') { fillCol = "text-blue-500"; label = "DOC"; foldBg = "#93c5fd"; }
+                                    else if (ext === 'pptx' || ext === 'ppt') { fillCol = "text-orange-500"; label = "PPT"; foldBg = "#fed7aa"; }
+                                    else if (ext === 'xlsx' || ext === 'xls') { fillCol = "text-emerald-500"; label = "XLS"; foldBg = "#a7f3d0"; }
+                                    
+                                    return (
+                                      <svg viewBox="0 0 24 28" fill="none" className={`w-7.5 h-8.5 ${fillCol}`}>
+                                        <path d="M2 0h14l6 6v21a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V1a1 1 0 0 1 1-1z" fill="currentColor" />
+                                        <path d="M16 0v6h6" fill={foldBg} opacity="0.9" />
+                                        <text x="11" y="21" fill="white" fontSize="7" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">{label}</text>
+                                      </svg>
+                                    );
+                                  })()}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-bold text-zinc-900 dark:text-white truncate group-hover:text-orange-500 transition-colors">
+                                    {cleanName}
+                                  </p>
+                                  <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold mt-0.5 uppercase">
+                                    {ext || 'pdf'} • {file.size || '2.4 MB'}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="py-3.5 px-3 text-center">
+                              {(() => {
+                                const match = file.name.match(/Unit\s*(\d+)/i) || (file.description && file.description.match(/Unit\s*(\d+)/i));
+                                if (match) {
+                                  return (
+                                    <span className="px-2.5 py-1 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-white/5 rounded-lg text-[9px] font-bold text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
+                                      Unit {match[1]}
+                                    </span>
+                                  );
+                                }
+                                return <span className="text-zinc-300 dark:text-zinc-700 font-bold">-</span>;
+                              })()}
+                            </td>
+
+                            <td className="py-3.5 px-3 hidden md:table-cell">
+                              <div className="flex items-center gap-2">
+                                <div className="w-5.5 h-5.5 rounded-full overflow-hidden border border-zinc-200 dark:border-white/10 flex items-center justify-center bg-zinc-100 dark:bg-white/5 shrink-0">
+                                  <img 
+                                    src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${avatarSeed}`} 
+                                    alt="avatar" 
+                                    className="w-full h-full object-cover" 
+                                  />
+                                </div>
+                                <span className="text-[11px] font-bold text-zinc-700 dark:text-zinc-350 truncate max-w-[100px]">
+                                  {uploaderName}
+                                </span>
+                              </div>
+                            </td>
+
+                            <td className="py-3.5 px-3 hidden sm:table-cell text-zinc-400 dark:text-zinc-500 text-[11px] font-semibold">
+                              {timeAgoVal}
+                            </td>
+
+                            <td className="py-3.5 px-3 text-right hidden sm:table-cell text-zinc-500 dark:text-zinc-400 text-[11px] font-bold">
+                              {downloadCountVal}
+                            </td>
+
+                            <td className="py-3.5 px-3 text-right text-zinc-800 dark:text-zinc-200 text-[11px] font-black">
+                              {ratingVal ? (
+                                <span className="inline-flex items-center gap-1">
+                                  {ratingVal} <Star size={11} className="text-amber-500" fill="currentColor" />
+                                </span>
+                              ) : (
+                                <span className="text-zinc-300 dark:text-zinc-700 font-bold">-</span>
+                              )}
+                            </td>
+
+                            <td className="py-3.5 pr-4 text-right">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  setMenuAnchorRect(activeMenuFileId === file.id ? null : rect);
+                                  setActiveMenuFileId(activeMenuFileId === file.id ? null : file.id);
+                                }}
+                                className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl text-zinc-400 hover:text-zinc-700 dark:hover:text-white bg-transparent border-none cursor-pointer transition-all hover:scale-105 active:scale-95"
+                              >
+                                <MoreHorizontal size={18} />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="block sm:hidden space-y-3">
+                {categoryFiles.map((file) => {
+                  const getRealFileName = (f: LibraryFile) => {
+                    if (f.storage_path) {
+                      const base = f.storage_path.split('/').pop() || '';
+                      const clean = base.replace(/^[a-z0-9]+_/, '');
+                      if (clean) {
+                        try {
+                          return decodeURIComponent(clean);
+                        } catch (e) {
+                          return clean;
+                        }
+                      }
+                    }
+                    return f.name;
+                  };
+
+                  const realNameWithExt = getRealFileName(file);
+                  const ext = realNameWithExt.split('.').pop()?.toLowerCase() || '';
+                  const cleanName = realNameWithExt.replace(/\.[^/.]+$/, "");
+
+                  const ratingVal = (() => {
+                    if (file.rating_votes) {
+                      const votes = Object.values(file.rating_votes as Record<string, number>);
+                      if (votes.length > 0) return (votes.reduce((a, b) => a + b, 0) / votes.length).toFixed(1);
+                    }
+                    return null;
+                  })();
+                  
+                  const timeAgoVal = (() => {
+                    const timestamp = file.uploadDate || (file.created_at ? Date.parse(file.created_at) : Date.now());
+                    return getRelativeTime(timestamp);
+                  })();
+
+                  const avatarSeed = file.uploader_username || file.uploader_id || file.name;
+                  const uploaderName = file.uploader_username || file.faculty_name || "Faculty";
+                  const unitMatch = file.name.match(/Unit\s*(\d+)/i) || (file.description && file.description.match(/Unit\s*(\d+)/i));
+
+                  return (
+                    <div 
+                      key={file.id}
+                      onClick={() => handleOpenFile(file)}
+                      className="p-4 bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/5 rounded-2xl flex flex-col gap-3 relative hover:border-zinc-200 dark:hover:border-white/10 transition-all cursor-pointer"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="relative w-8 h-9 shrink-0 flex items-center justify-center">
+                            {(() => {
+                              let fillCol = "text-zinc-500";
+                              let label = "FILE";
+                              let foldBg = "#cbd5e1";
+                              
+                              if (ext === 'pdf') { fillCol = "text-red-500"; label = "PDF"; foldBg = "#fca5a5"; }
+                              else if (ext === 'docx' || ext === 'doc') { fillCol = "text-blue-500"; label = "DOC"; foldBg = "#93c5fd"; }
+                              else if (ext === 'pptx' || ext === 'ppt') { fillCol = "text-orange-500"; label = "PPT"; foldBg = "#fed7aa"; }
+                              else if (ext === 'xlsx' || ext === 'xls') { fillCol = "text-emerald-500"; label = "XLS"; foldBg = "#a7f3d0"; }
+                              
+                              return (
+                                <svg viewBox="0 0 24 28" fill="none" className={`w-7.5 h-8.5 ${fillCol}`}>
+                                  <path d="M2 0h14l6 6v21a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V1a1 1 0 0 1 1-1z" fill="currentColor" />
+                                  <path d="M16 0v6h6" fill={foldBg} opacity="0.9" />
+                                  <text x="11" y="21" fill="white" fontSize="7" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">{label}</text>
+                                </svg>
+                              );
+                            })()}
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate max-w-[200px]">
+                              {cleanName}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase">
+                                {ext || 'pdf'} • {file.size || '2.4 MB'}
+                              </span>
+                              {unitMatch && (
+                                <span className="px-1.5 py-0.5 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-white/5 rounded text-[8px] font-bold text-zinc-500 dark:text-zinc-400">
+                                  Unit {unitMatch[1]}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setMenuAnchorRect(activeMenuFileId === file.id ? null : rect);
+                            setActiveMenuFileId(activeMenuFileId === file.id ? null : file.id);
+                          }}
+                          className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg text-zinc-400 hover:text-zinc-650 dark:hover:text-zinc-300 transition-colors bg-transparent border-none cursor-pointer shrink-0"
+                        >
+                          <MoreHorizontal size={18} />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center justify-between border-t border-zinc-100 dark:border-white/5 pt-2.5 mt-0.5 text-[9px] text-zinc-400 dark:text-zinc-500 font-semibold">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5.5 h-5.5 rounded-full overflow-hidden border border-zinc-200 dark:border-white/10 flex items-center justify-center bg-zinc-100 dark:bg-white/5 shrink-0">
+                            <img 
+                              src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${avatarSeed}`} 
+                              alt="avatar" 
+                              className="w-full h-full object-cover" 
+                            />
+                          </div>
+                          <span className="truncate max-w-[100px] text-zinc-700 dark:text-zinc-350">{uploaderName}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          {ratingVal && (
+                            <span className="inline-flex items-center gap-0.5 text-zinc-800 dark:text-zinc-200">
+                              {ratingVal} <Star size={9} className="text-amber-500" fill="currentColor" />
+                            </span>
+                          )}
+                          <span>{timeAgoVal}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Header block (unified tinted section on mobile, box on desktop) */}
+      {mainContent ? mainContent : (
+        <>
+          {/* Header block (unified tinted section on mobile, box on desktop) */}
       <div 
         className="mx-[-32px] sm:mx-0 px-8 sm:px-0 pt-0 pb-3 sm:py-0 bg-gradient-to-b sm:bg-none relative overflow-hidden sm:overflow-visible"
         style={isMobile ? {
@@ -779,7 +1340,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         </div>
 
         {/* Subject Header Banner Box */}
-        <div className="relative overflow-hidden bg-transparent sm:bg-gradient-to-br sm:from-zinc-50 sm:to-zinc-100/50 sm:dark:from-white/[0.01] sm:dark:to-transparent border-0 sm:border border-zinc-150 dark:border-white/5 rounded-none sm:rounded-3xl p-0 sm:p-6 flex flex-row items-center justify-between gap-3 sm:gap-6 shadow-none sm:shadow-sm">
+        <div className="relative overflow-visible bg-transparent sm:bg-gradient-to-br sm:from-zinc-50 sm:to-zinc-100/50 sm:dark:from-white/[0.01] sm:dark:to-transparent border-0 sm:border border-zinc-150 dark:border-white/5 rounded-none sm:rounded-3xl p-0 sm:p-6 flex flex-row items-center justify-between gap-3 sm:gap-6 shadow-none sm:shadow-sm">
           <div className="absolute top-0 right-0 w-32 h-32 blur-3xl opacity-20 rounded-full pointer-events-none hidden sm:block" style={{ backgroundColor: theme.rawColor }} />
 
           {/* Course Logo & Info */}
@@ -816,12 +1377,37 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               )}
             </button>
             
-            <button
-              title="Options"
-              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-none bg-transparent sm:hover:bg-zinc-100 sm:dark:hover:bg-white/5 outline-none text-zinc-500 dark:text-zinc-400 active:scale-95 shrink-0"
-            >
-              <MoreHorizontal className="w-5 h-5" strokeWidth={2.5} />
-            </button>
+            {userProfile?.is_admin && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowSubjectOptions(!showSubjectOptions)}
+                  title="Options"
+                  className="w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-none bg-transparent sm:hover:bg-zinc-100 sm:dark:hover:bg-white/5 outline-none text-zinc-500 dark:text-zinc-400 active:scale-95 shrink-0"
+                >
+                  <MoreHorizontal className="w-5 h-5" strokeWidth={2.5} />
+                </button>
+                {showSubjectOptions && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-10" 
+                      onClick={() => setShowSubjectOptions(false)} 
+                    />
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-950 border border-zinc-150 dark:border-white/5 rounded-2xl p-1.5 shadow-xl z-20">
+                      <button
+                        onClick={() => {
+                          setShowSubjectOptions(false);
+                          setShowEditSubjectModal(true);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-xs font-bold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-white/5 rounded-xl border-none bg-transparent cursor-pointer transition-colors"
+                      >
+                        <Edit className="w-4 h-4 text-zinc-500" />
+                        Edit Subject Details
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -857,8 +1443,15 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
       {/* 1. FILES TAB (Default) */}
       {activeTab === 'files' && (
         <div className="space-y-6">
-          {/* Listing Category Folders (Overview of study sections) */}
-          {!activeCategoryFolder ? (
+          {selectedFileDetail ? (
+            <FileDetailPage
+              file={selectedFileDetail}
+              userProfile={userProfile}
+              onClose={() => setSelectedFileDetail(null)}
+              onRefresh={loadCommunityData}
+              themeColor={theme.rawColor}
+            />
+          ) : !activeCategoryFolder ? (
             <div className="space-y-6 animate-fade-in">
               {/* Continue Studying Card */}
               {userProfile && continueStudyingFile && (
@@ -896,60 +1489,113 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     })
                     .map((cat) => {
                       const filesInCat = subjectFiles.filter(f => isFileTypeMatchingCategory(f.type, cat.name));
-                    const meta = getCategoryMetadata(cat.name);
-                    
-                    const progressList = userProgressList || [];
-                    const totalPercent = filesInCat.reduce((sum, file) => {
-                      const prog = progressList.find(p => p.document_id === file.id);
-                      return sum + (prog ? prog.progress_percentage : 0);
-                    }, 0);
-                    const averagePercent = filesInCat.length > 0 ? Math.round(totalPercent / filesInCat.length) : 0;
-                    
-                    const strokeDasharray = 2 * Math.PI * 16;
-                    const strokeDashoffset = strokeDasharray - (averagePercent / 100) * strokeDasharray;
+                      const meta = getCategoryMetadata(cat.name);
+                      
+                      const progressList = userProgressList || [];
+                      const totalPercent = filesInCat.reduce((sum, file) => {
+                        const prog = progressList.find(p => p.document_id === file.id);
+                        return sum + (prog ? prog.progress_percentage : 0);
+                      }, 0);
+                      const averagePercent = filesInCat.length > 0 ? Math.round(totalPercent / filesInCat.length) : 0;
+                      
+                      const strokeDasharray = 2 * Math.PI * 16;
+                      const strokeDashoffset = strokeDasharray - (averagePercent / 100) * strokeDasharray;
 
-                    return (
-                      <div
-                        key={cat.id}
-                        onClick={() => setActiveCategoryFolder(cat)}
-                        className="group p-3.5 bg-white dark:bg-[#111113] border border-zinc-200/60 dark:border-white/[0.06] rounded-2xl flex items-start gap-3.5 hover:shadow-md cursor-pointer transition-all duration-200"
-                      >
-                        {/* Left Column: Soft colored backdrop containing the solid filled icon */}
-                        <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 ${meta.lightColorBg}`}>
-                          {meta.icon}
-                        </div>
+                      const latestFile = filesInCat.length > 0 
+                        ? [...filesInCat].sort((a, b) => {
+                            const aTime = a.uploadDate || (a.created_at ? Date.parse(a.created_at) : 0);
+                            const bTime = b.uploadDate || (b.created_at ? Date.parse(b.created_at) : 0);
+                            return bTime - aTime;
+                          })[0]
+                        : null;
+                      const latestFileRelativeTime = latestFile
+                        ? getRelativeTime(latestFile.uploadDate || (latestFile.created_at ? Date.parse(latestFile.created_at) : Date.now()))
+                        : '';
 
-                        {/* Right Column: Text area & progress ring */}
-                        <div className="flex-1 min-w-0 flex flex-col justify-between">
-                          {/* Row 1: Title & Progress Ring */}
-                          <div className="flex items-center justify-between gap-2 w-full">
-                            <h4 className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white capitalize group-hover:text-orange-500 transition-colors truncate">
-                              {cat.name}
-                            </h4>
-                            
-                            {/* SVG Progress Ring */}
-                            <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
-                              <svg className="w-10 h-10 -rotate-90">
-                                <circle cx="20" cy="20" r="16" className="stroke-zinc-100 dark:stroke-white/5" strokeWidth="2.5" fill="transparent" />
-                                <circle cx="20" cy="20" r="16" style={{ stroke: meta.color }} strokeWidth="2.5" fill="transparent" strokeDasharray={strokeDasharray} strokeDashoffset={strokeDashoffset} strokeLinecap="round" />
-                              </svg>
-                              <span className="absolute text-[10px] font-black text-zinc-800 dark:text-zinc-200">{averagePercent}%</span>
+                      return (
+                        <div
+                          key={cat.id}
+                          onClick={() => setActiveCategoryFolder(cat)}
+                          className={`group relative overflow-hidden rounded-[24px] flex flex-col justify-between cursor-pointer transition-all duration-300 border ${meta.borderClass} bg-white dark:bg-[#0a0a0b] ${meta.glowShadowClass}`}
+                        >
+                          {/* Colored Background Gradient Overlay */}
+                          <div className={`absolute inset-0 opacity-[0.8] dark:opacity-[0.9] group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br ${meta.gradientBgClass} z-0 pointer-events-none`} />
+
+                          {/* Top Left Radial Glossy Highlight */}
+                          <div className="absolute -top-12 -left-12 w-32 h-32 bg-white/10 dark:bg-white/[0.02] blur-[40px] rounded-full pointer-events-none z-0" />
+
+                          {/* Giant faint background icon on bottom right */}
+                          <div className={`absolute -bottom-4 -right-4 ${meta.iconColor} opacity-[0.03] dark:opacity-[0.06] transform transition-all duration-700 group-hover:scale-110 group-hover:-translate-x-1 group-hover:-translate-y-1 pointer-events-none z-0`}>
+                            {React.cloneElement(meta.icon, { className: "w-24 h-24 text-current" })}
+                          </div>
+
+                          {/* Inner card padding content */}
+                          <div className="p-4 flex items-start gap-3.5 flex-1 min-w-0 relative z-10">
+                            {/* Left Column: Glassmorphic colored icon container */}
+                            <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 border border-white/20 dark:border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.05),inset_0_1px_1px_rgba(255,255,255,0.1)] overflow-hidden backdrop-blur-md ${meta.lightColorBg}`}>
+                              {React.cloneElement(meta.icon, { className: `w-5.5 h-5.5 ${meta.iconColor}` })}
+                            </div>
+
+                            {/* Right Column: Title, description, resources count and progress ring */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-between h-full">
+                              <div className="flex items-start justify-between gap-2 w-full">
+                                <div className="min-w-0">
+                                  <h4 className="text-xs sm:text-sm font-extrabold text-zinc-900 dark:text-white capitalize truncate tracking-wide group-hover:text-brand-primary transition-colors duration-300">
+                                    {cat.name}
+                                  </h4>
+                                  <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold line-clamp-1 mt-0.5">
+                                    {meta.description}
+                                  </p>
+                                </div>
+
+                                {/* circular progress ring */}
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <div className="relative w-9 h-9 flex items-center justify-center">
+                                    <svg className="w-9 h-9 -rotate-90">
+                                      <circle cx="18" cy="18" r="14" className="stroke-zinc-100 dark:stroke-white/5" strokeWidth="2.5" fill="transparent" />
+                                      <circle 
+                                        cx="18" 
+                                        cy="18" 
+                                        r="14" 
+                                        className={meta.progressRingColor} 
+                                        strokeWidth="2.5" 
+                                        fill="transparent" 
+                                        strokeDasharray={2 * Math.PI * 14} 
+                                        strokeDashoffset={2 * Math.PI * 14 - (averagePercent / 100) * (2 * Math.PI * 14)} 
+                                        strokeLinecap="round" 
+                                      />
+                                    </svg>
+                                    <span className="absolute text-[9px] font-black text-zinc-800 dark:text-zinc-200">{averagePercent}%</span>
+                                  </div>
+                                  
+                                  {/* Right Chevron arrow */}
+                                  <ChevronRight size={14} className="text-zinc-400 dark:text-zinc-650 group-hover:text-brand-primary transition-colors shrink-0" />
+                                </div>
+                              </div>
+
+                              {/* Resources count with file prefix */}
+                              <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 dark:text-zinc-400 font-bold mt-2">
+                                <FileText className="w-3.5 h-3.5 opacity-80" />
+                                <span>{filesInCat.length} Resources</span>
+                              </div>
                             </div>
                           </div>
 
-                          {/* Row 2: Description */}
-                          <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium line-clamp-1 -mt-1">
-                            {meta.description}
-                          </p>
-
-                          {/* Row 3: Resources Count */}
-                          <p className="text-[10px] sm:text-[11px] font-bold text-zinc-500 dark:text-zinc-400 mt-2">
-                            {filesInCat.length} Resources
-                          </p>
+                          {/* Bottom strip: Latest file uploaded info */}
+                          <div className="w-full bg-zinc-50/40 dark:bg-black/20 px-4 py-2 border-t border-zinc-100 dark:border-white/[0.04] flex items-center justify-between gap-2 text-[9px] text-zinc-500 dark:text-zinc-400 font-semibold hover:bg-zinc-100/50 dark:hover:bg-black/30 transition-all shrink-0 relative z-10">
+                            <span className="truncate max-w-[85%]">
+                              {latestFile ? (
+                                <>
+                                  Latest: <span className="font-bold text-zinc-800 dark:text-zinc-200">{latestFile.name}</span> uploaded {latestFileRelativeTime}
+                                </>
+                              ) : (
+                                "No resources uploaded yet"
+                              )}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
               </div>
 
@@ -975,129 +1621,140 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     No resources uploaded yet. Be the first to add study material!
                   </div>
                 ) : (
-                  <div className="overflow-x-auto no-scrollbar border border-zinc-150 dark:border-white/5 rounded-2xl bg-white dark:bg-[#111113]">
-                    <table className="w-full text-left border-collapse min-w-[600px]">
-                      <thead>
-                        <tr className="border-b border-zinc-150 dark:border-white/5 text-[10px] sm:text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider bg-zinc-50/50 dark:bg-white/[0.005]">
-                          <th className="py-3 px-4">Name</th>
-                          <th className="py-3 px-4">Type</th>
-                          <th className="py-3 px-4">Added By</th>
-                          <th className="py-3 px-4">Added On</th>
-                          <th className="py-3 px-4 w-10"></th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
-                        {recentFiles.map((file) => {
-                          const relativeTime = getRelativeTime(file.uploadDate);
-                          return (
-                            <tr 
-                              key={file.id} 
-                              onClick={() => handleOpenFile(file)}
-                              className="group hover:bg-zinc-50/50 dark:hover:bg-white/[0.01] transition-all cursor-pointer text-xs sm:text-sm"
-                            >
-                              {/* Name */}
-                              <td className="py-3.5 px-4 font-bold text-zinc-800 dark:text-zinc-200 min-w-[220px]">
-                                <div className="flex items-center gap-2.5">
-                                  <FileIcon fileName={file.name} size="w-5 h-5" className="shrink-0" />
-                                  <span className="truncate group-hover:text-orange-500 transition-colors max-w-[280px]">
-                                    {file.name}
-                                  </span>
-                                </div>
-                              </td>
-                              {/* Type */}
-                              <td className="py-3.5 px-4 font-semibold text-zinc-400 dark:text-zinc-500 uppercase">
-                                {file.type}
-                              </td>
-                              {/* Added By */}
-                              <td className="py-3.5 px-4 text-zinc-600 dark:text-zinc-350 font-medium">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-6 h-6 rounded-full bg-orange-500/10 dark:bg-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-[10px]">
-                                    {(file.uploader_username || 'A')[0].toUpperCase()}
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden sm:block overflow-x-auto no-scrollbar border border-zinc-150 dark:border-white/5 rounded-2xl bg-white dark:bg-[#111113]">
+                      <table className="w-full text-left border-collapse min-w-[600px]">
+                        <thead>
+                          <tr className="border-b border-zinc-150 dark:border-white/5 text-[10px] sm:text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider bg-zinc-50/50 dark:bg-white/[0.005]">
+                            <th className="py-3 px-4">Name</th>
+                            <th className="py-3 px-4">Type</th>
+                            <th className="py-3 px-4">Added By</th>
+                            <th className="py-3 px-4">Added On</th>
+                            <th className="py-3 px-4 w-10"></th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
+                          {recentFiles.map((file) => {
+                            const relativeTime = getRelativeTime(file.uploadDate);
+                            return (
+                              <tr 
+                                key={file.id} 
+                                onClick={() => handleOpenFile(file)}
+                                className="group hover:bg-zinc-50/50 dark:hover:bg-white/[0.01] transition-all cursor-pointer text-xs sm:text-sm"
+                              >
+                                {/* Name */}
+                                <td className="py-3.5 px-4 font-bold text-zinc-800 dark:text-zinc-200 min-w-[220px]">
+                                  <div className="flex items-center gap-2.5">
+                                    <FileIcon fileName={file.name} size="w-5 h-5" className="shrink-0" />
+                                    <span className="truncate group-hover:text-orange-500 transition-colors max-w-[280px]">
+                                      {file.name}
+                                    </span>
                                   </div>
-                                  <span className="truncate max-w-[120px]">
-                                    {file.uploader_username || "Anonymous Verto"}
-                                  </span>
-                                </div>
-                              </td>
-                              {/* Added On */}
-                              <td className="py-3.5 px-4 text-zinc-400 dark:text-zinc-500 font-medium">
-                                {relativeTime}
-                              </td>
-                              {/* Action button */}
-                              <td className="py-3.5 px-4 text-center relative">
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setActiveMenuFileId(activeMenuFileId === file.id ? null : file.id);
-                                  }}
-                                  className="p-1 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-350 transition-colors bg-transparent border-none cursor-pointer"
-                                >
-                                  <MoreHorizontal className="w-4.5 h-4.5" />
-                                </button>
-
-                                {activeMenuFileId === file.id && (
-                                  <>
-                                    {/* Dropdown Menu Container */}
-                                    <div 
-                                      className="absolute right-4 mt-1 w-36 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/5 py-1.5 shadow-xl z-50 text-left overflow-hidden animate-fade-in"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      {/* View Details */}
-                                      <button
-                                        onClick={() => {
-                                          setActiveMenuFileId(null);
-                                          setSelectedFileDetail(file);
-                                        }}
-                                        className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-650 dark:text-zinc-350 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                      >
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-                                        Details
-                                      </button>
-
-                                      {/* Edit (Admin only) */}
-                                      {userProfile?.is_admin && (
-                                        <button
-                                          onClick={() => {
-                                            setActiveMenuFileId(null);
-                                            setSelectedFileToEdit(file);
-                                            setEditForm({
-                                              name: file.name,
-                                              description: file.description || '',
-                                              type: file.type || '',
-                                              display_order: file.display_order || 0
-                                            });
-                                            setShowEditModal(true);
-                                          }}
-                                          className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-650 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                        >
-                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
-                                          Edit Metadata
-                                        </button>
-                                      )}
-
-                                      {/* Delete (Admin only) */}
-                                      {userProfile?.is_admin && (
-                                        <button
-                                          onClick={() => {
-                                            setActiveMenuFileId(null);
-                                            handleDeleteFile(file);
-                                          }}
-                                          className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                        >
-                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
-                                          Delete File
-                                        </button>
-                                      )}
+                                </td>
+                                {/* Type */}
+                                <td className="py-3.5 px-4 font-semibold text-zinc-400 dark:text-zinc-500 uppercase">
+                                  {file.type}
+                                </td>
+                                {/* Added By */}
+                                <td className="py-3.5 px-4 text-zinc-600 dark:text-zinc-350 font-medium">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-6 h-6 rounded-full bg-orange-500/10 dark:bg-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-[10px]">
+                                      {(file.uploader_username || 'A')[0].toUpperCase()}
                                     </div>
-                                  </>
+                                    <span className="truncate max-w-[120px]">
+                                      {file.uploader_username || "Anonymous Verto"}
+                                    </span>
+                                  </div>
+                                </td>
+                                {/* Added On */}
+                                <td className="py-3.5 px-4 text-zinc-400 dark:text-zinc-500 font-medium">
+                                  {relativeTime}
+                                </td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const rect = e.currentTarget.getBoundingClientRect();
+                                      setMenuAnchorRect(activeMenuFileId === file.id ? null : rect);
+                                      setActiveMenuFileId(activeMenuFileId === file.id ? null : file.id);
+                                    }}
+                                    className="p-1 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-350 transition-colors bg-transparent border-none cursor-pointer"
+                                  >
+                                    <MoreHorizontal className="w-4.5 h-4.5" />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="block sm:hidden space-y-3">
+                      {recentFiles.map((file) => {
+                        const relativeTime = getRelativeTime(file.uploadDate);
+                        const ratingVal = (() => {
+                          if (file.rating_votes) {
+                            const votes = Object.values(file.rating_votes as Record<string, number>);
+                            if (votes.length > 0) return (votes.reduce((a, b) => a + b, 0) / votes.length).toFixed(1);
+                          }
+                          return null;
+                        })();
+                        return (
+                          <div 
+                            key={file.id}
+                            onClick={() => handleOpenFile(file)}
+                            className="p-4 bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/5 rounded-2xl flex flex-col gap-3 relative hover:border-zinc-200 dark:hover:border-white/10 transition-all cursor-pointer"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <FileIcon fileName={file.name} size="w-8 h-8" className="shrink-0" />
+                                <div className="min-w-0">
+                                  <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate max-w-[200px]">
+                                    {file.name}
+                                  </h4>
+                                  <p className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase mt-0.5">
+                                    {file.type}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  setMenuAnchorRect(activeMenuFileId === file.id ? null : rect);
+                                  setActiveMenuFileId(activeMenuFileId === file.id ? null : file.id);
+                                }}
+                                className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-350 transition-colors bg-transparent border-none cursor-pointer shrink-0"
+                              >
+                                <MoreHorizontal className="w-4.5 h-4.5" />
+                              </button>
+                            </div>
+
+                            <div className="flex items-center justify-between border-t border-zinc-100 dark:border-white/5 pt-2.5 mt-0.5 text-[9px] text-zinc-400 dark:text-zinc-500 font-semibold">
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-5.5 h-5.5 rounded-full bg-orange-500/10 dark:bg-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-[9px]">
+                                  {(file.uploader_username || 'A')[0].toUpperCase()}
+                                </div>
+                                <span className="truncate max-w-[100px] text-zinc-600 dark:text-zinc-350">{file.uploader_username || "Anonymous Verto"}</span>
+                              </div>
+                              <div className="flex items-center gap-2.5">
+                                {ratingVal && (
+                                  <span className="inline-flex items-center gap-0.5 text-zinc-800 dark:text-zinc-200">
+                                    {ratingVal} <Star size={9} className="text-amber-500" fill="currentColor" />
+                                  </span>
                                 )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                                <span>{relativeTime}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -1147,242 +1804,312 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     </div>
                   );
                 }                return (
-                  <div className="w-full overflow-hidden border border-zinc-150 dark:border-white/5 rounded-3xl bg-white dark:bg-[#111113] shadow-sm">
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse text-left">
-                        <thead>
-                          <tr className="border-b border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01]">
-                            <th className="py-3 pl-4 pr-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider min-w-[220px]">
-                              Name
-                            </th>
-                            <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-center w-20">
-                              Unit
-                            </th>
-                            <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider hidden md:table-cell w-28">
-                              Added By
-                            </th>
-                            <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider hidden sm:table-cell w-28">
-                              Updated On
-                            </th>
-                            <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-right hidden sm:table-cell w-24">
-                              Downloads
-                            </th>
-                            <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-right w-24">
-                              Rating
-                            </th>
-                            <th className="py-3 pr-4 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-right w-12"></th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
-                          {categoryFiles.map((file) => {
-                            // Extract real name from storage path (e.g. community/6yc9oo_UNIT 1 (O).pdf -> UNIT 1 (O).pdf)
-                            const getRealFileName = (f: LibraryFile) => {
-                              if (f.storage_path) {
-                                const base = f.storage_path.split('/').pop() || '';
-                                const clean = base.replace(/^[a-z0-9]+_/, '');
-                                if (clean) {
-                                  try {
-                                    return decodeURIComponent(clean);
-                                  } catch (e) {
-                                    return clean;
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden sm:block w-full overflow-hidden border border-zinc-150 dark:border-white/5 rounded-3xl bg-white dark:bg-[#111113] shadow-sm">
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse text-left">
+                          <thead>
+                            <tr className="border-b border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01]">
+                              <th className="py-3 pl-4 pr-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider min-w-[220px]">
+                                Name
+                              </th>
+                              <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-center w-20">
+                                Unit
+                              </th>
+                              <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider hidden md:table-cell w-28">
+                                Added By
+                              </th>
+                              <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider hidden sm:table-cell w-28">
+                                Updated On
+                              </th>
+                              <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-right hidden sm:table-cell w-24">
+                                Downloads
+                              </th>
+                              <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-right w-24">
+                                Rating
+                              </th>
+                              <th className="py-3 pr-4 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-right w-12"></th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
+                            {categoryFiles.map((file) => {
+                              // Extract real name from storage path (e.g. community/6yc9oo_UNIT 1 (O).pdf -> UNIT 1 (O).pdf)
+                              const getRealFileName = (f: LibraryFile) => {
+                                if (f.storage_path) {
+                                  const base = f.storage_path.split('/').pop() || '';
+                                  const clean = base.replace(/^[a-z0-9]+_/, '');
+                                  if (clean) {
+                                    try {
+                                      return decodeURIComponent(clean);
+                                    } catch (e) {
+                                      return clean;
+                                    }
                                   }
                                 }
-                              }
-                              return f.name;
-                            };
+                                return f.name;
+                              };
 
-                            const realNameWithExt = getRealFileName(file);
-                            const ext = realNameWithExt.split('.').pop()?.toLowerCase() || '';
-                            const cleanName = realNameWithExt.replace(/\.[^/.]+$/, ""); // Strip extension for clean text
+                              const realNameWithExt = getRealFileName(file);
+                              const ext = realNameWithExt.split('.').pop()?.toLowerCase() || '';
+                              const cleanName = realNameWithExt.replace(/\.[^/.]+$/, ""); // Strip extension for clean text
 
-                            const ratingVal = (() => {
-                              if (file.rating_votes) {
-                                const votes = Object.values(file.rating_votes as Record<string, number>);
-                                if (votes.length > 0) return (votes.reduce((a, b) => a + b, 0) / votes.length).toFixed(1);
-                              }
-                              return null;
-                            })();
-                            
-                            const downloadCountVal = file.downloads || 0;
+                              const ratingVal = (() => {
+                                if (file.rating_votes) {
+                                  const votes = Object.values(file.rating_votes as Record<string, number>);
+                                  if (votes.length > 0) return (votes.reduce((a, b) => a + b, 0) / votes.length).toFixed(1);
+                                }
+                                return null;
+                              })();
+                              
+                              const downloadCountVal = file.downloads || 0;
 
-                            const timeAgoVal = (() => {
-                              const timestamp = file.uploadDate || (file.created_at ? Date.parse(file.created_at) : Date.now());
-                              return getRelativeTime(timestamp);
-                            })();
+                              const timeAgoVal = (() => {
+                                const timestamp = file.uploadDate || (file.created_at ? Date.parse(file.created_at) : Date.now());
+                                return getRelativeTime(timestamp);
+                              })();
 
-                            const avatarSeed = file.uploader_username || file.uploader_id || file.name;
-                            const uploaderName = file.uploader_username || file.faculty_name || "Faculty";
+                              const avatarSeed = file.uploader_username || file.uploader_id || file.name;
+                              const uploaderName = file.uploader_username || file.faculty_name || "Faculty";
 
-                            return (
-                              <tr 
-                                key={file.id}
-                                onClick={() => handleOpenFile(file)}
-                                className="hover:bg-zinc-50 dark:hover:bg-white/[0.01] transition-colors cursor-pointer group"
-                              >
-                                {/* Name column */}
-                                <td className="py-3.5 pl-4 pr-3 min-w-[220px]">
-                                  <div className="flex items-center gap-3">
-                                    {/* Mockup Vector File Icon */}
-                                    <div className="relative w-8 h-9 shrink-0 flex items-center justify-center">
-                                      {(() => {
-                                        let fillCol = "text-zinc-500";
-                                        let label = "FILE";
-                                        let foldBg = "#cbd5e1";
-                                        
-                                        if (ext === 'pdf') { fillCol = "text-red-500"; label = "PDF"; foldBg = "#fca5a5"; }
-                                        else if (ext === 'docx' || ext === 'doc') { fillCol = "text-blue-500"; label = "DOC"; foldBg = "#93c5fd"; }
-                                        else if (ext === 'pptx' || ext === 'ppt') { fillCol = "text-orange-500"; label = "PPT"; foldBg = "#fed7aa"; }
-                                        else if (ext === 'xlsx' || ext === 'xls') { fillCol = "text-emerald-500"; label = "XLS"; foldBg = "#a7f3d0"; }
-                                        
-                                        return (
-                                          <svg viewBox="0 0 24 28" fill="none" className={`w-7.5 h-8.5 ${fillCol}`}>
-                                            <path d="M2 0h14l6 6v21a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V1a1 1 0 0 1 1-1z" fill="currentColor" />
-                                            <path d="M16 0v6h6" fill={foldBg} opacity="0.9" />
-                                            <text x="11" y="21" fill="white" fontSize="7" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">{label}</text>
-                                          </svg>
-                                        );
-                                      })()}
-                                    </div>
-                                    <div className="min-w-0">
-                                      <p className="text-xs font-bold text-zinc-900 dark:text-white truncate group-hover:text-orange-500 transition-colors">
-                                        {cleanName}
-                                      </p>
-                                      <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold mt-0.5 uppercase">
-                                        {ext || 'pdf'} • {file.size || '2.4 MB'}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </td>
-
-                                {/* Unit column */}
-                                <td className="py-3.5 px-3 text-center">
-                                  {(() => {
-                                    const match = file.name.match(/Unit\s*(\d+)/i) || (file.description && file.description.match(/Unit\s*(\d+)/i));
-                                    if (match) {
-                                      return (
-                                        <span className="px-2.5 py-1 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-white/5 rounded-lg text-[9px] font-bold text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
-                                          Unit {match[1]}
-                                        </span>
-                                      );
-                                    }
-                                    return <span className="text-zinc-300 dark:text-zinc-700 font-bold">-</span>;
-                                  })()}
-                                </td>
-
-                                {/* Added By column */}
-                                <td className="py-3.5 px-3 hidden md:table-cell">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-5.5 h-5.5 rounded-full overflow-hidden border border-zinc-200 dark:border-white/10 flex items-center justify-center bg-zinc-100 dark:bg-white/5 shrink-0">
-                                      <img 
-                                        src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${avatarSeed}`} 
-                                        alt="avatar" 
-                                        className="w-full h-full object-cover" 
-                                      />
-                                    </div>
-                                    <span className="text-[11px] font-bold text-zinc-700 dark:text-zinc-350 truncate max-w-[100px]">
-                                      {uploaderName}
-                                    </span>
-                                  </div>
-                                </td>
-
-                                {/* Updated On column */}
-                                <td className="py-3.5 px-3 hidden sm:table-cell text-zinc-400 dark:text-zinc-500 text-[11px] font-semibold">
-                                  {timeAgoVal}
-                                </td>
-
-                                {/* Downloads column */}
-                                <td className="py-3.5 px-3 text-right hidden sm:table-cell text-zinc-500 dark:text-zinc-400 text-[11px] font-bold">
-                                  {downloadCountVal}
-                                </td>
-
-                                {/* Rating column */}
-                                <td className="py-3.5 px-3 text-right text-zinc-800 dark:text-zinc-200 text-[11px] font-black">
-                                  {ratingVal ? (
-                                    <span className="inline-flex items-center gap-1">
-                                      {ratingVal} <Star size={11} className="text-amber-500" fill="currentColor" />
-                                    </span>
-                                  ) : (
-                                    <span className="text-zinc-300 dark:text-zinc-700 font-bold">-</span>
-                                  )}
-                                </td>
-
-                                {/* Options Actions */}
-                                <td className="py-3.5 pr-4 text-right relative">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setActiveMenuFileId(activeMenuFileId === file.id ? null : file.id);
-                                    }}
-                                    className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl text-zinc-400 hover:text-zinc-700 dark:hover:text-white bg-transparent border-none cursor-pointer transition-all hover:scale-105 active:scale-95"
-                                    title="Actions"
-                                  >
-                                    <MoreHorizontal size={18} />
-                                  </button>
-
-                                  {activeMenuFileId === file.id && (
-                                    <>
-                                      {/* Dropdown Menu Container */}
-                                      <div 
-                                        className="absolute right-4 mt-1 w-36 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/5 py-1.5 shadow-xl z-50 text-left overflow-hidden animate-fade-in"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
-                                        {/* View Details */}
-                                        <button
-                                          onClick={() => {
-                                            setActiveMenuFileId(null);
-                                            setSelectedFileDetail(file);
-                                          }}
-                                          className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-650 dark:text-zinc-350 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                        >
-                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-                                          Details
-                                        </button>
-
-                                        {/* Edit (Admin only) */}
-                                        {userProfile?.is_admin && (
-                                          <button
-                                            onClick={() => {
-                                              setActiveMenuFileId(null);
-                                              setSelectedFileToEdit(file);
-                                              setEditForm({
-                                                name: file.name,
-                                                description: file.description || '',
-                                                type: file.type || '',
-                                                display_order: file.display_order || 0
-                                              });
-                                              setShowEditModal(true);
-                                            }}
-                                            className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-650 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                          >
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
-                                            Edit Metadata
-                                          </button>
-                                        )}
-
-                                        {/* Delete (Admin only) */}
-                                        {userProfile?.is_admin && (
-                                          <button
-                                            onClick={() => {
-                                              setActiveMenuFileId(null);
-                                              handleDeleteFile(file);
-                                            }}
-                                            className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                          >
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
-                                            Delete File
-                                          </button>
-                                        )}
+                              return (
+                                <tr 
+                                  key={file.id}
+                                  onClick={() => handleOpenFile(file)}
+                                  className="hover:bg-zinc-50 dark:hover:bg-white/[0.01] transition-colors cursor-pointer group"
+                                >
+                                  {/* Name column */}
+                                  <td className="py-3.5 pl-4 pr-3 min-w-[220px]">
+                                    <div className="flex items-center gap-3">
+                                      {/* Mockup Vector File Icon */}
+                                      <div className="relative w-8 h-9 shrink-0 flex items-center justify-center">
+                                        {(() => {
+                                          let fillCol = "text-zinc-500";
+                                          let label = "FILE";
+                                          let foldBg = "#cbd5e1";
+                                          
+                                          if (ext === 'pdf') { fillCol = "text-red-500"; label = "PDF"; foldBg = "#fca5a5"; }
+                                          else if (ext === 'docx' || ext === 'doc') { fillCol = "text-blue-500"; label = "DOC"; foldBg = "#93c5fd"; }
+                                          else if (ext === 'pptx' || ext === 'ppt') { fillCol = "text-orange-500"; label = "PPT"; foldBg = "#fed7aa"; }
+                                          else if (ext === 'xlsx' || ext === 'xls') { fillCol = "text-emerald-500"; label = "XLS"; foldBg = "#a7f3d0"; }
+                                          
+                                          return (
+                                            <svg viewBox="0 0 24 28" fill="none" className={`w-7.5 h-8.5 ${fillCol}`}>
+                                              <path d="M2 0h14l6 6v21a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V1a1 1 0 0 1 1-1z" fill="currentColor" />
+                                              <path d="M16 0v6h6" fill={foldBg} opacity="0.9" />
+                                              <text x="11" y="21" fill="white" fontSize="7" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">{label}</text>
+                                            </svg>
+                                          );
+                                        })()}
                                       </div>
-                                    </>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                                      <div className="min-w-0">
+                                        <p className="text-xs font-bold text-zinc-900 dark:text-white truncate group-hover:text-orange-500 transition-colors">
+                                          {cleanName}
+                                        </p>
+                                        <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold mt-0.5 uppercase">
+                                          {ext || 'pdf'} • {file.size || '2.4 MB'}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </td>
+
+                                  {/* Unit column */}
+                                  <td className="py-3.5 px-3 text-center">
+                                    {(() => {
+                                      const match = file.name.match(/Unit\s*(\d+)/i) || (file.description && file.description.match(/Unit\s*(\d+)/i));
+                                      if (match) {
+                                        return (
+                                          <span className="px-2.5 py-1 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-white/5 rounded-lg text-[9px] font-bold text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
+                                            Unit {match[1]}
+                                          </span>
+                                        );
+                                      }
+                                      return <span className="text-zinc-300 dark:text-zinc-700 font-bold">-</span>;
+                                    })()}
+                                  </td>
+
+                                  {/* Added By column */}
+                                  <td className="py-3.5 px-3 hidden md:table-cell">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-5.5 h-5.5 rounded-full overflow-hidden border border-zinc-200 dark:border-white/10 flex items-center justify-center bg-zinc-100 dark:bg-white/5 shrink-0">
+                                        <img 
+                                          src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${avatarSeed}`} 
+                                          alt="avatar" 
+                                          className="w-full h-full object-cover" 
+                                        />
+                                      </div>
+                                      <span className="text-[11px] font-bold text-zinc-700 dark:text-zinc-350 truncate max-w-[100px]">
+                                        {uploaderName}
+                                      </span>
+                                    </div>
+                                  </td>
+
+                                  {/* Updated On column */}
+                                  <td className="py-3.5 px-3 hidden sm:table-cell text-zinc-400 dark:text-zinc-500 text-[11px] font-semibold">
+                                    {timeAgoVal}
+                                  </td>
+
+                                  {/* Downloads column */}
+                                  <td className="py-3.5 px-3 text-right hidden sm:table-cell text-zinc-500 dark:text-zinc-400 text-[11px] font-bold">
+                                    {downloadCountVal}
+                                  </td>
+
+                                  {/* Rating column */}
+                                  <td className="py-3.5 px-3 text-right text-zinc-800 dark:text-zinc-200 text-[11px] font-black">
+                                    {ratingVal ? (
+                                      <span className="inline-flex items-center gap-1">
+                                        {ratingVal} <Star size={11} className="text-amber-500" fill="currentColor" />
+                                      </span>
+                                    ) : (
+                                      <span className="text-zinc-300 dark:text-zinc-700 font-bold">-</span>
+                                    )}
+                                  </td>
+
+                                  {/* Options Actions */}
+                                  <td className="py-3.5 pr-4 text-right">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const rect = e.currentTarget.getBoundingClientRect();
+                                        setMenuAnchorRect(activeMenuFileId === file.id ? null : rect);
+                                        setActiveMenuFileId(activeMenuFileId === file.id ? null : file.id);
+                                      }}
+                                      className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl text-zinc-400 hover:text-zinc-700 dark:hover:text-white bg-transparent border-none cursor-pointer transition-all hover:scale-105 active:scale-95"
+                                      title="Actions"
+                                    >
+                                      <MoreHorizontal size={18} />
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                  </div>
+
+                    {/* Mobile Card View */}
+                    <div className="block sm:hidden space-y-3">
+                      {categoryFiles.map((file) => {
+                        const getRealFileName = (f: LibraryFile) => {
+                          if (f.storage_path) {
+                            const base = f.storage_path.split('/').pop() || '';
+                            const clean = base.replace(/^[a-z0-9]+_/, '');
+                            if (clean) {
+                              try {
+                                return decodeURIComponent(clean);
+                              } catch (e) {
+                                return clean;
+                              }
+                            }
+                          }
+                          return f.name;
+                        };
+
+                        const realNameWithExt = getRealFileName(file);
+                        const ext = realNameWithExt.split('.').pop()?.toLowerCase() || '';
+                        const cleanName = realNameWithExt.replace(/\.[^/.]+$/, "");
+
+                        const ratingVal = (() => {
+                          if (file.rating_votes) {
+                            const votes = Object.values(file.rating_votes as Record<string, number>);
+                            if (votes.length > 0) return (votes.reduce((a, b) => a + b, 0) / votes.length).toFixed(1);
+                          }
+                          return null;
+                        })();
+                        
+                        const timeAgoVal = (() => {
+                          const timestamp = file.uploadDate || (file.created_at ? Date.parse(file.created_at) : Date.now());
+                          return getRelativeTime(timestamp);
+                        })();
+
+                        const avatarSeed = file.uploader_username || file.uploader_id || file.name;
+                        const uploaderName = file.uploader_username || file.faculty_name || "Faculty";
+                        const unitMatch = file.name.match(/Unit\s*(\d+)/i) || (file.description && file.description.match(/Unit\s*(\d+)/i));
+
+                        return (
+                          <div 
+                            key={file.id}
+                            onClick={() => handleOpenFile(file)}
+                            className="p-4 bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/5 rounded-2xl flex flex-col gap-3 relative hover:border-zinc-200 dark:hover:border-white/10 transition-all cursor-pointer"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="relative w-8 h-9 shrink-0 flex items-center justify-center">
+                                  {(() => {
+                                    let fillCol = "text-zinc-500";
+                                    let label = "FILE";
+                                    let foldBg = "#cbd5e1";
+                                    
+                                    if (ext === 'pdf') { fillCol = "text-red-500"; label = "PDF"; foldBg = "#fca5a5"; }
+                                    else if (ext === 'docx' || ext === 'doc') { fillCol = "text-blue-500"; label = "DOC"; foldBg = "#93c5fd"; }
+                                    else if (ext === 'pptx' || ext === 'ppt') { fillCol = "text-orange-500"; label = "PPT"; foldBg = "#fed7aa"; }
+                                    else if (ext === 'xlsx' || ext === 'xls') { fillCol = "text-emerald-500"; label = "XLS"; foldBg = "#a7f3d0"; }
+                                    
+                                    return (
+                                      <svg viewBox="0 0 24 28" fill="none" className={`w-7.5 h-8.5 ${fillCol}`}>
+                                        <path d="M2 0h14l6 6v21a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V1a1 1 0 0 1 1-1z" fill="currentColor" />
+                                        <path d="M16 0v6h6" fill={foldBg} opacity="0.9" />
+                                        <text x="11" y="21" fill="white" fontSize="7" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">{label}</text>
+                                      </svg>
+                                    );
+                                  })()}
+                                </div>
+                                <div className="min-w-0">
+                                  <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate max-w-[200px]">
+                                    {cleanName}
+                                  </h4>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase">
+                                      {ext || 'pdf'} • {file.size || '2.4 MB'}
+                                    </span>
+                                    {unitMatch && (
+                                      <span className="px-1.5 py-0.5 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-white/5 rounded text-[8px] font-bold text-zinc-500 dark:text-zinc-400">
+                                        Unit {unitMatch[1]}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  setMenuAnchorRect(activeMenuFileId === file.id ? null : rect);
+                                  setActiveMenuFileId(activeMenuFileId === file.id ? null : file.id);
+                                }}
+                                className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-350 transition-colors bg-transparent border-none cursor-pointer shrink-0"
+                              >
+                                <MoreHorizontal size={18} />
+                              </button>
+                            </div>
+
+                            <div className="flex items-center justify-between border-t border-zinc-100 dark:border-white/5 pt-2.5 mt-0.5 text-[9px] text-zinc-400 dark:text-zinc-500 font-semibold">
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-5.5 h-5.5 rounded-full overflow-hidden border border-zinc-200 dark:border-white/10 flex items-center justify-center bg-zinc-100 dark:bg-white/5 shrink-0">
+                                  <img 
+                                    src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${avatarSeed}`} 
+                                    alt="avatar" 
+                                    className="w-full h-full object-cover" 
+                                  />
+                                </div>
+                                <span className="truncate max-w-[100px] text-zinc-700 dark:text-zinc-350">{uploaderName}</span>
+                              </div>
+                              <div className="flex items-center gap-2.5">
+                                {ratingVal && (
+                                  <span className="inline-flex items-center gap-0.5 text-zinc-800 dark:text-zinc-200">
+                                    {ratingVal} <Star size={9} className="text-amber-500" fill="currentColor" />
+                                  </span>
+                                )}
+                                <span>{timeAgoVal}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
                 );
               })()}
             </div>
@@ -1879,18 +2606,9 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
         </div>
       )}
-
-      {/* Detail Overlay */}
-      {selectedFileDetail && createPortal(
-        <FileDetailPage
-          file={selectedFileDetail}
-          userProfile={userProfile}
-          onClose={() => setSelectedFileDetail(null)}
-          onRefresh={loadCommunityData}
-          themeColor={theme.rawColor}
-        />,
-        document.body
+        </>
       )}
+
       {createPortal(
         <AnimatePresence>
           {showCreatePost && (
@@ -2395,6 +3113,296 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
           </div>
         </div>,
         document.body
+      )}
+
+      {/* 4. Edit Subject Details Modal */}
+      {showEditSubjectModal && createPortal(
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto"
+          onClick={() => setShowEditSubjectModal(false)}
+        >
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-md"
+            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          />
+
+          {/* Modal Container */}
+          <div 
+            className="relative w-full max-w-xl bg-white dark:bg-[#0a0a0c] border border-zinc-150 dark:border-white/5 rounded-[36px] p-6 sm:p-8 shadow-2xl space-y-6 z-10 my-8 overflow-hidden max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center border-b border-zinc-100 dark:border-white/5 pb-4 shrink-0">
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <Edit size={18} style={{ color: theme.rawColor }} /> Edit Subject Details
+              </h3>
+              <button 
+                onClick={() => setShowEditSubjectModal(false)} 
+                className="text-zinc-400 hover:text-zinc-655 dark:hover:text-white bg-transparent border-none text-xl cursor-pointer font-semibold transition-colors outline-none"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Scrollable Form */}
+            <div className="space-y-5 overflow-y-auto pr-1 flex-1 no-scrollbar">
+              {/* Code & Name Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Subject Code</label>
+                  <input
+                    type="text"
+                    value={editSubjectCode}
+                    onChange={(e) => setEditSubjectCode(e.target.value)}
+                    placeholder="e.g. CSE101"
+                    className="w-full bg-zinc-50 dark:bg-white/5 border border-zinc-150 dark:border-white/5 rounded-2xl px-4 py-3 text-xs font-semibold outline-none text-zinc-900 dark:text-white focus:ring-1 focus:ring-orange-500 transition-all"
+                    required
+                  />
+                </div>
+                <div className="sm:col-span-2 space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Subject Name</label>
+                  <input
+                    type="text"
+                    value={editSubjectName}
+                    onChange={(e) => setEditSubjectName(e.target.value)}
+                    placeholder="e.g. Computer Programming"
+                    className="w-full bg-zinc-50 dark:bg-white/5 border border-zinc-150 dark:border-white/5 rounded-2xl px-4 py-3 text-xs font-semibold outline-none text-zinc-900 dark:text-white focus:ring-1 focus:ring-orange-500 transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Program & Semester Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Program</label>
+                  <select
+                    value={editProgram}
+                    onChange={(e) => setEditProgram(e.target.value)}
+                    className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold outline-none text-zinc-900 dark:text-white focus:ring-1 focus:ring-orange-500 transition-all cursor-pointer"
+                  >
+                    <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BTech-CSE">BTech-CSE</option>
+                    <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BTech-ECE">BTech-ECE</option>
+                    <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BCA">BCA</option>
+                    <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BSc">BSc</option>
+                    <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BBA">BBA</option>
+                    <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BTech-MTech">BTech-MTech</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Semester</label>
+                  <select
+                    value={editSemesterId}
+                    onChange={(e) => setEditSemesterId(e.target.value)}
+                    className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold outline-none text-zinc-900 dark:text-white focus:ring-1 focus:ring-orange-500 transition-all cursor-pointer"
+                  >
+                    {semestersList.map((sem) => (
+                      <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" key={sem.id} value={sem.id}>{sem.name}</option>
+                    ))}
+                    {semestersList.length === 0 && (
+                      <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="">No semesters found</option>
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              {/* Theme Color Picker */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Theme Color</label>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {[
+                    { hex: '#ff7a00', name: 'Orange' },
+                    { hex: '#0ea5e9', name: 'Blue' },
+                    { hex: '#22c55e', name: 'Green' },
+                    { hex: '#a855f7', name: 'Purple' },
+                    { hex: '#ec4899', name: 'Pink' },
+                    { hex: '#14b8a6', name: 'Teal' },
+                    { hex: '#f43f5e', name: 'Rose' },
+                    { hex: '#eab308', name: 'Yellow' }
+                  ].map((c) => (
+                    <button
+                      key={c.hex}
+                      type="button"
+                      onClick={() => setEditColor(c.hex)}
+                      style={{ backgroundColor: c.hex }}
+                      className={`w-7 h-7 rounded-full border-2 cursor-pointer transition-transform relative ${
+                        editColor === c.hex 
+                          ? 'scale-110 border-zinc-900 dark:border-white' 
+                          : 'border-transparent hover:scale-105'
+                      }`}
+                      title={c.name}
+                    >
+                      {editColor === c.hex && (
+                        <span className="absolute inset-0 flex items-center justify-center text-white text-[10px]">✓</span>
+                      )}
+                    </button>
+                  ))}
+                  
+                  {/* Custom Color Input */}
+                  <div className="flex items-center gap-2 ml-auto">
+                    <span className="text-[10px] text-zinc-400 font-bold">Custom:</span>
+                    <input
+                      type="color"
+                      value={editColor}
+                      onChange={(e) => setEditColor(e.target.value)}
+                      className="w-7 h-7 rounded-lg border-0 cursor-pointer overflow-hidden p-0 bg-transparent shrink-0"
+                    />
+                    <input
+                      type="text"
+                      value={editColor}
+                      onChange={(e) => setEditColor(e.target.value)}
+                      placeholder="#ff7a00"
+                      className="w-20 bg-zinc-50 dark:bg-white/5 border border-zinc-150 dark:border-white/5 rounded-xl px-2.5 py-1 text-[11px] font-semibold outline-none text-zinc-900 dark:text-white uppercase"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Logo / Icon Grid Picker */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Logo / Icon</label>
+                <div className="grid grid-cols-4 sm:grid-cols-8 gap-2.5">
+                  {[
+                    { name: 'Code', icon: <Code className="w-4 h-4" /> },
+                    { name: 'Database', icon: <Database className="w-4 h-4" /> },
+                    { name: 'Compass', icon: <Compass className="w-4 h-4" /> },
+                    { name: 'Terminal', icon: <Terminal className="w-4 h-4" /> },
+                    { name: 'Globe', icon: <Globe className="w-4 h-4" /> },
+                    { name: 'Languages', icon: <Languages className="w-4 h-4" /> },
+                    { name: 'MessageSquare', icon: <MessageSquare className="w-4 h-4" /> },
+                    { name: 'Landmark', icon: <Landmark className="w-4 h-4" /> },
+                    { name: 'BookOpen', icon: <BookOpen className="w-4 h-4" /> },
+                    { name: 'FileText', icon: <FileText className="w-4 h-4" /> },
+                    { name: 'Cpu', icon: <Cpu className="w-4 h-4" /> },
+                    { name: 'Monitor', icon: <Monitor className="w-4 h-4" /> },
+                    { name: 'Sigma', icon: <Sigma className="w-4 h-4" /> },
+                    { name: 'Folder', icon: <Folder className="w-4 h-4" /> },
+                    { name: 'HelpCircle', icon: <HelpCircle className="w-4 h-4" /> },
+                    { name: 'Video', icon: <Video className="w-4 h-4" /> }
+                  ].map((i) => {
+                    const isSelected = editIcon === i.name;
+                    return (
+                      <button
+                        key={i.name}
+                        type="button"
+                        onClick={() => setEditIcon(i.name)}
+                        style={isSelected ? { backgroundColor: `${editColor}1c`, borderColor: editColor, color: editColor } : {}}
+                        className={`p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 cursor-pointer transition-all ${
+                          isSelected
+                            ? 'font-bold'
+                            : 'border-zinc-150 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01] text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5'
+                        }`}
+                        title={i.name}
+                      >
+                        {React.cloneElement(i.icon as React.ReactElement, { className: 'w-4 h-4 shrink-0' })}
+                        <span className="text-[8px] truncate max-w-full tracking-tighter opacity-80">{i.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 justify-end pt-4 border-t border-zinc-100 dark:border-white/5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowEditSubjectModal(false)}
+                className="px-5 py-3 text-zinc-500 hover:text-zinc-800 dark:hover:text-white font-bold text-xs border-none bg-transparent transition-colors cursor-pointer outline-none"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveSubjectDetails}
+                disabled={isSavingSubject}
+                style={{ backgroundColor: editColor }}
+                className="px-6 py-3 text-white rounded-2xl text-xs font-bold border-none cursor-pointer hover:opacity-90 active:scale-95 transition-all outline-none disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSavingSubject ? 'Saving Changes...' : 'Save Subject Details'}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* 5. Portal Dropdown Menu for Files list */}
+      {activeMenuFileId && menuAnchorRect && createPortal(
+        <>
+          <div 
+            className="fixed inset-0 z-[9998]" 
+            onClick={() => {
+              setActiveMenuFileId(null);
+              setMenuAnchorRect(null);
+            }} 
+          />
+          <div 
+            style={{
+              position: 'fixed',
+              top: `${menuAnchorRect.bottom + 4}px`,
+              left: `${Math.max(16, Math.min(window.innerWidth - 144 - 16, menuAnchorRect.right - 144))}px`,
+            }}
+            className="w-36 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/5 py-1.5 shadow-xl z-[9999] text-left overflow-hidden animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* View Details */}
+            <button
+              onClick={() => {
+                const file = allFiles.find(f => f.id === activeMenuFileId);
+                setActiveMenuFileId(null);
+                setMenuAnchorRect(null);
+                if (file) setSelectedFileDetail(file);
+              }}
+              className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+              Details
+            </button>
+
+            {/* Edit (Admin only) */}
+            {userProfile?.is_admin && (
+              <button
+                onClick={() => {
+                  const file = allFiles.find(f => f.id === activeMenuFileId);
+                  setActiveMenuFileId(null);
+                  setMenuAnchorRect(null);
+                  if (file) {
+                    setSelectedFileToEdit(file);
+                    setEditForm({
+                      name: file.name,
+                      description: file.description || '',
+                      type: file.type || '',
+                      display_order: file.display_order || 0
+                    });
+                    setShowEditModal(true);
+                  }
+                }}
+                className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+                Edit Metadata
+              </button>
+            )}
+
+            {/* Delete (Admin only) */}
+            {userProfile?.is_admin && (
+              <button
+                onClick={() => {
+                  const file = allFiles.find(f => f.id === activeMenuFileId);
+                  setActiveMenuFileId(null);
+                  setMenuAnchorRect(null);
+                  if (file) handleDeleteFile(file);
+                }}
+                className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                Delete File
+              </button>
+            )}
+          </div>
+        </>
+        , document.body
       )}
     </div>
   );

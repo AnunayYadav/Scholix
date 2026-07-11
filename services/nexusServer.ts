@@ -1280,6 +1280,66 @@ class NexusServer {
     }
   }
 
+  static async updateSubjectDetails(
+    subjectId: string, 
+    oldSubjectName: string, 
+    newCode: string, 
+    newName: string, 
+    semesterId: string, 
+    semesterName: string, 
+    program: string, 
+    color: string, 
+    iconName: string
+  ) {
+    const client = getSupabase();
+    if (!client) throw new Error("Database connection unavailable.");
+
+    const dbId = subjectId.split('-dup-')[0];
+    const newSubjectName = `${newCode}: ${newName}`;
+
+    // 1. Update the subject folder details
+    const { error: subjectErr } = await client
+      .from('library_items')
+      .update({
+        name: newSubjectName,
+        color,
+        icon_name: iconName,
+        parent_id: semesterId,
+        program
+      })
+      .eq('id', dbId);
+
+    if (subjectErr) {
+      console.error("Update Subject Folder Error:", subjectErr);
+      throw new Error(subjectErr.message);
+    }
+
+    // 2. Update all documents belonging to this subject
+    const { error: docsErr } = await client
+      .from('documents')
+      .update({
+        subject: newSubjectName,
+        semester: semesterName,
+        program
+      })
+      .eq('subject', oldSubjectName);
+
+    if (docsErr) {
+      console.error("Update Documents Error:", docsErr);
+    }
+
+    // 3. Update program of all child category folders
+    const { error: catErr } = await client
+      .from('library_items')
+      .update({ program })
+      .eq('parent_id', dbId)
+      .eq('type', 'category');
+
+    if (catErr) {
+      console.error("Update Category Folders Error:", catErr);
+    }
+  }
+
   static async deleteFolder(id: string) {
     const client = getSupabase();
     if (!client) return;

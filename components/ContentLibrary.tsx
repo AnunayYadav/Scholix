@@ -1585,6 +1585,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 navigate(`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester?.name || '', 'semester')}`);
               }}
               searchQuery={searchQuery}
+              onRefresh={() => fetchFromSource(false)}
             />
           ) : activeSubject && searchQuery.trim() !== '' ? (
             <div className="space-y-4 animate-fade-in">
