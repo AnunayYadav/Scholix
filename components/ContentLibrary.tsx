@@ -1723,7 +1723,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
                                   {activeMenuFileId === file.id && (
                                     <div 
-                                      className="absolute right-4 mt-1 w-36 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/5 py-1.5 shadow-xl z-50 text-left overflow-hidden animate-fade-in"
+                                      className="absolute right-4 mt-1 w-36 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/10 py-1.5 shadow-xl z-50 text-left overflow-hidden animate-fade-in"
                                       onClick={(e) => e.stopPropagation()}
                                     >
                                       <button
@@ -2023,7 +2023,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                       {activeMenuFileId === file.id && (
                                         <>
                                           <div 
-                                            className="absolute right-4 mt-1 w-36 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/5 py-1.5 shadow-xl z-50 text-left overflow-hidden animate-fade-in"
+                                            className="absolute right-4 mt-1 w-36 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/10 py-1.5 shadow-xl z-50 text-left overflow-hidden animate-fade-in"
                                             onClick={(e) => e.stopPropagation()}
                                           >
                                             {/* Details */}

@@ -292,6 +292,7 @@ export interface Folder {
   icon_name?: string;
   color?: string;
   display_order?: number;
+  description?: string;
 }
 
 export interface Flashcard {

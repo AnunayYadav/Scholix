@@ -321,6 +321,484 @@ const getCategoryMetadata = (catName: string) => {
   };
 };
 
+const SUBJECT_DESCRIPTIONS: Record<string, string> = {
+  // Term 1 / 2 Core
+  "cse111": `### Course Description
+**Orientation to Computing-I** introduces students to the fundamental principles of computational thinking, logical problem solving, and baseline computer literacy.
+
+### Key Learning Objectives
+- Learn standard computer hardware, firmware, and Operating System abstractions.
+- Understand basic command-line interfaces, directory structures, and file systems.
+- Build foundations in logical decomposition and flowcharts.
+
+### Core Topics Covered
+- Basics of CPU, memory hierarchies, and peripheral operations.
+- Operating system basics (kernel, shell, process scheduling).
+- File systems, command-line nav (ls, cd, mkdir, cat).
+- Introduction to Boolean Algebra and basic gate logic.`,
+
+  "cse121": `### Course Description
+**Orientation to Computing-II** builds upon the first course to introduce algorithmic problem solving, basic data structures, and the fundamentals of networking.
+
+### Key Learning Objectives
+- Write simple logical pseudocodes and trace computational branches.
+- Differentiate between foundational linear structures (arrays and lists).
+- Understand basic client-server networking models.
+
+### Core Topics Covered
+- Iterative processes, conditional logic, and recursion paradigms.
+- Array allocation, indexing, and lookup operations.
+- Basics of HTML/CSS structure and standard web requests.
+- Introduction to version control concepts (git repository systems).`,
+
+  "cse326": `### Course Description
+**Internet Programming Laboratory** is a hands-on practical lab introducing students to HTML5, CSS3, JavaScript, DOM manipulation, responsive UI frameworks, and modern web application development.
+
+### Key Learning Objectives
+- Design and build semantic, responsive web layouts.
+- Apply dynamic user interactions using native JavaScript DOM methods.
+- Connect forms and components to mock APIs or client storage systems.
+
+### Core Topics Covered
+- HTML5 elements, structures, and semantic tags.
+- CSS3 flexbox, grid systems, media queries, and animations.
+- JavaScript ES6 syntax (promises, fetch API, variables, and arrays).
+- Document Object Model (DOM) events, queries, and style mutations.
+- Version control integrations and static application deployments.`,
+
+  "int108": `### Course Description
+**Python Programming** provides a comprehensive introduction to the Python language, data structures, scripting, and scientific libraries for computing.
+
+### Key Learning Objectives
+- Master syntax, expressions, condition checks, and loops in Python.
+- Solve array-based operations using Python lists, tuples, sets, and dictionaries.
+- Implement file operations, exception handling, and basic module packaging.
+
+### Core Topics Covered
+- Python compilers, interpreters, variables, and data structures.
+- Control flow structures: if-statements, for-loops, while-loops.
+- Native collections: Lists, Tuples, Dictionaries, Sets.
+- Functions, modules, scopes, lambda expressions, and decorators.
+- Basic file I/O operations, error checking, and exception handling.`,
+
+  "mth165": `### Course Description
+**Mathematics for Engineers** covers critical mathematical models in calculus, linear algebra, and coordinate systems crucial for engineering calculations.
+
+### Key Learning Objectives
+- Solve systems of linear equations using matrix reduction techniques.
+- Apply differential and integral calculus to engineering problems.
+- Determine limits, continuity, and derivatives of multivariate equations.
+
+### Core Topics Covered
+- Matrices, row operations, rank, determinants, and Eigenvalues.
+- Infinite series, convergence tests, Taylor and Maclaurin expansions.
+- Limits, continuity, and partial differentiation of functions.
+- Multiple integration (double/triple integrals), volumes, and surface areas.`,
+
+  "ece249": `### Course Description
+**Basic Electrical and Electronics Engineering** introduces the physical laws, circuit analysis methods, and semiconductor components underpinning electronics.
+
+### Key Learning Objectives
+- Analyze DC and AC circuits using mesh, nodal, and Kirchhoff laws.
+- Understand magnetic fields, transformers, and electrical machines.
+- Differentiate operation of diodes, transistors, and logic gates.
+
+### Core Topics Covered
+- Kirchhoff's current/voltage laws, superposition, and Thevenin theorems.
+- Single-phase AC circuits, impedance, phase diagrams, and power.
+- Construction and operation of single-phase transformers.
+- Semiconductor physics, PN-junction diodes, BJT, and operational amplifiers.`,
+
+  "mec136": `### Course Description
+**Engineering Drawing with AutoCAD** covers standard projections, isometric views, and CAD drafting principles.
+
+### Key Learning Objectives
+- Read and create standard multi-view projections (first/third angle).
+- Draft engineering structures and parts using Autodesk AutoCAD tools.
+- Produce auxiliary, sectional, and isometric drawings.
+
+### Core Topics Covered
+- Scales, standard sheet layouts, and line conventions.
+- Orthographic projection of points, lines, planes, and solid shapes.
+- Isometric views and sectional drawing configurations.
+- AutoCAD navigation, drafting commands (draw, modify), and layout spacing.`,
+
+  "che110": `### Course Description
+**Environmental Studies** reviews the global ecosystems, natural resource challenges, pollution hazards, and biodiversity conservation strategies.
+
+### Key Learning Objectives
+- Analyze human footprint, carbon cycle, and climate adjustments.
+- Understand renewable energies, water resources, and waste mitigation.
+- Apply local environmental regulations to municipal structures.
+
+### Core Topics Covered
+- Structure of atmosphere, biosphere, lithosphere, and food chains.
+- Air, water, soil, thermal, and noise pollution mitigation protocols.
+- Waste management, resource depletion, and renewable transitions.`,
+
+  "phy110": `### Course Description
+**Engineering Physics** covers quantum mechanics, wave properties, electromagnetic waves, and laser optics systems.
+
+### Key Learning Objectives
+- Formulate quantum behaviors, wave-particle duality, and uncertainty.
+- Apply Maxwell's equations to compute electromagnetic wave actions.
+- Understand laser optics, optical fibers, and semiconductor crystal lattices.
+
+### Core Topics Covered
+- Wave optics: Interference, diffraction, and polarization.
+- Quantum mechanics: Schrodinger equation, wavefunctions, and particle in a box.
+- Electromagnetism: Ampere, Faraday, Gauss laws, and displacement currents.
+- Semiconductor physics, energy bands, and optical fiber transmissions.`,
+
+  "cse101": `### Course Description
+**Computer Programming** introduces computational logic, variables, branching, arrays, pointers, functions, and file structure design using C/C++.
+
+### Key Learning Objectives
+- Master syntax, branches (if-else, switch), and loop iterations.
+- Create modular components using parameters, scopes, and pointers.
+- Construct array-based strings and perform standard file input/output.
+
+### Core Topics Covered
+- Compilers, CPU architectures, data representation, and code structures.
+- Variables, operators, data types, and arithmetic expressions.
+- Arrays, dynamic memory allocation, and basic pointers.
+- User-defined functions, recursion models, and macro headers.
+- File system reading/writing and custom struct/union allocations.`,
+
+  "cse320": `### Course Description
+**Software Engineering** reviews the system development lifecycle (SDLC), modeling conventions (UML), and modern agile management methods.
+
+### Key Learning Objectives
+- Apply Agile, Scrum, and Waterfall processes depending on specifications.
+- Gather requirements, write specs, and model system diagrams.
+- Understand software testing regimes, QA cycles, and release management.
+
+### Core Topics Covered
+- SDLC models: Waterfall, Spiral, Prototype, and Scrum patterns.
+- Requirements gathering, feasibility checking, and SRS generation.
+- Unified Modeling Language (UML) class, use-case, and sequence designs.
+- Software testing strategies (black-box, white-box, unit, and system tests).
+- Project metrics, costing, estimations, and risk management.`,
+
+  "int306": `### Course Description
+**Database Management Systems** focuses on relational schema architectures, SQL commands, data constraints, normalization guidelines, and transaction operations.
+
+### Key Learning Objectives
+- Construct Entity-Relationship (ER) schemas for system specifications.
+- Normalize schemas to minimize redundancy and prevent transaction anomalies.
+- Write complex queries, joins, aggregates, and triggers in SQL.
+
+### Core Topics Covered
+- Relational schema designs, keys, attributes, and entities.
+- SQL syntax: DDL, DML, DQL (select, join, group, having).
+- Normalization forms: 1NF, 2NF, 3NF, BCNF.
+- Transaction ACID rules, concurrency anomalies, and locking models.
+- Database indexing models (B-Trees, B+ Trees) and query optimizations.`,
+
+  "mth166": `### Course Description
+**Differential Equations and Vector Calculus** teaches differential solutions, Laplace transforms, vector integrations, and coordinate conversions.
+
+### Key Learning Objectives
+- Solve ordinary differential equations (first and higher order models).
+- Apply Laplace transforms to solve system response equations.
+- Integrate vector fields using Green's, Stokes', and Gauss theorems.
+
+### Core Topics Covered
+- Homogeneous and non-homogeneous ordinary differential equations.
+- Laplace transforms, inverse transforms, and differential convolutions.
+- Vector fields, gradient, curl, divergence, and line/surface integrals.
+- Green's, Gauss divergence, and Stokes' integral theorems.`,
+
+  "cse202": `### Course Description
+**Object Oriented Programming** covers class structures, encapsulation, inheritance, polymorphism, templates, memory management, and file streams in C++/Java.
+
+### Key Learning Objectives
+- Design systems using encapsulation, access modifiers, and constructors.
+- Implement reusable code structures via inheritance and interface classes.
+- Apply compile-time/run-time polymorphism and custom templates.
+
+### Core Topics Covered
+- Classes, objects, memory layouts, static members, and constructors.
+- Inheritance trees, virtual base classes, and abstraction layers.
+- Virtual functions, overriding, overloading, and dynamic bindings.
+- Exception handling, standard templates, and file I/O operations.`,
+
+  "cse205": `### Course Description
+**Data Structures and Algorithms** teaches complex structures, sorting/searching algorithms, algorithmic analyses, and computational heuristics.
+
+### Key Learning Objectives
+- Analyze execution bounds using Big-O, Theta, and Omega models.
+- Build linear systems (lists, stacks, queues) and non-linear systems (trees, graphs).
+- Apply sorting and search optimizations.
+
+### Core Topics Covered
+- Time complexity bounds, recursion limits, and arrays.
+- Linked Lists (singly, doubly, circular) and operational interfaces.
+- Stacks, Queues, Deques, and Priority Queue heaps.
+- Binary Search Trees, AVL balance adjustments, and traversal routines.
+- Graph representations (matrices/lists), BFS/DFS, and shortest paths.`,
+
+  "cse306": `### Course Description
+**Computer Networks** reviews physical transmissions, routing protocols, transport connections, and application services across OSI/TCP-IP stacks.
+
+### Key Learning Objectives
+- Differentiate between Routing algorithms (Link State, Distance Vector) and addressing systems (IPv4/IPv6).
+- Configure TCP/UDP sockets, flow control, and sliding window buffers.
+- Model standard application layers (HTTP, DNS, SMTP, DHCP).
+
+### Core Topics Covered
+- Network layered architectures (OSI vs TCP/IP frameworks).
+- Physical/Link structures: Framing, Error checking, and MAC layers.
+- Network routing, CIDR subnet allocation, and Internet Protocol.
+- Transport reliability: TCP congestion control, handshakes, and UDP.
+- Standard application protocols and socket connections.`,
+
+  "cse423": `### Course Description
+**Virtualization and Cloud Computing** introduces virtual machine architectures, hypervisors, cloud models (SaaS/PaaS/IaaS), and cluster scaling.
+
+### Key Learning Objectives
+- Configure hardware virtualization and configure system hypervisors.
+- Deploy services using cloud deployment models (AWS, Azure, or GCP).
+- Understand container networks, Kubernetes setups, and load balancing.
+
+### Core Topics Covered
+- CPU, memory, and I/O virtualization techniques.
+- Type 1 and Type 2 hypervisors (KVM, ESXi, VirtualBox).
+- Infrastructure (IaaS), Platform (PaaS), and Software (SaaS) models.
+- Containerization (Docker engine) and container management.`,
+
+  "mth401": `### Course Description
+**Discrete Mathematics** reviews mathematical logic, set configurations, relations, recurrence functions, and graph theories crucial for software logic.
+
+### Key Learning Objectives
+- Deduce propositional arguments and formulate mathematical proofs.
+- Compute recurrence relations and generating functions.
+- Solve graph coloring, paths, and spanning tree calculations.
+
+### Core Topics Covered
+- Propositional logic, quantifiers, and inference rules.
+- Set operations, functions, cardinality, and equivalence relations.
+- Recurrence relations, mathematical induction, and combinatorics.
+- Graph theories: Euler paths, Hamiltonian paths, trees, and coloring.`,
+
+  "cse211": `### Course Description
+**Computer Organization and Design** teaches hardware execution loops, CPU designs, memory systems, and assembly level instructions.
+
+### Key Learning Objectives
+- Trace MIPS/x86 instruction cycles and write basic assembly codes.
+- Evaluate cache memory structures (associative, direct-mapped).
+- Understand pipeline hazards and CPU execution controls.
+
+### Core Topics Covered
+- Instruction set architectures, registers, and memory addresses.
+- Computer arithmetic: ALU designs, integer and floating point math.
+- Processor control lines, datapaths, and multi-stage pipelining.
+- Cache hierarchies, virtual memories, and bus transactions.`,
+
+  "cse310": `### Course Description
+**Programming in Java** teaches class structures, JVM behaviors, multi-threaded operations, collections, and event-driven interfaces.
+
+### Key Learning Objectives
+- Master JVM structures, garbage collection, and compilation phases.
+- Build threaded applications with lock synchronization.
+- Implement Collections framework (List, Map, Set, Stream APIs).
+
+### Core Topics Covered
+- Java syntax, bytecodes, class loaders, and object runtimes.
+- Abstract classes, interfaces, dynamic mappings, and package imports.
+- Exception structures, custom classes, and assertions.
+- Multi-threading, task synchronization, and thread states.
+- Java Collections, generics, lambdas, and File I/O classes.`,
+
+  "cse316": `### Course Description
+**Operating Systems** reviews process controls, thread designs, CPU schedulers, lock syncs, page tables, disk setups, and file allocations.
+
+### Key Learning Objectives
+- Solve process scheduling metrics (turnaround, wait bounds).
+- Trace deadlock conditions, semaphore configurations, and mutexes.
+- Model memory paging, page faults, and disk access schedules.
+
+### Core Topics Covered
+- System calls, shell execution loops, and boot sequences.
+- Process states, context transitions, IPC, and thread models.
+- CPU scheduling: FIFO, SJF, Priority, and Round Robin.
+- Paging systems, TLB, page replacement (FIFO, LRU, Optimal).
+- File directory trees, disk queues (SSTF, SCAN), and protections.`,
+
+  "int428": `### Course Description
+**Artificial Intelligence Essentials** introduces state-space heuristics, logic systems, machine learning pipelines, and neural networks.
+
+### Key Learning Objectives
+- Implement heuristics (A*, Minimax, Alpha-Beta pruning).
+- Apply logic systems (first order logic, resolution steps).
+- Train basic regression, classification, and clustering models.
+
+### Core Topics Covered
+- Uninformed and informed state searches (BFS, DFS, A*, Greedy).
+- Adversarial game trees: Minimax and alpha-beta pruning.
+- Knowledge representation, propositional logics, and inference rules.
+- Supervised ML: linear regressions, SVM, Decision Trees, K-Means.`,
+
+  "mth302": `### Course Description
+**Probability and Statistics** covers distributions, hypothesis tests, regressions, and statistical inferences.
+
+### Key Learning Objectives
+- Differentiate and compute probability distribution factors.
+- Perform parameter tests (z-test, t-test, chi-square).
+- Calculate linear regression models and analyze dataset variances.
+
+### Core Topics Covered
+- Sample spaces, conditional probabilities, and Bayes' theorem.
+- Discrete/Continuous distributions: Binomial, Poisson, Normal.
+- Hypothesis checks, null theories, critical values, and p-values.
+- Regression models, correlations, and analysis of variance (ANOVA).`
+};
+
+const getFallbackSubjectDescription = (name: string) => {
+  const cleanName = name.trim();
+  const n = cleanName.toLowerCase();
+  
+  // Try to match by subject code (e.g. "CSE101: Computer Programming" -> code "cse101")
+  const subjectCodeMatch = cleanName.match(/^([A-Za-z]+\d{3})/);
+  if (subjectCodeMatch) {
+    const code = subjectCodeMatch[1].toLowerCase();
+    if (SUBJECT_DESCRIPTIONS[code]) {
+      return SUBJECT_DESCRIPTIONS[code];
+    }
+  }
+
+  // Also try to match by title keyword if code is not present
+  for (const [code, desc] of Object.entries(SUBJECT_DESCRIPTIONS)) {
+    if (n.includes(code)) return desc;
+  }
+
+  // General fallback template
+  if (n.includes('programming') || n.includes('coding') || n.includes('python') || n.includes('cpp') || n.includes('java') || n.includes('c#') || n.includes('javascript') || n.includes('c programming')) {
+    return `### Course Description
+Welcome to **${cleanName}**! This course introduces the fundamental concepts of computer programming and software development. You will learn how to design, write, test, and debug code to solve complex problems.
+
+### Key Learning Objectives
+- Master key programming paradigms (syntax, control flow, loops, functions, and recursion).
+- Differentiate programming patterns depending on the curriculum.
+- Develop strong algorithmic thinking and computational problem-solving skills.
+
+### Core Topics Covered
+- Introduction to compilers, interpreters, and IDE setups.
+- Data types, variables, arithmetic operators, and expressions.
+- Conditional statements (if-else, switch) and loop control structures.
+- Arrays, strings, multi-dimensional structures, and memory addresses.
+- Functions, scope, recursion, parameter passing, and library integrations.
+
+### Study Tips
+- **Code Daily**: Theoretical knowledge is useless without hands-on practice. Write programs for every concept learned.
+- **Trace Code**: Practice dry-running code on paper to trace variable states and understand control flow.
+- **Utilize Resources**: Check the Lectures and Notes folders for step-by-step guides and implementation files.`;
+  }
+  
+  if (n.includes('data structure') || n.includes('algorithm') || n.includes('dsa')) {
+    return `### Course Description
+Welcome to **${cleanName}**! This course focuses on organizing, managing, and storing data efficiently to perform operations optimally. You will explore algorithms, analyze their complexity, and implement various structures to build high-performance software.
+
+### Key Learning Objectives
+- Analyze algorithmic complexity using Big-O, Big-Theta, and Big-Omega notations.
+- Master linear structures (arrays, linked lists, stacks, queues) and non-linear structures (trees, graphs).
+- Understand and implement sorting, searching, and traversal algorithms.
+- Apply dynamic programming, greedy algorithms, and divide-and-conquer strategies.
+
+### Core Topics Covered
+- Time and Space Complexity analysis.
+- Singly, Doubly, and Circular Linked Lists.
+- Stacks, Queues, Deques, and Priority Queues.
+- Binary Trees, AVL Trees, Heaps, and Binary Search Trees (BST).
+- Graph representations (Adjacency Matrix/List) and traversals (BFS/DFS).
+- Hashing, collision resolution strategies, and lookup optimizations.
+
+### Study Tips
+- **Visualize**: Draw pointer mutations, tree rotations, and graph traversals on paper to build intuition.
+- **Analyze Complexity**: Make it a habit to calculate the time and space complexity of every algorithm you write.
+- **Code from Scratch**: Don't just read code; implement stacks, trees, and sorting algorithms from scratch.`;
+  }
+
+  if (n.includes('database') || n.includes('sql') || n.includes('dbms') || n.includes('rdbms')) {
+    return `### Course Description
+Welcome to **${cleanName}**! This course covers the design, implementation, and management of relational database management systems. You will learn data modeling, normalization, transactional safety, and query design using SQL.
+
+### Key Learning Objectives
+- Design relational schemas using Entity-Relationship (ER) modeling.
+- Normalize schemas to minimize redundancy and prevent anomalies (1NF, 2NF, 3NF, BCNF).
+- Write complex queries, joins, subqueries, and aggregates in Structured Query Language (SQL).
+- Understand database internals, indexing, transaction safety (ACID), and concurrency control.
+
+### Core Topics Covered
+- Introduction to Database Architecture and DBMS models.
+- ER Diagrams, Entities, Attributes, Relationships, and constraints.
+- Relational Algebra and SQL queries (DDL, DML, DCL).
+- Normalization rules and Functional Dependencies.
+- Indexing structures (B-Trees, B+ Trees, Hashing).
+- Transaction management, ACID properties, serializability, and locking protocols.
+
+### Study Tips
+- **Write SQL**: Practice building schemas, joining tables, and writing complex nested queries.
+- **Map Scenarios**: Pick real-world systems (like e-commerce, banking) and design their ER diagrams and tables.`;
+  }
+
+  if (n.includes('math') || n.includes('algebra') || n.includes('calculus') || n.includes('probability') || n.includes('discrete') || n.includes('statistics')) {
+    return `### Course Description
+Welcome to **${cleanName}**! This course provides the foundational mathematical concepts, analytical models, and logical frameworks required for computer science, engineering, and data analysis.
+
+### Key Learning Objectives
+- Formulate mathematical proofs and apply logical reasoning.
+- Perform calculations, solve systems of equations, and analyze functions.
+- Apply statistics and probability theory to analyze datasets.
+- Translate real-world systems into formal mathematical equations.
+
+### Core Topics Covered
+- Propositional logic, set theory, functions, and relations.
+- Matrices, linear transformations, determinants, and eigenvectors.
+- Limits, differentiation, integration, and multivariate calculus.
+- Permutations, combinations, probability distributions, and hypothesis testing.
+- Recurrence relations, generating functions, and graph theory (for discrete math).
+
+### Study Tips
+- **Solve Exercises**: Mathematics is learned by doing. Solve as many practice problems as possible.
+- **Understand the Logic**: Don't memorize steps; understand the theorems and proofs behind the formulas.`;
+  }
+
+  if (n.includes('physics') || n.includes('chemistry') || n.includes('mechanics') || n.includes('electrical') || n.includes('electronics')) {
+    return `### Course Description
+Welcome to **${cleanName}**! This course covers the fundamental physical and scientific principles, chemical structures, electrical circuits, or semiconductor devices that form the basis of modern engineering.
+
+### Key Learning Objectives
+- Apply physical laws and chemical principles to analyze engineered systems.
+- Solve scientific problems using mathematical equations and dimensions.
+- Understand circuit diagrams, component characteristics, and semiconductor models.
+- Perform measurements and interpret experimental data.
+
+### Study Tips
+- **Understand Units**: Keep track of dimensional units and constants during calculations.
+- **Draw Diagrams**: Always sketch the physical layout, circuit diagram, or atomic structures before solving equations.`;
+  }
+
+  // General fallback
+  return `### Course Description
+Welcome to **${cleanName}**! This course provides a structured curriculum to build specialized expertise, professional skills, and core knowledge in the subject area.
+
+### Key Learning Objectives
+- Understand the core principles, terminologies, and methodologies of the subject.
+- Develop critical thinking and practical skills to solve domain-specific problems.
+- Collaborate on assignments, review resource materials, and prepare for examinations.
+
+### Core Topics Covered
+- Foundations, fundamental definitions, and introductory concepts.
+- Primary modules, system architectures, and standard methodologies.
+- Case studies, practical applications, and advanced domain topics.
+
+### Study Tips
+- **Stay Organized**: Review the Lecture Slides, handwritten Notes, and curriculum materials regularly.
+- **Solve Papers**: Solve the Previous Year Questions (PYQs) to understand exam patterns and question formats.
+- **Ask Questions**: Participate in the Discussions tab to clear doubts and collaborate with peers.`;
+};
+
 const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   activeSubject,
   activeSemester,
@@ -410,6 +888,9 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
   // Subject Options & Editing
   const [showSubjectOptions, setShowSubjectOptions] = useState(false);
+  const [showAboutSubjectModal, setShowAboutSubjectModal] = useState(false);
+  const [aboutSubjectContent, setAboutSubjectContent] = useState<string>('');
+  const [aboutSubjectLoading, setAboutSubjectLoading] = useState(false);
   const [showEditSubjectModal, setShowEditSubjectModal] = useState(false);
   const [editSubjectCode, setEditSubjectCode] = useState(subjectCode);
   const [editSubjectName, setEditSubjectName] = useState(subjectName);
@@ -916,6 +1397,92 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     }
   };
 
+  // Helper to parse simple Markdown formatting from Gemini responses
+  const parseInlineStyles = (content: string) => {
+    const parts = content.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={index} className="font-extrabold text-zinc-950 dark:text-white">{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
+  };
+
+  const parseSimpleMarkdown = (text: string) => {
+    if (!text) return null;
+    
+    const lines = text.split('\n');
+    return lines.map((line, idx) => {
+      // 1. Headers (e.g. ### Header or ## Header)
+      const headerMatch = line.match(/^(#{1,6})\s+(.*)$/);
+      if (headerMatch) {
+        const level = headerMatch[1].length;
+        const content = headerMatch[2];
+        const parsedContent = parseInlineStyles(content);
+        
+        if (level === 1) return <h1 key={idx} className="text-lg font-black text-zinc-950 dark:text-white mt-4 mb-2 tracking-tight">{parsedContent}</h1>;
+        if (level === 2) return <h2 key={idx} className="text-base font-black text-zinc-950 dark:text-white mt-4 mb-2 tracking-tight">{parsedContent}</h2>;
+        return <h3 key={idx} className="text-xs font-bold text-zinc-900 dark:text-zinc-200 mt-3 mb-1.5 uppercase tracking-wider">{parsedContent}</h3>;
+      }
+      
+      // 2. Bullet list items (e.g. - item or * item)
+      const bulletMatch = line.match(/^[-*+]\s+(.*)$/);
+      if (bulletMatch) {
+        const content = bulletMatch[1];
+        return (
+          <div key={idx} className="flex items-start gap-2 ml-4 my-1 text-xs text-zinc-600 dark:text-zinc-300">
+            <span className="text-brand-primary font-bold mt-0.5">•</span>
+            <span className="flex-1 leading-relaxed">{parseInlineStyles(content)}</span>
+          </div>
+        );
+      }
+      
+      // 3. Numbered list items (e.g. 1. item)
+      const numberMatch = line.match(/^(\d+)\.\s+(.*)$/);
+      if (numberMatch) {
+        const num = numberMatch[1];
+        const content = numberMatch[2];
+        return (
+          <div key={idx} className="flex items-start gap-2 ml-4 my-1.5 text-xs text-zinc-600 dark:text-zinc-300">
+            <span className="text-brand-primary font-black mt-0.5">{num}.</span>
+            <span className="flex-1 leading-relaxed">{parseInlineStyles(content)}</span>
+          </div>
+        );
+      }
+      
+      // 4. Blank lines
+      if (!line.trim()) {
+        return <div key={idx} className="h-2" />;
+      }
+      
+      // 5. Standard paragraph line
+      return <p key={idx} className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed my-1.5">{parseInlineStyles(line)}</p>;
+    });
+  };
+
+  // Fetch AI generated subject details
+  const handleOpenAboutSubject = async () => {
+    setShowAboutSubjectModal(true);
+    if (aboutSubjectContent) return; // already loaded
+    
+    setAboutSubjectLoading(true);
+    try {
+      // 1. If subject has a description in Supabase, use it!
+      if (activeSubject.description && activeSubject.description.trim()) {
+        setAboutSubjectContent(activeSubject.description);
+      } else {
+        // 2. Otherwise, use our high-quality hardcoded subject-specific fallback
+        const fallback = getFallbackSubjectDescription(activeSubject.name);
+        setAboutSubjectContent(fallback);
+      }
+    } catch (err) {
+      console.error("Failed to load about subject content:", err);
+      setAboutSubjectContent(`### About ${activeSubject.name}\n\nThis subject covers topics related to **${activeSubject.name}**.\n\nPlease check the uploaded course files and roadmap resources for specific curriculum information.`);
+    } finally {
+      setAboutSubjectLoading(false);
+    }
+  };
+
   // Filtered files in selected category folder
   const categoryFiles = useMemo(() => {
     if (!activeCategoryFolder) return [];
@@ -1377,22 +1944,32 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               )}
             </button>
             
-            {userProfile?.is_admin && (
-              <div className="relative">
-                <button
-                  onClick={() => setShowSubjectOptions(!showSubjectOptions)}
-                  title="Options"
-                  className="w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-none bg-transparent sm:hover:bg-zinc-100 sm:dark:hover:bg-white/5 outline-none text-zinc-500 dark:text-zinc-400 active:scale-95 shrink-0"
-                >
-                  <MoreHorizontal className="w-5 h-5" strokeWidth={2.5} />
-                </button>
-                {showSubjectOptions && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-10" 
-                      onClick={() => setShowSubjectOptions(false)} 
-                    />
-                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-950 border border-zinc-150 dark:border-white/5 rounded-2xl p-1.5 shadow-xl z-20">
+            <div className="relative">
+              <button
+                onClick={() => setShowSubjectOptions(!showSubjectOptions)}
+                title="Options"
+                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-none bg-transparent sm:hover:bg-zinc-100 sm:dark:hover:bg-white/5 outline-none text-zinc-500 dark:text-zinc-400 active:scale-95 shrink-0"
+              >
+                <MoreHorizontal className="w-5 h-5" strokeWidth={2.5} />
+              </button>
+              {showSubjectOptions && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-10" 
+                    onClick={() => setShowSubjectOptions(false)} 
+                  />
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/10 rounded-2xl p-1.5 shadow-xl z-20 overflow-hidden">
+                    <button
+                      onClick={() => {
+                        setShowSubjectOptions(false);
+                        handleOpenAboutSubject();
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-xs font-bold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-white/5 rounded-xl border-none bg-transparent cursor-pointer transition-colors"
+                    >
+                      <BookOpen className="w-4 h-4 text-zinc-500" />
+                      About Subject
+                    </button>
+                    {userProfile?.is_admin && (
                       <button
                         onClick={() => {
                           setShowSubjectOptions(false);
@@ -1403,11 +1980,11 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                         <Edit className="w-4 h-4 text-zinc-500" />
                         Edit Subject Details
                       </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -3327,6 +3904,71 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         document.body
       )}
 
+      {/* 4.5 About Subject Modal */}
+      {showAboutSubjectModal && createPortal(
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto"
+          onClick={() => setShowAboutSubjectModal(false)}
+        >
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-md"
+            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          />
+
+          {/* Modal Container */}
+          <div 
+            className="relative w-full max-w-xl bg-white dark:bg-[#0a0a0c] border border-zinc-150 dark:border-white/10 rounded-[36px] p-6 sm:p-8 shadow-2xl space-y-5 z-10 my-8 overflow-hidden max-h-[85vh] flex flex-col animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center border-b border-zinc-100 dark:border-white/5 pb-4 shrink-0">
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <BookOpen size={18} style={{ color: theme.rawColor }} /> About {activeSubject.name}
+              </h3>
+              <button 
+                onClick={() => setShowAboutSubjectModal(false)} 
+                className="text-zinc-400 hover:text-zinc-655 dark:hover:text-white bg-transparent border-none text-xl cursor-pointer font-semibold transition-colors outline-none"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto no-scrollbar pr-1 text-left space-y-4">
+              {aboutSubjectLoading ? (
+                <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                  <div className="relative w-12 h-12 flex items-center justify-center">
+                    <div className="w-10 h-10 border-4 border-zinc-200 dark:border-white/5 rounded-full absolute" />
+                    <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin absolute" style={{ borderTopColor: theme.rawColor, borderRightColor: theme.rawColor, borderBottomColor: theme.rawColor }} />
+                  </div>
+                  <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider animate-pulse">
+                    Generating Course Overview...
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3.5 pr-2">
+                  {parseSimpleMarkdown(aboutSubjectContent)}
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end pt-4 border-t border-zinc-100 dark:border-white/5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowAboutSubjectModal(false)}
+                style={{ backgroundColor: theme.rawColor }}
+                className="px-6 py-2.5 text-white rounded-xl text-xs font-bold border-none cursor-pointer hover:opacity-90 active:scale-95 transition-all outline-none"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
       {/* 5. Portal Dropdown Menu for Files list */}
       {activeMenuFileId && menuAnchorRect && createPortal(
         <>
@@ -3343,7 +3985,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               top: `${menuAnchorRect.bottom + 4}px`,
               left: `${Math.max(16, Math.min(window.innerWidth - 144 - 16, menuAnchorRect.right - 144))}px`,
             }}
-            className="w-36 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/5 py-1.5 shadow-xl z-[9999] text-left overflow-hidden animate-fade-in"
+            className="w-36 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/10 py-1.5 shadow-xl z-[9999] text-left overflow-hidden animate-fade-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* View Details */}
