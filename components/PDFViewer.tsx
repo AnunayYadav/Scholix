@@ -305,7 +305,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
     const zoomWrapperRef = useRef<HTMLDivElement>(null);
     const pageOriginalWidthRef = useRef<number>(612);
-    const pageOriginalHeightRef = useRef<number>(792);
     const pdfBytesRef = useRef<Uint8Array | null>(null);
     const animationFrameId = useRef<number | null>(null);
     const pendingUpdate = useRef<{
@@ -659,7 +658,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                 const firstPage = await pdf.getPage(1);
                 const originalViewport = firstPage.getViewport({ scale: 1.0 });
                 pageOriginalWidthRef.current = originalViewport.width;
-                pageOriginalHeightRef.current = originalViewport.height;
                 setScale(window.innerWidth < 768 ? (window.innerWidth - 40) / originalViewport.width : 1.0);
 
                 setIsLoading(false);
@@ -1501,47 +1499,30 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                         </div>
                     ) : (
                         <div 
-                            className="pdf-layout-container mx-auto"
+                            ref={zoomWrapperRef}
+                            className="flex flex-col items-center min-w-max mx-auto px-4 md:px-8"
                             style={{
-                                width: pageOriginalWidthRef.current && window.innerWidth < 768 
-                                    ? `calc(${pageOriginalWidthRef.current}px * var(--pdf-scale))` 
-                                    : 'auto',
-                                minWidth: pageOriginalWidthRef.current && window.innerWidth < 768 
-                                    ? `calc(${pageOriginalWidthRef.current}px * var(--pdf-scale))` 
-                                    : '100%',
-                                height: pageOriginalHeightRef.current && window.innerWidth < 768 
-                                    ? `calc(((${pageOriginalHeightRef.current}px + 24px) * ${numPages} + 48px) * var(--pdf-scale))` 
-                                    : 'auto',
-                                position: 'relative',
-                                overflow: 'visible'
+                                transform: 'scale(var(--pdf-scale)) translateZ(0)',
+                                transformOrigin: window.innerWidth < 768 ? 'top left' : 'top center',
+                                willChange: 'transform',
+                                paddingTop: '0px',
+                                paddingBottom: 'calc(48px * var(--pdf-scale))',
                             }}
                         >
-                            <div 
-                                ref={zoomWrapperRef}
-                                className="flex flex-col items-center min-w-max mx-auto px-4 md:px-8"
-                                style={{
-                                    transform: 'scale(var(--pdf-scale)) translateZ(0)',
-                                    transformOrigin: window.innerWidth < 768 ? 'top left' : 'top center',
-                                    willChange: 'transform',
-                                    paddingTop: '0px',
-                                    paddingBottom: 'calc(48px * var(--pdf-scale))',
-                                }}
-                            >
-                                {Array.from({ length: numPages }).map((_, i) => (
-                                    <PageRenderer
-                                        key={i}
-                                        pageNum={i + 1}
-                                        pdfDoc={pdfDoc}
-                                        userProfile={userProfile}
-                                        searchQuery={searchQuery}
-                                        currentSearchIndex={currentSearchIndex}
-                                        searchResults={searchResults}
-                                        pdfjsLib={pdfjsLibState}
-                                        registerRef={registerPageRef}
-                                        isInteractingRef={isInteractingRef}
-                                    />
-                                ))}
-                            </div>
+                            {Array.from({ length: numPages }).map((_, i) => (
+                                <PageRenderer
+                                    key={i}
+                                    pageNum={i + 1}
+                                    pdfDoc={pdfDoc}
+                                    userProfile={userProfile}
+                                    searchQuery={searchQuery}
+                                    currentSearchIndex={currentSearchIndex}
+                                    searchResults={searchResults}
+                                    pdfjsLib={pdfjsLibState}
+                                    registerRef={registerPageRef}
+                                    isInteractingRef={isInteractingRef}
+                                />
+                            ))}
                         </div>
                     )}
                 </main>
