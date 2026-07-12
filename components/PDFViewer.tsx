@@ -1499,10 +1499,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     ) : (
                         <div 
                             ref={zoomWrapperRef}
-                            className="pdf-zoom-wrapper"
+                            className="flex flex-col items-center min-w-max mx-auto px-4 md:px-8"
                             style={{
-                                '--page-original-width': `${pageOriginalWidthRef.current}px`,
-                            } as any}
+                                transform: 'scale(var(--pdf-scale)) translateZ(0)',
+                                transformOrigin: 'top center',
+                                willChange: 'transform',
+                                paddingTop: '0px',
+                                paddingBottom: 'calc(48px * var(--pdf-scale))',
+                            }}
                         >
                             {Array.from({ length: numPages }).map((_, i) => (
                                 <PageRenderer
@@ -1531,27 +1535,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
             </div>
 
             <style>{`
-                .pdf-zoom-wrapper {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    margin-left: auto;
-                    margin-right: auto;
-                    transform: scale(var(--pdf-scale)) translateZ(0);
-                    transform-origin: top left;
-                    will-change: transform;
-                    padding-top: 0px;
-                    padding-bottom: calc(48px * var(--pdf-scale));
-                    --padding-x: 32px;
-                    width: calc((var(--page-original-width) + var(--padding-x)) * var(--pdf-scale));
-                }
-
-                @media (min-width: 768px) {
-                    .pdf-zoom-wrapper {
-                        --padding-x: 64px;
-                    }
-                }
-
                 .pdf-viewer-overlay {
                     transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1), transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
                 }
