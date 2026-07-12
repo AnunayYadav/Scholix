@@ -1640,17 +1640,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                         </thead>
                         <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
                           {matchedFiles.map((file) => {
-                            const getRealFileName = (f: LibraryFile) => {
-                              if (f.storage_path) {
-                                const base = f.storage_path.split('/').pop() || '';
-                                const clean = base.replace(/^[a-z0-9]+_/, '');
-                                if (clean) {
-                                  try { return decodeURIComponent(clean); } catch (e) { return clean; }
-                                }
-                              }
-                              return f.name;
-                            };
-                            const cleanName = getRealFileName(file);
+                            const cleanName = file.name;
                             const timestamp = file.uploadDate || (file.created_at ? Date.parse(file.created_at) : Date.now());
                             const formattedDate = new Date(timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                             
@@ -1909,18 +1899,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                             </thead>
                             <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
                               {displayFiles.map((file) => {
-                                const getRealFileName = (f: LibraryFile) => {
-                                  if (f.storage_path) {
-                                    const base = f.storage_path.split('/').pop() || '';
-                                    const clean = base.replace(/^[a-z0-9]+_/, '');
-                                    if (clean) {
-                                      try { return decodeURIComponent(clean); } catch (e) { return clean; }
-                                    }
-                                  }
-                                  return f.name;
-                                };
-
-                                const realNameWithExt = getRealFileName(file);
+                                const realNameWithExt = file.name;
                                 const cleanName = realNameWithExt.replace(/\.[^/.]+$/, "");
                                 const fileStyle = getFileStyle(file.storage_path || file.name);
 

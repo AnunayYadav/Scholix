@@ -1611,23 +1611,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     </thead>
                     <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
                       {categoryFiles.map((file) => {
-                        const getRealFileName = (f: LibraryFile) => {
-                          if (f.storage_path) {
-                            const base = f.storage_path.split('/').pop() || '';
-                            const clean = base.replace(/^[a-z0-9]+_/, '');
-                            if (clean) {
-                              try {
-                                return decodeURIComponent(clean);
-                              } catch (e) {
-                                return clean;
-                              }
-                            }
-                          }
-                          return f.name;
-                        };
-
-                        const realNameWithExt = getRealFileName(file);
-                        const ext = realNameWithExt.split('.').pop()?.toLowerCase() || '';
+                        const realNameWithExt = file.name;
+                        const ext = file.storage_path ? file.storage_path.split('.').pop()?.toLowerCase() || '' : '';
                         const cleanName = realNameWithExt.replace(/\.[^/.]+$/, "");
 
                         const ratingVal = (() => {
@@ -1758,23 +1743,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               {/* Mobile Card View */}
               <div className="block sm:hidden space-y-3">
                 {categoryFiles.map((file) => {
-                  const getRealFileName = (f: LibraryFile) => {
-                    if (f.storage_path) {
-                      const base = f.storage_path.split('/').pop() || '';
-                      const clean = base.replace(/^[a-z0-9]+_/, '');
-                      if (clean) {
-                        try {
-                          return decodeURIComponent(clean);
-                        } catch (e) {
-                          return clean;
-                        }
-                      }
-                    }
-                    return f.name;
-                  };
-
-                  const realNameWithExt = getRealFileName(file);
-                  const ext = realNameWithExt.split('.').pop()?.toLowerCase() || '';
+                  const realNameWithExt = file.name;
+                  const ext = file.storage_path ? file.storage_path.split('.').pop()?.toLowerCase() || '' : '';
                   const cleanName = realNameWithExt.replace(/\.[^/.]+$/, "");
 
                   const ratingVal = (() => {
@@ -2412,23 +2382,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                           <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
                             {categoryFiles.map((file) => {
                               // Extract real name from storage path (e.g. community/6yc9oo_UNIT 1 (O).pdf -> UNIT 1 (O).pdf)
-                              const getRealFileName = (f: LibraryFile) => {
-                                if (f.storage_path) {
-                                  const base = f.storage_path.split('/').pop() || '';
-                                  const clean = base.replace(/^[a-z0-9]+_/, '');
-                                  if (clean) {
-                                    try {
-                                      return decodeURIComponent(clean);
-                                    } catch (e) {
-                                      return clean;
-                                    }
-                                  }
-                                }
-                                return f.name;
-                              };
-
-                              const realNameWithExt = getRealFileName(file);
-                              const ext = realNameWithExt.split('.').pop()?.toLowerCase() || '';
+                              const realNameWithExt = file.name;
+                              const ext = file.storage_path ? file.storage_path.split('.').pop()?.toLowerCase() || '' : '';
                               const cleanName = realNameWithExt.replace(/\.[^/.]+$/, ""); // Strip extension for clean text
 
                               const ratingVal = (() => {
@@ -2568,23 +2523,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     {/* Mobile Card View */}
                     <div className="block sm:hidden space-y-3">
                       {categoryFiles.map((file) => {
-                        const getRealFileName = (f: LibraryFile) => {
-                          if (f.storage_path) {
-                            const base = f.storage_path.split('/').pop() || '';
-                            const clean = base.replace(/^[a-z0-9]+_/, '');
-                            if (clean) {
-                              try {
-                                return decodeURIComponent(clean);
-                              } catch (e) {
-                                return clean;
-                              }
-                            }
-                          }
-                          return f.name;
-                        };
-
-                        const realNameWithExt = getRealFileName(file);
-                        const ext = realNameWithExt.split('.').pop()?.toLowerCase() || '';
+                        const realNameWithExt = file.name;
+                        const ext = file.storage_path ? file.storage_path.split('.').pop()?.toLowerCase() || '' : '';
                         const cleanName = realNameWithExt.replace(/\.[^/.]+$/, "");
 
                         const ratingVal = (() => {
