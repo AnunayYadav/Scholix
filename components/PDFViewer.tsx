@@ -779,6 +779,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
         }
     }, [scale]);
 
+
     // Simplified focal point logic removed in favor of direct gesture scroll handling
 
     // Native Non-Passive Event Listeners for Touch/Wheel to guarantee smoothness
@@ -1499,12 +1500,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     ) : (
                         <div 
                             ref={zoomWrapperRef}
-                            className="flex flex-col items-center mx-auto px-4 md:px-8"
+                            className="flex flex-col items-center min-w-max mx-auto px-4 md:px-8"
                             style={{
                                 transform: 'scale(var(--pdf-scale)) translateZ(0)',
-                                transformOrigin: 'top center',
-                                width: pageOriginalWidthRef.current ? `calc(${pageOriginalWidthRef.current}px * var(--pdf-scale))` : '100%',
-                                minWidth: pageOriginalWidthRef.current ? `calc(${pageOriginalWidthRef.current}px * var(--pdf-scale))` : 'auto',
+                                transformOrigin: window.innerWidth < 768 ? 'top left' : 'top center',
                                 willChange: 'transform',
                                 paddingTop: '0px',
                                 paddingBottom: 'calc(48px * var(--pdf-scale))',
