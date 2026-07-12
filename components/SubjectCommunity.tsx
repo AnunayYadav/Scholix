@@ -702,7 +702,7 @@ Welcome to **${cleanName}**! This course focuses on organizing, managing, and st
 ### Key Learning Objectives
 - Analyze algorithmic complexity using Big-O, Big-Theta, and Big-Omega notations.
 - Master linear structures (arrays, linked lists, stacks, queues) and non-linear structures (trees, graphs).
-- Understand and implement sorting, searching, and traversal algorithms.
+- Understand and implement sorting, searching, and traversal al gorithms.
 - Apply dynamic programming, greedy algorithms, and divide-and-conquer strategies.
 
 ### Core Topics Covered
