@@ -761,7 +761,16 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       // Fetch available subject names from Supabase
       const subjectNames = await NexusServer.fetchSubjectNames();
 
-      subjectNames.forEach((subjectName, index) => {
+      const filteredSubjectNames = subjectNames.filter(name => {
+        const code = name.split(':')[0].trim().toUpperCase();
+        if (uniSlug === 'iitm') {
+          return code.startsWith('BS');
+        } else {
+          return !code.startsWith('BS');
+        }
+      });
+
+      filteredSubjectNames.forEach((subjectName, index) => {
         // Normalize code by removing spaces: "CHE 110" -> "CHE110"
         const subjectMatch = subjectName.match(/[A-Za-z]+[0-9]+/);
         const normalizedCode = subjectMatch ? subjectMatch[0].toUpperCase() : subjectName.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
@@ -774,7 +783,16 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
       // Also ensure subjects from SYLLABUS_DATA (Fallback) are included
       // We deduplicate by normalized code
-      Object.keys(SYLLABUS_DATA).forEach((fullName, index) => {
+      const filteredSyllabusKeys = Object.keys(SYLLABUS_DATA).filter(fullName => {
+        const code = fullName.split(':')[0].trim().toUpperCase();
+        if (uniSlug === 'iitm') {
+          return code.startsWith('BS');
+        } else {
+          return !code.startsWith('BS');
+        }
+      });
+
+      filteredSyllabusKeys.forEach((fullName, index) => {
         const fullCode = fullName.split(':')[0].trim();
         const normalizedCode = fullCode.replace(/\s+/g, '').toUpperCase();
         
@@ -806,12 +824,21 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       setSubjectsWithSyllabi(finalSubjects);
     } catch (err) {
       console.error("Library load error:", err);
-      // Fallback: at least show what's in SYLLABUS_DATA
-      const fallback = Object.keys(SYLLABUS_DATA).map((name, i) => ({
-          id: `F_SUB_${i}`,
-          name,
-          syllabusFile: null as any
-      }));
+      // Fallback: at least show what's in SYLLABUS_DATA filtered
+      const fallback = Object.keys(SYLLABUS_DATA)
+        .filter(fullName => {
+          const code = fullName.split(':')[0].trim().toUpperCase();
+          if (uniSlug === 'iitm') {
+            return code.startsWith('BS');
+          } else {
+            return !code.startsWith('BS');
+          }
+        })
+        .map((name, i) => ({
+            id: `F_SUB_${i}`,
+            name,
+            syllabusFile: null as any
+        }));
       setSubjectsWithSyllabi(fallback);
     } finally {
       setInitializing(false);

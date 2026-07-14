@@ -3,6 +3,7 @@ import { useQuizDashboardStore, FeaturedQuiz, ActiveChallenge } from '../stores/
 import NexusServer from '../services/nexusServer';
 import { QuizQuestion } from '../types';
 import { SYLLABUS_DATA } from '../data/syllabusData';
+import { useUniversity } from './useUniversity';
 
 // ═══════════════════════════════════════
 // Deterministic Seeded Random — same result for all users on same date
@@ -193,14 +194,26 @@ const CHALLENGE_TEMPLATES = [
   { desc: 'The ultimate syllabus challenge', count: 20, timePerQ: 45, xp: 250, minLevel: 2 },
 ];
 
-async function generateFeaturedQuiz(): Promise<FeaturedQuiz | null> {
+async function generateFeaturedQuiz(uniSlug: string): Promise<FeaturedQuiz | null> {
   const today = getTodayIST();
-  const seed = hashStr(`featured_v3_${today}`);
+  const seed = hashStr(`featured_v3_${uniSlug}_${today}`);
   const rng = seededRandom(seed);
 
   const dbSubjects = await NexusServer.fetchSubjectNames();
   const syllabusSubjects = Object.keys(SYLLABUS_DATA);
-  const subjects = Array.from(new Set([...syllabusSubjects, ...dbSubjects])).sort();
+  let subjects = Array.from(new Set([...syllabusSubjects, ...dbSubjects])).sort();
+
+  if (uniSlug === 'iitm') {
+    subjects = subjects.filter(name => {
+      const code = name.split(':')[0].trim().toUpperCase();
+      return code.startsWith('BS');
+    });
+  } else {
+    subjects = subjects.filter(name => {
+      const code = name.split(':')[0].trim().toUpperCase();
+      return !code.startsWith('BS');
+    });
+  }
 
   if (!subjects || subjects.length === 0) return null;
 
@@ -263,7 +276,7 @@ async function generateFeaturedQuiz(): Promise<FeaturedQuiz | null> {
 // Mon, Wed, Fri releases with 3-5 day durations
 // ═══════════════════════════════════════
 
-async function generateActiveChallenges(): Promise<ActiveChallenge[]> {
+async function generateActiveChallenges(uniSlug: string): Promise<ActiveChallenge[]> {
   const today = getTodayIST();
   const currentFullDate = new Date(today + 'T00:00:00Z');
   
@@ -273,7 +286,19 @@ async function generateActiveChallenges(): Promise<ActiveChallenge[]> {
   
   const dbSubjects = await NexusServer.fetchSubjectNames();
   const syllabusSubjects = Object.keys(SYLLABUS_DATA);
-  const subjects = Array.from(new Set([...syllabusSubjects, ...dbSubjects])).sort();
+  let subjects = Array.from(new Set([...syllabusSubjects, ...dbSubjects])).sort();
+
+  if (uniSlug === 'iitm') {
+    subjects = subjects.filter(name => {
+      const code = name.split(':')[0].trim().toUpperCase();
+      return code.startsWith('BS');
+    });
+  } else {
+    subjects = subjects.filter(name => {
+      const code = name.split(':')[0].trim().toUpperCase();
+      return !code.startsWith('BS');
+    });
+  }
   
   if (subjects.length === 0) return [];
 
@@ -366,6 +391,7 @@ async function generateActiveChallenges(): Promise<ActiveChallenge[]> {
 // useDashboard Hook
 // ═══════════════════════════════════════
 export function useDashboard(userId: string | null) {
+  const { uniSlug } = useUniversity();
   const {
     setFeaturedQuiz,
     setActiveChallenges,
@@ -391,12 +417,12 @@ export function useDashboard(userId: string | null) {
     } finally {
       setIsDashboardLoading(false);
     }
-  }, [userId]);
+  }, [userId, uniSlug]);
 
 
   const loadFeaturedQuiz = async () => {
     const today = getTodayIST();
-    const cacheKey = `nexus_featured_quiz_${today}`;
+    const cacheKey = `nexus_featured_quiz_${uniSlug || 'default'}_${today}`;
     const cached = localStorage.getItem(cacheKey);
 
     if (cached) {
@@ -409,7 +435,7 @@ export function useDashboard(userId: string | null) {
           throw new Error('stale');
         }
       } catch {
-        const fresh = await generateFeaturedQuiz();
+        const fresh = await generateFeaturedQuiz(uniSlug);
         if (fresh) {
           localStorage.setItem(cacheKey, JSON.stringify(fresh));
           setFeaturedQuiz(fresh);
@@ -424,7 +450,7 @@ export function useDashboard(userId: string | null) {
         }
       }
 
-      const fresh = await generateFeaturedQuiz();
+      const fresh = await generateFeaturedQuiz(uniSlug);
       if (fresh) {
         localStorage.setItem(cacheKey, JSON.stringify(fresh));
         setFeaturedQuiz(fresh);
@@ -455,7 +481,7 @@ export function useDashboard(userId: string | null) {
 
   const loadActiveChallenges = async () => {
     // Challenges are deterministic per 3-day window, always regenerate for correctness
-    const fresh = await generateActiveChallenges();
+    const fresh = await generateActiveChallenges(uniSlug);
     setActiveChallenges(fresh);
   };
 

@@ -31,6 +31,7 @@ const PrivacyPolicy = lazyWithPreload(() => import('./components/PrivacyPolicy.t
 const SecurityHallOfFame = lazyWithPreload(() => import('./components/SecurityHallOfFame.tsx'));
 const ToolsHub = lazyWithPreload(() => import('./components/ToolsHub.tsx'));
 const FacultyDetail = lazyWithPreload(() => import('./components/FacultyDetail.tsx'));
+const DegreeGuide = lazyWithPreload(() => import('./components/DegreeGuide.tsx'));
 
 // Eager/static imports for shared/immediate layout components
 import VerifiedBadge from './components/VerifiedBadge.tsx';
@@ -63,7 +64,8 @@ import {
   Map,
   Calculator,
   ShoppingBag,
-  Calendar
+  Calendar,
+  BookOpen
 } from 'lucide-react';
 import BottomNavbar from './components/BottomNavbar.tsx';
 import NexusAd from './components/NexusAd.tsx';
@@ -84,6 +86,7 @@ import { useLoadingStore } from './stores/loadingStore.ts';
 import UniversalSearch from './components/UniversalSearch.tsx';
 import { useOnlineStatus } from './hooks/useOnlineStatus.ts';
 import OfflineOverlay from './components/OfflineOverlay.tsx';
+import AcademicCalendar from './components/AcademicCalendar.tsx';
 
 const getUniSlug = (id: UniversityId): string => {
   if (id === 'lpu') return 'lpu';
@@ -118,6 +121,7 @@ const getModuleFromPath = (path: string): ModuleType => {
   if (normalizedPath.includes('/market')) return ModuleType.MARKETPLACE;
   if (normalizedPath.includes('/roommate')) return ModuleType.ROOMMATE;
   if (normalizedPath.includes('/emergency')) return ModuleType.EMERGENCY;
+  if (normalizedPath.includes('/degree-guide')) return ModuleType.DEGREE_GUIDE;
 
   if (normalizedPath.includes('/admin-stats')) return ModuleType.ADMIN_STATS;
   if (normalizedPath.includes('/privacy')) return ModuleType.PRIVACY;
@@ -597,7 +601,7 @@ const StaticRedirect: React.FC<{ to: string }> = ({ to }) => {
 
 const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ userProfile }) => {
   const navigate = useNavigate();
-  const { selectedUniversity } = useUniversity();
+  const { selectedUniversity, universityInfo } = useUniversity();
     const allFeatures = [
       { id: ModuleType.ATTENDANCE, name: 'Attendance Tracker', desc: 'Track your daily attendance.', icon: <CheckCircle2 />, category: 'Tools', lightColor: 'bg-emerald-500/20', iconColor: 'text-emerald-500', gradient: 'from-emerald-500/20 to-transparent' },
       { id: ModuleType.CAMPUS, name: 'Campus Map', desc: 'Find buildings and facilities.', icon: <Map />, category: 'Campus', lightColor: 'bg-blue-500/20', iconColor: 'text-blue-500', gradient: 'from-blue-500/20 to-transparent', customPath: '/campus/map' },
@@ -606,10 +610,43 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
       { id: 'mess', name: 'Mess Menu', desc: "Today's meal planning.", icon: <Utensils />, category: 'Campus', lightColor: 'bg-orange-500/20', iconColor: 'text-orange-500', gradient: 'from-orange-500/20 to-transparent', customPath: '/campus/mess' },
       { id: ModuleType.LIBRARY, name: 'Content Library', desc: 'Study materials and resources.', icon: <Rocket />, category: 'Study', lightColor: 'bg-indigo-500/20', iconColor: 'text-indigo-500', gradient: 'from-indigo-500/20 to-transparent' },
       { id: ModuleType.QUIZ, name: 'Quiz Taker', desc: 'Practice with AI generated quizzes.', icon: <PenTool />, category: 'Study', lightColor: 'bg-cyan-500/20', iconColor: 'text-cyan-500', gradient: 'from-cyan-500/20 to-transparent' },
+      { 
+        id: 'degree-guide', 
+        name: 'Degree Guide', 
+        desc: 'Explore IIT Madras BS degree levels, fees & options.', 
+        icon: <BookOpen className="w-5 h-5" />, 
+        category: 'Study', 
+        lightColor: 'bg-amber-500/20', 
+        iconColor: 'text-amber-500', 
+        gradient: 'from-amber-500/20 to-transparent', 
+        customPath: '/degree-guide' 
+      },
+      { 
+        id: ModuleType.LECTURES, 
+        name: 'YT Lectures', 
+        desc: 'Search and watch university lectures inline.', 
+        icon: <PlayCircle className="w-5 h-5" />, 
+        category: 'Study', 
+        lightColor: 'bg-red-500/20', 
+        iconColor: 'text-red-500', 
+        gradient: 'from-red-500/20 to-transparent',
+        customPath: '/tools?tab=lectures' 
+      },
 
       { id: ModuleType.ROOMMATE, name: 'Roommate Finder', desc: 'Find your perfect roomie.', icon: <User />, category: 'Social', lightColor: 'bg-amber-500/20', iconColor: 'text-amber-500', gradient: 'from-amber-500/20 to-transparent' },
       { id: ModuleType.MARKETPLACE, name: 'Marketplace', desc: 'Buy and sell student gear.', icon: <ShoppingBag />, category: 'Social', lightColor: 'bg-violet-500/20', iconColor: 'text-violet-500', gradient: 'from-violet-500/20 to-transparent' },
     ];
+
+    const filteredFeatures = allFeatures.filter(f => {
+      if (!universityInfo) return true;
+      if (f.id === 'mess') {
+        return universityInfo.features.campusTabs?.includes('mess') ?? false;
+      }
+      if (f.id === 'degree-guide') {
+        return selectedUniversity === 'iitm_bs';
+      }
+      return universityInfo.features.enabledModules.includes(f.id as ModuleType);
+    });
 
   return (
     <div className="w-full min-h-screen pb-32 animate-fade-in relative z-0 bg-[#fbfcfd] dark:bg-[#030303]">
@@ -627,14 +664,14 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
-              {allFeatures.map((f) => (
+              {filteredFeatures.map((f) => (
                 <FeatureCard key={f.id} f={f} navigate={() => navigate(f.customPath || getPathFromModule(f.id as any, selectedUniversity))} />
               ))}
             </div>
           </div>
 
           <div className="lg:col-span-4 order-1 lg:order-2">
-            <TodaysSchedule />
+            {selectedUniversity === 'iitm_bs' ? <AcademicCalendar /> : <TodaysSchedule />}
           </div>
         </div>
 
@@ -2149,6 +2186,8 @@ const FeatureRoutes: React.FC<{
         <Route path="/placement/:reportId" element={<PlacementRedirect />} />
         <Route path="/attendance" element={<FeatureGuard module={ModuleType.ATTENDANCE}><Navigate to="/tools?tab=attendance" replace /></FeatureGuard>} />
         <Route path="/cgpa" element={<FeatureGuard module={ModuleType.CGPA}><Navigate to="/tools?tab=cgpa" replace /></FeatureGuard>} />
+        <Route path="/degree-guide" element={<DegreeGuide />} />
+        <Route path="/lectures" element={<FeatureGuard module={ModuleType.LECTURES}><Navigate to="/tools?tab=lectures" replace /></FeatureGuard>} />
         
   
         <Route path="/timetable" element={<FeatureGuard module={ModuleType.TIMETABLE}><TimetableHub userProfile={userProfile} /></FeatureGuard>} />

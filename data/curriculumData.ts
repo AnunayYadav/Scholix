@@ -433,15 +433,217 @@ export const BTECH_CSE_2025: ProgramCurriculum = {
   ]
 };
 
+// IIT Madras BS in Data Science Curriculum
+export const IITM_BS_DS: ProgramCurriculum = {
+  programCode: "BSDS",
+  programName: "BS Data Science",
+  admissionYear: 2025,
+  terms: [
+    {
+      termNumber: 1,
+      termName: "Term 1 (Foundation)",
+      coreSubjects: [
+        { code: "BSMA1001", title: "Mathematics for Data Science I", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "BSC" },
+        { code: "BSMA1002", title: "Statistics for Data Science I", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "BSC" },
+        { code: "BSCS1001", title: "Computational Thinking", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSHS1001", title: "English I", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "LCS" }
+      ],
+      electiveBaskets: []
+    },
+    {
+      termNumber: 2,
+      termName: "Term 2 (Foundation)",
+      coreSubjects: [
+        { code: "BSMA1003", title: "Mathematics for Data Science II", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "BSC" },
+        { code: "BSMA1004", title: "Statistics for Data Science II", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "BSC" },
+        { code: "BSCS1002", title: "Programming in Python", l: 3, t: 0, p: 2, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSHS1002", title: "English II", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "LCS" }
+      ],
+      electiveBaskets: []
+    },
+    {
+      termNumber: 3,
+      termName: "Term 3 (Diploma Prog 1)",
+      coreSubjects: [
+        { code: "BSCS2001", title: "Database Management Systems", l: 3, t: 0, p: 2, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSCS2002", title: "Programming, Data Structures and Algorithms using Python", l: 3, t: 0, p: 2, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSCS2003", title: "Modern Application Development I", l: 3, t: 0, p: 2, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSCS2003P", title: "Modern Application Development I - Project", l: 0, t: 0, p: 4, credits: 2.0, type: "CR", nature: "PRJ" }
+      ],
+      electiveBaskets: []
+    },
+    {
+      termNumber: 4,
+      termName: "Term 4 (Diploma Prog 2)",
+      coreSubjects: [
+        { code: "BSCS2005", title: "Programming Concepts using Java", l: 3, t: 0, p: 2, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSCS2006", title: "Modern Application Development II", l: 3, t: 0, p: 2, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSCS2006P", title: "Modern Application Development II - Project", l: 0, t: 0, p: 4, credits: 2.0, type: "CR", nature: "PRJ" },
+        { code: "BSSE2001", title: "System Commands", l: 2, t: 0, p: 2, credits: 3.0, type: "CR", nature: "DSC" }
+      ],
+      electiveBaskets: []
+    },
+    {
+      termNumber: 5,
+      termName: "Term 5 (Diploma DS 1)",
+      coreSubjects: [
+        { code: "BSCS2004", title: "Machine Learning Foundations", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSMS2001", title: "Business Data Management", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSCS2007", title: "Machine Learning Techniques", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSSE2002", title: "Tools in Data Science", l: 2, t: 0, p: 2, credits: 3.0, type: "CR", nature: "DSC" }
+      ],
+      electiveBaskets: []
+    },
+    {
+      termNumber: 6,
+      termName: "Term 6 (Diploma DS 2)",
+      coreSubjects: [
+        { code: "BSCS2008", title: "Machine Learning Practice", l: 3, t: 0, p: 2, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSCS2008P", title: "Machine Learning Practice - Project", l: 0, t: 0, p: 4, credits: 2.0, type: "CR", nature: "PRJ" }
+      ],
+      electiveBaskets: [
+        {
+          name: "Diploma DS Option 1 (Business Analytics)",
+          type: "CE",
+          nature: "DSC",
+          subjects: [
+            { code: "BSMS2001P", title: "Business Data Management - Project", l: 0, t: 0, p: 4, credits: 2.0, type: "CE", nature: "PRJ" },
+            { code: "BSMS2002", title: "Business Analytics", l: 3, t: 1, p: 0, credits: 4.0, type: "CE", nature: "DSC" }
+          ]
+        },
+        {
+          name: "Diploma DS Option 2 (Deep Learning & AI)",
+          type: "CE",
+          nature: "DSC",
+          subjects: [
+            { code: "BSDA2001", title: "Introduction to Deep Learning and Generative AI", l: 3, t: 1, p: 0, credits: 4.0, type: "CE", nature: "DSC" },
+            { code: "BSDA2001P", title: "Deep Learning and Generative AI - Project", l: 0, t: 0, p: 4, credits: 2.0, type: "CE", nature: "PRJ" }
+          ]
+        }
+      ]
+    },
+    {
+      termNumber: 7,
+      termName: "Term 7 (BSc Degree)",
+      coreSubjects: [
+        { code: "BSCS3001", title: "Software Engineering", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSCS3002", title: "Software Testing", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSGN3001", title: "Strategies for Professional Growth", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "DSC" }
+      ],
+      electiveBaskets: [
+        {
+          name: "Degree Electives",
+          type: "DE",
+          nature: "DSC",
+          subjects: [
+            { code: "BSBT4001", title: "Algorithmic Thinking in Bioinformatics", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSBT4002", title: "Big Data and Biological Networks", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSCS4001", title: "Data Visualization Design", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSEE4001", title: "Speech Technology", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSMS4002", title: "Design Thinking for Data-Driven App Development", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSMS4001", title: "Industry 4.0", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSMS3002", title: "Market Research", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSCS4003", title: "Privacy & Security in Online Social Media", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA5001", title: "Introduction to Big Data", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSMS4003", title: "Financial Forensics", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSMA3012", title: "Linear Statistical Models", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSCS4021", title: "Advanced Algorithms", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSMA3014", title: "Statistical Computing", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSCS3031", title: "Computer Systems Design", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSCS3005", title: "Programming in C", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSMA2001", title: "Mathematical Thinking", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSMS3033", title: "Managerial Economics", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSMS4023", title: "Game Theory and Strategy", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSMS3034", title: "Corporate Finance", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA5013", title: "Deep Learning Practice", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSCS4022", title: "Operating Systems", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA4001", title: "Data Science and AI Lab", l: 0, t: 0, p: 8, credits: 4.0, type: "DE", nature: "PRJ" },
+            { code: "BSCS4010", title: "App Dev Lab", l: 0, t: 0, p: 8, credits: 4.0, type: "DE", nature: "PRJ" },
+            { code: "BSCS4024", title: "Computer Networks", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSCS3021", title: "Theory of Computation", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSCS4032", title: "Compiler Design", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSMA3001", title: "Discrete Mathematics", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" }
+          ]
+        }
+      ]
+    },
+    {
+      termNumber: 8,
+      termName: "Term 8 (BS Degree)",
+      coreSubjects: [
+        { code: "BSCS3003", title: "AI: Search Methods for Problem Solving", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSCS3004", title: "Deep Learning", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "DSC" }
+      ],
+      electiveBaskets: [
+        {
+          name: "BS/PGD Electives",
+          type: "DE",
+          nature: "DSC",
+          subjects: [
+            { code: "BSDA5004", title: "Large Language Models", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA5002", title: "Mathematical Foundations of Generative AI", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA5003", title: "Algorithms for Data Science", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA5014", title: "Machine Learning Operations (MLOps)", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA5005", title: "Introduction to Natural Language Processing (i-NLP)", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA5006", title: "Deep Learning for Computer Vision", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA5007", title: "Reinforcement Learning", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" }
+          ]
+        }
+      ]
+    },
+    {
+      termNumber: 9,
+      termName: "Term 9 (PG Diploma)",
+      coreSubjects: [
+        { code: "BSDA5014", title: "Machine Learning Operations (MLOps)", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSDA5002", title: "Mathematical Foundations of Generative AI", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "DSC" },
+        { code: "BSDA5003", title: "Algorithms for Data Science", l: 3, t: 1, p: 0, credits: 4.0, type: "CR", nature: "DSC" }
+      ],
+      electiveBaskets: [
+        {
+          name: "PGD Electives",
+          type: "DE",
+          nature: "DSC",
+          subjects: [
+            { code: "BSDA5004", title: "Large Language Models", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA5005", title: "Introduction to Natural Language Processing (i-NLP)", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA5006", title: "Deep Learning for Computer Vision", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA5007", title: "Reinforcement Learning", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA6001", title: "Responsible AI", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA6002", title: "Statistical Learning Theory", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA6003", title: "Deployability Aspects of AI", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA6004", title: "Sequential Decision Making", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA6005", title: "Information Theory and Learning", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSEE5001", title: "Speech Technology (PG)", l: 3, t: 1, p: 0, credits: 4.0, type: "DE", nature: "DSC" },
+            { code: "BSDA6006", title: "Research Project", l: 0, t: 0, p: 8, credits: 4.0, type: "DE", nature: "PRJ" }
+          ]
+        }
+      ]
+    },
+    {
+      termNumber: 10,
+      termName: "Term 10 (MTech)",
+      coreSubjects: [
+        { code: "BSDA6901", title: "MTech Project", l: 0, t: 0, p: 40, credits: 20.0, type: "CR", nature: "PRJ" }
+      ],
+      electiveBaskets: []
+    }
+  ]
+};
+
 // Main entry Registry Map
 export const CURRICULUM_REGISTRY: Record<string, ProgramCurriculum> = {
-  "btech-cse": BTECH_CSE_2025
+  "btech-cse": BTECH_CSE_2025,
+  "bs-data-science": IITM_BS_DS
 };
 
 export const getProgramCurriculum = (programSlug: string): ProgramCurriculum | null => {
   const normalized = programSlug.toLowerCase().replace(/[^a-z0-9]/g, '');
   if (normalized === 'btechcse' || normalized === 'btechcomputerscienceandengineering') {
     return BTECH_CSE_2025;
+  }
+  if (normalized === 'bsdatascience' || normalized === 'bsindatascienceandapplications') {
+    return IITM_BS_DS;
   }
   return CURRICULUM_REGISTRY[normalized] || null;
 };

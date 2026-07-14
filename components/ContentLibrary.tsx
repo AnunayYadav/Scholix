@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { LibraryFile, UserProfile, Folder } from '../types.ts';
-import NexusServer from '../services/nexusServer.ts';
+import NexusServer, { isIITMProgram } from '../services/nexusServer.ts';
 import PDFViewer from './PDFViewer.tsx';
 import NexusOriginals from './NexusOriginals.tsx';
 import NexusDropdown from './NexusDropdown.tsx';
@@ -58,39 +58,37 @@ const FolderIcon = ({ type, name = '', size = "w-7 h-7", iconName, color }: { ty
     BookOpen, FileText, Cpu, Monitor, Sigma, Folder: FolderIconLucide, HelpCircle, Video
   };
 
-  const className = `${size} mb-2 transition-colors`;
+  const className = `${size} transition-colors`;
   const iconColor = color || '#ff7a00';
 
   if (iconName && IconMap[iconName]) {
     const IconComponent = IconMap[iconName];
-    // If the icon is rendered inside a white background container (e.g. subject card), we might override its color to white.
-    // However, style={{ color: iconColor }} is generally perfect.
-    return <IconComponent className={className} style={{ color: iconColor }} strokeWidth={2.0} />;
+    return <IconComponent className={className} style={{ color: iconColor }} strokeWidth={3} />;
   }
 
   const lowerName = name.toLowerCase().trim();
 
   if (lowerName === 'lectures') {
-    return <Video className={className} style={{ color: iconColor }} strokeWidth={2.0} />;
+    return <Video className={className} style={{ color: iconColor }} strokeWidth={3} />;
   }
 
   if (lowerName === 'notes') {
-    return <BookOpen className={className} style={{ color: iconColor }} strokeWidth={2.0} />;
+    return <BookOpen className={className} style={{ color: iconColor }} strokeWidth={3} />;
   }
 
   if (lowerName === 'pyqs') {
-    return <HelpCircle className={className} style={{ color: iconColor }} strokeWidth={2.0} />;
+    return <HelpCircle className={className} style={{ color: iconColor }} strokeWidth={3} />;
   }
 
   if (lowerName === 'syllabus') {
-    return <FileText className={className} style={{ color: iconColor }} strokeWidth={2.0} />;
+    return <FileText className={className} style={{ color: iconColor }} strokeWidth={3} />;
   }
 
   if (type === 'semester') {
-    return <Landmark className={className} style={{ color: iconColor }} strokeWidth={2.0} />;
+    return <Landmark className={className} style={{ color: iconColor }} strokeWidth={3} />;
   }
 
-  return <FolderIconLucide className={className} style={{ color: iconColor }} strokeWidth={2.0} />;
+  return <FolderIconLucide className={className} style={{ color: iconColor }} strokeWidth={3} />;
 };
 
 interface FileStyleConfig {
@@ -431,7 +429,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [activeSubject, setActiveSubject] = useState<Folder | null>(null);
   const [activeCategory, setActiveCategory] = useState<Folder | null>(null);
 
-  const initialPrograms = ["BTech CSE", "BTech IT", "BCA", "MCA", "MBA", "BCom", "BA"];
+  const initialPrograms = ["BTech CSE", "BTech IT", "BCA", "MCA", "MBA", "BCom", "BA", "BS Data Science"];
   const [availablePrograms, setAvailablePrograms] = useState(initialPrograms);
   const [selectedProgram, setSelectedProgram] = useState(() => {
     if (program) {
@@ -1230,7 +1228,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         }
       }
 
-      await NexusServer.createFolder(newFolderName.trim(), type, parentId, selectedProgram, folderIcon, folderColor);
+      await NexusServer.createFolder(newFolderName.trim(), type, parentId, selectedProgram, folderIcon, folderColor, uniSlug === 'iitm' ? 'iitmuni' : 'lpu');
       setNewFolderName('');
       setFolderIcon('Folder');
       setFolderColor('#ff7a00');
@@ -1517,58 +1515,115 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             )
           ) : !program && viewMode === 'browse' ? (
             // Screen 1: Program Selection Screen (Root)
-            <div className="space-y-4 animate-fade-in">
-              <div className="flex items-center justify-between border-b border-zinc-150 dark:border-white/5 pb-2 mt-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-1 h-3 rounded-full bg-orange-500" />
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-555 dark:text-zinc-400">Select Academic Program</span>
-                </div>
-                <span className="px-2 py-0.5 bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5 rounded-full text-[9px] font-medium text-zinc-555 dark:text-zinc-400">{availablePrograms.length} Programs</span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                {availablePrograms.map((prog, idx) => {
-                  const progColors = ['#ff7a00', '#a855f7', '#0ea5e9', '#22c55e', '#f43f5e', '#eab308', '#14b8a6', '#6366f1'];
-                  const color = progColors[idx % progColors.length];
-                  
-                  const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
-                  const pResources = allFiles.filter(f => f.program === prog).length;
-                  
-                  let subtitle = "3 Years Program";
-                  if (prog.includes("BTech")) subtitle = "4 Years Program";
-                  else if (prog.includes("MCA") || prog.includes("MBA")) subtitle = "2 Years Program";
-                  
-                  return (
-                    <Link
-                      key={prog}
-                      to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
-                      className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99]"
-                    >
-<div className="flex items-center gap-3.5 min-w-0">
-                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: color }}>
-                          <Landmark className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white leading-snug">{prog}</h4>
-                          <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
-                            <span className="whitespace-nowrap shrink-0">{subtitle}</span>
-                            <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-                            <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
-                              <BookOpen className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
-                              {pSubjects} Subjects
-                            </span>
-                            <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-                            <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
-                              <FileText className="w-3.5 h-3.5 text-zinc-450 dark:text-zinc-500" />
-                              {pResources} Resources
-                            </span>
+            <div className="space-y-8 animate-fade-in">
+              {/* IIT Madras Section */}
+              {availablePrograms.some(isIITMProgram) && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b border-zinc-150 dark:border-white/5 pb-2 mt-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-4.5 rounded-full bg-red-750" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-555 dark:text-zinc-400">Indian Institute of Technology Madras</span>
+                    </div>
+                    <span className="px-2 py-0.5 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-full text-[9px] font-bold text-red-750 dark:text-red-400">IITM Portal</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {availablePrograms.filter(isIITMProgram).map((prog) => {
+                      const color = '#800000'; // Maroon
+                      const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
+                      const pResources = allFiles.filter(f => f.program === prog).length;
+                      let subtitle = "4 Years Program (BS Degree)";
+                      
+                      return (
+                        <Link
+                          key={prog}
+                          to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
+                          className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99]"
+                        >
+                          <div className="flex items-center gap-3.5 min-w-0">
+                            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: color }}>
+                              <Landmark className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white leading-snug">{prog}</h4>
+                              <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+                                <span className="whitespace-nowrap shrink-0">{subtitle}</span>
+                                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+                                <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
+                                  <BookOpen className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
+                                  {pSubjects} Subjects
+                                </span>
+                                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+                                <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
+                                  <FileText className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
+                                  {pResources} Resources
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-300 dark:text-zinc-600 group-hover:translate-x-0.5 transition-transform shrink-0" style={{ color: color }}><path d="M9 18l6-6-6-6" /></svg>
-                    </Link>
-                  );
-                })}
-              </div>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-300 dark:text-zinc-600 group-hover:translate-x-0.5 transition-transform shrink-0" style={{ color: color }}><path d="M9 18l6-6-6-6" /></svg>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* LPU Section */}
+              {availablePrograms.some(p => !isIITMProgram(p)) && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b border-zinc-150 dark:border-white/5 pb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-4.5 rounded-full bg-orange-500" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-555 dark:text-zinc-400">Lovely Professional University</span>
+                    </div>
+                    <span className="px-2 py-0.5 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/30 rounded-full text-[9px] font-bold text-orange-500">LPU Portals</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {availablePrograms.filter(p => !isIITMProgram(p)).map((prog, idx) => {
+                      const progColors = ['#ff7a00', '#a855f7', '#0ea5e9', '#22c55e', '#f43f5e', '#eab308', '#14b8a6', '#6366f1'];
+                      const color = progColors[idx % progColors.length];
+                      
+                      const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
+                      const pResources = allFiles.filter(f => f.program === prog).length;
+                      
+                      let subtitle = "3 Years Program";
+                      if (prog.includes("BTech")) subtitle = "4 Years Program";
+                      else if (prog.includes("MCA") || prog.includes("MBA")) subtitle = "2 Years Program";
+                      
+                      return (
+                        <Link
+                          key={prog}
+                          to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
+                          className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99]"
+                        >
+                          <div className="flex items-center gap-3.5 min-w-0">
+                            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: color }}>
+                              <Landmark className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white leading-snug">{prog}</h4>
+                              <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+                                <span className="whitespace-nowrap shrink-0">{subtitle}</span>
+                                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+                                <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
+                                  <BookOpen className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
+                                  {pSubjects} Subjects
+                                </span>
+                                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+                                <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
+                                  <FileText className="w-3.5 h-3.5 text-zinc-450 dark:text-zinc-500" />
+                                  {pResources} Resources
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-300 dark:text-zinc-600 group-hover:translate-x-0.5 transition-transform shrink-0" style={{ color: color }}><path d="M9 18l6-6-6-6" /></svg>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           ) : activeSubject && !activeCategory && viewMode === 'browse' && searchQuery.trim() === '' ? (
             <SubjectCommunity

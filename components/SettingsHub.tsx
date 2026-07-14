@@ -57,6 +57,13 @@ const SECTIONS = (userProfile: UserProfile | null) => [
     title: 'How you use Scholix',
     items: [
       { id: 'theme', label: 'Dark mode', color: 'text-indigo-500', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>, isToggle: true },
+      ...(userProfile ? [{ 
+        id: 'merge_libraries', 
+        label: 'Merge Content Libraries', 
+        color: 'text-emerald-500', 
+        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M4 6h16a2 2 0 0 0 2-2V2H2v2a2 2 0 0 0 2 2z" /></svg>, 
+        isToggle: true 
+      }] : [])
     ]
   },
   {
@@ -97,6 +104,12 @@ export function SettingsHub({
   const [showChatModal, setShowChatModal] = useState(false);
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [mergeLibraries, setMergeLibraries] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('nexus_merge_libraries') === 'true';
+    }
+    return false;
+  });
   const prefix = uniSlug ? `/${uniSlug}` : '';
 
   useEffect(() => {
@@ -170,7 +183,14 @@ export function SettingsHub({
                       key={item.id}
                       onClick={() => {
                         if (item.isToggle) {
-                          toggleTheme();
+                          if (item.id === 'theme') {
+                            toggleTheme();
+                          } else if (item.id === 'merge_libraries') {
+                            const nextVal = !mergeLibraries;
+                            setMergeLibraries(nextVal);
+                            localStorage.setItem('nexus_merge_libraries', String(nextVal));
+                            window.dispatchEvent(new Event('storage'));
+                          }
                         } else if (item.id === 'download') {
                           setShowDownloadModal(true);
                         } else if (item.id === 'profile' && !userProfile) {
@@ -219,9 +239,17 @@ export function SettingsHub({
 
                       {item.isToggle ? (
                         <div
-                          className={`w-[32px] h-4.5 rounded-full relative transition-all duration-300 flex items-center px-[2px] ${theme === 'dark' ? 'bg-brand-primary' : 'bg-zinc-200 dark:bg-zinc-800'}`}
+                          className={`w-[32px] h-4.5 rounded-full relative transition-all duration-300 flex items-center px-[2px] ${
+                            item.id === 'theme'
+                              ? (theme === 'dark' ? 'bg-brand-primary' : 'bg-zinc-200 dark:bg-zinc-800')
+                              : (mergeLibraries ? 'bg-brand-primary' : 'bg-zinc-200 dark:bg-zinc-800')
+                          }`}
                         >
-                          <div className={`w-3.5 h-3.5 bg-white rounded-full shadow-sm transition-transform duration-300 ${theme === 'dark' ? 'translate-x-[14px]' : 'translate-x-0'}`} />
+                          <div className={`w-3.5 h-3.5 bg-white rounded-full shadow-sm transition-transform duration-300 ${
+                            item.id === 'theme'
+                              ? (theme === 'dark' ? 'translate-x-[14px]' : 'translate-x-0')
+                              : (mergeLibraries ? 'translate-x-[14px]' : 'translate-x-0')
+                          }`} />
                         </div>
                       ) : (
                         <div className="w-4 h-4" /> 

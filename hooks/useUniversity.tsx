@@ -53,7 +53,8 @@ export const UNIVERSITIES: University[] = [
         ModuleType.HELP,
         ModuleType.ABOUT,
         ModuleType.TIMETABLE,
-        ModuleType.FRESHERS
+        ModuleType.FRESHERS,
+        ModuleType.LECTURES
       ],
       campusTabs: ['mess', 'map']
     }
@@ -63,29 +64,27 @@ export const UNIVERSITIES: University[] = [
     name: 'Indian Institute of Technology BS Degree', 
     shortName: 'IITM', 
     comingSoon: false, 
-    adminOnly: true,
-    campusMapUrl: 'https://www.iitm.ac.in/it-at-iitm-bs/campus-map',
     logo: '/IIT_Madras_Logo.webp',
     theme: {
-      primary: '#800000', // Deep Institutional Maroon (Refined)
-      secondary: '#b91c1c', // Vibrant Terracotta
-      gradient: 'linear-gradient(to bottom right, #800000, #b91c1c)',
-      glow: 'rgba(185, 28, 28, 0.4)'
+      primary: '#b91c1c', // Vibrant Institutional Crimson
+      secondary: '#ef4444', // Bright Accent Red
+      gradient: 'linear-gradient(to bottom right, #b91c1c, #ef4444)',
+      glow: 'rgba(239, 68, 68, 0.4)'
     },
     features: {
       enabledModules: [
         ModuleType.DASHBOARD,
         ModuleType.CGPA,
         ModuleType.LIBRARY,
-        ModuleType.CAMPUS,
-        ModuleType.EMERGENCY,
+        ModuleType.DEGREE_GUIDE,
         ModuleType.QUIZ,
         ModuleType.HELP,
         ModuleType.ABOUT,
         ModuleType.TIMETABLE,
-        ModuleType.FRESHERS
+        ModuleType.FRESHERS,
+        ModuleType.LECTURES
       ],
-      campusTabs: ['map'] // IITM doesn't have the messy LPU mess menu logic yet
+      campusTabs: []
     }
   },
 ];

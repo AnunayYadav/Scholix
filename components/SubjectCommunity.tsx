@@ -819,6 +819,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
   const theme = useMemo(() => getSubjectTheme(activeSubject.name, activeSubject.color, activeSubject.icon_name), [activeSubject.name, activeSubject.color, activeSubject.icon_name]);
 
+  const isIITM = selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'bsdatascience';
+
   // Navigation / Tabs
   const [activeTab, setActiveTab] = useState<'files' | 'discussions' | 'requests' | 'packs' | 'leaderboard' | 'people'>('files');
   const [joined, setJoined] = useState(false);
@@ -3699,12 +3701,18 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     onChange={(e) => setEditProgram(e.target.value)}
                     className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold outline-none text-zinc-900 dark:text-white focus:ring-1 focus:ring-orange-500 transition-all cursor-pointer"
                   >
-                    <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BTech-CSE">BTech-CSE</option>
-                    <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BTech-ECE">BTech-ECE</option>
-                    <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BCA">BCA</option>
-                    <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BSc">BSc</option>
-                    <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BBA">BBA</option>
-                    <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BTech-MTech">BTech-MTech</option>
+                    {isIITM ? (
+                      <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BS Data Science">BS Data Science</option>
+                    ) : (
+                      <>
+                        <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BTech-CSE">BTech-CSE</option>
+                        <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BTech-ECE">BTech-ECE</option>
+                        <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BCA">BCA</option>
+                        <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BSc">BSc</option>
+                        <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BBA">BBA</option>
+                        <option className="bg-white dark:bg-[#121214] text-zinc-900 dark:text-zinc-200" value="BTech-MTech">BTech-MTech</option>
+                      </>
+                    )}
                   </select>
                 </div>
                 <div className="space-y-1">

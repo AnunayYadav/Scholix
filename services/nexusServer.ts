@@ -16,6 +16,12 @@ const getEnvVar = (name: string): string => {
   return '';
 };
 
+export const isIITMProgram = (program: string): boolean => {
+  const name = (program || '').toLowerCase().trim();
+  return name.startsWith('bs ') || name.includes('iitm') || name.includes('madras');
+};
+
+
 // Rate limiter for auth operations
 const rateLimiter = {
   attempts: new Map<string, { count: number; resetAt: number }>(),
@@ -1245,17 +1251,37 @@ class NexusServer {
     }
   }
 
-  static async createFolder(name: string, type: 'semester' | 'subject' | 'category', parentId: string | null, program: string, iconName?: string, color?: string) {
+  static async createFolder(name: string, type: 'semester' | 'subject' | 'category', parentId: string | null, program: string, iconName?: string, color?: string, universityOverride?: string) {
     const client = getSupabase();
     if (!client) return;
+    
+    let university = universityOverride;
+    
+    if (!university) {
+      if (parentId) {
+        const { data: parentFolder } = await client
+          .from('library_items')
+          .select('university')
+          .eq('id', parentId.split('-dup-')[0])
+          .maybeSingle();
+        if (parentFolder?.university) {
+          university = parentFolder.university;
+        }
+      }
+      
+      if (!university) {
+        university = isIITMProgram(program) ? "iitmuni" : "lpu";
+      }
+    }
     
     const { error } = await client.from('library_items').insert([{
       name,
       type,
-      parent_id: parentId,
+      parent_id: parentId ? parentId.split('-dup-')[0] : null,
       program,
       icon_name: iconName || 'Folder',
-      color: color || '#ff7a00'
+      color: color || '#ff7a00',
+      university
     }]);
     
     if (error) {
@@ -1434,7 +1460,8 @@ class NexusServer {
     const allFolders = await this.fetchFolders(program);
     let semFolder = allFolders.find(f => f.type === 'semester' && f.name.trim() === sem.trim() && f.program === program);
     if (!semFolder) {
-      await this.createFolder(sem.trim(), 'semester', null, program);
+      const universityOverride = isIITMProgram(program) ? 'iitmuni' : 'lpu';
+      await this.createFolder(sem.trim(), 'semester', null, program, undefined, undefined, universityOverride);
       const fresh = await this.fetchFolders(program);
       semFolder = fresh.find(f => f.type === 'semester' && f.name.trim() === sem.trim() && f.program === program);
     }
@@ -1456,11 +1483,28 @@ class NexusServer {
     const { error: storageErr } = await client.storage.from('nexus-documents').upload(path, file);
     if (storageErr) throw storageErr;
 
+    let university = 'lpu';
+    if (catFolder) {
+      const { data: catFolderDb } = await client
+        .from('library_items')
+        .select('university')
+        .eq('id', catFolder.id)
+        .maybeSingle();
+      if (catFolderDb?.university) {
+        university = catFolderDb.university;
+      } else {
+        university = isIITMProgram(program) ? "iitmuni" : "lpu";
+      }
+    } else {
+      university = isIITMProgram(program) ? "iitmuni" : "lpu";
+    }
+
     const { error: dbErr } = await client.from('library_items').insert([{
       name, description: desc, parent_id: catFolder?.id || null, type: 'file',
       size: `${(file.size / 1024 / 1024).toFixed(2)} MB`, storage_path: path,
       uploader_id: uid, status: admin ? 'approved' : 'pending',
-      program: program.trim()
+      program: program.trim(),
+      university
     }]);
     if (dbErr) throw dbErr;
   }

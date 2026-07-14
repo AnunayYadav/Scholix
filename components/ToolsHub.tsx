@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CheckCircle2, Calculator, Briefcase } from 'lucide-react';
+import { CheckCircle2, Calculator, Briefcase, PlayCircle } from 'lucide-react';
 import AttendanceTracker from './AttendanceTracker';
 import CGPACalculator from './CGPACalculator';
 import PlacementPrefect from './PlacementPrefect';
+import LecturesHub from './LecturesHub';
 import { UserProfile, ModuleType } from '../types';
 import { useUniversity } from '../hooks/useUniversity';
 import NexusAd from './NexusAd';
@@ -36,8 +37,8 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
   const uniSlug = getUniSlug(selectedUniversity);
   const prefix = uniSlug ? `/${uniSlug}` : '';
   
-  // Tabs: attendance, cgpa, placement
-  const [activeTab, setActiveTab] = useState<'attendance' | 'cgpa' | 'placement' | null>(null);
+  // Tabs: attendance, cgpa, placement, lectures
+  const [activeTab, setActiveTab] = useState<'attendance' | 'cgpa' | 'placement' | 'lectures' | null>(null);
 
   const [attendanceStats, setAttendanceStats] = useState<{ avg: number; margin: number; safe: boolean; hasData: boolean }>({
     avg: 0, margin: 0, safe: true, hasData: false
@@ -165,14 +166,14 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
-    if (tab === 'attendance' || tab === 'cgpa' || tab === 'placement') {
+    if (tab === 'attendance' || tab === 'cgpa' || tab === 'placement' || tab === 'lectures') {
       setActiveTab(tab as any);
     } else {
       setActiveTab(null);
     }
   }, [location.search]);
 
-  const switchTab = (tab: 'attendance' | 'cgpa' | 'placement') => {
+  const switchTab = (tab: 'attendance' | 'cgpa' | 'placement' | 'lectures') => {
     setActiveTab(tab);
     navigate(`${prefix}/tools?tab=${tab}`, { replace: true });
   };
@@ -195,6 +196,12 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
       name: 'Placement', 
       icon: <Briefcase className="w-5 h-5" />,
       module: ModuleType.PLACEMENT
+    },
+    { 
+      id: 'lectures', 
+      name: 'YT Lectures', 
+      icon: <PlayCircle className="w-5 h-5" />,
+      module: ModuleType.LECTURES
     }
   ];
 
@@ -218,6 +225,12 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
       color: 'text-blue-500 dark:text-blue-400 bg-blue-500/10',
       hoverBorder: 'hover:border-blue-500/30',
       glow: 'rgba(59, 130, 246, 0.15)'
+    },
+    lectures: {
+      desc: 'Browse and watch university lectures inline without distraction.',
+      color: 'text-red-500 dark:text-red-400 bg-red-500/10',
+      hoverBorder: 'hover:border-red-500/30',
+      glow: 'rgba(239, 68, 68, 0.15)'
     }
   };
 
@@ -338,10 +351,16 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
                 <h1 className="text-2xl md:text-3xl font-semibold text-zinc-800 dark:text-white tracking-tight leading-none mb-2">
                   {activeTab === 'attendance' && 'Attendance Tracker'}
                   {activeTab === 'placement' && 'Placement Prefect'}
+                  {activeTab === 'lectures' && (
+                    <>
+                      YouTube <span className="text-brand-primary">Lectures</span>
+                    </>
+                  )}
                 </h1>
                 <p className="text-zinc-500 dark:text-zinc-400 font-medium text-[11px] sm:text-xs">
                   {activeTab === 'attendance' && 'Log and monitor your daily course attendance'}
                   {activeTab === 'placement' && 'Track applications and prepare for placements'}
+                  {activeTab === 'lectures' && 'Browse and watch university lectures inline without distraction'}
                 </p>
               </div>
             )}
@@ -365,6 +384,7 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
               reportIdOverride={new URLSearchParams(location.search).get('id') || undefined} 
             />
           )}
+          {activeTab === 'lectures' && <LecturesHub hideHeader={true} />}
         </div>
       </div>
 

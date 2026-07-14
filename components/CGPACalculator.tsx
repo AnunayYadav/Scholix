@@ -37,6 +37,39 @@ const LPU_STANDARDS = [
 
 const GRADELIST = ['O', 'A+', 'A', 'B+', 'B', 'C', 'P', 'F'];
 
+const IITM_TERM_CREDITS: Record<number, number> = {
+  1: 16, 2: 16, 3: 17, 4: 12, 5: 19, 6: 18, 7: 14, 8: 14, 9: 14, 10: 14, 11: 10, 12: 10, 13: 10, 14: 10
+};
+
+const getGradePoints = (uni: string): Record<string, number> => {
+  if (uni === 'iitm_bs') {
+    return { 'S': 10, 'A': 9, 'B': 8, 'C': 7, 'D': 6, 'E': 4, 'U': 0 };
+  }
+  return GRADE_POINTS;
+};
+
+const getGradeList = (uni: string): string[] => {
+  if (uni === 'iitm_bs') {
+    return ['S', 'A', 'B', 'C', 'D', 'E', 'U'];
+  }
+  return GRADELIST;
+};
+
+const getStandards = (uni: string) => {
+  if (uni === 'iitm_bs') {
+    return [
+      { grade: 'S', points: 10, range: '90-100', label: 'Super' },
+      { grade: 'A', points: 9, range: '80-89', label: 'Excellent' },
+      { grade: 'B', points: 8, range: '70-79', label: 'Very Good' },
+      { grade: 'C', points: 7, range: '60-69', label: 'Good' },
+      { grade: 'D', points: 6, range: '50-59', label: 'Average' },
+      { grade: 'E', points: 4, range: '40-49', label: 'Pass' },
+      { grade: 'U', points: 0, range: '0-39', label: 'Fail' },
+    ];
+  }
+  return LPU_STANDARDS;
+};
+
 const getGradeFromMarks = (marks: number): string => {
   if (marks === 0) return 'F';
   if (marks >= 90) return 'O';
@@ -47,6 +80,20 @@ const getGradeFromMarks = (marks: number): string => {
   if (marks >= 45) return 'C';
   if (marks >= 40) return 'P';
   return 'F';
+};
+
+const getGradeFromMarksForUni = (marks: number, uni: string): string => {
+  if (uni === 'iitm_bs') {
+    if (marks === 0) return 'U';
+    if (marks >= 90) return 'S';
+    if (marks >= 80) return 'A';
+    if (marks >= 70) return 'B';
+    if (marks >= 60) return 'C';
+    if (marks >= 50) return 'D';
+    if (marks >= 40) return 'E';
+    return 'U';
+  }
+  return getGradeFromMarks(marks);
 };
 
 const serializePayload = (data: any): string => {
@@ -69,6 +116,160 @@ const serializePayload = (data: any): string => {
   return parts.join('|');
 };
 
+const SUBJECT_NICKNAMES: Record<string, string> = {
+  // IITM Foundation & Diploma & Degree
+  "BSMA1001": "Maths 1",
+  "BSMA1002": "Stats 1",
+  "BSCS1001": "CT",
+  "BSHS1001": "English 1",
+  "BSMA1003": "Maths 2",
+  "BSMA1004": "Stats 2",
+  "BSCS1002": "Python",
+  "BSHS1002": "English 2",
+  "BSCS2001": "DBMS",
+  "BSCS2002": "PDSA",
+  "BSCS2003": "MAD 1",
+  "BSCS2003P": "MAD 1 Proj",
+  "BSCS2005": "Java",
+  "BSCS2006": "MAD 2",
+  "BSCS2006P": "MAD 2 Proj",
+  "BSSE2001": "System Commands",
+  "BSCS2004": "MLF",
+  "BSMS2001": "BDM",
+  "BSCS2007": "MLT",
+  "BSSE2002": "TDS",
+  "BSCS2008": "MLP",
+  "BSCS2008P": "MLP Proj",
+  "BSMS2001P": "BDM Proj",
+  "BSMS2002": "Business Analytics",
+  "BSDA2001": "DL & GenAI",
+  "BSDA2001P": "DL & GenAI Proj",
+  "BSCS3001": "SE",
+  "BSCS3002": "Software Testing",
+  "BSGN3001": "SPG",
+  "BSBT4001": "Bioinformatics",
+  "BSBT4002": "Big Data & Bio",
+  "BSCS4001": "Data Viz",
+  "BSEE4001": "Speech Tech",
+  "BSMS4002": "Design Thinking",
+  "BSMS4001": "Industry 4.0",
+  "BSMS3002": "Market Research",
+  "BSCS4003": "Privacy & Security",
+  "BSDA5001": "Intro to Big Data",
+  "BSMS4003": "Financial Forensics",
+  "BSMA3012": "LSM",
+  "BSCS4021": "Adv Algorithms",
+  "BSMA3014": "Stat Computing",
+  "BSCS3031": "System Design",
+  "BSCS3005": "C Programming",
+  "BSMA2001": "Math Thinking",
+  "BSMS3033": "Managerial Econ",
+  "BSMS4023": "Game Theory",
+  "BSMS3034": "Corp Finance",
+  "BSDA5013": "DL Practice",
+  "BSCS4022": "OS",
+  "BSDA4001": "DS & AI Lab",
+  "BSCS4010": "App Dev Lab",
+  "BSCS4024": "Networks",
+  "BSCS3021": "TOC",
+  "BSCS4032": "Compiler Design",
+  "BSMA3001": "Discrete Maths",
+  "BSCS3003": "AI Search",
+  "BSCS3004": "Deep Learning",
+  "BSDA5004": "LLMs",
+  "BSDA5002": "Math for GenAI",
+  "BSDA5003": "Algorithms for DS",
+  "BSDA5014": "MLOps",
+  "BSDA5005": "NLP",
+  "BSDA5006": "CV",
+  "BSDA5007": "RL",
+  "BSDA6001": "Responsible AI",
+  "BSDA6002": "Stat Learning",
+  "BSDA6003": "Deployability of AI",
+  "BSDA6004": "Seq Decision Making",
+  "BSDA6005": "Info Theory",
+  "BSEE5001": "Speech Tech (PG)",
+  "BSDA6006": "Research Proj",
+  "BSDA6901": "MTech Proj",
+
+  // BTech CSE (LPU or standard)
+  "CSE111": "OC 1",
+  "CSE326": "IP Lab",
+  "INT108": "Python",
+  "MTH165": "Maths 1",
+  "ECE249": "BEEE",
+  "MEC136": "Engineering Drawing",
+  "CHE110": "EVS",
+  "PHY110": "Physics",
+  "ECE279": "BEEE Lab",
+  "CSE101": "CP",
+  "CSE121": "OC 2",
+  "CSE320": "SE",
+  "INT306": "DBMS",
+  "MTH166": "Maths 2",
+  "CSE202": "OOP",
+  "CSE205": "DSA",
+  "CSE306": "Networks",
+  "CSE307": "Internetworking Lab",
+  "CSE423": "Cloud Computing",
+  "GEN231": "Community Dev Proj",
+  "INT335": "Design Thinking",
+  "MTH401": "Discrete Maths",
+  "FRN601": "French 1",
+  "GER601": "German 1",
+  "JAP601": "Japanese 1",
+  "PEL121": "Comm Skills 1",
+  "PEL125": "Comm Skills 1 (Int)",
+  "PEL130": "Comm Skills 1 (Adv)",
+  "SPA601": "Spanish 1",
+  "FRN602": "French 2",
+  "GER602": "German 2",
+  "JAP602": "Japanese 2",
+  "PEL132": "Comm Skills 2",
+  "PEL134": "Comm Skills 2 (Int)",
+  "PEL136": "Comm Skills 2 (Adv)",
+  "SPA602": "Spanish 2",
+  "CSE211": "COD",
+  "CSE310": "Java",
+  "CSE316": "OS",
+  "CSE325": "OS Lab",
+  "INT428": "AI Essentials",
+  "MTH302": "Prob & Stats",
+  "PEA305": "Analytical Skills 1",
+  "PEA307": "Analytical Skills 1 (Adv)",
+  "INT330": "Cloud Solutions",
+  "INT242": "Cyber Security",
+  "INT217": "Data Management",
+  "INT219": "Front End Dev",
+  "ECE217": "Intro to IoT",
+  "CSE273": "ML Foundations",
+  "CSE374": "Adv SE",
+  "CSE332": "Ethics & Law",
+  "CSE408": "DAA",
+  "INT362": "Cloud Arch 1",
+  "INT249": "System Admin",
+  "INT232": "R Prog",
+  "INT222": "Adv Web Dev",
+  "ECE341": "Programming IoT",
+  "CSE274": "Applied ML",
+  "CSE375": "Software Testing",
+  "INT363": "Cloud Microservices",
+  "INT250": "Digital Evidence",
+  "INT374": "Power BI",
+  "INT252": "ReactJS",
+  "ECE128": "IoT Protocols",
+  "CSE471": "DL & CV",
+  "CSE376": "Automated Testing",
+  "PEA306": "Analytical Skills 2",
+  "PEA308": "Analytical Skills 2 (Adv)",
+  "CSE329": "Competitive Coding"
+};
+
+const simplifySubjectTitle = (code: string, originalTitle: string): string => {
+  const normalizedCode = code.trim().toUpperCase();
+  return SUBJECT_NICKNAMES[normalizedCode] || originalTitle;
+};
+
 
 interface CGPACalculatorProps {
   userProfile?: UserProfile | null;
@@ -85,7 +286,10 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
   const [manualAdjustments, setManualAdjustments] = useState<Record<number, number>>({});
   const [courses, setCourses] = useState<Course[]>([]);
   const [focusedCourseId, setFocusedCourseId] = useState<string | null>(null);
-  const [selectedProgram, setSelectedProgram] = useState<string>('btech-cse');
+  const ignoreAutoPopulateRef = useRef(false);
+
+  const defaultProgram = selectedUniversity === 'iitm_bs' ? 'bs-data-science' : 'btech-cse';
+  const [selectedProgram, setSelectedProgram] = useState<string>(defaultProgram);
 
   const currentCurriculum = useMemo(() => {
     return CURRICULUM_REGISTRY[selectedProgram] || BTECH_CSE_2025;
@@ -100,7 +304,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
       // Core subjects
       term.coreSubjects.forEach(s => {
         list.push({
-          name: `${s.code}: ${s.title}`,
+          name: `${s.code}: ${simplifySubjectTitle(s.code, s.title)}`,
           credits: s.credits
         });
       });
@@ -110,7 +314,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
         basket.subjects.forEach(s => {
           if (!list.some(item => item.name.startsWith(s.code))) {
             list.push({
-              name: `${s.code}: ${s.title}`,
+              name: `${s.code}: ${simplifySubjectTitle(s.code, s.title)}`,
               credits: s.credits
             });
           }
@@ -122,6 +326,32 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
     
     return result;
   }, [currentCurriculum]);
+
+  useEffect(() => {
+    setSelectedProgram(defaultProgram);
+    setCurrentSemester(1);
+    setManualAdjustments({});
+    setCourses([]);
+  }, [defaultProgram]);
+
+  useEffect(() => {
+    if (ignoreAutoPopulateRef.current) {
+      ignoreAutoPopulateRef.current = false;
+      return;
+    }
+    const defaultSubjects = activeProgramSubjects[currentSemester] || [];
+    if (defaultSubjects.length > 0) {
+      setCourses(defaultSubjects.map(sub => ({
+        id: Math.random().toString(36).substr(2, 9),
+        name: sub.name,
+        credits: sub.credits,
+        grade: selectedUniversity === 'iitm_bs' ? 'U' : 'F',
+        marks: 0
+      })));
+    } else {
+      setCourses([]);
+    }
+  }, [currentSemester, activeProgramSubjects, selectedUniversity]);
 
   // Flattened list for autocomplete lookup
   const allProgramSubjects = useMemo(() => {
@@ -231,6 +461,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
 
   const loadSnapshot = (record: any) => {
     const c = record.content;
+    ignoreAutoPopulateRef.current = true;
     setCourses(c.courses || []);
     setPrevCGPA(c.prevCGPA || '');
     setPrevTotalCredits(c.prevTotalCredits || '');
@@ -251,7 +482,8 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
   };
 
   const addCourse = () => {
-    setCourses([...courses, { id: Math.random().toString(36).substr(2, 9), name: '', credits: 2, grade: 'F', marks: 0 }]);
+    const defaultGrade = selectedUniversity === 'iitm_bs' ? 'U' : 'F';
+    setCourses([...courses, { id: Math.random().toString(36).substr(2, 9), name: '', credits: 2, grade: defaultGrade, marks: 0 }]);
   };
 
   const removeCourse = (id: string) => { setCourses(courses.filter(c => c.id !== id)); };
@@ -266,7 +498,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
             updated.credits = match.credits;
           }
         }
-        if (updates.marks !== undefined) updated.grade = getGradeFromMarks(Number(updates.marks));
+        if (updates.marks !== undefined) updated.grade = getGradeFromMarksForUni(Number(updates.marks), selectedUniversity);
         return updated;
       }
       return c;
@@ -275,16 +507,18 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
 
   const currentStats = useMemo(() => {
     let totalPoints = 0, totalCredits = 0;
+    const gradePoints = getGradePoints(selectedUniversity);
+    const gradeList = getGradeList(selectedUniversity);
     const gradeCounts: Record<string, number> = {};
-    GRADELIST.forEach(g => gradeCounts[g] = 0);
+    gradeList.forEach(g => gradeCounts[g] = 0);
     courses.forEach(c => {
-      totalPoints += (GRADE_POINTS[c.grade] || 0) * (Number(c.credits) || 0);
+      totalPoints += (gradePoints[c.grade] || 0) * (Number(c.credits) || 0);
       totalCredits += Number(c.credits) || 0;
       gradeCounts[c.grade] = (gradeCounts[c.grade] || 0) + 1;
     });
     const result = { sgpa: totalCredits === 0 ? 0 : totalPoints / totalCredits, totalPoints, totalCredits, gradeCounts };
     return result;
-  }, [courses]);
+  }, [courses, selectedUniversity]);
 
   // Track CGPA Calculation with debounce
   useEffect(() => {
@@ -303,11 +537,13 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
   const archivedCredits = useMemo(() => {
     if (prevTotalCredits !== '' && !isNaN(Number(prevTotalCredits))) return Number(prevTotalCredits);
     let sum = 0;
+    const isIITM = selectedUniversity === 'iitm_bs';
+    const creditsMap = isIITM ? IITM_TERM_CREDITS : LPU_BTECH_CREDITS;
     for (let i = 1; i < currentSemester; i++) {
-      sum += LPU_BTECH_CREDITS[i] || 20;
+      sum += creditsMap[i] || 20;
     }
     return sum;
-  }, [prevTotalCredits, currentSemester]);
+  }, [prevTotalCredits, currentSemester, selectedUniversity]);
 
   const overallCGPA = useMemo(() => {
     const pCGPA = Number(prevCGPA) || 0;
@@ -320,7 +556,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
     const tCGPA = Number(targetCGPA);
     if (!tCGPA || tCGPA <= 0) return { roadmap: [], summary: null };
 
-    const totalSems = 8;
+    const totalSems = currentCurriculum.terms.length;
     const archivedPoints = (Number(prevCGPA) || 0) * archivedCredits;
 
     const planSemIndices = [];
@@ -328,7 +564,10 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
 
     if (planSemIndices.length === 0) return { roadmap: [], summary: null };
 
-    const futureCredits = planSemIndices.reduce((sum, sem) => sum + (LPU_BTECH_CREDITS[sem] || 20), 0);
+    const isIITM = selectedUniversity === 'iitm_bs';
+    const creditsMap = isIITM ? IITM_TERM_CREDITS : LPU_BTECH_CREDITS;
+
+    const futureCredits = planSemIndices.reduce((sum, sem) => sum + (creditsMap[sem] || 20), 0);
     const totalCreditsForDegree = archivedCredits + futureCredits;
     const totalPointsNeeded = tCGPA * totalCreditsForDegree;
     const pointsNeededFromFuture = totalPointsNeeded - archivedPoints;
@@ -338,7 +577,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
     Object.entries(manualAdjustments).forEach(([sem, val]) => {
       const sNum = parseInt(sem);
       if (planSemIndices.includes(sNum)) {
-        const semCredits = LPU_BTECH_CREDITS[sNum] || 20;
+        const semCredits = creditsMap[sNum] || 20;
         manualPoints += (Number(val) * semCredits);
         manualCredits += semCredits;
       }
@@ -366,7 +605,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
         isImpossible: autoSGPA > 10 || (pointsNeededFromUnpinned > 0 && autoSGPA <= 0)
       }
     };
-  }, [targetCGPA, prevCGPA, archivedCredits, currentSemester, manualAdjustments]);
+  }, [targetCGPA, prevCGPA, archivedCredits, currentSemester, manualAdjustments, currentCurriculum, selectedUniversity]);
 
   const adjustSemTarget = (sem: number, delta: number) => {
     setManualAdjustments(prev => {
@@ -456,7 +695,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                       <input type="number" min="0" max="100" value={c.marks} onChange={(e) => updateCourse(c.id, { marks: parseInt(e.target.value) || 0 })} className="w-20 bg-white dark:bg-white/5 border dark:border-white/10 rounded-2xl px-3 py-3 text-xs text-center font-semibold dark:text-white outline-none" />
                     ) : (
                       <NexusDropdown
-                        options={GRADELIST}
+                        options={getGradeList(selectedUniversity)}
                         value={c.grade}
                         onChange={(val) => updateCourse(c.id, { grade: val })}
                         className="w-24"
@@ -473,7 +712,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
 
       <div className="border-t border-zinc-100 dark:border-white/5 pt-6 flex items-center justify-between">
         <div className="text-[11px] sm:text-xs text-zinc-400 font-semibold">
-          Total Semester Credits: <span className="text-zinc-800 dark:text-white font-bold">{currentStats.totalCredits}</span>
+          {selectedUniversity === 'iitm_bs' ? 'Total Level Credits' : 'Total Semester Credits'}: <span className="text-zinc-800 dark:text-white font-bold">{currentStats.totalCredits}</span>
         </div>
         <button 
           onClick={() => setShowForecast(!showForecast)}
@@ -516,7 +755,16 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {roadmapData.roadmap.map((item) => (
                   <div key={item.sem} className={`p-4 rounded-2xl border transition-all flex flex-col items-center justify-center text-center relative overflow-hidden ${item.isManual ? 'bg-brand-primary/10 border-brand-primary/30 shadow-lg' : 'bg-white dark:bg-[#0a0a0a] border-zinc-100 dark:border-white/5'}`}>
-                    <p className="text-[10px] text-zinc-400 mb-2">Sem {item.sem} • {LPU_BTECH_CREDITS[item.sem] || 20} Cr</p>
+                    <p className="text-[10px] text-zinc-400 mb-2">
+                      {(() => {
+                        const isIITM = selectedUniversity === 'iitm_bs';
+                        const termName = currentCurriculum.terms.find(t => t.termNumber === item.sem)?.termName || `Term ${item.sem}`;
+                        const shortTermName = termName.includes('(') ? termName.split(' ')[0] + ' ' + termName.split(' ')[1] : termName;
+                        const label = isIITM ? shortTermName : `Sem ${item.sem}`;
+                        const credits = isIITM ? (IITM_TERM_CREDITS[item.sem] || 16) : (LPU_BTECH_CREDITS[item.sem] || 20);
+                        return `${label} • ${credits} Cr`;
+                      })()}
+                    </p>
 
                     <div className="flex items-center gap-1.5 relative z-10">
                       <button onClick={() => adjustSemTarget(item.sem, -0.1)} className="w-6 h-6 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-brand-primary hover:text-white transition-all border-none">
@@ -549,7 +797,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                 <p className="text-[10px] sm:text-[11px] font-bold text-zinc-600 dark:text-zinc-300 leading-relaxed">
                   {roadmapData.summary.isImpossible
                     ? "Target mathematically unreachable. Reduce manual locks or lower target CGPA."
-                    : <>Auto-balancing: Remaining unlocked semesters now require an average of <strong className="text-brand-primary">{roadmapData.summary.avgNeeded.toFixed(2)} SGPA</strong> to maintain your <strong className="text-brand-primary">{targetCGPA}</strong> goal.</>
+                    : <>Auto-balancing: Remaining unlocked {selectedUniversity === 'iitm_bs' ? 'terms' : 'semesters'} now require an average of <strong className="text-brand-primary">{roadmapData.summary.avgNeeded.toFixed(2)} SGPA</strong> to maintain your <strong className="text-brand-primary">{targetCGPA}</strong> goal.</>
                   }
                 </p>
               </div>
@@ -693,10 +941,12 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
         {/* Program Selector Only */}
         <div className="flex flex-wrap items-center gap-3">
           <NexusDropdown
-            options={Object.keys(CURRICULUM_REGISTRY).map(k => CURRICULUM_REGISTRY[k].programName)}
-            value={CURRICULUM_REGISTRY[selectedProgram]?.programName || 'BTech CSE'}
+            options={Object.keys(CURRICULUM_REGISTRY)
+              .filter(k => selectedUniversity === 'iitm_bs' ? k === 'bs-data-science' : k !== 'bs-data-science')
+              .map(k => CURRICULUM_REGISTRY[k].programName)}
+            value={CURRICULUM_REGISTRY[selectedProgram]?.programName || (selectedUniversity === 'iitm_bs' ? 'BS Data Science' : 'BTech CSE')}
             onChange={(val) => {
-              const key = Object.keys(CURRICULUM_REGISTRY).find(k => CURRICULUM_REGISTRY[k].programName === val) || 'btech-cse';
+              const key = Object.keys(CURRICULUM_REGISTRY).find(k => CURRICULUM_REGISTRY[k].programName === val) || (selectedUniversity === 'iitm_bs' ? 'bs-data-science' : 'btech-cse');
               setSelectedProgram(key);
               setCurrentSemester(1);
               setManualAdjustments({});
@@ -710,10 +960,14 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
 
       {currentSemester > 1 && (
         <div className="glass-panel p-8 rounded-[40px] border border-brand-primary/20 bg-brand-primary/[0.02] shadow-sm mb-8 animate-fade-in">
-          <h3 className="text-[11px] sm:text-xs font-medium text-brand-primary mb-6">Academic history (Sems 1 – {currentSemester - 1})</h3>
+          <h3 className="text-[11px] sm:text-xs font-medium text-brand-primary mb-6">
+            {selectedUniversity === 'iitm_bs' ? `Academic history (Terms 1 – ${currentSemester - 1})` : `Academic history (Sems 1 – ${currentSemester - 1})`}
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-[11px] sm:text-xs text-zinc-400 mb-2 ml-1">CGPA till Sem {currentSemester - 1}</label>
+              <label className="block text-[11px] sm:text-xs text-zinc-400 mb-2 ml-1">
+                {selectedUniversity === 'iitm_bs' ? `CGPA till Term ${currentSemester - 1}` : `CGPA till Sem ${currentSemester - 1}`}
+              </label>
               <input
                 type="number" step="0.01" max="10"
                 value={prevCGPA}
@@ -742,12 +996,14 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
           <div className="flex flex-row items-center justify-between gap-3 px-1 w-full">
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <NexusDropdown
-                options={['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8']}
-                value={`Semester ${currentSemester}`}
+                options={currentCurriculum.terms.map(t => t.termName)}
+                value={currentCurriculum.terms.find(t => t.termNumber === currentSemester)?.termName || `Semester ${currentSemester}`}
                 onChange={(val) => {
-                  const sem = parseInt(val.split(' ')[1]);
-                  setCurrentSemester(sem);
-                  setManualAdjustments({});
+                  const term = currentCurriculum.terms.find(t => t.termName === val);
+                  if (term) {
+                    setCurrentSemester(term.termNumber);
+                    setManualAdjustments({});
+                  }
                 }}
               />
               <NexusDropdown
@@ -784,11 +1040,13 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
       {showGradingStandards && (
         <div className="search-dropdown-anim glass-panel p-8 rounded-[40px] border border-zinc-200 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/60 shadow-sm overflow-hidden">
           <header className="flex items-center justify-between mb-8">
-            <h3 className="text-[11px] sm:text-xs font-semibold text-brand-primary">{shortBrandName} grading standards</h3>
+            <h3 className="text-[11px] sm:text-xs font-semibold text-brand-primary">
+              {selectedUniversity === 'iitm_bs' ? 'IIT Madras' : shortBrandName} grading standards
+            </h3>
             <span className="text-[11px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-3 py-1 rounded-full">Standard Reference</span>
           </header>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {LPU_STANDARDS.map((s) => (
+            {getStandards(selectedUniversity).map((s) => (
               <div key={s.grade} className="p-4 rounded-[28px] bg-zinc-50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 flex flex-col items-center text-center group hover:border-brand-primary/30 transition-all">
                 <span className="text-xl font-bold text-zinc-900 dark:text-white mb-1 group-hover:scale-110 transition-transform">{s.grade}</span>
                 <p className="text-xs text-brand-primary mb-2">{s.points} Points</p>
@@ -799,7 +1057,11 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
           </div>
           <div className="mt-6 p-4 rounded-2xl bg-brand-primary/5 border border-brand-primary/10">
             <p className="text-[11px] sm:text-xs font-bold text-zinc-600 dark:text-zinc-400 leading-relaxed">
-              <strong className="text-brand-primary">Pro Tip:</strong> {shortBrandName} uses relative grading based on class performance. These mark ranges are "Safe Estimates" to ensure you hit your target grade regardless of class average shifts.
+              {selectedUniversity === 'iitm_bs' ? (
+                <><strong className="text-brand-primary">Pro Tip:</strong> IIT Madras BS program uses absolute grading. S stands for Super (10 points), A is Excellent (9 points), and E is the minimum passing grade (4 points).</>
+              ) : (
+                <><strong className="text-brand-primary">Pro Tip:</strong> {shortBrandName} uses relative grading based on class performance. These mark ranges are "Safe Estimates" to ensure you hit your target grade regardless of class average shifts.</>
+              )}
             </p>
           </div>
         </div>

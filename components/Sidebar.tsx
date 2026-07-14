@@ -55,6 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       case ModuleType.MARKETPLACE: return `${prefix}/campus/market`;
       case ModuleType.ROOMMATE: return `${prefix}/campus/roommate`;
       case ModuleType.EMERGENCY: return `${prefix}/emergency`;
+      case ModuleType.DEGREE_GUIDE: return `${prefix}/degree-guide`;
       case ModuleType.TOOLS: return `${prefix}/tools`;
       case ModuleType.ADMIN_STATS: return `${prefix}/admin-stats`;
       case ModuleType.PRIVACY: return `${prefix}/settings/privacy`;
@@ -118,6 +119,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
     },
     {
+      id: ModuleType.DEGREE_GUIDE,
+      label: 'Degree Guide',
+      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z" /><path d="M6 6h10M6 10h10" /></svg>
+    },
+    {
       id: ModuleType.SETTINGS,
       label: 'Settings',
       icon: <svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.72V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.17a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
@@ -128,7 +134,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     ? allNavItems.filter(item => {
       if (
         item.id === ModuleType.DASHBOARD ||
-        item.id === ModuleType.EMERGENCY ||
         item.id === ModuleType.SETTINGS
       ) return true;
 

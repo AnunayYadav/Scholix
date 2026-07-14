@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Flame, Upload, HelpCircle, Trophy, MessageSquare, Download, ArrowRight, Star, ThumbsUp } from 'lucide-react';
 import CommunityService from '../services/communityService';
-import NexusServer from '../services/nexusServer';
+import NexusServer, { isIITMProgram } from '../services/nexusServer';
 import { CommunityPost, MaterialRequest } from '../types/communityTypes';
 import { LibraryFile } from '../types';
 import { slugify, librarySlug } from '../utils/slugify';
+import { useUniversity } from '../hooks/useUniversity.tsx';
+import { IITM_BS_DS, BTECH_CSE_2025 } from '../data/curriculumData.ts';
 
 interface DailyFeedProps {
   userProfile: any;
@@ -18,6 +20,7 @@ const DailyFeed: React.FC<DailyFeedProps> = ({ userProfile }) => {
   const [topContributors, setTopContributors] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { selectedUniversity } = useUniversity();
 
   useEffect(() => {
     const loadFeedData = async () => {
@@ -31,8 +34,8 @@ const DailyFeed: React.FC<DailyFeedProps> = ({ userProfile }) => {
 
         // Fetch global posts, active requests, latest files, and leaderboard in parallel
         const [postsRes, reqsRes, filesRes, leaderboard] = await Promise.all([
-          client.from('community_hub').select('*').eq('type', 'post').order('created_at', { ascending: false }).limit(20),
-          client.from('community_hub').select('*').eq('type', 'request').eq('status', 'open').order('created_at', { ascending: false }).limit(10),
+          client.from('community_hub').select('*').eq('type', 'post').order('created_at', { ascending: false }).limit(100),
+          client.from('community_hub').select('*').eq('type', 'request').eq('status', 'open').order('created_at', { ascending: false }).limit(50),
           NexusServer.fetchFiles('All'),
           NexusServer.fetchLeaderboard()
         ]);
@@ -41,16 +44,33 @@ const DailyFeed: React.FC<DailyFeedProps> = ({ userProfile }) => {
         const reqsData = reqsRes.data || [];
         const allFiles = filesRes || [];
 
+        // Check if library merging is enabled in settings
+        const mergeLibraries = typeof window !== 'undefined' ? localStorage.getItem('nexus_merge_libraries') === 'true' : false;
+
+        let filteredPosts = postsData;
+        let filteredRequests = reqsData;
+        let filteredFiles = allFiles;
+
+        if (selectedUniversity === 'iitm_bs' && !mergeLibraries) {
+          filteredPosts = postsData.filter(p => (p.subject_id || '').toUpperCase().trim().startsWith('BS'));
+          filteredRequests = reqsData.filter(r => (r.subject_id || '').toUpperCase().trim().startsWith('BS'));
+          filteredFiles = allFiles.filter(f => isIITMProgram(f.program || ''));
+        } else if (selectedUniversity === 'lpu' && !mergeLibraries) {
+          filteredPosts = postsData.filter(p => !(p.subject_id || '').toUpperCase().trim().startsWith('BS'));
+          filteredRequests = reqsData.filter(r => !(r.subject_id || '').toUpperCase().trim().startsWith('BS'));
+          filteredFiles = allFiles.filter(f => !isIITMProgram(f.program || ''));
+        }
+
         // Sort posts by popularity (total reactions)
-        const sortedPosts = [...postsData].sort((a, b) => {
+        const sortedPosts = [...filteredPosts].sort((a, b) => {
           const aVotes = ((a.reactions?.helpful?.length || 0) + (a.reactions?.quality?.length || 0) + (a.reactions?.important?.length || 0));
           const bVotes = ((b.reactions?.helpful?.length || 0) + (b.reactions?.quality?.length || 0) + (b.reactions?.important?.length || 0));
           return bVotes - aVotes;
         }).slice(0, 4);
 
         setTrendingPosts(sortedPosts);
-        setRecentUploads(allFiles.slice(0, 4));
-        setOpenRequests(reqsData.slice(0, 3));
+        setRecentUploads(filteredFiles.slice(0, 4));
+        setOpenRequests(filteredRequests.slice(0, 3));
 
         // Map real leaderboard contributors from Supabase
         const contributors = leaderboard.map((user, idx) => ({
@@ -70,26 +90,50 @@ const DailyFeed: React.FC<DailyFeedProps> = ({ userProfile }) => {
     };
 
     loadFeedData();
-  }, [userProfile]);
+  }, [userProfile, selectedUniversity]);
+
+  const getSubjectPath = (subjectId: string, itemId: string, type: 'post' | 'file' | 'request') => {
+    const isIITM = (subjectId || '').toUpperCase().trim().startsWith('BS');
+    const programSlug = isIITM ? 'bs-data-science' : 'btech-cse';
+    
+    // Fallback semester/level slug
+    let semesterSlug = isIITM ? 'foundation-level-32-credits' : 'semester-2';
+    
+    const curriculum = isIITM ? IITM_BS_DS : BTECH_CSE_2025;
+    for (const term of curriculum.terms) {
+      const hasCore = term.coreSubjects.some(s => s.code.toUpperCase() === subjectId.toUpperCase() || `${s.code}: ${s.title}`.toUpperCase() === subjectId.toUpperCase());
+      const hasElective = term.electiveBaskets.some(b => b.subjects.some(s => s.code.toUpperCase() === subjectId.toUpperCase() || `${s.code}: ${s.title}`.toUpperCase() === subjectId.toUpperCase()));
+      if (hasCore || hasElective) {
+        semesterSlug = librarySlug(term.termName, 'semester');
+        break;
+      }
+    }
+    
+    const prefix = isIITM ? '/iitm' : '/lpu';
+    
+    if (type === 'file') {
+      return `${prefix}/library/${programSlug}/${semesterSlug}/${librarySlug(subjectId, 'subject')}?tab=files&file=${itemId}`;
+    }
+    if (type === 'request') {
+      return `${prefix}/library/${programSlug}/${semesterSlug}/${librarySlug(subjectId, 'subject')}?tab=requests&request=${itemId}`;
+    }
+    return `${prefix}/library/${programSlug}/${semesterSlug}/${librarySlug(subjectId, 'subject')}?tab=overview&post=${itemId}`;
+  };
 
   const handlePostClick = (post: CommunityPost) => {
-    // Navigate to r/Subject community page with Overview tab and open the post
-    const semesterSlug = 'semester-2'; // Default fallback or look up from files
-    const path = `/library/BTech-CSE/${semesterSlug}/${librarySlug(post.subject_id, 'subject')}?tab=overview&post=${post.id}`;
-    navigate(path);
+    navigate(getSubjectPath(post.subject_id, post.id, 'post'));
   };
 
   const handleUploadClick = (file: LibraryFile) => {
-    // Navigate to subject files and select the file
-    const semesterSlug = librarySlug(file.semester || 'semester-2', 'semester');
-    const path = `/library/${librarySlug(file.program || 'BTech CSE', 'program')}/${semesterSlug}/${librarySlug(file.subject, 'subject')}?tab=files&file=${file.id}`;
+    const isIITM = isIITMProgram(file.program || '');
+    const prefix = isIITM ? '/iitm' : '/lpu';
+    const semesterSlug = librarySlug(file.semester || (isIITM ? 'Foundation Level (32 Credits)' : 'semester-2'), 'semester');
+    const path = `${prefix}/library/${librarySlug(file.program || (isIITM ? 'BS Data Science' : 'BTech CSE'), 'program')}/${semesterSlug}/${librarySlug(file.subject, 'subject')}?tab=files&file=${file.id}`;
     navigate(path);
   };
 
   const handleRequestClick = (req: MaterialRequest) => {
-    const semesterSlug = 'semester-2';
-    const path = `/library/BTech-CSE/${semesterSlug}/${librarySlug(req.subject_id, 'subject')}?tab=requests&request=${req.id}`;
-    navigate(path);
+    navigate(getSubjectPath(req.subject_id, req.id, 'request'));
   };
 
   if (isLoading) {
