@@ -667,7 +667,6 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
       if (controller.signal.aborted) return;
       if (fetchedVideos.length === 0) throw new Error("No lectures found.");
       setYtVideos(fetchedVideos);
-      setActiveVideoId(fetchedVideos[0].id);
     } catch (err: any) {
       if (err.name === 'AbortError') return;
       setError(err.message || "Search failed.");
