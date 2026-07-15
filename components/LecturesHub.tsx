@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -8,7 +8,6 @@ import {
   Loader2, 
   AlertTriangle,
   PlayCircle,
-  Video,
   ChevronDown,
   X,
   ThumbsUp,
@@ -19,14 +18,18 @@ import {
   Minimize2,
   Maximize2,
   SlidersHorizontal,
-  Calendar,
-  BookOpen,
-  FileText,
-  List,
   Bookmark,
-  Send
+  BookmarkCheck,
+  ChevronRight,
+  SkipForward,
+  ListVideo,
+  Timer,
+  MonitorPlay
 } from 'lucide-react';
 import { IITM_BS_DS, BTECH_CSE_2025 } from '../data/curriculumData.ts';
+import { SUBJECT_NICKNAMES, CUSTOM_ACRONYMS } from '../data/subjectNicknames.ts';
+
+// ─── Types ───
 
 interface YTVideo {
   id: string;
@@ -57,6 +60,8 @@ interface DropdownOption {
   label: string;
 }
 
+// ─── Constants ───
+
 const INVIDIOUS_INSTANCES = [
   "https://invidious.projectsegfau.lt",
   "https://invidious.flokinet.to",
@@ -64,123 +69,7 @@ const INVIDIOUS_INSTANCES = [
   "https://invidious.private.coffee"
 ];
 
-// Shorthand / Abbreviation Nicknames Mapping
-const SUBJECT_NICKNAMES: Record<string, string> = {
-  // IITM
-  "BSMA1001": "Maths 1",
-  "BSMA1002": "Stats 1",
-  "BSCS1001": "CT",
-  "BSHS1001": "English 1",
-  "BSMA1003": "Maths 2",
-  "BSMA1004": "Stats 2",
-  "BSCS1002": "Python",
-  "BSHS1002": "English 2",
-  "BSCS2001": "DBMS",
-  "BSCS2002": "PDSA",
-  "BSCS2003": "MAD 1",
-  "BSCS2003P": "MAD 1 Proj",
-  "BSCS2005": "Java",
-  "BSCS2006": "MAD 2",
-  "BSCS2006P": "MAD 2 Proj",
-  "BSSE2001": "System Commands",
-  "BSCS2004": "MLF",
-  "BSMS2001": "BDM",
-  "BSCS2007": "MLT",
-  "BSSE2002": "TDS",
-  "BSCS2008": "MLP",
-  "BSCS2008P": "MLP Proj",
-  "BSMS2001P": "BDM Proj",
-  "BSMS2002": "Business Analytics",
-  "BSDA2001": "DL & GenAI",
-  "BSDA2001P": "DL & GenAI Proj",
-  "BSCS3001": "SE",
-  "BSCS3002": "Software Testing",
-  "BSGN3001": "SPG",
-  "BSBT4001": "Bioinformatics",
-  "BSBT4002": "Big Data & Bio",
-  "BSCS4001": "Data Viz",
-  "BSEE4001": "Speech Tech",
-  "BSMS4002": "Design Thinking",
-  "BSMS4001": "Industry 4.0",
-  "BSMS3002": "Market Research",
-  "BSCS4003": "Privacy & Security",
-  "BSDA5001": "Intro to Big Data",
-  "BSMS4003": "Financial Forensics",
-  "BSMA3012": "LSM",
-  "BSCS4021": "Adv Algorithms",
-  "BSMA3014": "Stat Computing",
-  "BSCS3031": "System Design",
-  "BSCS3005": "C Programming",
-  "BSMA2001": "Math Thinking",
-  "BSMS3033": "Managerial Econ",
-  "BSMS4023": "Game Theory",
-  "BSMS3034": "Corp Finance",
-  "BSDA5013": "DL Practice",
-  "BSCS4022": "OS",
-  "BSDA4001": "DS & AI Lab",
-  "BSCS4010": "App Dev Lab",
-  "BSCS4024": "Networks",
-  "BSCS3021": "TOC",
-  "BSCS4032": "Compiler Design",
-  "BSMA3001": "Discrete Maths",
-  "BSCS3003": "AI Search",
-  "BSCS3004": "Deep Learning",
-  "BSDA5004": "LLMs",
-  "BSDA5002": "Math for GenAI",
-  "BSDA5003": "Algorithms for DS",
-  "BSDA5014": "MLOps",
-  "BSDA5005": "NLP",
-  "BSDA5006": "CV",
-  "BSDA5007": "RL",
-  
-  // LPU
-  "CSE111": "OC 1",
-  "CSE326": "IP Lab",
-  "INT108": "Python",
-  "MTH165": "Maths 1",
-  "ECE249": "BEEE",
-  "CSE101": "CP",
-  "CSE121": "OC 2",
-  "CSE320": "SE",
-  "INT306": "DBMS",
-  "MTH166": "Maths 2",
-  "CSE202": "OOP",
-  "CSE205": "DSA",
-  "CSE306": "Networks",
-  "CSE423": "Cloud Computing",
-  "INT335": "Design Thinking",
-  "MTH401": "Discrete Maths",
-  "PEL121": "Comm Skills 1",
-  "PEL132": "Comm Skills 2",
-  "CSE211": "COD",
-  "CSE310": "Java",
-  "CSE316": "OS",
-  "MTH302": "Prob & Stats",
-  "INT330": "Cloud Solutions",
-  "INT242": "Cyber Security",
-  "INT217": "Data Management",
-  "INT219": "Front End Dev",
-  "CSE273": "ML Foundations",
-  "CSE374": "Adv SE",
-  "CSE408": "DAA",
-  "INT232": "R Prog",
-  "INT222": "Adv Web Dev",
-  "CSE274": "Applied ML",
-  "CSE375": "Software Testing",
-  "INT252": "ReactJS",
-  "CSE471": "DL & CV",
-  "CSE376": "Automated Testing",
-  "CSE329": "Competitive Coding"
-};
-
-// Filter suggestions categories
-const LECTURE_CATEGORIES = [
-  { id: 'all', label: 'All Lectures', suffix: '' },
-  { id: 'quiz1', label: 'Quiz 1 / Midterm', suffix: 'quiz 1 midterm' },
-  { id: 'quiz2', label: 'Quiz 2', suffix: 'quiz 2' },
-  { id: 'endterm', label: 'End Term / Finals', suffix: 'end term final exam' },
-  { id: 'pyq', label: 'PYQs & Solutions', suffix: 'pyq past papers solved' }
-];
+// ─── Search Query Building ───
 
 const findFullTitleInCurriculum = (code: string): string | null => {
   const findInProg = (prog: any) => {
@@ -196,7 +85,6 @@ const findFullTitleInCurriculum = (code: string): string | null => {
     }
     return null;
   };
-
   return findInProg(IITM_BS_DS) || findInProg(BTECH_CSE_2025);
 };
 
@@ -204,15 +92,11 @@ const resolveSearchQuery = (query: string): string => {
   const q = query.trim().toUpperCase();
   if (!q) return query;
 
-  // 1. Exact matching by course code (e.g. BSCS1001 -> Computational Thinking)
-  for (const code of Object.keys(SUBJECT_NICKNAMES)) {
-    if (code === q) {
-      const fullTitle = findFullTitleInCurriculum(code);
-      if (fullTitle) return fullTitle;
-    }
+  if (SUBJECT_NICKNAMES[q]) {
+    const fullTitle = findFullTitleInCurriculum(q);
+    if (fullTitle) return fullTitle;
   }
 
-  // 2. Matching by Nickname (case-insensitive, e.g. CT -> Computational Thinking)
   for (const [code, nick] of Object.entries(SUBJECT_NICKNAMES)) {
     if (nick.toUpperCase() === q) {
       const fullTitle = findFullTitleInCurriculum(code);
@@ -220,33 +104,7 @@ const resolveSearchQuery = (query: string): string => {
     }
   }
 
-  // 3. Manual common initials backup
-  const customAcronyms: Record<string, string> = {
-    "CT": "Computational Thinking",
-    "DBMS": "Database Management Systems",
-    "DSA": "Data Structures and Algorithms",
-    "PDSA": "Programming, Data Structures and Algorithms using Python",
-    "MAD1": "Modern Application Development I",
-    "MAD 1": "Modern Application Development I",
-    "MAD2": "Modern Application Development II",
-    "MAD 2": "Modern Application Development II",
-    "MLF": "Machine Learning Foundations",
-    "MLT": "Machine Learning Techniques",
-    "MLP": "Machine Learning Practice",
-    "SE": "Software Engineering",
-    "MLOPS": "Machine Learning Operations (MLOps)",
-    "OS": "Operating Systems",
-    "TOC": "Theory of Computation",
-    "DL": "Deep Learning",
-    "NLP": "Natural Language Processing",
-    "CV": "Computer Vision",
-    "RL": "Reinforcement Learning"
-  };
-
-  if (customAcronyms[q]) {
-    return customAcronyms[q];
-  }
-
+  if (CUSTOM_ACRONYMS[q]) return CUSTOM_ACRONYMS[q];
   return query;
 };
 
@@ -264,157 +122,131 @@ const findCodeInCurriculum = (title: string): string | null => {
     }
     return null;
   };
-
   return findInProg(IITM_BS_DS) || findInProg(BTECH_CSE_2025);
 };
 
 const buildSearchQuery = (subject: string, catId: string, university: string, channelName?: string): string => {
   const isIITM = university === 'iitm_bs';
-  
   const resolved = resolveSearchQuery(subject);
   const code = findCodeInCurriculum(resolved) || findCodeInCurriculum(subject);
-  
-  let subjectTerm = resolved;
-  if (code) {
-    const nickname = SUBJECT_NICKNAMES[code];
-    if (isIITM) {
-      subjectTerm = nickname || code; // e.g. Maths 1
-    } else {
-      subjectTerm = nickname ? `${code} ${nickname}` : code; // e.g. CSE202 OOP
-    }
+
+  let subjectTerm: string;
+  if (isIITM) {
+    subjectTerm = resolved;
+  } else {
+    subjectTerm = code ? `${code} ${resolved}` : resolved;
   }
 
-  let categoryKeywords = '';
+  let categorySuffix: string;
   if (isIITM) {
     switch (catId) {
-      case 'quiz1':
-        categoryKeywords = 'quiz 1 midterm week 1 to 4 one shots pyqs';
-        break;
-      case 'quiz2':
-        categoryKeywords = 'quiz 2 week 5 to 8 one shots pyqs';
-        break;
-      case 'endterm':
-        categoryKeywords = 'end term final exam week 9 to 12 one shots pyqs';
-        break;
-      case 'pyq':
-        categoryKeywords = 'pyqs solved past papers solutions practice';
-        break;
-      default:
-        categoryKeywords = 'lectures playlist complete course';
+      case 'quiz1': categorySuffix = 'quiz 1'; break;
+      case 'quiz2': categorySuffix = 'quiz 2'; break;
+      case 'endterm': categorySuffix = 'end term exam'; break;
+      case 'pyq': categorySuffix = 'pyq solutions'; break;
+      default: categorySuffix = 'lectures'; break;
     }
   } else {
-    // LPU Specific keywords
     switch (catId) {
-      case 'quiz1':
-        categoryKeywords = 'midterm CA1 CA2 unit 1 unit 2 unit 3 lectures one shot';
-        break;
-      case 'quiz2':
-        categoryKeywords = 'CA3 unit 4 unit 5 lectures one shot';
-        break;
-      case 'endterm':
-        categoryKeywords = 'endterm final exam syllabus unit 1 unit 2 unit 3 unit 4 unit 5 unit 6 lectures one shot';
-        break;
-      case 'pyq':
-        categoryKeywords = 'endterm midterm CA1 CA2 CA3 pyqs solved past papers question bank';
-        break;
-      default:
-        categoryKeywords = 'lectures chapters playlist unit wise';
+      case 'quiz1': categorySuffix = 'midterm one shot'; break;
+      case 'quiz2': categorySuffix = 'CA3 one shot'; break;
+      case 'endterm': categorySuffix = 'end term exam'; break;
+      case 'pyq': categorySuffix = 'pyq solved papers'; break;
+      default: categorySuffix = 'lectures'; break;
     }
   }
 
-  let query = '';
+  let query: string;
   if (channelName) {
-    // Search within a specific channel
-    query = `"${channelName}" ${subjectTerm} ${categoryKeywords}`;
+    query = `${channelName} ${subjectTerm} ${categorySuffix}`;
   } else {
-    // General search: brand + term + category keywords
     const brand = isIITM ? 'IITM BS' : 'LPU';
-    query = `${brand} ${subjectTerm} ${categoryKeywords}`;
+    query = `${brand} ${subjectTerm} ${categorySuffix}`;
   }
-
   return query.trim().replace(/\s+/g, ' ');
 };
+
+// ─── Utilities ───
 
 const formatDuration = (totalSecs: number): string => {
   if (totalSecs <= 0) return "";
   const hrs = Math.floor(totalSecs / 3600);
   const mins = Math.floor((totalSecs % 3600) / 60);
   const secs = totalSecs % 60;
-  
-  if (hrs > 0) {
-    return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  } else {
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  }
+  if (hrs > 0) return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 };
 
-const fetchFromInvidious = async (query: string, page: number): Promise<YTVideo[]> => {
+const parseDurationToSeconds = (dur: string): number => {
+  if (!dur) return 0;
+  const parts = dur.split(':').map(Number);
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  return 0;
+};
+
+const formatStudyTime = (totalSecs: number): string => {
+  if (totalSecs <= 0) return "";
+  const hrs = Math.floor(totalSecs / 3600);
+  const mins = Math.floor((totalSecs % 3600) / 60);
+  if (hrs > 0) return `${hrs}h ${mins}m`;
+  return `${mins}m`;
+};
+
+const safeJsonParse = <T,>(raw: string | null, fallback: T): T => {
+  if (!raw) return fallback;
+  try { return JSON.parse(raw) ?? fallback; } catch { return fallback; }
+};
+
+// ─── API Fetchers ───
+
+const fetchFromInvidious = async (query: string, page: number, signal?: AbortSignal): Promise<YTVideo[]> => {
   for (const instance of INVIDIOUS_INSTANCES) {
     try {
       const targetUrl = `${instance}/api/v1/search?q=${encodeURIComponent(query)}&type=video&page=${page}`;
       const url = `/api/gateway?action=youtube-proxy&url=${encodeURIComponent(targetUrl)}`;
-      const res = await fetch(url);
-      
+      const res = await fetch(url, { signal });
       const contentType = res.headers.get('content-type') || '';
       let data;
       if (!res.ok || contentType.includes('text/html')) {
-        console.warn(`Gateway API proxy failed or returned HTML. Trying direct client-side fetch from Invidious...`);
-        const directRes = await fetch(targetUrl);
+        const directRes = await fetch(targetUrl, { signal });
         if (!directRes.ok) continue;
         data = await directRes.json();
       } else {
         data = await res.json();
       }
-      
       if (!Array.isArray(data)) continue;
-      
-      return data.map((item: any) => {
-        const videoId = item.videoId;
-        const title = item.title || "Untitled Lecture";
-        const channel = item.author || "University Channel";
-        const duration = formatDuration(item.lengthSeconds || 0);
-        const views = item.viewCount ? `${item.viewCount.toLocaleString()} views` : "";
-        const published = item.publishedText || "";
-        const thumbnail = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
-        const channelLogo = item.authorThumbnails?.[0]?.url || "";
-        const isLive = item.liveNow || item.isLive || false;
-        
-        return {
-          id: videoId,
-          title,
-          channel,
-          channelLogo,
-          isLive,
-          duration,
-          views,
-          published,
-          thumbnail
-        };
-      });
-    } catch (e) {
-      console.warn(`Failed fetching from Invidious instance: ${instance}`, e);
+      return data.map((item: any) => ({
+        id: item.videoId,
+        title: item.title || "Untitled Lecture",
+        channel: item.author || "University Channel",
+        channelLogo: item.authorThumbnails?.[0]?.url || "",
+        isLive: item.liveNow || item.isLive || false,
+        duration: formatDuration(item.lengthSeconds || 0),
+        views: item.viewCount ? `${item.viewCount.toLocaleString()} views` : "",
+        published: item.publishedText || "",
+        thumbnail: `https://i.ytimg.com/vi/${item.videoId}/mqdefault.jpg`
+      }));
+    } catch (e: any) {
+      if (e.name === 'AbortError') throw e;
+      console.warn(`Failed: ${instance}`, e);
     }
   }
-  throw new Error("All backup lecture search servers are currently down.");
+  throw new Error("All lecture search servers are currently unavailable.");
 };
 
+// ─── Sub-Components ───
+
 const ThemeDropdown: React.FC<{
-  label: string;
-  options: DropdownOption[];
-  value: string;
-  onChange: (val: string) => void;
+  label: string; options: DropdownOption[]; value: string; onChange: (val: string) => void;
 }> = ({ label, options, value, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
   }, []);
 
   const currentOption = options.find(o => o.value === value) || options[0];
@@ -423,39 +255,24 @@ const ThemeDropdown: React.FC<{
     <div ref={ref} className="relative space-y-1.5 w-full text-left">
       <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider pl-1">{label}</label>
       <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        type="button" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen} aria-haspopup="listbox"
         className="w-full flex items-center justify-between bg-zinc-900/40 dark:bg-black/30 border border-zinc-200/10 dark:border-white/5 rounded-xl px-3 py-2.5 text-xs font-semibold text-white outline-none hover:border-brand-primary/50 transition-all text-left cursor-pointer"
       >
         <span className="truncate pr-2">{currentOption?.label || value}</span>
-        <ChevronDown className="w-4 h-4 text-zinc-400 shrink-0" />
+        <ChevronDown className={`w-4 h-4 text-zinc-400 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.15 }}
-            className="absolute z-50 left-0 right-0 mt-1 bg-zinc-900 dark:bg-[#0a0a0a] border border-zinc-200/10 dark:border-white/5 rounded-xl shadow-lg max-h-48 overflow-y-auto no-scrollbar p-1 space-y-0.5"
+          <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.15 }}
+            role="listbox" className="absolute z-50 left-0 right-0 mt-1 bg-zinc-900 dark:bg-[#0a0a0a] border border-zinc-200/10 dark:border-white/5 rounded-xl shadow-2xl max-h-48 overflow-y-auto no-scrollbar p-1 space-y-0.5 backdrop-blur-xl"
           >
             {options.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => {
-                  onChange(opt.value);
-                  setIsOpen(false);
-                }}
+              <button key={opt.value} type="button" role="option" aria-selected={value === opt.value}
+                onClick={() => { onChange(opt.value); setIsOpen(false); }}
                 className={`w-full text-left px-3 py-2 text-xs font-semibold transition-all border-none rounded-lg cursor-pointer ${
-                  value === opt.value
-                    ? 'bg-brand-primary text-white'
-                    : 'text-zinc-300 bg-transparent hover:bg-white/5 hover:text-brand-primary'
+                  value === opt.value ? 'bg-brand-primary text-white' : 'text-zinc-300 bg-transparent hover:bg-white/5 hover:text-brand-primary'
                 }`}
-              >
-                {opt.label}
-              </button>
+              >{opt.label}</button>
             ))}
           </motion.div>
         )}
@@ -464,41 +281,208 @@ const ThemeDropdown: React.FC<{
   );
 };
 
-const LecturesSkeleton: React.FC = () => {
-  return (
-    <div className="space-y-12 animate-pulse max-w-5xl mx-auto w-full pt-4">
-      {[1, 2, 3].map((shelfIdx) => (
-        <div key={shelfIdx} className="space-y-4 text-left">
-          {/* Header Skeleton */}
-          <div className="flex items-center gap-2 border-b border-zinc-100 dark:border-white/5 pb-2">
-            <div className="w-5 h-5 rounded-full bg-zinc-200 dark:bg-white/5" />
-            <div className="h-3.5 w-32 bg-zinc-200 dark:bg-white/5 rounded" />
-            <div className="h-4 w-12 bg-zinc-200 dark:bg-white/5 rounded-full" />
-          </div>
-          
-          {/* Cards Row Skeleton */}
-          <div className="flex gap-5 overflow-x-hidden pb-4">
-            {[1, 2, 3, 4].map((cardIdx) => (
-              <div 
-                key={cardIdx} 
-                className="shrink-0 w-[240px] sm:w-[260px] flex flex-col bg-zinc-50 dark:bg-white/[0.01] border border-zinc-200/50 dark:border-white/5 rounded-2xl overflow-hidden"
-              >
-                <div className="aspect-video bg-zinc-200 dark:bg-white/5 w-full" />
-                <div className="p-3.5 space-y-3.5">
-                  <div className="space-y-2">
-                    <div className="h-3 bg-zinc-200 dark:bg-white/5 rounded w-5/6" />
-                    <div className="h-3 bg-zinc-200 dark:bg-white/5 rounded w-2/3" />
-                  </div>
-                  <div className="h-2 bg-zinc-200 dark:bg-white/5 rounded w-1/3 pt-1" />
-                </div>
+const LecturesSkeleton: React.FC = () => (
+  <div className="space-y-12 max-w-5xl mx-auto w-full pt-4">
+    {[1, 2, 3].map((shelfIdx) => (
+      <div key={shelfIdx} className="space-y-4 text-left">
+        <div className="flex items-center gap-2 border-b border-zinc-100 dark:border-white/5 pb-2">
+          <div className="w-5 h-5 rounded-full bg-white/5 animate-pulse" />
+          <div className="h-3.5 w-32 bg-white/5 rounded animate-pulse" />
+        </div>
+        <div className="flex gap-5 overflow-x-hidden pb-4">
+          {[1, 2, 3, 4].map((cardIdx) => (
+            <div key={cardIdx} className="shrink-0 w-[240px] sm:w-[260px] flex flex-col bg-white/[0.01] border border-white/5 rounded-2xl overflow-hidden">
+              <div className="aspect-video bg-white/5 w-full shimmer-bg" />
+              <div className="p-3.5 space-y-3">
+                <div className="h-3 bg-white/5 rounded w-5/6 shimmer-bg" />
+                <div className="h-3 bg-white/5 rounded w-2/3 shimmer-bg" />
+                <div className="h-2 bg-white/5 rounded w-1/3 shimmer-bg" />
               </div>
-            ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+// ─── Video Card — Netflix-Style with Hover Expand ───
+
+const VideoCard: React.FC<{
+  video: YTVideo;
+  isActive: boolean;
+  isBookmarked: boolean;
+  onSelect: (video: YTVideo) => void;
+  onToggleBookmark: (videoId: string) => void;
+  variant: 'shelf' | 'feed';
+  index?: number;
+}> = ({ video, isActive, isBookmarked, onSelect, onToggleBookmark, variant, index = 0 }) => {
+  const isShelf = variant === 'shelf';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay: Math.min(index * 0.05, 0.3), ease: [0.25, 0.46, 0.45, 0.94] }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Play ${video.title} by ${video.channel}`}
+      onClick={() => onSelect(video)}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(video); } }}
+      className={`group relative ${isShelf ? 'snap-start shrink-0 w-[240px] sm:w-[270px]' : ''} flex flex-col bg-[#111317] border rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/60 ${
+        isActive
+          ? 'border-brand-primary ring-1 ring-brand-primary/30 shadow-lg shadow-brand-primary/5'
+          : 'border-white/[0.06] hover:border-white/[0.12] hover:shadow-xl hover:shadow-black/40'
+      } hover:scale-[1.03] hover:-translate-y-1`}
+    >
+      {/* Thumbnail */}
+      <div className="relative aspect-video bg-black overflow-hidden">
+        <img src={video.thumbnail} alt={video.title} loading="lazy"
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+        />
+        
+        {/* Gradient overlay on hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        {video.duration && (
+          <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-bold text-white z-10">
+            {video.duration}
+          </span>
+        )}
+        {video.isLive && (
+          <span className="absolute top-2 left-2 bg-red-600 px-2 py-0.5 rounded text-[7px] font-bold text-white uppercase tracking-wider animate-pulse z-10">
+            ● Live
+          </span>
+        )}
+        
+        {/* Play Overlay */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+          <div className="w-12 h-12 rounded-full bg-brand-primary/90 backdrop-blur-sm flex items-center justify-center shadow-2xl shadow-brand-primary/30 transform scale-75 group-hover:scale-100 transition-all duration-300">
+            <Play size={18} className="text-white fill-white ml-0.5" />
           </div>
         </div>
-      ))}
+
+        {/* Bookmark */}
+        <button type="button" aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark'}
+          onClick={(e) => { e.stopPropagation(); onToggleBookmark(video.id); }}
+          className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/50 backdrop-blur-sm text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-black/70 border-none cursor-pointer z-20"
+        >
+          {isBookmarked ? <BookmarkCheck size={13} className="text-brand-primary" /> : <Bookmark size={13} />}
+        </button>
+      </div>
+
+      {/* Metadata */}
+      <div className={`${isShelf ? 'p-3' : 'p-3.5'} flex gap-2.5 flex-1 items-start`}>
+        {!isShelf && (
+          video.channelLogo ? (
+            <img src={video.channelLogo} alt={video.channel} loading="lazy"
+              className="w-8 h-8 rounded-full object-cover border border-white/10 shrink-0 mt-0.5"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-xs shrink-0 mt-0.5">
+              {video.channel.charAt(0)}
+            </div>
+          )
+        )}
+        <div className="space-y-1 min-w-0 flex-1">
+          <h4 className="text-[11px] sm:text-xs font-semibold text-white leading-snug line-clamp-2 group-hover:text-brand-primary/90 transition-colors">
+            {video.title}
+          </h4>
+          {!isShelf && (
+            <span className="text-[10px] text-zinc-500 font-medium truncate block">{video.channel}</span>
+          )}
+          <div className="text-[9px] text-zinc-600 flex items-center gap-1.5 flex-wrap">
+            {video.views && <span>{video.views}</span>}
+            {video.views && video.published && <span>•</span>}
+            {video.published && <span>{video.published}</span>}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// ─── Up Next Sidebar ───
+
+const UpNextPanel: React.FC<{
+  videos: YTVideo[];
+  activeVideoId: string;
+  bookmarks: Set<string>;
+  onSelect: (v: YTVideo) => void;
+  onToggleBookmark: (id: string) => void;
+}> = ({ videos, activeVideoId, bookmarks, onSelect, onToggleBookmark }) => {
+  const upNextVideos = useMemo(() => {
+    const idx = videos.findIndex(v => v.id === activeVideoId);
+    if (idx === -1) return videos.slice(0, 10);
+    return [...videos.slice(idx + 1), ...videos.slice(0, idx)].slice(0, 10);
+  }, [videos, activeVideoId]);
+
+  if (upNextVideos.length === 0) return null;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 pb-2 border-b border-white/5">
+        <ListVideo size={13} className="text-brand-primary" />
+        <h5 className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Up Next</h5>
+        <span className="text-[9px] text-zinc-600 ml-auto">{upNextVideos.length} videos</span>
+      </div>
+      <div className="space-y-2 max-h-[500px] overflow-y-auto no-scrollbar pr-1">
+        {upNextVideos.map((video, i) => (
+          <div
+            key={video.id}
+            role="button" tabIndex={0}
+            aria-label={`Play next: ${video.title}`}
+            onClick={() => onSelect(video)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(video); } }}
+            className="group flex gap-3 p-2 rounded-xl cursor-pointer hover:bg-white/[0.03] transition-all duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-brand-primary/50"
+          >
+            {/* Index */}
+            <span className="text-[10px] text-zinc-600 font-bold w-4 shrink-0 pt-1 text-center">{i + 1}</span>
+            
+            {/* Thumbnail */}
+            <div className="relative w-28 sm:w-32 aspect-video rounded-lg overflow-hidden bg-black shrink-0">
+              <img src={video.thumbnail} alt={video.title} loading="lazy"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              {video.duration && (
+                <span className="absolute bottom-1 right-1 bg-black/80 px-1 py-px rounded text-[7px] font-bold text-white">
+                  {video.duration}
+                </span>
+              )}
+              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-200">
+                <Play size={14} className="text-white fill-white" />
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0 space-y-1 pt-0.5">
+              <h6 className="text-[10px] sm:text-[11px] font-semibold text-zinc-200 leading-snug line-clamp-2 group-hover:text-white transition-colors">
+                {video.title}
+              </h6>
+              <p className="text-[9px] text-zinc-600 truncate">{video.channel}</p>
+              {video.views && <p className="text-[8px] text-zinc-700">{video.views}</p>}
+            </div>
+
+            {/* Bookmark */}
+            <button type="button"
+              onClick={(e) => { e.stopPropagation(); onToggleBookmark(video.id); }}
+              className="p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity text-zinc-500 hover:text-brand-primary bg-transparent border-none cursor-pointer shrink-0 self-center"
+            >
+              {bookmarks.has(video.id) ? <BookmarkCheck size={12} /> : <Bookmark size={12} />}
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
+
+
+
+// ═══════════════════════════════════════════════════
+// ─── MAIN COMPONENT ───
+// ═══════════════════════════════════════════════════
 
 export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = false }) => {
   const { selectedUniversity } = useUniversity();
@@ -511,116 +495,73 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Scoped load more pagination variables per-shelf/channel concurrently
+  // Pagination
   const [channelPages, setChannelPages] = useState<Record<string, number>>({});
   const [channelHasMore, setChannelHasMore] = useState<Record<string, boolean>>({});
   const [loadingChannels, setLoadingChannels] = useState<Record<string, boolean>>({});
-
-  // Direct Raw Feed View Pagination
   const [feedPage, setFeedPage] = useState(1);
   const [hasMoreFeed, setHasMoreFeed] = useState(true);
   const [loadingMoreFeed, setLoadingMoreFeed] = useState(false);
 
+  // Player
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [activeVideoDetails, setActiveVideoDetails] = useState<VideoDetails | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
-  
   const [isFocusMode, setIsFocusMode] = useState(false);
+  // Persistence
   const [recentLectures, setRecentLectures] = useState<RecentLecture[]>([]);
-  
-  const [activeTab, setActiveTab] = useState<'resources' | 'notes' | 'pyqs' | 'discussion'>('resources');
-  const [noteText, setNoteText] = useState('');
-  const [discussionText, setDiscussionText] = useState('');
-  const [mockComments, setMockComments] = useState<{ id: string; user: string; text: string; time: string }[]>([]);
+  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
 
+  // Refs
   const topRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const feedEndRef = useRef<HTMLDivElement>(null);
 
-  // Load recent lectures on mount
+  // ─── Load persisted data ───
   useEffect(() => {
-    const saved = localStorage.getItem('scholix_recent_lectures');
-    if (saved) {
-      try {
-        setRecentLectures(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse recent lectures:", e);
-      }
-    }
+    setRecentLectures(safeJsonParse(localStorage.getItem('scholix_recent_lectures'), []));
+    setBookmarks(new Set(safeJsonParse<string[]>(localStorage.getItem('scholix_bookmarks'), [])));
   }, []);
 
-  // Load note text and comments when activeVideoId changes
-  useEffect(() => {
-    if (activeVideoId) {
-      const savedNote = localStorage.getItem(`scholix_note_${activeVideoId}`);
-      setNoteText(savedNote || '');
+  // ─── Bookmark toggle ───
+  const toggleBookmark = useCallback((videoId: string) => {
+    setBookmarks(prev => {
+      const next = new Set(prev);
+      next.has(videoId) ? next.delete(videoId) : next.add(videoId);
+      localStorage.setItem('scholix_bookmarks', JSON.stringify([...next]));
+      return next;
+    });
+  }, []);
 
-      const savedComments = localStorage.getItem(`scholix_comments_${activeVideoId}`);
-      if (savedComments) {
-        setMockComments(JSON.parse(savedComments));
-      } else {
-        setMockComments([
-          { id: '1', user: 'Anunay Yadav', text: 'This lecture explains recursion so much better than the professor did in class!', time: '2 hours ago' },
-          { id: '2', user: 'Sumit Sharma', text: 'Does anyone know the time stamp where he explains the master theorem?', time: '5 hours ago' },
-          { id: '3', user: 'Pooja Patel', text: 'Master theorem is at 24:15. It was super helpful!', time: '4 hours ago' }
-        ]);
-      }
-    } else {
-      setNoteText('');
-      setMockComments([]);
-    }
-  }, [activeVideoId]);
-
-
-
-  // Save/update recent lectures helper
-  const saveRecentLecture = (video: YTVideo, progress: number = 0) => {
+  const saveRecentLecture = useCallback((video: YTVideo, progress: number = 0) => {
     setRecentLectures(prev => {
       const filtered = prev.filter(v => v.id !== video.id);
-      const updated: RecentLecture = {
-        ...video,
-        progress,
-        watchedAt: Date.now()
-      };
+      const updated: RecentLecture = { ...video, progress, watchedAt: Date.now() };
       const newList = [updated, ...filtered].slice(0, 8);
       localStorage.setItem('scholix_recent_lectures', JSON.stringify(newList));
       return newList;
     });
-  };
+  }, []);
 
-  const handleSelectVideo = (video: YTVideo) => {
+  const handleSelectVideo = useCallback((video: YTVideo) => {
     setActiveVideoId(video.id);
-    saveRecentLecture(video, 10 + Math.floor(Math.random() * 80)); // Mock progress
+    const existing = recentLectures.find(r => r.id === video.id);
+    saveRecentLecture(video, existing?.progress || 0);
     topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  }, [recentLectures, saveRecentLecture]);
 
-  const handleSelectRecentVideo = (video: RecentLecture) => {
+  const handleSelectRecentVideo = useCallback((video: RecentLecture) => {
     setActiveVideoId(video.id);
     saveRecentLecture(video, video.progress);
     topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  }, [saveRecentLecture]);
 
-  const handleSaveNote = (text: string) => {
-    setNoteText(text);
-    if (activeVideoId) {
-      localStorage.setItem(`scholix_note_${activeVideoId}`, text);
-    }
-  };
-
-  const handlePostComment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!discussionText.trim() || !activeVideoId) return;
-
-    const newComment = {
-      id: Date.now().toString(),
-      user: 'Student User',
-      text: discussionText.trim(),
-      time: 'Just now'
-    };
-
-    const updated = [newComment, ...mockComments];
-    setMockComments(updated);
-    setDiscussionText('');
-    localStorage.setItem(`scholix_comments_${activeVideoId}`, JSON.stringify(updated));
-  };
+  const handlePlayNext = useCallback(() => {
+    if (!activeVideoId || ytVideos.length === 0) return;
+    const idx = ytVideos.findIndex(v => v.id === activeVideoId);
+    const nextIdx = (idx + 1) % ytVideos.length;
+    handleSelectVideo(ytVideos[nextIdx]);
+  }, [activeVideoId, ytVideos, handleSelectVideo]);
 
   const activeVideo = useMemo(() => {
     if (!activeVideoId) return null;
@@ -638,14 +579,12 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
     ];
   }, [selectedUniversity]);
 
-  // Parse curriculum data dynamically to align exactly with Content Library
+  // ─── Curriculum parsing ───
   const curriculumMap = useMemo(() => {
     const isIITM = selectedUniversity === 'iitm_bs';
     const curriculum = isIITM ? IITM_BS_DS : BTECH_CSE_2025;
-    
     const levelsSet = new Set<string>();
     const levelToCourses: Record<string, string[]> = {};
-    
     curriculum.terms.forEach(term => {
       let levelName = '';
       if (isIITM) {
@@ -658,355 +597,219 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
         else if (term.termNumber <= 6) levelName = 'Year 3';
         else levelName = 'Year 4';
       }
-      
       levelsSet.add(levelName);
-      if (!levelToCourses[levelName]) {
-        levelToCourses[levelName] = [];
-      }
-      
+      if (!levelToCourses[levelName]) levelToCourses[levelName] = [];
       const addCourse = (title: string) => {
-        if (!levelToCourses[levelName].includes(title)) {
-          levelToCourses[levelName].push(title);
-        }
+        if (!levelToCourses[levelName].includes(title)) levelToCourses[levelName].push(title);
       };
-      
       term.coreSubjects.forEach(s => addCourse(s.title));
-      term.electiveBaskets.forEach(b => {
-        b.subjects.forEach(s => addCourse(s.title));
-      });
+      term.electiveBaskets.forEach(b => b.subjects.forEach(s => addCourse(s.title)));
     });
-    
-    return {
-      levels: Array.from(levelsSet),
-      levelToCourses
-    };
+    return { levels: Array.from(levelsSet), levelToCourses };
   }, [selectedUniversity]);
 
   const levels = curriculumMap.levels;
 
-  // Set default level when levels options change
-  useEffect(() => {
-    if (levels.length > 0) {
-      setSelectedLevel(levels[0]);
-    }
-  }, [levels]);
+  useEffect(() => { if (levels.length > 0) setSelectedLevel(levels[0]); }, [levels]);
 
-  // Retrieve courses matching active selected level
-  const courseOptions = useMemo(() => {
-    return curriculumMap.levelToCourses[selectedLevel] || [];
-  }, [selectedLevel, curriculumMap]);
+  const courseOptions = useMemo(() => curriculumMap.levelToCourses[selectedLevel] || [], [selectedLevel, curriculumMap]);
 
-  // Auto-select first course when level courses options change
-  useEffect(() => {
-    if (courseOptions.length > 0) {
-      setSelectedCourse(courseOptions[0]);
-    } else {
-      setSelectedCourse('');
-    }
-  }, [courseOptions]);
+  useEffect(() => { setSelectedCourse(courseOptions.length > 0 ? courseOptions[0] : ''); }, [courseOptions]);
 
-  const searchYouTube = async (subject: string, catId: string = 'all') => {
+  // ─── Search ───
+  const searchYouTube = useCallback(async (subject: string, catId: string = 'all') => {
     if (!subject) return;
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
-    setLoading(true);
-    setYtVideos([]);
-    setError(null);
-    setActiveVideoId(null);
-    
-    // Reset scoped channel loaders
-    setChannelPages({});
-    setChannelHasMore({});
-    setLoadingChannels({});
-
-    // Reset Raw Feed pagination
-    setFeedPage(1);
-    setHasMoreFeed(true);
-    setLoadingMoreFeed(false);
+    setLoading(true); setYtVideos([]); setError(null); setActiveVideoId(null);
+    setChannelPages({}); setChannelHasMore({}); setLoadingChannels({});
+    setFeedPage(1); setHasMoreFeed(true); setLoadingMoreFeed(false);
 
     const searchQuery = buildSearchQuery(subject, catId, selectedUniversity);
     const query = encodeURIComponent(searchQuery);
     
     try {
       let fetchedVideos: YTVideo[] = [];
-
-      // Try scraping first
       try {
         const url = `/api/gateway?action=youtube-proxy&url=${encodeURIComponent(`https://www.youtube.com/results?search_query=${query}`)}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("CORS Proxy returned error.");
+        const res = await fetch(url, { signal: controller.signal });
+        if (!res.ok) throw new Error("Proxy error.");
         const html = await res.text();
-
         const startStr = 'var ytInitialData = ';
         const startIndex = html.indexOf(startStr);
-        if (startIndex === -1) throw new Error("YouTube data payload not found.");
-
+        if (startIndex === -1) throw new Error("Payload not found.");
         const dataStart = startIndex + startStr.length;
         const endIndex = html.indexOf(';</script>', dataStart);
-        if (endIndex === -1) throw new Error("YouTube payload boundary reading failure.");
-
-        const jsonStr = html.substring(dataStart, endIndex);
-        const data = JSON.parse(jsonStr);
-
+        if (endIndex === -1) throw new Error("Payload boundary error.");
+        const data = JSON.parse(html.substring(dataStart, endIndex));
         const contents = data.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents;
         if (contents && Array.isArray(contents)) {
           for (const item of contents) {
             if (item.videoRenderer) {
               const vr = item.videoRenderer;
-              const videoId = vr.videoId;
-              const title = vr.title?.runs?.[0]?.text || "Untitled Lecture";
-              const channel = vr.longBylineText?.runs?.[0]?.text || vr.ownerText?.runs?.[0]?.text || "University Channel";
-              const duration = vr.lengthText?.simpleText || "";
-              const views = vr.viewCountText?.simpleText || "";
-              const published = vr.publishedTimeText?.simpleText || "";
-              const thumbnail = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
-              const channelLogo = vr.channelThumbnailSupportedRenderers?.channelThumbnailWithLinkRenderer?.thumbnail?.thumbnails?.[0]?.url || "";
-              const isLive = vr.badges?.some((b: any) => b.metadataBadgeRenderer?.style === "BADGE_STYLE_TYPE_LIVE_NOW" || b.metadataBadgeRenderer?.label === "LIVE") || !vr.lengthText;
-
               fetchedVideos.push({
-                id: videoId,
-                title,
-                channel,
-                channelLogo,
-                isLive,
-                duration,
-                views,
-                published,
-                thumbnail
+                id: vr.videoId, title: vr.title?.runs?.[0]?.text || "Untitled",
+                channel: vr.longBylineText?.runs?.[0]?.text || vr.ownerText?.runs?.[0]?.text || "Channel",
+                channelLogo: vr.channelThumbnailSupportedRenderers?.channelThumbnailWithLinkRenderer?.thumbnail?.thumbnails?.[0]?.url || "",
+                isLive: vr.badges?.some((b: any) => b.metadataBadgeRenderer?.style === "BADGE_STYLE_TYPE_LIVE_NOW" || b.metadataBadgeRenderer?.label === "LIVE") || !vr.lengthText,
+                duration: vr.lengthText?.simpleText || "", views: vr.viewCountText?.simpleText || "",
+                published: vr.publishedTimeText?.simpleText || "", thumbnail: `https://i.ytimg.com/vi/${vr.videoId}/mqdefault.jpg`
               });
             }
           }
         }
-      } catch (scrapeErr) {
-        console.warn("Direct YouTube scraping failed, trying Invidious fallback...", scrapeErr);
-        fetchedVideos = await fetchFromInvidious(searchQuery, 1);
+      } catch (scrapeErr: any) {
+        if (scrapeErr.name === 'AbortError') throw scrapeErr;
+        fetchedVideos = await fetchFromInvidious(searchQuery, 1, controller.signal);
       }
-
-      if (fetchedVideos.length === 0) {
-        throw new Error("No lecture records match this search.");
-      }
-
+      if (controller.signal.aborted) return;
+      if (fetchedVideos.length === 0) throw new Error("No lectures found.");
       setYtVideos(fetchedVideos);
-      if (fetchedVideos.length > 0) {
-        setActiveVideoId(fetchedVideos[0].id);
-      }
+      setActiveVideoId(fetchedVideos[0].id);
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Failed to search lecture videos.");
+      if (err.name === 'AbortError') return;
+      setError(err.message || "Search failed.");
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
-  };
+  }, [selectedUniversity]);
 
-  // Channel-specific Concurrent Load More Scraper
-  const loadMoreForChannel = async (channelName: string) => {
+  // ─── Channel Load More ───
+  const loadMoreForChannel = useCallback(async (channelName: string) => {
     if (loading || loadingChannels[channelName]) return;
-
     setLoadingChannels(prev => ({ ...prev, [channelName]: true }));
-
     const nextPage = (channelPages[channelName] || 1) + 1;
     const activeSubject = searchText.trim() || selectedCourse;
-    if (!activeSubject) {
-      setLoadingChannels(prev => ({ ...prev, [channelName]: false }));
-      return;
-    }
-
-    if (nextPage > 5) {
+    if (!activeSubject || nextPage > 5) {
       setChannelHasMore(prev => ({ ...prev, [channelName]: false }));
       setLoadingChannels(prev => ({ ...prev, [channelName]: false }));
       return;
     }
-
     try {
-      const queryStr = buildSearchQuery(activeSubject, activeCategory, selectedUniversity, channelName);
-      const fetched = await fetchFromInvidious(queryStr, nextPage);
-
-      const filtered = fetched.filter(v => 
-        v.channel.toLowerCase().includes(channelName.toLowerCase()) || 
-        channelName.toLowerCase().includes(v.channel.toLowerCase())
-      );
-
-      if (filtered.length === 0) {
-        setChannelHasMore(prev => ({ ...prev, [channelName]: false }));
-      } else {
-        setYtVideos(prev => {
-          const existingIds = new Set(prev.map(v => v.id));
-          const uniqueNew = filtered.filter(v => !existingIds.has(v.id));
-          return [...prev, ...uniqueNew];
-        });
+      const q = buildSearchQuery(activeSubject, activeCategory, selectedUniversity, channelName);
+      const fetched = await fetchFromInvidious(q, nextPage);
+      const filtered = fetched.filter(v => v.channel.toLowerCase().includes(channelName.toLowerCase()) || channelName.toLowerCase().includes(v.channel.toLowerCase()));
+      if (filtered.length === 0) { setChannelHasMore(prev => ({ ...prev, [channelName]: false })); }
+      else {
+        setYtVideos(prev => { const ids = new Set(prev.map(v => v.id)); return [...prev, ...filtered.filter(v => !ids.has(v.id))]; });
         setChannelPages(prev => ({ ...prev, [channelName]: nextPage }));
       }
-    } catch (err) {
-      console.error(`Failed to load more for channel ${channelName}:`, err);
-      setChannelHasMore(prev => ({ ...prev, [channelName]: false }));
-    } finally {
-      setLoadingChannels(prev => ({ ...prev, [channelName]: false }));
-    }
-  };
+    } catch { setChannelHasMore(prev => ({ ...prev, [channelName]: false })); }
+    finally { setLoadingChannels(prev => ({ ...prev, [channelName]: false })); }
+  }, [loading, loadingChannels, channelPages, searchText, selectedCourse, activeCategory, selectedUniversity]);
 
-  // Direct Raw YouTube Feed Load More Scraper
-  const loadMoreForFeed = async () => {
+  // ─── Feed Load More ───
+  const loadMoreForFeed = useCallback(async () => {
     if (loading || loadingMoreFeed || !hasMoreFeed) return;
     setLoadingMoreFeed(true);
-
     const nextPage = feedPage + 1;
     const activeSubject = searchText.trim() || selectedCourse;
-    if (!activeSubject) {
-      setLoadingMoreFeed(false);
-      return;
-    }
-
-    if (nextPage > 6) {
-      setHasMoreFeed(false);
-      setLoadingMoreFeed(false);
-      return;
-    }
-
+    if (!activeSubject || nextPage > 6) { setHasMoreFeed(false); setLoadingMoreFeed(false); return; }
     try {
-      const searchQuery = buildSearchQuery(activeSubject, activeCategory, selectedUniversity);
-
-      const fetched = await fetchFromInvidious(searchQuery, nextPage);
-      if (fetched.length === 0) {
-        setHasMoreFeed(false);
-      } else {
-        setYtVideos(prev => {
-          const existingIds = new Set(prev.map(v => v.id));
-          const uniqueNew = fetched.filter(v => !existingIds.has(v.id));
-          return [...prev, ...uniqueNew];
-        });
+      const fetched = await fetchFromInvidious(buildSearchQuery(activeSubject, activeCategory, selectedUniversity), nextPage);
+      if (fetched.length === 0) setHasMoreFeed(false);
+      else {
+        setYtVideos(prev => { const ids = new Set(prev.map(v => v.id)); return [...prev, ...fetched.filter(v => !ids.has(v.id))]; });
         setFeedPage(nextPage);
       }
-    } catch (err) {
-      console.error("Failed to load more for feed:", err);
-      setHasMoreFeed(false);
-    } finally {
-      setLoadingMoreFeed(false);
-    }
-  };
+    } catch { setHasMoreFeed(false); }
+    finally { setLoadingMoreFeed(false); }
+  }, [loading, loadingMoreFeed, hasMoreFeed, feedPage, searchText, selectedCourse, activeCategory, selectedUniversity]);
 
-  // Video Details Fetcher
-  const fetchVideoDetails = async (videoId: string) => {
-    setLoadingDetails(true);
-    setActiveVideoDetails(null);
-
+  // ─── Video Details ───
+  const fetchVideoDetails = useCallback(async (videoId: string) => {
+    setLoadingDetails(true); setActiveVideoDetails(null);
     for (const instance of INVIDIOUS_INSTANCES) {
       try {
         const targetUrl = `${instance}/api/v1/videos/${videoId}`;
         const url = `/api/gateway?action=youtube-proxy&url=${encodeURIComponent(targetUrl)}`;
         const res = await fetch(url);
-        
-        const contentType = res.headers.get('content-type') || '';
+        const ct = res.headers.get('content-type') || '';
         let data;
-        if (!res.ok || contentType.includes('text/html')) {
-          console.warn(`Gateway API proxy failed or returned HTML. Trying direct client-side details fetch...`);
-          const directRes = await fetch(targetUrl);
-          if (!directRes.ok) continue;
-          data = await directRes.json();
-        } else {
-          data = await res.json();
-        }
-        
-        let subsStr = "0";
+        if (!res.ok || ct.includes('text/html')) { const d = await fetch(targetUrl); if (!d.ok) continue; data = await d.json(); }
+        else data = await res.json();
         const subs = data.authorSubscriberCount || 0;
-        if (subs >= 1000000) {
-          subsStr = `${(subs / 1000000).toFixed(1)}M`;
-        } else if (subs >= 1000) {
-          subsStr = `${(subs / 1000).toFixed(1)}K`;
-        } else {
-          subsStr = `${subs}`;
-        }
-
         setActiveVideoDetails({
-          likes: data.likeCount || 0,
-          dislikes: data.dislikeCount || 0,
-          subscribers: subsStr,
+          likes: data.likeCount || 0, dislikes: data.dislikeCount || 0,
+          subscribers: subs >= 1e6 ? `${(subs / 1e6).toFixed(1)}M` : subs >= 1e3 ? `${(subs / 1e3).toFixed(1)}K` : `${subs}`,
           description: data.description || ""
         });
-        setLoadingDetails(false);
-        return;
-      } catch (e) {
-        console.warn(`Failed details from instance: ${instance}`, e);
-      }
+        setLoadingDetails(false); return;
+      } catch { /* try next */ }
     }
     setLoadingDetails(false);
-  };
+  }, []);
+
+  useEffect(() => { if (activeVideoId) fetchVideoDetails(activeVideoId); }, [activeVideoId, fetchVideoDetails]);
 
   useEffect(() => {
-    if (activeVideoId) {
-      fetchVideoDetails(activeVideoId);
-    }
-  }, [activeVideoId]);
+    if (selectedCourse) { setSearchText(''); searchYouTube(selectedCourse, activeCategory); }
+  }, [selectedCourse, activeCategory, selectedUniversity, searchYouTube]);
 
+  // ─── Keyboard Shortcuts ───
   useEffect(() => {
-    if (selectedCourse) {
-      setSearchText(''); // Clear text search to prioritize dropdown
-      searchYouTube(selectedCourse, activeCategory);
-    }
-  }, [selectedCourse, activeCategory, selectedUniversity]);
+    const h = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === 'Escape') { if (isFocusMode) setIsFocusMode(false); else if (activeVideoId) { setActiveVideoId(null); } }
+      if (e.key === 'f' && activeVideoId && !isFocusMode) setIsFocusMode(true);
+      if (e.key === 'n' && activeVideoId) handlePlayNext();
+    };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, [isFocusMode, activeVideoId, handlePlayNext]);
+
+  // ─── Feed infinite scroll ───
+  useEffect(() => {
+    if (!isRawView || !feedEndRef.current) return;
+    const obs = new IntersectionObserver(([e]) => { if (e?.isIntersecting && hasMoreFeed && !loadingMoreFeed) loadMoreForFeed(); }, { rootMargin: '400px' });
+    obs.observe(feedEndRef.current);
+    return () => obs.disconnect();
+  }, [isRawView, hasMoreFeed, loadingMoreFeed, loadMoreForFeed]);
 
   const handleCustomSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchText.trim()) {
-      setIsRawView(true); // Automatically switch to YouTube Feed list view
-      searchYouTube(searchText.trim(), activeCategory);
-    }
+    if (searchText.trim()) { setIsRawView(true); searchYouTube(searchText.trim(), activeCategory); }
   };
 
-  // Horizontal Scroll Trigger (when user swipes to the right of any channel shelf)
-  const handleHorizontalScroll = (e: React.UIEvent<HTMLDivElement>, channelName: string) => {
-    const target = e.currentTarget;
-    const isScrollable = target.scrollWidth > target.clientWidth;
-    if (!isScrollable) return;
-
-    const threshold = 300; // Trigger when within 300px of the right side to prevent delays
-    const isNearRight = target.scrollWidth - target.scrollLeft - target.clientWidth < threshold;
-    
-    if (isNearRight && !loading && !loadingChannels[channelName] && channelHasMore[channelName] !== false) {
-      loadMoreForChannel(channelName);
-    }
+  const handleHorizontalScroll = (e: React.UIEvent<HTMLDivElement>, ch: string) => {
+    const t = e.currentTarget;
+    if (t.scrollWidth <= t.clientWidth) return;
+    if (t.scrollWidth - t.scrollLeft - t.clientWidth < 300 && !loading && !loadingChannels[ch] && channelHasMore[ch] !== false) loadMoreForChannel(ch);
   };
 
-  // Group videos by channel
   const groupedVideos = useMemo(() => {
-    const groups: Record<string, YTVideo[]> = {};
-    ytVideos.forEach((video) => {
-      const ch = video.channel || 'Unknown Channel';
-      if (!groups[ch]) {
-        groups[ch] = [];
-      }
-      groups[ch].push(video);
-    });
-    return groups;
+    const g: Record<string, YTVideo[]> = {};
+    ytVideos.forEach(v => { const ch = v.channel || 'Unknown'; if (!g[ch]) g[ch] = []; g[ch].push(v); });
+    return g;
   }, [ytVideos]);
 
-
-  // Calculate rating percentage and ratio bar width
   const ratingMetrics = useMemo(() => {
     if (!activeVideoDetails) return null;
     const { likes, dislikes } = activeVideoDetails;
     const total = likes + dislikes;
     const pct = total > 0 ? Math.round((likes / total) * 100) : 0;
-    
-    return {
-      percentage: pct,
-      totalCount: total,
-      likesFormatted: likes >= 1000 ? `${(likes / 1000).toFixed(1)}K` : `${likes}`,
-      dislikesFormatted: dislikes >= 1000 ? `${(dislikes / 1000).toFixed(1)}K` : `${dislikes}`
-    };
+    return { percentage: pct, likesFormatted: likes >= 1000 ? `${(likes / 1000).toFixed(1)}K` : `${likes}`, dislikesFormatted: dislikes >= 1000 ? `${(dislikes / 1000).toFixed(1)}K` : `${dislikes}` };
   }, [activeVideoDetails]);
 
+  // ═══════════════════════════════════════════════════
+  // ─── RENDER ───
+  // ═══════════════════════════════════════════════════
+
   return (
-    <div ref={topRef} className="max-w-5xl mx-auto w-full space-y-8 animate-fade-in pb-20 text-center md:text-left scroll-mt-6 px-4">
-      
-      {/* Scrollbar CSS Overrides */}
-      <style>{`
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
+    <div ref={topRef} className="max-w-6xl mx-auto w-full space-y-8 animate-fade-in pb-20 text-center md:text-left scroll-mt-6 px-4">
+
+      {/* ─── Focus Mode Cinema Overlay ─── */}
+      <AnimatePresence>
+        {isFocusMode && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-black/95 backdrop-blur-sm"
+            onClick={() => setIsFocusMode(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {!hideHeader && (
         <header className="mb-6 border-b border-zinc-100 dark:border-white/5 pb-6 text-left">
@@ -1015,520 +818,454 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
             YouTube <span className="text-brand-primary">Lectures</span>
           </h2>
           <p className="text-zinc-500 dark:text-zinc-400 font-medium text-[11px] sm:text-xs mt-1">
-            Browse and watch university lectures inline without distraction.
+            Distraction-free university lecture streaming
           </p>
         </header>
       )}
 
-      {/* Hero Recommendation Banner */}
+      {/* ─── Hero Banner ─── */}
       {!activeVideoId && (
-        <div className="relative w-full aspect-[21/9] md:aspect-[3/1] bg-gradient-to-r from-zinc-900 to-black rounded-3xl overflow-hidden shadow-2xl flex items-center justify-start text-left p-6 sm:p-12 border border-zinc-200/10 dark:border-white/5">
-          {recentLectures.length > 0 ? (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="relative w-full aspect-[16/7] sm:aspect-[21/9] md:aspect-[3/1] bg-gradient-to-br from-zinc-950 via-zinc-900 to-black rounded-3xl overflow-hidden shadow-2xl flex items-center justify-start text-left p-6 sm:p-12 border border-white/[0.06]"
+        >
+          {/* Animated background accent */}
+          <div className="absolute top-0 right-0 w-1/2 h-full opacity-20">
+            <div className="absolute inset-0 bg-gradient-to-l from-brand-primary/20 via-transparent to-transparent" />
+            <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-brand-primary/10 rounded-full blur-3xl animate-pulse" />
+          </div>
+
+          {recentLectures.length > 0 && (
             <div className="absolute inset-0 z-0">
-              <img 
-                src={recentLectures[0].thumbnail} 
-                alt="Hero BG" 
-                className="w-full h-full object-cover blur-2xl opacity-30 scale-105"
+              <img src={recentLectures[0].thumbnail} alt="" aria-hidden="true"
+                className="w-full h-full object-cover blur-3xl opacity-20 scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/80 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/85 to-zinc-950/40" />
             </div>
-          ) : null}
+          )}
 
           <div className="relative z-10 max-w-lg space-y-3 sm:space-y-4">
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[8px] font-bold bg-brand-primary/10 text-brand-primary uppercase tracking-widest border border-brand-primary/20">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[8px] font-bold bg-brand-primary/10 text-brand-primary uppercase tracking-widest border border-brand-primary/20 backdrop-blur-sm">
               <Sparkles size={10} />
-              Recommendation
+              {recentLectures.length > 0 ? 'Continue Studying' : 'Start Learning'}
             </span>
 
             {recentLectures.length > 0 ? (
               <>
-                <h3 className="text-xl sm:text-2xl font-light text-white tracking-wide leading-tight line-clamp-2">
+                <h3 className="text-lg sm:text-2xl font-light text-white tracking-wide leading-tight line-clamp-2">
                   Resume: <span className="font-semibold">{recentLectures[0].title}</span>
                 </h3>
-                <p className="text-[10px] sm:text-xs text-zinc-400 font-medium">
-                  {recentLectures[0].channel} • Progress: {recentLectures[0].progress}%
-                </p>
-                
-                <button
-                  onClick={() => handleSelectRecentVideo(recentLectures[0])}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-brand-primary hover:bg-brand-primary/95 text-white font-bold text-xs rounded-xl border-none cursor-pointer transition-all active:scale-95 shadow-lg shadow-brand-primary/25"
+                <p className="text-[10px] sm:text-xs text-zinc-400 font-medium">{recentLectures[0].channel}</p>
+                <button onClick={() => handleSelectRecentVideo(recentLectures[0])}
+                  className="flex items-center gap-2 px-6 py-3 bg-brand-primary hover:bg-brand-primary/90 text-white font-bold text-xs rounded-xl border-none cursor-pointer transition-all active:scale-95 shadow-lg shadow-brand-primary/25 hover:shadow-xl hover:shadow-brand-primary/30"
                 >
-                  <Play size={13} className="fill-white" />
-                  Resume Lecture
+                  <Play size={14} className="fill-white" /> Resume Lecture
                 </button>
               </>
             ) : (
               <>
-                <h3 className="text-xl sm:text-2xl font-light text-white tracking-wide leading-tight">
+                <h3 className="text-lg sm:text-2xl font-light text-white tracking-wide leading-tight">
                   Start Your <span className="font-semibold text-brand-primary">Study Session</span>
                 </h3>
                 <p className="text-[10px] sm:text-xs text-zinc-400 font-medium leading-relaxed max-w-sm">
-                  Select your university curriculum level, choose a course, and stream distraction-free video lectures instantly.
+                  Select your course and stream distraction-free video lectures instantly.
                 </p>
-                
-                <button
-                  onClick={() => {
-                    const filtersEl = document.getElementById('search-filters-card');
-                    filtersEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-white text-zinc-950 hover:bg-zinc-100 font-bold text-xs rounded-xl border-none cursor-pointer transition-all active:scale-95"
+                <button onClick={() => document.getElementById('search-filters-card')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex items-center gap-2 px-6 py-3 bg-white text-zinc-950 hover:bg-zinc-100 font-bold text-xs rounded-xl border-none cursor-pointer transition-all active:scale-95"
                 >
-                  <SlidersHorizontal size={13} />
-                  Explore Courses
+                  <SlidersHorizontal size={13} /> Explore Courses
                 </button>
               </>
             )}
           </div>
-        </div>
+        </motion.div>
       )}
 
-      {/* Active Embed Player */}
+      {/* ─── Player + Up Next ─── */}
       <AnimatePresence>
         {activeVideoId && activeVideo && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            className={`space-y-4 border rounded-3xl overflow-hidden text-left transition-all duration-300 ${
-              isFocusMode
-                ? 'fixed inset-0 z-50 bg-[#060606] p-4 sm:p-8 flex flex-col justify-center max-w-none'
-                : 'p-6 bg-gradient-to-r from-zinc-900/40 to-black/80 dark:from-zinc-950/20 dark:to-black/50 border-zinc-200/10 dark:border-white/5 rounded-3xl backdrop-blur-md shadow-2xl'
-            }`}
-          >
-            <div className={`flex items-center justify-between pb-2 border-b border-zinc-200/50 dark:border-white/5 ${isFocusMode ? 'max-w-5xl mx-auto w-full' : ''}`}>
-              <span className="text-[9px] font-bold text-brand-primary uppercase flex items-center gap-1.5 animate-pulse">
-                <PlayCircle size={12} />
-                Now Playing Inline
-              </span>
+          <div className={`${isFocusMode ? 'fixed inset-0 z-50 p-4 sm:p-8 flex flex-col justify-center bg-black/95' : 'flex flex-col lg:flex-row gap-6'}`}>
+            
+            {/* Main Player Column */}
+            <div className={`${isFocusMode ? 'max-w-6xl mx-auto w-full' : 'flex-1 min-w-0 space-y-4'}`}>
               
-              <div className="flex items-center gap-2">
-
-
-                <button 
-                  onClick={() => {
-                    setActiveVideoId(null);
-                    setIsFocusMode(false);
-                  }}
-                  className="p-1.5 hover:bg-zinc-850 dark:hover:bg-white/5 rounded-xl border-none bg-transparent cursor-pointer text-zinc-400 hover:text-white"
-                >
-                  <X size={15} />
-                </button>
-              </div>
-            </div>
-
-            <div className={`relative aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl border dark:border-white/5 ${isFocusMode ? 'max-w-5xl mx-auto flex-1' : 'max-w-4xl mx-auto'}`}>
-              <iframe 
-                src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1`}
-                title="YouTube Lecture Player"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="absolute inset-0 w-full h-full"
-              />
-            </div>
-
-            {/* Dynamic Video & Channel Stats Row */}
-            <div className={`w-full pt-2 space-y-4 ${isFocusMode ? 'max-w-5xl mx-auto' : 'max-w-4xl mx-auto'}`}>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                {/* Channel Details */}
-                <div className="flex items-center gap-3">
-                  {activeVideo.channelLogo ? (
-                    <img 
-                      src={activeVideo.channelLogo} 
-                      alt={activeVideo.channel}
-                      className="w-10 h-10 rounded-full object-cover border dark:border-white/10"
-                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-sm">
-                      {activeVideo.channel.charAt(0)}
-                    </div>
-                  )}
-                  <div>
-                    <h4 className="text-xs font-bold text-zinc-950 dark:text-white leading-tight">{activeVideo.title}</h4>
-                    <p className="text-[10px] text-zinc-400 mt-0.5">{activeVideo.channel}</p>
-                    {loadingDetails ? (
-                      <span className="text-[9px] text-zinc-400 flex items-center gap-1 mt-0.5">
-                        <Loader2 className="w-2.5 h-2.5 animate-spin" /> Loading stats...
-                      </span>
-                    ) : activeVideoDetails ? (
-                      <p className="text-[9px] text-zinc-400 font-semibold flex items-center gap-1.5 mt-0.5">
-                        <Users size={10} className="text-zinc-500" />
-                        {activeVideoDetails.subscribers} subscribers
-                      </p>
-                    ) : null}
+              {/* The Player Card itself */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                className={`text-left transition-all duration-300 border border-white/[0.06] rounded-3xl overflow-hidden p-5 sm:p-6 space-y-4 bg-gradient-to-br from-[#0e0f12] to-[#080809] shadow-2xl shadow-black/40 ${
+                  isFocusMode ? 'w-full max-w-6xl mx-auto' : ''
+                }`}
+              >
+                {/* Header bar */}
+                <div className="flex items-center justify-between pb-2 border-b border-white/5">
+                  <span className="text-[9px] font-bold text-brand-primary uppercase flex items-center gap-1.5">
+                    <PlayCircle size={12} /> Now Playing
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button onClick={handlePlayNext} aria-label="Play next video (N)" title="Next (N)"
+                      className="p-1.5 hover:bg-white/5 rounded-lg border-none bg-transparent cursor-pointer text-zinc-500 hover:text-white transition-colors">
+                      <SkipForward size={13} />
+                    </button>
+                    <button onClick={() => setIsFocusMode(prev => !prev)} aria-label={isFocusMode ? 'Exit focus mode' : 'Focus mode (F)'}
+                      title={isFocusMode ? 'Exit (Esc)' : 'Focus (F)'}
+                      className="p-1.5 hover:bg-white/5 rounded-lg border-none bg-transparent cursor-pointer text-zinc-500 hover:text-white transition-colors">
+                      {isFocusMode ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+                    </button>
+                    <button onClick={() => { setActiveVideoId(null); setIsFocusMode(false); }} aria-label="Close player"
+                      className="p-1.5 hover:bg-white/5 rounded-lg border-none bg-transparent cursor-pointer text-zinc-500 hover:text-red-400 transition-colors">
+                      <X size={14} />
+                    </button>
                   </div>
                 </div>
 
-                {/* Likes / Dislikes Ratio Display */}
-                {!loadingDetails && ratingMetrics && (
-                  <div className="flex flex-col items-end gap-1.5 shrink-0 max-w-[200px] w-full sm:w-auto">
-                    <div className="flex items-center gap-4 text-[10px] font-bold text-zinc-600 dark:text-zinc-300">
-                      <span className="flex items-center gap-1 hover:text-green-500 transition-colors">
-                        <ThumbsUp size={12} className="text-zinc-500" />
-                        {ratingMetrics.likesFormatted} ({ratingMetrics.percentage}%)
-                      </span>
-                      <span className="flex items-center gap-1 hover:text-red-500 transition-colors">
-                        <ThumbsDown size={12} className="text-zinc-500" />
-                        {ratingMetrics.dislikesFormatted}
-                      </span>
+                {/* YouTube embed wrapper */}
+                <div className="relative aspect-video w-full rounded-2xl border border-white/5 overflow-hidden bg-black shadow-2xl">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1&rel=0&modestbranding=1`}
+                    title={activeVideo.title} frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen className="absolute inset-0 w-full h-full"
+                  />
+                </div>
+
+                {/* Video info + stats */}
+                <div className="space-y-3 pt-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {activeVideo.channelLogo ? (
+                        <img src={activeVideo.channelLogo} alt={activeVideo.channel}
+                          className="w-10 h-10 rounded-full object-cover border border-white/10 shrink-0"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-sm shrink-0">
+                          {activeVideo.channel.charAt(0)}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <h4 className="text-xs sm:text-sm font-bold text-white leading-tight line-clamp-2">{activeVideo.title}</h4>
+                        <p className="text-[10px] text-zinc-500 mt-0.5 truncate">{activeVideo.channel}</p>
+                        {loadingDetails ? (
+                          <span className="text-[9px] text-zinc-500 flex items-center gap-1 mt-0.5">
+                            <Loader2 className="w-2.5 h-2.5 animate-spin" /> Loading...
+                          </span>
+                        ) : activeVideoDetails ? (
+                          <p className="text-[9px] text-zinc-500 font-semibold flex items-center gap-1.5 mt-0.5">
+                            <Users size={10} /> {activeVideoDetails.subscribers} subs
+                          </p>
+                        ) : null}
+                      </div>
                     </div>
-                    
-                    {/* Rating Ratio Bar */}
-                    <div className="w-full sm:w-36 h-1 bg-zinc-200 dark:bg-white/10 rounded-full overflow-hidden flex">
-                      <div 
-                        className="h-full bg-emerald-500" 
-                        style={{ width: `${ratingMetrics.percentage}%` }}
-                      />
-                      <div 
-                        className="h-full bg-red-500" 
-                        style={{ width: `${100 - ratingMetrics.percentage}%` }}
-                      />
-                    </div>
+
+                    {!loadingDetails && ratingMetrics && (
+                      <div className="flex flex-col items-end gap-1.5 shrink-0">
+                        <div className="flex items-center gap-4 text-[10px] font-bold text-zinc-400">
+                          <span className="flex items-center gap-1">
+                            <ThumbsUp size={12} className="text-emerald-500" />
+                            {ratingMetrics.likesFormatted} ({ratingMetrics.percentage}%)
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <ThumbsDown size={12} className="text-red-400" />
+                            {ratingMetrics.dislikesFormatted}
+                          </span>
+                        </div>
+                        <div className="w-36 h-1 bg-white/10 rounded-full overflow-hidden flex">
+                          <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${ratingMetrics.percentage}%` }} />
+                          <div className="h-full bg-red-500/70" style={{ width: `${100 - ratingMetrics.percentage}%` }} />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between px-1 pt-2 border-t border-white/5">
+                    <span className="text-[9px] text-zinc-600 flex items-center gap-2">
+                      <kbd className="px-1.5 py-0.5 bg-white/5 rounded text-[8px] font-mono text-zinc-500">F</kbd> Focus
+                      <kbd className="px-1.5 py-0.5 bg-white/5 rounded text-[8px] font-mono text-zinc-500">N</kbd> Next
+                      <kbd className="px-1.5 py-0.5 bg-white/5 rounded text-[8px] font-mono text-zinc-500">Esc</kbd> Close
+                    </span>
+                    <a href={`https://www.youtube.com/watch?v=${activeVideoId}`} target="_blank" rel="noreferrer"
+                      className="text-[10px] text-brand-primary font-bold flex items-center gap-1 hover:underline">
+                      YouTube <ExternalLink size={10} />
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* ── Up Next Sidebar (desktop only, hidden in focus mode) ── */}
+            {!isFocusMode && ytVideos.length > 1 && (
+              <div className="hidden lg:block w-[340px] shrink-0">
+                <div className="sticky top-6 bg-[#0c0c0e] border border-white/[0.06] rounded-2xl p-4 shadow-xl">
+                  <UpNextPanel
+                    videos={ytVideos}
+                    activeVideoId={activeVideoId}
+                    bookmarks={bookmarks}
+                    onSelect={handleSelectVideo}
+                    onToggleBookmark={toggleBookmark}
+                  />
+                </div>
               </div>
-            </div>
-            
-            <div className={`flex items-center justify-between px-1 pt-2 border-t border-zinc-200/50 dark:border-white/5 ${isFocusMode ? 'max-w-5xl mx-auto w-full' : 'max-w-4xl mx-auto'}`}>
-              <span className="text-[10px] text-zinc-400">Distraction-free learning portal</span>
-              <a 
-                href={`https://www.youtube.com/watch?v=${activeVideoId}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-[10px] text-brand-primary font-bold flex items-center gap-1 hover:underline"
-              >
-                Watch on YouTube
-                <ExternalLink size={10} />
-              </a>
-            </div>
-          </motion.div>
+            )}
+          </div>
         )}
       </AnimatePresence>
 
-      {/* Search & Filters Card (Always visible, styled exactly like the Hero card) */}
-      <div id="search-filters-card" className="w-full bg-gradient-to-r from-zinc-900/60 to-black/80 dark:from-zinc-950/40 dark:to-black/60 rounded-3xl p-6 sm:p-8 space-y-6 text-left border border-zinc-200/10 dark:border-white/5 shadow-xl backdrop-blur-md">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200/10 dark:border-white/5">
+      {/* ─── Search & Filters ─── */}
+      <div id="search-filters-card" className="w-full bg-gradient-to-br from-[#0e0f12] to-[#080809] rounded-3xl p-6 sm:p-8 space-y-6 text-left border border-white/[0.06] shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
           <div>
-            <h4 className="text-xs font-semibold text-white tracking-wide uppercase tracking-wider">Search & Filters</h4>
-            <p className="text-[10px] text-zinc-400 mt-0.5">Select your course or enter custom query search terms below</p>
+            <h4 className="text-xs font-semibold text-white uppercase tracking-wider">Search & Filters</h4>
+            <p className="text-[10px] text-zinc-500 mt-0.5">Select your course or search a custom topic</p>
           </div>
-          
-          {/* View Mode Toggle Switch */}
-          <div className="flex bg-zinc-855/40 dark:bg-black/30 p-0.5 rounded-xl border border-zinc-200/10 dark:border-white/5 shrink-0">
-            <button
-              type="button"
-              onClick={() => setIsRawView(false)}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border-none cursor-pointer transition-all ${
-                !isRawView
-                  ? 'bg-brand-primary text-white shadow-sm'
-                  : 'bg-transparent text-zinc-400 hover:text-white'
-              }`}
-            >
-              Shelves
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsRawView(true)}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border-none cursor-pointer transition-all ${
-                isRawView
-                  ? 'bg-brand-primary text-white shadow-sm'
-                  : 'bg-transparent text-zinc-400 hover:text-white'
-              }`}
-            >
-              Feed
-            </button>
+          <div className="flex bg-black/40 p-0.5 rounded-xl border border-white/5 shrink-0">
+            {[{ key: false, label: 'Shelves' }, { key: true, label: 'Feed' }].map(m => (
+              <button key={String(m.key)} type="button" onClick={() => setIsRawView(m.key)}
+                className={`px-3.5 py-1.5 rounded-lg text-[10px] font-bold border-none cursor-pointer transition-all ${
+                  isRawView === m.key ? 'bg-brand-primary text-white shadow-sm' : 'bg-transparent text-zinc-400 hover:text-white'
+                }`}
+              >{m.label}</button>
+            ))}
           </div>
         </div>
 
-        {/* Dropdowns row */}
         <div className="flex flex-col sm:flex-row gap-4 w-full">
           <div className="w-full sm:w-1/2">
-            <ThemeDropdown
-              label="Select Level"
-              options={levels.map(l => ({ value: l, label: l }))}
-              value={selectedLevel}
-              onChange={setSelectedLevel}
-            />
+            <ThemeDropdown label="Select Level" options={levels.map(l => ({ value: l, label: l }))} value={selectedLevel} onChange={setSelectedLevel} />
           </div>
           <div className="w-full sm:w-1/2">
-            <ThemeDropdown
-              label="Quick Select Course"
-              options={courseOptions.map(c => ({ value: c, label: c }))}
-              value={selectedCourse}
-              onChange={setSelectedCourse}
-            />
+            <ThemeDropdown label="Quick Select Course" options={courseOptions.map(c => ({ value: c, label: c }))} value={selectedCourse} onChange={setSelectedCourse} />
           </div>
         </div>
 
-        {/* Custom Text Search */}
         <form onSubmit={handleCustomSearchSubmit} className="relative w-full">
-          <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider pl-1 block mb-1.5">Or Custom YouTube Search</label>
+          <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider pl-1 block mb-1.5">Or Custom Search</label>
           <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-            <input
-              type="text"
-              placeholder="Search custom topic (e.g. Backprop derivation, Dijkstra code)..."
-              value={searchText}
+            <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+            <input type="text" placeholder="Search any topic (e.g. Backprop derivation, Dijkstra)..." value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="w-full pl-9 pr-24 py-3 bg-zinc-950/50 dark:bg-black/35 border border-zinc-200/10 dark:border-white/5 rounded-xl text-xs font-semibold text-white outline-none focus:ring-1 focus:ring-brand-primary"
+              className="w-full pl-9 pr-24 py-3 bg-black/30 border border-white/5 rounded-xl text-xs font-semibold text-white outline-none focus:ring-1 focus:ring-brand-primary/50 placeholder:text-zinc-600"
             />
-            <button
-              type="submit"
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-brand-primary hover:bg-brand-primary/95 text-white font-bold text-[10px] rounded-lg border-none cursor-pointer active:scale-95 transition-all shadow-md shadow-brand-primary/10"
-            >
-              Search
-            </button>
+            <button type="submit"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-brand-primary hover:bg-brand-primary/90 text-white font-bold text-[10px] rounded-lg border-none cursor-pointer active:scale-95 transition-all shadow-md shadow-brand-primary/10"
+            >Search</button>
           </div>
         </form>
 
-        {/* Categories */}
         <div className="space-y-2">
-          <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider pl-1">Filter by Category</label>
+          <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider pl-1">Category</label>
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            {categories.map(cat => {
-              const isActive = activeCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setActiveCategory(cat.id)}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border cursor-pointer active:scale-95 duration-200 border-solid ${
-                    isActive
-                      ? 'bg-brand-primary border-brand-primary text-white shadow-md shadow-brand-primary/10'
-                      : 'bg-zinc-800/40 dark:bg-black/30 border border-zinc-200/10 dark:border-white/5 text-zinc-300 hover:border-brand-primary/50'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
+            {categories.map(cat => (
+              <button key={cat.id} type="button" onClick={() => setActiveCategory(cat.id)}
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border cursor-pointer active:scale-95 duration-200 ${
+                  activeCategory === cat.id
+                    ? 'bg-brand-primary border-brand-primary text-white shadow-md shadow-brand-primary/10'
+                    : 'bg-black/30 border-white/5 text-zinc-400 hover:border-brand-primary/40 hover:text-zinc-200'
+                }`}
+              >{cat.label}</button>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Continue Studying horizontal shelf */}
+      {/* ─── Continue Watching ─── */}
       {!activeVideoId && recentLectures.length > 0 && (
-        <div className="space-y-4 text-left animate-fade-in">
-          <div className="flex items-center gap-2 border-b border-zinc-100 dark:border-white/5 pb-2">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+          className="space-y-4 text-left">
+          <div className="flex items-center gap-2 border-b border-white/5 pb-2">
             <Clock size={14} className="text-brand-primary" />
-            <h4 className="text-[10px] sm:text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-widest leading-none">
-              Continue Watching
-            </h4>
+            <h4 className="text-[10px] sm:text-xs font-bold text-zinc-300 uppercase tracking-widest">Continue Watching</h4>
           </div>
-
           <div className="flex gap-5 overflow-x-auto no-scrollbar pb-3 snap-x snap-mandatory pt-1 px-1 -mx-1">
-            {recentLectures.map((video) => (
-              <div
-                key={video.id}
+            {recentLectures.map((video, i) => (
+              <motion.div key={video.id}
+                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06, duration: 0.4 }}
+                role="button" tabIndex={0} aria-label={`Resume ${video.title}`}
                 onClick={() => handleSelectRecentVideo(video)}
-                className="snap-start shrink-0 w-[200px] sm:w-[240px] flex flex-col bg-zinc-50 dark:bg-white/[0.01] border border-zinc-200/50 dark:border-white/5 rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] hover:bg-zinc-100/50 dark:hover:bg-white/[0.03] transition-all duration-300 group animate-fade-in"
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSelectRecentVideo(video); } }}
+                className="group snap-start shrink-0 w-[200px] sm:w-[240px] flex flex-col bg-white/[0.01] border border-white/[0.06] rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.03] hover:-translate-y-1 hover:shadow-xl hover:shadow-black/40 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/50"
               >
                 <div className="relative aspect-video bg-black overflow-hidden">
-                  <img 
-                    src={video.thumbnail} 
-                    alt={video.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  <img src={video.thumbnail} alt={video.title} loading="lazy"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
-                  <span className="absolute bottom-2 right-2 bg-black/75 px-1.5 py-0.5 rounded text-[8px] font-bold text-white">
-                    {video.duration}
-                  </span>
-                  
-                  {/* Progress Bar overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-800">
-                    <div 
-                      className="h-full bg-brand-primary" 
-                      style={{ width: `${video.progress}%` }}
-                    />
+                  {video.duration && (
+                    <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-bold text-white z-10">
+                      {video.duration}
+                    </span>
+                  )}
+                  {/* Netflix-style progress bar */}
+                  <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-zinc-800/80">
+                    <div className="h-full bg-brand-primary rounded-r-full transition-all" style={{ width: `${video.progress}%` }} />
+                  </div>
+                  {/* Play overlay */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
+                    <div className="w-10 h-10 rounded-full bg-brand-primary/90 backdrop-blur-sm flex items-center justify-center shadow-xl">
+                      <Play size={14} className="text-white fill-white ml-0.5" />
+                    </div>
                   </div>
                 </div>
-
-                <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
-                  <div>
-                    <h5 className="text-[10px] sm:text-xs font-semibold text-zinc-950 dark:text-white leading-snug line-clamp-2">
-                      {video.title}
-                    </h5>
-                    <p className="text-[8px] sm:text-[9px] text-zinc-500 truncate mt-1">{video.channel}</p>
-                  </div>
+                <div className="p-3 space-y-1">
+                  <h5 className="text-[10px] sm:text-[11px] font-semibold text-white leading-snug line-clamp-2">{video.title}</h5>
+                  <p className="text-[8px] sm:text-[9px] text-zinc-600 truncate">{video.channel}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
 
-      {/* Shimmering Skeleton Loader */}
+      {/* ─── Loading ─── */}
       {loading && <LecturesSkeleton />}
 
-      {/* Error Handling */}
+      {/* ─── Error ─── */}
       {error && !loading && (
-        <div className="flex flex-col items-center justify-center py-16 text-center space-y-4 bg-red-500/[0.02] border border-dashed border-red-500/20 rounded-2xl max-w-xl mx-auto p-6 animate-fade-in">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          className="flex flex-col items-center justify-center py-16 text-center space-y-4 bg-red-500/[0.02] border border-dashed border-red-500/20 rounded-2xl max-w-xl mx-auto p-6">
           <AlertTriangle className="w-10 h-10 text-red-500" />
           <div>
-            <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Lecture Directory Blocked</h4>
-            <p className="text-[10px] text-zinc-400 max-w-sm mt-1 leading-relaxed">
-              The scrapers could not query the direct YouTube feed due to local client proxy limits. Try selecting another category or course.
-            </p>
+            <h4 className="text-xs font-bold text-zinc-200">Search Failed</h4>
+            <p className="text-[10px] text-zinc-500 max-w-sm mt-1 leading-relaxed">{error}</p>
           </div>
-          <a 
-            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(selectedCourse)}`}
-            target="_blank"
-            rel="noreferrer"
-            className="px-5 py-2.5 bg-brand-primary text-white rounded-xl text-[10px] font-bold border-none cursor-pointer hover:bg-brand-primary/95 flex items-center gap-1.5 shadow-md shadow-brand-primary/10"
-          >
-            Search YouTube Direct
-            <ExternalLink size={12} />
-          </a>
-        </div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => searchYouTube(searchText.trim() || selectedCourse, activeCategory)}
+              className="px-5 py-2.5 bg-brand-primary text-white rounded-xl text-[10px] font-bold border-none cursor-pointer hover:bg-brand-primary/90 transition-all active:scale-95">
+              Retry
+            </button>
+            <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(selectedCourse)}`} target="_blank" rel="noreferrer"
+              className="px-5 py-2.5 bg-white/5 text-zinc-300 rounded-xl text-[10px] font-bold border border-white/10 flex items-center gap-1.5">
+              YouTube <ExternalLink size={12} />
+            </a>
+          </div>
+        </motion.div>
       )}
 
-      {/* Dynamic Display Mode */}
+      {/* ─── Empty State ─── */}
+      {!loading && !error && ytVideos.length === 0 && (
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+          className="flex flex-col items-center justify-center py-24 text-center space-y-5">
+          <div className="relative">
+            <div className="w-20 h-20 rounded-full bg-brand-primary/5 flex items-center justify-center border border-brand-primary/10">
+              <MonitorPlay size={32} className="text-brand-primary/60" />
+            </div>
+            <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-brand-primary/10 flex items-center justify-center">
+              <Sparkles size={12} className="text-brand-primary" />
+            </div>
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-zinc-200">Select a Course to Begin</h4>
+            <p className="text-[11px] text-zinc-500 mt-1.5 max-w-md leading-relaxed">
+              Choose a level and course from the filters above, or search for any topic to start browsing lectures.
+            </p>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ─── Results Display ─── */}
       {!loading && !error && ytVideos.length > 0 && (
         <>
           {isRawView ? (
-            /* Raw Feed View Mode (YouTube style vertical grid feed) */
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 animate-fade-in text-left">
-              {ytVideos.map((video) => (
-                <div
-                  key={video.id}
-                  onClick={() => handleSelectVideo(video)}
-                  className={`group flex flex-col bg-[#111317] border rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.01] hover:bg-[#1a1c23]/30 transition-all duration-300 ${
-                    activeVideoId === video.id ? 'border-brand-primary font-medium' : 'border-zinc-200/50 dark:border-white/5'
-                  }`}
-                >
-                  {/* Video Thumbnail */}
-                  <div className="relative aspect-video bg-black overflow-hidden border-b border-zinc-200/20 dark:border-white/5">
-                    <img 
-                      src={video.thumbnail} 
-                      alt={video.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <span className="absolute bottom-2 right-2 bg-black/75 px-1.5 py-0.5 rounded text-[9px] font-bold text-white">
-                      {video.duration}
-                    </span>
-                    {video.isLive && (
-                      <span className="absolute top-2 left-2 bg-red-600 px-1.5 py-0.5 rounded text-[7px] font-bold text-white uppercase tracking-wider animate-pulse">
-                        Live
-                      </span>
-                    )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
-                      <div className="w-11 h-11 rounded-full bg-brand-primary flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-all duration-300">
-                        <Play size={16} className="text-white fill-white ml-0.5" />
-                      </div>
-                    </div>
-                  </div>
+            /* ── Feed Grid ── */
+            <div className="space-y-6 text-left">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {ytVideos.map((video, i) => (
+                  <VideoCard key={video.id} video={video} isActive={activeVideoId === video.id}
+                    isBookmarked={bookmarks.has(video.id)} onSelect={handleSelectVideo}
+                    onToggleBookmark={toggleBookmark} variant="feed" index={i}
+                  />
+                ))}
+              </div>
 
-                  {/* Metadata block (with channel logo) */}
-                  <div className="p-4 flex gap-3 flex-1 items-start">
-                    {video.channelLogo ? (
-                      <img 
-                        src={video.channelLogo} 
-                        alt={video.channel}
-                        className="w-8 h-8 rounded-full object-cover border dark:border-white/10 shrink-0"
-                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-xs shrink-0">
-                        {video.channel.charAt(0)}
-                      </div>
-                    )}
-                    <div className="space-y-1.5 min-w-0 flex-1">
-                      <h4 className="text-xs font-bold text-zinc-950 dark:text-white leading-snug line-clamp-2">
-                        {video.title}
-                      </h4>
-                      <div className="flex flex-col text-[10px] text-zinc-500 font-semibold">
-                        <span className="truncate hover:text-brand-primary transition-colors">{video.channel}</span>
-                        <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                          <span>{video.views}</span>
-                          <span>•</span>
-                          <span>{video.published}</span>
-                        </div>
-                      </div>
-                    </div>
+              <div ref={feedEndRef} className="flex justify-center py-6">
+                {loadingMoreFeed && (
+                  <div className="flex items-center gap-2 text-zinc-500 text-xs font-semibold">
+                    <Loader2 className="w-4 h-4 animate-spin text-brand-primary" /> Loading more...
                   </div>
-                </div>
-              ))}
+                )}
+                {!loadingMoreFeed && hasMoreFeed && ytVideos.length >= 10 && (
+                  <button onClick={loadMoreForFeed}
+                    className="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-zinc-300 rounded-xl text-xs font-bold border border-white/10 cursor-pointer transition-all active:scale-95 flex items-center gap-2">
+                    Load More <ChevronDown size={14} />
+                  </button>
+                )}
+                {!hasMoreFeed && ytVideos.length > 0 && (
+                  <p className="text-[10px] text-zinc-600 font-medium">End of results</p>
+                )}
+              </div>
             </div>
           ) : (
-            /* Channel Shelves View Mode */
-            <div className="space-y-12">
+            /* ── Channel Shelves ── */
+            <div className="space-y-10">
               {Object.entries(groupedVideos).map(([channelName, videosList]) => {
                 const videos = videosList as YTVideo[];
                 const firstVideo = videos[0];
+                const totalDuration = videos.reduce((sum, v) => sum + parseDurationToSeconds(v.duration), 0);
 
                 return (
-                  <div key={channelName} className="space-y-4 text-left animate-fade-in">
+                  <motion.div key={channelName}
+                    initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+                    className="space-y-4 text-left"
+                  >
                     {/* Channel Header */}
-                    <div className="flex items-center gap-2 border-b border-zinc-100 dark:border-white/5 pb-2">
+                    <div className="flex items-center gap-2.5 border-b border-white/5 pb-2.5">
                       {firstVideo?.channelLogo ? (
-                        <img 
-                          src={firstVideo.channelLogo} 
-                          alt={channelName} 
-                          className="w-5 h-5 rounded-full object-cover border dark:border-white/10 shrink-0"
+                        <img src={firstVideo.channelLogo} alt={channelName} loading="lazy"
+                          className="w-6 h-6 rounded-full object-cover border border-white/10 shrink-0"
                           onError={(e) => { e.currentTarget.style.display = 'none'; }}
                         />
                       ) : (
-                        <div className="w-1.5 h-1.5 rounded-full bg-brand-primary shrink-0" />
+                        <div className="w-2 h-2 rounded-full bg-brand-primary shrink-0" />
                       )}
-                      <h4 className="text-[10px] sm:text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-widest leading-none">
+                      <h4 className="text-[10px] sm:text-xs font-bold text-zinc-200 uppercase tracking-widest leading-none flex-1">
                         {channelName}
                       </h4>
-                    </div>
-
-                    {/* Horizontal Scrollable Row */}
-                    <div className="relative w-full overflow-hidden">
-                      <div 
-                        onScroll={(e) => handleHorizontalScroll(e, channelName)}
-                        className="flex gap-5 overflow-x-auto no-scrollbar scroll-smooth pb-4 pt-1 px-1 -mx-1 snap-x snap-mandatory animate-fade-in"
-                      >
-                        {videos.map((video) => (
-                          <div
-                            key={video.id}
-                            onClick={() => handleSelectVideo(video)}
-                            className={`snap-start shrink-0 w-[240px] sm:w-[260px] flex flex-col bg-[#111317] border rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] hover:bg-[#1a1c23]/30 transition-all duration-300 ${
-                              activeVideoId === video.id ? 'border-brand-primary font-medium' : 'border-zinc-200/50 dark:border-white/5'
-                            }`}
-                          >
-                            {/* Thumbnail with Play Overlay */}
-                            <div className="relative aspect-video bg-black overflow-hidden border-b border-zinc-200/20 dark:border-white/5">
-                              <img 
-                                src={video.thumbnail} 
-                                alt={video.title} 
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                              />
-                              <span className="absolute bottom-2 right-2 bg-black/75 px-1.5 py-0.5 rounded text-[8px] font-bold text-white">
-                                {video.duration}
-                              </span>
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
-                                <div className="w-11 h-11 rounded-full bg-brand-primary flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-all duration-300">
-                                  <Play size={16} className="text-white fill-white ml-0.5" />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="p-3.5 flex-1 flex flex-col justify-between space-y-3">
-                              <div>
-                                <h4 className="text-[11px] sm:text-xs font-semibold text-zinc-950 dark:text-white leading-snug line-clamp-2">
-                                  {video.title}
-                                </h4>
-                              </div>
-                              <div className="text-[9px] text-zinc-500 flex items-center gap-1.5 pt-1 border-t border-zinc-200/30 dark:border-white/[0.02] flex-wrap">
-                                <span>{video.views}</span>
-                                <span>•</span>
-                                <span>{video.published}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="flex items-center gap-3 text-[9px] text-zinc-600 font-medium shrink-0">
+                        {totalDuration > 0 && (
+                          <span className="flex items-center gap-1">
+                            <Timer size={10} /> {formatStudyTime(totalDuration)}
+                          </span>
+                        )}
+                        <span>{videos.length} videos</span>
                       </div>
                     </div>
-                  </div>
+
+                    {/* Horizontal Row */}
+                    <div className="relative w-full overflow-hidden">
+                      <div onScroll={(e) => handleHorizontalScroll(e, channelName)}
+                        className="flex gap-5 overflow-x-auto no-scrollbar scroll-smooth pb-4 pt-1 px-1 -mx-1 snap-x snap-mandatory"
+                      >
+                        {videos.map((video, i) => (
+                          <VideoCard key={video.id} video={video} isActive={activeVideoId === video.id}
+                            isBookmarked={bookmarks.has(video.id)} onSelect={handleSelectVideo}
+                            onToggleBookmark={toggleBookmark} variant="shelf" index={i}
+                          />
+                        ))}
+
+                        {loadingChannels[channelName] && (
+                          <div className="snap-start shrink-0 w-[120px] flex items-center justify-center">
+                            <Loader2 className="w-5 h-5 text-brand-primary animate-spin" />
+                          </div>
+                        )}
+                        {channelHasMore[channelName] !== false && !loadingChannels[channelName] && videos.length >= 3 && (
+                          <button onClick={() => loadMoreForChannel(channelName)} aria-label={`More from ${channelName}`}
+                            className="snap-start shrink-0 w-[100px] flex flex-col items-center justify-center gap-2 text-zinc-500 hover:text-brand-primary transition-colors cursor-pointer bg-transparent border-none">
+                            <div className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
+                              <ChevronRight size={18} />
+                            </div>
+                            <span className="text-[9px] font-bold">More</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
                 );
               })}
             </div>
           )}
         </>
       )}
-
     </div>
   );
 };
