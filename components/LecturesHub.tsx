@@ -13,7 +13,18 @@ import {
   X,
   ThumbsUp,
   ThumbsDown,
-  Users
+  Users,
+  Sparkles,
+  Clock,
+  Minimize2,
+  Maximize2,
+  SlidersHorizontal,
+  Calendar,
+  BookOpen,
+  FileText,
+  List,
+  Bookmark,
+  Send
 } from 'lucide-react';
 import { IITM_BS_DS, BTECH_CSE_2025 } from '../data/curriculumData.ts';
 
@@ -27,6 +38,11 @@ interface YTVideo {
   views: string;
   published: string;
   thumbnail: string;
+}
+
+interface RecentLecture extends YTVideo {
+  progress: number;
+  watchedAt: number;
 }
 
 interface VideoDetails {
@@ -338,8 +354,18 @@ const fetchFromInvidious = async (query: string, page: number): Promise<YTVideo[
       const targetUrl = `${instance}/api/v1/search?q=${encodeURIComponent(query)}&type=video&page=${page}`;
       const url = `/api/gateway?action=youtube-proxy&url=${encodeURIComponent(targetUrl)}`;
       const res = await fetch(url);
-      if (!res.ok) continue;
-      const data = await res.json();
+      
+      const contentType = res.headers.get('content-type') || '';
+      let data;
+      if (!res.ok || contentType.includes('text/html')) {
+        console.warn(`Gateway API proxy failed or returned HTML. Trying direct client-side fetch from Invidious...`);
+        const directRes = await fetch(targetUrl);
+        if (!directRes.ok) continue;
+        data = await directRes.json();
+      } else {
+        data = await res.json();
+      }
+      
       if (!Array.isArray(data)) continue;
       
       return data.map((item: any) => {
@@ -399,7 +425,7 @@ const ThemeDropdown: React.FC<{
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between bg-zinc-50 dark:bg-white/5 border border-zinc-200/50 dark:border-white/10 rounded-xl px-3 py-2.5 text-xs font-semibold text-zinc-700 dark:text-white outline-none hover:border-brand-primary/50 transition-all text-left cursor-pointer"
+        className="w-full flex items-center justify-between bg-zinc-900/40 dark:bg-black/30 border border-zinc-200/10 dark:border-white/5 rounded-xl px-3 py-2.5 text-xs font-semibold text-white outline-none hover:border-brand-primary/50 transition-all text-left cursor-pointer"
       >
         <span className="truncate pr-2">{currentOption?.label || value}</span>
         <ChevronDown className="w-4 h-4 text-zinc-400 shrink-0" />
@@ -412,7 +438,7 @@ const ThemeDropdown: React.FC<{
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-50 left-0 right-0 mt-1 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-xl shadow-lg max-h-48 overflow-y-auto no-scrollbar p-1 space-y-0.5"
+            className="absolute z-50 left-0 right-0 mt-1 bg-zinc-900 dark:bg-[#0a0a0a] border border-zinc-200/10 dark:border-white/5 rounded-xl shadow-lg max-h-48 overflow-y-auto no-scrollbar p-1 space-y-0.5"
           >
             {options.map((opt) => (
               <button
@@ -425,7 +451,7 @@ const ThemeDropdown: React.FC<{
                 className={`w-full text-left px-3 py-2 text-xs font-semibold transition-all border-none rounded-lg cursor-pointer ${
                   value === opt.value
                     ? 'bg-brand-primary text-white'
-                    : 'text-zinc-600 dark:text-zinc-400 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-brand-primary'
+                    : 'text-zinc-300 bg-transparent hover:bg-white/5 hover:text-brand-primary'
                 }`}
               >
                 {opt.label}
@@ -498,8 +524,108 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [activeVideoDetails, setActiveVideoDetails] = useState<VideoDetails | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  
+  const [isFocusMode, setIsFocusMode] = useState(false);
+  const [recentLectures, setRecentLectures] = useState<RecentLecture[]>([]);
+  
+  const [activeTab, setActiveTab] = useState<'resources' | 'notes' | 'pyqs' | 'discussion'>('resources');
+  const [noteText, setNoteText] = useState('');
+  const [discussionText, setDiscussionText] = useState('');
+  const [mockComments, setMockComments] = useState<{ id: string; user: string; text: string; time: string }[]>([]);
 
   const topRef = useRef<HTMLDivElement>(null);
+
+  // Load recent lectures on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('scholix_recent_lectures');
+    if (saved) {
+      try {
+        setRecentLectures(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse recent lectures:", e);
+      }
+    }
+  }, []);
+
+  // Load note text and comments when activeVideoId changes
+  useEffect(() => {
+    if (activeVideoId) {
+      const savedNote = localStorage.getItem(`scholix_note_${activeVideoId}`);
+      setNoteText(savedNote || '');
+
+      const savedComments = localStorage.getItem(`scholix_comments_${activeVideoId}`);
+      if (savedComments) {
+        setMockComments(JSON.parse(savedComments));
+      } else {
+        setMockComments([
+          { id: '1', user: 'Anunay Yadav', text: 'This lecture explains recursion so much better than the professor did in class!', time: '2 hours ago' },
+          { id: '2', user: 'Sumit Sharma', text: 'Does anyone know the time stamp where he explains the master theorem?', time: '5 hours ago' },
+          { id: '3', user: 'Pooja Patel', text: 'Master theorem is at 24:15. It was super helpful!', time: '4 hours ago' }
+        ]);
+      }
+    } else {
+      setNoteText('');
+      setMockComments([]);
+    }
+  }, [activeVideoId]);
+
+
+
+  // Save/update recent lectures helper
+  const saveRecentLecture = (video: YTVideo, progress: number = 0) => {
+    setRecentLectures(prev => {
+      const filtered = prev.filter(v => v.id !== video.id);
+      const updated: RecentLecture = {
+        ...video,
+        progress,
+        watchedAt: Date.now()
+      };
+      const newList = [updated, ...filtered].slice(0, 8);
+      localStorage.setItem('scholix_recent_lectures', JSON.stringify(newList));
+      return newList;
+    });
+  };
+
+  const handleSelectVideo = (video: YTVideo) => {
+    setActiveVideoId(video.id);
+    saveRecentLecture(video, 10 + Math.floor(Math.random() * 80)); // Mock progress
+    topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleSelectRecentVideo = (video: RecentLecture) => {
+    setActiveVideoId(video.id);
+    saveRecentLecture(video, video.progress);
+    topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleSaveNote = (text: string) => {
+    setNoteText(text);
+    if (activeVideoId) {
+      localStorage.setItem(`scholix_note_${activeVideoId}`, text);
+    }
+  };
+
+  const handlePostComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!discussionText.trim() || !activeVideoId) return;
+
+    const newComment = {
+      id: Date.now().toString(),
+      user: 'Student User',
+      text: discussionText.trim(),
+      time: 'Just now'
+    };
+
+    const updated = [newComment, ...mockComments];
+    setMockComments(updated);
+    setDiscussionText('');
+    localStorage.setItem(`scholix_comments_${activeVideoId}`, JSON.stringify(updated));
+  };
+
+  const activeVideo = useMemo(() => {
+    if (!activeVideoId) return null;
+    return ytVideos.find(v => v.id === activeVideoId) || recentLectures.find(v => v.id === activeVideoId) || null;
+  }, [activeVideoId, ytVideos, recentLectures]);
 
   const categories = useMemo(() => {
     const isIITM = selectedUniversity === 'iitm_bs';
@@ -660,6 +786,9 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
       }
 
       setYtVideos(fetchedVideos);
+      if (fetchedVideos.length > 0) {
+        setActiveVideoId(fetchedVideos[0].id);
+      }
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Failed to search lecture videos.");
@@ -764,8 +893,17 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
         const targetUrl = `${instance}/api/v1/videos/${videoId}`;
         const url = `/api/gateway?action=youtube-proxy&url=${encodeURIComponent(targetUrl)}`;
         const res = await fetch(url);
-        if (!res.ok) continue;
-        const data = await res.json();
+        
+        const contentType = res.headers.get('content-type') || '';
+        let data;
+        if (!res.ok || contentType.includes('text/html')) {
+          console.warn(`Gateway API proxy failed or returned HTML. Trying direct client-side details fetch...`);
+          const directRes = await fetch(targetUrl);
+          if (!directRes.ok) continue;
+          data = await directRes.json();
+        } else {
+          data = await res.json();
+        }
         
         let subsStr = "0";
         const subs = data.authorSubscriberCount || 0;
@@ -840,10 +978,6 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
     return groups;
   }, [ytVideos]);
 
-  // Find the selected video to render logo and other basic stats
-  const activeVideo = useMemo(() => {
-    return ytVideos.find(v => v.id === activeVideoId) || null;
-  }, [activeVideoId, ytVideos]);
 
   // Calculate rating percentage and ratio bar width
   const ratingMetrics = useMemo(() => {
@@ -861,7 +995,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
   }, [activeVideoDetails]);
 
   return (
-    <div ref={topRef} className="max-w-5xl mx-auto w-full space-y-8 animate-fade-in pb-20 text-center md:text-left scroll-mt-6">
+    <div ref={topRef} className="max-w-5xl mx-auto w-full space-y-8 animate-fade-in pb-20 text-center md:text-left scroll-mt-6 px-4">
       
       {/* Scrollbar CSS Overrides */}
       <style>{`
@@ -875,7 +1009,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
       `}</style>
 
       {!hideHeader && (
-        <header className="mb-6 border-b border-zinc-100 dark:border-white/5 pb-6">
+        <header className="mb-6 border-b border-zinc-100 dark:border-white/5 pb-6 text-left">
           <span className="text-[10px] uppercase tracking-wider text-brand-primary font-bold">YT Library</span>
           <h2 className="text-xl md:text-2xl font-semibold mt-1 text-zinc-900 dark:text-white tracking-tight">
             YouTube <span className="text-brand-primary">Lectures</span>
@@ -886,12 +1020,230 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
         </header>
       )}
 
-      {/* Dynamic Selector Dropdowns, Suggestion chips & Custom Direct search */}
-      <div className="max-w-5xl mx-auto space-y-6">
-        
-        {/* Dropdowns row (Same line for both mobile & desktop view) */}
-        <div className="flex flex-row gap-3 w-full">
-          <div className="w-1/2 sm:w-56 shrink-0">
+      {/* Hero Recommendation Banner */}
+      {!activeVideoId && (
+        <div className="relative w-full aspect-[21/9] md:aspect-[3/1] bg-gradient-to-r from-zinc-900 to-black rounded-3xl overflow-hidden shadow-2xl flex items-center justify-start text-left p-6 sm:p-12 border border-zinc-200/10 dark:border-white/5">
+          {recentLectures.length > 0 ? (
+            <div className="absolute inset-0 z-0">
+              <img 
+                src={recentLectures[0].thumbnail} 
+                alt="Hero BG" 
+                className="w-full h-full object-cover blur-2xl opacity-30 scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/80 to-transparent" />
+            </div>
+          ) : null}
+
+          <div className="relative z-10 max-w-lg space-y-3 sm:space-y-4">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[8px] font-bold bg-brand-primary/10 text-brand-primary uppercase tracking-widest border border-brand-primary/20">
+              <Sparkles size={10} />
+              Recommendation
+            </span>
+
+            {recentLectures.length > 0 ? (
+              <>
+                <h3 className="text-xl sm:text-2xl font-light text-white tracking-wide leading-tight line-clamp-2">
+                  Resume: <span className="font-semibold">{recentLectures[0].title}</span>
+                </h3>
+                <p className="text-[10px] sm:text-xs text-zinc-400 font-medium">
+                  {recentLectures[0].channel} • Progress: {recentLectures[0].progress}%
+                </p>
+                
+                <button
+                  onClick={() => handleSelectRecentVideo(recentLectures[0])}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-brand-primary hover:bg-brand-primary/95 text-white font-bold text-xs rounded-xl border-none cursor-pointer transition-all active:scale-95 shadow-lg shadow-brand-primary/25"
+                >
+                  <Play size={13} className="fill-white" />
+                  Resume Lecture
+                </button>
+              </>
+            ) : (
+              <>
+                <h3 className="text-xl sm:text-2xl font-light text-white tracking-wide leading-tight">
+                  Start Your <span className="font-semibold text-brand-primary">Study Session</span>
+                </h3>
+                <p className="text-[10px] sm:text-xs text-zinc-400 font-medium leading-relaxed max-w-sm">
+                  Select your university curriculum level, choose a course, and stream distraction-free video lectures instantly.
+                </p>
+                
+                <button
+                  onClick={() => {
+                    const filtersEl = document.getElementById('search-filters-card');
+                    filtersEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-white text-zinc-950 hover:bg-zinc-100 font-bold text-xs rounded-xl border-none cursor-pointer transition-all active:scale-95"
+                >
+                  <SlidersHorizontal size={13} />
+                  Explore Courses
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Active Embed Player */}
+      <AnimatePresence>
+        {activeVideoId && activeVideo && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            className={`space-y-4 border rounded-3xl overflow-hidden text-left transition-all duration-300 ${
+              isFocusMode
+                ? 'fixed inset-0 z-50 bg-[#060606] p-4 sm:p-8 flex flex-col justify-center max-w-none'
+                : 'p-6 bg-gradient-to-r from-zinc-900/40 to-black/80 dark:from-zinc-950/20 dark:to-black/50 border-zinc-200/10 dark:border-white/5 rounded-3xl backdrop-blur-md shadow-2xl'
+            }`}
+          >
+            <div className={`flex items-center justify-between pb-2 border-b border-zinc-200/50 dark:border-white/5 ${isFocusMode ? 'max-w-5xl mx-auto w-full' : ''}`}>
+              <span className="text-[9px] font-bold text-brand-primary uppercase flex items-center gap-1.5 animate-pulse">
+                <PlayCircle size={12} />
+                Now Playing Inline
+              </span>
+              
+              <div className="flex items-center gap-2">
+
+
+                <button 
+                  onClick={() => {
+                    setActiveVideoId(null);
+                    setIsFocusMode(false);
+                  }}
+                  className="p-1.5 hover:bg-zinc-850 dark:hover:bg-white/5 rounded-xl border-none bg-transparent cursor-pointer text-zinc-400 hover:text-white"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            </div>
+
+            <div className={`relative aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl border dark:border-white/5 ${isFocusMode ? 'max-w-5xl mx-auto flex-1' : 'max-w-4xl mx-auto'}`}>
+              <iframe 
+                src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1`}
+                title="YouTube Lecture Player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+              />
+            </div>
+
+            {/* Dynamic Video & Channel Stats Row */}
+            <div className={`w-full pt-2 space-y-4 ${isFocusMode ? 'max-w-5xl mx-auto' : 'max-w-4xl mx-auto'}`}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                {/* Channel Details */}
+                <div className="flex items-center gap-3">
+                  {activeVideo.channelLogo ? (
+                    <img 
+                      src={activeVideo.channelLogo} 
+                      alt={activeVideo.channel}
+                      className="w-10 h-10 rounded-full object-cover border dark:border-white/10"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-sm">
+                      {activeVideo.channel.charAt(0)}
+                    </div>
+                  )}
+                  <div>
+                    <h4 className="text-xs font-bold text-zinc-950 dark:text-white leading-tight">{activeVideo.title}</h4>
+                    <p className="text-[10px] text-zinc-400 mt-0.5">{activeVideo.channel}</p>
+                    {loadingDetails ? (
+                      <span className="text-[9px] text-zinc-400 flex items-center gap-1 mt-0.5">
+                        <Loader2 className="w-2.5 h-2.5 animate-spin" /> Loading stats...
+                      </span>
+                    ) : activeVideoDetails ? (
+                      <p className="text-[9px] text-zinc-400 font-semibold flex items-center gap-1.5 mt-0.5">
+                        <Users size={10} className="text-zinc-500" />
+                        {activeVideoDetails.subscribers} subscribers
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* Likes / Dislikes Ratio Display */}
+                {!loadingDetails && ratingMetrics && (
+                  <div className="flex flex-col items-end gap-1.5 shrink-0 max-w-[200px] w-full sm:w-auto">
+                    <div className="flex items-center gap-4 text-[10px] font-bold text-zinc-600 dark:text-zinc-300">
+                      <span className="flex items-center gap-1 hover:text-green-500 transition-colors">
+                        <ThumbsUp size={12} className="text-zinc-500" />
+                        {ratingMetrics.likesFormatted} ({ratingMetrics.percentage}%)
+                      </span>
+                      <span className="flex items-center gap-1 hover:text-red-500 transition-colors">
+                        <ThumbsDown size={12} className="text-zinc-500" />
+                        {ratingMetrics.dislikesFormatted}
+                      </span>
+                    </div>
+                    
+                    {/* Rating Ratio Bar */}
+                    <div className="w-full sm:w-36 h-1 bg-zinc-200 dark:bg-white/10 rounded-full overflow-hidden flex">
+                      <div 
+                        className="h-full bg-emerald-500" 
+                        style={{ width: `${ratingMetrics.percentage}%` }}
+                      />
+                      <div 
+                        className="h-full bg-red-500" 
+                        style={{ width: `${100 - ratingMetrics.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className={`flex items-center justify-between px-1 pt-2 border-t border-zinc-200/50 dark:border-white/5 ${isFocusMode ? 'max-w-5xl mx-auto w-full' : 'max-w-4xl mx-auto'}`}>
+              <span className="text-[10px] text-zinc-400">Distraction-free learning portal</span>
+              <a 
+                href={`https://www.youtube.com/watch?v=${activeVideoId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[10px] text-brand-primary font-bold flex items-center gap-1 hover:underline"
+              >
+                Watch on YouTube
+                <ExternalLink size={10} />
+              </a>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Search & Filters Card (Always visible, styled exactly like the Hero card) */}
+      <div id="search-filters-card" className="w-full bg-gradient-to-r from-zinc-900/60 to-black/80 dark:from-zinc-950/40 dark:to-black/60 rounded-3xl p-6 sm:p-8 space-y-6 text-left border border-zinc-200/10 dark:border-white/5 shadow-xl backdrop-blur-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200/10 dark:border-white/5">
+          <div>
+            <h4 className="text-xs font-semibold text-white tracking-wide uppercase tracking-wider">Search & Filters</h4>
+            <p className="text-[10px] text-zinc-400 mt-0.5">Select your course or enter custom query search terms below</p>
+          </div>
+          
+          {/* View Mode Toggle Switch */}
+          <div className="flex bg-zinc-855/40 dark:bg-black/30 p-0.5 rounded-xl border border-zinc-200/10 dark:border-white/5 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsRawView(false)}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border-none cursor-pointer transition-all ${
+                !isRawView
+                  ? 'bg-brand-primary text-white shadow-sm'
+                  : 'bg-transparent text-zinc-400 hover:text-white'
+              }`}
+            >
+              Shelves
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsRawView(true)}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border-none cursor-pointer transition-all ${
+                isRawView
+                  ? 'bg-brand-primary text-white shadow-sm'
+                  : 'bg-transparent text-zinc-400 hover:text-white'
+              }`}
+            >
+              Feed
+            </button>
+          </div>
+        </div>
+
+        {/* Dropdowns row */}
+        <div className="flex flex-col sm:flex-row gap-4 w-full">
+          <div className="w-full sm:w-1/2">
             <ThemeDropdown
               label="Select Level"
               options={levels.map(l => ({ value: l, label: l }))}
@@ -899,8 +1251,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
               onChange={setSelectedLevel}
             />
           </div>
-
-          <div className="w-1/2 sm:w-72 shrink-0">
+          <div className="w-full sm:w-1/2">
             <ThemeDropdown
               label="Quick Select Course"
               options={courseOptions.map(c => ({ value: c, label: c }))}
@@ -910,9 +1261,9 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
           </div>
         </div>
 
-        {/* Custom Text Search Input Form */}
+        {/* Custom Text Search */}
         <form onSubmit={handleCustomSearchSubmit} className="relative w-full">
-          <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider pl-1 block mb-1.5 text-left">Or Custom YouTube Search</label>
+          <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider pl-1 block mb-1.5">Or Custom YouTube Search</label>
           <div className="relative">
             <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
@@ -920,7 +1271,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
               placeholder="Search custom topic (e.g. Backprop derivation, Dijkstra code)..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="w-full pl-9 pr-20 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-200/50 dark:border-white/10 rounded-xl text-xs font-semibold dark:text-white outline-none focus:ring-1 focus:ring-brand-primary"
+              className="w-full pl-9 pr-24 py-3 bg-zinc-950/50 dark:bg-black/35 border border-zinc-200/10 dark:border-white/5 rounded-xl text-xs font-semibold text-white outline-none focus:ring-1 focus:ring-brand-primary"
             />
             <button
               type="submit"
@@ -931,38 +1282,9 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
           </div>
         </form>
 
-        {/* Suggestion Chips Filter & View Toggle Bar */}
-        <div className="flex flex-col space-y-2 text-left">
-          <div className="flex items-center justify-between">
-            <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider pl-1">Filter by Category</label>
-            
-            {/* View Mode Toggle Switch */}
-            <div className="flex bg-zinc-100 dark:bg-white/5 p-0.5 rounded-lg border border-zinc-200/30 dark:border-white/5 shrink-0">
-              <button
-                type="button"
-                onClick={() => setIsRawView(false)}
-                className={`px-2.5 py-1 rounded-md text-[10px] font-bold border-none cursor-pointer transition-all ${
-                  !isRawView
-                    ? 'bg-white dark:bg-[#1a1a1a] text-brand-primary shadow-sm'
-                    : 'bg-transparent text-zinc-500 hover:text-zinc-950 dark:hover:text-white'
-                }`}
-              >
-                Channel Shelves
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsRawView(true)}
-                className={`px-2.5 py-1 rounded-md text-[10px] font-bold border-none cursor-pointer transition-all ${
-                  isRawView
-                    ? 'bg-white dark:bg-[#1a1a1a] text-brand-primary shadow-sm'
-                    : 'bg-transparent text-zinc-500 hover:text-zinc-950 dark:hover:text-white'
-                }`}
-              >
-                YouTube Feed
-              </button>
-            </div>
-          </div>
-          
+        {/* Categories */}
+        <div className="space-y-2">
+          <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider pl-1">Filter by Category</label>
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             {categories.map(cat => {
               const isActive = activeCategory === cat.id;
@@ -974,7 +1296,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
                   className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border cursor-pointer active:scale-95 duration-200 border-solid ${
                     isActive
                       ? 'bg-brand-primary border-brand-primary text-white shadow-md shadow-brand-primary/10'
-                      : 'bg-zinc-50 dark:bg-white/5 border-zinc-200/50 dark:border-white/10 text-zinc-600 dark:text-zinc-400 hover:border-brand-primary/50'
+                      : 'bg-zinc-800/40 dark:bg-black/30 border border-zinc-200/10 dark:border-white/5 text-zinc-300 hover:border-brand-primary/50'
                   }`}
                 >
                   {cat.label}
@@ -985,372 +1307,227 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
         </div>
       </div>
 
-      {/* Main Player & Grid Layout */}
-      <div className="max-w-5xl mx-auto space-y-10">
-        
-        {/* Active Embed Player */}
-        <AnimatePresence>
-          {activeVideoId && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="space-y-4 border border-zinc-200/50 dark:border-white/10 p-5 bg-zinc-50/50 dark:bg-white/[0.01] rounded-2xl overflow-hidden text-left"
-            >
-              <div className="flex items-center justify-between pb-2 border-b border-zinc-200/50 dark:border-white/5">
-                <span className="text-[9px] font-bold text-brand-primary uppercase flex items-center gap-1.5 animate-pulse">
-                  <PlayCircle size={12} />
-                  Now Playing Inline
-                </span>
-                <button 
-                  onClick={() => setActiveVideoId(null)}
-                  className="p-1 hover:bg-zinc-200 dark:hover:bg-white/5 rounded-lg border-none bg-transparent cursor-pointer text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+      {/* Continue Studying horizontal shelf */}
+      {!activeVideoId && recentLectures.length > 0 && (
+        <div className="space-y-4 text-left animate-fade-in">
+          <div className="flex items-center gap-2 border-b border-zinc-100 dark:border-white/5 pb-2">
+            <Clock size={14} className="text-brand-primary" />
+            <h4 className="text-[10px] sm:text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-widest leading-none">
+              Continue Watching
+            </h4>
+          </div>
+
+          <div className="flex gap-5 overflow-x-auto no-scrollbar pb-3 snap-x snap-mandatory pt-1 px-1 -mx-1">
+            {recentLectures.map((video) => (
+              <div
+                key={video.id}
+                onClick={() => handleSelectRecentVideo(video)}
+                className="snap-start shrink-0 w-[200px] sm:w-[240px] flex flex-col bg-zinc-50 dark:bg-white/[0.01] border border-zinc-200/50 dark:border-white/5 rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] hover:bg-zinc-100/50 dark:hover:bg-white/[0.03] transition-all duration-300 group animate-fade-in"
+              >
+                <div className="relative aspect-video bg-black overflow-hidden">
+                  <img 
+                    src={video.thumbnail} 
+                    alt={video.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <span className="absolute bottom-2 right-2 bg-black/75 px-1.5 py-0.5 rounded text-[8px] font-bold text-white">
+                    {video.duration}
+                  </span>
+                  
+                  {/* Progress Bar overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-800">
+                    <div 
+                      className="h-full bg-brand-primary" 
+                      style={{ width: `${video.progress}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
+                  <div>
+                    <h5 className="text-[10px] sm:text-xs font-semibold text-zinc-950 dark:text-white leading-snug line-clamp-2">
+                      {video.title}
+                    </h5>
+                    <p className="text-[8px] sm:text-[9px] text-zinc-500 truncate mt-1">{video.channel}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Shimmering Skeleton Loader */}
+      {loading && <LecturesSkeleton />}
+
+      {/* Error Handling */}
+      {error && !loading && (
+        <div className="flex flex-col items-center justify-center py-16 text-center space-y-4 bg-red-500/[0.02] border border-dashed border-red-500/20 rounded-2xl max-w-xl mx-auto p-6 animate-fade-in">
+          <AlertTriangle className="w-10 h-10 text-red-500" />
+          <div>
+            <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Lecture Directory Blocked</h4>
+            <p className="text-[10px] text-zinc-400 max-w-sm mt-1 leading-relaxed">
+              The scrapers could not query the direct YouTube feed due to local client proxy limits. Try selecting another category or course.
+            </p>
+          </div>
+          <a 
+            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(selectedCourse)}`}
+            target="_blank"
+            rel="noreferrer"
+            className="px-5 py-2.5 bg-brand-primary text-white rounded-xl text-[10px] font-bold border-none cursor-pointer hover:bg-brand-primary/95 flex items-center gap-1.5 shadow-md shadow-brand-primary/10"
+          >
+            Search YouTube Direct
+            <ExternalLink size={12} />
+          </a>
+        </div>
+      )}
+
+      {/* Dynamic Display Mode */}
+      {!loading && !error && ytVideos.length > 0 && (
+        <>
+          {isRawView ? (
+            /* Raw Feed View Mode (YouTube style vertical grid feed) */
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 animate-fade-in text-left">
+              {ytVideos.map((video) => (
+                <div
+                  key={video.id}
+                  onClick={() => handleSelectVideo(video)}
+                  className={`group flex flex-col bg-[#111317] border rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.01] hover:bg-[#1a1c23]/30 transition-all duration-300 ${
+                    activeVideoId === video.id ? 'border-brand-primary font-medium' : 'border-zinc-200/50 dark:border-white/5'
+                  }`}
                 >
-                  <X size={14} />
-                </button>
-              </div>
+                  {/* Video Thumbnail */}
+                  <div className="relative aspect-video bg-black overflow-hidden border-b border-zinc-200/20 dark:border-white/5">
+                    <img 
+                      src={video.thumbnail} 
+                      alt={video.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <span className="absolute bottom-2 right-2 bg-black/75 px-1.5 py-0.5 rounded text-[9px] font-bold text-white">
+                      {video.duration}
+                    </span>
+                    {video.isLive && (
+                      <span className="absolute top-2 left-2 bg-red-600 px-1.5 py-0.5 rounded text-[7px] font-bold text-white uppercase tracking-wider animate-pulse">
+                        Live
+                      </span>
+                    )}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
+                      <div className="w-11 h-11 rounded-full bg-brand-primary flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-all duration-300">
+                        <Play size={16} className="text-white fill-white ml-0.5" />
+                      </div>
+                    </div>
+                  </div>
 
-              <div className="relative aspect-video w-full max-w-4xl mx-auto rounded-xl overflow-hidden bg-black shadow-inner border dark:border-white/5">
-                <iframe 
-                  src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1`}
-                  title="YouTube Lecture Player"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="absolute inset-0 w-full h-full"
-                />
-              </div>
-
-              {/* Dynamic Video & Channel Stats Row */}
-              <div className="max-w-4xl mx-auto pt-2 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  {/* Channel Details */}
-                  <div className="flex items-center gap-3">
-                    {activeVideo?.channelLogo ? (
+                  {/* Metadata block (with channel logo) */}
+                  <div className="p-4 flex gap-3 flex-1 items-start">
+                    {video.channelLogo ? (
                       <img 
-                        src={activeVideo.channelLogo} 
-                        alt={activeVideo.channel}
-                        className="w-10 h-10 rounded-full object-cover border dark:border-white/10"
+                        src={video.channelLogo} 
+                        alt={video.channel}
+                        className="w-8 h-8 rounded-full object-cover border dark:border-white/10 shrink-0"
                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-sm">
-                        {activeVideo?.channel.charAt(0)}
+                      <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-xs shrink-0">
+                        {video.channel.charAt(0)}
                       </div>
                     )}
-                    <div>
-                      <h4 className="text-xs font-bold text-zinc-900 dark:text-white">{activeVideo?.channel}</h4>
-                      {loadingDetails ? (
-                        <span className="text-[9px] text-zinc-400 flex items-center gap-1">
-                          <Loader2 className="w-2.5 h-2.5 animate-spin" /> Loading stats...
-                        </span>
-                      ) : activeVideoDetails ? (
-                        <p className="text-[9px] text-zinc-400 font-semibold flex items-center gap-1.5">
-                          <Users size={10} className="text-zinc-500" />
-                          {activeVideoDetails.subscribers} subscribers
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  {/* Likes / Dislikes Ratio Display */}
-                  {!loadingDetails && ratingMetrics && (
-                    <div className="flex flex-col items-end gap-1.5 shrink-0 max-w-[200px] w-full sm:w-auto">
-                      <div className="flex items-center gap-4 text-[10px] font-bold text-zinc-600 dark:text-zinc-300">
-                        <span className="flex items-center gap-1 hover:text-green-500 transition-colors">
-                          <ThumbsUp size={12} className="text-zinc-500" />
-                          {ratingMetrics.likesFormatted} ({ratingMetrics.percentage}%)
-                        </span>
-                        <span className="flex items-center gap-1 hover:text-red-500 transition-colors">
-                          <ThumbsDown size={12} className="text-zinc-500" />
-                          {ratingMetrics.dislikesFormatted}
-                        </span>
-                      </div>
-                      
-                      {/* Rating Ratio Bar */}
-                      <div className="w-full sm:w-36 h-1.5 bg-zinc-200 dark:bg-white/10 rounded-full overflow-hidden flex">
-                        <div 
-                          className="h-full bg-emerald-500" 
-                          style={{ width: `${ratingMetrics.percentage}%` }}
-                        />
-                        <div 
-                          className="h-full bg-red-500" 
-                          style={{ width: `${100 - ratingMetrics.percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between px-1 max-w-4xl mx-auto pt-2 border-t border-zinc-200/50 dark:border-white/5">
-                <span className="text-[10px] text-zinc-400">Distraction-free learning portal</span>
-                <a 
-                  href={`https://www.youtube.com/watch?v=${activeVideoId}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-[10px] text-brand-primary font-bold flex items-center gap-1 hover:underline"
-                >
-                  Watch on YouTube
-                  <ExternalLink size={10} />
-                </a>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Shimmering Skeleton Loader */}
-        {loading && <LecturesSkeleton />}
-
-        {/* Error Handling */}
-        {error && !loading && (
-          <div className="flex flex-col items-center justify-center py-16 text-center space-y-4 bg-red-500/[0.02] border border-dashed border-red-500/20 rounded-2xl max-w-xl mx-auto p-6">
-            <AlertTriangle className="w-10 h-10 text-red-500" />
-            <div>
-              <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Lecture Directory Blocked</h4>
-              <p className="text-[10px] text-zinc-400 max-w-sm mt-1 leading-relaxed">
-                The scrapers could not query the direct YouTube feed due to local client proxy limits. Try selecting another category or course.
-              </p>
-            </div>
-            <a 
-              href={`https://www.youtube.com/results?search_query=${encodeURIComponent(selectedCourse)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="px-5 py-2.5 bg-brand-primary text-white rounded-xl text-[10px] font-bold border-none cursor-pointer hover:bg-brand-primary/95 flex items-center gap-1.5 shadow-md shadow-brand-primary/10"
-            >
-              Search YouTube Direct
-              <ExternalLink size={12} />
-            </a>
-          </div>
-        )}
-
-        {/* Dynamic Display Mode */}
-        {!loading && !error && ytVideos.length > 0 && (
-          <>
-            {isRawView ? (
-              /* Raw Feed View Mode (YouTube style vertical grid feed) */
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 animate-fade-in text-left">
-                {ytVideos.map((video) => (
-                  <div
-                    key={video.id}
-                    onClick={() => {
-                      setActiveVideoId(video.id);
-                      topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }}
-                    className={`group flex flex-col bg-zinc-50 dark:bg-white/[0.01] border rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.01] hover:bg-zinc-100/50 dark:hover:bg-white/[0.02] transition-all duration-300 ${
-                      activeVideoId === video.id ? 'border-brand-primary font-medium' : 'border-zinc-200/50 dark:border-white/5'
-                    }`}
-                  >
-                    {/* Video Thumbnail */}
-                    <div className="relative aspect-video bg-black overflow-hidden border-b border-zinc-200/20 dark:border-white/5">
-                      <img 
-                        src={video.thumbnail} 
-                        alt={video.title} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <span className="absolute bottom-2 right-2 bg-black/75 px-1.5 py-0.5 rounded text-[9px] font-bold text-white">
-                        {video.duration}
-                      </span>
-                      {video.isLive && (
-                        <span className="absolute top-2 left-2 bg-red-600 px-1.5 py-0.5 rounded text-[7px] font-bold text-white uppercase tracking-wider animate-pulse">
-                          Live
-                        </span>
-                      )}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
-                        <div className="w-11 h-11 rounded-full bg-brand-primary flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-all duration-300">
-                          <Play size={16} className="text-white fill-white ml-0.5" />
+                    <div className="space-y-1.5 min-w-0 flex-1">
+                      <h4 className="text-xs font-bold text-zinc-950 dark:text-white leading-snug line-clamp-2">
+                        {video.title}
+                      </h4>
+                      <div className="flex flex-col text-[10px] text-zinc-500 font-semibold">
+                        <span className="truncate hover:text-brand-primary transition-colors">{video.channel}</span>
+                        <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                          <span>{video.views}</span>
+                          <span>•</span>
+                          <span>{video.published}</span>
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* Channel Shelves View Mode */
+            <div className="space-y-12">
+              {Object.entries(groupedVideos).map(([channelName, videosList]) => {
+                const videos = videosList as YTVideo[];
+                const firstVideo = videos[0];
 
-                    {/* Metadata block (with channel logo) */}
-                    <div className="p-4 flex gap-3 flex-1 items-start">
-                      {video.channelLogo ? (
+                return (
+                  <div key={channelName} className="space-y-4 text-left animate-fade-in">
+                    {/* Channel Header */}
+                    <div className="flex items-center gap-2 border-b border-zinc-100 dark:border-white/5 pb-2">
+                      {firstVideo?.channelLogo ? (
                         <img 
-                          src={video.channelLogo} 
-                          alt={video.channel}
-                          className="w-8 h-8 rounded-full object-cover border dark:border-white/10 shrink-0"
+                          src={firstVideo.channelLogo} 
+                          alt={channelName} 
+                          className="w-5 h-5 rounded-full object-cover border dark:border-white/10 shrink-0"
                           onError={(e) => { e.currentTarget.style.display = 'none'; }}
                         />
                       ) : (
-                        <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-xs shrink-0">
-                          {video.channel.charAt(0)}
-                        </div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-brand-primary shrink-0" />
                       )}
-                      <div className="space-y-1.5 min-w-0 flex-1">
-                        <h4 className="text-xs font-bold text-zinc-950 dark:text-white leading-snug line-clamp-2">
-                          {video.title}
-                        </h4>
-                        <div className="flex flex-col text-[10px] text-zinc-500 font-semibold">
-                          <span className="truncate hover:text-brand-primary transition-colors">{video.channel}</span>
-                          <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                            <span>{video.views}</span>
-                            <span>•</span>
-                            <span>{video.published}</span>
+                      <h4 className="text-[10px] sm:text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-widest leading-none">
+                        {channelName}
+                      </h4>
+                    </div>
+
+                    {/* Horizontal Scrollable Row */}
+                    <div className="relative w-full overflow-hidden">
+                      <div 
+                        onScroll={(e) => handleHorizontalScroll(e, channelName)}
+                        className="flex gap-5 overflow-x-auto no-scrollbar scroll-smooth pb-4 pt-1 px-1 -mx-1 snap-x snap-mandatory animate-fade-in"
+                      >
+                        {videos.map((video) => (
+                          <div
+                            key={video.id}
+                            onClick={() => handleSelectVideo(video)}
+                            className={`snap-start shrink-0 w-[240px] sm:w-[260px] flex flex-col bg-[#111317] border rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] hover:bg-[#1a1c23]/30 transition-all duration-300 ${
+                              activeVideoId === video.id ? 'border-brand-primary font-medium' : 'border-zinc-200/50 dark:border-white/5'
+                            }`}
+                          >
+                            {/* Thumbnail with Play Overlay */}
+                            <div className="relative aspect-video bg-black overflow-hidden border-b border-zinc-200/20 dark:border-white/5">
+                              <img 
+                                src={video.thumbnail} 
+                                alt={video.title} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
+                              <span className="absolute bottom-2 right-2 bg-black/75 px-1.5 py-0.5 rounded text-[8px] font-bold text-white">
+                                {video.duration}
+                              </span>
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
+                                <div className="w-11 h-11 rounded-full bg-brand-primary flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-all duration-300">
+                                  <Play size={16} className="text-white fill-white ml-0.5" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="p-3.5 flex-1 flex flex-col justify-between space-y-3">
+                              <div>
+                                <h4 className="text-[11px] sm:text-xs font-semibold text-zinc-950 dark:text-white leading-snug line-clamp-2">
+                                  {video.title}
+                                </h4>
+                              </div>
+                              <div className="text-[9px] text-zinc-500 flex items-center gap-1.5 pt-1 border-t border-zinc-200/30 dark:border-white/[0.02] flex-wrap">
+                                <span>{video.views}</span>
+                                <span>•</span>
+                                <span>{video.published}</span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                        ))}
                       </div>
                     </div>
                   </div>
-                ))}
-
-                {/* End of Feed Load More Skeleton Card */}
-                {hasMoreFeed && (
-                  <div 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      loadMoreForFeed();
-                    }}
-                    className="flex flex-col bg-zinc-50 dark:bg-white/[0.01] border border-dashed border-zinc-200/60 dark:border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-brand-primary/50 hover:bg-zinc-100/30 dark:hover:bg-white/[0.02] transition-all duration-300 group min-h-[220px]"
-                  >
-                    <div className="aspect-video bg-zinc-200/40 dark:bg-white/5 w-full flex flex-col items-center justify-center relative">
-                      {loadingMoreFeed ? (
-                        <Loader2 className="w-8 h-8 text-brand-primary animate-spin" />
-                      ) : (
-                        <div className="flex flex-col items-center justify-center gap-1">
-                          <PlayCircle className="w-8 h-8 text-zinc-400 dark:text-zinc-600 group-hover:text-brand-primary transition-colors" />
-                          <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider">Click to Load More</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4 flex gap-3 flex-1 items-start">
-                      <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-white/5 shrink-0 animate-pulse" />
-                      <div className="space-y-2 flex-1">
-                        <div className="h-3 bg-zinc-200 dark:bg-white/5 rounded w-5/6 animate-pulse" />
-                        <div className="h-3 bg-zinc-200 dark:bg-white/5 rounded w-2/3 animate-pulse" />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* Channel Shelves View Mode (grouped channel-wise horizontally scrollable rows) */
-              <div className="space-y-12">
-                {Object.entries(groupedVideos).map(([channelName, videosList]) => {
-                  const videos = videosList as YTVideo[];
-                  const firstVideo = videos[0];
-
-                  return (
-                    <div key={channelName} className="space-y-4 text-left animate-fade-in">
-                      {/* Channel Header */}
-                      <div className="flex items-center gap-2 border-b border-zinc-100 dark:border-white/5 pb-2">
-                        {firstVideo?.channelLogo ? (
-                          <img 
-                            src={firstVideo.channelLogo} 
-                            alt={channelName} 
-                            className="w-5 h-5 rounded-full object-cover border dark:border-white/10 shrink-0"
-                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                          />
-                        ) : (
-                          <div className="w-1.5 h-1.5 rounded-full bg-brand-primary shrink-0" />
-                        )}
-                        <h4 className="text-[10px] sm:text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-widest leading-none">
-                          {channelName}
-                        </h4>
-                        <span className="text-[8px] text-zinc-400 font-bold bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded-full">
-                          {videos.length} {videos.length === 1 ? 'Video' : 'Videos'}
-                        </span>
-                      </div>
-
-                      {/* Horizontal Scrollable Row */}
-                      <div className="relative w-full overflow-hidden">
-                        <div 
-                          onScroll={(e) => handleHorizontalScroll(e, channelName)}
-                          className="flex gap-5 overflow-x-auto no-scrollbar scroll-smooth pb-4 pt-1 px-1 -mx-1 snap-x snap-mandatory animate-fade-in"
-                        >
-                          {videos.map((video) => (
-                            <div
-                              key={video.id}
-                              onClick={() => {
-                                setActiveVideoId(video.id);
-                                topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                              }}
-                              className={`snap-start shrink-0 w-[240px] sm:w-[260px] flex flex-col bg-zinc-50 dark:bg-white/[0.01] border rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] hover:bg-zinc-100/50 dark:hover:bg-white/[0.03] transition-all duration-300 ${
-                                activeVideoId === video.id ? 'border-brand-primary font-medium' : 'border-zinc-200/50 dark:border-white/5'
-                              }`}
-                            >
-                              {/* Thumbnail with Premium Play Button */}
-                              <div className="relative aspect-video bg-black overflow-hidden border-b border-zinc-200/20 dark:border-white/5">
-                                <img 
-                                  src={video.thumbnail} 
-                                  alt={video.title} 
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                />
-                                <span className="absolute bottom-2 right-2 bg-black/75 px-1.5 py-0.5 rounded text-[9px] font-bold text-white">
-                                  {video.duration}
-                                </span>
-                                
-                                {/* Live Badge */}
-                                {video.isLive && (
-                                  <span className="absolute top-2 left-2 bg-red-600 px-1.5 py-0.5 rounded text-[7px] font-bold text-white uppercase tracking-wider animate-pulse">
-                                    Live
-                                  </span>
-                                )}
-                                
-                                {/* Premium Play Button overlay */}
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
-                                  <div className="w-11 h-11 rounded-full bg-brand-primary flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-all duration-300">
-                                    <Play size={16} className="text-white fill-white ml-0.5" />
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Meta details */}
-                              <div className="p-3.5 flex-1 flex flex-col justify-between space-y-3">
-                                <div>
-                                  <h4 className="text-[11px] sm:text-xs font-semibold text-zinc-950 dark:text-white leading-snug line-clamp-2">
-                                    {video.title}
-                                  </h4>
-                                </div>
-                                
-                                <div className="text-[9px] text-zinc-500 flex items-center gap-1.5 pt-1 border-t border-zinc-200/30 dark:border-white/[0.02] flex-wrap">
-                                  <span>{video.views}</span>
-                                  <span>•</span>
-                                  <span>{video.published}</span>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                          
-                          {/* End of row Interactive Premium Skeleton Loader Card (Channel Scoped & Concurrently Non-blocking) */}
-                          {channelHasMore[channelName] !== false && (
-                            <div 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                loadMoreForChannel(channelName);
-                              }}
-                              className="snap-start shrink-0 w-[240px] sm:w-[260px] flex flex-col bg-zinc-50 dark:bg-white/[0.01] border border-dashed border-zinc-200/60 dark:border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-brand-primary/50 hover:bg-zinc-100/30 dark:hover:bg-white/[0.02] transition-all duration-300 group flex-none"
-                            >
-                              <div className="aspect-video bg-zinc-200/40 dark:bg-white/5 w-full flex flex-col items-center justify-center relative">
-                                {loadingChannels[channelName] ? (
-                                  <Loader2 className="w-8 h-8 text-brand-primary animate-spin" />
-                                ) : (
-                                  <div className="flex flex-col items-center justify-center gap-1">
-                                    <PlayCircle className="w-8 h-8 text-zinc-400 dark:text-zinc-600 group-hover:text-brand-primary transition-colors" />
-                                    <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider">Click to Load More</span>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="p-3.5 space-y-3.5 flex-1 flex flex-col justify-between">
-                                <div className="space-y-2">
-                                  <div className="h-3 bg-zinc-200 dark:bg-white/5 rounded w-5/6 animate-pulse" />
-                                  <div className="h-3 bg-zinc-200 dark:bg-white/5 rounded w-2/3 animate-pulse" />
-                                </div>
-                                <div className="h-2 bg-zinc-200 dark:bg-white/5 rounded w-1/3 pt-1 animate-pulse" />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </>
-        )}
-
-      </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
 
     </div>
   );
