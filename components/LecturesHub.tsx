@@ -234,6 +234,67 @@ const resolveSearchQuery = (query: string): string => {
   return query;
 };
 
+const findCodeInCurriculum = (title: string): string | null => {
+  const findInProg = (prog: any) => {
+    for (const term of prog.terms) {
+      for (const s of term.coreSubjects) {
+        if (s.title.toLowerCase() === title.toLowerCase()) return s.code;
+      }
+      for (const b of term.electiveBaskets) {
+        for (const s of b.subjects) {
+          if (s.title.toLowerCase() === title.toLowerCase()) return s.code;
+        }
+      }
+    }
+    return null;
+  };
+
+  return findInProg(IITM_BS_DS) || findInProg(BTECH_CSE_2025);
+};
+
+const buildSearchQuery = (subject: string, catId: string, university: string, channelName?: string): string => {
+  const isIITM = university === 'iitm_bs';
+  const brand = isIITM ? '"IIT Madras"' : '"LPU"';
+  
+  const resolved = resolveSearchQuery(subject);
+  const code = findCodeInCurriculum(resolved) || findCodeInCurriculum(subject);
+  
+  let categoryPart = '';
+  switch (catId) {
+    case 'quiz1':
+      categoryPart = 'quiz 1 midterm';
+      break;
+    case 'quiz2':
+      categoryPart = 'quiz 2';
+      break;
+    case 'endterm':
+      categoryPart = 'end term final';
+      break;
+    case 'pyq':
+      categoryPart = 'pyq solved';
+      break;
+    default:
+      categoryPart = '';
+  }
+
+  let query = '';
+  if (channelName) {
+    if (code) {
+      query = `"${channelName}" "${resolved}" ${code} ${categoryPart} lectures`;
+    } else {
+      query = `"${channelName}" ${resolved} ${categoryPart} lectures`;
+    }
+  } else {
+    if (code) {
+      query = `${brand} "${resolved}" ${code} ${categoryPart} lectures`;
+    } else {
+      query = `${brand} ${resolved} ${categoryPart} lectures`;
+    }
+  }
+
+  return query.trim().replace(/\s+/g, ' ');
+};
+
 const formatDuration = (totalSecs: number): string => {
   if (totalSecs <= 0) return "";
   const hrs = Math.floor(totalSecs / 3600);
@@ -501,11 +562,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
     setHasMoreFeed(true);
     setLoadingMoreFeed(false);
 
-    const resolvedSubject = resolveSearchQuery(subject);
-    const categorySuffix = LECTURE_CATEGORIES.find(c => c.id === catId)?.suffix || '';
-    const uniBrand = selectedUniversity === 'iitm_bs' ? 'IIT Madras BS' : 'LPU';
-    
-    const searchQuery = `${uniBrand} ${resolvedSubject} ${categorySuffix} lectures`.trim().replace(/\s+/g, ' ');
+    const searchQuery = buildSearchQuery(subject, catId, selectedUniversity);
     const query = encodeURIComponent(searchQuery);
     
     try {
@@ -596,8 +653,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
     }
 
     try {
-      const categorySuffix = LECTURE_CATEGORIES.find(c => c.id === activeCategory)?.suffix || '';
-      const queryStr = `"${channelName}" ${resolveSearchQuery(activeSubject)} ${categorySuffix} lectures`.trim().replace(/\s+/g, ' ');
+      const queryStr = buildSearchQuery(activeSubject, activeCategory, selectedUniversity, channelName);
       const fetched = await fetchFromInvidious(queryStr, nextPage);
 
       const filtered = fetched.filter(v => 
@@ -642,10 +698,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
     }
 
     try {
-      const categorySuffix = LECTURE_CATEGORIES.find(c => c.id === activeCategory)?.suffix || '';
-      const resolvedSubject = resolveSearchQuery(activeSubject);
-      const uniBrand = selectedUniversity === 'iitm_bs' ? 'IIT Madras BS' : 'LPU';
-      const searchQuery = `${uniBrand} ${resolvedSubject} ${categorySuffix} lectures`.trim().replace(/\s+/g, ' ');
+      const searchQuery = buildSearchQuery(activeSubject, activeCategory, selectedUniversity);
 
       const fetched = await fetchFromInvidious(searchQuery, nextPage);
       if (fetched.length === 0) {
