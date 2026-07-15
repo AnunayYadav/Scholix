@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -6,7 +6,9 @@ import {
   Search, Shield, Check, Flame, Trophy, Map, ArrowRight, ArrowLeft,
   Sparkles, Send, Edit, FileText, Download, Award, Code, Database,
   Terminal, Globe, Book, Video, FlaskConical, ClipboardList, Scroll, Folder, MessageCircle, Pin,
-  Languages, Bell, BellOff, MoreHorizontal, Cpu, Monitor, Sigma, ChevronDown, ChevronRight, Compass, Landmark
+  Languages, Bell, BellOff, MoreHorizontal, Cpu, Monitor, Sigma, ChevronDown, ChevronRight, Compass, Landmark,
+  Link, Image, Smile, Bold, Italic, Strikethrough, List, ListOrdered, AlertTriangle, Quote, BarChart2,
+  Share2, ArrowBigUp, ArrowBigDown
 } from 'lucide-react';
 import { Folder as FolderType, LibraryFile, UserProfile } from '../types';
 import {
@@ -878,12 +880,30 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
   // Forms
   const [postTitle, setPostTitle] = useState('');
-  const [postCategory, setPostCategory] = useState<'discussion' | 'doubt' | 'poll' | 'question' | 'resource'>('discussion');
+  const [postCategory, setPostCategory] = useState<'discussion' | 'doubt' | 'poll' | 'question' | 'resource' | 'announcement'>('discussion');
   const [postContent, setPostContent] = useState('');
   const [postTags, setPostTags] = useState('');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showSubjectSelector, setShowSubjectSelector] = useState(false);
+  const [showEditCategoryDropdown, setShowEditCategoryDropdown] = useState(false);
+  const [editPostCategory, setEditPostCategory] = useState<'discussion' | 'doubt' | 'poll' | 'question' | 'resource' | 'announcement'>('discussion');
   const [pollOptions, setPollOptions] = useState<string[]>(['', '']);
+  const createEditorRef = useRef<HTMLDivElement>(null);
+  const editEditorRef = useRef<HTMLDivElement>(null);
+  const reqEditorRef = useRef<HTMLDivElement>(null);
 
+  // WYSIWYG formatting helper
+  const execFormat = useCallback((command: string, value?: string) => {
+    document.execCommand(command, false, value);
+  }, []);
+
+  const getEditorText = useCallback((ref: React.RefObject<HTMLDivElement | null>) => {
+    return ref.current?.innerText?.trim() || '';
+  }, []);
+
+  const getEditorHtml = useCallback((ref: React.RefObject<HTMLDivElement | null>) => {
+    return ref.current?.innerHTML || '';
+  }, []);
   const [reqTitle, setReqTitle] = useState('');
   const [reqContent, setReqContent] = useState('');
   const [reqBounty, setReqBounty] = useState(50);
@@ -964,6 +984,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const [packTitle, setPackTitle] = useState('');
   const [packContent, setPackContent] = useState('');
   const [packFiles, setPackFiles] = useState<string[]>([]);
+  const [packFileSearch, setPackFileSearch] = useState('');
+  const packEditorRef = useRef<HTMLDivElement>(null);
 
   // Subject Scoped AI Chat
   const [subjectAiInput, setSubjectAiInput] = useState('');
@@ -1283,7 +1305,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const handlePostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userProfile) return;
-    if (!postTitle.trim() || !postContent.trim()) return;
+    const editorContent = getEditorText(createEditorRef);
+    if (!postTitle.trim() || !editorContent) return;
 
     try {
       const cleanTags = postTags.split(',').map(t => t.trim()).filter(t => t.startsWith('#') ? t : `#${t}`);
@@ -1295,13 +1318,14 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         type: 'post',
         category: postCategory,
         title: postTitle.trim(),
-        content: postContent.trim(),
+        content: editorContent,
         tags: cleanTags,
         verified_status: 'none'
       });
       setPostTitle('');
       setPostContent('');
       setPostTags('');
+      if (createEditorRef.current) createEditorRef.current.innerHTML = '';
       setShowCreatePost(false);
       loadCommunityData();
       showToast("Post created!", "success");
@@ -1314,7 +1338,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const handleRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userProfile) return;
-    if (!reqTitle.trim() || !reqContent.trim()) return;
+    const editorContent = getEditorText(reqEditorRef);
+    if (!reqTitle.trim() || !editorContent) return;
 
     try {
       await CommunityService.createMaterialRequest({
@@ -1324,11 +1349,12 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         user_avatar: userProfile.avatar_url,
         type: 'request',
         title: reqTitle.trim(),
-        content: reqContent.trim(),
+        content: editorContent,
         bounty_xp: Number(reqBounty)
       });
       setReqTitle('');
       setReqContent('');
+      if (reqEditorRef.current) reqEditorRef.current.innerHTML = '';
       setShowCreateRequest(false);
       loadCommunityData();
       showToast("Request bounty created!", "success");
@@ -1341,7 +1367,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const handlePackSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userProfile) return;
-    if (!packTitle.trim() || !packContent.trim()) return;
+    const editorContent = getEditorText(packEditorRef);
+    if (!packTitle.trim() || !editorContent) return;
 
     try {
       await CommunityService.createStudyPack({
@@ -1351,11 +1378,14 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         user_avatar: userProfile.avatar_url,
         type: 'collection',
         title: packTitle.trim(),
-        content: packContent.trim(),
-        file_ids: []
+        content: editorContent,
+        file_ids: packFiles
       });
       setPackTitle('');
       setPackContent('');
+      setPackFiles([]);
+      setPackFileSearch('');
+      if (packEditorRef.current) packEditorRef.current.innerHTML = '';
       setShowCreatePack(false);
       loadCommunityData();
       showToast("Curated study pack created!", "success");
@@ -2643,55 +2673,80 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         <div className="space-y-5 animate-fade-in">
           <div className="flex justify-between items-center gap-4">
             <h3 className="text-xs font-bold text-zinc-400 tracking-wider flex items-center gap-1.5"><MessageSquare className="w-3.5 h-3.5" /> Discussions</h3>
-            <button
-              onClick={() => setShowCreatePost(true)}
-              style={{ backgroundColor: theme.rawColor }}
-              className="px-3.5 py-2 text-white rounded-xl text-xs font-bold border-none cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1"
-            >
-              <Plus size={14} /> Create Post
-            </button>
           </div>
 
+          {/* Reddit-style create post prompt bar */}
+          <button
+            onClick={() => setShowCreatePost(true)}
+            className="w-full flex items-center gap-3 p-3 bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/8 rounded-2xl cursor-pointer hover:border-zinc-300 dark:hover:border-white/15 transition-all group"
+            style={{ outline: 'none' }}
+          >
+            <img
+              src={userProfile?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'}
+              className="w-8 h-8 rounded-full flex-shrink-0 border-2 border-zinc-100 dark:border-white/10"
+              alt=""
+            />
+            <div className="flex-1 text-left px-3 py-2 bg-zinc-50 dark:bg-white/[0.04] rounded-xl text-xs text-zinc-400 dark:text-zinc-500 font-medium group-hover:bg-zinc-100 dark:group-hover:bg-white/[0.06] transition-colors">
+              Create Post
+            </div>
+            <div className="flex items-center gap-1.5 flex-shrink-0 pr-1">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"><Image size={16} /></div>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"><Link size={16} /></div>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"><BarChart2 size={16} /></div>
+            </div>
+          </button>
 
 
-          {/* List of discussions */}
-          <div className="space-y-4">
+
+          {/* List of discussions — Reddit style */}
+          <div className="space-y-3">
             {discussions.map((p) => {
-              const reactionsCount = (p.reactions.helpful?.length || 0) + (p.reactions.quality?.length || 0) + (p.reactions.important?.length || 0);
+              const helpfulCount = p.reactions.helpful?.length || 0;
+              const isHelpful = userProfile ? p.reactions.helpful?.includes(userProfile.id) : false;
+              const commentsCount = p.comments?.length || 0;
+              const timeAgo = (() => {
+                const diff = Date.now() - new Date(p.created_at).getTime();
+                const mins = Math.floor(diff / 60000);
+                if (mins < 60) return `${mins}m ago`;
+                const hrs = Math.floor(mins / 60);
+                if (hrs < 24) return `${hrs}h ago`;
+                const days = Math.floor(hrs / 24);
+                if (days < 30) return `${days}d ago`;
+                return new Date(p.created_at).toLocaleDateString();
+              })();
               return (
                 <div
                   key={p.id}
-                  className="p-5 bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/5 rounded-3xl space-y-3.5 shadow-sm"
+                  className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-2xl overflow-hidden hover:border-zinc-250 dark:hover:border-white/10 transition-colors"
                 >
-                  <div className="flex items-center justify-between relative">
-                    <div className="text-[10px] font-black text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
-                      <img src={p.user_avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-6 h-6 rounded-full" />
-                      {p.user_username} • <span className="text-zinc-400 font-normal">{new Date(p.created_at).toLocaleDateString()}</span>
-                      {p.is_pinned && (
-                        <span className="flex items-center gap-0.5 text-orange-500 font-bold bg-orange-500/15 border border-orange-500/20 px-2 py-0.5 rounded-lg text-[8px]">
-                          📌 Pinned
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider" style={{ backgroundColor: `${theme.rawColor}15`, color: theme.rawColor }}>
-                        {p.category}
-                      </span>
+                  <div className="px-4 pt-3.5 pb-1">
+                    {/* Header: avatar · username · time · pinned · menu */}
+                    <div className="flex items-center justify-between mb-2.5">
+                      <div className="flex items-center gap-2 text-[11px] min-w-0">
+                        <img src={p.user_avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-7 h-7 rounded-full flex-shrink-0" />
+                        <span className="font-bold text-zinc-800 dark:text-zinc-200 truncate">{p.user_username}</span>
+                        <span className="text-zinc-400 dark:text-zinc-500 font-medium flex-shrink-0">• {timeAgo}</span>
+                        {p.is_pinned && (
+                          <span className="flex items-center gap-0.5 font-bold px-2 py-0.5 rounded-full text-[9px] flex-shrink-0" style={{ color: theme.rawColor, backgroundColor: `${theme.rawColor}12` }}>
+                            <Pin size={9} /> Pinned
+                          </span>
+                        )}
+                      </div>
 
-                      {/* Three-dot dropdown menu */}
+                      {/* Three-dot menu */}
                       {(userProfile?.is_admin || userProfile?.id === p.user_id) && (
-                        <div className="relative flex items-center">
+                        <div className="relative flex-shrink-0 ml-2">
                           <button
                             onClick={() => setActivePostMenuId(activePostMenuId === p.id ? null : p.id)}
-                            className="p-1 text-zinc-400 hover:text-zinc-650 dark:hover:text-zinc-200 bg-transparent border-none cursor-pointer transition-colors rounded-lg hover:bg-zinc-50 dark:hover:bg-white/5"
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 bg-transparent border-none cursor-pointer transition-all hover:bg-zinc-100 dark:hover:bg-white/5"
                           >
-                            <MoreHorizontal size={14} />
+                            <MoreHorizontal size={16} />
                           </button>
 
                           {activePostMenuId === p.id && (
                             <>
                               <div className="fixed inset-0 z-10" onClick={() => setActivePostMenuId(null)} />
-                              <div className="absolute right-0 top-full mt-1 w-28 bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/5 rounded-xl shadow-lg py-1 z-20 text-[10px] font-bold">
+                              <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/8 rounded-xl shadow-xl py-1 z-20">
                                 {userProfile?.is_admin && (
                                   <button
                                     onClick={async () => {
@@ -2716,9 +2771,9 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                                       setPinningPostId(null);
                                     }}
                                     disabled={pinningPostId === p.id}
-                                    className="w-full text-left px-3 py-1.5 hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 border-none bg-transparent cursor-pointer font-bold"
+                                    className="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 border-none bg-transparent cursor-pointer flex items-center gap-2"
                                   >
-                                    {p.is_pinned ? "Unpin Post" : "Pin Post"}
+                                    <Pin size={12} /> {p.is_pinned ? "Unpin" : "Pin Post"}
                                   </button>
                                 )}
 
@@ -2729,10 +2784,16 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                                       setEditingPost(p);
                                       setEditPostTitle(p.title);
                                       setEditPostContent(p.content);
+                                      setEditPostCategory((p.category as any) || 'discussion');
+                                      setTimeout(() => {
+                                        if (editEditorRef.current) {
+                                          editEditorRef.current.innerText = p.content;
+                                        }
+                                      }, 50);
                                     }}
-                                    className="w-full text-left px-3 py-1.5 hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 border-none bg-transparent cursor-pointer font-bold"
+                                    className="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 border-none bg-transparent cursor-pointer flex items-center gap-2"
                                   >
-                                    Edit Post
+                                    <Edit size={12} /> Edit
                                   </button>
                                 )}
 
@@ -2749,9 +2810,9 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                                       }
                                     }
                                   }}
-                                  className="w-full text-left px-3 py-1.5 hover:bg-zinc-50 dark:hover:bg-white/5 text-red-500 border-none bg-transparent cursor-pointer font-bold"
+                                  className="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-white/5 text-red-500 border-none bg-transparent cursor-pointer flex items-center gap-2"
                                 >
-                                  Delete Post
+                                  Delete
                                 </button>
                               </div>
                             </>
@@ -2759,59 +2820,98 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                         </div>
                       )}
                     </div>
-                  </div>
-                  <h4 className="text-xs font-black text-zinc-950 dark:text-white leading-tight">
-                    {p.title}
-                  </h4>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
-                    {p.content}
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {p.tags.map(t => (
-                      <span key={t} className="px-1.5 py-0.2 bg-zinc-50 dark:bg-white/5 border border-zinc-150/50 dark:border-white/5 rounded text-[8px] font-semibold text-zinc-400">{t}</span>
-                    ))}
+
+                    {/* Title — big, bold, Reddit-style */}
+                    <h3 className="text-[15px] sm:text-base font-extrabold text-zinc-900 dark:text-white leading-snug mb-1.5">
+                      {p.title}
+                    </h3>
+
+                    {/* Category flair pill */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <span
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold"
+                        style={{ 
+                          backgroundColor: p.category === 'announcement' ? '#ff444412' : `${theme.rawColor}12`, 
+                          color: p.category === 'announcement' ? '#ff4444' : theme.rawColor 
+                        }}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: p.category === 'announcement' ? '#ff4444' : theme.rawColor }} />
+                        {p.category === 'discussion' && 'Discussion'}
+                        {p.category === 'doubt' && 'Doubt'}
+                        {p.category === 'poll' && 'Poll'}
+                        {p.category === 'question' && 'Exam Prep'}
+                        {p.category === 'resource' && 'Resource'}
+                        {p.category === 'announcement' && '📢 Announcement'}
+                      </span>
+                    </div>
+
+                    {/* Body text — clean, readable */}
+                    <p className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal mb-3" style={{ lineHeight: '1.7' }}>
+                      {p.content}
+                    </p>
+
+                    {/* Tags */}
+                    {p.tags && p.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {p.tags.map(t => (
+                          <span key={t} className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400">{t}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex items-center justify-between gap-4 border-t border-zinc-100 dark:border-white/5 pt-3">
-                    <div className="flex gap-2">
+                  {/* Bottom action bar — Reddit style */}
+                  <div className="flex items-center gap-1 px-2.5 pb-2.5 pt-0.5">
+                    {/* Upvote / count / Downvote pill */}
+                    <div className="flex items-center bg-zinc-100 dark:bg-white/[0.06] rounded-full">
                       <button
                         onClick={() => handleReaction(p.id, 'post', 'helpful')}
-                        className="px-2.5 py-1 bg-zinc-50 dark:bg-white/5 border border-zinc-150/50 dark:border-white/5 hover:border-blue-500/20 text-[10px] rounded-lg font-bold text-zinc-500 flex items-center gap-1 cursor-pointer"
+                        className={`w-9 h-9 rounded-full flex items-center justify-center border-none cursor-pointer transition-all ${
+                          isHelpful
+                            ? 'text-white'
+                            : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent hover:bg-zinc-200 dark:hover:bg-white/10'
+                        }`}
+                        style={isHelpful ? { color: theme.rawColor } : undefined}
                       >
-                        👍 Helpful ({p.reactions.helpful?.length || 0})
+                        <ArrowBigUp size={20} fill={isHelpful ? theme.rawColor : 'none'} />
+                      </button>
+                      <span className={`text-xs font-bold min-w-[20px] text-center ${
+                        isHelpful ? '' : 'text-zinc-600 dark:text-zinc-300'
+                      }`} style={isHelpful ? { color: theme.rawColor } : undefined}>
+                        {helpfulCount}
+                      </span>
+                      <button
+                        onClick={() => handleReaction(p.id, 'post', 'important')}
+                        className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent hover:bg-zinc-200 dark:hover:bg-white/10 border-none cursor-pointer transition-all"
+                      >
+                        <ArrowBigDown size={20} />
                       </button>
                     </div>
+
+                    {/* Comments button */}
                     <button
                       onClick={() => setExpandedPostCommentsId(expandedPostCommentsId === p.id ? null : p.id)}
-                      className="text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 font-bold flex items-center gap-1.5 bg-transparent border-none cursor-pointer transition-all p-1.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5"
+                      className="flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.06] bg-transparent border-none cursor-pointer transition-all"
                     >
-                      <MessageSquare size={12} /> {p.comments?.length || 0} Comments
+                      <MessageSquare size={16} /> {commentsCount}
+                    </button>
+
+                    {/* Share button */}
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(window.location.href);
+                        showToast('Link copied!', 'success');
+                      }}
+                      className="flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.06] bg-transparent border-none cursor-pointer transition-all"
+                    >
+                      <Share2 size={15} /> Share
                     </button>
                   </div>
 
-                  {/* Expanded Comments Box */}
+                  {/* Expanded Comments Section */}
                   {expandedPostCommentsId === p.id && (
-                    <div className="space-y-3.5 mt-4 pt-4 border-t border-zinc-100 dark:border-white/5 pl-2 sm:pl-4">
-                      {p.comments && p.comments.length > 0 ? (
-                        <div className="space-y-3 max-h-60 overflow-y-auto pr-1 no-scrollbar">
-                          {p.comments.map((comment) => (
-                            <div key={comment.id} className="flex gap-2.5 items-start text-xs animate-fade-in">
-                              <img src={comment.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-5 h-5 rounded-full shrink-0 mt-0.5" />
-                              <div className="flex-1 min-w-0 bg-zinc-50 dark:bg-white/[0.015] p-2.5 rounded-2xl border border-zinc-150 dark:border-white/5">
-                                <div className="flex items-center justify-between gap-2 mb-1">
-                                  <span className="font-bold text-zinc-800 dark:text-zinc-200">{comment.username}</span>
-                                  <span className="text-[9px] text-zinc-400 font-medium">{new Date(comment.created_at).toLocaleDateString()}</span>
-                                </div>
-                                <p className="text-zinc-650 dark:text-zinc-350 leading-relaxed font-medium">{comment.content}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-[10px] font-bold text-zinc-400 italic">No comments yet. Start the conversation!</div>
-                      )}
-
-                      {/* Add Comment Input Form */}
+                    <div className="px-4 pb-4 pt-1 border-t border-zinc-100 dark:border-white/5">
+                      {/* Add Comment Input — top */}
                       <form 
                         onSubmit={async (e) => {
                           e.preventDefault();
@@ -2831,7 +2931,6 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                               content: text.trim()
                             });
 
-                            // Update state locally
                             setDiscussions(prev => prev.map(post => {
                               if (post.id === p.id) {
                                 return { ...post, comments: [...(post.comments || []), added] };
@@ -2847,26 +2946,72 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                             setSubmittingCommentId(null);
                           }
                         }}
-                        className="flex gap-2.5 items-center mt-3"
+                        className="flex gap-2.5 items-start py-3"
                       >
-                        <img src={userProfile?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-5 h-5 rounded-full shrink-0" />
-                        <input
-                          type="text"
-                          placeholder="Write a comment..."
-                          value={newCommentTexts[p.id] || ''}
-                          onChange={(e) => setNewCommentTexts(prev => ({ ...prev, [p.id]: e.target.value }))}
-                          className="flex-1 min-w-0 bg-zinc-50 dark:bg-[#121214] border border-zinc-150 dark:border-white/5 rounded-xl px-3 py-1.5 text-xs text-zinc-800 dark:text-white placeholder-zinc-400 focus:outline-none focus:border-orange-500 transition-colors"
-                          disabled={submittingCommentId === p.id}
-                        />
-                        <button
-                          type="submit"
-                          style={{ backgroundColor: theme.rawColor }}
-                          className="px-3.5 py-1.5 text-white rounded-xl text-xs font-bold border-none cursor-pointer hover:opacity-90 transition-all shrink-0 flex items-center justify-center min-w-[50px]"
-                          disabled={submittingCommentId === p.id}
-                        >
-                          {submittingCommentId === p.id ? "..." : "Reply"}
-                        </button>
+                        <img src={userProfile?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-7 h-7 rounded-full shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0 flex flex-col gap-2">
+                          <input
+                            type="text"
+                            placeholder="Add a comment..."
+                            value={newCommentTexts[p.id] || ''}
+                            onChange={(e) => setNewCommentTexts(prev => ({ ...prev, [p.id]: e.target.value }))}
+                            className="w-full bg-transparent border border-zinc-200 dark:border-white/8 rounded-xl px-3.5 py-2.5 text-xs text-zinc-800 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none transition-colors"
+                            style={{ borderColor: (newCommentTexts[p.id] || '').trim() ? theme.rawColor : undefined }}
+                            disabled={submittingCommentId === p.id}
+                          />
+                          {(newCommentTexts[p.id] || '').trim() && (
+                            <div className="flex justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setNewCommentTexts(prev => ({ ...prev, [p.id]: '' }))}
+                                className="px-3.5 py-1.5 rounded-full text-xs font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="submit"
+                                style={{ backgroundColor: theme.rawColor }}
+                                className="px-4 py-1.5 text-white rounded-full text-xs font-bold border-none cursor-pointer hover:opacity-90 active:scale-95 transition-all"
+                                disabled={submittingCommentId === p.id}
+                              >
+                                {submittingCommentId === p.id ? '...' : 'Comment'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </form>
+
+                      {/* Comment threads */}
+                      {p.comments && p.comments.length > 0 ? (
+                        <div className="space-y-0 max-h-80 overflow-y-auto no-scrollbar">
+                          {p.comments.map((comment) => {
+                            const commentTimeAgo = (() => {
+                              const diff = Date.now() - new Date(comment.created_at).getTime();
+                              const mins = Math.floor(diff / 60000);
+                              if (mins < 60) return `${mins}m ago`;
+                              const hrs = Math.floor(mins / 60);
+                              if (hrs < 24) return `${hrs}h ago`;
+                              const days = Math.floor(hrs / 24);
+                              if (days < 30) return `${days}d ago`;
+                              return new Date(comment.created_at).toLocaleDateString();
+                            })();
+                            return (
+                              <div key={comment.id} className="flex gap-2.5 items-start py-2.5 border-t border-zinc-50 dark:border-white/[0.03] first:border-t-0">
+                                <img src={comment.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-6 h-6 rounded-full shrink-0 mt-0.5" />
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1.5 mb-0.5">
+                                    <span className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200">{comment.username}</span>
+                                    <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">• {commentTimeAgo}</span>
+                                  </div>
+                                  <p className="text-[12px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">{comment.content}</p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="text-xs text-zinc-400 dark:text-zinc-500 py-3 text-center font-medium">No comments yet — be the first to reply!</div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -2879,15 +3024,20 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
       {/* 4. REQUESTS TAB */}
       {activeTab === 'requests' && (
         <div className="space-y-5 animate-fade-in">
-          <div className="flex justify-between items-center gap-4">
-            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5"><HelpCircle className="w-3.5 h-3.5" /> Open Study Material Bounties</h3>
-            <button
-              onClick={() => setShowCreateRequest(true)}
-              style={{ backgroundColor: theme.rawColor }}
-              className="px-3.5 py-2 text-white rounded-xl text-xs font-bold border-none cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1"
-            >
-              <Plus size={14} /> Request Material
-            </button>
+          {/* Reddit-style create request prompt */}
+          <div
+            onClick={() => setShowCreateRequest(true)}
+            className="flex items-center gap-3 p-3 bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/8 rounded-2xl cursor-pointer hover:border-zinc-300 dark:hover:border-white/15 transition-all group"
+          >
+            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${theme.rawColor}15` }}>
+              <HelpCircle size={16} style={{ color: theme.rawColor }} />
+            </div>
+            <div className="flex-1 py-2 px-3 rounded-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/8 group-hover:border-zinc-300 dark:group-hover:border-white/15 transition-colors">
+              <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Request study material with bounty...</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-full text-[10px] font-bold flex items-center gap-1" style={{ backgroundColor: `${theme.rawColor}12`, color: theme.rawColor }}>
+              <Trophy size={11} /> Bounty
+            </div>
           </div>
 
 
@@ -2943,15 +3093,20 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
       {/* 5. STUDY PACKS TAB */}
       {activeTab === 'packs' && (
         <div className="space-y-5 animate-fade-in">
-          <div className="flex justify-between items-center gap-4">
-            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" /> Curated Student Study Packs</h3>
-            <button
-              onClick={() => setShowCreatePack(true)}
-              style={{ backgroundColor: theme.rawColor }}
-              className="px-3.5 py-2 text-white rounded-xl text-xs font-bold border-none cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1"
-            >
-              <Plus size={14} /> Create Study Pack
-            </button>
+          {/* Reddit-style create pack prompt */}
+          <div
+            onClick={() => setShowCreatePack(true)}
+            className="flex items-center gap-3 p-3 bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/8 rounded-2xl cursor-pointer hover:border-zinc-300 dark:hover:border-white/15 transition-all group"
+          >
+            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${theme.rawColor}15` }}>
+              <BookOpen size={16} style={{ color: theme.rawColor }} />
+            </div>
+            <div className="flex-1 py-2 px-3 rounded-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/8 group-hover:border-zinc-300 dark:group-hover:border-white/15 transition-colors">
+              <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Create a curated study pack...</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-full text-[10px] font-bold flex items-center gap-1" style={{ backgroundColor: `${theme.rawColor}12`, color: theme.rawColor }}>
+              <Folder size={11} /> {subjectFiles.length} files
+            </div>
           </div>
 
           {/* List of Study Packs */}
@@ -3121,158 +3276,290 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               </div>
             </div>
           </div>
-
-
         </div>
       )}
         </>
       )}
 
+      {/* Reddit-style Create Post Composer */}
       {createPortal(
         <AnimatePresence>
           {showCreatePost && (
-            <div 
-              className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto"
-              onClick={() => setShowCreatePost(false)}
-            >
-              {/* Backdrop */}
+            <div className="fixed inset-0 z-[9999] flex flex-col overflow-hidden">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/55 backdrop-blur-md"
-                style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={() => setShowCreatePost(false)}
               />
 
-              {/* Modal Content */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                className="relative w-full max-w-xl bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-[40px] p-8 shadow-2xl space-y-5 overflow-hidden z-10"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 40 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="relative z-10 w-full max-w-2xl mx-auto mt-8 sm:mt-16 mb-8 flex flex-col bg-white dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/8 rounded-3xl shadow-2xl overflow-hidden"
+                style={{ maxHeight: 'calc(100vh - 4rem)' }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex justify-between items-center border-b border-zinc-100 dark:border-white/5 pb-3.5">
-                  <h3 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                    <Plus size={18} style={{ color: theme.rawColor }} /> Create New Post
-                  </h3>
-                  <button onClick={() => setShowCreatePost(false)} className="text-zinc-400 hover:text-zinc-655 dark:hover:text-white bg-transparent border-none text-lg cursor-pointer font-semibold transition-colors">×</button>
+                {/* Header with subject selector */}
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 dark:border-white/5">
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowSubjectSelector(!showSubjectSelector)}
+                      className="flex items-center gap-2.5 px-1 py-1 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors bg-transparent border-none cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
+                        {subjectCode.slice(0, 2)}
+                      </div>
+                      <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
+                      <ChevronDown size={12} className={`text-zinc-400 transition-transform duration-200 ${showSubjectSelector ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showSubjectSelector && (
+                      <>
+                        <div className="fixed inset-0 z-30" onClick={() => setShowSubjectSelector(false)} />
+                        <div className="absolute left-0 top-full z-40 mt-1 w-64 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                          <div className="px-3 py-2 text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Post to community</div>
+                          {categories.map((cat) => {
+                            const catCode = cat.name.match(/^([A-Za-z]+\d{3})/)?.[1]?.toUpperCase() || cat.name.split(':')[0].trim();
+                            const catTheme = getSubjectTheme(cat.name, cat.color, cat.icon_name);
+                            const isActive = catCode === subjectCode;
+                            return (
+                              <button
+                                key={cat.id}
+                                type="button"
+                                onClick={() => setShowSubjectSelector(false)}
+                                style={isActive ? { backgroundColor: `${catTheme.rawColor}12`, color: catTheme.rawColor } : undefined}
+                                className={`w-full text-left px-3 py-2.5 text-xs font-semibold transition-all border-none bg-transparent cursor-pointer flex items-center gap-2.5 ${
+                                  isActive ? '' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.04]'
+                                }`}
+                              >
+                                <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-black flex-shrink-0" style={{ backgroundColor: catTheme.rawColor }}>
+                                  {catCode.slice(0, 2)}
+                                </div>
+                                <span className="truncate">{catCode}</span>
+                                {isActive && <Check size={12} className="ml-auto flex-shrink-0" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setShowCreatePost(false)}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
+                  >
+                    ×
+                  </button>
                 </div>
 
-                <form onSubmit={handlePostSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Title</label>
-                      <input
-                        type="text"
-                        value={postTitle}
-                        onChange={(e) => setPostTitle(e.target.value)}
-                        placeholder="Enter post title..."
-                        className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold outline-none text-zinc-955 dark:text-white transition-all"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Category</label>
-                      <div className="relative">
-                        <button
-                          type="button"
-                          onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                          className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold outline-none text-zinc-955 dark:text-white transition-all flex items-center justify-between cursor-pointer"
-                        >
-                          <span>
-                            {postCategory === 'discussion' && 'General Discussion'}
-                            {postCategory === 'doubt' && 'Doubt / Question'}
-                            {postCategory === 'poll' && 'Poll'}
-                            {postCategory === 'question' && 'Midterm/Exam Prep'}
-                            {postCategory === 'resource' && 'Reference resource'}
-                          </span>
-                          <ChevronDown size={14} className={`transition-transform duration-200 ${showCategoryDropdown ? 'rotate-180' : ''}`} />
-                        </button>
-
-                        {showCategoryDropdown && (
-                          <>
-                            {/* Overlay to close the dropdown when clicking outside */}
-                            <div className="fixed inset-0 z-30" onClick={() => setShowCategoryDropdown(false)} />
-                            <div className="absolute left-0 right-0 z-40 mt-1.5 bg-white dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1.5 animate-in fade-in slide-in-from-top-2 duration-150">
-                              {[
-                                { value: 'discussion', label: 'General Discussion' },
-                                { value: 'doubt', label: 'Doubt / Question' },
-                                { value: 'poll', label: 'Poll' },
-                                { value: 'question', label: 'Midterm/Exam Prep' },
-                                { value: 'resource', label: 'Reference resource' }
-                              ].map((opt) => {
-                                const isSelected = postCategory === opt.value;
-                                return (
-                                  <button
-                                    key={opt.value}
-                                    type="button"
-                                    onClick={() => {
-                                      setPostCategory(opt.value as any);
-                                      setShowCategoryDropdown(false);
-                                    }}
-                                    style={isSelected ? {
-                                      backgroundColor: `${theme.rawColor}12`,
-                                      color: theme.rawColor
-                                    } : undefined}
-                                    className={`w-full text-left px-4 py-2.5 text-xs font-semibold transition-all border-none bg-transparent cursor-pointer flex items-center justify-between ${
-                                      isSelected
-                                        ? ''
-                                        : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03]'
-                                    }`}
-                                  >
-                                    <span>{opt.label}</span>
-                                    {isSelected && (
-                                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: theme.rawColor }} />
-                                    )}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                {/* Scrollable form body */}
+                <form onSubmit={handlePostSubmit} className="flex-1 overflow-y-auto flex flex-col">
+                  <div className="px-5 pt-5 pb-2 space-y-1">
+                    <input
+                      type="text"
+                      value={postTitle}
+                      onChange={(e) => setPostTitle(e.target.value)}
+                      placeholder="Title*"
+                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
+                      required
+                      autoFocus
+                    />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Tags (comma-separated)</label>
+                  {/* Flair & Tags row */}
+                  <div className="px-5 pb-3 flex flex-wrap items-center gap-2">
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold border cursor-pointer transition-all"
+                        style={{
+                          borderColor: `${theme.rawColor}40`,
+                          backgroundColor: `${theme.rawColor}08`,
+                          color: theme.rawColor
+                        }}
+                      >
+                        <Sparkles size={11} />
+                        {postCategory === 'discussion' && 'Discussion'}
+                        {postCategory === 'doubt' && 'Doubt'}
+                        {postCategory === 'poll' && 'Poll'}
+                        {postCategory === 'question' && 'Exam Prep'}
+                        {postCategory === 'resource' && 'Resource'}
+                        {postCategory === 'announcement' && '📢 Announcement'}
+                        <ChevronDown size={10} className={`transition-transform duration-200 ${showCategoryDropdown ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {showCategoryDropdown && (
+                        <>
+                          <div className="fixed inset-0 z-30" onClick={() => setShowCategoryDropdown(false)} />
+                          <div className="absolute left-0 z-40 mt-1.5 w-48 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1">
+                            {[
+                              { value: 'discussion', label: 'Discussion', icon: '💬' },
+                              { value: 'doubt', label: 'Doubt / Question', icon: '❓' },
+                              { value: 'poll', label: 'Poll', icon: '📊' },
+                              { value: 'question', label: 'Exam Prep', icon: '📝' },
+                              { value: 'resource', label: 'Resource', icon: '📎' },
+                              ...(userProfile?.is_admin ? [{ value: 'announcement', label: 'Announcement', icon: '📢' }] : [])
+                            ].map((opt) => {
+                              const isSelected = postCategory === opt.value;
+                              return (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={() => {
+                                    setPostCategory(opt.value as any);
+                                    setShowCategoryDropdown(false);
+                                  }}
+                                  style={isSelected ? {
+                                    backgroundColor: `${theme.rawColor}12`,
+                                    color: theme.rawColor
+                                  } : undefined}
+                                  className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold transition-all border-none bg-transparent cursor-pointer flex items-center gap-2.5 ${
+                                    isSelected
+                                      ? ''
+                                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.04]'
+                                  }`}
+                                >
+                                  <span>{opt.icon}</span>
+                                  <span>{opt.label}</span>
+                                  {isSelected && <Check size={12} className="ml-auto" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {postTags.split(',').filter(t => t.trim()).map((tag, i) => (
+                      <span key={i} className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400">
+                        #{tag.trim()}
+                      </span>
+                    ))}
+
                     <input
                       type="text"
                       value={postTags}
                       onChange={(e) => setPostTags(e.target.value)}
-                      placeholder="e.g. pointers, malloc, unit5"
-                      className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold outline-none text-zinc-955 dark:text-white transition-all"
+                      placeholder="+ Add tags"
+                      className="bg-transparent border-none outline-none text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 w-20"
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Content Body (supports Markdown)</label>
-                    <textarea
-                      value={postContent}
-                      onChange={(e) => setPostContent(e.target.value)}
-                      placeholder="Explain details of the doubt or question..."
-                      rows={5}
-                      className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-3xl p-4 text-xs font-semibold outline-none text-zinc-955 dark:text-white transition-all resize-none"
-                      required
+                  <div className="mx-5 border-t border-zinc-100 dark:border-white/5" />
+
+                  {/* WYSIWYG Body Editor */}
+                  <div className="px-5 pt-4 pb-3 flex-1">
+                    <div
+                      ref={createEditorRef}
+                      contentEditable
+                      data-placeholder="Body text*"
+                      onInput={() => setPostContent(getEditorText(createEditorRef))}
+                      className="w-full min-h-[200px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none"
+                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                      suppressContentEditableWarning
                     />
                   </div>
 
-                  <div className="flex gap-3 justify-end pt-4 border-t border-zinc-100 dark:border-white/5">
+                  {/* Formatting Toolbar */}
+                  <div className="px-5 pb-4">
+                    <div className="flex items-center gap-0.5 flex-wrap">
+                      {[
+                        { icon: Link, label: 'Link', action: () => {
+                          const url = prompt('Enter URL:');
+                          if (url) execFormat('createLink', url);
+                        }},
+                        { icon: Image, label: 'Image', action: () => {
+                          const url = prompt('Enter image URL:');
+                          if (url) execFormat('insertImage', url);
+                        }},
+                        { icon: Smile, label: 'Emoji', action: () => {} },
+                        { type: 'divider' },
+                        { icon: Bold, label: 'Bold', action: () => execFormat('bold') },
+                        { icon: Italic, label: 'Italic', action: () => execFormat('italic') },
+                        { icon: Strikethrough, label: 'Strikethrough', action: () => execFormat('strikeThrough') },
+                        { type: 'divider' },
+                        { icon: Code, label: 'Code', action: () => {
+                          const sel = window.getSelection();
+                          if (sel && sel.rangeCount > 0) {
+                            const range = sel.getRangeAt(0);
+                            const code = document.createElement('code');
+                            code.style.cssText = 'background:rgba(127,127,127,0.15);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:12px';
+                            range.surroundContents(code);
+                          }
+                        }},
+                        { icon: AlertTriangle, label: 'Spoiler', action: () => {
+                          const sel = window.getSelection();
+                          if (sel && sel.rangeCount > 0) {
+                            const range = sel.getRangeAt(0);
+                            const span = document.createElement('span');
+                            span.style.cssText = 'background:#333;color:#333;border-radius:3px;padding:0 4px;cursor:pointer';
+                            span.title = 'Click to reveal';
+                            span.onclick = () => { span.style.color = 'inherit'; span.style.background = 'rgba(127,127,127,0.15)'; };
+                            range.surroundContents(span);
+                          }
+                        }},
+                        { type: 'divider' },
+                        { icon: List, label: 'Bullet List', action: () => execFormat('insertUnorderedList') },
+                        { icon: ListOrdered, label: 'Numbered List', action: () => execFormat('insertOrderedList') },
+                        { icon: Quote, label: 'Quote', action: () => {
+                          const sel = window.getSelection();
+                          if (sel && sel.rangeCount > 0) {
+                            const range = sel.getRangeAt(0);
+                            const bq = document.createElement('blockquote');
+                            bq.style.cssText = 'border-left:3px solid rgba(127,127,127,0.4);padding-left:12px;margin:4px 0;color:inherit;opacity:0.8';
+                            range.surroundContents(bq);
+                          }
+                        }},
+                      ].map((item, i) => {
+                        if ((item as any).type === 'divider') {
+                          return <div key={`d-${i}`} className="w-px h-5 bg-zinc-200 dark:bg-white/8 mx-1" />;
+                        }
+                        const Ic = (item as any).icon;
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={(item as any).action}
+                            title={(item as any).label}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
+                          >
+                            <Ic size={15} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Footer actions */}
+                  <div className="flex items-center justify-end gap-2.5 px-5 py-3.5 border-t border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
                     <button
                       type="button"
                       onClick={() => setShowCreatePost(false)}
-                      className="px-5 py-3 text-zinc-450 hover:text-zinc-800 dark:hover:text-white font-bold text-xs border-none bg-transparent transition-colors cursor-pointer outline-none"
+                      className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      style={{ backgroundColor: theme.rawColor }}
-                      className="px-6 py-3 text-white rounded-2xl text-xs font-bold border-none cursor-pointer hover:opacity-90 active:scale-95 transition-all outline-none"
+                      disabled={!postTitle.trim() || !postContent.trim()}
+                      style={{
+                        backgroundColor: (!postTitle.trim() || !postContent.trim()) ? undefined : theme.rawColor,
+                        opacity: (!postTitle.trim() || !postContent.trim()) ? 0.4 : 1
+                      }}
+                      className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
+                        (!postTitle.trim() || !postContent.trim())
+                          ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
+                          : 'text-white hover:opacity-90 active:scale-95'
+                      }`}
                     >
-                      Submit Post
+                      Post
                     </button>
                   </div>
                 </form>
@@ -3283,48 +3570,56 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         document.body
       )}
 
-      {/* Edit Post Modal */}
+      {/* Reddit-style Edit Post Composer */}
       {createPortal(
         <AnimatePresence>
           {editingPost && (
-            <div 
-              className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto"
-              onClick={() => setEditingPost(null)}
-            >
-              {/* Backdrop */}
+            <div className="fixed inset-0 z-[9999] flex flex-col overflow-hidden">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/55 backdrop-blur-md"
-                style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={() => setEditingPost(null)}
               />
 
-              {/* Modal Content */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                className="relative w-full max-w-xl bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/10 rounded-[40px] p-8 shadow-2xl space-y-5 overflow-hidden z-10"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 40 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="relative z-10 w-full max-w-2xl mx-auto mt-8 sm:mt-16 mb-8 flex flex-col bg-white dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/8 rounded-3xl shadow-2xl overflow-hidden"
+                style={{ maxHeight: 'calc(100vh - 4rem)' }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex justify-between items-center border-b border-zinc-100 dark:border-white/5 pb-3.5">
-                  <h3 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                    Edit Post
-                  </h3>
-                  <button onClick={() => setEditingPost(null)} className="text-zinc-400 hover:text-zinc-655 dark:hover:text-white bg-transparent border-none text-lg cursor-pointer font-semibold transition-colors">×</button>
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 dark:border-white/5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
+                      {subjectCode.slice(0, 2)}
+                    </div>
+                    <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
+                    <span className="text-[10px] font-semibold text-zinc-400 bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded-full">Editing</span>
+                  </div>
+                  <button
+                    onClick={() => setEditingPost(null)}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
+                  >
+                    ×
+                  </button>
                 </div>
 
-                <form 
+                <form
                   onSubmit={async (e) => {
                     e.preventDefault();
                     if (!editingPost) return;
-                    const ok = await CommunityService.editPost(editingPost.id, editPostTitle, editPostContent);
+                    const content = getEditorText(editEditorRef);
+                    if (!editPostTitle.trim() || !content) return;
+                    const ok = await CommunityService.editPost(editingPost.id, editPostTitle, content);
                     if (ok) {
                       setDiscussions(prev => prev.map(post => {
                         if (post.id === editingPost.id) {
-                          return { ...post, title: editPostTitle, content: editPostContent, updated_at: new Date().toISOString() };
+                          return { ...post, title: editPostTitle, content, category: editPostCategory, updated_at: new Date().toISOString() };
                         }
                         return post;
                       }));
@@ -3333,45 +3628,194 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     } else {
                       showToast("Failed to edit post", "error");
                     }
-                  }} 
-                  className="space-y-4"
+                  }}
+                  className="flex-1 overflow-y-auto flex flex-col"
                 >
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Title</label>
+                  <div className="px-5 pt-5 pb-2">
                     <input
                       type="text"
                       value={editPostTitle}
                       onChange={(e) => setEditPostTitle(e.target.value)}
-                      placeholder="Enter post title..."
-                      className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold outline-none text-zinc-955 dark:text-white transition-all"
+                      placeholder="Title*"
+                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
                       required
+                      autoFocus
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Content Body</label>
-                    <textarea
-                      value={editPostContent}
-                      onChange={(e) => setEditPostContent(e.target.value)}
-                      placeholder="Explain details of the doubt or question..."
-                      rows={5}
-                      className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-3xl p-4 text-xs font-semibold outline-none text-zinc-955 dark:text-white transition-all resize-none"
-                      required
+                  {/* Flair picker */}
+                  <div className="px-5 pb-3 flex flex-wrap items-center gap-2">
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowEditCategoryDropdown(!showEditCategoryDropdown)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold border cursor-pointer transition-all"
+                        style={{
+                          borderColor: `${theme.rawColor}40`,
+                          backgroundColor: `${theme.rawColor}08`,
+                          color: theme.rawColor
+                        }}
+                      >
+                        <Sparkles size={11} />
+                        {editPostCategory === 'discussion' && 'Discussion'}
+                        {editPostCategory === 'doubt' && 'Doubt'}
+                        {editPostCategory === 'poll' && 'Poll'}
+                        {editPostCategory === 'question' && 'Exam Prep'}
+                        {editPostCategory === 'resource' && 'Resource'}
+                        {editPostCategory === 'announcement' && '📢 Announcement'}
+                        <ChevronDown size={10} className={`transition-transform duration-200 ${showEditCategoryDropdown ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {showEditCategoryDropdown && (
+                        <>
+                          <div className="fixed inset-0 z-30" onClick={() => setShowEditCategoryDropdown(false)} />
+                          <div className="absolute left-0 z-40 mt-1.5 w-48 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1">
+                            {[
+                              { value: 'discussion', label: 'Discussion', icon: '💬' },
+                              { value: 'doubt', label: 'Doubt / Question', icon: '❓' },
+                              { value: 'poll', label: 'Poll', icon: '📊' },
+                              { value: 'question', label: 'Exam Prep', icon: '📝' },
+                              { value: 'resource', label: 'Resource', icon: '📎' },
+                              ...(userProfile?.is_admin ? [{ value: 'announcement', label: 'Announcement', icon: '📢' }] : [])
+                            ].map((opt) => {
+                              const isSelected = editPostCategory === opt.value;
+                              return (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={() => {
+                                    setEditPostCategory(opt.value as any);
+                                    setShowEditCategoryDropdown(false);
+                                  }}
+                                  style={isSelected ? {
+                                    backgroundColor: `${theme.rawColor}12`,
+                                    color: theme.rawColor
+                                  } : undefined}
+                                  className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold transition-all border-none bg-transparent cursor-pointer flex items-center gap-2.5 ${
+                                    isSelected
+                                      ? ''
+                                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.04]'
+                                  }`}
+                                >
+                                  <span>{opt.icon}</span>
+                                  <span>{opt.label}</span>
+                                  {isSelected && <Check size={12} className="ml-auto" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mx-5 border-t border-zinc-100 dark:border-white/5" />
+
+                  {/* WYSIWYG Body Editor */}
+                  <div className="px-5 pt-4 pb-3 flex-1">
+                    <div
+                      ref={editEditorRef}
+                      contentEditable
+                      data-placeholder="Body text*"
+                      onInput={() => setEditPostContent(getEditorText(editEditorRef))}
+                      className="w-full min-h-[200px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none"
+                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                      suppressContentEditableWarning
                     />
                   </div>
 
-                  <div className="flex gap-3 justify-end pt-4 border-t border-zinc-100 dark:border-white/5">
+                  {/* Formatting Toolbar */}
+                  <div className="px-5 pb-4">
+                    <div className="flex items-center gap-0.5 flex-wrap">
+                      {[
+                        { icon: Link, label: 'Link', action: () => {
+                          const url = prompt('Enter URL:');
+                          if (url) execFormat('createLink', url);
+                        }},
+                        { icon: Image, label: 'Image', action: () => {
+                          const url = prompt('Enter image URL:');
+                          if (url) execFormat('insertImage', url);
+                        }},
+                        { icon: Smile, label: 'Emoji', action: () => {} },
+                        { type: 'divider' },
+                        { icon: Bold, label: 'Bold', action: () => execFormat('bold') },
+                        { icon: Italic, label: 'Italic', action: () => execFormat('italic') },
+                        { icon: Strikethrough, label: 'Strikethrough', action: () => execFormat('strikeThrough') },
+                        { type: 'divider' },
+                        { icon: Code, label: 'Code', action: () => {
+                          const sel = window.getSelection();
+                          if (sel && sel.rangeCount > 0) {
+                            const range = sel.getRangeAt(0);
+                            const code = document.createElement('code');
+                            code.style.cssText = 'background:rgba(127,127,127,0.15);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:12px';
+                            range.surroundContents(code);
+                          }
+                        }},
+                        { icon: AlertTriangle, label: 'Spoiler', action: () => {
+                          const sel = window.getSelection();
+                          if (sel && sel.rangeCount > 0) {
+                            const range = sel.getRangeAt(0);
+                            const span = document.createElement('span');
+                            span.style.cssText = 'background:#333;color:#333;border-radius:3px;padding:0 4px;cursor:pointer';
+                            span.title = 'Click to reveal';
+                            span.onclick = () => { span.style.color = 'inherit'; span.style.background = 'rgba(127,127,127,0.15)'; };
+                            range.surroundContents(span);
+                          }
+                        }},
+                        { type: 'divider' },
+                        { icon: List, label: 'Bullet List', action: () => execFormat('insertUnorderedList') },
+                        { icon: ListOrdered, label: 'Numbered List', action: () => execFormat('insertOrderedList') },
+                        { icon: Quote, label: 'Quote', action: () => {
+                          const sel = window.getSelection();
+                          if (sel && sel.rangeCount > 0) {
+                            const range = sel.getRangeAt(0);
+                            const bq = document.createElement('blockquote');
+                            bq.style.cssText = 'border-left:3px solid rgba(127,127,127,0.4);padding-left:12px;margin:4px 0;color:inherit;opacity:0.8';
+                            range.surroundContents(bq);
+                          }
+                        }},
+                      ].map((item, i) => {
+                        if ((item as any).type === 'divider') {
+                          return <div key={`ed-${i}`} className="w-px h-5 bg-zinc-200 dark:bg-white/8 mx-1" />;
+                        }
+                        const Ic = (item as any).icon;
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={(item as any).action}
+                            title={(item as any).label}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
+                          >
+                            <Ic size={15} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-end gap-2.5 px-5 py-3.5 border-t border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
                     <button
                       type="button"
                       onClick={() => setEditingPost(null)}
-                      className="px-5 py-3 text-zinc-450 hover:text-zinc-800 dark:hover:text-white font-bold text-xs border-none bg-transparent transition-colors cursor-pointer outline-none"
+                      className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      style={{ backgroundColor: theme.rawColor }}
-                      className="px-6 py-3 text-white rounded-2xl text-xs font-bold border-none cursor-pointer hover:opacity-90 active:scale-95 transition-all outline-none"
+                      disabled={!editPostTitle.trim()}
+                      style={{
+                        backgroundColor: !editPostTitle.trim() ? undefined : theme.rawColor,
+                        opacity: !editPostTitle.trim() ? 0.4 : 1
+                      }}
+                      className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
+                        !editPostTitle.trim()
+                          ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
+                          : 'text-white hover:opacity-90 active:scale-95'
+                      }`}
                     >
                       Save Changes
                     </button>
@@ -3384,89 +3828,166 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         document.body
       )}
 
-      {/* 2. Create Request Modal */}
+      {/* Reddit-style Create Request Composer */}
       {createPortal(
         <AnimatePresence>
           {showCreateRequest && (
-            <div 
-              className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto"
-              onClick={() => setShowCreateRequest(false)}
-            >
-              {/* Backdrop */}
+            <div className="fixed inset-0 z-[9999] flex flex-col overflow-hidden">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/55 backdrop-blur-md"
-                style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={() => setShowCreateRequest(false)}
               />
 
-              {/* Modal Content */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                className="relative w-full max-w-xl bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-[40px] p-8 shadow-2xl space-y-5 overflow-hidden z-10"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 40 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="relative z-10 w-full max-w-2xl mx-auto mt-8 sm:mt-16 mb-8 flex flex-col bg-white dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/8 rounded-3xl shadow-2xl overflow-hidden"
+                style={{ maxHeight: 'calc(100vh - 4rem)' }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex justify-between items-center border-b border-zinc-100 dark:border-white/5 pb-3.5">
-                  <h3 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                    <HelpCircle size={18} style={{ color: theme.rawColor }} /> Request Study Material
-                  </h3>
-                  <button onClick={() => setShowCreateRequest(false)} className="text-zinc-400 hover:text-zinc-655 dark:hover:text-white bg-transparent border-none text-lg cursor-pointer font-semibold transition-colors">×</button>
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 dark:border-white/5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
+                      {subjectCode.slice(0, 2)}
+                    </div>
+                    <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
+                    <span className="text-[10px] font-semibold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full flex items-center gap-1"><Trophy size={9} /> Bounty Request</span>
+                  </div>
+                  <button
+                    onClick={() => setShowCreateRequest(false)}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
+                  >
+                    ×
+                  </button>
                 </div>
 
-                <form onSubmit={handleRequestSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Document Title Needed</label>
-                      <input
-                        type="text"
-                        value={reqTitle}
-                        onChange={(e) => setReqTitle(e.target.value)}
-                        placeholder="e.g. Unit 3 lab manual code solved"
-                        className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold outline-none text-zinc-955 dark:text-white transition-all"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">XP Reward Bounty</label>
-                      <input
-                        type="number"
-                        value={reqBounty}
-                        onChange={(e) => setReqBounty(Number(e.target.value))}
-                        placeholder="e.g. 50"
-                        className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold outline-none text-zinc-955 dark:text-white transition-all"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Description</label>
-                    <textarea
-                      value={reqContent}
-                      onChange={(e) => setReqContent(e.target.value)}
-                      placeholder="Specify details or requirements..."
-                      rows={4}
-                      className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-3xl p-4 text-xs font-semibold outline-none text-zinc-955 dark:text-white transition-all resize-none"
+                <form onSubmit={handleRequestSubmit} className="flex-1 overflow-y-auto flex flex-col">
+                  {/* Title */}
+                  <div className="px-5 pt-5 pb-2">
+                    <input
+                      type="text"
+                      value={reqTitle}
+                      onChange={(e) => setReqTitle(e.target.value)}
+                      placeholder="What material do you need?*"
+                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
                       required
+                      autoFocus
                     />
                   </div>
 
-                  <div className="flex gap-3 justify-end pt-4 border-t border-zinc-100 dark:border-white/5">
+                  {/* Bounty XP row */}
+                  <div className="px-5 pb-3 flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold border border-amber-400/40 bg-amber-400/8 text-amber-500">
+                      <Trophy size={11} />
+                      <span>{reqBounty} XP Bounty</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={10}
+                      max={500}
+                      step={10}
+                      value={reqBounty}
+                      onChange={(e) => setReqBounty(Number(e.target.value))}
+                      className="flex-1 h-1.5 rounded-full appearance-none bg-zinc-200 dark:bg-white/10 cursor-pointer"
+                      style={{ accentColor: theme.rawColor }}
+                    />
+                    <input
+                      type="number"
+                      value={reqBounty}
+                      onChange={(e) => setReqBounty(Number(e.target.value))}
+                      min={10}
+                      max={500}
+                      className="w-16 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-[11px] font-bold text-center outline-none text-zinc-800 dark:text-white"
+                    />
+                  </div>
+
+                  <div className="mx-5 border-t border-zinc-100 dark:border-white/5" />
+
+                  {/* WYSIWYG Body Editor */}
+                  <div className="px-5 pt-4 pb-3 flex-1">
+                    <div
+                      ref={reqEditorRef}
+                      contentEditable
+                      data-placeholder="Describe what you need in detail — unit, topic, type of material...*"
+                      onInput={() => setReqContent(getEditorText(reqEditorRef))}
+                      className="w-full min-h-[160px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none"
+                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                      suppressContentEditableWarning
+                    />
+                  </div>
+
+                  {/* Formatting Toolbar */}
+                  <div className="px-5 pb-4">
+                    <div className="flex items-center gap-0.5 flex-wrap">
+                      {[
+                        { icon: Bold, label: 'Bold', action: () => execFormat('bold') },
+                        { icon: Italic, label: 'Italic', action: () => execFormat('italic') },
+                        { icon: Strikethrough, label: 'Strikethrough', action: () => execFormat('strikeThrough') },
+                        { type: 'divider' },
+                        { icon: List, label: 'Bullet List', action: () => execFormat('insertUnorderedList') },
+                        { icon: ListOrdered, label: 'Numbered List', action: () => execFormat('insertOrderedList') },
+                        { type: 'divider' },
+                        { icon: Link, label: 'Link', action: () => {
+                          const url = prompt('Enter URL:');
+                          if (url) execFormat('createLink', url);
+                        }},
+                        { icon: Code, label: 'Code', action: () => {
+                          const sel = window.getSelection();
+                          if (sel && sel.rangeCount > 0) {
+                            const range = sel.getRangeAt(0);
+                            const code = document.createElement('code');
+                            code.style.cssText = 'background:rgba(127,127,127,0.15);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:12px';
+                            range.surroundContents(code);
+                          }
+                        }},
+                      ].map((item, i) => {
+                        if ((item as any).type === 'divider') {
+                          return <div key={`rd-${i}`} className="w-px h-5 bg-zinc-200 dark:bg-white/8 mx-1" />;
+                        }
+                        const Ic = (item as any).icon;
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={(item as any).action}
+                            title={(item as any).label}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
+                          >
+                            <Ic size={15} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-end gap-2.5 px-5 py-3.5 border-t border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
                     <button
                       type="button"
                       onClick={() => setShowCreateRequest(false)}
-                      className="px-5 py-3 text-zinc-450 hover:text-zinc-800 dark:hover:text-white font-bold text-xs border-none bg-transparent transition-colors cursor-pointer outline-none"
+                      className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      style={{ backgroundColor: theme.rawColor }}
-                      className="px-6 py-3 text-white rounded-2xl text-xs font-bold border-none cursor-pointer hover:opacity-90 active:scale-95 transition-all outline-none"
+                      disabled={!reqTitle.trim() || !reqContent.trim()}
+                      style={{
+                        backgroundColor: (!reqTitle.trim() || !reqContent.trim()) ? undefined : theme.rawColor,
+                        opacity: (!reqTitle.trim() || !reqContent.trim()) ? 0.4 : 1
+                      }}
+                      className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
+                        (!reqTitle.trim() || !reqContent.trim())
+                          ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
+                          : 'text-white hover:opacity-90 active:scale-95'
+                      }`}
                     >
                       Post Bounty Request
                     </button>
@@ -3479,79 +4000,241 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         document.body
       )}
 
-      {/* 3. Create Study Pack Modal */}
+      {/* Reddit-style Create Study Pack Composer */}
       {createPortal(
         <AnimatePresence>
           {showCreatePack && (
-            <div 
-              className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto"
-              onClick={() => setShowCreatePack(false)}
-            >
-              {/* Backdrop */}
+            <div className="fixed inset-0 z-[9999] flex flex-col overflow-hidden">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/55 backdrop-blur-md"
-                style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={() => setShowCreatePack(false)}
               />
 
-              {/* Modal Content */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                className="relative w-full max-w-xl bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-[40px] p-8 shadow-2xl space-y-5 overflow-hidden z-10"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 40 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="relative z-10 w-full max-w-2xl mx-auto mt-8 sm:mt-12 mb-8 flex flex-col bg-white dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/8 rounded-3xl shadow-2xl overflow-hidden"
+                style={{ maxHeight: 'calc(100vh - 4rem)' }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex justify-between items-center border-b border-zinc-100 dark:border-white/5 pb-3.5">
-                  <h3 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                    <BookOpen size={18} style={{ color: theme.rawColor }} /> Create Curated Study Pack
-                  </h3>
-                  <button onClick={() => setShowCreatePack(false)} className="text-zinc-400 hover:text-zinc-655 dark:hover:text-white bg-transparent border-none text-lg cursor-pointer font-semibold transition-colors">×</button>
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 dark:border-white/5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
+                      {subjectCode.slice(0, 2)}
+                    </div>
+                    <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
+                    <span className="text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full flex items-center gap-1"><BookOpen size={9} /> Study Pack</span>
+                  </div>
+                  <button
+                    onClick={() => setShowCreatePack(false)}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
+                  >
+                    ×
+                  </button>
                 </div>
 
-                <form onSubmit={handlePackSubmit} className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Study Pack Title</label>
+                <form onSubmit={handlePackSubmit} className="flex-1 overflow-y-auto flex flex-col">
+                  {/* Title */}
+                  <div className="px-5 pt-5 pb-2">
                     <input
                       type="text"
                       value={packTitle}
                       onChange={(e) => setPackTitle(e.target.value)}
-                      placeholder="e.g. CSE101 Midterm Complete Preparation Bundle"
-                      className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold outline-none text-zinc-955 dark:text-white transition-all"
+                      placeholder="Study Pack Title*"
+                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
                       required
+                      autoFocus
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Study Pack Description</label>
-                    <textarea
-                      value={packContent}
-                      onChange={(e) => setPackContent(e.target.value)}
-                      placeholder="Summarize what files are included and what chapters this pack covers..."
-                      rows={4}
-                      className="w-full bg-zinc-50 dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-3xl p-4 text-xs font-semibold outline-none text-zinc-955 dark:text-white transition-all resize-none"
-                      required
+                  <div className="mx-5 border-t border-zinc-100 dark:border-white/5" />
+
+                  {/* WYSIWYG Description */}
+                  <div className="px-5 pt-4 pb-3">
+                    <div
+                      ref={packEditorRef}
+                      contentEditable
+                      data-placeholder="Describe this study pack — what topics it covers, why it's useful...*"
+                      onInput={() => setPackContent(getEditorText(packEditorRef))}
+                      className="w-full min-h-[100px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none"
+                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                      suppressContentEditableWarning
                     />
                   </div>
 
-                  <div className="flex gap-3 justify-end pt-4 border-t border-zinc-100 dark:border-white/5">
-                    <button
-                      type="button"
-                      onClick={() => setShowCreatePack(false)}
-                      className="px-5 py-3 text-zinc-455 hover:text-zinc-800 dark:hover:text-white font-bold text-xs border-none bg-transparent transition-colors cursor-pointer outline-none"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      style={{ backgroundColor: theme.rawColor }}
-                      className="px-6 py-3 text-white rounded-2xl text-xs font-bold border-none cursor-pointer hover:opacity-90 active:scale-95 transition-all outline-none"
-                    >
-                      Create Study Pack
-                    </button>
+                  {/* Formatting Toolbar */}
+                  <div className="px-5 pb-3">
+                    <div className="flex items-center gap-0.5 flex-wrap">
+                      {[
+                        { icon: Bold, label: 'Bold', action: () => execFormat('bold') },
+                        { icon: Italic, label: 'Italic', action: () => execFormat('italic') },
+                        { icon: Strikethrough, label: 'Strikethrough', action: () => execFormat('strikeThrough') },
+                        { type: 'divider' },
+                        { icon: List, label: 'Bullet List', action: () => execFormat('insertUnorderedList') },
+                        { icon: ListOrdered, label: 'Numbered List', action: () => execFormat('insertOrderedList') },
+                      ].map((item, i) => {
+                        if ((item as any).type === 'divider') {
+                          return <div key={`pd-${i}`} className="w-px h-5 bg-zinc-200 dark:bg-white/8 mx-1" />;
+                        }
+                        const Ic = (item as any).icon;
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={(item as any).action}
+                            title={(item as any).label}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
+                          >
+                            <Ic size={15} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="mx-5 border-t border-zinc-100 dark:border-white/5" />
+
+                  {/* File Picker — YouTube playlist style */}
+                  <div className="px-5 pt-3 pb-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+                        <Folder size={11} /> Add files to pack ({packFiles.length} selected)
+                      </span>
+                    </div>
+
+                    {/* Search bar */}
+                    <div className="relative mb-2">
+                      <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                      <input
+                        type="text"
+                        value={packFileSearch}
+                        onChange={(e) => setPackFileSearch(e.target.value)}
+                        placeholder="Search files..."
+                        className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/8 rounded-xl pl-8 pr-3 py-2 text-[11px] font-medium outline-none text-zinc-800 dark:text-white placeholder:text-zinc-400"
+                      />
+                    </div>
+
+                    {/* Selected files pills */}
+                    {packFiles.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        {packFiles.map(fid => {
+                          const f = subjectFiles.find(sf => sf.id === fid);
+                          return f ? (
+                            <span key={fid} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold" style={{ backgroundColor: `${theme.rawColor}12`, color: theme.rawColor }}>
+                              <FileText size={10} />
+                              <span className="max-w-[120px] truncate">{f.name}</span>
+                              <button
+                                type="button"
+                                onClick={() => setPackFiles(prev => prev.filter(id => id !== fid))}
+                                className="ml-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 bg-transparent border-none cursor-pointer text-current text-[9px] font-bold"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ) : null;
+                        })}
+                      </div>
+                    )}
+
+                    {/* File list */}
+                    <div className="max-h-[180px] overflow-y-auto rounded-xl border border-zinc-200 dark:border-white/8 bg-zinc-50/50 dark:bg-white/[0.02]">
+                      {subjectFiles
+                        .filter(f => !packFileSearch || f.name.toLowerCase().includes(packFileSearch.toLowerCase()))
+                        .map((f) => {
+                          const isSelected = packFiles.includes(f.id);
+                          const typeIcon = f.type === 'pdf' ? FileText : f.type === 'video' ? Video : f.type === 'code' ? Code : FileText;
+                          const TypeIc = typeIcon;
+                          return (
+                            <button
+                              key={f.id}
+                              type="button"
+                              onClick={() => {
+                                setPackFiles(prev =>
+                                  prev.includes(f.id)
+                                    ? prev.filter(id => id !== f.id)
+                                    : [...prev, f.id]
+                                );
+                              }}
+                              className={`w-full text-left px-3 py-2.5 flex items-center gap-3 transition-all border-none cursor-pointer border-b border-zinc-100 dark:border-white/5 last:border-b-0 ${
+                                isSelected
+                                  ? 'bg-white dark:bg-white/[0.04]'
+                                  : 'bg-transparent hover:bg-zinc-100/50 dark:hover:bg-white/[0.03]'
+                              }`}
+                            >
+                              {/* Checkbox */}
+                              <div className={`w-4.5 h-4.5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                                isSelected
+                                  ? 'border-transparent'
+                                  : 'border-zinc-300 dark:border-zinc-600'
+                              }`} style={isSelected ? { backgroundColor: theme.rawColor } : undefined}>
+                                {isSelected && <Check size={10} className="text-white" />}
+                              </div>
+
+                              <TypeIc size={14} className="text-zinc-400 flex-shrink-0" />
+
+                              <div className="flex-1 min-w-0">
+                                <div className={`text-[11px] font-semibold truncate ${
+                                  isSelected ? 'text-zinc-900 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'
+                                }`}>{f.name}</div>
+                                <div className="text-[9px] text-zinc-400 flex items-center gap-2">
+                                  <span>{f.type.toUpperCase()}</span>
+                                  {f.faculty_name && <><span>·</span><span>{f.faculty_name}</span></>}
+                                  <span>·</span>
+                                  <span>{f.size}</span>
+                                </div>
+                              </div>
+
+                              {isSelected && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md" style={{ backgroundColor: `${theme.rawColor}15`, color: theme.rawColor }}>Added</span>
+                              )}
+                            </button>
+                          );
+                        })}
+
+                      {subjectFiles.filter(f => !packFileSearch || f.name.toLowerCase().includes(packFileSearch.toLowerCase())).length === 0 && (
+                        <div className="px-4 py-6 text-center text-xs text-zinc-400">
+                          {packFileSearch ? 'No files match your search' : 'No files available in this subject'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between gap-2.5 px-5 py-3.5 border-t border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02] mt-auto">
+                    <span className="text-[10px] text-zinc-400 font-medium">
+                      {packFiles.length} file{packFiles.length !== 1 ? 's' : ''} selected
+                    </span>
+                    <div className="flex gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setShowCreatePack(false)}
+                        className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!packTitle.trim() || !packContent.trim()}
+                        style={{
+                          backgroundColor: (!packTitle.trim() || !packContent.trim()) ? undefined : theme.rawColor,
+                          opacity: (!packTitle.trim() || !packContent.trim()) ? 0.4 : 1
+                        }}
+                        className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
+                          (!packTitle.trim() || !packContent.trim())
+                            ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
+                            : 'text-white hover:opacity-90 active:scale-95'
+                        }`}
+                      >
+                        Create Study Pack
+                      </button>
+                    </div>
                   </div>
                 </form>
               </motion.div>
