@@ -28,6 +28,8 @@ import {
 } from 'lucide-react';
 import { IITM_BS_DS, BTECH_CSE_2025 } from '../data/curriculumData.ts';
 import { SUBJECT_NICKNAMES, CUSTOM_ACRONYMS } from '../data/subjectNicknames.ts';
+import { UserProfile } from '../types';
+import NexusServer from '../services/nexusServer.ts';
 
 // ─── Types ───
 
@@ -237,9 +239,9 @@ const fetchFromInvidious = async (query: string, page: number, signal?: AbortSig
 
 // ─── Sub-Components ───
 
-const ThemeDropdown: React.FC<{
-  label: string; options: DropdownOption[]; value: string; onChange: (val: string) => void;
-}> = ({ label, options, value, onChange }) => {
+const CompactDropdown: React.FC<{
+  prefix?: string; options: DropdownOption[]; value: string; onChange: (val: string) => void; className?: string;
+}> = ({ prefix, options, value, onChange, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -252,24 +254,26 @@ const ThemeDropdown: React.FC<{
   const currentOption = options.find(o => o.value === value) || options[0];
 
   return (
-    <div ref={ref} className="relative space-y-1.5 w-full text-left">
-      <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider pl-1">{label}</label>
+    <div ref={ref} className={`relative text-left ${className}`}>
       <button
         type="button" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen} aria-haspopup="listbox"
-        className="w-full flex items-center justify-between bg-zinc-900/40 dark:bg-black/30 border border-zinc-200/10 dark:border-white/5 rounded-xl px-3 py-2.5 text-xs font-semibold text-white outline-none hover:border-brand-primary/50 transition-all text-left cursor-pointer"
+        className="w-full flex items-center justify-between gap-1.5 bg-zinc-900/40 dark:bg-black/30 border border-zinc-200/10 dark:border-white/5 rounded-xl px-3 py-2 text-xs font-semibold text-white outline-none hover:border-brand-primary/50 transition-all text-left cursor-pointer"
       >
-        <span className="truncate pr-2">{currentOption?.label || value}</span>
-        <ChevronDown className={`w-4 h-4 text-zinc-400 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <span className="truncate pr-1">
+          {prefix && <span className="text-zinc-400 font-medium mr-1">{prefix}:</span>}
+          {currentOption?.label || value}
+        </span>
+        <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       <AnimatePresence>
         {isOpen && (
-          <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.15 }}
-            role="listbox" className="absolute z-50 left-0 right-0 mt-1 bg-zinc-900 dark:bg-[#0a0a0a] border border-zinc-200/10 dark:border-white/5 rounded-xl shadow-2xl max-h-48 overflow-y-auto no-scrollbar p-1 space-y-0.5 backdrop-blur-xl"
+          <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.12 }}
+            role="listbox" className="absolute z-50 left-0 mt-1 min-w-[200px] max-w-[280px] bg-zinc-900 dark:bg-[#0a0a0a] border border-zinc-200/10 dark:border-white/5 rounded-xl shadow-2xl max-h-48 overflow-y-auto no-scrollbar p-1 space-y-0.5 backdrop-blur-xl"
           >
             {options.map((opt) => (
               <button key={opt.value} type="button" role="option" aria-selected={value === opt.value}
                 onClick={() => { onChange(opt.value); setIsOpen(false); }}
-                className={`w-full text-left px-3 py-2 text-xs font-semibold transition-all border-none rounded-lg cursor-pointer ${
+                className={`w-full text-left px-3 py-1.5 text-xs font-semibold transition-all border-none rounded-lg cursor-pointer ${
                   value === opt.value ? 'bg-brand-primary text-white' : 'text-zinc-300 bg-transparent hover:bg-white/5 hover:text-brand-primary'
                 }`}
               >{opt.label}</button>
@@ -329,16 +333,14 @@ const VideoCard: React.FC<{
       aria-label={`Play ${video.title} by ${video.channel}`}
       onClick={() => onSelect(video)}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(video); } }}
-      className={`group relative ${isShelf ? 'snap-start shrink-0 w-[240px] sm:w-[270px]' : ''} flex flex-col bg-[#111317] border rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/60 ${
-        isActive
-          ? 'border-brand-primary ring-1 ring-brand-primary/30 shadow-lg shadow-brand-primary/5'
-          : 'border-white/[0.06] hover:border-white/[0.12] hover:shadow-xl hover:shadow-black/40'
-      } hover:scale-[1.03] hover:-translate-y-1`}
+      className={`group relative ${isShelf ? 'snap-start shrink-0 w-[240px] sm:w-[270px]' : ''} flex flex-col cursor-pointer transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/60`}
     >
       {/* Thumbnail */}
-      <div className="relative aspect-video bg-black overflow-hidden">
+      <div className={`relative aspect-video bg-zinc-950 overflow-hidden rounded-xl transition-all duration-300 ${
+        isActive ? 'ring-2 ring-brand-primary shadow-lg shadow-brand-primary/20 scale-[0.98]' : 'group-hover:shadow-md'
+      }`}>
         <img src={video.thumbnail} alt={video.title} loading="lazy"
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
         />
         
         {/* Gradient overlay on hover */}
@@ -372,7 +374,7 @@ const VideoCard: React.FC<{
       </div>
 
       {/* Metadata */}
-      <div className={`${isShelf ? 'p-3' : 'p-3.5'} flex gap-2.5 flex-1 items-start`}>
+      <div className="pt-2 px-0.5 pb-1 flex gap-2 flex-1 items-start">
         {!isShelf && (
           video.channelLogo ? (
             <img src={video.channelLogo} alt={video.channel} loading="lazy"
@@ -484,7 +486,12 @@ const UpNextPanel: React.FC<{
 // ─── MAIN COMPONENT ───
 // ═══════════════════════════════════════════════════
 
-export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = false }) => {
+interface LecturesHubProps {
+  hideHeader?: boolean;
+  userProfile?: UserProfile | null;
+}
+
+export const LecturesHub: React.FC<LecturesHubProps> = ({ hideHeader = false, userProfile = null }) => {
   const { selectedUniversity } = useUniversity();
   const [selectedLevel, setSelectedLevel] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
@@ -507,7 +514,6 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [activeVideoDetails, setActiveVideoDetails] = useState<VideoDetails | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
-  const [isFocusMode, setIsFocusMode] = useState(false);
   // Persistence
   const [recentLectures, setRecentLectures] = useState<RecentLecture[]>([]);
   const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
@@ -517,11 +523,80 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
   const abortRef = useRef<AbortController | null>(null);
   const feedEndRef = useRef<HTMLDivElement>(null);
 
+  const playerRef = useRef<any>(null);
+  const progressIntervalRef = useRef<number | null>(null);
+  const lastSavedProgressRef = useRef<Record<string, number>>({});
+
   // ─── Load persisted data ───
   useEffect(() => {
     setRecentLectures(safeJsonParse(localStorage.getItem('scholix_recent_lectures'), []));
     setBookmarks(new Set(safeJsonParse<string[]>(localStorage.getItem('scholix_bookmarks'), [])));
   }, []);
+
+  const activeVideo = useMemo(() => {
+    if (!activeVideoId) return null;
+    return ytVideos.find(v => v.id === activeVideoId) || recentLectures.find(v => v.id === activeVideoId) || null;
+  }, [activeVideoId, ytVideos, recentLectures]);
+
+  // ─── Sync watch progress from Supabase on mount/login ───
+  useEffect(() => {
+    const syncSupabaseProgress = async () => {
+      if (!userProfile?.id) return;
+      try {
+        const stats = await NexusServer.fetchStudyStats(userProfile.id);
+        if (stats && Array.isArray(stats.recent_activities)) {
+          const supabaseProgressRecords = stats.recent_activities.filter(
+            (act: any) => act.type === 'video_progress'
+          );
+
+          if (supabaseProgressRecords.length > 0) {
+            setRecentLectures(prev => {
+              const mergedMap = new Map<string, RecentLecture>();
+              // Load local records first
+              prev.forEach(l => mergedMap.set(l.id, l));
+
+              // Load newer records from Supabase
+              supabaseProgressRecords.forEach((rec: any) => {
+                const data = rec.content;
+                if (data && data.videoId) {
+                  const existingLocal = mergedMap.get(data.videoId);
+                  const videoInfo = data.video || (existingLocal ? existingLocal : null);
+                  
+                  if (videoInfo) {
+                    const localWatchedAt = existingLocal?.watchedAt || 0;
+                    const supabaseWatchedAt = data.watchedAt || new Date(rec.created_at).getTime() || 0;
+
+                    // If Supabase record is newer, or local doesn't exist, use Supabase progress
+                    if (!existingLocal || supabaseWatchedAt > localWatchedAt) {
+                      mergedMap.set(data.videoId, {
+                        ...videoInfo,
+                        progress: data.progress,
+                        watchedAt: supabaseWatchedAt
+                      });
+                      // Seed last saved progress ref to avoid immediate rewrite
+                      lastSavedProgressRef.current[data.videoId] = data.progress;
+                    }
+                  }
+                }
+              });
+
+              // Sort by watchedAt descending and limit to 8
+              const newList = Array.from(mergedMap.values())
+                .sort((a, b) => b.watchedAt - a.watchedAt)
+                .slice(0, 8);
+
+              localStorage.setItem('scholix_recent_lectures', JSON.stringify(newList));
+              return newList;
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Failed to sync progress from Supabase:", err);
+      }
+    };
+
+    syncSupabaseProgress();
+  }, [userProfile]);
 
   // ─── Bookmark toggle ───
   const toggleBookmark = useCallback((videoId: string) => {
@@ -543,6 +618,140 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
     });
   }, []);
 
+  const updateProgress = useCallback((video: YTVideo, progress: number, currentTime: number) => {
+    // 1. Update local storage and React state
+    setRecentLectures(prev => {
+      const filtered = prev.filter(v => v.id !== video.id);
+      const updated: RecentLecture = { ...video, progress, watchedAt: Date.now() };
+      const newList = [updated, ...filtered].slice(0, 8);
+      localStorage.setItem('scholix_recent_lectures', JSON.stringify(newList));
+      return newList;
+    });
+
+    // 2. Sync to Supabase if logged in
+    if (userProfile?.id) {
+      const lastSaved = lastSavedProgressRef.current[video.id] || 0;
+      // Write if progress changes by >= 3%, or is complete (100%), or is just starting (> 0)
+      if (Math.abs(progress - lastSaved) >= 3 || progress === 100 || (lastSaved === 0 && progress > 0)) {
+        lastSavedProgressRef.current[video.id] = progress;
+        
+        console.log("Saving video progress to Supabase:", {
+          videoId: video.id,
+          title: video.title,
+          progress,
+          currentTime
+        });
+
+        NexusServer.saveRecord(
+          userProfile.id,
+          'video_progress',
+          video.id,
+          {
+            videoId: video.id,
+            progress,
+            currentTime,
+            watchedAt: Date.now(),
+            video: video
+          }
+        ).catch(err => {
+          console.error("Error saving progress to Supabase:", err);
+        });
+      }
+    }
+  }, [userProfile]);
+
+  const stopProgressInterval = useCallback(() => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+  }, []);
+
+  const startProgressInterval = useCallback(() => {
+    stopProgressInterval();
+    progressIntervalRef.current = window.setInterval(() => {
+      const player = playerRef.current;
+      if (player && typeof player.getCurrentTime === 'function' && typeof player.getDuration === 'function') {
+        try {
+          const currentTime = player.getCurrentTime();
+          const duration = player.getDuration();
+          const state = typeof player.getPlayerState === 'function' ? player.getPlayerState() : -1;
+          const loadedFraction = typeof player.getVideoLoadedFraction === 'function' ? player.getVideoLoadedFraction() : 0;
+          
+          if (duration > 0) {
+            const progress = Math.min(100, Math.round((currentTime / duration) * 100));
+            
+            console.log("YouTube Player Progress Update:", {
+              currentTime: Math.round(currentTime),
+              duration: Math.round(duration),
+              progress: progress.toFixed(2) + "%",
+              playerState: state,
+              bufferedFraction: loadedFraction
+            });
+
+            if (activeVideo) {
+              updateProgress(activeVideo, progress, currentTime);
+            }
+          }
+        } catch (err) {
+          console.warn("Error reading from YT Player API:", err);
+        }
+      }
+    }, 4000); // Check every 4 seconds
+  }, [activeVideo, updateProgress, stopProgressInterval]);
+
+  // ─── YouTube Iframe Player API Injection & Initialization ───
+  useEffect(() => {
+    if (activeVideoId) {
+      if (!(window as any).YT) {
+        (window as any).onYouTubeIframeAPIReady = () => {
+          initializePlayer();
+        };
+
+        const existingScript = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
+        if (!existingScript) {
+          const tag = document.createElement('script');
+          tag.src = 'https://www.youtube.com/iframe_api';
+          const firstScriptTag = document.getElementsByTagName('script')[0];
+          firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+        }
+      } else {
+        initializePlayer();
+      }
+    }
+
+    return () => {
+      stopProgressInterval();
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy();
+        } catch (e) {
+          console.warn("Error destroying YT Player:", e);
+        }
+        playerRef.current = null;
+      }
+    };
+
+    function initializePlayer() {
+      setTimeout(() => {
+        const iframeElement = document.getElementById('yt-player');
+        if (!iframeElement || !(window as any).YT || !(window as any).YT.Player) return;
+
+        playerRef.current = new (window as any).YT.Player('yt-player', {
+          events: {
+            onStateChange: (event: any) => {
+              if (event.data === 1) {
+                startProgressInterval();
+              } else {
+                stopProgressInterval();
+              }
+            }
+          }
+        });
+      }, 500);
+    }
+  }, [activeVideoId, startProgressInterval, stopProgressInterval]);
+
   const handleSelectVideo = useCallback((video: YTVideo) => {
     setActiveVideoId(video.id);
     const existing = recentLectures.find(r => r.id === video.id);
@@ -563,7 +772,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
     handleSelectVideo(ytVideos[nextIdx]);
   }, [activeVideoId, ytVideos, handleSelectVideo]);
 
-  const activeVideo = useMemo(() => {
+  const activeVideoMemo = useMemo(() => {
     if (!activeVideoId) return null;
     return ytVideos.find(v => v.id === activeVideoId) || recentLectures.find(v => v.id === activeVideoId) || null;
   }, [activeVideoId, ytVideos, recentLectures]);
@@ -751,13 +960,12 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key === 'Escape') { if (isFocusMode) setIsFocusMode(false); else if (activeVideoId) { setActiveVideoId(null); } }
-      if (e.key === 'f' && activeVideoId && !isFocusMode) setIsFocusMode(true);
+      if (e.key === 'Escape') { if (activeVideoId) { setActiveVideoId(null); } }
       if (e.key === 'n' && activeVideoId) handlePlayNext();
     };
     document.addEventListener('keydown', h);
     return () => document.removeEventListener('keydown', h);
-  }, [isFocusMode, activeVideoId, handlePlayNext]);
+  }, [activeVideoId, handlePlayNext]);
 
   // ─── Feed infinite scroll ───
   useEffect(() => {
@@ -797,28 +1005,76 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
   // ═══════════════════════════════════════════════════
 
   return (
-    <div ref={topRef} className="max-w-6xl mx-auto w-full space-y-8 animate-fade-in pb-20 text-center md:text-left scroll-mt-6 px-4">
+    <div ref={topRef} className="max-w-5xl mx-auto w-full space-y-8 animate-fade-in pb-20 text-center md:text-left scroll-mt-6 px-4">
 
-      {/* ─── Focus Mode Cinema Overlay ─── */}
-      <AnimatePresence>
-        {isFocusMode && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/95 backdrop-blur-sm"
-            onClick={() => setIsFocusMode(false)}
-          />
-        )}
-      </AnimatePresence>
+
 
       {!hideHeader && (
-        <header className="mb-6 border-b border-zinc-100 dark:border-white/5 pb-6 text-left">
-          <span className="text-[10px] uppercase tracking-wider text-brand-primary font-bold">YT Library</span>
-          <h2 className="text-xl md:text-2xl font-semibold mt-1 text-zinc-900 dark:text-white tracking-tight">
-            YouTube <span className="text-brand-primary">Lectures</span>
-          </h2>
-          <p className="text-zinc-500 dark:text-zinc-400 font-medium text-[11px] sm:text-xs mt-1">
-            Distraction-free university lecture streaming
-          </p>
+        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-zinc-100 dark:border-white/5 text-left mb-2">
+          <div>
+            <h2 className="text-xl md:text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight leading-tight">
+              YouTube <span className="text-brand-primary">Lectures</span>
+            </h2>
+            <p className="text-zinc-500 dark:text-zinc-400 font-medium text-[11px] sm:text-xs mt-0.5">
+              Browse and watch university lectures inline without distraction
+            </p>
+          </div>
+
+          {/* Compact Filters & Controls */}
+          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            {/* Level Dropdown */}
+            <CompactDropdown 
+              prefix="Level" 
+              options={levels.map(l => ({ value: l, label: l }))} 
+              value={selectedLevel} 
+              onChange={setSelectedLevel} 
+              className="w-[calc(50%-4px)] sm:w-auto min-w-[130px]"
+            />
+            
+            {/* Course Dropdown */}
+            <CompactDropdown 
+              prefix="Course" 
+              options={courseOptions.map(c => ({ value: c, label: c }))} 
+              value={selectedCourse} 
+              onChange={setSelectedCourse} 
+              className="w-[calc(50%-4px)] sm:w-auto min-w-[180px] max-w-[280px]"
+            />
+
+            {/* Category Dropdown */}
+            <CompactDropdown 
+              prefix="Category" 
+              options={categories.map(cat => ({ value: cat.id, label: cat.label }))} 
+              value={activeCategory} 
+              onChange={setActiveCategory} 
+              className="w-[calc(50%-4px)] sm:w-auto min-w-[130px]"
+            />
+
+            {/* Search bar */}
+            <form onSubmit={handleCustomSearchSubmit} className="relative w-[calc(50%-4px)] sm:w-auto">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <input 
+                type="text" 
+                placeholder="Search topic..." 
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="w-full sm:w-[150px] md:w-[180px] pl-8 pr-3 py-2 bg-black/30 border border-white/5 rounded-xl text-xs font-semibold text-white outline-none focus:ring-1 focus:ring-brand-primary/50 placeholder:text-zinc-600 transition-all"
+              />
+            </form>
+
+            {/* Shelves / Feed Toggle */}
+            <div className="flex bg-black/40 p-0.5 rounded-xl border border-white/5 shrink-0 ml-auto sm:ml-0">
+              {[{ key: false, label: 'Shelves' }, { key: true, label: 'Feed' }].map(m => (
+                <button 
+                  key={String(m.key)} 
+                  type="button" 
+                  onClick={() => setIsRawView(m.key)}
+                  className={`px-3 py-1 rounded-lg text-[10px] font-bold border-none cursor-pointer transition-all ${
+                    isRawView === m.key ? 'bg-brand-primary text-white shadow-sm' : 'bg-transparent text-zinc-400 hover:text-white'
+                  }`}
+                >{m.label}</button>
+              ))}
+            </div>
+          </div>
         </header>
       )}
 
@@ -869,7 +1125,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
                 <p className="text-[10px] sm:text-xs text-zinc-400 font-medium leading-relaxed max-w-sm">
                   Select your course and stream distraction-free video lectures instantly.
                 </p>
-                <button onClick={() => document.getElementById('search-filters-card')?.scrollIntoView({ behavior: 'smooth' })}
+                <button onClick={() => topRef.current?.scrollIntoView({ behavior: 'smooth' })}
                   className="flex items-center gap-2 px-6 py-3 bg-white text-zinc-950 hover:bg-zinc-100 font-bold text-xs rounded-xl border-none cursor-pointer transition-all active:scale-95"
                 >
                   <SlidersHorizontal size={13} /> Explore Courses
@@ -883,19 +1139,17 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
       {/* ─── Player + Up Next ─── */}
       <AnimatePresence>
         {activeVideoId && activeVideo && (
-          <div className={`${isFocusMode ? 'fixed inset-0 z-50 p-4 sm:p-8 flex flex-col justify-center bg-black/95' : 'flex flex-col lg:flex-row gap-6'}`}>
+          <div className="flex flex-col lg:flex-row gap-6">
             
             {/* Main Player Column */}
-            <div className={`${isFocusMode ? 'max-w-6xl mx-auto w-full' : 'flex-1 min-w-0 space-y-4'}`}>
+            <div className="flex-1 min-w-0 space-y-4">
               
               {/* The Player Card itself */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
-                className={`text-left transition-all duration-300 border border-white/[0.06] rounded-3xl overflow-hidden p-5 sm:p-6 space-y-4 bg-gradient-to-br from-[#0e0f12] to-[#080809] shadow-2xl shadow-black/40 ${
-                  isFocusMode ? 'w-full max-w-6xl mx-auto' : ''
-                }`}
+                className="text-left transition-all duration-300 border border-white/[0.06] rounded-3xl overflow-hidden p-5 sm:p-6 space-y-4 bg-gradient-to-br from-[#0e0f12] to-[#080809] shadow-2xl shadow-black/40"
               >
                 {/* Header bar */}
                 <div className="flex items-center justify-between pb-2 border-b border-white/5">
@@ -907,12 +1161,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
                       className="p-1.5 hover:bg-white/5 rounded-lg border-none bg-transparent cursor-pointer text-zinc-500 hover:text-white transition-colors">
                       <SkipForward size={13} />
                     </button>
-                    <button onClick={() => setIsFocusMode(prev => !prev)} aria-label={isFocusMode ? 'Exit focus mode' : 'Focus mode (F)'}
-                      title={isFocusMode ? 'Exit (Esc)' : 'Focus (F)'}
-                      className="p-1.5 hover:bg-white/5 rounded-lg border-none bg-transparent cursor-pointer text-zinc-500 hover:text-white transition-colors">
-                      {isFocusMode ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
-                    </button>
-                    <button onClick={() => { setActiveVideoId(null); setIsFocusMode(false); }} aria-label="Close player"
+                    <button onClick={() => setActiveVideoId(null)} aria-label="Close player"
                       className="p-1.5 hover:bg-white/5 rounded-lg border-none bg-transparent cursor-pointer text-zinc-500 hover:text-red-400 transition-colors">
                       <X size={14} />
                     </button>
@@ -922,7 +1171,8 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
                 {/* YouTube embed wrapper */}
                 <div className="relative aspect-video w-full rounded-2xl border border-white/5 overflow-hidden bg-black shadow-2xl">
                   <iframe
-                    src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1&rel=0&modestbranding=1`}
+                    id="yt-player"
+                    src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`}
                     title={activeVideo.title} frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen className="absolute inset-0 w-full h-full"
@@ -981,7 +1231,6 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
                   {/* Footer */}
                   <div className="flex items-center justify-between px-1 pt-2 border-t border-white/5">
                     <span className="text-[9px] text-zinc-600 flex items-center gap-2">
-                      <kbd className="px-1.5 py-0.5 bg-white/5 rounded text-[8px] font-mono text-zinc-500">F</kbd> Focus
                       <kbd className="px-1.5 py-0.5 bg-white/5 rounded text-[8px] font-mono text-zinc-500">N</kbd> Next
                       <kbd className="px-1.5 py-0.5 bg-white/5 rounded text-[8px] font-mono text-zinc-500">Esc</kbd> Close
                     </span>
@@ -994,8 +1243,8 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
               </motion.div>
             </div>
 
-            {/* ── Up Next Sidebar (desktop only, hidden in focus mode) ── */}
-            {!isFocusMode && ytVideos.length > 1 && (
+            {/* ── Up Next Sidebar (desktop only) ── */}
+            {ytVideos.length > 1 && (
               <div className="hidden lg:block w-[340px] shrink-0">
                 <div className="sticky top-6 bg-[#0c0c0e] border border-white/[0.06] rounded-2xl p-4 shadow-xl">
                   <UpNextPanel
@@ -1012,62 +1261,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
         )}
       </AnimatePresence>
 
-      {/* ─── Search & Filters ─── */}
-      <div id="search-filters-card" className="w-full bg-gradient-to-br from-[#0e0f12] to-[#080809] rounded-3xl p-6 sm:p-8 space-y-6 text-left border border-white/[0.06] shadow-xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
-          <div>
-            <h4 className="text-xs font-semibold text-white uppercase tracking-wider">Search & Filters</h4>
-            <p className="text-[10px] text-zinc-500 mt-0.5">Select your course or search a custom topic</p>
-          </div>
-          <div className="flex bg-black/40 p-0.5 rounded-xl border border-white/5 shrink-0">
-            {[{ key: false, label: 'Shelves' }, { key: true, label: 'Feed' }].map(m => (
-              <button key={String(m.key)} type="button" onClick={() => setIsRawView(m.key)}
-                className={`px-3.5 py-1.5 rounded-lg text-[10px] font-bold border-none cursor-pointer transition-all ${
-                  isRawView === m.key ? 'bg-brand-primary text-white shadow-sm' : 'bg-transparent text-zinc-400 hover:text-white'
-                }`}
-              >{m.label}</button>
-            ))}
-          </div>
-        </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 w-full">
-          <div className="w-full sm:w-1/2">
-            <ThemeDropdown label="Select Level" options={levels.map(l => ({ value: l, label: l }))} value={selectedLevel} onChange={setSelectedLevel} />
-          </div>
-          <div className="w-full sm:w-1/2">
-            <ThemeDropdown label="Quick Select Course" options={courseOptions.map(c => ({ value: c, label: c }))} value={selectedCourse} onChange={setSelectedCourse} />
-          </div>
-        </div>
-
-        <form onSubmit={handleCustomSearchSubmit} className="relative w-full">
-          <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider pl-1 block mb-1.5">Or Custom Search</label>
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
-            <input type="text" placeholder="Search any topic (e.g. Backprop derivation, Dijkstra)..." value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="w-full pl-9 pr-24 py-3 bg-black/30 border border-white/5 rounded-xl text-xs font-semibold text-white outline-none focus:ring-1 focus:ring-brand-primary/50 placeholder:text-zinc-600"
-            />
-            <button type="submit"
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-brand-primary hover:bg-brand-primary/90 text-white font-bold text-[10px] rounded-lg border-none cursor-pointer active:scale-95 transition-all shadow-md shadow-brand-primary/10"
-            >Search</button>
-          </div>
-        </form>
-
-        <div className="space-y-2">
-          <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider pl-1">Category</label>
-          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            {categories.map(cat => (
-              <button key={cat.id} type="button" onClick={() => setActiveCategory(cat.id)}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border cursor-pointer active:scale-95 duration-200 ${
-                  activeCategory === cat.id
-                    ? 'bg-brand-primary border-brand-primary text-white shadow-md shadow-brand-primary/10'
-                    : 'bg-black/30 border-white/5 text-zinc-400 hover:border-brand-primary/40 hover:text-zinc-200'
-                }`}
-              >{cat.label}</button>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* ─── Continue Watching ─── */}
       {!activeVideoId && recentLectures.length > 0 && (
@@ -1084,11 +1278,11 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
                 role="button" tabIndex={0} aria-label={`Resume ${video.title}`}
                 onClick={() => handleSelectRecentVideo(video)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSelectRecentVideo(video); } }}
-                className="group snap-start shrink-0 w-[200px] sm:w-[240px] flex flex-col bg-white/[0.01] border border-white/[0.06] rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.03] hover:-translate-y-1 hover:shadow-xl hover:shadow-black/40 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/50"
+                className="group snap-start shrink-0 w-[200px] sm:w-[240px] flex flex-col cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/50"
               >
-                <div className="relative aspect-video bg-black overflow-hidden">
+                <div className="relative aspect-video bg-zinc-950 overflow-hidden rounded-xl group-hover:shadow-md">
                   <img src={video.thumbnail} alt={video.title} loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                   {video.duration && (
                     <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-bold text-white z-10">
@@ -1106,7 +1300,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
                     </div>
                   </div>
                 </div>
-                <div className="p-3 space-y-1">
+                <div className="pt-2 px-0.5 pb-1 space-y-1">
                   <h5 className="text-[10px] sm:text-[11px] font-semibold text-white leading-snug line-clamp-2">{video.title}</h5>
                   <p className="text-[8px] sm:text-[9px] text-zinc-600 truncate">{video.channel}</p>
                 </div>
