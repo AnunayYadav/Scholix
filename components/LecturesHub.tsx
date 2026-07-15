@@ -254,42 +254,77 @@ const findCodeInCurriculum = (title: string): string | null => {
 
 const buildSearchQuery = (subject: string, catId: string, university: string, channelName?: string): string => {
   const isIITM = university === 'iitm_bs';
-  const brand = isIITM ? '"IIT Madras"' : '"LPU"';
   
+  // Resolve all course information
   const resolved = resolveSearchQuery(subject);
-  const code = findCodeInCurriculum(resolved) || findCodeInCurriculum(subject);
+  const code = findCodeInCurriculum(resolved) || findCodeInCurriculum(subject) || '';
   
-  let categoryPart = '';
-  switch (catId) {
-    case 'quiz1':
-      categoryPart = 'quiz 1 midterm';
-      break;
-    case 'quiz2':
-      categoryPart = 'quiz 2';
-      break;
-    case 'endterm':
-      categoryPart = 'end term final';
-      break;
-    case 'pyq':
-      categoryPart = 'pyq solved';
-      break;
-    default:
-      categoryPart = '';
+  let nickname = '';
+  // Find nickname if code is known
+  if (code) {
+    nickname = SUBJECT_NICKNAMES[code] || '';
+  } else {
+    // If subject is a nickname itself, find it
+    for (const [c, nick] of Object.entries(SUBJECT_NICKNAMES)) {
+      if (nick.toLowerCase() === subject.trim().toLowerCase()) {
+        nickname = nick;
+        break;
+      }
+    }
   }
+
+  const fullName = code ? (findFullTitleInCurriculum(code) || resolved) : resolved;
+  
+  // Build keywords based on university and category
+  let categoryKeywords = '';
+  if (isIITM) {
+    switch (catId) {
+      case 'quiz1':
+        categoryKeywords = 'quiz 1 midterm week 1 to 4 one shot lectures pyqs';
+        break;
+      case 'quiz2':
+        categoryKeywords = 'quiz 2 week 5 to 8 one shot lectures pyqs';
+        break;
+      case 'endterm':
+        categoryKeywords = 'end term final exam week 9 to 12 one shot lectures pyqs';
+        break;
+      case 'pyq':
+        categoryKeywords = 'pyqs solved past papers solutions practice';
+        break;
+      default:
+        categoryKeywords = 'lectures playlist complete course';
+    }
+  } else {
+    // LPU Specific keywords
+    switch (catId) {
+      case 'quiz1':
+        categoryKeywords = 'midterm quiz 1 chapter 1 unit 1 lectures one shot pyq';
+        break;
+      case 'quiz2':
+        categoryKeywords = 'quiz 2 unit 2 unit 3 lectures one shot pyq';
+        break;
+      case 'endterm':
+        categoryKeywords = 'endterm final exam syllabus unit 4 unit 5 unit 6 lectures one shot pyq';
+        break;
+      case 'pyq':
+        categoryKeywords = 'endterm midterm pyqs solved past papers question bank';
+        break;
+      default:
+        categoryKeywords = 'lectures chapters playlist unit wise';
+    }
+  }
+
+  // Combine subject info (without strict quotes to allow multiple channels & fuzzy matches)
+  const subjectTerms = `${code} ${nickname} ${fullName}`.trim().replace(/\s+/g, ' ');
 
   let query = '';
   if (channelName) {
-    if (code) {
-      query = `"${channelName}" "${resolved}" ${code} ${categoryPart} lectures`;
-    } else {
-      query = `"${channelName}" ${resolved} ${categoryPart} lectures`;
-    }
+    // For specific channel shelves, force the channel name in quotes, but search terms fuzzy
+    query = `"${channelName}" ${subjectTerms} ${categoryKeywords}`;
   } else {
-    if (code) {
-      query = `${brand} "${resolved}" ${code} ${categoryPart} lectures`;
-    } else {
-      query = `${brand} ${resolved} ${categoryPart} lectures`;
-    }
+    // General YouTube Feed search: prefix with university brand initials (unquoted to allow variety)
+    const brand = isIITM ? 'IITM BS' : 'LPU';
+    query = `${brand} ${subjectTerms} ${categoryKeywords}`;
   }
 
   return query.trim().replace(/\s+/g, ' ');
