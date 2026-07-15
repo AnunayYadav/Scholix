@@ -251,7 +251,7 @@ const fetchFromInvidious = async (query: string, page: number): Promise<YTVideo[
   for (const instance of INVIDIOUS_INSTANCES) {
     try {
       const targetUrl = `${instance}/api/v1/search?q=${encodeURIComponent(query)}&type=video&page=${page}`;
-      const url = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+      const url = `/api/gateway?action=youtube-proxy&url=${encodeURIComponent(targetUrl)}`;
       const res = await fetch(url);
       if (!res.ok) continue;
       const data = await res.json();
@@ -513,7 +513,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
 
       // Try scraping first
       try {
-        const url = `https://corsproxy.io/?${encodeURIComponent(`https://www.youtube.com/results?search_query=${query}`)}`;
+        const url = `/api/gateway?action=youtube-proxy&url=${encodeURIComponent(`https://www.youtube.com/results?search_query=${query}`)}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error("CORS Proxy returned error.");
         const html = await res.text();
@@ -674,7 +674,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
     for (const instance of INVIDIOUS_INSTANCES) {
       try {
         const targetUrl = `${instance}/api/v1/videos/${videoId}`;
-        const url = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+        const url = `/api/gateway?action=youtube-proxy&url=${encodeURIComponent(targetUrl)}`;
         const res = await fetch(url);
         if (!res.ok) continue;
         const data = await res.json();

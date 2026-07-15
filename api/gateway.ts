@@ -162,6 +162,50 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json(result);
     }
 
+    if (action === 'youtube-proxy') {
+      if (req.method !== 'GET') return res.status(405).end();
+      const { url } = req.query;
+      if (!url) {
+        return res.status(400).json({ error: 'URL parameter is required.' });
+      }
+
+      try {
+        const decodedUrl = decodeURIComponent(url as string);
+        const parsedUrl = new URL(decodedUrl);
+        const domain = parsedUrl.hostname;
+        const pathname = parsedUrl.pathname;
+
+        const isYoutubeSearch = (domain === 'youtube.com' || domain === 'www.youtube.com') && pathname === '/results';
+        const isInvidiousSearch = (domain.includes('invidious') || domain.endsWith('.icu') || domain.endsWith('.coffee') || domain.endsWith('.lt') || domain.endsWith('.to')) && pathname === '/api/v1/search';
+        const isInvidiousVideoDetails = (domain.includes('invidious') || domain.endsWith('.icu') || domain.endsWith('.coffee') || domain.endsWith('.lt') || domain.endsWith('.to')) && pathname.startsWith('/api/v1/videos/');
+
+        if (!isYoutubeSearch && !isInvidiousSearch && !isInvidiousVideoDetails) {
+          return res.status(400).json({ error: 'Domain or path not allowed.' });
+        }
+
+        const headers: HeadersInit = {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        };
+
+        const response = await fetch(decodedUrl, { headers });
+        const contentType = response.headers.get('content-type') || '';
+
+        if (contentType.includes('application/json')) {
+          const data = await response.json();
+          return res.status(response.status).json(data);
+        } else {
+          const text = await response.text();
+          res.setHeader('Content-Type', contentType || 'text/plain');
+          return res.status(response.status).send(text);
+        }
+      } catch (proxyErr: any) {
+        console.error('YouTube Proxy Error:', proxyErr);
+        return res.status(500).json({ error: 'Failed to proxy request.', details: proxyErr.message });
+      }
+    }
+
     return res.status(400).json({ error: 'Invalid action' });
 
   } catch (error: any) {
