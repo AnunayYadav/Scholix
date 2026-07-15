@@ -255,38 +255,30 @@ const findCodeInCurriculum = (title: string): string | null => {
 const buildSearchQuery = (subject: string, catId: string, university: string, channelName?: string): string => {
   const isIITM = university === 'iitm_bs';
   
-  // Resolve all course information
   const resolved = resolveSearchQuery(subject);
-  const code = findCodeInCurriculum(resolved) || findCodeInCurriculum(subject) || '';
+  const code = findCodeInCurriculum(resolved) || findCodeInCurriculum(subject);
   
-  let nickname = '';
-  // Find nickname if code is known
+  let subjectTerm = resolved;
   if (code) {
-    nickname = SUBJECT_NICKNAMES[code] || '';
-  } else {
-    // If subject is a nickname itself, find it
-    for (const [c, nick] of Object.entries(SUBJECT_NICKNAMES)) {
-      if (nick.toLowerCase() === subject.trim().toLowerCase()) {
-        nickname = nick;
-        break;
-      }
+    const nickname = SUBJECT_NICKNAMES[code];
+    if (isIITM) {
+      subjectTerm = nickname || code; // e.g. Maths 1
+    } else {
+      subjectTerm = nickname ? `${code} ${nickname}` : code; // e.g. CSE202 OOP
     }
   }
 
-  const fullName = code ? (findFullTitleInCurriculum(code) || resolved) : resolved;
-  
-  // Build keywords based on university and category
   let categoryKeywords = '';
   if (isIITM) {
     switch (catId) {
       case 'quiz1':
-        categoryKeywords = 'quiz 1 midterm week 1 to 4 one shot lectures pyqs';
+        categoryKeywords = 'quiz 1 midterm week 1 to 4 one shots pyqs';
         break;
       case 'quiz2':
-        categoryKeywords = 'quiz 2 week 5 to 8 one shot lectures pyqs';
+        categoryKeywords = 'quiz 2 week 5 to 8 one shots pyqs';
         break;
       case 'endterm':
-        categoryKeywords = 'end term final exam week 9 to 12 one shot lectures pyqs';
+        categoryKeywords = 'end term final exam week 9 to 12 one shots pyqs';
         break;
       case 'pyq':
         categoryKeywords = 'pyqs solved past papers solutions practice';
@@ -298,33 +290,30 @@ const buildSearchQuery = (subject: string, catId: string, university: string, ch
     // LPU Specific keywords
     switch (catId) {
       case 'quiz1':
-        categoryKeywords = 'midterm quiz 1 chapter 1 unit 1 lectures one shot pyq';
+        categoryKeywords = 'midterm CA1 CA2 unit 1 unit 2 unit 3 lectures one shot';
         break;
       case 'quiz2':
-        categoryKeywords = 'quiz 2 unit 2 unit 3 lectures one shot pyq';
+        categoryKeywords = 'CA3 unit 4 unit 5 lectures one shot';
         break;
       case 'endterm':
-        categoryKeywords = 'endterm final exam syllabus unit 4 unit 5 unit 6 lectures one shot pyq';
+        categoryKeywords = 'endterm final exam syllabus unit 1 unit 2 unit 3 unit 4 unit 5 unit 6 lectures one shot';
         break;
       case 'pyq':
-        categoryKeywords = 'endterm midterm pyqs solved past papers question bank';
+        categoryKeywords = 'endterm midterm CA1 CA2 CA3 pyqs solved past papers question bank';
         break;
       default:
         categoryKeywords = 'lectures chapters playlist unit wise';
     }
   }
 
-  // Combine subject info (without strict quotes to allow multiple channels & fuzzy matches)
-  const subjectTerms = `${code} ${nickname} ${fullName}`.trim().replace(/\s+/g, ' ');
-
   let query = '';
   if (channelName) {
-    // For specific channel shelves, force the channel name in quotes, but search terms fuzzy
-    query = `"${channelName}" ${subjectTerms} ${categoryKeywords}`;
+    // Search within a specific channel
+    query = `"${channelName}" ${subjectTerm} ${categoryKeywords}`;
   } else {
-    // General YouTube Feed search: prefix with university brand initials (unquoted to allow variety)
+    // General search: brand + term + category keywords
     const brand = isIITM ? 'IITM BS' : 'LPU';
-    query = `${brand} ${subjectTerms} ${categoryKeywords}`;
+    query = `${brand} ${subjectTerm} ${categoryKeywords}`;
   }
 
   return query.trim().replace(/\s+/g, ' ');
@@ -511,6 +500,17 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
   const [loadingDetails, setLoadingDetails] = useState(false);
 
   const topRef = useRef<HTMLDivElement>(null);
+
+  const categories = useMemo(() => {
+    const isIITM = selectedUniversity === 'iitm_bs';
+    return [
+      { id: 'all', label: 'All Lectures' },
+      { id: 'quiz1', label: isIITM ? 'Quiz 1 / Midterm' : 'Midterm / CA1 & CA2' },
+      { id: 'quiz2', label: isIITM ? 'Quiz 2' : 'CA3' },
+      { id: 'endterm', label: isIITM ? 'End Term / Finals' : 'End Term' },
+      { id: 'pyq', label: 'PYQs & Solutions' }
+    ];
+  }, [selectedUniversity]);
 
   // Parse curriculum data dynamically to align exactly with Content Library
   const curriculumMap = useMemo(() => {
@@ -964,7 +964,7 @@ export const LecturesHub: React.FC<{ hideHeader?: boolean }> = ({ hideHeader = f
           </div>
           
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            {LECTURE_CATEGORIES.map(cat => {
+            {categories.map(cat => {
               const isActive = activeCategory === cat.id;
               return (
                 <button
