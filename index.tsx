@@ -18,7 +18,7 @@
       const vitePrefix = `VITE_${varName}`;
       // Check import.meta.env (Standard for Vite/Modern ESM)
       // @ts-ignore
-      const meta = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env : {};
+      const meta: any = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env : {};
 
       const val = meta[vitePrefix] ||
         meta[varName] ||
@@ -39,6 +39,56 @@
 
 
 })();
+
+// Global fetch interceptor for Capacitor mobile app environments.
+// If VITE_API_BASE_URL is set, relative /api/ requests are redirected to the hosted backend.
+(function setupCapacitorFetchInterceptor() {
+  try {
+    // @ts-ignore
+    const meta: any = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env : {};
+    const apiBase = meta.VITE_API_BASE_URL;
+    if (apiBase) {
+      const originalFetch = window.fetch;
+      window.fetch = function (input, init) {
+        let url = '';
+        if (typeof input === 'string') {
+          url = input;
+        } else if (input instanceof URL) {
+          url = input.toString();
+        } else if (input && typeof input === 'object' && 'url' in input) {
+          url = input.url;
+        }
+
+        const localOrigin = window.location.origin;
+        if (url.startsWith('/api/')) {
+          const newUrl = `${apiBase}${url}`;
+          if (typeof input === 'string') {
+            return originalFetch(newUrl, init);
+          } else if (input instanceof URL) {
+            return originalFetch(new URL(newUrl), init);
+          } else {
+            const newRequest = new Request(newUrl, input);
+            return originalFetch(newRequest, init);
+          }
+        } else if (url.startsWith(`${localOrigin}/api/`)) {
+          const newUrl = url.replace(localOrigin, apiBase);
+          if (typeof input === 'string') {
+            return originalFetch(newUrl, init);
+          } else if (input instanceof URL) {
+            return originalFetch(new URL(newUrl), init);
+          } else {
+            const newRequest = new Request(newUrl, input);
+            return originalFetch(newRequest, init);
+          }
+        }
+        return originalFetch(input, init);
+      };
+    }
+  } catch (e) {
+    console.error('Failed to initialize Capacitor fetch interceptor:', e);
+  }
+})();
+
 
 // Automatically reload page when a dynamically imported asset fails to load (e.g. after a redeployment)
 if (typeof window !== 'undefined') {
