@@ -23,6 +23,23 @@ import { showToast } from './Toast';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
 
+// CodeMirror 6 Imports
+import { EditorState } from "@codemirror/state";
+import { EditorView, keymap, tooltips } from "@codemirror/view";
+import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { autocompletion, completionKeymap } from "@codemirror/autocomplete";
+import { javascript } from "@codemirror/lang-javascript";
+import { python } from "@codemirror/lang-python";
+import { cpp } from "@codemirror/lang-cpp";
+import { java } from "@codemirror/lang-java";
+import { rust } from "@codemirror/lang-rust";
+import { go } from "@codemirror/lang-go";
+import { html as langHtml } from "@codemirror/lang-html";
+import { css as langCss } from "@codemirror/lang-css";
+import { sql as langSql } from "@codemirror/lang-sql";
+import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import { tags as t } from "@lezer/highlight";
+
 interface SubjectCommunityProps {
   activeSubject: FolderType;
   activeSemester: FolderType | null;
@@ -875,11 +892,260 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const [submittingCommentId, setSubmittingCommentId] = useState<string | null>(null);
   const [pinningPostId, setPinningPostId] = useState<string | null>(null);
 
+  // Nesting replies state
+  const [replyTarget, setReplyTarget] = useState<{ commentId: string; username: string; postId: string } | null>(null);
+  const [replyText, setReplyText] = useState('');
+
+  // Autocomplete state
+  const [acState, setAcState] = useState<{
+    active: boolean;
+    type: 'people' | 'docs' | null;
+    query: string;
+    triggerIndex: number;
+    inputType: 'comment' | 'reply' | 'post-create' | 'post-edit';
+    itemId: string;
+  }>({
+    active: false,
+    type: null,
+    query: '',
+    triggerIndex: -1,
+    inputType: 'comment',
+    itemId: ''
+  });
+
+  const [acSuggestions, setAcSuggestions] = useState<any[]>([]);
+  const [acSelectedIndex, setAcSelectedIndex] = useState(0);
+
   // Post editing & options states
   const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
   const [editPostTitle, setEditPostTitle] = useState('');
   const [editPostContent, setEditPostContent] = useState('');
   const [activePostMenuId, setActivePostMenuId] = useState<string | null>(null);
+
+  // Robust subject code extractor
+  const getSubjectCode = (nameOrCode: string) => {
+    const match = nameOrCode.match(/([A-Za-z]+[0-9]+)/);
+    return match ? match[1].toUpperCase() : nameOrCode.split(':')[0].trim().toUpperCase().replace(/\s+/g, '');
+  };
+
+  // Filter subject specific files
+  const subjectFiles = useMemo(() => {
+    const activeSubCode = getSubjectCode(activeSubject.name);
+    console.log("[SubjectCommunity] activeSubject.name:", activeSubject.name, "activeSubCode:", activeSubCode);
+    console.log("[SubjectCommunity] allFiles count:", allFiles.length);
+    if (allFiles.length > 0) {
+      console.log("[SubjectCommunity] Sample file subject:", allFiles[0].subject, "sample file program:", allFiles[0].program);
+    }
+    const filtered = allFiles.filter(f => {
+      const fileSubCode = getSubjectCode(f.subject);
+      const isSubMatch = fileSubCode === activeSubCode;
+      if (!isSubMatch) return false;
+      if (searchQuery && searchQuery.trim() !== '') {
+        return f.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
+      }
+      return true;
+    });
+    console.log("[SubjectCommunity] Filtered subjectFiles count:", filtered.length);
+    
+    // Sort files by display_order ascending (1 to 6), with uploadDate descending as fallback
+    return [...filtered].sort((a, b) => {
+      const orderA = a.display_order ?? Number.MAX_SAFE_INTEGER;
+      const orderB = b.display_order ?? Number.MAX_SAFE_INTEGER;
+      if (orderA !== orderB) return orderA - orderB;
+      return b.uploadDate - a.uploadDate;
+    });
+  }, [allFiles, activeSubject.name, searchQuery]);
+  const recentFiles = useMemo(() => {
+    return [...subjectFiles]
+      .sort((a, b) => b.uploadDate - a.uploadDate)
+      .slice(0, 5);
+  }, [subjectFiles]);
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
+
+  // Keep track of CodeMirror 6 views by pre elements
+  const cm6Views = useRef<Map<HTMLElement, EditorView>>(new globalThis.Map());
+
+  // Automatically inject and synchronize CodeMirror 6 editors in active WYSIWYG pre blocks
+  useEffect(() => {
+    const syncCodeMirror6 = () => {
+      // Find all pre elements inside active contenteditable editors
+      const pres = document.querySelectorAll('.wysiwyg-editor pre');
+      
+      pres.forEach(preEl => {
+        const pre = preEl as HTMLElement;
+        const code = pre.querySelector('code');
+        if (!code) return;
+
+        // Check if there is a manual language
+        let lang = 'auto';
+        const classList = Array.from(code.classList) as string[];
+        const langClass = classList.find(c => c.startsWith('language-')) as string | undefined;
+        if (langClass) {
+          lang = langClass.replace('language-', '');
+        }
+
+        // If auto language, make sure CodeMirror is destroyed and pre is visible
+        if (lang === 'auto') {
+          if (cm6Views.current.has(pre)) {
+            const view = cm6Views.current.get(pre);
+            view?.destroy();
+            // Find and remove the cm6 container next to it
+            const container = pre.nextSibling as HTMLElement;
+            if (container && container.classList.contains('cm6-editor-container')) {
+              container.remove();
+            }
+            pre.style.display = '';
+            cm6Views.current.delete(pre);
+          }
+          return;
+        }
+
+        // If manual language, we want to mount CodeMirror 6 if not already mounted
+        if (!cm6Views.current.has(pre)) {
+          // Hide the original pre element
+          pre.style.display = 'none';
+
+          // Create container for CodeMirror (contenteditable=false to prevent parent editing quirks)
+          const container = document.createElement('div');
+          container.contentEditable = 'false';
+          container.className = 'cm6-editor-container my-3 overflow-hidden rounded-lg';
+          pre.parentNode?.insertBefore(container, pre.nextSibling);
+
+          // Get appropriate language support extension
+          const getLangSupport = (l: string) => {
+            const low = l.toLowerCase();
+            if (low === 'javascript' || low === 'typescript') return javascript();
+            if (low === 'python') return python();
+            if (low === 'cpp' || low === 'c') return cpp();
+            if (low === 'java') return java();
+            if (low === 'rust') return rust();
+            if (low === 'go') return go();
+            if (low === 'html') return langHtml();
+            if (low === 'css') return langCss();
+            if (low === 'sql') return langSql();
+            return null;
+          };
+
+          const githubDarkHighlightStyle = HighlightStyle.define([
+            { tag: t.keyword, color: "#ff7b72", fontWeight: "bold" },
+            { tag: t.string, color: "#a5d6ff" },
+            { tag: t.comment, color: "#8b949e", fontStyle: "italic" },
+            { tag: t.variableName, color: "#c9d1d9" },
+            { tag: t.propertyName, color: "#d2a8ff" },
+            { tag: t.function(t.variableName), color: "#d2a8ff" },
+            { tag: t.className, color: "#f0883e" },
+            { tag: t.number, color: "#79c0ff" },
+            { tag: t.operator, color: "#ff7b72" }
+          ]);
+
+          const langSupport = getLangSupport(lang);
+          const extensions: any[] = [
+            history(),
+            keymap.of([...defaultKeymap, ...historyKeymap, ...completionKeymap]),
+            autocompletion(),
+            tooltips({
+              parent: document.body
+            }),
+            syntaxHighlighting(githubDarkHighlightStyle),
+            EditorView.theme({
+              "&": {
+                background: "#0d1117 !important",
+                color: "#c9d1d9 !important",
+                fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace !important",
+                fontSize: "13px !important",
+                borderRadius: "8px !important",
+                border: "none !important",
+                outline: "none !important",
+                padding: "1rem !important"
+              },
+              ".cm-content": {
+                caretColor: "#c9d1d9 !important",
+                padding: "0 !important"
+              },
+              ".cm-cursor": {
+                borderLeftColor: "#c9d1d9 !important"
+              },
+              ".cm-scroller": {
+                fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace !important",
+                lineHeight: "1.5 !important",
+                overflow: "visible !important"
+              },
+              ".cm-tooltip-autocomplete": {
+                backgroundColor: "#121214 !important",
+                border: "1px solid #27272a !important",
+                borderRadius: "8px !important",
+                padding: "4px !important",
+                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.5) !important",
+                color: "#a1a1aa !important",
+                zIndex: "99999 !important"
+              },
+              ".cm-tooltip-autocomplete ul li": {
+                padding: "4px 8px !important",
+                borderRadius: "4px !important",
+                fontSize: "11px !important",
+                cursor: "pointer !important"
+              },
+              ".cm-tooltip-autocomplete ul li[aria-selected]": {
+                backgroundColor: "rgba(255, 255, 255, 0.05) !important",
+                color: "#ffffff !important"
+              }
+            }, { dark: true })
+          ];
+
+          if (langSupport) {
+            extensions.push(langSupport);
+          }
+
+          const startState = EditorState.create({
+            doc: code.textContent || '',
+            extensions
+          });
+
+          const view = new EditorView({
+            state: startState,
+            parent: container,
+            dispatch: (tr) => {
+              view.update([tr]);
+              if (tr.docChanged) {
+                code.textContent = view.state.doc.toString();
+                // Trigger input event on the parent contenteditable editor
+                const editor = pre.closest('.wysiwyg-editor');
+                if (editor) {
+                  const event = new Event('input', { bubbles: true });
+                  editor.dispatchEvent(event);
+                }
+              }
+            }
+          });
+
+          cm6Views.current.set(pre, view);
+          view.focus();
+        }
+      });
+
+      // Cleanup destroyed pre elements
+      cm6Views.current.forEach((view, pre) => {
+        if (!document.body.contains(pre)) {
+          view.destroy();
+          cm6Views.current.delete(pre);
+        }
+      });
+    };
+
+    // Run sync on load and selection changes
+    syncCodeMirror6();
+    const interval = setInterval(syncCodeMirror6, 1000);
+
+    return () => {
+      clearInterval(interval);
+      cm6Views.current.forEach((view) => {
+        view.destroy();
+      });
+      cm6Views.current.clear();
+      // Remove any container left
+      document.querySelectorAll('.cm6-editor-container').forEach(c => c.remove());
+    };
+  }, [subjectFiles]);
 
   // Forms
   const [postTitle, setPostTitle] = useState('');
@@ -1011,109 +1277,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     document.dispatchEvent(new Event('selectionchange'));
   }, []);
 
-  const handleEditorKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter') {
-      const sel = window.getSelection();
-      if (!sel || sel.rangeCount === 0) return;
-      const range = sel.getRangeAt(0);
 
-      // Find if we are inside a code or pre tag
-      let node = sel.anchorNode;
-      let codeNode: HTMLElement | null = null;
-      let preNode: HTMLElement | null = null;
-      while (node && node !== e.currentTarget) {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          const el = node as HTMLElement;
-          if (el.tagName.toLowerCase() === 'code') {
-            codeNode = el;
-          }
-          if (el.tagName.toLowerCase() === 'pre') {
-            preNode = el;
-          }
-        }
-        node = node.parentNode;
-      }
-
-      if (preNode || (codeNode && codeNode.parentNode && (codeNode.parentNode as HTMLElement).tagName.toLowerCase() === 'pre')) {
-        // Inside a multiline code block (pre)
-        e.preventDefault();
-        
-        const container = range.startContainer;
-        if (container.nodeType === Node.TEXT_NODE) {
-          const textNode = container as Text;
-          const offset = range.startOffset;
-          const val = textNode.nodeValue || '';
-          
-          // Check if cursor is at the end of the text node (or only has whitespace/zero-width space to the right)
-          const remainingText = val.substring(offset).replace(/[\u200b\u200c\s]/g, '');
-          const isAtEnd = remainingText === '';
-          
-          const insertStr = isAtEnd ? '\n\u200b' : '\n';
-          textNode.nodeValue = val.substring(0, offset) + insertStr + val.substring(offset);
-          
-          // Place cursor right after the \n (which is offset + 1)
-          range.setStart(textNode, offset + 1);
-          range.collapse(true);
-          sel.removeAllRanges();
-          sel.addRange(range);
-        } else {
-          // Fallback: insert a text node
-          let isAtEnd = true;
-          if (codeNode) {
-            const rightRange = range.cloneRange();
-            rightRange.selectNodeContents(codeNode);
-            rightRange.setStart(range.endContainer, range.endOffset);
-            isAtEnd = rightRange.toString().replace(/[\u200b\u200c\s]/g, '') === '';
-          }
-          
-          const insertStr = isAtEnd ? '\n\u200b' : '\n';
-          const textNode = document.createTextNode(insertStr);
-          range.insertNode(textNode);
-          
-          if (isAtEnd) {
-            range.setStart(textNode, 1);
-          } else {
-            range.setStartAfter(textNode);
-          }
-          range.collapse(true);
-          sel.removeAllRanges();
-          sel.addRange(range);
-        }
-        
-        // Trigger input event to update React state
-        const event = new Event('input', { bubbles: true });
-        e.currentTarget.dispatchEvent(event);
-      } else if (codeNode) {
-        // Inside an inline code block
-        e.preventDefault();
-        
-        // Exit the inline code block by inserting a paragraph outside of it
-        const parent = codeNode.parentNode;
-        if (parent) {
-          // Create a paragraph element for clean line breaking
-          const p = document.createElement('p');
-          p.innerHTML = '&#8203;'; // zero-width space
-          
-          // Insert after codeNode
-          if (codeNode.nextSibling) {
-            parent.insertBefore(p, codeNode.nextSibling);
-          } else {
-            parent.appendChild(p);
-          }
-          
-          // Move cursor to this new paragraph
-          range.setStart(p.firstChild!, 1);
-          range.collapse(true);
-          sel.removeAllRanges();
-          sel.addRange(range);
-
-          // Trigger input event to update React state
-          const event = new Event('input', { bubbles: true });
-          e.currentTarget.dispatchEvent(event);
-        }
-      }
-    }
-  }, []);
 
   // Poll formatting state on selection change
   useEffect(() => {
@@ -1275,6 +1439,482 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     }
     return html;
   }, [theme.rawColor]);
+
+  // Helper to format tags (@people and @docs)
+  const renderFormattedContent = useCallback((content: string): string => {
+    if (!content) return '';
+    
+    // Run link parsing first
+    let formatted = autoLink(content);
+    
+    // Format doc tags: [@docName](doc:docId) -> <span class="tagged-doc" data-id="docId">📄 docName</span>
+    const docRegex = /\[@([^\]]+)\]\(doc:([^\)]+)\)/g;
+    formatted = formatted.replace(docRegex, (match, docName, docId) => {
+      return `<span class="tagged-doc cursor-pointer font-bold underline transition-colors hover:opacity-80" data-id="${docId}" style="color: ${theme.rawColor}">📄 ${docName}</span>`;
+    });
+
+    // Format people tags: @username -> <span class="tagged-user font-bold" style="color: ${theme.rawColor}">@username</span>
+    const userRegex = /@([a-zA-Z0-9_-]+)/g;
+    formatted = formatted.replace(userRegex, (match, username) => {
+      return `<span class="tagged-user font-bold" style="color: ${theme.rawColor}">@${username}</span>`;
+    });
+
+    return formatted;
+  }, [autoLink, theme.rawColor]);
+
+  // Click handler to open documents linked in posts/comments
+  const handleContentClick = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.classList.contains('tagged-doc')) {
+      const docId = target.getAttribute('data-id');
+      if (docId) {
+        const file = subjectFiles.find(f => f.id === docId);
+        if (file) {
+          setSelectedFileDetail(file);
+        } else {
+          showToast("Document not found.", "info");
+        }
+      }
+    }
+  }, [subjectFiles, showToast]);
+
+  // Autocomplete suggestion fetcher
+  const fetchAutocompleteSuggestions = useCallback(async (query: string) => {
+    const q = query.trim().toLowerCase();
+    
+    // 1. Fetch matching docs from subjectFiles
+    const matchedDocs = subjectFiles.filter(f => 
+      f.name.toLowerCase().includes(q)
+    ).map(f => ({
+      type: 'doc' as const,
+      id: f.id,
+      name: f.name
+    }));
+
+    // 2. Fetch matching users (profiles) from database, fallback to local users
+    let matchedPeople: any[] = [];
+    const client = NexusServer.getClient();
+    if (client && q.length > 0) {
+      try {
+        const { data } = await client
+          .from('profiles')
+          .select('id, username, avatar_url')
+          .ilike('username', `%${q}%`)
+          .limit(25);
+        if (data && data.length > 0) {
+          matchedPeople = data.map(p => ({
+            type: 'people' as const,
+            id: p.id,
+            username: p.username,
+            avatar_url: p.avatar_url
+          }));
+        }
+      } catch (e) {}
+    }
+
+    if (matchedPeople.length === 0) {
+      // Fallback search in local community users
+      const localUsers = [
+        userProfile,
+        ...moderatorsList.map(m => ({ id: m.username, username: m.username, avatar_url: m.avatar_url })),
+        ...leaderboardList.map(l => ({ id: l.username, username: l.username, avatar_url: l.avatar_url }))
+      ].filter(Boolean) as any[];
+
+      const seen = new Set();
+      const uniqueUsers = localUsers.filter(u => {
+        if (!u.username || seen.has(u.username)) return false;
+        seen.add(u.username);
+        return u.username.toLowerCase().includes(q);
+      }).map(u => ({
+        type: 'people' as const,
+        id: u.id,
+        username: u.username,
+        avatar_url: u.avatar_url
+      }));
+
+      matchedPeople = uniqueUsers;
+    }
+
+    setAcSuggestions([...matchedPeople, ...matchedDocs]);
+    setAcSelectedIndex(0);
+  }, [subjectFiles, userProfile, moderatorsList, leaderboardList]);
+
+  // Search input change handler to check for '@' autocomplete triggers
+  // Code keyword suggestions fetcher
+  const fetchKeywordSuggestions = useCallback((word: string, lang: string) => {
+    const q = word.toLowerCase();
+    const keywordMap: Record<string, string[]> = {
+      javascript: ['const', 'let', 'var', 'function', 'class', 'import', 'export', 'return', 'if', 'else', 'for', 'while', 'switch', 'case', 'break', 'continue', 'true', 'false', 'null', 'undefined', 'console.log', 'async', 'await', 'promise', 'then', 'catch'],
+      typescript: ['const', 'let', 'var', 'function', 'class', 'import', 'export', 'return', 'if', 'else', 'for', 'while', 'switch', 'case', 'break', 'continue', 'true', 'false', 'null', 'undefined', 'console.log', 'async', 'await', 'promise', 'then', 'catch', 'interface', 'type', 'keyof', 'readonly'],
+      python: ['def', 'class', 'import', 'from', 'as', 'return', 'if', 'elif', 'else', 'for', 'while', 'break', 'continue', 'in', 'is', 'not', 'and', 'or', 'True', 'False', 'None', 'try', 'except', 'finally', 'print', 'with', 'lambda'],
+      cpp: ['int', 'float', 'double', 'char', 'void', 'class', 'struct', 'public', 'private', 'protected', 'return', 'if', 'else', 'for', 'while', 'switch', 'case', 'break', 'continue', 'std::cout', 'std::cin', 'include', 'define', 'using', 'namespace'],
+      c: ['int', 'float', 'double', 'char', 'void', 'struct', 'return', 'if', 'else', 'for', 'while', 'switch', 'case', 'break', 'continue', 'printf', 'scanf', 'include', 'define'],
+      java: ['public', 'private', 'protected', 'class', 'interface', 'extends', 'implements', 'import', 'package', 'return', 'if', 'else', 'for', 'while', 'switch', 'case', 'break', 'continue', 'int', 'double', 'float', 'boolean', 'char', 'String', 'System.out.println', 'new', 'this', 'super'],
+      csharp: ['public', 'private', 'protected', 'class', 'interface', 'using', 'namespace', 'return', 'if', 'else', 'for', 'while', 'switch', 'case', 'break', 'continue', 'int', 'double', 'float', 'bool', 'char', 'string', 'Console.WriteLine', 'new', 'this', 'var'],
+      rust: ['fn', 'let', 'mut', 'struct', 'enum', 'impl', 'use', 'mod', 'return', 'if', 'else', 'for', 'while', 'match', 'pub', 'crate', 'self', 'Self', 'println!', 'true', 'false'],
+      go: ['func', 'package', 'import', 'var', 'const', 'type', 'struct', 'interface', 'return', 'if', 'else', 'for', 'range', 'switch', 'case', 'break', 'continue', 'fmt.Println', 'fmt.Printf', 'nil', 'true', 'false'],
+      html: ['div', 'span', 'p', 'h1', 'h2', 'h3', 'a', 'img', 'button', 'input', 'form', 'label', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'class', 'id', 'style', 'href', 'src', 'alt', 'type', 'placeholder', 'value'],
+      css: ['color', 'background', 'background-color', 'font-size', 'font-family', 'font-weight', 'margin', 'padding', 'border', 'border-radius', 'display', 'flex', 'grid', 'position', 'absolute', 'relative', 'fixed', 'width', 'height', 'top', 'bottom', 'left', 'right', 'justify-content', 'align-items', 'box-shadow', 'transition', 'animation', 'transform'],
+      sql: ['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'CREATE', 'TABLE', 'DROP', 'ALTER', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'ON', 'GROUP', 'BY', 'ORDER', 'HAVING', 'LIMIT', 'COUNT', 'SUM', 'AVG', 'MIN', 'MAX'],
+      json: ['"name"', '"id"', '"type"', '"value"', '"status"', '"count"', '"description"', '"true"', '"false"', '"null"'],
+      bash: ['echo', 'cd', 'ls', 'pwd', 'mkdir', 'rm', 'cp', 'mv', 'chmod', 'sudo', 'grep', 'awk', 'sed', 'cat', 'less', 'curl', 'wget', 'export', 'alias', 'git', 'npm', 'node', 'python3']
+    };
+
+    const list = keywordMap[lang.toLowerCase()] || [];
+    const matched = list.filter(k => k.toLowerCase().startsWith(q)).map(k => ({
+      type: 'code-keyword' as const,
+      id: k,
+      name: k
+    }));
+
+    setAcSuggestions(matched);
+    setAcSelectedIndex(0);
+  }, []);
+
+  // Search input change handler to check for '@' autocomplete triggers
+  const handleInputAutocomplete = useCallback((
+    val: string,
+    selectionStart: number,
+    inputType: 'comment' | 'reply' | 'post-create' | 'post-edit',
+    itemId: string
+  ) => {
+    // 1. Check if we are inside a contenteditable code block
+    if (inputType === 'post-create' || inputType === 'post-edit') {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        const textNode = range.startContainer;
+        
+        let temp: Node | null = textNode;
+        let codeNode: HTMLElement | null = null;
+        while (temp && temp !== document.body) {
+          if (temp.nodeType === Node.ELEMENT_NODE && (temp as HTMLElement).tagName.toLowerCase() === 'code') {
+            codeNode = temp as HTMLElement;
+            break;
+          }
+          temp = temp.parentNode;
+        }
+
+        if (codeNode) {
+          // Inside a code block! Let's get the text before cursor in the current text node
+          const textBeforeCursor = textNode.nodeValue ? textNode.nodeValue.slice(0, range.startOffset) : '';
+          const words = textBeforeCursor.split(/[^a-zA-Z0-9_$#@!]+/);
+          const lastWord = words[words.length - 1] || '';
+
+          const cls = Array.from(codeNode.classList).find(c => c.startsWith('language-')) as string | undefined;
+          const lang = cls ? cls.replace('language-', '').toLowerCase() : 'auto';
+
+          // Trigger code keyword suggestions if manual language is selected, word is non-empty, and not a user tag
+          if (lang !== 'auto' && lastWord.length >= 1 && !lastWord.startsWith('@')) {
+            setAcState({
+              active: true,
+              type: 'code-keyword',
+              query: lastWord,
+              triggerIndex: textBeforeCursor.lastIndexOf(lastWord),
+              inputType,
+              itemId
+            });
+            fetchKeywordSuggestions(lastWord, lang);
+            return;
+          }
+        }
+      }
+    }
+
+    // 2. Regular user / document tagging trigger
+    const textBeforeCursor = val.slice(0, selectionStart);
+    const words = textBeforeCursor.split(/[\s,]+/);
+    const lastWord = words[words.length - 1] || '';
+
+    if (lastWord.startsWith('@')) {
+      const query = lastWord.slice(1);
+      setAcState({
+        active: true,
+        type: 'people',
+        query,
+        triggerIndex: textBeforeCursor.lastIndexOf('@'),
+        inputType,
+        itemId
+      });
+      fetchAutocompleteSuggestions(query);
+    } else {
+      setAcState(prev => ({ ...prev, active: false }));
+    }
+  }, [fetchAutocompleteSuggestions, fetchKeywordSuggestions]);
+
+  // Insert caret text for contenteditable
+  const insertTextAtCaret = useCallback((text: string) => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+
+      const triggerLength = acState.type === 'code-keyword' ? acState.query.length : acState.query.length + 1;
+      try {
+        const textNode = range.startContainer;
+        if (textNode.nodeType === Node.TEXT_NODE) {
+          const offset = range.startOffset;
+          if (offset >= triggerLength) {
+            range.setStart(textNode, offset - triggerLength);
+            range.deleteContents();
+          }
+        }
+      } catch (e) {}
+
+      const node = document.createTextNode(text);
+      range.insertNode(node);
+      range.setStartAfter(node);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }, [acState.query, acState.type]);
+
+  // Handle suggestion selection
+  const handleSelectAutocomplete = useCallback((suggestion: any) => {
+    const isDoc = suggestion.type === 'doc';
+    const isKeyword = suggestion.type === 'code-keyword';
+    
+    const inserted = isKeyword
+      ? `${suggestion.name} `
+      : isDoc 
+        ? `[@${suggestion.name}](doc:${suggestion.id}) ` 
+        : `@${suggestion.username} `;
+
+    if (acState.inputType === 'comment') {
+      const currentText = newCommentTexts[acState.itemId] || '';
+      const beforeTrigger = currentText.slice(0, acState.triggerIndex);
+      const afterTrigger = currentText.slice(acState.triggerIndex + acState.query.length + 1);
+      setNewCommentTexts(prev => ({
+        ...prev,
+        [acState.itemId]: beforeTrigger + inserted + afterTrigger
+      }));
+    } else if (acState.inputType === 'reply') {
+      const currentText = replyText;
+      const beforeTrigger = currentText.slice(0, acState.triggerIndex);
+      const afterTrigger = currentText.slice(acState.triggerIndex + acState.query.length + 1);
+      setReplyText(beforeTrigger + inserted + afterTrigger);
+    } else if (acState.inputType === 'post-create') {
+      if (createEditorRef.current) {
+        createEditorRef.current.focus();
+        insertTextAtCaret(inserted);
+        setPostContent(getEditorText(createEditorRef));
+      }
+    } else if (acState.inputType === 'post-edit') {
+      if (editEditorRef.current) {
+        editEditorRef.current.focus();
+        insertTextAtCaret(inserted);
+        setEditPostContent(getEditorText(editEditorRef));
+      }
+    }
+
+    setAcState(prev => ({ ...prev, active: false }));
+    setAcSelectedIndex(0);
+  }, [acState, newCommentTexts, replyText, insertTextAtCaret]);
+
+  // Unified Autocomplete dropdown rendering
+  const renderAutocompleteDropdown = (inputId: string) => {
+    if (!acState.active || acState.itemId !== inputId) return null;
+
+    return (
+      <div 
+        className="absolute bottom-full left-0 mb-2 z-[9999] bg-white/95 dark:bg-[#121214]/95 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl p-1 w-64 h-[220px] flex flex-col backdrop-blur-md animate-toast-in select-none"
+        onMouseDown={(e) => e.preventDefault()}
+      >
+        <div className="flex-1 overflow-y-auto space-y-0.5 pr-0.5">
+          {acSuggestions.length > 0 ? (
+            acSuggestions.map((suggestion, idx) => {
+              const isDoc = suggestion.type === 'doc';
+              const isKeyword = suggestion.type === 'code-keyword';
+              const key = suggestion.id + '-' + (isKeyword ? suggestion.name : isDoc ? suggestion.name : suggestion.username);
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => handleSelectAutocomplete(suggestion)}
+                  className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg text-left border-none bg-transparent cursor-pointer transition-colors ${
+                    acSelectedIndex === idx 
+                      ? 'bg-zinc-100 dark:bg-white/5 text-zinc-900 dark:text-white' 
+                      : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/[0.02]'
+                  }`}
+                >
+                  {isDoc ? (
+                    <FileText className="w-4 h-4 shrink-0 text-amber-500" />
+                  ) : isKeyword ? (
+                    <Cpu className="w-4 h-4 shrink-0 text-indigo-500 dark:text-indigo-400" />
+                  ) : (
+                    <img src={suggestion.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=50&h=50&q=80'} className="w-5 h-5 rounded-full shrink-0" />
+                  )}
+                  <span className="truncate flex-1">
+                    {isKeyword ? suggestion.name : isDoc ? suggestion.name : `@${suggestion.username}`}
+                  </span>
+                  <span className="text-[8px] uppercase font-bold tracking-widest text-zinc-400 ml-auto shrink-0 bg-zinc-100 dark:bg-white/5 px-1.5 py-0.5 rounded">
+                    {isKeyword ? 'Code' : isDoc ? 'Doc' : 'User'}
+                  </span>
+                </button>
+              );
+            })
+          ) : (
+            <div className="text-[10px] text-zinc-450 p-3 text-center font-semibold h-full flex items-center justify-center">
+              No matches for {acState.type === 'code-keyword' ? `"${acState.query}"` : `"@${acState.query}"`}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Keyboard navigation inside text inputs for autocomplete suggestion list
+  const handleAutocompleteKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!acState.active || acSuggestions.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setAcSelectedIndex(prev => (prev + 1) % acSuggestions.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setAcSelectedIndex(prev => (prev - 1 + acSuggestions.length) % acSuggestions.length);
+    } else if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      const selected = acSuggestions[acSelectedIndex];
+      if (selected) {
+        handleSelectAutocomplete(selected);
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setAcState(prev => ({ ...prev, active: false }));
+    }
+  };
+
+  const handleEditorKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (acState.active && acSuggestions.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setAcSelectedIndex(prev => (prev + 1) % acSuggestions.length);
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setAcSelectedIndex(prev => (prev - 1 + acSuggestions.length) % acSuggestions.length);
+        return;
+      }
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        const selected = acSuggestions[acSelectedIndex];
+        if (selected) {
+          handleSelectAutocomplete(selected);
+        }
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setAcState(prev => ({ ...prev, active: false }));
+        return;
+      }
+    }
+
+    if (e.key === 'Enter') {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+
+      // Find if we are inside a code or pre tag
+      let node = sel.anchorNode;
+      let codeNode: HTMLElement | null = null;
+      let preNode: HTMLElement | null = null;
+      while (node && node !== e.currentTarget) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const el = node as HTMLElement;
+          if (el.tagName.toLowerCase() === 'code') {
+            codeNode = el;
+          }
+          if (el.tagName.toLowerCase() === 'pre') {
+            preNode = el;
+          }
+        }
+        node = node.parentNode;
+      }
+
+      if (preNode || (codeNode && codeNode.parentNode && (codeNode.parentNode as HTMLElement).tagName.toLowerCase() === 'pre')) {
+        // Inside a multiline code block (pre)
+        e.preventDefault();
+        
+        const container = range.startContainer;
+        if (container.nodeType === Node.TEXT_NODE) {
+          const textNode = container as Text;
+          const offset = range.startOffset;
+          const val = textNode.nodeValue || '';
+          
+          // Check if cursor is at the end of the text node (or only has whitespace/zero-width space to the right)
+          const remainingText = val.substring(offset).replace(/[\u200b\u200c\s]/g, '');
+          const isAtEnd = remainingText === '';
+          
+          const insertStr = isAtEnd ? '\n\u200b' : '\n';
+          textNode.nodeValue = val.substring(0, offset) + insertStr + val.substring(offset);
+          
+          // Place cursor right after the \n (which is offset + 1)
+          range.setStart(textNode, offset + 1);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else {
+          // Fallback: insert a text node
+          let isAtEnd = true;
+          if (codeNode) {
+            const rightRange = range.cloneRange();
+            rightRange.selectNodeContents(codeNode);
+            rightRange.setStart(range.endContainer, range.endOffset);
+            isAtEnd = rightRange.toString().replace(/[\u200b\u200c\s]/g, '') === '';
+          }
+          
+          const insertStr = isAtEnd ? '\n\u200b' : '\n';
+          const textNode = document.createTextNode(insertStr);
+          range.insertNode(textNode);
+          
+          if (isAtEnd) {
+            range.setStart(textNode, 1);
+          } else {
+            range.setStartAfter(textNode);
+          }
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+        
+        // Trigger input event to update React state
+        const event = new Event('input', { bubbles: true });
+        e.currentTarget.dispatchEvent(event);
+      } else if (codeNode) {
+        // Inside an inline code block
+        e.preventDefault();
+        
+        // Exit the inline code block by inserting a paragraph outside of it
+        const parent = codeNode.parentNode;
+        if (parent) {
+          // Create a paragraph element for clean line breaking
+          const p = document.createElement('p');
+          p.innerHTML = '&#8203;'; // zero-width space
+          
+          // Insert after codeNode
+          if (codeNode.nextSibling) {
+            parent.insertBefore(p, codeNode.nextSibling);
+          } else {
+            parent.appendChild(p);
+          }
+          
+          // Move cursor to this new paragraph
+          range.setStart(p.firstChild!, 1);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+
+          // Trigger input event to update React state
+          const event = new Event('input', { bubbles: true });
+          e.currentTarget.dispatchEvent(event);
+        }
+      }
+    }
+  }, [acState, acSuggestions, acSelectedIndex, handleSelectAutocomplete]);
 
   // Reusable toolbar items builder — returns the standard formatting items array
   const buildToolbarItems = useCallback((editorRef: React.RefObject<HTMLDivElement | null>, opts?: { full?: boolean }) => {
@@ -1480,59 +2120,101 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
       temp = temp.offsetParent as HTMLElement;
     }
 
+    // Get current language
+    const currentLang = (() => {
+      const code = activePreNode.querySelector('code');
+      if (code) {
+        const cls = (Array.from(code.classList) as string[]).find(c => c.startsWith('language-')) as string | undefined;
+        return cls ? cls.replace('language-', '') : 'auto';
+      }
+      return 'auto';
+    })();
+
+    const languages = [
+      { value: 'auto', label: 'Auto Detect' },
+      { value: 'python', label: 'Python' },
+      { value: 'javascript', label: 'JavaScript' },
+      { value: 'typescript', label: 'TypeScript' },
+      { value: 'cpp', label: 'C++' },
+      { value: 'c', label: 'C' },
+      { value: 'java', label: 'Java' },
+      { value: 'csharp', label: 'C#' },
+      { value: 'rust', label: 'Rust' },
+      { value: 'go', label: 'Go' },
+      { value: 'html', label: 'HTML' },
+      { value: 'css', label: 'CSS' },
+      { value: 'sql', label: 'SQL' },
+      { value: 'json', label: 'JSON' },
+      { value: 'bash', label: 'Bash / Shell' }
+    ];
+
+    const currentLabel = languages.find(l => l.value === currentLang)?.label || 'Auto Detect';
+
+    const handleSelectLang = (val: string) => {
+      const code = activePreNode.querySelector('code');
+      if (code) {
+        // Remove existing language classes
+        (Array.from(code.classList) as string[]).forEach(c => {
+          if (c.startsWith('language-')) code.classList.remove(c);
+        });
+        if (val !== 'auto') {
+          code.classList.add(`language-${val}`);
+        }
+        // Dispatch selection change to refresh state
+        document.dispatchEvent(new Event('selectionchange'));
+      }
+      setShowLangDropdown(false);
+    };
+
     return (
       <div
         style={{
           position: 'absolute',
           top: `${offsetTop + 8}px`,
           right: '16px',
-          zIndex: 10,
+          zIndex: 9999,
         }}
-        className="animate-fade-in flex items-center gap-1.5 bg-[#161b22] border border-[#30363d] rounded-lg px-2.5 py-1 shadow-md select-none"
+        className="relative animate-fade-in select-none"
       >
-        <span className="text-[9px] font-bold text-[#8b949e] uppercase tracking-widest">Language:</span>
-        <select
-          value={(() => {
-            const code = activePreNode.querySelector('code');
-            if (code) {
-              const cls = (Array.from(code.classList) as string[]).find(c => c.startsWith('language-'));
-              return cls ? cls.replace('language-', '') : 'auto';
-            }
-            return 'auto';
-          })()}
-          onChange={(e) => {
-            const val = e.target.value;
-            const code = activePreNode.querySelector('code');
-            if (code) {
-              // Remove existing language classes
-              (Array.from(code.classList) as string[]).forEach(c => {
-                if (c.startsWith('language-')) code.classList.remove(c);
-              });
-              if (val !== 'auto') {
-                code.classList.add(`language-${val}`);
-              }
-              // Dispatch selection change to refresh state
-              document.dispatchEvent(new Event('selectionchange'));
-            }
-          }}
-          className="bg-transparent border-none outline-none text-[10px] font-bold text-[#c9d1d9] cursor-pointer"
+        {/* Trigger Button - Clean and Compact */}
+        <button
+          type="button"
+          onClick={() => setShowLangDropdown(prev => !prev)}
+          className="flex items-center gap-1 bg-zinc-900/90 dark:bg-[#121214]/90 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 rounded-lg px-2.5 py-1 text-[10px] font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white shadow-sm cursor-pointer transition-all duration-150"
         >
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="auto">Auto Detect</option>
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="python">Python</option>
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="javascript">JavaScript</option>
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="typescript">TypeScript</option>
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="cpp">C++</option>
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="c">C</option>
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="java">Java</option>
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="csharp">C#</option>
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="rust">Rust</option>
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="go">Go</option>
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="html">HTML</option>
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="css">CSS</option>
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="sql">SQL</option>
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="json">JSON</option>
-          <option className="bg-[#161b22] text-[#c9d1d9]" value="bash">Bash / Shell</option>
-        </select>
+          <span>{currentLabel}</span>
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showLangDropdown ? 'rotate-180' : ''}`} />
+        </button>
+
+        {/* Custom Theme Dropdown Menu */}
+        {showLangDropdown && (
+          <>
+            {/* Click Outside Overlay to close dropdown */}
+            <div 
+              className="fixed inset-0 z-[99998]" 
+              onClick={() => setShowLangDropdown(false)}
+            />
+            
+            <div 
+              className="absolute right-0 top-full mt-1.5 z-[99999] w-36 max-h-56 overflow-y-auto bg-white/95 dark:bg-[#121214]/95 border border-zinc-200 dark:border-zinc-800/80 rounded-xl shadow-2xl p-1 flex flex-col gap-0.5 backdrop-blur-md animate-toast-in scrollbar-thin"
+            >
+              {languages.map(lang => (
+                <button
+                  key={lang.value}
+                  type="button"
+                  onClick={() => handleSelectLang(lang.value)}
+                  className={`w-full text-left py-1.5 px-2.5 text-[11px] font-semibold rounded-lg border-none cursor-pointer transition-colors ${
+                    currentLang === lang.value
+                      ? 'bg-zinc-100 dark:bg-white/5 text-zinc-900 dark:text-white'
+                      : 'bg-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/[0.02] hover:text-zinc-900 dark:hover:text-white'
+                  }`}
+                >
+                  {lang.label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     );
   };
@@ -1672,11 +2354,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     }
   };
 
-  // Robust subject code extractor
-  const getSubjectCode = (nameOrCode: string) => {
-    const match = nameOrCode.match(/([A-Za-z]+[0-9]+)/);
-    return match ? match[1].toUpperCase() : nameOrCode.split(':')[0].trim().toUpperCase().replace(/\s+/g, '');
-  };
+
 
   // Robust file-type to category name matcher
   const isFileTypeMatchingCategory = (fileType: string, catName: string) => {
@@ -1707,33 +2385,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     return ft === cn || ft.includes(cn) || cn.includes(ft);
   };
 
-  // Filter subject specific files
-  const subjectFiles = useMemo(() => {
-    const activeSubCode = getSubjectCode(activeSubject.name);
-    console.log("[SubjectCommunity] activeSubject.name:", activeSubject.name, "activeSubCode:", activeSubCode);
-    console.log("[SubjectCommunity] allFiles count:", allFiles.length);
-    if (allFiles.length > 0) {
-      console.log("[SubjectCommunity] Sample file subject:", allFiles[0].subject, "sample file program:", allFiles[0].program);
-    }
-    const filtered = allFiles.filter(f => {
-      const fileSubCode = getSubjectCode(f.subject);
-      const isSubMatch = fileSubCode === activeSubCode;
-      if (!isSubMatch) return false;
-      if (searchQuery && searchQuery.trim() !== '') {
-        return f.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
-      }
-      return true;
-    });
-    console.log("[SubjectCommunity] Filtered subjectFiles count:", filtered.length);
-    
-    // Sort files by display_order ascending (1 to 6), with uploadDate descending as fallback
-    return [...filtered].sort((a, b) => {
-      const orderA = a.display_order ?? Number.MAX_SAFE_INTEGER;
-      const orderB = b.display_order ?? Number.MAX_SAFE_INTEGER;
-      if (orderA !== orderB) return orderA - orderB;
-      return b.uploadDate - a.uploadDate;
-    });
-  }, [allFiles, activeSubject.name, searchQuery]);
+
 
   const continueStudyingFile = useMemo(() => {
     if (subjectFiles.length === 0) return null;
@@ -1765,11 +2417,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     return { doc: subjectFiles[0], percent: 0 };
   }, [userProgressList, subjectFiles]);
 
-  const recentFiles = useMemo(() => {
-    return [...subjectFiles]
-      .sort((a, b) => b.uploadDate - a.uploadDate)
-      .slice(0, 5);
-  }, [subjectFiles]);
+
 
   const getRelativeTime = (timestamp: number) => {
     const diff = Date.now() - timestamp;
@@ -1870,13 +2518,14 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         const code = pre.querySelector('code');
         if (!code) return;
 
-        // Extract text content of code
-        const rawCodeText = code.textContent || '';
+        // Extract and clean text content of code (removing leading/trailing newlines/zero-width spaces)
+        const rawCodeText = (code.textContent || '').replace(/^[\r\n\u200b]+|[\r\n\u200b]+$/g, '');
+        code.textContent = rawCodeText;
         
         // Auto-detect language or use language class if available
         let lang = 'auto';
-        const classList = Array.from(code.classList);
-        const langClass = classList.find(c => c.startsWith('language-'));
+        const classList = Array.from(code.classList) as string[];
+        const langClass = classList.find(c => c.startsWith('language-')) as string | undefined;
         if (langClass) {
           lang = langClass.replace('language-', '');
         } else {
@@ -1957,7 +2606,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         
         // Style pre and code to fit inside wrapper cleanly
         pre.style.margin = '0';
-        pre.style.padding = '1rem';
+        pre.style.padding = '0.75rem 1rem';
         pre.style.background = 'transparent';
         pre.className = 'overflow-x-auto text-[13px] leading-relaxed m-0 no-scrollbar';
         
@@ -3663,13 +4312,22 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       ref={createEditorRef}
                       contentEditable
                       data-placeholder="Body text*"
-                      onInput={() => setPostContent(getEditorText(createEditorRef))}
+                      onInput={() => {
+                        const text = getEditorText(createEditorRef);
+                        setPostContent(text);
+                        const sel = window.getSelection();
+                        if (sel && sel.rangeCount > 0) {
+                          const range = sel.getRangeAt(0);
+                          handleInputAutocomplete(text, range.startOffset, 'post-create', 'create-post-editor');
+                        }
+                      }}
                       onKeyDown={handleEditorKeyDown}
                       className="w-full min-h-[220px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
                       style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
                       suppressContentEditableWarning
                     />
                     {renderFloatingLanguageDropdown(createEditorRef)}
+                    {renderAutocompleteDropdown('create-post-editor')}
                   </div>
 
                   {/* Formatting Toolbar */}
@@ -3843,13 +4501,22 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       ref={editEditorRef}
                       contentEditable
                       data-placeholder="Body text*"
-                      onInput={() => setEditPostContent(getEditorText(editEditorRef))}
+                      onInput={() => {
+                        const text = getEditorText(editEditorRef);
+                        setEditPostContent(text);
+                        const sel = window.getSelection();
+                        if (sel && sel.rangeCount > 0) {
+                          const range = sel.getRangeAt(0);
+                          handleInputAutocomplete(text, range.startOffset, 'post-edit', 'edit-post-editor');
+                        }
+                      }}
                       onKeyDown={handleEditorKeyDown}
                       className="w-full min-h-[220px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
                       style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
                       suppressContentEditableWarning
                     />
                     {renderFloatingLanguageDropdown(editEditorRef)}
+                    {renderAutocompleteDropdown('edit-post-editor')}
                   </div>
 
                   {/* Formatting Toolbar */}
@@ -4055,7 +4722,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     <div 
                       className="text-[13px] text-zinc-700 dark:text-zinc-300 leading-relaxed font-normal wysiwyg-content" 
                       style={{ lineHeight: '1.7' }}
-                      dangerouslySetInnerHTML={{ __html: autoLink(p.content) }}
+                      onClick={handleContentClick}
+                      dangerouslySetInnerHTML={{ __html: renderFormattedContent(p.content) }}
                     />
 
                     {/* Tags */}
@@ -4158,20 +4826,31 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     >
                       <img src={userProfile?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-7 h-7 rounded-full shrink-0 mt-0.5" />
                       <div className="flex-1 min-w-0 flex flex-col gap-2">
-                        <input
-                          type="text"
-                          placeholder="Add a comment..."
-                          value={newCommentTexts[p.id] || ''}
-                          onChange={(e) => setNewCommentTexts(prev => ({ ...prev, [p.id]: e.target.value }))}
-                          className="w-full bg-transparent border border-zinc-200 dark:border-white/8 rounded-xl px-3.5 py-2.5 text-xs text-zinc-800 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none transition-colors"
-                          style={{ borderColor: (newCommentTexts[p.id] || '').trim() ? theme.rawColor : undefined }}
-                          disabled={submittingCommentId === p.id}
-                        />
+                        <div className="relative w-full">
+                          <input
+                            type="text"
+                            placeholder="Add a comment..."
+                            value={newCommentTexts[p.id] || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setNewCommentTexts(prev => ({ ...prev, [p.id]: val }));
+                              handleInputAutocomplete(val, e.target.selectionStart || 0, 'comment', p.id);
+                            }}
+                            onKeyDown={handleAutocompleteKeyDown}
+                            className="w-full bg-transparent border border-zinc-200 dark:border-white/8 rounded-xl px-3.5 py-2.5 text-xs text-zinc-800 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none transition-colors"
+                            style={{ borderColor: (newCommentTexts[p.id] || '').trim() ? theme.rawColor : undefined }}
+                            disabled={submittingCommentId === p.id}
+                          />
+                          {renderAutocompleteDropdown(p.id)}
+                        </div>
                         {(newCommentTexts[p.id] || '').trim() && (
                           <div className="flex justify-end gap-2">
                             <button
                               type="button"
-                              onClick={() => setNewCommentTexts(prev => ({ ...prev, [p.id]: '' }))}
+                              onClick={() => {
+                                setNewCommentTexts(prev => ({ ...prev, [p.id]: '' }));
+                                setAcState(prev => ({ ...prev, active: false }));
+                              }}
                               className="px-3.5 py-1.5 rounded-full text-xs font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
                             >
                               Cancel
@@ -4203,21 +4882,167 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                             return new Date(comment.created_at).toLocaleDateString();
                           })();
                           return (
-                            <div key={comment.id} className="flex gap-2.5 items-start py-3 border-t border-zinc-100 dark:border-white/[0.04] first:border-t-0">
-                              <img src={comment.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-6 h-6 rounded-full shrink-0 mt-0.5" />
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5 mb-0.5">
-                                  <span className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200">{comment.username}</span>
-                                  <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">• {commentTimeAgo}</span>
+                            <div key={comment.id} className="py-3.5 border-t border-zinc-100 dark:border-white/[0.04] first:border-t-0 space-y-3">
+                              {/* Main Comment */}
+                              <div className="flex gap-2.5 items-start">
+                                <img src={comment.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-6.5 h-6.5 rounded-full shrink-0 mt-0.5" />
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1.5 mb-0.5">
+                                    <span className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200">{comment.username}</span>
+                                    <span className="text-[10px] text-zinc-450 dark:text-zinc-550 font-medium">• {commentTimeAgo}</span>
+                                  </div>
+                                  <p 
+                                    className="text-[12px] text-zinc-700 dark:text-zinc-300 leading-relaxed font-normal break-words"
+                                    onClick={handleContentClick}
+                                    dangerouslySetInnerHTML={{ __html: renderFormattedContent(comment.content) }}
+                                  />
+                                  <div className="flex items-center gap-3.5 text-[9px] font-bold text-zinc-450 mt-1">
+                                    <button 
+                                      onClick={() => {
+                                        setReplyTarget({ commentId: comment.id, username: comment.username, postId: p.id });
+                                        setReplyText(`@${comment.username} `);
+                                      }}
+                                      className="bg-transparent border-none text-zinc-400 dark:text-zinc-550 hover:text-zinc-750 dark:hover:text-zinc-200 cursor-pointer text-[9px] font-bold p-0"
+                                    >
+                                      Reply
+                                    </button>
+                                  </div>
                                 </div>
-                                <p className="text-[12px] text-zinc-700 dark:text-zinc-300 leading-relaxed font-normal">{comment.content}</p>
                               </div>
+
+                              {/* Nested Replies */}
+                              {comment.replies && comment.replies.length > 0 && (
+                                <div className="ml-7 pl-3.5 border-l border-zinc-150 dark:border-white/5 space-y-3">
+                                  {comment.replies.map((reply) => {
+                                    const replyTimeAgo = (() => {
+                                      const diff = Date.now() - new Date(reply.created_at).getTime();
+                                      const mins = Math.floor(diff / 60000);
+                                      if (mins < 60) return `${mins}m ago`;
+                                      const hrs = Math.floor(mins / 60);
+                                      if (hrs < 24) return `${hrs}h ago`;
+                                      const days = Math.floor(hrs / 24);
+                                      if (days < 30) return `${days}d ago`;
+                                      return new Date(reply.created_at).toLocaleDateString();
+                                    })();
+                                    return (
+                                      <div key={reply.id} className="flex gap-2.5 items-start">
+                                        <img src={reply.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-5.5 h-5.5 rounded-full shrink-0 mt-0.5" />
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-center gap-1.5 mb-0.5">
+                                            <span className="text-[10px] font-bold text-zinc-800 dark:text-zinc-200">{reply.username}</span>
+                                            <span className="text-[9px] text-zinc-450 dark:text-zinc-550 font-medium">• {replyTimeAgo}</span>
+                                          </div>
+                                          <p 
+                                            className="text-[11.5px] text-zinc-700 dark:text-zinc-300 leading-relaxed font-normal break-words"
+                                            onClick={handleContentClick}
+                                            dangerouslySetInnerHTML={{ __html: renderFormattedContent(reply.content) }}
+                                          />
+                                          <div className="flex items-center gap-3.5 text-[8.5px] font-bold text-zinc-450 mt-0.5">
+                                            <button 
+                                              onClick={() => {
+                                                setReplyTarget({ commentId: comment.id, username: reply.username, postId: p.id });
+                                                setReplyText(`@${reply.username} `);
+                                              }}
+                                              className="bg-transparent border-none text-zinc-400 dark:text-zinc-550 hover:text-zinc-750 dark:hover:text-zinc-200 cursor-pointer text-[8.5px] font-bold p-0"
+                                            >
+                                              Reply
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+
+                              {/* Reply Form */}
+                              {replyTarget && replyTarget.commentId === comment.id && replyTarget.postId === p.id && (
+                                <form 
+                                  onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    if (!userProfile) return;
+                                    if (!replyText.trim()) return;
+
+                                    try {
+                                      const added = await CommunityService.addReplyToComment(p.id, 'post', comment.id, {
+                                        user_id: userProfile.id,
+                                        username: userProfile.username,
+                                        avatar_url: userProfile.avatar_url || '',
+                                        content: replyText.trim()
+                                      });
+
+                                      setDiscussions(prev => prev.map(post => {
+                                        if (post.id === p.id) {
+                                          const comments = (post.comments || []).map(c => {
+                                            if (c.id === comment.id) {
+                                              return {
+                                                ...c,
+                                                replies: [...(c.replies || []), added]
+                                              };
+                                            }
+                                            return c;
+                                          });
+                                          return { ...post, comments };
+                                        }
+                                        return post;
+                                      }));
+
+                                      setReplyText('');
+                                      setReplyTarget(null);
+                                      showToast("Reply posted!", "success");
+                                    } catch (err) {
+                                      showToast("Failed to post reply", "error");
+                                    }
+                                  }}
+                                  className="ml-7 pl-3.5 border-l border-zinc-150 dark:border-white/5 py-2 flex gap-2.5 items-start"
+                                >
+                                  <img src={userProfile?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-5.5 h-5.5 rounded-full shrink-0 mt-0.5" />
+                                  <div className="flex-1 min-w-0 flex flex-col gap-2">
+                                    <div className="relative w-full">
+                                      <input
+                                        type="text"
+                                        placeholder={`Reply to @${replyTarget.username}...`}
+                                        value={replyText}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          setReplyText(val);
+                                          handleInputAutocomplete(val, e.target.selectionStart || 0, 'reply', comment.id);
+                                        }}
+                                        onKeyDown={handleAutocompleteKeyDown}
+                                        className="w-full bg-transparent border border-zinc-200 dark:border-white/8 rounded-xl px-3 py-2 text-xs text-zinc-800 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-550 focus:outline-none transition-colors"
+                                        style={{ borderColor: replyText.trim() ? theme.rawColor : undefined }}
+                                        autoFocus
+                                      />
+                                      {renderAutocompleteDropdown(comment.id)}
+                                    </div>
+                                    <div className="flex justify-end gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setReplyTarget(null);
+                                          setReplyText('');
+                                        }}
+                                        className="px-3 py-1 rounded-full text-[10px] font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button
+                                        type="submit"
+                                        style={{ backgroundColor: theme.rawColor }}
+                                        className="px-3.5 py-1 text-white rounded-full text-[10px] font-bold border-none cursor-pointer hover:opacity-90 active:scale-95 transition-all"
+                                      >
+                                        Reply
+                                      </button>
+                                    </div>
+                                  </div>
+                                </form>
+                              )}
                             </div>
                           );
                         })}
                       </div>
                     ) : (
-                      <div className="text-xs text-zinc-400 dark:text-zinc-500 py-6 text-center font-medium">No comments yet — be the first to reply!</div>
+                      <div className="text-xs text-zinc-400 dark:text-zinc-550 py-6 text-center font-medium">No comments yet — be the first to reply!</div>
                     )}
                   </div>
                 </div>

@@ -13,7 +13,7 @@ const StreakToast: React.FC = () => {
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ y: -100, opacity: 0, scale: 0.8 }}
           transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-          className="fixed top-6 left-1/2 -translate-x-1/2 z-[90] px-8 py-4 bg-white dark:bg-dark-950 border border-amber-500/30 rounded-[24px] shadow-2xl shadow-amber-500/10 flex items-center gap-4 max-w-md"
+          className="fixed top-6 left-1/2 -translate-x-1/2 z-[90] px-6 py-3.5 bg-white/95 dark:bg-[#0f141c]/95 border border-amber-500/25 backdrop-blur-md rounded-2xl shadow-xl shadow-amber-500/5 dark:shadow-amber-500/10 flex items-center gap-3.5 max-w-md cursor-pointer select-none"
           onClick={() => setStreakToastMessage(null)}
         >
           {/* Fire animation */}
@@ -37,7 +37,7 @@ const StreakToast: React.FC = () => {
           {/* Close */}
           <button
             onClick={() => setStreakToastMessage(null)}
-            className="ml-2 p-1 text-zinc-400 hover:text-zinc-600 transition-colors"
+            className="ml-2 p-1 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer border-none bg-transparent"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
               <path d="M18 6L6 18M6 6l12 12" />
