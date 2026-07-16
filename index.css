@@ -894,4 +894,82 @@ input[type=number] {
   background-color: transparent !important;
 }
 
+/* Premium code block wrapper overrides to prevent styling conflicts */
+.premium-code-block {
+  background-color: #1e1e1e !important;
+}
+
+.premium-code-block pre {
+  margin: 0 !important;
+  padding: 0 1rem 1.25rem 1rem !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* VS Code Dark+ / Shiki theme overrides for Highlight.js and CodeMirror */
+.wysiwyg-content pre code,
+.comment-content pre code,
+.premium-code-block code,
+.hljs {
+  color: #d4d4d4 !important; /* Default text color */
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-meta {
+  color: #c586c0 !important; /* purple */
+}
+
+.hljs-string,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-regexp,
+.hljs-addition {
+  color: #ce9178 !important; /* orange/peach */
+}
+
+.hljs-title,
+.hljs-title.function_,
+.hljs-section,
+.hljs-name {
+  color: #dcdcaa !important; /* yellow */
+}
+
+.hljs-attr,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-attribute {
+  color: #9cdcfe !important; /* light blue */
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #6a9955 !important; /* comment green */
+  font-style: italic !important;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-symbol,
+.hljs-bullet {
+  color: #b5cea8 !important; /* light green */
+}
+
+.hljs-built_in,
+.hljs-class,
+.hljs-type {
+  color: #4ec9b0 !important; /* green-blue */
+}
+
+.hljs-params {
+  color: #9cdcfe !important;
+}
+
+.hljs-operator,
+.hljs-punctuation {
+  color: #d4d4d4 !important;
+}
+
 

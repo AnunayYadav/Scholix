@@ -7,11 +7,15 @@ const supabase = createClient(url, key);
 
 async function inspect() {
   try {
-    const { data, error } = await supabase.from('questions').select('*').limit(1);
+    const { data, error } = await supabase
+      .from('community_hub')
+      .select('title, content')
+      .eq('title', 'vxcvxc')
+      .limit(1);
     if (error) {
-      console.error('Error fetching question:', error);
+      console.error('Error fetching post:', error);
     } else {
-      console.log('Sample question row from database:');
+      console.log('Post from database:');
       console.log(JSON.stringify(data[0], null, 2));
     }
   } catch (err) {

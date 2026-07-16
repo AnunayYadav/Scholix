@@ -1138,8 +1138,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
             abbreviationTracker(),
             EditorView.theme({
               "&": {
-                background: "#0d1117 !important",
-                color: "#c9d1d9 !important",
+                background: "#1e1e1e !important",
+                color: "#d4d4d4 !important",
                 fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace !important",
                 fontSize: "13px !important",
                 borderRadius: "8px !important",
@@ -1148,11 +1148,11 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                 padding: "1rem !important"
               },
               ".cm-content": {
-                caretColor: "#c9d1d9 !important",
+                caretColor: "#d4d4d4 !important",
                 padding: "0 !important"
               },
               ".cm-cursor": {
-                borderLeftColor: "#c9d1d9 !important"
+                borderLeftColor: "#d4d4d4 !important"
               },
               ".cm-scroller": {
                 fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace !important",
@@ -1275,7 +1275,20 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   }, []);
 
   const getEditorHtml = useCallback((ref: React.RefObject<HTMLDivElement | null>) => {
-    return ref.current?.innerHTML || '';
+    if (!ref.current) return '';
+    const clone = ref.current.cloneNode(true) as HTMLDivElement;
+    
+    // Find all CodeMirror containers, restore the original pre elements, and remove the wrappers
+    const containers = clone.querySelectorAll('.cm6-editor-container');
+    containers.forEach((container) => {
+      const pre = container.previousSibling as HTMLElement | null;
+      if (pre && pre.tagName?.toLowerCase() === 'pre') {
+        pre.style.display = '';
+      }
+      container.remove();
+    });
+    
+    return clone.innerHTML;
   }, []);
 
   // Track active formatting state (bold, italic, etc.)
@@ -1554,8 +1567,92 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const renderFormattedContent = useCallback((content: string): string => {
     if (!content) return '';
     
-    // Run link parsing first
-    let formatted = autoLink(content);
+    // Create a temporary element to parse and manipulate HTML (fully safe inside client-side React)
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    
+    // 1. Strip any saved CodeMirror editor containers from the DOM (legacy dirty database entries)
+    tempDiv.querySelectorAll('.cm6-editor-container').forEach(c => c.remove());
+    
+    // 2. Wrap all pre blocks with our premium block design
+    const preElements = tempDiv.querySelectorAll('pre');
+    preElements.forEach((pre) => {
+      // If it's inside an editor or already wrapped, skip it
+      if (pre.closest('.wysiwyg-editor') || pre.closest('.premium-code-block')) return;
+      
+      const code = pre.querySelector('code');
+      if (!code) return;
+      
+      // Auto-detect language
+      let lang = 'auto';
+      const classList = Array.from(code.classList) as string[];
+      const langClass = classList.find(c => c.startsWith('language-')) as string | undefined;
+      
+      // Also check pre element classes for language
+      const preClassList = Array.from(pre.classList) as string[];
+      const preLangClass = preClassList.find(c => c.startsWith('language-')) as string | undefined;
+      
+      if (langClass) {
+        lang = langClass.replace('language-', '');
+      } else if (preLangClass) {
+        lang = preLangClass.replace('language-', '');
+      }
+      
+      const niceLangNames: Record<string, string> = {
+        javascript: 'JavaScript',
+        typescript: 'TypeScript',
+        js: 'JavaScript',
+        ts: 'TypeScript',
+        python: 'Python',
+        py: 'Python',
+        html: 'HTML',
+        css: 'CSS',
+        cpp: 'C++',
+        c: 'C',
+        java: 'Java',
+        csharp: 'C#',
+        cs: 'C#',
+        rust: 'Rust',
+        go: 'Go',
+        bash: 'Bash',
+        shell: 'Shell',
+        sql: 'SQL',
+        json: 'JSON',
+        xml: 'XML',
+        yaml: 'YAML',
+        markdown: 'Markdown',
+        md: 'Markdown',
+        php: 'PHP',
+        ruby: 'Ruby',
+      };
+      
+      const displayLang = niceLangNames[lang.toLowerCase()] || (lang.charAt(0).toUpperCase() + lang.slice(1));
+      const cleanCodeText = (code.textContent || '').replace(/^[\r\n\u200b]+|[\r\n\u200b]+$/g, '');
+      
+      // Ensure the pre element style is visible
+      pre.style.display = '';
+
+      // Helper to HTML-escape code content so it displays as raw text rather than parsing as HTML tags
+      const escapeHtml = (text: string): string => {
+        return text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      };
+      
+      // Create premium block HTML wrapper
+      const wrapperHTML = `<div class="premium-code-block relative rounded-xl overflow-hidden border border-zinc-800/50 dark:border-white/5 my-4 bg-[#1e1e1e] text-[#d4d4d4] font-mono shadow-sm"><div class="flex items-center justify-between px-4 py-3 bg-[#1e1e1e] text-[12px] font-semibold text-[#abb2bf] select-none"><div class="flex items-center"><svg style="width:14px;height:14px;stroke-width:2.5px;color:#abb2bf;margin-right:8px;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg><span>${displayLang}</span></div><button type="button" class="code-copy-btn text-[#abb2bf] hover:text-white bg-transparent hover:bg-white/5 p-1.5 rounded-md transition-all active:scale-95 cursor-pointer border-none" onclick="const text = this.parentElement.nextElementSibling.innerText; navigator.clipboard.writeText(text).then(() => { const oldHTML = this.innerHTML; this.innerHTML = '<svg style=\x27width:16px;height:16px;stroke-width:2px;color:#abb2bf;\x27 viewBox=\x270 0 24 24\x27 fill=\x27none\x27 stroke=\x27currentColor\x27 stroke-linecap=\x27round\x27 stroke-linejoin=\x27round\x27><polyline points=\x2720 6 9 17 4 12\x27></polyline></svg>'; setTimeout(() => { this.innerHTML = oldHTML; }, 2000); })"><svg style="width:16px;height:16px;stroke-width:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div><pre style="margin: 0 !important; padding: 0.25rem 1rem 1.25rem 1rem !important; background: transparent !important; border: none !important; border-radius: 0 !important; box-shadow: none !important;" class="overflow-x-auto text-[13px] leading-relaxed m-0 no-scrollbar"><code class="language-${lang}">${escapeHtml(cleanCodeText)}</code></pre></div>`;
+      
+      const placeholder = document.createElement('div');
+      placeholder.innerHTML = wrapperHTML;
+      pre.replaceWith(placeholder.firstElementChild!);
+    });
+    
+    // 3. Run link parsing and tagging on the text
+    let formatted = tempDiv.innerHTML;
+    formatted = autoLink(formatted);
     
     // Format doc tags: [@docName](doc:docId) -> <span class="tagged-doc" data-id="docId">📄 docName</span>
     const docRegex = /\[@([^\]]+)\]\(doc:([^\)]+)\)/g;
@@ -2641,25 +2738,14 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   useEffect(() => {
     loadCommunityData();
   }, [activeSubject.id, userProfile]);
-  // Trigger Highlight.js syntax highlighting and premium block wrapping on code segments
+  // Trigger Highlight.js syntax highlighting on code segments
   useEffect(() => {
-    // Helper function to wrap code blocks with language labels and copy buttons
-    const decorateCodeBlocks = () => {
-      const preElements = document.querySelectorAll('.wysiwyg-content pre, .comment-content pre, pre');
-      preElements.forEach((preElement) => {
-        const pre = preElement as HTMLElement;
-        // If it's inside a contenteditable editor, skip it
-        if (pre.closest('.wysiwyg-editor') || pre.closest('[contenteditable="true"]')) return;
-        
-        // If it's already decorated (inside a .premium-code-block), skip it
-        if (pre.closest('.premium-code-block')) return;
-
-        const code = pre.querySelector('code');
-        if (!code) return;
-
-        // Extract and clean text content of code (removing leading/trailing newlines/zero-width spaces)
-        const rawCodeText = (code.textContent || '').replace(/^[\r\n\u200b]+|[\r\n\u200b]+$/g, '');
-        code.textContent = rawCodeText;
+    const highlightCode = () => {
+      const codeElements = document.querySelectorAll('.wysiwyg-content code, .comment-content code, pre code');
+      codeElements.forEach((codeEl) => {
+        const code = codeEl as HTMLElement;
+        if (code.closest('.wysiwyg-editor') || code.closest('[contenteditable="true"]')) return;
+        if (code.classList.contains('hljs')) return;
         
         // Auto-detect language or use language class if available
         let lang = 'auto';
@@ -2667,103 +2753,24 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         const langClass = classList.find(c => c.startsWith('language-')) as string | undefined;
         if (langClass) {
           lang = langClass.replace('language-', '');
-        } else {
-          // Use highlightAuto to get the guessed language
-          try {
-            const detection = hljs.highlightAuto(rawCodeText);
-            if (detection.language) {
-              lang = detection.language;
-            }
-          } catch (err) {
-            console.error("HighlightAuto failed:", err);
-          }
         }
 
-        // Capitalize the language name nicely
-        const niceLangNames: Record<string, string> = {
-          javascript: 'JavaScript',
-          typescript: 'TypeScript',
-          js: 'JavaScript',
-          ts: 'TypeScript',
-          python: 'Python',
-          py: 'Python',
-          html: 'HTML',
-          css: 'CSS',
-          cpp: 'C++',
-          c: 'C',
-          java: 'Java',
-          csharp: 'C#',
-          cs: 'C#',
-          rust: 'Rust',
-          go: 'Go',
-          bash: 'Bash',
-          shell: 'Shell',
-          sql: 'SQL',
-          json: 'JSON',
-          xml: 'XML',
-          yaml: 'YAML',
-          markdown: 'Markdown',
-          md: 'Markdown',
-          php: 'PHP',
-          ruby: 'Ruby',
-        };
-        const displayLang = niceLangNames[lang.toLowerCase()] || (lang.charAt(0).toUpperCase() + lang.slice(1));
-
-        // Create wrapper container
-        const wrapper = document.createElement('div');
-        wrapper.className = 'premium-code-block relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 my-4 bg-[#0d1117] text-[#c9d1d9] font-mono shadow-sm';
+        if (lang !== 'auto' && !code.classList.contains(`language-${lang}`)) {
+          code.classList.add(`language-${lang}`);
+        }
         
-        // Create header bar
-        const header = document.createElement('div');
-        header.className = 'flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-[#21262d] text-[11px] font-bold text-[#8b949e] select-none';
-        
-        const langLabel = document.createElement('span');
-        langLabel.className = 'code-lang-label tracking-wider font-semibold';
-        langLabel.textContent = displayLang;
-        
-        const copyBtn = document.createElement('button');
-        copyBtn.className = 'code-copy-btn flex items-center gap-1.5 bg-transparent hover:bg-white/5 border border-[#30363d] hover:border-[#8b949e] text-[10px] text-[#8b949e] hover:text-[#c9d1d9] px-2.5 py-1 rounded-md transition-all active:scale-95 cursor-pointer';
-        copyBtn.innerHTML = 'Copy <svg style="width:11px;height:11px;stroke-width:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
-        copyBtn.type = 'button';
-        copyBtn.onclick = (e) => {
-          e.stopPropagation();
-          navigator.clipboard.writeText(rawCodeText).then(() => {
-            copyBtn.innerHTML = 'Copied! <svg style="width:11px;height:11px;stroke-width:2.5px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-            setTimeout(() => {
-              copyBtn.innerHTML = 'Copy <svg style="width:11px;height:11px;stroke-width:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
-            }, 2000);
-          });
-        };
-        
-        header.appendChild(langLabel);
-        header.appendChild(copyBtn);
-        
-        // Rearrange nodes
-        pre.parentNode?.insertBefore(wrapper, pre);
-        wrapper.appendChild(header);
-        wrapper.appendChild(pre);
-        
-        // Style pre and code to fit inside wrapper cleanly
-        pre.style.margin = '0';
-        pre.style.padding = '0.75rem 1rem';
-        pre.style.background = 'transparent';
-        pre.className = 'overflow-x-auto text-[13px] leading-relaxed m-0 no-scrollbar';
-        
-        // Highlight the code block using Highlight.js
-        if (langClass) {
+        try {
           hljs.highlightElement(code);
-        } else if (lang !== 'auto') {
-          code.className = `language-${lang}`;
-          hljs.highlightElement(code);
-        } else {
-          hljs.highlightElement(code);
+        } catch (err) {
+          console.error("Highlighting element failed:", err);
         }
       });
     };
 
-    // Decorate blocks
-    decorateCodeBlocks();
-  });
+    highlightCode();
+    const interval = setInterval(highlightCode, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const handleDocClick = () => setActiveMenuFileId(null);
@@ -5373,7 +5380,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                         <div 
                           className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal mb-3 wysiwyg-content post-collapsed-content" 
                           style={{ lineHeight: '1.7' }}
-                          dangerouslySetInnerHTML={{ __html: autoLink(p.content) }}
+                          dangerouslySetInnerHTML={{ __html: renderFormattedContent(p.content) }}
                         />
 
                         {/* Tags */}
@@ -5605,7 +5612,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       </h4>
                       <div 
                         className="text-xs text-zinc-500 dark:text-zinc-400 font-medium wysiwyg-content"
-                        dangerouslySetInnerHTML={{ __html: autoLink(r.content) }}
+                        dangerouslySetInnerHTML={{ __html: renderFormattedContent(r.content) }}
                       />
                     </div>
 
@@ -5883,7 +5890,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       </div>
                       <div 
                         className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed wysiwyg-content"
-                        dangerouslySetInnerHTML={{ __html: autoLink(pack.content) }}
+                        dangerouslySetInnerHTML={{ __html: renderFormattedContent(pack.content) }}
                       />
                       <div className="text-[10px] text-zinc-400 font-semibold flex items-center gap-3">
                         <span>Created by {pack.user_username}</span>
