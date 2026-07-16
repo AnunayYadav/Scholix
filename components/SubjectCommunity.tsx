@@ -5204,7 +5204,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               {/* Reddit-style create post prompt bar */}
               <button
                 onClick={() => setShowCreatePost(true)}
-                className="w-full flex items-center gap-3 p-3 bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/8 rounded-2xl cursor-pointer hover:border-zinc-300 dark:hover:border-white/15 transition-all group"
+                className="w-full flex items-center gap-3 py-2 bg-transparent border-none cursor-pointer transition-all group"
                 style={{ outline: 'none' }}
               >
                 <img
