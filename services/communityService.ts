@@ -436,12 +436,15 @@ class CommunityService {
     const client = getSupabase();
     if (client) {
       try {
-        const { data, error } = await client.from('community_hub').insert([{
-          ...newPost,
-          id: undefined // Let DB generate uuid if possible
-        }]).select().maybeSingle();
+        const { id, ...insertPayload } = newPost;
+        const { data, error } = await client.from('community_hub').insert([insertPayload]).select().maybeSingle();
+        if (error) {
+          console.error("[Supabase Error in createPost]:", error);
+        }
         if (!error && data) return data as CommunityPost;
-      } catch (e) {}
+      } catch (e) {
+        console.error("[System Error in createPost]:", e);
+      }
     }
 
     // LocalStorage write
@@ -738,9 +741,15 @@ class CommunityService {
     const client = getSupabase();
     if (client) {
       try {
-        const { data, error } = await client.from('community_hub').insert([newReq]).select().maybeSingle();
+        const { id, ...insertPayload } = newReq;
+        const { data, error } = await client.from('community_hub').insert([insertPayload]).select().maybeSingle();
+        if (error) {
+          console.error("[Supabase Error in createRequest]:", error);
+        }
         if (!error && data) return data as MaterialRequest;
-      } catch (e) {}
+      } catch (e) {
+        console.error("[System Error in createRequest]:", e);
+      }
     }
 
     const hub = getLocalData(STORAGE_KEYS.HUB);
@@ -888,9 +897,15 @@ class CommunityService {
     const client = getSupabase();
     if (client) {
       try {
-        const { data, error } = await client.from('community_hub').insert([newPack]).select().maybeSingle();
+        const { id, ...insertPayload } = newPack;
+        const { data, error } = await client.from('community_hub').insert([insertPayload]).select().maybeSingle();
+        if (error) {
+          console.error("[Supabase Error in createStudyPack]:", error);
+        }
         if (!error && data) return data as StudyPack;
-      } catch (e) {}
+      } catch (e) {
+        console.error("[System Error in createStudyPack]:", e);
+      }
     }
 
     const hub = getLocalData(STORAGE_KEYS.HUB);
@@ -976,9 +991,15 @@ class CommunityService {
     const client = getSupabase();
     if (client) {
       try {
-        const { data, error } = await client.from('community_hub').insert([newMsg]).select().maybeSingle();
+        const { id, ...insertPayload } = newMsg;
+        const { data, error } = await client.from('community_hub').insert([insertPayload]).select().maybeSingle();
+        if (error) {
+          console.error("[Supabase Error in sendChatMessage]:", error);
+        }
         if (!error && data) return data as SubjectChatMsg;
-      } catch (e) {}
+      } catch (e) {
+        console.error("[System Error in sendChatMessage]:", e);
+      }
     }
 
     const hub = getLocalData(STORAGE_KEYS.HUB);
