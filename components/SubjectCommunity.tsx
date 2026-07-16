@@ -869,6 +869,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const [showCreatePack, setShowCreatePack] = useState(false);
 
   // Discussions comments & pin states
+  const [selectedPost, setSelectedPost] = useState<CommunityPost | null>(null);
   const [expandedPostCommentsId, setExpandedPostCommentsId] = useState<string | null>(null);
   const [newCommentTexts, setNewCommentTexts] = useState<Record<string, string>>({});
   const [submittingCommentId, setSubmittingCommentId] = useState<string | null>(null);
@@ -911,6 +912,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
   // Track active formatting state (bold, italic, etc.)
   const [activeFormats, setActiveFormats] = useState<Record<string, boolean>>({});
+  const [activePreNode, setActivePreNode] = useState<HTMLElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [imageUploading, setImageUploading] = useState(false);
 
@@ -1773,6 +1775,10 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     return () => document.removeEventListener('click', handleDocClick);
   }, []);
 
+  useEffect(() => {
+    setSelectedPost(null);
+  }, [activeTab]);
+
   // Real-time Presence sync for active studying users count
   useEffect(() => {
     const client = NexusServer.getClient();
@@ -1866,10 +1872,49 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
       showToast("Please login to react.", "info");
       return;
     }
+
+    const userId = userProfile.id;
+
+    // Save previous state for rollback on error
+    const prevDiscussions = [...discussions];
+    const prevRequests = [...requests];
+
+    const updateLocalReactions = (reactions: any) => {
+      const container = {
+        helpful: Array.isArray(reactions?.helpful) ? [...reactions.helpful] : [],
+        quality: Array.isArray(reactions?.quality) ? [...reactions.quality] : [],
+        important: Array.isArray(reactions?.important) ? [...reactions.important] : []
+      };
+
+      const hasReacted = container[reaction].includes(userId);
+      if (hasReacted) {
+        container[reaction] = container[reaction].filter((id: string) => id !== userId);
+      } else {
+        container[reaction] = [...container[reaction], userId];
+        // Apply mutual exclusivity for post upvote/downvote
+        if (reaction === 'helpful') {
+          container.quality = container.quality.filter((id: string) => id !== userId);
+        } else if (reaction === 'quality') {
+          container.helpful = container.helpful.filter((id: string) => id !== userId);
+        }
+      }
+      return container;
+    };
+
+    // Optimistic UI updates
+    if (type === 'post') {
+      setDiscussions(prev => prev.map(p => p.id === itemId ? { ...p, reactions: updateLocalReactions(p.reactions) } : p));
+    } else if (type === 'request') {
+      setRequests(prev => prev.map(r => r.id === itemId ? { ...r, reactions: updateLocalReactions(r.reactions) } : r));
+    }
+
     try {
-      await CommunityService.toggleReaction(itemId, type, reaction, userProfile.id);
-      loadCommunityData();
-    } catch (e) { }
+      await CommunityService.toggleReaction(itemId, type, reaction, userId);
+    } catch (e) {
+      // Rollback on error
+      if (type === 'post') setDiscussions(prevDiscussions);
+      else if (type === 'request') setRequests(prevRequests);
+    }
   };
 
   // Submit Post
@@ -3245,38 +3290,226 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
       {/* 3. DISCUSSIONS TAB */}
       {activeTab === 'discussions' && (
         <div className="space-y-5 animate-fade-in">
-          <div className="flex justify-between items-center gap-4">
-            <h3 className="text-xs font-bold text-zinc-400 tracking-wider flex items-center gap-1.5"><MessageSquare className="w-3.5 h-3.5" /> Discussions</h3>
-          </div>
+          {showCreatePost ? (
+            // ────────────────────────────────────────────────────────
+            // INLINE CREATE POST VIEW
+            // ────────────────────────────────────────────────────────
+            <div className="space-y-4">
+              {/* Back button */}
+              <button 
+                type="button"
+                onClick={() => setShowCreatePost(false)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all self-start"
+              >
+                <ArrowLeft size={14} /> Back to Discussions
+              </button>
 
-          {/* Reddit-style create post prompt bar */}
-          <button
-            onClick={() => setShowCreatePost(true)}
-            className="w-full flex items-center gap-3 p-3 bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/8 rounded-2xl cursor-pointer hover:border-zinc-300 dark:hover:border-white/15 transition-all group"
-            style={{ outline: 'none' }}
-          >
-            <img
-              src={userProfile?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'}
-              className="w-8 h-8 rounded-full flex-shrink-0 border-2 border-zinc-100 dark:border-white/10"
-              alt=""
-            />
-            <div className="flex-1 text-left px-3 py-2 bg-zinc-50 dark:bg-white/[0.04] rounded-xl text-xs text-zinc-400 dark:text-zinc-500 font-medium group-hover:bg-zinc-100 dark:group-hover:bg-white/[0.06] transition-colors">
-              Create Post
+              <div className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm flex flex-col">
+                {/* Header with subject selector */}
+                <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100 dark:border-white/5">
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowSubjectSelector(!showSubjectSelector)}
+                      className="flex items-center gap-2.5 px-1 py-1 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors bg-transparent border-none cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
+                        {subjectCode.slice(0, 2)}
+                      </div>
+                      <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
+                      <ChevronDown size={12} className={`text-zinc-400 transition-transform duration-200 ${showSubjectSelector ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showSubjectSelector && (
+                      <>
+                        <div className="fixed inset-0 z-30" onClick={() => setShowSubjectSelector(false)} />
+                        <div className="absolute left-0 top-full z-40 mt-1.5 w-64 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                          <div className="px-3 py-2 text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Post to community</div>
+                          {categories.map((cat) => {
+                            const catCode = cat.name.match(/^([A-Za-z]+\d{3})/)?.[1]?.toUpperCase() || cat.name.split(':')[0].trim();
+                            const catTheme = getSubjectTheme(cat.name, cat.color, cat.icon_name);
+                            const isActive = catCode === subjectCode;
+                            return (
+                              <button
+                                key={cat.id}
+                                type="button"
+                                onClick={() => setShowSubjectSelector(false)}
+                                style={isActive ? { backgroundColor: `${catTheme.rawColor}12`, color: catTheme.rawColor } : undefined}
+                                className={`w-full text-left px-3 py-2.5 text-xs font-semibold transition-all border-none bg-transparent cursor-pointer flex items-center gap-2.5 ${
+                                  isActive ? '' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.04]'
+                                }`}
+                              >
+                                <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-black flex-shrink-0" style={{ backgroundColor: catTheme.rawColor }}>
+                                  {catCode.slice(0, 2)}
+                                </div>
+                                <span className="truncate">{catCode}</span>
+                                {isActive && <Check size={12} className="ml-auto flex-shrink-0" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Form body */}
+                <form onSubmit={handlePostSubmit} className="flex flex-col pt-4">
+                  <div className="pb-2 space-y-1">
+                    <input
+                      type="text"
+                      value={postTitle}
+                      onChange={(e) => setPostTitle(e.target.value)}
+                      placeholder="Title*"
+                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600 focus:ring-0"
+                      required
+                      autoFocus
+                    />
+                  </div>
+
+                  {/* Flair & Tags row */}
+                  <div className="pb-3 flex flex-wrap items-center gap-2">
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold border cursor-pointer transition-all"
+                        style={{
+                          borderColor: `${theme.rawColor}40`,
+                          backgroundColor: `${theme.rawColor}08`,
+                          color: theme.rawColor
+                        }}
+                      >
+                        <Sparkles size={11} />
+                        {postCategory === 'discussion' && 'Discussion'}
+                        {postCategory === 'doubt' && 'Doubt'}
+                        {postCategory === 'poll' && 'Poll'}
+                        {postCategory === 'question' && 'Exam Prep'}
+                        {postCategory === 'resource' && 'Resource'}
+                        {postCategory === 'announcement' && '📢 Announcement'}
+                        <ChevronDown size={10} className={`transition-transform duration-200 ${showCategoryDropdown ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {showCategoryDropdown && (
+                        <>
+                          <div className="fixed inset-0 z-30" onClick={() => setShowCategoryDropdown(false)} />
+                          <div className="absolute left-0 z-40 mt-1.5 w-48 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1">
+                            {[
+                              { value: 'discussion', label: 'Discussion', icon: '💬' },
+                              { value: 'doubt', label: 'Doubt / Question', icon: '❓' },
+                              { value: 'poll', label: 'Poll', icon: '📊' },
+                              { value: 'question', label: 'Exam Prep', icon: '📝' },
+                              { value: 'resource', label: 'Resource', icon: '📎' },
+                              ...(userProfile?.is_admin ? [{ value: 'announcement', label: 'Announcement', icon: '📢' }] : [])
+                            ].map((opt) => {
+                              const isSelected = postCategory === opt.value;
+                              return (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={() => {
+                                    setPostCategory(opt.value as any);
+                                    setShowCategoryDropdown(false);
+                                  }}
+                                  style={isSelected ? {
+                                    backgroundColor: `${theme.rawColor}12`,
+                                    color: theme.rawColor
+                                  } : undefined}
+                                  className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold transition-all border-none bg-transparent cursor-pointer flex items-center gap-2.5 ${
+                                    isSelected
+                                      ? ''
+                                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.04]'
+                                  }`}
+                                >
+                                  <span>{opt.icon}</span>
+                                  <span>{opt.label}</span>
+                                  {isSelected && <Check size={12} className="ml-auto" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {postTags.split(',').filter(t => t.trim()).map((tag, i) => (
+                      <span key={i} className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400">
+                        #{tag.trim()}
+                      </span>
+                    ))}
+
+                    <input
+                      type="text"
+                      value={postTags}
+                      onChange={(e) => setPostTags(e.target.value)}
+                      placeholder="+ Add tags"
+                      className="bg-transparent border-none outline-none text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 w-20"
+                    />
+                  </div>
+
+                  <div className="border-t border-zinc-100 dark:border-white/5" />
+
+                  {/* WYSIWYG Body Editor */}
+                  <div className="pt-4 pb-3">
+                    <div
+                      ref={createEditorRef}
+                      contentEditable
+                      data-placeholder="Body text*"
+                      onInput={() => setPostContent(getEditorText(createEditorRef))}
+                      onKeyDown={handleEditorKeyDown}
+                      className="w-full min-h-[220px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
+                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                      suppressContentEditableWarning
+                    />
+                  </div>
+
+                  {/* Formatting Toolbar */}
+                  <div className="pb-4">
+                    <div className="flex items-center gap-0.5 flex-wrap">
+                      {renderToolbar(buildToolbarItems(createEditorRef), 'cp')}
+                      {imageUploading && <span className="text-[10px] text-zinc-400 ml-2 animate-pulse">Uploading...</span>}
+                    </div>
+                  </div>
+
+                  {/* Footer actions */}
+                  <div className="flex items-center justify-end gap-2.5 pt-3.5 border-t border-zinc-100 dark:border-white/5">
+                    <button
+                      type="button"
+                      onClick={() => setShowCreatePost(false)}
+                      className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!postTitle.trim() || !postContent.trim()}
+                      style={{
+                        backgroundColor: (!postTitle.trim() || !postContent.trim()) ? undefined : theme.rawColor,
+                        opacity: (!postTitle.trim() || !postContent.trim()) ? 0.4 : 1
+                      }}
+                      className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
+                        (!postTitle.trim() || !postContent.trim())
+                          ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
+                          : 'text-white hover:opacity-90 active:scale-95'
+                      }`}
+                    >
+                      Post
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 flex-shrink-0 pr-1">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"><Image size={16} /></div>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"><Link size={16} /></div>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"><BarChart2 size={16} /></div>
-            </div>
-          </button>
-
-
-
-          {/* List of discussions — Reddit style */}
-          <div className="space-y-3">
-            {discussions.map((p) => {
-              const helpfulCount = p.reactions.helpful?.length || 0;
-              const isHelpful = userProfile ? p.reactions.helpful?.includes(userProfile.id) : false;
+          ) : selectedPost ? (
+            // ────────────────────────────────────────────────────────
+            // POST DETAIL VIEW
+            // ────────────────────────────────────────────────────────
+            (() => {
+              const p = discussions.find(d => d.id === selectedPost.id) || selectedPost;
+              const helpfulCount = p.reactions?.helpful?.length || 0;
+              const downvoteCount = p.reactions?.quality?.length || 0;
+              const netScore = helpfulCount - downvoteCount;
+              const isHelpful = userProfile ? p.reactions?.helpful?.includes(userProfile.id) : false;
+              const isDownvoted = userProfile ? p.reactions?.quality?.includes(userProfile.id) : false;
               const commentsCount = p.comments?.length || 0;
               const timeAgo = (() => {
                 const diff = Date.now() - new Date(p.created_at).getTime();
@@ -3288,14 +3521,20 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                 if (days < 30) return `${days}d ago`;
                 return new Date(p.created_at).toLocaleDateString();
               })();
+
               return (
-                <div
-                  key={p.id}
-                  className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-2xl overflow-hidden hover:border-zinc-250 dark:hover:border-white/10 transition-colors"
-                >
-                  <div className="px-4 pt-3.5 pb-1">
-                    {/* Header: avatar · username · time · pinned · menu */}
-                    <div className="flex items-center justify-between mb-2.5">
+                <div className="space-y-4">
+                  {/* Back button */}
+                  <button 
+                    onClick={() => setSelectedPost(null)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all self-start"
+                  >
+                    <ArrowLeft size={14} /> Back to Discussions
+                  </button>
+
+                  <div className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-2xl overflow-hidden p-5 space-y-4">
+                    {/* Header */}
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-[11px] min-w-0">
                         <img src={p.user_avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-7 h-7 rounded-full flex-shrink-0" />
                         <span className="font-bold text-zinc-800 dark:text-zinc-200 truncate">{p.user_username}</span>
@@ -3307,7 +3546,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                         )}
                       </div>
 
-                      {/* Three-dot menu */}
+                      {/* Dropdown Menu (only if user is admin or creator) */}
                       {(userProfile?.is_admin || userProfile?.id === p.user_id) && (
                         <div className="relative flex-shrink-0 ml-2">
                           <button
@@ -3323,7 +3562,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                               <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/8 rounded-xl shadow-xl py-1 z-20">
                                 {userProfile?.is_admin && (
                                   <button
-                                    onClick={async () => {
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
                                       setActivePostMenuId(null);
                                       setPinningPostId(p.id);
                                       const nextPinStatus = !p.is_pinned;
@@ -3353,7 +3593,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
                                 {userProfile?.id === p.user_id && (
                                   <button
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       setActivePostMenuId(null);
                                       setEditingPost(p);
                                       setEditPostTitle(p.title);
@@ -3372,11 +3613,13 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                                 )}
 
                                 <button
-                                  onClick={async () => {
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
                                     if (confirm("Are you sure you want to delete this post?")) {
                                       setActivePostMenuId(null);
                                       const ok = await CommunityService.deletePost(p.id);
                                       if (ok) {
+                                        setSelectedPost(null);
                                         setDiscussions(prev => prev.filter(post => post.id !== p.id));
                                         showToast("Post deleted successfully", "success");
                                       } else {
@@ -3395,13 +3638,13 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       )}
                     </div>
 
-                    {/* Title — big, bold, Reddit-style */}
-                    <h3 className="text-[15px] sm:text-base font-extrabold text-zinc-900 dark:text-white leading-snug mb-1.5">
+                    {/* Title */}
+                    <h3 className="text-base sm:text-lg font-black text-zinc-950 dark:text-white leading-snug">
                       {p.title}
                     </h3>
 
                     {/* Category flair pill */}
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2">
                       <span
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold"
                         style={{ 
@@ -3419,323 +3662,913 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       </span>
                     </div>
 
-                    {/* Body text — clean, readable */}
+                    {/* Body text — clean, readable (fully expanded!) */}
                     <div 
-                      className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal mb-3 wysiwyg-content" 
+                      className="text-[13px] text-zinc-700 dark:text-zinc-300 leading-relaxed font-normal wysiwyg-content" 
                       style={{ lineHeight: '1.7' }}
                       dangerouslySetInnerHTML={{ __html: autoLink(p.content) }}
                     />
 
                     {/* Tags */}
                     {p.tags && p.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mb-3">
+                      <div className="flex flex-wrap gap-1.5">
                         {p.tags.map(t => (
                           <span key={t} className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400">{t}</span>
                         ))}
                       </div>
                     )}
-                  </div>
 
-                  {/* Bottom action bar — Reddit style */}
-                  <div className="flex items-center gap-1 px-2.5 pb-2.5 pt-0.5">
-                    {/* Upvote / count / Downvote pill */}
-                    <div className="flex items-center bg-zinc-100 dark:bg-white/[0.06] rounded-full">
+                    {/* Actions Row */}
+                    <div className="flex items-center gap-1.5 border-t border-zinc-100 dark:border-white/5 pt-3.5">
+                      <div className="flex items-center bg-zinc-100 dark:bg-white/[0.06] rounded-full">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleReaction(p.id, 'post', 'helpful'); }}
+                          className={`w-9 h-9 rounded-full flex items-center justify-center border-none cursor-pointer transition-all ${
+                            isHelpful
+                              ? 'text-white'
+                              : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent hover:bg-zinc-200 dark:hover:bg-white/10'
+                          }`}
+                          style={isHelpful ? { color: theme.rawColor } : undefined}
+                        >
+                          <ArrowBigUp size={20} fill={isHelpful ? theme.rawColor : 'none'} />
+                        </button>
+                        <span className={`text-xs font-bold min-w-[20px] text-center ${
+                          isHelpful || isDownvoted ? '' : 'text-zinc-600 dark:text-zinc-300'
+                        }`} style={isHelpful ? { color: theme.rawColor } : isDownvoted ? { color: '#3b82f6' } : undefined}>
+                          {netScore}
+                        </span>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleReaction(p.id, 'post', 'quality'); }}
+                          className={`w-9 h-9 rounded-full flex items-center justify-center border-none cursor-pointer transition-all ${
+                            isDownvoted
+                              ? 'text-white'
+                              : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent hover:bg-zinc-200 dark:hover:bg-white/10'
+                          }`}
+                          style={isDownvoted ? { color: '#3b82f6' } : undefined}
+                        >
+                          <ArrowBigDown size={20} fill={isDownvoted ? '#3b82f6' : 'none'} />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 bg-zinc-100/50 dark:bg-white/[0.04]">
+                        <MessageSquare size={16} /> {commentsCount} comments
+                      </div>
+
                       <button
-                        onClick={() => handleReaction(p.id, 'post', 'helpful')}
-                        className={`w-9 h-9 rounded-full flex items-center justify-center border-none cursor-pointer transition-all ${
-                          isHelpful
-                            ? 'text-white'
-                            : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent hover:bg-zinc-200 dark:hover:bg-white/10'
-                        }`}
-                        style={isHelpful ? { color: theme.rawColor } : undefined}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigator.clipboard.writeText(window.location.href);
+                          showToast('Link copied!', 'success');
+                        }}
+                        className="flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.06] bg-transparent border-none cursor-pointer transition-all"
                       >
-                        <ArrowBigUp size={20} fill={isHelpful ? theme.rawColor : 'none'} />
-                      </button>
-                      <span className={`text-xs font-bold min-w-[20px] text-center ${
-                        isHelpful ? '' : 'text-zinc-600 dark:text-zinc-300'
-                      }`} style={isHelpful ? { color: theme.rawColor } : undefined}>
-                        {helpfulCount}
-                      </span>
-                      <button
-                        onClick={() => handleReaction(p.id, 'post', 'important')}
-                        className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent hover:bg-zinc-200 dark:hover:bg-white/10 border-none cursor-pointer transition-all"
-                      >
-                        <ArrowBigDown size={20} />
+                        <Share2 size={15} /> Share
                       </button>
                     </div>
-
-                    {/* Comments button */}
-                    <button
-                      onClick={() => setExpandedPostCommentsId(expandedPostCommentsId === p.id ? null : p.id)}
-                      className="flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.06] bg-transparent border-none cursor-pointer transition-all"
-                    >
-                      <MessageSquare size={16} /> {commentsCount}
-                    </button>
-
-                    {/* Share button */}
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(window.location.href);
-                        showToast('Link copied!', 'success');
-                      }}
-                      className="flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.06] bg-transparent border-none cursor-pointer transition-all"
-                    >
-                      <Share2 size={15} /> Share
-                    </button>
                   </div>
 
-                  {/* Expanded Comments Section */}
-                  {expandedPostCommentsId === p.id && (
-                    <div className="px-4 pb-4 pt-1 border-t border-zinc-100 dark:border-white/5">
-                      {/* Add Comment Input — top */}
-                      <form 
-                        onSubmit={async (e) => {
-                          e.preventDefault();
-                          if (!userProfile) {
-                            showToast("Please login to post a comment.", "info");
-                            return;
-                          }
-                          const text = newCommentTexts[p.id] || '';
-                          if (!text.trim()) return;
+                  {/* Comments Section (always open on details) */}
+                  <div className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-2xl p-5 space-y-4">
+                    <h4 className="text-xs font-bold text-zinc-400 tracking-wider flex items-center gap-1.5"><MessageSquare className="w-3.5 h-3.5" /> Comments</h4>
 
-                          setSubmittingCommentId(p.id);
-                          try {
-                            const added = await CommunityService.addCommentToItem(p.id, 'post', {
-                              user_id: userProfile.id,
-                              username: userProfile.username,
-                              avatar_url: userProfile.avatar_url || '',
-                              content: text.trim()
-                            });
+                    <form 
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        if (!userProfile) {
+                          showToast("Please login to post a comment.", "info");
+                          return;
+                        }
+                        const text = newCommentTexts[p.id] || '';
+                        if (!text.trim()) return;
 
-                            setDiscussions(prev => prev.map(post => {
-                              if (post.id === p.id) {
-                                return { ...post, comments: [...(post.comments || []), added] };
-                              }
-                              return post;
-                            }));
+                        setSubmittingCommentId(p.id);
+                        try {
+                          const added = await CommunityService.addCommentToItem(p.id, 'post', {
+                            user_id: userProfile.id,
+                            username: userProfile.username,
+                            avatar_url: userProfile.avatar_url || '',
+                            content: text.trim()
+                          });
 
-                            setNewCommentTexts(prev => ({ ...prev, [p.id]: '' }));
-                            showToast("Comment posted!", "success");
-                          } catch (err) {
-                            showToast("Failed to post comment", "error");
-                          } finally {
-                            setSubmittingCommentId(null);
-                          }
-                        }}
-                        className="flex gap-2.5 items-start py-3"
-                      >
-                        <img src={userProfile?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-7 h-7 rounded-full shrink-0 mt-0.5" />
-                        <div className="flex-1 min-w-0 flex flex-col gap-2">
-                          <input
-                            type="text"
-                            placeholder="Add a comment..."
-                            value={newCommentTexts[p.id] || ''}
-                            onChange={(e) => setNewCommentTexts(prev => ({ ...prev, [p.id]: e.target.value }))}
-                            className="w-full bg-transparent border border-zinc-200 dark:border-white/8 rounded-xl px-3.5 py-2.5 text-xs text-zinc-800 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none transition-colors"
-                            style={{ borderColor: (newCommentTexts[p.id] || '').trim() ? theme.rawColor : undefined }}
-                            disabled={submittingCommentId === p.id}
-                          />
-                          {(newCommentTexts[p.id] || '').trim() && (
-                            <div className="flex justify-end gap-2">
+                          setDiscussions(prev => prev.map(post => {
+                            if (post.id === p.id) {
+                              return { ...post, comments: [...(post.comments || []), added] };
+                            }
+                            return post;
+                          }));
+
+                          setNewCommentTexts(prev => ({ ...prev, [p.id]: '' }));
+                          showToast("Comment posted!", "success");
+                        } catch (err) {
+                          showToast("Failed to post comment", "error");
+                        } finally {
+                          setSubmittingCommentId(null);
+                        }
+                      }}
+                      className="flex gap-2.5 items-start py-2 border-b border-zinc-100 dark:border-white/5 pb-4"
+                    >
+                      <img src={userProfile?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-7 h-7 rounded-full shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0 flex flex-col gap-2">
+                        <input
+                          type="text"
+                          placeholder="Add a comment..."
+                          value={newCommentTexts[p.id] || ''}
+                          onChange={(e) => setNewCommentTexts(prev => ({ ...prev, [p.id]: e.target.value }))}
+                          className="w-full bg-transparent border border-zinc-200 dark:border-white/8 rounded-xl px-3.5 py-2.5 text-xs text-zinc-800 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none transition-colors"
+                          style={{ borderColor: (newCommentTexts[p.id] || '').trim() ? theme.rawColor : undefined }}
+                          disabled={submittingCommentId === p.id}
+                        />
+                        {(newCommentTexts[p.id] || '').trim() && (
+                          <div className="flex justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setNewCommentTexts(prev => ({ ...prev, [p.id]: '' }))}
+                              className="px-3.5 py-1.5 rounded-full text-xs font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="submit"
+                              style={{ backgroundColor: theme.rawColor }}
+                              className="px-4 py-1.5 text-white rounded-full text-xs font-bold border-none cursor-pointer hover:opacity-90 active:scale-95 transition-all"
+                              disabled={submittingCommentId === p.id}
+                            >
+                              {submittingCommentId === p.id ? '...' : 'Comment'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </form>
+
+                    {p.comments && p.comments.length > 0 ? (
+                      <div className="space-y-4 pt-2">
+                        {p.comments.map((comment) => {
+                          const commentTimeAgo = (() => {
+                            const diff = Date.now() - new Date(comment.created_at).getTime();
+                            const mins = Math.floor(diff / 60000);
+                            if (mins < 60) return `${mins}m ago`;
+                            const hrs = Math.floor(mins / 60);
+                            if (hrs < 24) return `${hrs}h ago`;
+                            const days = Math.floor(hrs / 24);
+                            if (days < 30) return `${days}d ago`;
+                            return new Date(comment.created_at).toLocaleDateString();
+                          })();
+                          return (
+                            <div key={comment.id} className="flex gap-2.5 items-start py-3 border-t border-zinc-100 dark:border-white/[0.04] first:border-t-0">
+                              <img src={comment.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-6 h-6 rounded-full shrink-0 mt-0.5" />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5 mb-0.5">
+                                  <span className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200">{comment.username}</span>
+                                  <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">• {commentTimeAgo}</span>
+                                </div>
+                                <p className="text-[12px] text-zinc-700 dark:text-zinc-300 leading-relaxed font-normal">{comment.content}</p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-zinc-400 dark:text-zinc-500 py-6 text-center font-medium">No comments yet — be the first to reply!</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()
+          ) : (
+            // ────────────────────────────────────────────────────────
+            // FEED VIEW (COLLAPSED CARDS LIST)
+            // ────────────────────────────────────────────────────────
+            <>
+              <div className="flex justify-between items-center gap-4">
+                <h3 className="text-xs font-bold text-zinc-400 tracking-wider flex items-center gap-1.5"><MessageSquare className="w-3.5 h-3.5" /> Discussions</h3>
+              </div>
+
+              {/* Reddit-style create post prompt bar */}
+              <button
+                onClick={() => setShowCreatePost(true)}
+                className="w-full flex items-center gap-3 p-3 bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/8 rounded-2xl cursor-pointer hover:border-zinc-300 dark:hover:border-white/15 transition-all group"
+                style={{ outline: 'none' }}
+              >
+                <img
+                  src={userProfile?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'}
+                  className="w-8 h-8 rounded-full flex-shrink-0 border-2 border-zinc-100 dark:border-white/10"
+                  alt=""
+                />
+                <div className="flex-1 text-left px-3 py-2 bg-zinc-50 dark:bg-white/[0.04] rounded-xl text-xs text-zinc-400 dark:text-zinc-500 font-medium group-hover:bg-zinc-100 dark:group-hover:bg-white/[0.06] transition-colors">
+                  Create Post
+                </div>
+                <div className="flex items-center gap-1.5 flex-shrink-0 pr-1">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"><Image size={16} /></div>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"><Link size={16} /></div>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"><BarChart2 size={16} /></div>
+                </div>
+              </button>
+
+              <div className="space-y-3">
+                {discussions.map((p) => {
+                  const helpfulCount = p.reactions?.helpful?.length || 0;
+                  const downvoteCount = p.reactions?.quality?.length || 0;
+                  const netScore = helpfulCount - downvoteCount;
+                  const isHelpful = userProfile ? p.reactions?.helpful?.includes(userProfile.id) : false;
+                  const isDownvoted = userProfile ? p.reactions?.quality?.includes(userProfile.id) : false;
+                  const commentsCount = p.comments?.length || 0;
+                  const timeAgo = (() => {
+                    const diff = Date.now() - new Date(p.created_at).getTime();
+                    const mins = Math.floor(diff / 60000);
+                    if (mins < 60) return `${mins}m ago`;
+                    const hrs = Math.floor(mins / 60);
+                    if (hrs < 24) return `${hrs}h ago`;
+                    const days = Math.floor(hrs / 24);
+                    if (days < 30) return `${days}d ago`;
+                    return new Date(p.created_at).toLocaleDateString();
+                  })();
+
+                  return (
+                    <div
+                      key={p.id}
+                      onClick={() => setSelectedPost(p)}
+                      className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-2xl overflow-hidden hover:border-zinc-250 dark:hover:border-white/10 transition-colors cursor-pointer"
+                    >
+                      <div className="px-4 pt-3.5 pb-1">
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-2.5">
+                          <div className="flex items-center gap-2 text-[11px] min-w-0">
+                            <img src={p.user_avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-7 h-7 rounded-full flex-shrink-0" />
+                            <span className="font-bold text-zinc-800 dark:text-zinc-200 truncate">{p.user_username}</span>
+                            <span className="text-zinc-400 dark:text-zinc-500 font-medium flex-shrink-0">• {timeAgo}</span>
+                            {p.is_pinned && (
+                              <span className="flex items-center gap-0.5 font-bold px-2 py-0.5 rounded-full text-[9px] flex-shrink-0" style={{ color: theme.rawColor, backgroundColor: `${theme.rawColor}12` }}>
+                                <Pin size={9} /> Pinned
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Dropdown Menu */}
+                          {(userProfile?.is_admin || userProfile?.id === p.user_id) && (
+                            <div className="relative flex-shrink-0 ml-2">
                               <button
-                                type="button"
-                                onClick={() => setNewCommentTexts(prev => ({ ...prev, [p.id]: '' }))}
-                                className="px-3.5 py-1.5 rounded-full text-xs font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
+                                onClick={(e) => { e.stopPropagation(); setActivePostMenuId(activePostMenuId === p.id ? null : p.id); }}
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 bg-transparent border-none cursor-pointer transition-all hover:bg-zinc-100 dark:hover:bg-white/5"
                               >
-                                Cancel
+                                <MoreHorizontal size={16} />
                               </button>
-                              <button
-                                type="submit"
-                                style={{ backgroundColor: theme.rawColor }}
-                                className="px-4 py-1.5 text-white rounded-full text-xs font-bold border-none cursor-pointer hover:opacity-90 active:scale-95 transition-all"
-                                disabled={submittingCommentId === p.id}
-                              >
-                                {submittingCommentId === p.id ? '...' : 'Comment'}
-                              </button>
+
+                              {activePostMenuId === p.id && (
+                                <>
+                                  <div className="fixed inset-0 z-10" onClick={(e) => { e.stopPropagation(); setActivePostMenuId(null); }} />
+                                  <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/8 rounded-xl shadow-xl py-1 z-20">
+                                    {userProfile?.is_admin && (
+                                      <button
+                                        onClick={async (e) => {
+                                          e.stopPropagation();
+                                          setActivePostMenuId(null);
+                                          setPinningPostId(p.id);
+                                          const nextPinStatus = !p.is_pinned;
+                                          const ok = await CommunityService.updatePostPinStatus(p.id, nextPinStatus);
+                                          if (ok) {
+                                            setDiscussions(prev => {
+                                              const updated = prev.map(post => post.id === p.id ? { ...post, is_pinned: nextPinStatus } : post);
+                                              return [...updated].sort((a, b) => {
+                                                const pinA = a.is_pinned ? 1 : 0;
+                                                const pinB = b.is_pinned ? 1 : 0;
+                                                if (pinA !== pinB) return pinB - pinA;
+                                                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                                              });
+                                            });
+                                            showToast(nextPinStatus ? "Post pinned!" : "Post unpinned!", "success");
+                                          } else {
+                                            showToast("Failed to update pin status", "error");
+                                          }
+                                          setPinningPostId(null);
+                                        }}
+                                        disabled={pinningPostId === p.id}
+                                        className="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                      >
+                                        <Pin size={12} /> {p.is_pinned ? "Unpin" : "Pin Post"}
+                                      </button>
+                                    )}
+
+                                    {userProfile?.id === p.user_id && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setActivePostMenuId(null);
+                                          setEditingPost(p);
+                                          setEditPostTitle(p.title);
+                                          setEditPostContent(p.content);
+                                          setEditPostCategory((p.category as any) || 'discussion');
+                                          setTimeout(() => {
+                                           if (editEditorRef.current) {
+                                             editEditorRef.current.innerHTML = p.content;
+                                           }
+                                          }, 50);
+                                        }}
+                                        className="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                      >
+                                        <Edit size={12} /> Edit
+                                      </button>
+                                    )}
+
+                                    <button
+                                      onClick={async (e) => {
+                                        e.stopPropagation();
+                                        if (confirm("Are you sure you want to delete this post?")) {
+                                          setActivePostMenuId(null);
+                                          const ok = await CommunityService.deletePost(p.id);
+                                          if (ok) {
+                                            setDiscussions(prev => prev.filter(post => post.id !== p.id));
+                                            showToast("Post deleted successfully", "success");
+                                          } else {
+                                            showToast("Failed to delete post", "error");
+                                          }
+                                        }
+                                      }}
+                                      className="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-white/5 text-red-500 border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                </>
+                              )}
                             </div>
                           )}
                         </div>
-                      </form>
 
-                      {/* Comment threads */}
-                      {p.comments && p.comments.length > 0 ? (
-                        <div className="space-y-0 max-h-80 overflow-y-auto no-scrollbar">
-                          {p.comments.map((comment) => {
-                            const commentTimeAgo = (() => {
-                              const diff = Date.now() - new Date(comment.created_at).getTime();
-                              const mins = Math.floor(diff / 60000);
-                              if (mins < 60) return `${mins}m ago`;
-                              const hrs = Math.floor(mins / 60);
-                              if (hrs < 24) return `${hrs}h ago`;
-                              const days = Math.floor(hrs / 24);
-                              if (days < 30) return `${days}d ago`;
-                              return new Date(comment.created_at).toLocaleDateString();
-                            })();
-                            return (
-                              <div key={comment.id} className="flex gap-2.5 items-start py-2.5 border-t border-zinc-50 dark:border-white/[0.03] first:border-t-0">
-                                <img src={comment.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-6 h-6 rounded-full shrink-0 mt-0.5" />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-1.5 mb-0.5">
-                                    <span className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200">{comment.username}</span>
-                                    <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">• {commentTimeAgo}</span>
-                                  </div>
-                                  <p className="text-[12px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">{comment.content}</p>
-                                </div>
-                              </div>
-                            );
-                          })}
+                        {/* Title */}
+                        <h3 className="text-[15px] sm:text-base font-extrabold text-zinc-900 dark:text-white leading-snug mb-1.5">
+                          {p.title}
+                        </h3>
+
+                        {/* Category flair pill */}
+                        <div className="flex items-center gap-2 mb-3">
+                          <span
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold"
+                            style={{ 
+                              backgroundColor: p.category === 'announcement' ? '#ff444412' : `${theme.rawColor}12`, 
+                              color: p.category === 'announcement' ? '#ff4444' : theme.rawColor 
+                            }}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: p.category === 'announcement' ? '#ff4444' : theme.rawColor }} />
+                            {p.category === 'discussion' && 'Discussion'}
+                            {p.category === 'doubt' && 'Doubt'}
+                            {p.category === 'poll' && 'Poll'}
+                            {p.category === 'question' && 'Exam Prep'}
+                            {p.category === 'resource' && 'Resource'}
+                            {p.category === 'announcement' && '📢 Announcement'}
+                          </span>
                         </div>
-                      ) : (
-                        <div className="text-xs text-zinc-400 dark:text-zinc-500 py-3 text-center font-medium">No comments yet — be the first to reply!</div>
-                      )}
+
+                        {/* Body text — clean, readable (Reddit-style collapsed) */}
+                        <div 
+                          className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal mb-3 wysiwyg-content post-collapsed-content" 
+                          style={{ lineHeight: '1.7' }}
+                          dangerouslySetInnerHTML={{ __html: autoLink(p.content) }}
+                        />
+
+                        {/* Tags */}
+                        {p.tags && p.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mb-3">
+                            {p.tags.map(t => (
+                              <span key={t} className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400">{t}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Bottom action bar — Reddit style */}
+                      <div className="flex items-center gap-1 px-2.5 pb-2.5 pt-0.5">
+                        {/* Upvote / count / Downvote pill */}
+                        <div className="flex items-center bg-zinc-100 dark:bg-white/[0.06] rounded-full">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleReaction(p.id, 'post', 'helpful'); }}
+                            className={`w-9 h-9 rounded-full flex items-center justify-center border-none cursor-pointer transition-all ${
+                              isHelpful
+                                ? 'text-white'
+                                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent hover:bg-zinc-200 dark:hover:bg-white/10'
+                            }`}
+                            style={isHelpful ? { color: theme.rawColor } : undefined}
+                          >
+                            <ArrowBigUp size={20} fill={isHelpful ? theme.rawColor : 'none'} />
+                          </button>
+                          <span className={`text-xs font-bold min-w-[20px] text-center ${
+                            isHelpful || isDownvoted ? '' : 'text-zinc-600 dark:text-zinc-300'
+                          }`} style={isHelpful ? { color: theme.rawColor } : isDownvoted ? { color: '#3b82f6' } : undefined}>
+                            {netScore}
+                          </span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleReaction(p.id, 'post', 'quality'); }}
+                            className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center border-none cursor-pointer transition-all ${
+                              isDownvoted
+                                ? 'text-white'
+                                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent hover:bg-zinc-200 dark:hover:bg-white/10'
+                            }`}
+                            style={isDownvoted ? { color: '#3b82f6' } : undefined}
+                          >
+                            <ArrowBigDown size={20} fill={isDownvoted ? '#3b82f6' : 'none'} />
+                          </button>
+                        </div>
+
+                        {/* Comments button */}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setSelectedPost(p); }}
+                          className="flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.06] bg-transparent border-none cursor-pointer transition-all"
+                        >
+                          <MessageSquare size={16} /> {commentsCount}
+                        </button>
+
+                        {/* Share button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(window.location.href);
+                            showToast('Link copied!', 'success');
+                          }}
+                          className="flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.06] bg-transparent border-none cursor-pointer transition-all"
+                        >
+                          <Share2 size={15} /> Share
+                        </button>
+                      </div>
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       )}
 
       {/* 4. REQUESTS TAB */}
       {activeTab === 'requests' && (
         <div className="space-y-5 animate-fade-in">
-          {/* Reddit-style create request prompt */}
-          <div
-            onClick={() => setShowCreateRequest(true)}
-            className="flex items-center gap-3 p-3 bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/8 rounded-2xl cursor-pointer hover:border-zinc-300 dark:hover:border-white/15 transition-all group"
-          >
-            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${theme.rawColor}15` }}>
-              <HelpCircle size={16} style={{ color: theme.rawColor }} />
-            </div>
-            <div className="flex-1 py-2 px-3 rounded-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/8 group-hover:border-zinc-300 dark:group-hover:border-white/15 transition-colors">
-              <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Request study material with bounty...</span>
-            </div>
-            <div className="px-3 py-1.5 rounded-full text-[10px] font-bold flex items-center gap-1" style={{ backgroundColor: `${theme.rawColor}12`, color: theme.rawColor }}>
-              <Trophy size={11} /> Bounty
-            </div>
-          </div>
+          {showCreateRequest ? (
+            // ────────────────────────────────────────────────────────
+            // INLINE CREATE REQUEST VIEW
+            // ────────────────────────────────────────────────────────
+            <div className="space-y-4">
+              {/* Back button */}
+              <button 
+                type="button"
+                onClick={() => setShowCreateRequest(false)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all self-start"
+              >
+                <ArrowLeft size={14} /> Back to Requests
+              </button>
 
-
-
-          {/* Requests list */}
-          <div className="space-y-4">
-            {requests.map((r) => (
-              <div key={r.id} className="p-5 bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/5 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <img src={r.user_avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-6 h-6 rounded-full" />
-                    <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">{r.user_username} asked {new Date(r.created_at).toLocaleDateString()}</span>
+              <div className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm flex flex-col">
+                {/* Header */}
+                <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100 dark:border-white/5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
+                      {subjectCode.slice(0, 2)}
+                    </div>
+                    <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
+                    <span className="text-[10px] font-semibold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full flex items-center gap-1"><Trophy size={9} /> Bounty Request</span>
                   </div>
-                  <h4 className="text-xs font-black text-zinc-950 dark:text-white leading-tight">
-                    {r.title}
-                  </h4>
-                  <div 
-                    className="text-xs text-zinc-500 dark:text-zinc-400 font-medium wysiwyg-content"
-                    dangerouslySetInnerHTML={{ __html: autoLink(r.content) }}
-                  />
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
-                  <div className="px-3 py-1.5 border rounded-xl text-xs font-semibold" style={{ backgroundColor: `${theme.rawColor}15`, borderColor: `${theme.rawColor}30`, color: theme.rawColor }}>
-                    +{r.bounty_xp} XP Bounty
+                <form onSubmit={handleRequestSubmit} className="flex flex-col pt-4">
+                  {/* Title */}
+                  <div className="pb-2">
+                    <input
+                      type="text"
+                      value={reqTitle}
+                      onChange={(e) => setReqTitle(e.target.value)}
+                      placeholder="What material do you need?*"
+                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600 focus:ring-0"
+                      required
+                      autoFocus
+                    />
                   </div>
 
-                  {r.status === 'open' ? (
+                  {/* Bounty XP row */}
+                  <div className="pb-3 flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold border border-amber-400/40 bg-amber-400/8 text-amber-500">
+                      <Trophy size={11} />
+                      <span>{reqBounty} XP Bounty</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={10}
+                      max={500}
+                      step={10}
+                      value={reqBounty}
+                      onChange={(e) => setReqBounty(Number(e.target.value))}
+                      className="flex-1 h-1.5 rounded-full appearance-none bg-zinc-200 dark:bg-white/10 cursor-pointer"
+                      style={{ accentColor: theme.rawColor }}
+                    />
+                    <input
+                      type="number"
+                      value={reqBounty}
+                      onChange={(e) => setReqBounty(Number(e.target.value))}
+                      min={10}
+                      max={500}
+                      className="w-16 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-[11px] font-bold text-center outline-none text-zinc-800 dark:text-white"
+                    />
+                  </div>
+
+                  <div className="border-t border-zinc-100 dark:border-white/5" />
+
+                  {/* WYSIWYG Body Editor */}
+                  <div className="pt-4 pb-3">
+                    <div
+                      ref={reqEditorRef}
+                      contentEditable
+                      data-placeholder="Describe what you need in detail — unit, topic, type of material...*"
+                      onInput={() => setReqContent(getEditorText(reqEditorRef))}
+                      onKeyDown={handleEditorKeyDown}
+                      className="w-full min-h-[180px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
+                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                      suppressContentEditableWarning
+                    />
+                  </div>
+
+                  {/* Formatting Toolbar */}
+                  <div className="pb-4">
+                    <div className="flex items-center gap-0.5 flex-wrap">
+                      {renderToolbar(buildToolbarItems(reqEditorRef, { full: true }), 'rq')}
+                      {imageUploading && <span className="text-[10px] text-zinc-400 ml-2 animate-pulse">Uploading...</span>}
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-end gap-2.5 pt-3.5 border-t border-zinc-100 dark:border-white/5">
                     <button
-                      onClick={() => {
-                        if (!userProfile) {
-                          showToast("Please login to solve requests", "info");
-                          return;
-                        }
-                        // Fire file uploader
-                        onUploadClick();
-                        showToast("Upload the file to this subject folder first to solve!", "info");
-                      }}
-                      style={{ backgroundColor: theme.rawColor }}
-                      className="px-4 py-2 text-white rounded-xl text-xs font-bold border-none cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                      type="button"
+                      onClick={() => setShowCreateRequest(false)}
+                      className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
                     >
-                      Solve Request
+                      Cancel
                     </button>
-                  ) : (
-                    <span className="px-3 py-1.5 bg-emerald-500/10 text-emerald-500 rounded-xl text-xs font-bold">Solved</span>
-                  )}
+                    <button
+                      type="submit"
+                      disabled={!reqTitle.trim() || !reqContent.trim()}
+                      style={{
+                        backgroundColor: (!reqTitle.trim() || !reqContent.trim()) ? undefined : theme.rawColor,
+                        opacity: (!reqTitle.trim() || !reqContent.trim()) ? 0.4 : 1
+                      }}
+                      className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
+                        (!reqTitle.trim() || !reqContent.trim())
+                          ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
+                          : 'text-white hover:opacity-90 active:scale-95'
+                      }`}
+                    >
+                      Post Bounty Request
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          ) : (
+            // ────────────────────────────────────────────────────────
+            // REGULAR REQUESTS FEED
+            // ────────────────────────────────────────────────────────
+            <>
+              {/* Reddit-style create request prompt */}
+              <div
+                onClick={() => setShowCreateRequest(true)}
+                className="flex items-center gap-3 p-3 bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/8 rounded-2xl cursor-pointer hover:border-zinc-300 dark:hover:border-white/15 transition-all group"
+              >
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${theme.rawColor}15` }}>
+                  <HelpCircle size={16} style={{ color: theme.rawColor }} />
+                </div>
+                <div className="flex-1 py-2 px-3 rounded-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/8 group-hover:border-zinc-300 dark:group-hover:border-white/15 transition-colors">
+                  <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Request study material with bounty...</span>
+                </div>
+                <div className="px-3 py-1.5 rounded-full text-[10px] font-bold flex items-center gap-1" style={{ backgroundColor: `${theme.rawColor}12`, color: theme.rawColor }}>
+                  <Trophy size={11} /> Bounty
                 </div>
               </div>
-            ))}
-          </div>
+
+              {/* Requests list */}
+              <div className="space-y-4">
+                {requests.map((r) => (
+                  <div key={r.id} className="p-5 bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/5 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <img src={r.user_avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-6 h-6 rounded-full" />
+                        <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">{r.user_username} asked {new Date(r.created_at).toLocaleDateString()}</span>
+                      </div>
+                      <h4 className="text-xs font-black text-zinc-950 dark:text-white leading-tight">
+                        {r.title}
+                      </h4>
+                      <div 
+                        className="text-xs text-zinc-500 dark:text-zinc-400 font-medium wysiwyg-content"
+                        dangerouslySetInnerHTML={{ __html: autoLink(r.content) }}
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="px-3 py-1.5 border rounded-xl text-xs font-semibold" style={{ backgroundColor: `${theme.rawColor}15`, borderColor: `${theme.rawColor}30`, color: theme.rawColor }}>
+                        +{r.bounty_xp} XP Bounty
+                      </div>
+
+                      {r.status === 'open' ? (
+                        <button
+                          onClick={() => {
+                            if (!userProfile) {
+                              showToast("Please login to solve requests", "info");
+                              return;
+                            }
+                            // Fire file uploader
+                            onUploadClick();
+                            showToast("Upload the file to this subject folder first to solve!", "info");
+                          }}
+                          style={{ backgroundColor: theme.rawColor }}
+                          className="px-4 py-2 text-white rounded-xl text-xs font-bold border-none cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                        >
+                          Solve Request
+                        </button>
+                      ) : (
+                        <span className="px-3 py-1.5 bg-emerald-500/10 text-emerald-500 rounded-xl text-xs font-bold">Solved</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 
       {/* 5. STUDY PACKS TAB */}
       {activeTab === 'packs' && (
         <div className="space-y-5 animate-fade-in">
-          {/* Reddit-style create pack prompt */}
-          <div
-            onClick={() => setShowCreatePack(true)}
-            className="flex items-center gap-3 p-3 bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/8 rounded-2xl cursor-pointer hover:border-zinc-300 dark:hover:border-white/15 transition-all group"
-          >
-            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${theme.rawColor}15` }}>
-              <BookOpen size={16} style={{ color: theme.rawColor }} />
-            </div>
-            <div className="flex-1 py-2 px-3 rounded-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/8 group-hover:border-zinc-300 dark:group-hover:border-white/15 transition-colors">
-              <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Create a curated study pack...</span>
-            </div>
-            <div className="px-3 py-1.5 rounded-full text-[10px] font-bold flex items-center gap-1" style={{ backgroundColor: `${theme.rawColor}12`, color: theme.rawColor }}>
-              <Folder size={11} /> {subjectFiles.length} files
-            </div>
-          </div>
-
-          {/* List of Study Packs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {studyPacks.map((pack) => (
-              <div
-                key={pack.id}
-                className="p-5 bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/5 rounded-3xl space-y-4 shadow-sm flex flex-col justify-between"
+          {showCreatePack ? (
+            // ────────────────────────────────────────────────────────
+            // INLINE CREATE STUDY PACK VIEW
+            // ────────────────────────────────────────────────────────
+            <div className="space-y-4">
+              {/* Back button */}
+              <button 
+                type="button"
+                onClick={() => setShowCreatePack(false)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all self-start"
               >
-                <div className="space-y-2">
-                  <div className="text-xs font-black text-zinc-950 dark:text-white leading-tight">
-                    {pack.title}
-                  </div>
-                  <div 
-                    className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed wysiwyg-content"
-                    dangerouslySetInnerHTML={{ __html: autoLink(pack.content) }}
-                  />
-                  <div className="text-[10px] text-zinc-400 font-semibold flex items-center gap-3">
-                    <span>Created by {pack.user_username}</span>
-                    <span>•</span>
-                    <span>{pack.follower_ids?.length || 0} Followers</span>
+                <ArrowLeft size={14} /> Back to Study Packs
+              </button>
+
+              <div className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm flex flex-col">
+                {/* Header */}
+                <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100 dark:border-white/5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
+                      {subjectCode.slice(0, 2)}
+                    </div>
+                    <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
+                    <span className="text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full flex items-center gap-1"><BookOpen size={9} /> Study Pack</span>
                   </div>
                 </div>
 
-                <div className="flex gap-2.5 pt-2 border-t border-zinc-100 dark:border-white/5">
-                  <button
-                    onClick={() => {
-                      if (subjectFiles.length > 0) {
-                        setSelectedFileDetail(subjectFiles[0]);
-                      } else {
-                        showToast("Study Pack details loading...", "info");
-                      }
-                    }}
-                    style={{ backgroundColor: `${theme.rawColor}15`, color: theme.rawColor }}
-                    className="flex-1 py-2 rounded-xl text-xs font-bold border-none cursor-pointer hover:opacity-90 transition-all"
-                  >
-                    Open Study Pack
-                  </button>
-                  <button
-                    onClick={async () => {
-                      if (!userProfile) return;
-                      await CommunityService.toggleFollowStudyPack(pack.id, userProfile.id);
-                      loadCommunityData();
-                    }}
-                    className="px-4.5 py-2 bg-zinc-100 dark:bg-white/5 rounded-xl text-xs font-bold text-zinc-500 border-none cursor-pointer"
-                  >
-                    Follow
-                  </button>
+                <form onSubmit={handlePackSubmit} className="flex flex-col pt-4">
+                  {/* Title */}
+                  <div className="pb-2">
+                    <input
+                      type="text"
+                      value={packTitle}
+                      onChange={(e) => setPackTitle(e.target.value)}
+                      placeholder="Study Pack Title*"
+                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600 focus:ring-0"
+                      required
+                      autoFocus
+                    />
+                  </div>
+
+                  <div className="border-t border-zinc-100 dark:border-white/5" />
+
+                  {/* WYSIWYG Description */}
+                  <div className="pt-4 pb-3">
+                    <div
+                      ref={packEditorRef}
+                      contentEditable
+                      data-placeholder="Describe this study pack — what topics it covers, why it's useful...*"
+                      onInput={() => setPackContent(getEditorText(packEditorRef))}
+                      onKeyDown={handleEditorKeyDown}
+                      className="w-full min-h-[120px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
+                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                      suppressContentEditableWarning
+                    />
+                  </div>
+
+                  {/* Formatting Toolbar */}
+                  <div className="pb-3">
+                    <div className="flex items-center gap-0.5 flex-wrap">
+                      {renderToolbar(buildToolbarItems(packEditorRef, { full: false }), 'pk')}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-zinc-100 dark:border-white/5" />
+
+                  {/* File Picker — YouTube playlist style */}
+                  <div className="pt-4 pb-2">
+                    <div className="flex items-center justify-between mb-2.5">
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+                        <Folder size={11} /> Add files to pack ({packFiles.length} selected)
+                      </span>
+                    </div>
+
+                    {/* Search bar */}
+                    <div className="relative mb-3">
+                      <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                      <input
+                        type="text"
+                        value={packFileSearch}
+                        onChange={(e) => setPackFileSearch(e.target.value)}
+                        placeholder="Search files..."
+                        className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/8 rounded-xl pl-8 pr-3 py-2 text-[11px] font-medium outline-none text-zinc-800 dark:text-white placeholder:text-zinc-400"
+                      />
+                    </div>
+
+                    {/* Selected files pills */}
+                    {packFiles.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {packFiles.map(fid => {
+                          const f = subjectFiles.find(sf => sf.id === fid);
+                          return f ? (
+                            <span key={fid} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold" style={{ backgroundColor: `${theme.rawColor}12`, color: theme.rawColor }}>
+                              <FileText size={10} />
+                              <span className="max-w-[120px] truncate">{f.name}</span>
+                              <button
+                                type="button"
+                                onClick={() => setPackFiles(prev => prev.filter(id => id !== fid))}
+                                className="ml-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 bg-transparent border-none cursor-pointer text-current text-[9px] font-bold"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ) : null;
+                        })}
+                      </div>
+                    )}
+
+                    {/* File list */}
+                    <div className="max-h-[220px] overflow-y-auto rounded-xl border border-zinc-200 dark:border-white/8 bg-zinc-50/50 dark:bg-white/[0.02]">
+                      {subjectFiles
+                        .filter(f => !packFileSearch || f.name.toLowerCase().includes(packFileSearch.toLowerCase()))
+                        .map((f) => {
+                          const isSelected = packFiles.includes(f.id);
+                          const typeIcon = f.type === 'pdf' ? FileText : f.type === 'video' ? Video : f.type === 'code' ? Code : FileText;
+                          const TypeIc = typeIcon;
+                          return (
+                            <button
+                              key={f.id}
+                              type="button"
+                              onClick={() => {
+                                setPackFiles(prev =>
+                                  prev.includes(f.id)
+                                    ? prev.filter(id => id !== f.id)
+                                    : [...prev, f.id]
+                                );
+                              }}
+                              className={`w-full text-left px-3 py-2.5 flex items-center gap-3 transition-all border-none cursor-pointer border-b border-zinc-100 dark:border-white/5 last:border-b-0 ${
+                                isSelected
+                                  ? 'bg-white dark:bg-white/[0.04]'
+                                  : 'bg-transparent hover:bg-zinc-100/50 dark:hover:bg-white/[0.03]'
+                              }`}
+                            >
+                              {/* Checkbox */}
+                              <div className={`w-4.5 h-4.5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                                isSelected
+                                  ? 'border-transparent'
+                                  : 'border-zinc-300 dark:border-zinc-600'
+                              }`} style={isSelected ? { backgroundColor: theme.rawColor } : undefined}>
+                                {isSelected && <Check size={10} className="text-white" />}
+                              </div>
+
+                              <TypeIc size={14} className="text-zinc-400 flex-shrink-0" />
+
+                              <div className="flex-1 min-w-0">
+                                <div className={`text-[11px] font-semibold truncate ${
+                                  isSelected ? 'text-zinc-900 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'
+                                }`}>{f.name}</div>
+                                <div className="text-[9px] text-zinc-400 flex items-center gap-2">
+                                  <span>{f.type.toUpperCase()}</span>
+                                  {f.faculty_name && <><span>·</span><span>{f.faculty_name}</span></>}
+                                  <span>·</span>
+                                  <span>{f.size}</span>
+                                </div>
+                              </div>
+
+                              {isSelected && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md" style={{ backgroundColor: `${theme.rawColor}15`, color: theme.rawColor }}>Added</span>
+                              )}
+                            </button>
+                          );
+                        })}
+
+                      {subjectFiles.filter(f => !packFileSearch || f.name.toLowerCase().includes(packFileSearch.toLowerCase())).length === 0 && (
+                        <div className="px-4 py-6 text-center text-xs text-zinc-400">
+                          {packFileSearch ? 'No files match your search' : 'No files available in this subject'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between gap-2.5 pt-3.5 border-t border-zinc-100 dark:border-white/5">
+                    <span className="text-[10px] text-zinc-400 font-medium">
+                      {packFiles.length} file{packFiles.length !== 1 ? 's' : ''} selected
+                    </span>
+                    <div className="flex gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setShowCreatePack(false)}
+                        className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!packTitle.trim() || !packContent.trim()}
+                        style={{
+                          backgroundColor: (!packTitle.trim() || !packContent.trim()) ? undefined : theme.rawColor,
+                          opacity: (!packTitle.trim() || !packContent.trim()) ? 0.4 : 1
+                        }}
+                        className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
+                          (!packTitle.trim() || !packContent.trim())
+                            ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
+                            : 'text-white hover:opacity-90 active:scale-95'
+                        }`}
+                      >
+                        Create Study Pack
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          ) : (
+            // ────────────────────────────────────────────────────────
+            // REGULAR STUDY PACKS LIST
+            // ────────────────────────────────────────────────────────
+            <>
+              {/* Reddit-style create pack prompt */}
+              <div
+                onClick={() => setShowCreatePack(true)}
+                className="flex items-center gap-3 p-3 bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/8 rounded-2xl cursor-pointer hover:border-zinc-300 dark:hover:border-white/15 transition-all group"
+              >
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${theme.rawColor}15` }}>
+                  <BookOpen size={16} style={{ color: theme.rawColor }} />
+                </div>
+                <div className="flex-1 py-2 px-3 rounded-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/8 group-hover:border-zinc-300 dark:group-hover:border-white/15 transition-colors">
+                  <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Create a curated study pack...</span>
+                </div>
+                <div className="px-3 py-1.5 rounded-full text-[10px] font-bold flex items-center gap-1" style={{ backgroundColor: `${theme.rawColor}12`, color: theme.rawColor }}>
+                  <Folder size={11} /> {subjectFiles.length} files
                 </div>
               </div>
-            ))}
-          </div>
+
+              {/* List of Study Packs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {studyPacks.map((pack) => (
+                  <div
+                    key={pack.id}
+                    className="p-5 bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/5 rounded-3xl space-y-4 shadow-sm flex flex-col justify-between"
+                  >
+                    <div className="space-y-2">
+                      <div className="text-xs font-black text-zinc-950 dark:text-white leading-tight">
+                        {pack.title}
+                      </div>
+                      <div 
+                        className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed wysiwyg-content"
+                        dangerouslySetInnerHTML={{ __html: autoLink(pack.content) }}
+                      />
+                      <div className="text-[10px] text-zinc-400 font-semibold flex items-center gap-3">
+                        <span>Created by {pack.user_username}</span>
+                        <span>•</span>
+                        <span>{pack.follower_ids?.length || 0} Followers</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2.5 pt-2 border-t border-zinc-100 dark:border-white/5">
+                      <button
+                        onClick={() => {
+                          if (subjectFiles.length > 0) {
+                            setSelectedFileDetail(subjectFiles[0]);
+                          } else {
+                            showToast("Study Pack details loading...", "info");
+                          }
+                        }}
+                        style={{ backgroundColor: `${theme.rawColor}15`, color: theme.rawColor }}
+                        className="flex-1 py-2 rounded-xl text-xs font-bold border-none cursor-pointer hover:opacity-90 transition-all"
+                      >
+                        Open Study Pack
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!userProfile) return;
+                          await CommunityService.toggleFollowStudyPack(pack.id, userProfile.id);
+                          loadCommunityData();
+                        }}
+                        className="px-4.5 py-2 bg-zinc-100 dark:bg-white/5 rounded-xl text-xs font-bold text-zinc-500 border-none cursor-pointer"
+                      >
+                        Follow
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -3871,232 +4704,6 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         }}
       />
 
-      {/* Reddit-style Create Post Composer */}
-      {createPortal(
-        <AnimatePresence>
-          {showCreatePost && (
-            <div className="fixed inset-0 z-[9999] flex flex-col overflow-hidden">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                onClick={() => setShowCreatePost(false)}
-              />
-
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 40 }}
-                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                className="relative z-10 w-full max-w-2xl mx-auto mt-8 sm:mt-16 mb-8 flex flex-col bg-white dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/8 rounded-3xl shadow-2xl overflow-hidden"
-                style={{ maxHeight: 'calc(100vh - 4rem)' }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Header with subject selector */}
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 dark:border-white/5">
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowSubjectSelector(!showSubjectSelector)}
-                      className="flex items-center gap-2.5 px-1 py-1 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors bg-transparent border-none cursor-pointer"
-                    >
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
-                        {subjectCode.slice(0, 2)}
-                      </div>
-                      <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
-                      <ChevronDown size={12} className={`text-zinc-400 transition-transform duration-200 ${showSubjectSelector ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {showSubjectSelector && (
-                      <>
-                        <div className="fixed inset-0 z-30" onClick={() => setShowSubjectSelector(false)} />
-                        <div className="absolute left-0 top-full z-40 mt-1 w-64 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1 max-h-60 overflow-y-auto">
-                          <div className="px-3 py-2 text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Post to community</div>
-                          {categories.map((cat) => {
-                            const catCode = cat.name.match(/^([A-Za-z]+\d{3})/)?.[1]?.toUpperCase() || cat.name.split(':')[0].trim();
-                            const catTheme = getSubjectTheme(cat.name, cat.color, cat.icon_name);
-                            const isActive = catCode === subjectCode;
-                            return (
-                              <button
-                                key={cat.id}
-                                type="button"
-                                onClick={() => setShowSubjectSelector(false)}
-                                style={isActive ? { backgroundColor: `${catTheme.rawColor}12`, color: catTheme.rawColor } : undefined}
-                                className={`w-full text-left px-3 py-2.5 text-xs font-semibold transition-all border-none bg-transparent cursor-pointer flex items-center gap-2.5 ${
-                                  isActive ? '' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.04]'
-                                }`}
-                              >
-                                <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-black flex-shrink-0" style={{ backgroundColor: catTheme.rawColor }}>
-                                  {catCode.slice(0, 2)}
-                                </div>
-                                <span className="truncate">{catCode}</span>
-                                {isActive && <Check size={12} className="ml-auto flex-shrink-0" />}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => setShowCreatePost(false)}
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
-                  >
-                    ×
-                  </button>
-                </div>
-
-                {/* Scrollable form body */}
-                <form onSubmit={handlePostSubmit} className="flex-1 overflow-y-auto flex flex-col">
-                  <div className="px-5 pt-5 pb-2 space-y-1">
-                    <input
-                      type="text"
-                      value={postTitle}
-                      onChange={(e) => setPostTitle(e.target.value)}
-                      placeholder="Title*"
-                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
-                      required
-                      autoFocus
-                    />
-                  </div>
-
-                  {/* Flair & Tags row */}
-                  <div className="px-5 pb-3 flex flex-wrap items-center gap-2">
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold border cursor-pointer transition-all"
-                        style={{
-                          borderColor: `${theme.rawColor}40`,
-                          backgroundColor: `${theme.rawColor}08`,
-                          color: theme.rawColor
-                        }}
-                      >
-                        <Sparkles size={11} />
-                        {postCategory === 'discussion' && 'Discussion'}
-                        {postCategory === 'doubt' && 'Doubt'}
-                        {postCategory === 'poll' && 'Poll'}
-                        {postCategory === 'question' && 'Exam Prep'}
-                        {postCategory === 'resource' && 'Resource'}
-                        {postCategory === 'announcement' && '📢 Announcement'}
-                        <ChevronDown size={10} className={`transition-transform duration-200 ${showCategoryDropdown ? 'rotate-180' : ''}`} />
-                      </button>
-
-                      {showCategoryDropdown && (
-                        <>
-                          <div className="fixed inset-0 z-30" onClick={() => setShowCategoryDropdown(false)} />
-                          <div className="absolute left-0 z-40 mt-1.5 w-48 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1">
-                            {[
-                              { value: 'discussion', label: 'Discussion', icon: '💬' },
-                              { value: 'doubt', label: 'Doubt / Question', icon: '❓' },
-                              { value: 'poll', label: 'Poll', icon: '📊' },
-                              { value: 'question', label: 'Exam Prep', icon: '📝' },
-                              { value: 'resource', label: 'Resource', icon: '📎' },
-                              ...(userProfile?.is_admin ? [{ value: 'announcement', label: 'Announcement', icon: '📢' }] : [])
-                            ].map((opt) => {
-                              const isSelected = postCategory === opt.value;
-                              return (
-                                <button
-                                  key={opt.value}
-                                  type="button"
-                                  onClick={() => {
-                                    setPostCategory(opt.value as any);
-                                    setShowCategoryDropdown(false);
-                                  }}
-                                  style={isSelected ? {
-                                    backgroundColor: `${theme.rawColor}12`,
-                                    color: theme.rawColor
-                                  } : undefined}
-                                  className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold transition-all border-none bg-transparent cursor-pointer flex items-center gap-2.5 ${
-                                    isSelected
-                                      ? ''
-                                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.04]'
-                                  }`}
-                                >
-                                  <span>{opt.icon}</span>
-                                  <span>{opt.label}</span>
-                                  {isSelected && <Check size={12} className="ml-auto" />}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    {postTags.split(',').filter(t => t.trim()).map((tag, i) => (
-                      <span key={i} className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400">
-                        #{tag.trim()}
-                      </span>
-                    ))}
-
-                    <input
-                      type="text"
-                      value={postTags}
-                      onChange={(e) => setPostTags(e.target.value)}
-                      placeholder="+ Add tags"
-                      className="bg-transparent border-none outline-none text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 w-20"
-                    />
-                  </div>
-
-                  <div className="mx-5 border-t border-zinc-100 dark:border-white/5" />
-
-                  {/* WYSIWYG Body Editor */}
-                  <div className="px-5 pt-4 pb-3 flex-1">
-                    <div
-                      ref={createEditorRef}
-                      contentEditable
-                      data-placeholder="Body text*"
-                      onInput={() => setPostContent(getEditorText(createEditorRef))}
-                      onKeyDown={handleEditorKeyDown}
-                      className="w-full min-h-[200px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
-                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
-                      suppressContentEditableWarning
-                    />
-                  </div>
-
-                  {/* Formatting Toolbar */}
-                  <div className="px-5 pb-4">
-                    <div className="flex items-center gap-0.5 flex-wrap">
-                      {renderToolbar(buildToolbarItems(createEditorRef), 'cp')}
-                      {imageUploading && <span className="text-[10px] text-zinc-400 ml-2 animate-pulse">Uploading...</span>}
-                    </div>
-                  </div>
-
-                  {/* Footer actions */}
-                  <div className="flex items-center justify-end gap-2.5 px-5 py-3.5 border-t border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
-                    <button
-                      type="button"
-                      onClick={() => setShowCreatePost(false)}
-                      className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={!postTitle.trim() || !postContent.trim()}
-                      style={{
-                        backgroundColor: (!postTitle.trim() || !postContent.trim()) ? undefined : theme.rawColor,
-                        opacity: (!postTitle.trim() || !postContent.trim()) ? 0.4 : 1
-                      }}
-                      className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
-                        (!postTitle.trim() || !postContent.trim())
-                          ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
-                          : 'text-white hover:opacity-90 active:scale-95'
-                      }`}
-                    >
-                      Post
-                    </button>
-                  </div>
-                </form>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
 
       {/* Reddit-style Edit Post Composer */}
       {createPortal(
@@ -4295,362 +4902,6 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         document.body
       )}
 
-      {/* Reddit-style Create Request Composer */}
-      {createPortal(
-        <AnimatePresence>
-          {showCreateRequest && (
-            <div className="fixed inset-0 z-[9999] flex flex-col overflow-hidden">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                onClick={() => setShowCreateRequest(false)}
-              />
-
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 40 }}
-                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                className="relative z-10 w-full max-w-2xl mx-auto mt-8 sm:mt-16 mb-8 flex flex-col bg-white dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/8 rounded-3xl shadow-2xl overflow-hidden"
-                style={{ maxHeight: 'calc(100vh - 4rem)' }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Header */}
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 dark:border-white/5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
-                      {subjectCode.slice(0, 2)}
-                    </div>
-                    <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
-                    <span className="text-[10px] font-semibold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full flex items-center gap-1"><Trophy size={9} /> Bounty Request</span>
-                  </div>
-                  <button
-                    onClick={() => setShowCreateRequest(false)}
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
-                  >
-                    ×
-                  </button>
-                </div>
-
-                <form onSubmit={handleRequestSubmit} className="flex-1 overflow-y-auto flex flex-col">
-                  {/* Title */}
-                  <div className="px-5 pt-5 pb-2">
-                    <input
-                      type="text"
-                      value={reqTitle}
-                      onChange={(e) => setReqTitle(e.target.value)}
-                      placeholder="What material do you need?*"
-                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
-                      required
-                      autoFocus
-                    />
-                  </div>
-
-                  {/* Bounty XP row */}
-                  <div className="px-5 pb-3 flex items-center gap-3">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold border border-amber-400/40 bg-amber-400/8 text-amber-500">
-                      <Trophy size={11} />
-                      <span>{reqBounty} XP Bounty</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={10}
-                      max={500}
-                      step={10}
-                      value={reqBounty}
-                      onChange={(e) => setReqBounty(Number(e.target.value))}
-                      className="flex-1 h-1.5 rounded-full appearance-none bg-zinc-200 dark:bg-white/10 cursor-pointer"
-                      style={{ accentColor: theme.rawColor }}
-                    />
-                    <input
-                      type="number"
-                      value={reqBounty}
-                      onChange={(e) => setReqBounty(Number(e.target.value))}
-                      min={10}
-                      max={500}
-                      className="w-16 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-[11px] font-bold text-center outline-none text-zinc-800 dark:text-white"
-                    />
-                  </div>
-
-                  <div className="mx-5 border-t border-zinc-100 dark:border-white/5" />
-
-                  {/* WYSIWYG Body Editor */}
-                  <div className="px-5 pt-4 pb-3 flex-1">
-                    <div
-                      ref={reqEditorRef}
-                      contentEditable
-                      data-placeholder="Describe what you need in detail — unit, topic, type of material...*"
-                      onInput={() => setReqContent(getEditorText(reqEditorRef))}
-                      onKeyDown={handleEditorKeyDown}
-                      className="w-full min-h-[160px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
-                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
-                      suppressContentEditableWarning
-                    />
-                  </div>
-
-                  {/* Formatting Toolbar */}
-                  <div className="px-5 pb-4">
-                    <div className="flex items-center gap-0.5 flex-wrap">
-                      {renderToolbar(buildToolbarItems(reqEditorRef, { full: true }), 'rq')}
-                      {imageUploading && <span className="text-[10px] text-zinc-400 ml-2 animate-pulse">Uploading...</span>}
-                    </div>
-                  </div>
-
-                  {/* Footer */}
-                  <div className="flex items-center justify-end gap-2.5 px-5 py-3.5 border-t border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
-                    <button
-                      type="button"
-                      onClick={() => setShowCreateRequest(false)}
-                      className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={!reqTitle.trim() || !reqContent.trim()}
-                      style={{
-                        backgroundColor: (!reqTitle.trim() || !reqContent.trim()) ? undefined : theme.rawColor,
-                        opacity: (!reqTitle.trim() || !reqContent.trim()) ? 0.4 : 1
-                      }}
-                      className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
-                        (!reqTitle.trim() || !reqContent.trim())
-                          ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
-                          : 'text-white hover:opacity-90 active:scale-95'
-                      }`}
-                    >
-                      Post Bounty Request
-                    </button>
-                  </div>
-                </form>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
-
-      {/* Reddit-style Create Study Pack Composer */}
-      {createPortal(
-        <AnimatePresence>
-          {showCreatePack && (
-            <div className="fixed inset-0 z-[9999] flex flex-col overflow-hidden">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                onClick={() => setShowCreatePack(false)}
-              />
-
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 40 }}
-                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                className="relative z-10 w-full max-w-2xl mx-auto mt-8 sm:mt-12 mb-8 flex flex-col bg-white dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/8 rounded-3xl shadow-2xl overflow-hidden"
-                style={{ maxHeight: 'calc(100vh - 4rem)' }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Header */}
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 dark:border-white/5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
-                      {subjectCode.slice(0, 2)}
-                    </div>
-                    <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
-                    <span className="text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full flex items-center gap-1"><BookOpen size={9} /> Study Pack</span>
-                  </div>
-                  <button
-                    onClick={() => setShowCreatePack(false)}
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
-                  >
-                    ×
-                  </button>
-                </div>
-
-                <form onSubmit={handlePackSubmit} className="flex-1 overflow-y-auto flex flex-col">
-                  {/* Title */}
-                  <div className="px-5 pt-5 pb-2">
-                    <input
-                      type="text"
-                      value={packTitle}
-                      onChange={(e) => setPackTitle(e.target.value)}
-                      placeholder="Study Pack Title*"
-                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
-                      required
-                      autoFocus
-                    />
-                  </div>
-
-                  <div className="mx-5 border-t border-zinc-100 dark:border-white/5" />
-
-                  {/* WYSIWYG Description */}
-                  <div className="px-5 pt-4 pb-3">
-                    <div
-                      ref={packEditorRef}
-                      contentEditable
-                      data-placeholder="Describe this study pack — what topics it covers, why it's useful...*"
-                      onInput={() => setPackContent(getEditorText(packEditorRef))}
-                      onKeyDown={handleEditorKeyDown}
-                      className="w-full min-h-[100px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
-                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
-                      suppressContentEditableWarning
-                    />
-                  </div>
-
-                  {/* Formatting Toolbar */}
-                  <div className="px-5 pb-3">
-                    <div className="flex items-center gap-0.5 flex-wrap">
-                      {renderToolbar(buildToolbarItems(packEditorRef, { full: false }), 'pk')}
-                    </div>
-                  </div>
-
-                  <div className="mx-5 border-t border-zinc-100 dark:border-white/5" />
-
-                  {/* File Picker — YouTube playlist style */}
-                  <div className="px-5 pt-3 pb-2">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
-                        <Folder size={11} /> Add files to pack ({packFiles.length} selected)
-                      </span>
-                    </div>
-
-                    {/* Search bar */}
-                    <div className="relative mb-2">
-                      <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-                      <input
-                        type="text"
-                        value={packFileSearch}
-                        onChange={(e) => setPackFileSearch(e.target.value)}
-                        placeholder="Search files..."
-                        className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/8 rounded-xl pl-8 pr-3 py-2 text-[11px] font-medium outline-none text-zinc-800 dark:text-white placeholder:text-zinc-400"
-                      />
-                    </div>
-
-                    {/* Selected files pills */}
-                    {packFiles.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mb-2">
-                        {packFiles.map(fid => {
-                          const f = subjectFiles.find(sf => sf.id === fid);
-                          return f ? (
-                            <span key={fid} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold" style={{ backgroundColor: `${theme.rawColor}12`, color: theme.rawColor }}>
-                              <FileText size={10} />
-                              <span className="max-w-[120px] truncate">{f.name}</span>
-                              <button
-                                type="button"
-                                onClick={() => setPackFiles(prev => prev.filter(id => id !== fid))}
-                                className="ml-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 bg-transparent border-none cursor-pointer text-current text-[9px] font-bold"
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ) : null;
-                        })}
-                      </div>
-                    )}
-
-                    {/* File list */}
-                    <div className="max-h-[180px] overflow-y-auto rounded-xl border border-zinc-200 dark:border-white/8 bg-zinc-50/50 dark:bg-white/[0.02]">
-                      {subjectFiles
-                        .filter(f => !packFileSearch || f.name.toLowerCase().includes(packFileSearch.toLowerCase()))
-                        .map((f) => {
-                          const isSelected = packFiles.includes(f.id);
-                          const typeIcon = f.type === 'pdf' ? FileText : f.type === 'video' ? Video : f.type === 'code' ? Code : FileText;
-                          const TypeIc = typeIcon;
-                          return (
-                            <button
-                              key={f.id}
-                              type="button"
-                              onClick={() => {
-                                setPackFiles(prev =>
-                                  prev.includes(f.id)
-                                    ? prev.filter(id => id !== f.id)
-                                    : [...prev, f.id]
-                                );
-                              }}
-                              className={`w-full text-left px-3 py-2.5 flex items-center gap-3 transition-all border-none cursor-pointer border-b border-zinc-100 dark:border-white/5 last:border-b-0 ${
-                                isSelected
-                                  ? 'bg-white dark:bg-white/[0.04]'
-                                  : 'bg-transparent hover:bg-zinc-100/50 dark:hover:bg-white/[0.03]'
-                              }`}
-                            >
-                              {/* Checkbox */}
-                              <div className={`w-4.5 h-4.5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                                isSelected
-                                  ? 'border-transparent'
-                                  : 'border-zinc-300 dark:border-zinc-600'
-                              }`} style={isSelected ? { backgroundColor: theme.rawColor } : undefined}>
-                                {isSelected && <Check size={10} className="text-white" />}
-                              </div>
-
-                              <TypeIc size={14} className="text-zinc-400 flex-shrink-0" />
-
-                              <div className="flex-1 min-w-0">
-                                <div className={`text-[11px] font-semibold truncate ${
-                                  isSelected ? 'text-zinc-900 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'
-                                }`}>{f.name}</div>
-                                <div className="text-[9px] text-zinc-400 flex items-center gap-2">
-                                  <span>{f.type.toUpperCase()}</span>
-                                  {f.faculty_name && <><span>·</span><span>{f.faculty_name}</span></>}
-                                  <span>·</span>
-                                  <span>{f.size}</span>
-                                </div>
-                              </div>
-
-                              {isSelected && (
-                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md" style={{ backgroundColor: `${theme.rawColor}15`, color: theme.rawColor }}>Added</span>
-                              )}
-                            </button>
-                          );
-                        })}
-
-                      {subjectFiles.filter(f => !packFileSearch || f.name.toLowerCase().includes(packFileSearch.toLowerCase())).length === 0 && (
-                        <div className="px-4 py-6 text-center text-xs text-zinc-400">
-                          {packFileSearch ? 'No files match your search' : 'No files available in this subject'}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Footer */}
-                  <div className="flex items-center justify-between gap-2.5 px-5 py-3.5 border-t border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02] mt-auto">
-                    <span className="text-[10px] text-zinc-400 font-medium">
-                      {packFiles.length} file{packFiles.length !== 1 ? 's' : ''} selected
-                    </span>
-                    <div className="flex gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => setShowCreatePack(false)}
-                        className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={!packTitle.trim() || !packContent.trim()}
-                        style={{
-                          backgroundColor: (!packTitle.trim() || !packContent.trim()) ? undefined : theme.rawColor,
-                          opacity: (!packTitle.trim() || !packContent.trim()) ? 0.4 : 1
-                        }}
-                        className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
-                          (!packTitle.trim() || !packContent.trim())
-                            ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
-                            : 'text-white hover:opacity-90 active:scale-95'
-                        }`}
-                      >
-                        Create Study Pack
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
 
       {/* Admin Edit Modal */}
       {showEditModal && selectedFileToEdit && createPortal(

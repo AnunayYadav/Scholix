@@ -823,6 +823,11 @@ input[type=number] {
   font-style: italic !important;
 }
 
+.wysiwyg-editor p, .wysiwyg-content p {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
 .wysiwyg-editor code, .wysiwyg-content code {
   font-family: monospace !important;
   font-size: 0.9em !important;
@@ -836,7 +841,7 @@ input[type=number] {
   font-family: monospace !important;
   border-radius: 8px !important;
   padding: 1rem !important;
-  margin: 0.75rem 0 !important;
+  margin: 0.35rem 0 !important;
   overflow-x: auto !important;
 }
 
@@ -845,5 +850,22 @@ input[type=number] {
   padding: 0 !important;
   color: inherit !important;
   border-radius: 0 !important;
+}
+
+.wysiwyg-editor img, .wysiwyg-content img {
+  max-width: min(100%, 480px) !important;
+  max-height: 360px !important;
+  object-fit: contain !important;
+  border-radius: 8px !important;
+  margin: 0.5rem 0 !important;
+  display: block !important;
+}
+
+.post-collapsed-content {
+  max-height: 120px !important;
+  overflow: hidden !important;
+  position: relative !important;
+  mask-image: linear-gradient(to bottom, black 50%, transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%) !important;
 }
 

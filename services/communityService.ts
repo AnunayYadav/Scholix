@@ -60,6 +60,28 @@ export async function uploadCommunityImage(file: File): Promise<string> {
   return publicUrl;
 }
 
+// Delete a community image from Supabase storage by its public URL
+export async function deleteCommunityImageByUrl(url: string): Promise<void> {
+  const client = getSupabase();
+  if (!client) return;
+
+  try {
+    const storageMarker = '/nexus-documents/';
+    const index = url.indexOf(storageMarker);
+    if (index !== -1) {
+      const filePath = decodeURIComponent(url.substring(index + storageMarker.length));
+      console.log(`[Storage Cleanup] Deleting community image: ${filePath}`);
+      const { error } = await client.storage.from('nexus-documents').remove([filePath]);
+      if (error) {
+        console.error(`[Storage Cleanup Error]:`, error);
+      }
+    }
+  } catch (e) {
+    console.error(`[Storage Cleanup Catch]:`, e);
+  }
+}
+
+
 // ═══════════════════════════════════════
 // SEED MOCK DATA FOR LOCALSTORAGE FALLBACK
 // ═══════════════════════════════════════
@@ -503,9 +525,23 @@ class CommunityService {
     const client = getSupabase();
     if (client) {
       try {
+        // Fetch the post first to get its content (for image URLs)
+        const { data: postData } = await client.from('community_hub').select('content').eq('id', postId).maybeSingle();
+        if (postData?.content) {
+          // Extract image URLs from content HTML
+          const imgRegex = /<img[^>]+src="([^">]+)"/g;
+          let match;
+          while ((match = imgRegex.exec(postData.content)) !== null) {
+            const url = match[1];
+            await deleteCommunityImageByUrl(url);
+          }
+        }
+
         const { error } = await client.from('community_hub').delete().eq('id', postId);
         if (!error) return true;
-      } catch (e) {}
+      } catch (e) {
+        console.error("[System Error in deletePost]:", e);
+      }
     }
 
     // LocalStorage fallback
@@ -662,6 +698,14 @@ class CommunityService {
           reactions[reactionType] = userList.filter(id => id !== userId);
         } else {
           reactions[reactionType] = [...userList, userId];
+          // Mutual exclusivity for community items
+          if (itemType !== 'file') {
+            if (reactionType === 'helpful') {
+              reactions.quality = (reactions.quality || []).filter(id => id !== userId);
+            } else if (reactionType === 'quality') {
+              reactions.helpful = (reactions.helpful || []).filter(id => id !== userId);
+            }
+          }
         }
         
         await client.from(table).update({ reactions }).eq('id', itemId);
@@ -696,6 +740,11 @@ class CommunityService {
           reactions[reactionType] = userList.filter(id => id !== userId);
         } else {
           reactions[reactionType] = [...userList, userId];
+          if (reactionType === 'helpful') {
+            reactions.quality = (reactions.quality || []).filter(id => id !== userId);
+          } else if (reactionType === 'quality') {
+            reactions.helpful = (reactions.helpful || []).filter(id => id !== userId);
+          }
         }
         hub[idx].reactions = reactions;
         setLocalData(STORAGE_KEYS.HUB, hub);
