@@ -43,3 +43,6 @@ scripts/backup_data.cjs
 
 # Database / Supabase Schemas
 *.sql
+
+# Scratch/Temporary Scripts
+tmp/

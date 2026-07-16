@@ -847,6 +847,7 @@ class NexusServer {
         const publicProfile = {
           id: result.data.user.id,
           username: cleanUsername,
+          avatar_url: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(cleanUsername || result.data.user.id)}`,
           is_verified: 'yes',
           is_admin: false,
           total_xp: 0,
@@ -1380,7 +1381,7 @@ class NexusServer {
   static async fetchFiles(program: string, q?: string): Promise<LibraryFile[]> {
     const client = getSupabase();
     if (!client) return [];
-    let query = client.from('documents').select('*, uploader:profiles!uploader_id(username, is_admin)').eq('status', 'approved');
+    let query = client.from('documents').select('*, uploader:profiles!uploader_id(username, is_admin, avatar_url)').eq('status', 'approved');
     if (program && program !== 'All') query = query.eq('program', program);
     if (q) query = query.ilike('name', `%${q}%`);
     const { data, error } = await query
@@ -1391,6 +1392,7 @@ class NexusServer {
       uploadDate: new Date(item.created_at).getTime(), size: item.size, status: item.status, storage_path: item.storage_path,
       program: item.program,
       uploader_username: (item.uploader as any)?.username || "Anonymous Verto",
+      uploader_avatar_url: (item.uploader as any)?.avatar_url || null,
       uploader_is_admin: (item.uploader as any)?.is_admin || false,
       description: item.description,
       admin_notes: item.admin_notes,
@@ -1413,7 +1415,7 @@ class NexusServer {
     if (!client || !id) return null;
     const { data, error } = await client
       .from('documents')
-      .select('*, uploader:profiles!uploader_id(username, is_admin)')
+      .select('*, uploader:profiles!uploader_id(username, is_admin, avatar_url)')
       .eq('id', id)
       .maybeSingle();
 
@@ -1434,6 +1436,7 @@ class NexusServer {
       status: data.status,
       storage_path: data.storage_path,
       uploader_username: (data.uploader as any)?.username || "Anonymous Verto",
+      uploader_avatar_url: (data.uploader as any)?.avatar_url || null,
       uploader_is_admin: (data.uploader as any)?.is_admin || false,
       description: data.description,
       admin_notes: data.admin_notes,
@@ -1797,7 +1800,7 @@ class NexusServer {
   static async fetchPendingFiles(program: string, q?: string): Promise<LibraryFile[]> {
     const client = getSupabase();
     if (!client) return [];
-    let query = client.from('documents').select('*, uploader:profiles!uploader_id(username, is_admin)').eq('status', 'pending');
+    let query = client.from('documents').select('*, uploader:profiles!uploader_id(username, is_admin, avatar_url)').eq('status', 'pending');
     if (program && program !== 'All') query = query.eq('program', program);
     if (q) query = query.ilike('name', `%${q}%`);
     const { data, error } = await query.order('created_at', { ascending: false });
@@ -1806,6 +1809,7 @@ class NexusServer {
       id: item.id, name: item.name, subject: item.subject, semester: item.semester, type: item.type,
       uploadDate: new Date(item.created_at).getTime(), size: item.size, status: item.status, storage_path: item.storage_path,
       uploader_username: (item.uploader as any)?.username || "Anonymous Verto",
+      uploader_avatar_url: (item.uploader as any)?.avatar_url || null,
       description: item.description,
       admin_notes: item.admin_notes,
       program: item.program,
@@ -1825,12 +1829,13 @@ class NexusServer {
   static async fetchUserFiles(uid: string): Promise<LibraryFile[]> {
     const client = getSupabase();
     if (!client) return [];
-    const { data, error } = await client.from('documents').select('*, uploader:profiles!uploader_id(username, is_admin)').eq('uploader_id', uid).order('created_at', { ascending: false });
+    const { data, error } = await client.from('documents').select('*, uploader:profiles!uploader_id(username, is_admin, avatar_url)').eq('uploader_id', uid).order('created_at', { ascending: false });
     if (error) { console.error("Fetch User Files Error:", error); return []; }
     return (data || []).map(item => ({
       id: item.id, name: item.name, subject: item.subject, semester: item.semester, type: item.type,
       uploadDate: new Date(item.created_at).getTime(), size: item.size, status: item.status, storage_path: item.storage_path,
       uploader_username: (item.uploader as any)?.username || "Anonymous Verto",
+      uploader_avatar_url: (item.uploader as any)?.avatar_url || null,
       description: item.description,
       admin_notes: item.admin_notes,
       program: item.program,

@@ -3344,7 +3344,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                               <div className="flex items-center gap-2">
                                 <div className="w-5.5 h-5.5 rounded-full overflow-hidden border border-zinc-200 dark:border-white/10 flex items-center justify-center bg-zinc-100 dark:bg-white/5 shrink-0">
                                   <img 
-                                    src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${avatarSeed}`} 
+                                    src={file.uploader_avatar_url || `https://api.dicebear.com/7.x/adventurer/svg?seed=${avatarSeed}`} 
                                     alt="avatar" 
                                     className="w-full h-full object-cover" 
                                   />
@@ -3480,7 +3480,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                         <div className="flex items-center gap-1.5">
                           <div className="w-5.5 h-5.5 rounded-full overflow-hidden border border-zinc-200 dark:border-white/10 flex items-center justify-center bg-zinc-100 dark:bg-white/5 shrink-0">
                             <img 
-                              src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${avatarSeed}`} 
+                              src={file.uploader_avatar_url || `https://api.dicebear.com/7.x/adventurer/svg?seed=${avatarSeed}`} 
                               alt="avatar" 
                               className="w-full h-full object-cover" 
                             />
@@ -4119,7 +4119,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                                     <div className="flex items-center gap-2">
                                       <div className="w-5.5 h-5.5 rounded-full overflow-hidden border border-zinc-200 dark:border-white/10 flex items-center justify-center bg-zinc-100 dark:bg-white/5 shrink-0">
                                         <img 
-                                          src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${avatarSeed}`} 
+                                          src={file.uploader_avatar_url || `https://api.dicebear.com/7.x/adventurer/svg?seed=${avatarSeed}`} 
                                           alt="avatar" 
                                           className="w-full h-full object-cover" 
                                         />
@@ -4260,7 +4260,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                               <div className="flex items-center gap-1.5">
                                 <div className="w-5.5 h-5.5 rounded-full overflow-hidden border border-zinc-200 dark:border-white/10 flex items-center justify-center bg-zinc-100 dark:bg-white/5 shrink-0">
                                   <img 
-                                    src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${avatarSeed}`} 
+                                    src={file.uploader_avatar_url || `https://api.dicebear.com/7.x/adventurer/svg?seed=${avatarSeed}`} 
                                     alt="avatar" 
                                     className="w-full h-full object-cover" 
                                   />

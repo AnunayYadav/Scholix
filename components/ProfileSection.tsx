@@ -78,6 +78,69 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ userProfile, setUserPro
   const [changeHistory, setChangeHistory] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Avatar Builder Constants & State
+  const skinColors = [
+    { name: 'Light', value: 'f1c27d' },
+    { name: 'Warm', value: 'e0a96d' },
+    { name: 'Brown', value: '8c5638' },
+    { name: 'Dark', value: '5c3826' },
+  ];
+
+  const hairColors = [
+    { name: 'Black', value: '2c2c2c' },
+    { name: 'Brown', value: '6d4c41' },
+    { name: 'Blonde', value: 'f1c34f' },
+    { name: 'Grey', value: '9e9e9e' },
+    { name: 'Pink', value: 'd45b85' },
+    { name: 'Purple', value: '734280' },
+  ];
+
+  const hairStyles = [
+    { name: 'Short Bun', value: 'short18' },
+    { name: 'Short Spikes', value: 'short02' },
+    { name: 'Long Straight', value: 'long01' },
+    { name: 'Long Bob', value: 'long02' },
+    { name: 'Long Wavy', value: 'long03' },
+    { name: 'Long Braids', value: 'long05' },
+    { name: 'Short Trim', value: 'short05' },
+  ];
+
+  const eyeStyles = [
+    { name: 'Normal', value: 'variant01' },
+    { name: 'Happy', value: 'variant02' },
+    { name: 'Wink', value: 'variant03' },
+    { name: 'Surprised', value: 'variant04' },
+    { name: 'Squinting', value: 'variant05' },
+    { name: 'Closed', value: 'variant06' },
+  ];
+
+  const mouthStyles = [
+    { name: 'Smiling', value: 'variant01' },
+    { name: 'Kissing', value: 'variant02' },
+    { name: 'Neutral', value: 'variant03' },
+    { name: 'Sad', value: 'variant04' },
+    { name: 'Grinning', value: 'variant05' },
+    { name: 'Surprised', value: 'variant06' },
+  ];
+
+  const eyebrowStyles = [
+    { name: 'Normal', value: 'variant01' },
+    { name: 'Concerned', value: 'variant02' },
+    { name: 'Angry', value: 'variant03' },
+    { name: 'Raised', value: 'variant04' },
+  ];
+
+  const [customOptions, setCustomOptions] = useState({
+    skinColor: 'f1c27d',
+    hairColor: '2c2c2c',
+    hair: 'short18',
+    eyes: 'variant01',
+    mouth: 'variant01',
+    eyebrows: 'variant01'
+  });
+
+  const customAvatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=CustomAvatar&skinColor=${customOptions.skinColor}&hairColor=${customOptions.hairColor}&hair=${customOptions.hair}&eyes=${customOptions.eyes}&mouth=${customOptions.mouth}&eyebrows=${customOptions.eyebrows}`;
+
   // Resend Timer Logic
   useEffect(() => {
     let interval: any;
@@ -359,6 +422,148 @@ const userId = userProfile?.id || null;
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* Adventurer Avatar Customizer */}
+      <div className="mb-8 p-5 bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-150 dark:border-white/5 rounded-3xl space-y-5">
+        <div>
+          <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-brand-primary"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" /><path d="M7.5 10.5C8.32843 10.5 9 9.82843 9 9C9 8.17157 8.32843 7.5 7.5 7.5C6.67157 7.5 6 8.17157 6 9C6 9.82843 6.67157 10.5 7.5 10.5Z" /><path d="M11.5 7.5C12.3284 7.5 13 6.82843 13 6C13 5.17157 12.3284 4.5 11.5 4.5C10.6716 4.5 10 5.17157 10 6C10 6.82843 10.6716 7.5 11.5 7.5Z" /><path d="M16.5 9.5C17.3284 9.5 18 8.82843 18 8C18 7.17157 17.3284 6.5 16.5 6.5C15.6716 6.5 15 7.17157 15 8C15 8.82843 15.6716 9.5 16.5 9.5Z" /><path d="M6 15C6 15 8.5 18 12 18C15.5 18 18 15 18 15" /></svg> Customize Adventurer Avatar
+          </h3>
+          <p className="text-[11px] text-zinc-450 dark:text-zinc-500 font-semibold mt-0.5">
+            Select styles, facial features, and custom color tones to build your identity.
+          </p>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-5 items-stretch">
+          {/* Preview Panel */}
+          <div className="flex flex-col items-center justify-center p-5 bg-zinc-100/50 dark:bg-black/20 border border-zinc-200/50 dark:border-white/5 rounded-2xl md:w-44 shrink-0">
+            <div className="w-20 h-20 rounded-2xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 p-1 flex items-center justify-center shadow-inner relative">
+              <img src={customAvatarUrl} alt="Avatar Customizer Preview" className="w-full h-full object-cover rounded-xl" />
+            </div>
+            
+            <button
+              type="button"
+              disabled={isUploading}
+              onClick={async () => {
+                setIsUploading(true);
+                try {
+                  await NexusServer.updateProfile(userProfile.id, { avatar_url: customAvatarUrl });
+                  setUserProfile({ ...userProfile, avatar_url: customAvatarUrl });
+                  showToast("Custom avatar saved!", "success");
+                } catch (err: any) {
+                  showToast("Failed to save avatar: " + err.message, "error");
+                } finally {
+                  setIsUploading(false);
+                }
+              }}
+              className="mt-4 w-full py-2 bg-brand-primary hover:bg-brand-primary/95 text-white rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-sm text-center"
+            >
+              Apply Face
+            </button>
+          </div>
+
+          {/* Builder Options Controls */}
+          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Skin Tone */}
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Skin Tone</label>
+              <div className="flex flex-wrap gap-1">
+                {skinColors.map((color) => (
+                  <button
+                    key={color.value}
+                    type="button"
+                    onClick={() => setCustomOptions(prev => ({ ...prev, skinColor: color.value }))}
+                    className={`w-6 h-6 rounded-full border transition-all hover:scale-110 active:scale-90 ${
+                      customOptions.skinColor === color.value 
+                        ? 'border-brand-primary ring-2 ring-brand-primary/20 scale-105' 
+                        : 'border-zinc-300 dark:border-white/10'
+                    }`}
+                    style={{ backgroundColor: `#${color.value}` }}
+                    title={color.name}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Hair Color */}
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Hair Color</label>
+              <div className="flex flex-wrap gap-1">
+                {hairColors.map((color) => (
+                  <button
+                    key={color.value}
+                    type="button"
+                    onClick={() => setCustomOptions(prev => ({ ...prev, hairColor: color.value }))}
+                    className={`w-6 h-6 rounded-full border transition-all hover:scale-110 active:scale-90 ${
+                      customOptions.hairColor === color.value 
+                        ? 'border-brand-primary ring-2 ring-brand-primary/20 scale-105' 
+                        : 'border-zinc-300 dark:border-white/10'
+                    }`}
+                    style={{ backgroundColor: `#${color.value}` }}
+                    title={color.name}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Hair Style */}
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Hair Style</label>
+              <select
+                value={customOptions.hair}
+                onChange={(e) => setCustomOptions(prev => ({ ...prev, hair: e.target.value }))}
+                className="w-full text-xs font-semibold bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-white/10 rounded-xl px-3 py-2 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-brand-primary cursor-pointer transition-colors"
+              >
+                {hairStyles.map((style) => (
+                  <option key={style.value} value={style.value} className="bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 font-semibold">{style.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Eyes */}
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Eyes</label>
+              <select
+                value={customOptions.eyes}
+                onChange={(e) => setCustomOptions(prev => ({ ...prev, eyes: e.target.value }))}
+                className="w-full text-xs font-semibold bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-white/10 rounded-xl px-3 py-2 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-brand-primary cursor-pointer transition-colors"
+              >
+                {eyeStyles.map((eye) => (
+                  <option key={eye.value} value={eye.value} className="bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 font-semibold">{eye.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Mouth */}
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Mouth</label>
+              <select
+                value={customOptions.mouth}
+                onChange={(e) => setCustomOptions(prev => ({ ...prev, mouth: e.target.value }))}
+                className="w-full text-xs font-semibold bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-white/10 rounded-xl px-3 py-2 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-brand-primary cursor-pointer transition-colors"
+              >
+                {mouthStyles.map((mouth) => (
+                  <option key={mouth.value} value={mouth.value} className="bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 font-semibold">{mouth.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Eyebrows */}
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Eyebrows</label>
+              <select
+                value={customOptions.eyebrows}
+                onChange={(e) => setCustomOptions(prev => ({ ...prev, eyebrows: e.target.value }))}
+                className="w-full text-xs font-semibold bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-white/10 rounded-xl px-3 py-2 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-brand-primary cursor-pointer transition-colors"
+              >
+                {eyebrowStyles.map((eyebrow) => (
+                  <option key={eyebrow.value} value={eyebrow.value} className="bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 font-semibold">{eyebrow.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 

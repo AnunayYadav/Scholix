@@ -2004,9 +2004,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                       <td className="py-3 px-3 hidden md:table-cell w-32">
                                         <div className="flex items-center gap-2">
                                           <img 
-                                            src={`https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(avatarSeed)}`}
+                                            src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(avatarSeed)}`}
                                             alt={uploaderName}
-                                            className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 shrink-0"
+                                            className="w-5 h-5 rounded-full bg-zinc-50 dark:bg-zinc-800 shrink-0"
                                           />
                                           <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 truncate max-w-[90px]">{uploaderName}</span>
                                         </div>

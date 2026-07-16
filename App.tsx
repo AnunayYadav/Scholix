@@ -1,37 +1,27 @@
-import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate, useParams } from 'react-router-dom';
 import Sidebar from './components/Sidebar.tsx';
 
-// Helper for lazy loading components with preloading capability
-function lazyWithPreload<T extends React.ComponentType<any>>(
-  factory: () => Promise<{ default: T }>
-) {
-  const Component = lazy(factory);
-  (Component as any).preload = factory;
-  return Component as React.LazyExoticComponent<T> & { preload: () => Promise<{ default: T }> };
-}
-
-// Lazy load route components with preloading
-const ContentLibrary = lazyWithPreload(() => import('./components/ContentLibrary.tsx'));
-const CampusNavigator = lazyWithPreload(() => import('./components/CampusNavigator.tsx'));
-const HelpSection = lazyWithPreload(() => import('./components/HelpSection.tsx'));
-const FreshersKit = lazyWithPreload(() => import('./components/FreshersKit.tsx'));
-const SettingsHub = lazyWithPreload(() => import('./components/SettingsHub.tsx'));
-const ShareReport = lazyWithPreload(() => import('./components/ShareReport.tsx'));
-const AboutUs = lazyWithPreload(() => import('./components/AboutUs.tsx'));
-const ProfileSection = lazyWithPreload(() => import('./components/ProfileSection.tsx'));
-const TimetableHub = lazyWithPreload(() => import('./components/TimetableHub.tsx'));
-const QuizTaker = lazyWithPreload(() => import('./components/QuizTaker.tsx'));
-const MarketplaceHub = lazyWithPreload(() => import('./components/MarketplaceHub.tsx'));
-const RoommateFinder = lazyWithPreload(() => import('./components/RoommateFinder.tsx'));
-const EmergencyContacts = lazyWithPreload(() => import('./components/EmergencyContacts.tsx'));
-const AdminStats = lazyWithPreload(() => import('./components/AdminStats.tsx'));
-const PaymentSuccess = lazyWithPreload(() => import('./components/PaymentSuccess.tsx'));
-const PrivacyPolicy = lazyWithPreload(() => import('./components/PrivacyPolicy.tsx'));
-const SecurityHallOfFame = lazyWithPreload(() => import('./components/SecurityHallOfFame.tsx'));
-const ToolsHub = lazyWithPreload(() => import('./components/ToolsHub.tsx'));
-const FacultyDetail = lazyWithPreload(() => import('./components/FacultyDetail.tsx'));
-const DegreeGuide = lazyWithPreload(() => import('./components/DegreeGuide.tsx'));
+import ContentLibrary from './components/ContentLibrary.tsx';
+import CampusNavigator from './components/CampusNavigator.tsx';
+import HelpSection from './components/HelpSection.tsx';
+import FreshersKit from './components/FreshersKit.tsx';
+import SettingsHub from './components/SettingsHub.tsx';
+import ShareReport from './components/ShareReport.tsx';
+import AboutUs from './components/AboutUs.tsx';
+import ProfileSection from './components/ProfileSection.tsx';
+import TimetableHub from './components/TimetableHub.tsx';
+import QuizTaker from './components/QuizTaker.tsx';
+import MarketplaceHub from './components/MarketplaceHub.tsx';
+import RoommateFinder from './components/RoommateFinder.tsx';
+import EmergencyContacts from './components/EmergencyContacts.tsx';
+import AdminStats from './components/AdminStats.tsx';
+import PaymentSuccess from './components/PaymentSuccess.tsx';
+import PrivacyPolicy from './components/PrivacyPolicy.tsx';
+import SecurityHallOfFame from './components/SecurityHallOfFame.tsx';
+import ToolsHub from './components/ToolsHub.tsx';
+import FacultyDetail from './components/FacultyDetail.tsx';
+import DegreeGuide from './components/DegreeGuide.tsx';
 
 // Eager/static imports for shared/immediate layout components
 import VerifiedBadge from './components/VerifiedBadge.tsx';
@@ -40,18 +30,17 @@ import CookieBanner from './components/CookieBanner.tsx';
 import ScholixLanding from './components/ScholixLanding.tsx';
 import DailyFeed from './components/DailyFeed.tsx';
 import AnnouncementModal from './components/AnnouncementModal.tsx';
-import { SkeletonPage } from './components/SkeletonLoader.tsx';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  User, 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  ArrowRight, 
-  CheckCircle2, 
-  Rocket, 
-  Briefcase, 
+import {
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  CheckCircle2,
+  Rocket,
+  Briefcase,
   X,
   ChevronDown,
   ChevronRight,
@@ -98,7 +87,7 @@ const getModuleFromPath = (path: string): ModuleType => {
   const p = path.toLowerCase();
   const parts = p.split('/').filter(Boolean);
   if (parts.length === 0) return ModuleType.DASHBOARD;
-  
+
   // Check if first segment is a uni slug
   const firstPart = parts[0];
   const isUniSlug = ['lpu', 'iitm', 'iitm_bs'].includes(firstPart);
@@ -212,19 +201,19 @@ const BackgroundEffects: React.FC = React.memo(() => {
 
 const FeatureGuard: React.FC<{ module: ModuleType, children: React.ReactNode }> = ({ module, children }) => {
   const { universityInfo } = useUniversity();
-  
+
   // Essential modules that are always allowed
   const essentialModules = [
-    ModuleType.DASHBOARD, 
-    ModuleType.PROFILE, 
-    ModuleType.ADMIN_STATS, 
-    ModuleType.PRIVACY, 
-    ModuleType.LOGIN, 
+    ModuleType.DASHBOARD,
+    ModuleType.PROFILE,
+    ModuleType.ADMIN_STATS,
+    ModuleType.PRIVACY,
+    ModuleType.LOGIN,
     ModuleType.SIGNUP
   ];
 
   if (essentialModules.includes(module)) return <>{children}</>;
-  
+
   // If no university is selected (Scholix default), all modules are allowed
   if (!universityInfo) return <>{children}</>;
 
@@ -232,7 +221,7 @@ const FeatureGuard: React.FC<{ module: ModuleType, children: React.ReactNode }> 
   if (!universityInfo.features.enabledModules.includes(module)) {
     return <Navigate to="/" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
@@ -293,7 +282,7 @@ const TodaysSchedule: React.FC = () => {
               <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase opacity-70 mt-0.5">{today}</p>
             </div>
           </div>
-          
+
           {activeSlot && (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-primary/5 border border-brand-primary/10 animate-pulse">
               <div className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
@@ -316,7 +305,7 @@ const TodaysSchedule: React.FC = () => {
               <div className="relative pl-8">
                 {/* Timeline Line */}
                 <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-dashed border-l border-dashed border-zinc-200 dark:border-white/10" />
-                
+
                 <div className="space-y-5">
                   {sortedSlots.map((slot) => {
                     const start = timeToMinutes(slot.startTime);
@@ -336,8 +325,8 @@ const TodaysSchedule: React.FC = () => {
                         <button
                           onClick={() => navigate('/timetable')}
                           className={`w-full flex items-center gap-4 p-3 rounded-2xl border transition-all duration-300 text-left
-                            ${isGoingOn 
-                              ? 'bg-brand-primary/[0.03] border-brand-primary/20 shadow-lg shadow-brand-primary/5 ring-1 ring-brand-primary/5' 
+                            ${isGoingOn
+                              ? 'bg-brand-primary/[0.03] border-brand-primary/20 shadow-lg shadow-brand-primary/5 ring-1 ring-brand-primary/5'
                               : 'bg-white dark:bg-white/[0.02] border-zinc-100 dark:border-white/[0.03] hover:border-zinc-200 dark:hover:border-white/10 hover:shadow-md'
                             }
                           `}
@@ -388,8 +377,8 @@ const TodaysSchedule: React.FC = () => {
                       className="flex flex-col items-center gap-3 snap-center shrink-0 w-[100px]"
                     >
                       <div className={`relative w-[80px] h-[80px] rounded-full flex flex-col items-center justify-center border-2 transition-all duration-500
-                        ${isGoingOn 
-                          ? 'border-brand-primary bg-brand-primary/5 shadow-lg shadow-brand-primary/20 scale-105' 
+                        ${isGoingOn
+                          ? 'border-brand-primary bg-brand-primary/5 shadow-lg shadow-brand-primary/20 scale-105'
                           : 'border-zinc-100 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.02]'
                         }
                       `}>
@@ -399,7 +388,7 @@ const TodaysSchedule: React.FC = () => {
                         <span className={`text-[13px] font-black tracking-tight text-center px-2 line-clamp-1 ${isGoingOn ? 'text-zinc-900 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'}`}>
                           {slot.subject.split(' ')[0]}
                         </span>
-                        
+
                         {isGoingOn && (
                           <div className="absolute -top-1 -right-1 w-4 h-4 bg-brand-primary rounded-full border-2 border-white dark:border-[#0a0a0a] flex items-center justify-center">
                             <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
@@ -474,7 +463,7 @@ const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.mem
               {/* Actions: Mobile only */}
               <div className="flex lg:hidden items-center gap-2 shrink-0">
                 <NotificationBell userProfile={userProfile} />
-                <button 
+                <button
                   onClick={toggleTheme}
                   className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-[#0a0a0a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 active:scale-90 shadow-sm"
                   aria-label="Toggle Theme"
@@ -488,11 +477,11 @@ const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.mem
             <div className="hidden lg:block flex-1 max-w-xl mx-12">
               <UniversalSearch />
             </div>
-            
+
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center gap-4 shrink-0">
               <NotificationBell userProfile={userProfile} />
-              <button 
+              <button
                 onClick={toggleTheme}
                 className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-[#0a0a0a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 active:scale-90 shadow-sm"
                 aria-label="Toggle Theme"
@@ -521,20 +510,19 @@ const FeatureCard = React.memo(({ f, navigate }: { f: any, navigate: any }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => navigate()}
-      className={`group relative p-4 bg-white dark:bg-[#0a0a0b] rounded-[24px] border border-zinc-100 dark:border-white/[0.04] text-left cursor-pointer transition-all duration-300 overflow-hidden ${
-        isHovered 
-          ? 'shadow-2xl shadow-zinc-200/40 dark:shadow-2xl dark:shadow-black/80 border-zinc-200/50 dark:border-white/10 -translate-y-1' 
+      className={`group relative p-4 bg-white dark:bg-[#0a0a0b] rounded-[24px] border border-zinc-100 dark:border-white/[0.04] text-left cursor-pointer transition-all duration-300 overflow-hidden ${isHovered
+          ? 'shadow-2xl shadow-zinc-200/40 dark:shadow-2xl dark:shadow-black/80 border-zinc-200/50 dark:border-white/10 -translate-y-1'
           : 'shadow-sm'
-      }`}
+        }`}
     >
       {/* Background Gradient - Simplified to remove 'rectangles' */}
-      <div 
-        className={`absolute inset-0 opacity-[0.7] dark:opacity-[0.85] group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br ${f.gradient || 'from-brand-primary/10 to-transparent'}`} 
+      <div
+        className={`absolute inset-0 opacity-[0.7] dark:opacity-[0.85] group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br ${f.gradient || 'from-brand-primary/10 to-transparent'}`}
       />
 
       {/* Top Left Whitish Glow - Radial for maximum smoothness */}
       <div className="absolute -top-12 -left-12 w-32 h-32 bg-white/10 dark:bg-white/[0.03] blur-[40px] rounded-full pointer-events-none z-0" />
-      
+
       {/* Action Arrow Button */}
       <div className={`absolute top-4 right-4 w-7 h-7 rounded-full border border-white/10 flex items-center justify-center transition-all duration-500 z-20 ${isHovered ? 'bg-white dark:bg-zinc-200 text-zinc-900 scale-110 shadow-lg shadow-black/20' : 'bg-white/5 text-white/30'}`}>
         <ArrowRight size={12} strokeWidth={3} className={`transition-transform duration-500 ${isHovered ? 'translate-x-0.5' : ''}`} />
@@ -570,24 +558,6 @@ const FeatureCard = React.memo(({ f, navigate }: { f: any, navigate: any }) => {
 
 // TopProgressBar removed
 
-const SuspenseLoader: React.FC = () => {
-  const { start, finish } = useLoadingStore();
-  const location = useLocation();
-
-  useEffect(() => {
-    start();
-    return () => {
-      finish();
-    };
-  }, [start, finish]);
-
-  if (location.pathname.includes('/library')) {
-    return <SkeletonPage cards={8} columns="grid-cols-2 md:grid-cols-3 lg:grid-cols-4" />;
-  }
-
-  return <SkeletonPage />;
-};
-
 const StaticRedirect: React.FC<{ to: string }> = ({ to }) => {
   useEffect(() => {
     window.location.replace(to);
@@ -602,59 +572,59 @@ const StaticRedirect: React.FC<{ to: string }> = ({ to }) => {
 const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ userProfile }) => {
   const navigate = useNavigate();
   const { selectedUniversity, universityInfo } = useUniversity();
-    const allFeatures = [
-      { id: ModuleType.ATTENDANCE, name: 'Attendance Tracker', desc: 'Track your daily attendance.', icon: <CheckCircle2 />, category: 'Tools', lightColor: 'bg-emerald-500/20', iconColor: 'text-emerald-500', gradient: 'from-emerald-500/20 to-transparent' },
-      { id: ModuleType.CAMPUS, name: 'Campus Map', desc: 'Find buildings and facilities.', icon: <Map />, category: 'Campus', lightColor: 'bg-blue-500/20', iconColor: 'text-blue-500', gradient: 'from-blue-500/20 to-transparent', customPath: '/campus/map' },
-      { id: ModuleType.CGPA, name: 'CGPA Calculator', desc: 'Plan your grades and GPA.', icon: <Calculator />, category: 'Tools', lightColor: 'bg-purple-500/20', iconColor: 'text-purple-500', gradient: 'from-purple-500/20 to-transparent' },
-      { id: ModuleType.PLACEMENT, name: 'Resume Checker', desc: 'AI feedback on your resume.', icon: <Briefcase />, category: 'Tools', lightColor: 'bg-rose-500/20', iconColor: 'text-rose-500', gradient: 'from-rose-500/20 to-transparent' },
-      { id: 'mess', name: 'Mess Menu', desc: "Today's meal planning.", icon: <Utensils />, category: 'Campus', lightColor: 'bg-orange-500/20', iconColor: 'text-orange-500', gradient: 'from-orange-500/20 to-transparent', customPath: '/campus/mess' },
-      { id: ModuleType.LIBRARY, name: 'Content Library', desc: 'Study materials and resources.', icon: <Rocket />, category: 'Study', lightColor: 'bg-indigo-500/20', iconColor: 'text-indigo-500', gradient: 'from-indigo-500/20 to-transparent' },
-      { id: ModuleType.QUIZ, name: 'Quiz Taker', desc: 'Practice with AI generated quizzes.', icon: <PenTool />, category: 'Study', lightColor: 'bg-cyan-500/20', iconColor: 'text-cyan-500', gradient: 'from-cyan-500/20 to-transparent' },
-      { 
-        id: 'degree-guide', 
-        name: 'Degree Guide', 
-        desc: 'Explore IIT Madras BS degree levels, fees & options.', 
-        icon: <BookOpen className="w-5 h-5" />, 
-        category: 'Study', 
-        lightColor: 'bg-amber-500/20', 
-        iconColor: 'text-amber-500', 
-        gradient: 'from-amber-500/20 to-transparent', 
-        customPath: '/degree-guide' 
-      },
-      { 
-        id: ModuleType.LECTURES, 
-        name: 'YT Lectures', 
-        desc: 'Search and watch university lectures inline.', 
-        icon: <PlayCircle className="w-5 h-5" />, 
-        category: 'Study', 
-        lightColor: 'bg-red-500/20', 
-        iconColor: 'text-red-500', 
-        gradient: 'from-red-500/20 to-transparent',
-        customPath: '/tools?tab=lectures' 
-      },
+  const allFeatures = [
+    { id: ModuleType.ATTENDANCE, name: 'Attendance Tracker', desc: 'Track your daily attendance.', icon: <CheckCircle2 />, category: 'Tools', lightColor: 'bg-emerald-500/20', iconColor: 'text-emerald-500', gradient: 'from-emerald-500/20 to-transparent' },
+    { id: ModuleType.CAMPUS, name: 'Campus Map', desc: 'Find buildings and facilities.', icon: <Map />, category: 'Campus', lightColor: 'bg-blue-500/20', iconColor: 'text-blue-500', gradient: 'from-blue-500/20 to-transparent', customPath: '/campus/map' },
+    { id: ModuleType.CGPA, name: 'CGPA Calculator', desc: 'Plan your grades and GPA.', icon: <Calculator />, category: 'Tools', lightColor: 'bg-purple-500/20', iconColor: 'text-purple-500', gradient: 'from-purple-500/20 to-transparent' },
+    { id: ModuleType.PLACEMENT, name: 'Resume Checker', desc: 'AI feedback on your resume.', icon: <Briefcase />, category: 'Tools', lightColor: 'bg-rose-500/20', iconColor: 'text-rose-500', gradient: 'from-rose-500/20 to-transparent' },
+    { id: 'mess', name: 'Mess Menu', desc: "Today's meal planning.", icon: <Utensils />, category: 'Campus', lightColor: 'bg-orange-500/20', iconColor: 'text-orange-500', gradient: 'from-orange-500/20 to-transparent', customPath: '/campus/mess' },
+    { id: ModuleType.LIBRARY, name: 'Content Library', desc: 'Study materials and resources.', icon: <Rocket />, category: 'Study', lightColor: 'bg-indigo-500/20', iconColor: 'text-indigo-500', gradient: 'from-indigo-500/20 to-transparent' },
+    { id: ModuleType.QUIZ, name: 'Quiz Taker', desc: 'Practice with AI generated quizzes.', icon: <PenTool />, category: 'Study', lightColor: 'bg-cyan-500/20', iconColor: 'text-cyan-500', gradient: 'from-cyan-500/20 to-transparent' },
+    {
+      id: 'degree-guide',
+      name: 'Degree Guide',
+      desc: 'Explore IIT Madras BS degree levels, fees & options.',
+      icon: <BookOpen className="w-5 h-5" />,
+      category: 'Study',
+      lightColor: 'bg-amber-500/20',
+      iconColor: 'text-amber-500',
+      gradient: 'from-amber-500/20 to-transparent',
+      customPath: '/degree-guide'
+    },
+    {
+      id: ModuleType.LECTURES,
+      name: 'YT Lectures',
+      desc: 'Search and watch university lectures inline.',
+      icon: <PlayCircle className="w-5 h-5" />,
+      category: 'Study',
+      lightColor: 'bg-red-500/20',
+      iconColor: 'text-red-500',
+      gradient: 'from-red-500/20 to-transparent',
+      customPath: '/tools?tab=lectures'
+    },
 
-      { id: ModuleType.ROOMMATE, name: 'Roommate Finder', desc: 'Find your perfect roomie.', icon: <User />, category: 'Social', lightColor: 'bg-amber-500/20', iconColor: 'text-amber-500', gradient: 'from-amber-500/20 to-transparent' },
-      { id: ModuleType.MARKETPLACE, name: 'Marketplace', desc: 'Buy and sell student gear.', icon: <ShoppingBag />, category: 'Social', lightColor: 'bg-violet-500/20', iconColor: 'text-violet-500', gradient: 'from-violet-500/20 to-transparent' },
-    ];
+    { id: ModuleType.ROOMMATE, name: 'Roommate Finder', desc: 'Find your perfect roomie.', icon: <User />, category: 'Social', lightColor: 'bg-amber-500/20', iconColor: 'text-amber-500', gradient: 'from-amber-500/20 to-transparent' },
+    { id: ModuleType.MARKETPLACE, name: 'Marketplace', desc: 'Buy and sell student gear.', icon: <ShoppingBag />, category: 'Social', lightColor: 'bg-violet-500/20', iconColor: 'text-violet-500', gradient: 'from-violet-500/20 to-transparent' },
+  ];
 
-    const filteredFeatures = allFeatures.filter(f => {
-      if (!universityInfo) return true;
-      if (f.id === 'mess') {
-        return universityInfo.features.campusTabs?.includes('mess') ?? false;
-      }
-      if (f.id === 'degree-guide') {
-        return selectedUniversity === 'iitm_bs';
-      }
-      return universityInfo.features.enabledModules.includes(f.id as ModuleType);
-    });
+  const filteredFeatures = allFeatures.filter(f => {
+    if (!universityInfo) return true;
+    if (f.id === 'mess') {
+      return universityInfo.features.campusTabs?.includes('mess') ?? false;
+    }
+    if (f.id === 'degree-guide') {
+      return selectedUniversity === 'iitm_bs';
+    }
+    return universityInfo.features.enabledModules.includes(f.id as ModuleType);
+  });
 
   return (
     <div className="w-full min-h-screen pb-32 animate-fade-in relative z-0 bg-[#fbfcfd] dark:bg-[#030303]">
       <DashboardHeader userProfile={userProfile} />
-      
+
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 items-start">
-          
+
           {/* Left Side: Tools */}
           <div className="lg:col-span-8 order-2 lg:order-1 space-y-6">
             <div className="flex items-center justify-between">
@@ -767,11 +737,10 @@ const AuthInput: React.FC<{
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          className={`w-full bg-zinc-100 dark:bg-zinc-900/50 border ${
-            error || status === 'taken' ? 'border-red-500/50 focus:border-red-500/50' : 
-            status === 'available' ? 'border-emerald-500/50 focus:border-emerald-500/50' : 
-            'border-black/5 dark:border-white/10'
-          } rounded-2xl py-4 pl-12 pr-12 text-sm font-medium text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:border-accent/50 focus:ring-4 focus:ring-accent/5 transition-all`}
+          className={`w-full bg-zinc-100 dark:bg-zinc-900/50 border ${error || status === 'taken' ? 'border-red-500/50 focus:border-red-500/50' :
+              status === 'available' ? 'border-emerald-500/50 focus:border-emerald-500/50' :
+                'border-black/5 dark:border-white/10'
+            } rounded-2xl py-4 pl-12 pr-12 text-sm font-medium text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:border-accent/50 focus:ring-4 focus:ring-accent/5 transition-all`}
         />
         {type === 'password' && (
           <button
@@ -790,15 +759,13 @@ const AuthInput: React.FC<{
 const StepCard: React.FC<{ step: number; title: string; active: boolean }> = ({ step, title, active }) => (
   <motion.div
     whileHover={{ x: 4 }}
-    className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${
-      active 
-        ? 'bg-accent/10 border-accent/20 shadow-[0_0_20px_rgba(255,122,24,0.1)]' 
+    className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${active
+        ? 'bg-accent/10 border-accent/20 shadow-[0_0_20px_rgba(255,122,24,0.1)]'
         : 'bg-black/20 border-white/5 opacity-50'
-    }`}
+      }`}
   >
-    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${
-      active ? 'bg-accent text-white' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500'
-    }`}>
+    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${active ? 'bg-accent text-white' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500'
+      }`}>
       {step}
     </div>
     <span className={`text-sm font-bold tracking-tight ${active ? 'text-zinc-900 dark:text-white' : 'text-zinc-500'}`}>
@@ -825,7 +792,7 @@ const PremiumAuthModal: React.FC<{
   const [step, setStep] = useState<'form' | 'otp' | 'reset' | 'verified'>('form');
   const [otpValue, setOtpValue] = useState('');
   const [resendTimer, setResendTimer] = useState(0);
-  
+
   const [identifier, setIdentifier] = useState('');
   const [emailError, setEmailError] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
@@ -993,13 +960,13 @@ const PremiumAuthModal: React.FC<{
       const response = await fetch('/api/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: emailToUse.toLowerCase().trim(), 
-          username: formData.username || userProfile?.username || '', 
-          type: mode === 'forgot_password' ? 'password_reset' 
-                : mode === 'verify_email' ? (emailToUse.toLowerCase().trim() !== userProfile?.email.toLowerCase().trim() ? 'email_update' : 'verification')
-                : 'signup',
-          university: selectedUniversity 
+        body: JSON.stringify({
+          email: emailToUse.toLowerCase().trim(),
+          username: formData.username || userProfile?.username || '',
+          type: mode === 'forgot_password' ? 'password_reset'
+            : mode === 'verify_email' ? (emailToUse.toLowerCase().trim() !== userProfile?.email.toLowerCase().trim() ? 'email_update' : 'verification')
+              : 'signup',
+          university: selectedUniversity
         })
       });
 
@@ -1035,7 +1002,7 @@ const PremiumAuthModal: React.FC<{
           setEmailError(true);
           throw new Error("Please enter a valid email address.");
         }
-        
+
         const result = await NexusServer.signIn(identifier.trim(), formData.password);
         if (result.error) throw result.error;
         onClose();
@@ -1054,11 +1021,11 @@ const PremiumAuthModal: React.FC<{
           const response = await fetch('/api/send-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              email: formData.email.toLowerCase().trim(), 
-              username: formData.username, 
-              type: 'signup', 
-              university: selectedUniversity 
+            body: JSON.stringify({
+              email: formData.email.toLowerCase().trim(),
+              username: formData.username,
+              type: 'signup',
+              university: selectedUniversity
             })
           });
 
@@ -1073,13 +1040,13 @@ const PremiumAuthModal: React.FC<{
           setResendTimer(60);
         } else {
           if (otpValue.length !== 6) throw new Error("6-digit code required.");
-          
+
           const verifyRes = await fetch('/api/verify-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              email: formData.email.toLowerCase().trim(), 
-              otp: otpValue, 
+            body: JSON.stringify({
+              email: formData.email.toLowerCase().trim(),
+              otp: otpValue,
               type: 'signup',
               username: formData.username,
               registration_number: formData.regNo,
@@ -1114,7 +1081,7 @@ const PremiumAuthModal: React.FC<{
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: formData.email.toLowerCase().trim(), type: 'password_reset', university: selectedUniversity })
           });
-          
+
           let data: any = {};
           const text = await response.text();
           if (text) {
@@ -1127,14 +1094,14 @@ const PremiumAuthModal: React.FC<{
         } else if (step === 'otp') {
           if (otpValue.length !== 6) throw new Error("6-digit code required.");
           if (formData.password.length < 6) throw new Error("New password must be at least 6 characters.");
-          
+
           const resetRes = await fetch('/api/reset-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              email: formData.email.toLowerCase().trim(), 
-              otp: otpValue, 
-              newPassword: formData.password 
+            body: JSON.stringify({
+              email: formData.email.toLowerCase().trim(),
+              otp: otpValue,
+              newPassword: formData.password
             })
           });
 
@@ -1145,7 +1112,7 @@ const PremiumAuthModal: React.FC<{
           }
 
           if (!resetRes.ok) throw new Error(resetData.error || "Reset failed. Please try again.");
-          
+
           setFormData(prev => ({ ...prev, password: '' }));
           setOtpValue('');
           setMode('login');
@@ -1160,13 +1127,13 @@ const PremiumAuthModal: React.FC<{
           }
 
           const isEmailChanged = formData.email.toLowerCase().trim() !== userProfile.email.toLowerCase().trim();
-          
+
           const response = await fetch('/api/send-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              email: formData.email.toLowerCase().trim(), 
-              username: userProfile.username, 
+            body: JSON.stringify({
+              email: formData.email.toLowerCase().trim(),
+              username: userProfile.username,
               type: isEmailChanged ? 'email_update' : 'verification',
               university: selectedUniversity
             })
@@ -1189,9 +1156,9 @@ const PremiumAuthModal: React.FC<{
           const verifyResponse = await fetch('/api/verify-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              email: formData.email.toLowerCase().trim(), 
-              otp: otpValue, 
+            body: JSON.stringify({
+              email: formData.email.toLowerCase().trim(),
+              otp: otpValue,
               type: isEmailChanged ? 'email_update' : 'verification',
               oldEmail: isEmailChanged ? userProfile.email : undefined,
               userId: userProfile.id
@@ -1220,7 +1187,7 @@ const PremiumAuthModal: React.FC<{
     }
   };
 
-  const isSubmitDisabled = loading || 
+  const isSubmitDisabled = loading ||
     (mode === 'signup' && (usernameStatus === 'taken' || usernameStatus === 'checking' || regNoStatus === 'taken' || regNoStatus === 'checking'));
 
   return (
@@ -1236,12 +1203,12 @@ const PremiumAuthModal: React.FC<{
           />
 
           {/* Modal Glow */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.4 }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-accent/10 blur-[120px] rounded-full pointer-events-none" 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-accent/10 blur-[120px] rounded-full pointer-events-none"
           />
 
           {/* Modal Container */}
@@ -1250,14 +1217,14 @@ const PremiumAuthModal: React.FC<{
             initial={{ opacity: 0, scale: 0.98, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 10 }}
-            transition={{ 
+            transition={{
               duration: 0.4,
-              ease: [0.22, 1, 0.36, 1] 
+              ease: [0.22, 1, 0.36, 1]
             }}
             className="relative w-full max-w-[1100px] h-full sm:h-auto max-h-[100%] sm:max-h-[720px] bg-white dark:bg-zinc-950 border border-black/5 dark:border-white/10 rounded-2xl sm:rounded-[32px] overflow-hidden flex flex-col sm:flex-row shadow-3xl text-zinc-900 dark:text-white"
           >
             {mode !== 'verify_email' && (
-              <button 
+              <button
                 onClick={onClose}
                 className="absolute top-4 right-4 sm:top-8 sm:right-8 z-50 p-2 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all hover:bg-black/10 dark:hover:bg-white/10"
               >
@@ -1268,20 +1235,20 @@ const PremiumAuthModal: React.FC<{
             {/* LEFT SECTION - Brand Experience */}
             <div className="hidden lg:flex w-[45%] relative flex-col p-12 overflow-hidden border-r border-black/5 dark:border-white/5 bg-zinc-950">
               {/* Video Background */}
-              <video 
-                autoPlay 
-                loop 
-                muted 
+              <video
+                autoPlay
+                loop
+                muted
                 playsInline
                 className="absolute inset-0 w-full h-full object-cover scale-105"
               >
                 <source src="/authvideo.mp4" type="video/mp4" />
               </video>
-              
+
               {/* Glass Overlays */}
               <div className="absolute inset-0 bg-zinc-950/40" />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-zinc-950/20" />
-              
+
               {/* Brand Logo */}
               <div className="relative z-10 flex items-center gap-3">
                 <div className="w-12 h-12 flex items-center justify-center overflow-hidden">
@@ -1352,16 +1319,16 @@ const PremiumAuthModal: React.FC<{
                         {mode === 'login' ? 'Welcome Back' : mode === 'signup' ? 'Get Started' : mode === 'forgot_password' ? 'Reset Password' : 'Verify Email'}
                       </h2>
                       <p className="text-sm text-zinc-500 dark:text-zinc-400 font-bold">
-                        {mode === 'login' ? 'Glad to see you again!' 
-                          : mode === 'signup' ? (step === 'otp' ? 'Enter verification code' : 'Create your student account') 
-                          : mode === 'forgot_password' ? (step === 'otp' ? 'Verify identity & reset' : 'Account Recovery') 
-                          : (step === 'otp' ? 'Enter the verification code' : 'Confirm or update your email address')}
+                        {mode === 'login' ? 'Glad to see you again!'
+                          : mode === 'signup' ? (step === 'otp' ? 'Enter verification code' : 'Create your student account')
+                            : mode === 'forgot_password' ? (step === 'otp' ? 'Verify identity & reset' : 'Account Recovery')
+                              : (step === 'otp' ? 'Enter the verification code' : 'Confirm or update your email address')}
                       </p>
                     </div>
 
                     {/* Error Message */}
                     {error && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         className="p-4 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl text-[11px] font-bold"
@@ -1380,19 +1347,19 @@ const PremiumAuthModal: React.FC<{
                               animate={{ opacity: 1, height: 'auto' }}
                               className="space-y-4"
                             >
-                              <AuthInput 
-                                label="Username" 
-                                icon={<User size={18} />} 
-                                placeholder="alex_smith" 
+                              <AuthInput
+                                label="Username"
+                                icon={<User size={18} />}
+                                placeholder="alex_smith"
                                 value={formData.username}
                                 onChange={handleUsernameChange}
                                 status={usernameStatus}
                                 autoComplete="username"
                               />
-                              <AuthInput 
-                                label="Reg No" 
-                                icon={<CheckCircle2 size={18} />} 
-                                placeholder="1220...." 
+                              <AuthInput
+                                label="Reg No"
+                                icon={<CheckCircle2 size={18} />}
+                                placeholder="1220...."
                                 value={formData.regNo}
                                 onChange={handleRegNoChange}
                                 status={regNoStatus}
@@ -1402,49 +1369,48 @@ const PremiumAuthModal: React.FC<{
                           )}
 
                           {mode === 'login' ? (
-                            <AuthInput 
-                              label="Email or Username" 
-                              icon={<Mail size={18} />} 
-                              placeholder="name@university.edu or username" 
+                            <AuthInput
+                              label="Email or Username"
+                              icon={<Mail size={18} />}
+                              placeholder="name@university.edu or username"
                               value={identifier}
                               onChange={setIdentifier}
                               autoComplete="username"
                             />
                           ) : (
-                            <AuthInput 
-                              label="Email Address" 
-                              icon={<Mail size={18} />} 
-                              placeholder="name@university.edu" 
+                            <AuthInput
+                              label="Email Address"
+                              icon={<Mail size={18} />}
+                              placeholder="name@university.edu"
                               value={formData.email}
                               onChange={(val) => {
-                                setFormData({...formData, email: val});
+                                setFormData({ ...formData, email: val });
                                 setEmailError(val.trim() !== '' && !validateEmail(val.trim()));
                               }}
                               error={emailError}
                               autoComplete="email"
                             />
                           )}
-                          
+
                           {mode !== 'forgot_password' && mode !== 'verify_email' && (
                             <div className="space-y-1">
-                              <AuthInput 
+                              <AuthInput
                                 label="Password"
-                                type="password" 
-                                icon={<Lock size={18} />} 
-                                placeholder="••••••••" 
+                                type="password"
+                                icon={<Lock size={18} />}
+                                placeholder="••••••••"
                                 value={formData.password}
-                                onChange={(val) => setFormData({...formData, password: val})}
+                                onChange={(val) => setFormData({ ...formData, password: val })}
                                 autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                               />
-                              
+
                               {mode === 'signup' && formData.password && (
                                 <div className="space-y-1.5 pt-1 px-1">
                                   <div className="flex justify-between items-center">
                                     <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Password Strength</span>
-                                    <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
-                                      getPasswordStrength(formData.password).score <= 2 ? 'text-red-500' :
-                                      getPasswordStrength(formData.password).score <= 3 ? 'text-yellow-500' : 'text-emerald-500'
-                                    }`}>
+                                    <span className={`text-[10px] font-extrabold uppercase tracking-wider ${getPasswordStrength(formData.password).score <= 2 ? 'text-red-500' :
+                                        getPasswordStrength(formData.password).score <= 3 ? 'text-yellow-500' : 'text-emerald-500'
+                                      }`}>
                                       {getPasswordStrength(formData.password).label}
                                     </span>
                                   </div>
@@ -1452,11 +1418,10 @@ const PremiumAuthModal: React.FC<{
                                     {[1, 2, 3, 4, 5].map((level) => (
                                       <div
                                         key={level}
-                                        className={`h-1.5 rounded-full transition-all duration-300 ${
-                                          level <= getPasswordStrength(formData.password).score
+                                        className={`h-1.5 rounded-full transition-all duration-300 ${level <= getPasswordStrength(formData.password).score
                                             ? getPasswordStrength(formData.password).color
                                             : 'bg-zinc-200 dark:bg-zinc-800'
-                                        }`}
+                                          }`}
                                       />
                                     ))}
                                   </div>
@@ -1465,7 +1430,7 @@ const PremiumAuthModal: React.FC<{
 
                               {mode === 'login' && (
                                 <div className="flex justify-end pt-1">
-                                  <button 
+                                  <button
                                     type="button"
                                     onClick={() => { setMode('forgot_password'); setStep('form'); setError(null); }}
                                     className="text-[10px] font-bold text-accent hover:text-accent-2 tracking-wider transition-colors uppercase border-none bg-transparent outline-none cursor-pointer"
@@ -1479,34 +1444,33 @@ const PremiumAuthModal: React.FC<{
                         </>
                       ) : step === 'otp' ? (
                         <div className="space-y-4">
-                          <AuthInput 
-                            label="Verification Code" 
-                            icon={<Rocket size={18} />} 
-                            placeholder="6-digit code" 
+                          <AuthInput
+                            label="Verification Code"
+                            icon={<Rocket size={18} />}
+                            placeholder="6-digit code"
                             value={otpValue}
                             onChange={(val) => setOtpValue(val.replace(/[^0-9]/g, '').slice(0, 6))}
                             autoComplete="one-time-code"
                           />
-                          
+
                           {mode === 'forgot_password' && (
                             <div className="space-y-1">
-                              <AuthInput 
+                              <AuthInput
                                 label="New Password"
-                                type="password" 
-                                icon={<Lock size={18} />} 
-                                placeholder="••••••••" 
+                                type="password"
+                                icon={<Lock size={18} />}
+                                placeholder="••••••••"
                                 value={formData.password}
-                                onChange={(val) => setFormData({...formData, password: val})}
+                                onChange={(val) => setFormData({ ...formData, password: val })}
                                 autoComplete="new-password"
                               />
                               {formData.password && (
                                 <div className="space-y-1.5 pt-1 px-1">
                                   <div className="flex justify-between items-center">
                                     <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Password Strength</span>
-                                    <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
-                                      getPasswordStrength(formData.password).score <= 2 ? 'text-red-500' :
-                                      getPasswordStrength(formData.password).score <= 3 ? 'text-yellow-500' : 'text-emerald-500'
-                                    }`}>
+                                    <span className={`text-[10px] font-extrabold uppercase tracking-wider ${getPasswordStrength(formData.password).score <= 2 ? 'text-red-500' :
+                                        getPasswordStrength(formData.password).score <= 3 ? 'text-yellow-500' : 'text-emerald-500'
+                                      }`}>
                                       {getPasswordStrength(formData.password).label}
                                     </span>
                                   </div>
@@ -1514,11 +1478,10 @@ const PremiumAuthModal: React.FC<{
                                     {[1, 2, 3, 4, 5].map((level) => (
                                       <div
                                         key={level}
-                                        className={`h-1.5 rounded-full transition-all duration-300 ${
-                                          level <= getPasswordStrength(formData.password).score
+                                        className={`h-1.5 rounded-full transition-all duration-300 ${level <= getPasswordStrength(formData.password).score
                                             ? getPasswordStrength(formData.password).color
                                             : 'bg-zinc-200 dark:bg-zinc-800'
-                                        }`}
+                                          }`}
                                       />
                                     ))}
                                   </div>
@@ -1528,7 +1491,7 @@ const PremiumAuthModal: React.FC<{
                           )}
 
                           <div className="flex justify-between items-center px-1 pt-2">
-                            <button 
+                            <button
                               type="button"
                               onClick={handleResendOTP}
                               disabled={resendTimer > 0 || loading}
@@ -1536,7 +1499,7 @@ const PremiumAuthModal: React.FC<{
                             >
                               {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code'}
                             </button>
-                            <button 
+                            <button
                               type="button"
                               onClick={() => { setStep('form'); setError(null); }}
                               className="text-[10px] font-bold text-zinc-400 hover:text-zinc-900 dark:hover:text-white uppercase tracking-widest transition-colors border-none bg-transparent outline-none cursor-pointer"
@@ -1562,10 +1525,10 @@ const PremiumAuthModal: React.FC<{
                         ) : (
                           <>
                             <span className="tracking-wider text-sm">
-                              {mode === 'login' ? 'Sign In' 
-                                : mode === 'signup' ? (step === 'otp' ? 'Verify & Join' : 'Create Account') 
-                                : mode === 'forgot_password' ? (step === 'otp' ? 'Update Password' : 'Send Recovery Code')
-                                : (step === 'otp' ? 'Verify Code' : 'Send Verification Code')}
+                              {mode === 'login' ? 'Sign In'
+                                : mode === 'signup' ? (step === 'otp' ? 'Verify & Join' : 'Create Account')
+                                  : mode === 'forgot_password' ? (step === 'otp' ? 'Update Password' : 'Send Recovery Code')
+                                    : (step === 'otp' ? 'Verify Code' : 'Send Verification Code')}
                             </span>
                             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                           </>
@@ -1575,7 +1538,7 @@ const PremiumAuthModal: React.FC<{
                       {mode !== 'verify_email' && (
                         <p className="text-center text-xs font-bold text-zinc-500 dark:text-zinc-400">
                           {mode === 'login' ? "Don't have an account?" : "Already a member?"} {' '}
-                          <button 
+                          <button
                             type="button"
                             onClick={handleToggleMode}
                             className="text-accent hover:text-accent-2 transition-colors underline underline-offset-4 border-none bg-transparent outline-none cursor-pointer"
@@ -1587,7 +1550,7 @@ const PremiumAuthModal: React.FC<{
 
                       {mode === 'verify_email' && userProfile && step === 'form' && (
                         <p className="text-center">
-                          <button 
+                          <button
                             type="button"
                             onClick={async () => {
                               await NexusServer.signOut();
@@ -1671,7 +1634,7 @@ const AppContent: React.FC = () => {
     }
 
     setShowAuthModal(false);
-    
+
     if (location.pathname === '/login' || location.pathname === '/signup') {
       const lastModulePath = localStorage.getItem('last_active_path') || '/';
       navigate(lastModulePath !== location.pathname ? lastModulePath : '/', { replace: true });
@@ -1709,7 +1672,7 @@ const AppContent: React.FC = () => {
     if (!authIsReady) return;
 
     const path = location.pathname;
-    
+
     // Check if path ends with /login or /signup (handling both /login and /lpu/login)
     const isLogin = path === '/login' || path.endsWith('/login');
     const isSignup = path === '/signup' || path.endsWith('/signup');
@@ -1738,7 +1701,7 @@ const AppContent: React.FC = () => {
       if (uniMap[firstPart]) {
         const targetUniId = uniMap[firstPart];
         const targetUni = UNIVERSITIES.find(u => u.id === targetUniId);
-        
+
         if (targetUni?.adminOnly) {
           if (!authIsReady) return; // Wait for session load before matching this route
           if (!userProfile || !userProfile.is_admin) {
@@ -1751,7 +1714,7 @@ const AppContent: React.FC = () => {
         if (selectedUniversity !== targetUniId) {
           selectUniversity(targetUniId);
         }
-        return; 
+        return;
       }
     }
 
@@ -1777,7 +1740,7 @@ const AppContent: React.FC = () => {
       const target = !lastPath.endsWith('/login') && !lastPath.endsWith('/signup') ? lastPath : '/';
       navigate(target, { replace: true });
     }
-    
+
     // Mandatory verification check
     if (!authIsReady) return;
 
@@ -1822,7 +1785,7 @@ const AppContent: React.FC = () => {
           setAuthIsReady(true);
           return;
         }
-        
+
         lastHandledUserRef.current = user.id;
         try {
           const profile = await NexusServer.ensureProfile(user);
@@ -1863,37 +1826,7 @@ const AppContent: React.FC = () => {
     };
   }, []);
 
-  // Preload critical lazy routes on idle/idle-timeout to eliminate dynamic load freezes
-  useEffect(() => {
-    const criticalPreloads = [
-      ContentLibrary,
-      ToolsHub,
-      TimetableHub,
-      CampusNavigator,
-      QuizTaker,
-      SettingsHub
-    ];
-    
-    const timer = setTimeout(() => {
-      if ('requestIdleCallback' in window) {
-        window.requestIdleCallback(() => {
-          criticalPreloads.forEach(comp => {
-            try {
-              comp.preload().catch(() => {});
-            } catch (e) {}
-          });
-        });
-      } else {
-        criticalPreloads.forEach(comp => {
-          try {
-            comp.preload().catch(() => {});
-          } catch (e) {}
-        });
-      }
-    }, 1500); // Trigger 1.5s after app load
 
-    return () => clearTimeout(timer);
-  }, []);
 
   const toggleTheme = React.useCallback(() => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
@@ -1957,45 +1890,45 @@ const AppContent: React.FC = () => {
         <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative bg-white dark:bg-[#0a0a0a] md:pl-[72px]">
           <BackgroundEffects />
 
-        {false && (
-          <header className="sticky top-0 h-16 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-2xl border-b border-zinc-200/50 dark:border-white/5 flex items-center px-4 md:px-8 z-[100] transition-all duration-300">
-            <div className="flex items-center gap-1 md:gap-4 flex-1 md:flex-none">
-              <button 
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-zinc-700 dark:text-zinc-400 mr-1 border-none active:scale-75 transition-all bg-zinc-100/50 dark:bg-white/5 group"
-                aria-label="Toggle menu"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 transition-transform group-hover:scale-110">
-                  <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="15" y2="6" /><line x1="3" y1="18" x2="18"/>
-                </svg>
-              </button>
-              <div className="flex-1 md:hidden flex justify-center">
-                <img 
-                  src={theme === 'dark' ? '/Scholix_dark.webp' : '/Scholix_light.webp'} 
-                  alt="Scholix" 
-                  width="108"
-                  height="36"
-                  className="h-7 sm:h-8 md:h-9 w-auto object-contain cursor-pointer active:scale-95 transition-transform"
-                  onClick={() => navigate('/')}
-                />
+          {false && (
+            <header className="sticky top-0 h-16 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-2xl border-b border-zinc-200/50 dark:border-white/5 flex items-center px-4 md:px-8 z-[100] transition-all duration-300">
+              <div className="flex items-center gap-1 md:gap-4 flex-1 md:flex-none">
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-zinc-700 dark:text-zinc-400 mr-1 border-none active:scale-75 transition-all bg-zinc-100/50 dark:bg-white/5 group"
+                  aria-label="Toggle menu"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 transition-transform group-hover:scale-110">
+                    <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="15" y2="6" /><line x1="3" y1="18" x2="18" />
+                  </svg>
+                </button>
+                <div className="flex-1 md:hidden flex justify-center">
+                  <img
+                    src={theme === 'dark' ? '/Scholix_dark.webp' : '/Scholix_light.webp'}
+                    alt="Scholix"
+                    width="108"
+                    height="36"
+                    className="h-7 sm:h-8 md:h-9 w-auto object-contain cursor-pointer active:scale-95 transition-transform"
+                    onClick={() => navigate('/')}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="flex-1 hidden md:flex ml-0 justify-start">
-              <div className="w-full max-w-[480px]">
-                <UniversalSearch />
+              <div className="flex-1 hidden md:flex ml-0 justify-start">
+                <div className="w-full max-w-[480px]">
+                  <UniversalSearch />
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center space-x-2 ml-auto">
-              <button 
-                onClick={handleOpenMobileSearch}
-                className="md:hidden p-2.5 rounded-full text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border-none active:scale-90"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-              </button>
-              <NotificationBell userProfile={userProfile} />
-              <div className="hidden md:flex">
+              <div className="flex items-center space-x-2 ml-auto">
+                <button
+                  onClick={handleOpenMobileSearch}
+                  className="md:hidden p-2.5 rounded-full text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border-none active:scale-90"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                </button>
+                <NotificationBell userProfile={userProfile} />
+                <div className="hidden md:flex">
                   <button onClick={toggleTheme} className="p-2.5 rounded-full bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90">
                     {theme === 'dark' ? (
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
@@ -2003,84 +1936,83 @@ const AppContent: React.FC = () => {
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
                     )}
                   </button>
-              </div>
+                </div>
 
-              {/* Desktop Profile Menu */}
-              <div className="hidden md:block relative ml-2">
-                {!authIsReady ? (
-                  <div className="w-11 h-11 rounded-full bg-zinc-100 dark:bg-white/5 animate-pulse" />
-                ) : userProfile ? (
-                  <>
-                    <button 
-                      onClick={() => isProfileMenuOpen ? handleProfileClose() : setIsProfileMenuOpen(true)} 
-                      className="w-11 h-11 transition-all relative group text-left border-none cursor-pointer flex items-center justify-center rounded-full bg-gradient-to-tr from-brand-primary to-brand-secondary p-[1.5px] shadow-[0_8px_20px_var(--brand-glow)] hover:scale-105 active:scale-95"
-                    >
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-nexus-darker flex items-center justify-center">
-                        {userProfile.avatar_url ? (
-                          <img
-                            src={userProfile.avatar_url}
-                            alt="Avatar"
-                            className="w-full h-full object-cover rounded-full"
-                          />
-                        ) : (
-                          <span className="text-zinc-900 dark:text-brand-primary font-bold text-xs uppercase">
-                            {userProfile.username?.[0] || userProfile.email[0]}
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                    {isProfileMenuOpen && (
-                      <>
-                        <div className="fixed inset-0 z-40 bg-transparent" onClick={handleProfileClose} />
-                        <div className={`absolute right-0 mt-3 w-56 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-50 animate-fade-in backdrop-blur-xl transition-all duration-300 ${isClosingProfile ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
-                          <div className="px-5 py-3 border-b border-zinc-100 dark:border-white/5 mb-2 flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-[11px] sm:text-xs shrink-0 border border-brand-primary/5 overflow-hidden">
-                              {userProfile.avatar_url ? <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" /> : (userProfile.username?.[0]?.toUpperCase() || studentTerm[0])}
-                            </div>
-                            <div className="flex flex-col text-left min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <p className="font-bold text-zinc-800 dark:text-white tracking-wider text-[11px] sm:text-xs truncate">{userProfile.username || studentTerm}</p>
-                                <VerifiedBadge isAdmin={userProfile.is_admin} size="w-3.5 h-3.5" />
-                              </div>
-                              <p className="text-[11px] sm:text-xs font-bold text-zinc-400 tracking-widest truncate">{userProfile.email}</p>
-                            </div>
-                          </div>
-                          {userProfile.is_admin && (
-                            <button
-                              onClick={() => { navigate('/admin-stats'); handleProfileClose(); }}
-                              className="w-full text-left px-5 py-2.5 text-xs font-semibold text-brand-primary hover:bg-brand-primary/5 border-none bg-transparent flex items-center gap-3 transition-all"
-                            >
-                              <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 2v20M2 12h20" /></svg>
-                              </div>
-                              Admin Dashboard
-                            </button>
+                {/* Desktop Profile Menu */}
+                <div className="hidden md:block relative ml-2">
+                  {!authIsReady ? (
+                    <div className="w-11 h-11 rounded-full bg-zinc-100 dark:bg-white/5 animate-pulse" />
+                  ) : userProfile ? (
+                    <>
+                      <button
+                        onClick={() => isProfileMenuOpen ? handleProfileClose() : setIsProfileMenuOpen(true)}
+                        className="w-11 h-11 transition-all relative group text-left border-none cursor-pointer flex items-center justify-center rounded-full bg-gradient-to-tr from-brand-primary to-brand-secondary p-[1.5px] shadow-[0_8px_20px_var(--brand-glow)] hover:scale-105 active:scale-95"
+                      >
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-nexus-darker flex items-center justify-center">
+                          {userProfile.avatar_url ? (
+                            <img
+                              src={userProfile.avatar_url}
+                              alt="Avatar"
+                              className="w-full h-full object-cover rounded-full"
+                            />
+                          ) : (
+                            <span className="text-zinc-900 dark:text-brand-primary font-bold text-xs uppercase">
+                              {userProfile.username?.[0] || userProfile.email[0]}
+                            </span>
                           )}
-                          <button
-                            onClick={() => { navigate(getPathFromModule(ModuleType.SETTINGS)); handleProfileClose(); }}
-                            className="w-full text-left px-5 py-2.5 text-xs font-semibold text-zinc-700 dark:text-white/80 hover:text-brand-primary dark:hover:text-white hover:bg-brand-primary/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
-                          >
-                            <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-brand-primary/20 transition-colors">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                            </div>
-                            Settings
-                          </button>
                         </div>
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <button onClick={openAuth} className="w-10 h-10 rounded-full border-none bg-zinc-100 dark:bg-[#0a0a0a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-95">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                  </button>
-                )}
+                      </button>
+                      {isProfileMenuOpen && (
+                        <>
+                          <div className="fixed inset-0 z-40 bg-transparent" onClick={handleProfileClose} />
+                          <div className={`absolute right-0 mt-3 w-56 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-50 animate-fade-in backdrop-blur-xl transition-all duration-300 ${isClosingProfile ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
+                            <div className="px-5 py-3 border-b border-zinc-100 dark:border-white/5 mb-2 flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-[11px] sm:text-xs shrink-0 border border-brand-primary/5 overflow-hidden">
+                                {userProfile.avatar_url ? <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" /> : (userProfile.username?.[0]?.toUpperCase() || studentTerm[0])}
+                              </div>
+                              <div className="flex flex-col text-left min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <p className="font-bold text-zinc-800 dark:text-white tracking-wider text-[11px] sm:text-xs truncate">{userProfile.username || studentTerm}</p>
+                                  <VerifiedBadge isAdmin={userProfile.is_admin} size="w-3.5 h-3.5" />
+                                </div>
+                                <p className="text-[11px] sm:text-xs font-bold text-zinc-400 tracking-widest truncate">{userProfile.email}</p>
+                              </div>
+                            </div>
+                            {userProfile.is_admin && (
+                              <button
+                                onClick={() => { navigate('/admin-stats'); handleProfileClose(); }}
+                                className="w-full text-left px-5 py-2.5 text-xs font-semibold text-brand-primary hover:bg-brand-primary/5 border-none bg-transparent flex items-center gap-3 transition-all"
+                              >
+                                <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 2v20M2 12h20" /></svg>
+                                </div>
+                                Admin Dashboard
+                              </button>
+                            )}
+                            <button
+                              onClick={() => { navigate(getPathFromModule(ModuleType.SETTINGS)); handleProfileClose(); }}
+                              className="w-full text-left px-5 py-2.5 text-xs font-semibold text-zinc-700 dark:text-white/80 hover:text-brand-primary dark:hover:text-white hover:bg-brand-primary/5 dark:hover:bg-white/5 border-none bg-transparent flex items-center gap-3 transition-all"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-brand-primary/20 transition-colors">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
+                              </div>
+                              Settings
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <button onClick={openAuth} className="w-10 h-10 rounded-full border-none bg-zinc-100 dark:bg-[#0a0a0a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-95">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          </header>
-        )}
-        <div id="main-content-area" className={`flex-1 ${isSettingsPath ? 'overflow-hidden' : 'overflow-y-auto'} relative scroll-smooth ${isDashboardPath || isSettingsPath ? 'mobile-safe-pt-0 px-0 pb-0 md:p-0' : 'mobile-safe-pt-4 px-4 pb-4 md:p-8'} ${isDashboardPath ? 'bg-[#fbfcfd] dark:bg-[#030303]' : isSettingsPath ? 'bg-white dark:bg-dark-950' : 'bg-white dark:bg-[#0a0a0a]'} no-scrollbar`}>
-          <div className={`relative ${isSettingsPath ? 'h-full' : ''} ${isDashboardPath || isSettingsPath ? 'w-full' : 'max-w-7xl mx-auto'}`}>
-            <Suspense fallback={<SuspenseLoader />}>
+            </header>
+          )}
+          <div id="main-content-area" className={`flex-1 ${isSettingsPath ? 'overflow-hidden' : 'overflow-y-auto'} relative scroll-smooth ${isDashboardPath || isSettingsPath ? 'mobile-safe-pt-0 px-0 pb-0 md:p-0' : 'mobile-safe-pt-4 px-4 pb-4 md:p-8'} ${isDashboardPath ? 'bg-[#fbfcfd] dark:bg-[#030303]' : isSettingsPath ? 'bg-white dark:bg-dark-950' : 'bg-white dark:bg-[#0a0a0a]'} no-scrollbar`}>
+            <div className={`relative ${isSettingsPath ? 'h-full' : ''} ${isDashboardPath || isSettingsPath ? 'w-full' : 'max-w-7xl mx-auto'}`}>
               <Routes>
                 <Route path="/welcome" element={<ScholixLanding userProfile={userProfile} />} />
                 <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
@@ -2095,56 +2027,55 @@ const AppContent: React.FC = () => {
                 <Route path="/:uniKey/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} onOpenAuth={openAuth} authModalOpen={showAuthModal} authIsReady={authIsReady} />} />
                 <Route path="/*" element={<FeatureRoutes userProfile={userProfile} setUserProfile={setUserProfile} navigateToModule={navigateToModule} theme={theme} toggleTheme={toggleTheme} onOpenSignup={openSignup} onOpenAuth={openAuth} authModalOpen={showAuthModal} authIsReady={authIsReady} />} />
               </Routes>
-            </Suspense>
-          </div>
-        </div>
-        {/* Premium Mobile Search Bottom Sheet */}
-        {isMobileSearchActive && (
-          <div className="md:hidden fixed inset-0 z-[200] flex items-end justify-center pointer-events-auto">
-            {/* Backdrop */}
-            <div 
-              className={`absolute inset-0 bg-black/40 backdrop-blur-sm ${isClosingMobileSearch ? 'animate-overlay-out' : 'animate-overlay-in'}`}
-              onClick={handleCloseMobileSearch} 
-            />
-            
-            {/* Bottom Sheet Container */}
-            <div className={`relative w-full bg-white dark:bg-[#0a0a0a] rounded-t-[40px] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] dark:shadow-[0_-20px_50px_rgba(0,0,0,0.6)] p-6 overflow-hidden border-t border-zinc-200 dark:border-white/10 flex flex-col h-[85vh] ${isClosingMobileSearch ? 'animate-sheet-out' : 'animate-sheet-in'}`}>
-              {/* Handle bar */}
-              <div className="w-12 h-1.5 bg-zinc-200 dark:bg-white/10 rounded-full mx-auto mb-6 shrink-0" onClick={handleCloseMobileSearch} />
-              
-              <div className="flex items-start gap-3 mb-4 shrink-0">
-                <button 
-                  onClick={handleCloseMobileSearch}
-                  className="mt-1 p-3 rounded-2xl bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:text-brand-primary transition-all border-none active:scale-90"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="m15 18-6-6 6-6" /></svg>
-                </button>
-                <div className="flex-1 min-w-0">
-                  <UniversalSearch 
-                    autoFocus={true} 
-                    placeholder="Search Scholix..." 
-                    resultsPortalRef={searchResultsRef}
-                  />
-                </div>
-              </div>
-
-              {/* Scrollable Results Area */}
-              <div 
-                ref={searchResultsRef}
-                className="flex-1 overflow-y-auto no-scrollbar -mx-2 px-2 pb-10"
-              />
             </div>
           </div>
-        )}
-      </main>
-    </div>
-    <BottomNavbar currentModule={currentModule} />
-    <PremiumAuthModal 
-      isOpen={showAuthModal} 
-      onClose={handleAuthClose} 
-      initialMode={authMode === 'verify_email' ? 'verify_email' : authMode} 
-      userProfile={userProfile || undefined} 
-    />
+          {/* Premium Mobile Search Bottom Sheet */}
+          {isMobileSearchActive && (
+            <div className="md:hidden fixed inset-0 z-[200] flex items-end justify-center pointer-events-auto">
+              {/* Backdrop */}
+              <div
+                className={`absolute inset-0 bg-black/40 backdrop-blur-sm ${isClosingMobileSearch ? 'animate-overlay-out' : 'animate-overlay-in'}`}
+                onClick={handleCloseMobileSearch}
+              />
+
+              {/* Bottom Sheet Container */}
+              <div className={`relative w-full bg-white dark:bg-[#0a0a0a] rounded-t-[40px] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] dark:shadow-[0_-20px_50px_rgba(0,0,0,0.6)] p-6 overflow-hidden border-t border-zinc-200 dark:border-white/10 flex flex-col h-[85vh] ${isClosingMobileSearch ? 'animate-sheet-out' : 'animate-sheet-in'}`}>
+                {/* Handle bar */}
+                <div className="w-12 h-1.5 bg-zinc-200 dark:bg-white/10 rounded-full mx-auto mb-6 shrink-0" onClick={handleCloseMobileSearch} />
+
+                <div className="flex items-start gap-3 mb-4 shrink-0">
+                  <button
+                    onClick={handleCloseMobileSearch}
+                    className="mt-1 p-3 rounded-2xl bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:text-brand-primary transition-all border-none active:scale-90"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="m15 18-6-6 6-6" /></svg>
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <UniversalSearch
+                      autoFocus={true}
+                      placeholder="Search Scholix..."
+                      resultsPortalRef={searchResultsRef}
+                    />
+                  </div>
+                </div>
+
+                {/* Scrollable Results Area */}
+                <div
+                  ref={searchResultsRef}
+                  className="flex-1 overflow-y-auto no-scrollbar -mx-2 px-2 pb-10"
+                />
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+      <BottomNavbar currentModule={currentModule} />
+      <PremiumAuthModal
+        isOpen={showAuthModal}
+        onClose={handleAuthClose}
+        initialMode={authMode === 'verify_email' ? 'verify_email' : authMode}
+        userProfile={userProfile || undefined}
+      />
       <CookieBanner />
       <Analytics />
       <SpeedInsights />
@@ -2155,11 +2086,11 @@ const AppContent: React.FC = () => {
   );
 };
 
-const FeatureRoutes: React.FC<{ 
-  userProfile: UserProfile | null, 
+const FeatureRoutes: React.FC<{
+  userProfile: UserProfile | null,
   setUserProfile: React.Dispatch<React.SetStateAction<UserProfile | null>>,
   navigateToModule: (module: ModuleType) => void,
-  theme: string, 
+  theme: string,
   toggleTheme: () => void,
   onOpenSignup: () => void,
   onOpenAuth: () => void,
@@ -2170,54 +2101,52 @@ const FeatureRoutes: React.FC<{
   const navigate = useNavigate();
 
   return (
-    <Suspense fallback={<SuspenseLoader />}>
-      <Routes>
-        <Route path="/" element={<Dashboard userProfile={userProfile} />} />
-        <Route path="/library/*" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
-        <Route path="/faculty/:facultyName" element={<FacultyDetail userProfile={userProfile} />} />
-        
-        <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
-        <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
-        
-        <Route path="/freshers" element={<FeatureGuard module={ModuleType.FRESHERS}><FreshersKit /></FeatureGuard>} />
-        <Route path="/tools" element={<ToolsHub userProfile={userProfile} />} />
-        <Route path="/share-cgpa" element={<ShareReport />} />
-        <Route path="/placement" element={<FeatureGuard module={ModuleType.PLACEMENT}><Navigate to="/tools?tab=placement" replace /></FeatureGuard>} />
-        <Route path="/placement/:reportId" element={<PlacementRedirect />} />
-        <Route path="/attendance" element={<FeatureGuard module={ModuleType.ATTENDANCE}><Navigate to="/tools?tab=attendance" replace /></FeatureGuard>} />
-        <Route path="/cgpa" element={<FeatureGuard module={ModuleType.CGPA}><Navigate to="/tools?tab=cgpa" replace /></FeatureGuard>} />
-        <Route path="/degree-guide" element={<DegreeGuide />} />
-        <Route path="/lectures" element={<FeatureGuard module={ModuleType.LECTURES}><Navigate to="/tools?tab=lectures" replace /></FeatureGuard>} />
-        
-  
-        <Route path="/timetable" element={<FeatureGuard module={ModuleType.TIMETABLE}><TimetableHub userProfile={userProfile} /></FeatureGuard>} />
-        
-        <Route path="/quiz" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
-        <Route path="/quiz/:subjectName" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
-        <Route path="/quiz/:subjectName/:quizId" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
-        
-        <Route path="/market" element={<Navigate to="/campus/market" replace />} />
-        <Route path="/market/:category" element={<Navigate to="/campus/market" replace />} />
-        <Route path="/market/item/:itemId" element={<Navigate to="/campus/market" replace />} />
-  
-        
-        <Route path="/roommate" element={<FeatureGuard module={ModuleType.ROOMMATE}><RoommateFinder userProfile={userProfile} /></FeatureGuard>} />
-        <Route path="/emergency" element={<FeatureGuard module={ModuleType.EMERGENCY}><EmergencyContacts /></FeatureGuard>} />
-  
-        <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
-        <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
-        <Route path="/settings" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
-        <Route path="/settings/profile" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="profile" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
-        <Route path="/settings/privacy" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="privacy" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
-        <Route path="/settings/security" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="security" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
-        <Route path="/settings/about" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="about" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
-        <Route path="/settings/help" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="help_center" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
-        <Route path="/settings/theme" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="theme" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
-        <Route path="/login" element={<Dashboard userProfile={userProfile} />} />
-        <Route path="/signup" element={<Dashboard userProfile={userProfile} />} />
-        <Route path="*" element={<Dashboard userProfile={userProfile} />} />
-      </Routes>
-    </Suspense>
+    <Routes>
+      <Route path="/" element={<Dashboard userProfile={userProfile} />} />
+      <Route path="/library/*" element={<FeatureGuard module={ModuleType.LIBRARY}><ContentLibrary userProfile={userProfile} onAuthRequired={onOpenAuth} authIsReady={authIsReady} /></FeatureGuard>} />
+      <Route path="/faculty/:facultyName" element={<FacultyDetail userProfile={userProfile} />} />
+
+      <Route path="/campus" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
+      <Route path="/campus/:tab" element={<FeatureGuard module={ModuleType.CAMPUS}><CampusNavigator userProfile={userProfile} /></FeatureGuard>} />
+
+      <Route path="/freshers" element={<FeatureGuard module={ModuleType.FRESHERS}><FreshersKit /></FeatureGuard>} />
+      <Route path="/tools" element={<ToolsHub userProfile={userProfile} />} />
+      <Route path="/share-cgpa" element={<ShareReport />} />
+      <Route path="/placement" element={<FeatureGuard module={ModuleType.PLACEMENT}><Navigate to="/tools?tab=placement" replace /></FeatureGuard>} />
+      <Route path="/placement/:reportId" element={<PlacementRedirect />} />
+      <Route path="/attendance" element={<FeatureGuard module={ModuleType.ATTENDANCE}><Navigate to="/tools?tab=attendance" replace /></FeatureGuard>} />
+      <Route path="/cgpa" element={<FeatureGuard module={ModuleType.CGPA}><Navigate to="/tools?tab=cgpa" replace /></FeatureGuard>} />
+      <Route path="/degree-guide" element={<DegreeGuide />} />
+      <Route path="/lectures" element={<FeatureGuard module={ModuleType.LECTURES}><Navigate to="/tools?tab=lectures" replace /></FeatureGuard>} />
+
+
+      <Route path="/timetable" element={<FeatureGuard module={ModuleType.TIMETABLE}><TimetableHub userProfile={userProfile} /></FeatureGuard>} />
+
+      <Route path="/quiz" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/quiz/:subjectName" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/quiz/:subjectName/:quizId" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+
+      <Route path="/market" element={<Navigate to="/campus/market" replace />} />
+      <Route path="/market/:category" element={<Navigate to="/campus/market" replace />} />
+      <Route path="/market/item/:itemId" element={<Navigate to="/campus/market" replace />} />
+
+
+      <Route path="/roommate" element={<FeatureGuard module={ModuleType.ROOMMATE}><RoommateFinder userProfile={userProfile} /></FeatureGuard>} />
+      <Route path="/emergency" element={<FeatureGuard module={ModuleType.EMERGENCY}><EmergencyContacts /></FeatureGuard>} />
+
+      <Route path="/admin-stats" element={<AdminStats userProfile={userProfile} />} />
+      <Route path="/payment-success" element={<PaymentSuccess userProfile={userProfile} />} />
+      <Route path="/settings" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+      <Route path="/settings/profile" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="profile" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+      <Route path="/settings/privacy" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="privacy" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+      <Route path="/settings/security" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="security" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+      <Route path="/settings/about" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="about" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+      <Route path="/settings/help" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="help_center" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+      <Route path="/settings/theme" element={<SettingsHub userProfile={userProfile} setUserProfile={setUserProfile} onSignOut={async () => { await NexusServer.signOut(); navigate('/'); }} theme={theme} toggleTheme={toggleTheme} navigateToModule={navigateToModule} initialTab="theme" onOpenSignup={onOpenSignup} authModalOpen={authModalOpen} />} />
+      <Route path="/login" element={<Dashboard userProfile={userProfile} />} />
+      <Route path="/signup" element={<Dashboard userProfile={userProfile} />} />
+      <Route path="*" element={<Dashboard userProfile={userProfile} />} />
+    </Routes>
   );
 };
 

@@ -75,7 +75,7 @@ const DailyFeed: React.FC<DailyFeedProps> = ({ userProfile }) => {
         // Map real leaderboard contributors from Supabase
         const contributors = leaderboard.map((user, idx) => ({
           username: user.username || 'Anonymous Verto',
-          avatar: user.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(user.username || 'Contributor')}`,
+          avatar: user.avatar_url || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(user.username || 'Contributor')}`,
           xp: user.total_xp || 0,
           level: user.level || 1,
           rank: idx + 1

@@ -259,6 +259,7 @@ export interface LibraryFile {
   storage_path: string;
   uploader_id?: string;
   uploader_username?: string;
+  uploader_avatar_url?: string;
   uploader_is_admin?: boolean;
   admin_notes?: string;
   isUserUploaded?: boolean;

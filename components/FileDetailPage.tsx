@@ -443,7 +443,7 @@ const FileDetailPage: React.FC<FileDetailPageProps> = ({ file, userProfile, onCl
                   <div key={comment.id} className="space-y-2">
                     <div className="flex gap-3 items-start">
                       <img 
-                        src={comment.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(comment.username)}`} 
+                        src={comment.avatar_url || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(comment.username)}`} 
                         alt={comment.username} 
                         className="w-7.5 h-7.5 rounded-full border border-zinc-150 dark:border-white/10 shrink-0" 
                       />
@@ -483,7 +483,7 @@ const FileDetailPage: React.FC<FileDetailPageProps> = ({ file, userProfile, onCl
                     {comment.replies && comment.replies.map((reply) => (
                       <div key={reply.id} className="ml-10 flex gap-2.5 items-start bg-zinc-50/50 dark:bg-white/[0.005] p-2.5 rounded-2xl border border-zinc-100/50 dark:border-white/5">
                         <img 
-                          src={reply.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(reply.username)}`} 
+                          src={reply.avatar_url || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(reply.username)}`} 
                           alt={reply.username} 
                           className="w-5.5 h-5.5 rounded-full border border-zinc-150 dark:border-white/10 shrink-0" 
                         />
