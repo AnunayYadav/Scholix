@@ -39,6 +39,7 @@ import { css as langCss } from "@codemirror/lang-css";
 import { sql as langSql } from "@codemirror/lang-sql";
 import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { tags as t } from "@lezer/highlight";
+import { abbreviationTracker } from "@emmetio/codemirror6-plugin";
 
 interface SubjectCommunityProps {
   activeSubject: FolderType;
@@ -1001,6 +1002,19 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         }
 
         // If manual language, we want to mount CodeMirror 6 if not already mounted
+        if (cm6Views.current.has(pre)) {
+          const container = pre.nextSibling as HTMLElement;
+          if (container && container.classList.contains('cm6-editor-container')) {
+            const currentMountedLang = container.dataset.lang;
+            if (currentMountedLang !== lang) {
+              const view = cm6Views.current.get(pre);
+              view?.destroy();
+              container.remove();
+              cm6Views.current.delete(pre);
+            }
+          }
+        }
+
         if (!cm6Views.current.has(pre)) {
           // Hide the original pre element
           pre.style.display = 'none';
@@ -1008,7 +1022,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
           // Create container for CodeMirror (contenteditable=false to prevent parent editing quirks)
           const container = document.createElement('div');
           container.contentEditable = 'false';
-          container.className = 'cm6-editor-container my-3 overflow-hidden rounded-lg';
+          container.className = 'cm6-editor-container my-3 rounded-lg';
+          container.dataset.lang = lang;
           pre.parentNode?.insertBefore(container, pre.nextSibling);
 
           // Get appropriate language support extension
@@ -1028,25 +1043,99 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
           const githubDarkHighlightStyle = HighlightStyle.define([
             { tag: t.keyword, color: "#ff7b72", fontWeight: "bold" },
+            { tag: t.controlKeyword, color: "#ff7b72", fontWeight: "bold" },
+            { tag: t.operator, color: "#ff7b72" },
+            { tag: t.operatorKeyword, color: "#ff7b72" },
             { tag: t.string, color: "#a5d6ff" },
+            { tag: t.character, color: "#a5d6ff" },
             { tag: t.comment, color: "#8b949e", fontStyle: "italic" },
             { tag: t.variableName, color: "#c9d1d9" },
             { tag: t.propertyName, color: "#d2a8ff" },
+            { tag: t.definition(t.propertyName), color: "#d2a8ff" },
             { tag: t.function(t.variableName), color: "#d2a8ff" },
             { tag: t.className, color: "#f0883e" },
+            { tag: t.typeName, color: "#ff7b72" },
             { tag: t.number, color: "#79c0ff" },
-            { tag: t.operator, color: "#ff7b72" }
+            { tag: t.bool, color: "#79c0ff" },
+            { tag: t.null, color: "#79c0ff" },
+            { tag: t.tagName, color: "#7ee787" },
+            { tag: t.angleBracket, color: "#8b949e" },
+            { tag: t.attributeName, color: "#a5d6ff" },
+            { tag: t.attributeValue, color: "#a5d6ff" },
+            { tag: t.className, color: "#d2a8ff" },
+            { tag: t.squareBracket, color: "#c9d1d9" },
+            { tag: t.standard(t.tagName), color: "#7ee787" }
           ]);
 
           const langSupport = getLangSupport(lang);
           const extensions: any[] = [
             history(),
-            keymap.of([...defaultKeymap, ...historyKeymap, ...completionKeymap]),
+            keymap.of([
+              {
+                key: "ArrowDown",
+                run: (view) => {
+                  const state = view.state;
+                  if (state.selection.main.empty && state.selection.main.head === state.doc.length) {
+                    const container = view.dom.closest('.cm6-editor-container');
+                    if (container) {
+                      let nextSibling = container.nextSibling as HTMLElement | null;
+                      if (!nextSibling || nextSibling.tagName.toLowerCase() !== 'p') {
+                        const p = document.createElement('p');
+                        p.innerHTML = '&#8203;';
+                        container.parentNode?.insertBefore(p, container.nextSibling);
+                        nextSibling = p;
+                      }
+                      const sel = window.getSelection();
+                      if (sel && nextSibling.firstChild) {
+                        const range = document.createRange();
+                        range.setStart(nextSibling.firstChild, 0);
+                        range.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                        nextSibling.focus();
+                        return true;
+                      }
+                    }
+                  }
+                  return false;
+                }
+              },
+              {
+                key: "ArrowUp",
+                run: (view) => {
+                  const state = view.state;
+                  if (state.selection.main.empty && state.selection.main.head === 0) {
+                    const container = view.dom.closest('.cm6-editor-container');
+                    if (container) {
+                      let prevSibling = container.previousSibling as HTMLElement | null;
+                      if (prevSibling && prevSibling.tagName.toLowerCase() === 'pre') {
+                        prevSibling = prevSibling.previousSibling as HTMLElement | null;
+                      }
+                      if (prevSibling && prevSibling.tagName.toLowerCase() === 'p') {
+                        const sel = window.getSelection();
+                        if (sel && prevSibling.firstChild) {
+                          const range = document.createRange();
+                          range.setStart(prevSibling.firstChild, prevSibling.firstChild.textContent?.length || 0);
+                          range.collapse(true);
+                          sel.removeAllRanges();
+                          sel.addRange(range);
+                          prevSibling.focus();
+                          return true;
+                        }
+                      }
+                    }
+                  }
+                  return false;
+                }
+              },
+              ...defaultKeymap,
+              ...historyKeymap,
+              ...completionKeymap
+            ]),
             autocompletion(),
-            tooltips({
-              parent: document.body
-            }),
+            tooltips(),
             syntaxHighlighting(githubDarkHighlightStyle),
+            abbreviationTracker(),
             EditorView.theme({
               "&": {
                 background: "#0d1117 !important",
@@ -1088,6 +1177,19 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               ".cm-tooltip-autocomplete ul li[aria-selected]": {
                 backgroundColor: "rgba(255, 255, 255, 0.05) !important",
                 color: "#ffffff !important"
+              },
+              ".cm-snippetField": {
+                backgroundColor: "rgba(255, 255, 255, 0.15) !important",
+                outline: "none !important",
+                display: "inline !important"
+              },
+              ".cm-snippetFieldPosition": {
+                display: "inline-block !important",
+                verticalAlign: "text-top !important",
+                width: "0 !important",
+                height: "1.15em !important",
+                margin: "0 -0.7px -.7em !important",
+                borderLeft: "1.4px dotted #888 !important"
               }
             }, { dark: true })
           ];
@@ -1324,6 +1426,14 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               const el = node as HTMLElement;
               const tagName = el.tagName.toLowerCase();
               
+              if (el.classList.contains('cm6-editor-container') || el.classList.contains('cm-editor')) {
+                formats.code = true;
+                const container = el.closest('.cm6-editor-container') || el;
+                const siblingPre = container.previousSibling as HTMLElement;
+                if (siblingPre && siblingPre.tagName.toLowerCase() === 'pre') {
+                  preEl = siblingPre;
+                }
+              }
               if (tagName === 'pre') {
                 preEl = el;
               }
@@ -1949,13 +2059,21 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
             const range = sel.getRangeAt(0);
             const selectedText = range.toString();
             
-            // Check if selection is already inside a pre or code tag
+            // Check if selection is already inside a pre or code tag, or inside CodeMirror 6
             let node = sel.anchorNode;
             let codeNode: HTMLElement | null = null;
             let preNode: HTMLElement | null = null;
+            let insideCM = false;
+            let cmContainer: HTMLElement | null = null;
+
             while (node && node !== editorRef.current) {
               if (node.nodeType === Node.ELEMENT_NODE) {
                 const el = node as HTMLElement;
+                if (el.classList.contains('cm6-editor-container') || el.classList.contains('cm-editor')) {
+                  insideCM = true;
+                  cmContainer = el.closest('.cm6-editor-container') || el;
+                  break;
+                }
                 if (el.tagName.toLowerCase() === 'code') {
                   codeNode = el;
                 }
@@ -1964,6 +2082,14 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                 }
               }
               node = node.parentNode;
+            }
+
+            if (insideCM && cmContainer) {
+              const siblingPre = cmContainer.previousSibling as HTMLElement;
+              if (siblingPre && siblingPre.tagName.toLowerCase() === 'pre') {
+                preNode = siblingPre;
+                codeNode = siblingPre.querySelector('code');
+              }
             }
 
             if (preNode || codeNode) {
@@ -1975,6 +2101,16 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                 const textContent = (contentSource.textContent || '').replace(/[\u200b\u200c\s]/g, '');
                 
                 if (textContent === '') {
+                  // If we are inside CodeMirror, destroy the view and remove the container
+                  if (insideCM && cmContainer) {
+                    if (preNode && cm6Views.current.has(preNode)) {
+                      const view = cm6Views.current.get(preNode);
+                      view?.destroy();
+                      cm6Views.current.delete(preNode);
+                    }
+                    cmContainer.remove();
+                  }
+
                   // If it is empty, toggle it off (unwrap/remove it)
                   const fragment = document.createDocumentFragment();
                   while (contentSource.firstChild) {
@@ -1999,8 +2135,9 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   const p = document.createElement('p');
                   p.innerHTML = '&#8203;'; // zero-width space
                   
-                  if (targetNode.nextSibling) {
-                    parent.insertBefore(p, targetNode.nextSibling);
+                  const anchorNode = insideCM && cmContainer ? cmContainer : targetNode;
+                  if (anchorNode.nextSibling) {
+                    parent.insertBefore(p, anchorNode.nextSibling);
                   } else {
                     parent.appendChild(p);
                   }
@@ -2010,6 +2147,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   range.collapse(true);
                   sel.removeAllRanges();
                   sel.addRange(range);
+                  
+                  p.focus();
                 }
                 
                 // Dispatch selection change to update toolbar

@@ -860,6 +860,16 @@ input[type=number] {
   display: block !important;
 }
 
+.wysiwyg-editor .cm-widgetBuffer,
+.wysiwyg-content .cm-widgetBuffer,
+.cm-widgetBuffer {
+  display: inline !important;
+  width: 0 !important;
+  height: 1em !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 .post-collapsed-content {
   max-height: 120px !important;
   overflow: hidden !important;
@@ -867,4 +877,21 @@ input[type=number] {
   mask-image: linear-gradient(to bottom, black 50%, transparent 100%) !important;
   -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%) !important;
 }
+
+/* CodeMirror Snippet Field layout fixes */
+.cm-editor .cm-snippetField,
+.cm-editor .cm-snippetFieldPosition,
+.cm-snippetField,
+.cm-snippetFieldPosition {
+  display: inline !important;
+  float: none !important;
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background-color: transparent !important;
+}
+
 
