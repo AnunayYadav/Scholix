@@ -14,12 +14,14 @@ import { Folder as FolderType, LibraryFile, UserProfile } from '../types';
 import {
   CommunityPost, MaterialRequest, StudyPack, WikiSection, SubjectChatMsg, SubjectStats
 } from '../types/communityTypes';
-import CommunityService from '../services/communityService';
+import CommunityService, { uploadCommunityImage } from '../services/communityService';
 import NexusServer from '../services/nexusServer';
 import { askGeminiText } from '../services/geminiService';
 import FileDetailPage from './FileDetailPage';
 import { FileIcon } from './FileIcon';
 import { showToast } from './Toast';
+import hljs from 'highlight.js';
+import 'highlight.js/styles/github-dark.css';
 
 interface SubjectCommunityProps {
   activeSubject: FolderType;
@@ -895,6 +897,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   // WYSIWYG formatting helper
   const execFormat = useCallback((command: string, value?: string) => {
     document.execCommand(command, false, value);
+    // Instantly notify selection change to update toolbar active states
+    document.dispatchEvent(new Event('selectionchange'));
   }, []);
 
   const getEditorText = useCallback((ref: React.RefObject<HTMLDivElement | null>) => {
@@ -904,6 +908,542 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const getEditorHtml = useCallback((ref: React.RefObject<HTMLDivElement | null>) => {
     return ref.current?.innerHTML || '';
   }, []);
+
+  // Track active formatting state (bold, italic, etc.)
+  const [activeFormats, setActiveFormats] = useState<Record<string, boolean>>({});
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [imageUploading, setImageUploading] = useState(false);
+
+  // Custom wrapper/unwrapper for tags like code and blockquote
+  const toggleTag = useCallback((tagName: string, defaultStyle = '', defaultClass = '') => {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+
+    // Check if selection is already inside this tag
+    let parentNode = sel.anchorNode;
+    let tagNode: HTMLElement | null = null;
+    while (parentNode && parentNode !== document.body) {
+      if (parentNode.nodeType === Node.ELEMENT_NODE) {
+        const el = parentNode as HTMLElement;
+        if (el.tagName.toLowerCase() === tagName) {
+          tagNode = el;
+          break;
+        }
+      }
+      parentNode = parentNode.parentNode;
+    }
+
+    if (tagNode) {
+      if (range.collapsed) {
+        // Exit the tag: Insert zero-width space after tagNode/pre block and move caret there
+        const parent = tagNode.parentNode;
+        if (parent && parent.nodeType === Node.ELEMENT_NODE) {
+          const parentEl = parent as HTMLElement;
+          const isPre = parentEl.tagName.toLowerCase() === 'pre';
+          const targetNode = isPre ? parentEl : tagNode;
+          const outerParent = targetNode.parentNode;
+          
+          if (outerParent) {
+            // Create a paragraph element for clean line breaking
+            const p = document.createElement('p');
+            p.innerHTML = '&#8203;'; // zero-width space
+            
+            if (targetNode.nextSibling) {
+              outerParent.insertBefore(p, targetNode.nextSibling);
+            } else {
+              outerParent.appendChild(p);
+            }
+            
+            // Move cursor to this new paragraph
+            range.setStart(p.firstChild!, 1);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }
+      } else {
+        // Unwrap the tag since they highlighted text and want to clear style
+        const parent = tagNode.parentNode;
+        if (parent) {
+          const fragment = document.createDocumentFragment();
+          while (tagNode.firstChild) {
+            fragment.appendChild(tagNode.firstChild);
+          }
+          parent.replaceChild(fragment, tagNode);
+        }
+      }
+    } else {
+      // Wrap selection
+      const el = document.createElement(tagName);
+      if (defaultStyle) {
+        el.style.cssText = defaultStyle;
+      }
+      if (defaultClass) {
+        el.className = defaultClass;
+      }
+      
+      if (range.collapsed) {
+        // If selection is empty, insert zero-width space so the tag doesn't collapse
+        el.innerHTML = '&#8203;';
+        range.insertNode(el);
+        // Put cursor inside the element, after the zero-width space
+        range.setStart(el.firstChild!, 1);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } else {
+        try {
+          range.surroundContents(el);
+        } catch (e) {
+          try {
+            el.appendChild(range.extractContents());
+            range.insertNode(el);
+          } catch (err) {
+            console.error("Failed to wrap selection:", err);
+          }
+        }
+      }
+    }
+    // Dispatch selectionchange instantly to update formatting states in toolbar
+    document.dispatchEvent(new Event('selectionchange'));
+  }, []);
+
+  const handleEditorKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter') {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+
+      // Find if we are inside a code or pre tag
+      let node = sel.anchorNode;
+      let codeNode: HTMLElement | null = null;
+      let preNode: HTMLElement | null = null;
+      while (node && node !== e.currentTarget) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const el = node as HTMLElement;
+          if (el.tagName.toLowerCase() === 'code') {
+            codeNode = el;
+          }
+          if (el.tagName.toLowerCase() === 'pre') {
+            preNode = el;
+          }
+        }
+        node = node.parentNode;
+      }
+
+      if (preNode || (codeNode && codeNode.parentNode && (codeNode.parentNode as HTMLElement).tagName.toLowerCase() === 'pre')) {
+        // Inside a multiline code block (pre)
+        e.preventDefault();
+        
+        const container = range.startContainer;
+        if (container.nodeType === Node.TEXT_NODE) {
+          const textNode = container as Text;
+          const offset = range.startOffset;
+          const val = textNode.nodeValue || '';
+          
+          // Check if cursor is at the end of the text node (or only has whitespace/zero-width space to the right)
+          const remainingText = val.substring(offset).replace(/[\u200b\u200c\s]/g, '');
+          const isAtEnd = remainingText === '';
+          
+          const insertStr = isAtEnd ? '\n\u200b' : '\n';
+          textNode.nodeValue = val.substring(0, offset) + insertStr + val.substring(offset);
+          
+          // Place cursor right after the \n (which is offset + 1)
+          range.setStart(textNode, offset + 1);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else {
+          // Fallback: insert a text node
+          let isAtEnd = true;
+          if (codeNode) {
+            const rightRange = range.cloneRange();
+            rightRange.selectNodeContents(codeNode);
+            rightRange.setStart(range.endContainer, range.endOffset);
+            isAtEnd = rightRange.toString().replace(/[\u200b\u200c\s]/g, '') === '';
+          }
+          
+          const insertStr = isAtEnd ? '\n\u200b' : '\n';
+          const textNode = document.createTextNode(insertStr);
+          range.insertNode(textNode);
+          
+          if (isAtEnd) {
+            range.setStart(textNode, 1);
+          } else {
+            range.setStartAfter(textNode);
+          }
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+        
+        // Trigger input event to update React state
+        const event = new Event('input', { bubbles: true });
+        e.currentTarget.dispatchEvent(event);
+      } else if (codeNode) {
+        // Inside an inline code block
+        e.preventDefault();
+        
+        // Exit the inline code block by inserting a paragraph outside of it
+        const parent = codeNode.parentNode;
+        if (parent) {
+          // Create a paragraph element for clean line breaking
+          const p = document.createElement('p');
+          p.innerHTML = '&#8203;'; // zero-width space
+          
+          // Insert after codeNode
+          if (codeNode.nextSibling) {
+            parent.insertBefore(p, codeNode.nextSibling);
+          } else {
+            parent.appendChild(p);
+          }
+          
+          // Move cursor to this new paragraph
+          range.setStart(p.firstChild!, 1);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+
+          // Trigger input event to update React state
+          const event = new Event('input', { bubbles: true });
+          e.currentTarget.dispatchEvent(event);
+        }
+      }
+    }
+  }, []);
+
+  // Poll formatting state on selection change
+  useEffect(() => {
+    const updateFormats = () => {
+      const formats: Record<string, boolean> = {
+        bold: false,
+        italic: false,
+        strikeThrough: false,
+        insertUnorderedList: false,
+        insertOrderedList: false,
+        code: false,
+        quote: false,
+      };
+
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        let node: Node | null = sel.anchorNode;
+        // Verify if selection is inside one of our WYSIWYG editors
+        let insideEditor = false;
+        let temp = node;
+        while (temp && temp !== document.body) {
+          if (temp.nodeType === Node.ELEMENT_NODE) {
+            const el = temp as HTMLElement;
+            if (el.classList.contains('wysiwyg-editor') || el.hasAttribute('contenteditable')) {
+              insideEditor = true;
+              break;
+            }
+          }
+          temp = temp.parentNode;
+        }
+
+        if (insideEditor) {
+          try {
+            formats.bold = document.queryCommandState('bold');
+            formats.italic = document.queryCommandState('italic');
+            formats.strikeThrough = document.queryCommandState('strikeThrough') || document.queryCommandState('strikethrough');
+            formats.insertUnorderedList = document.queryCommandState('insertUnorderedList');
+            formats.insertOrderedList = document.queryCommandState('insertOrderedList');
+          } catch (e) {}
+
+          while (node && node !== document.body) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              const el = node as HTMLElement;
+              const tagName = el.tagName.toLowerCase();
+              
+              if (tagName === 'code') {
+                formats.code = true;
+              }
+              if (tagName === 'blockquote') {
+                formats.quote = true;
+              }
+              if (tagName === 'strong' || tagName === 'b' || el.style.fontWeight === 'bold' || el.style.fontWeight === '700') {
+                formats.bold = true;
+              }
+              if (tagName === 'em' || tagName === 'i' || el.style.fontStyle === 'italic') {
+                formats.italic = true;
+              }
+              if (tagName === 'strike' || tagName === 's' || tagName === 'del' || el.style.textDecoration.includes('line-through')) {
+                formats.strikeThrough = true;
+              }
+              if (tagName === 'ul') {
+                formats.insertUnorderedList = true;
+              }
+              if (tagName === 'ol') {
+                formats.insertOrderedList = true;
+              }
+            }
+            node = node.parentNode;
+          }
+        }
+      }
+      setActiveFormats(formats);
+    };
+
+    document.addEventListener('selectionchange', updateFormats);
+    // Initialize formats once
+    updateFormats();
+    return () => document.removeEventListener('selectionchange', updateFormats);
+  }, []);
+
+  // Image upload handler
+  const handleImageUpload = useCallback(async (file: File, editorRef: React.RefObject<HTMLDivElement | null>) => {
+    if (!file || !file.type.startsWith('image/')) return;
+    setImageUploading(true);
+    try {
+      const url = await uploadCommunityImage(file);
+      // Focus the editor and insert image at cursor
+      if (editorRef.current) {
+        editorRef.current.focus();
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = file.name;
+        img.style.cssText = 'max-width:100%;border-radius:8px;margin:8px 0;display:block';
+        // Insert at cursor or append
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && editorRef.current.contains(sel.anchorNode)) {
+          const range = sel.getRangeAt(0);
+          range.deleteContents();
+          range.insertNode(img);
+          range.setStartAfter(img);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else {
+          editorRef.current.appendChild(img);
+        }
+      }
+      showToast('Image uploaded!', 'success');
+    } catch (e: any) {
+      console.error('Image upload failed:', e);
+      showToast('Image upload failed: ' + (e?.message || 'Unknown error'), 'error');
+    } finally {
+      setImageUploading(false);
+      if (imageInputRef.current) imageInputRef.current.value = '';
+    }
+  }, [showToast]);
+
+  // Track which editor triggered the image upload
+  const activeEditorForImageRef = useRef<React.RefObject<HTMLDivElement | null>>(createEditorRef);
+
+  // Automatically detect and wrap links inside html strings
+  const autoLink = useCallback((html: string): string => {
+    if (!html) return '';
+    try {
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+      
+      const walkTextNodes = (node: Node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent || '';
+          if (urlRegex.test(text)) {
+            const parent = node.parentNode;
+            if (parent && parent.nodeName.toLowerCase() !== 'a' && parent.nodeName.toLowerCase() !== 'code') {
+              const span = document.createElement('span');
+              span.innerHTML = text.replace(urlRegex, (url) => {
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: ${theme.rawColor}; text-decoration: underline; font-weight: 600;">${url}</a>`;
+              });
+              parent.replaceChild(span, node);
+            }
+          }
+        } else {
+          for (let i = 0; i < node.childNodes.length; i++) {
+            walkTextNodes(node.childNodes[i]);
+          }
+        }
+      };
+      
+      if (doc.body) {
+        walkTextNodes(doc.body);
+        return doc.body.innerHTML;
+      }
+    } catch (e) {
+      console.error("AutoLink parsing failed:", e);
+    }
+    return html;
+  }, [theme.rawColor]);
+
+  // Reusable toolbar items builder — returns the standard formatting items array
+  const buildToolbarItems = useCallback((editorRef: React.RefObject<HTMLDivElement | null>, opts?: { full?: boolean }) => {
+    const full = opts?.full !== false; // default true
+    const items: any[] = [];
+
+    if (full) {
+      items.push(
+        { icon: Image, label: 'Image', cmd: 'image', action: () => {
+          activeEditorForImageRef.current = editorRef;
+          imageInputRef.current?.click();
+        }},
+        { type: 'divider' },
+      );
+    }
+
+    items.push(
+      { icon: Bold, label: 'Bold', cmd: 'bold', action: () => execFormat('bold') },
+      { icon: Italic, label: 'Italic', cmd: 'italic', action: () => execFormat('italic') },
+      { icon: Strikethrough, label: 'Strikethrough', cmd: 'strikeThrough', action: () => execFormat('strikeThrough') },
+      { type: 'divider' },
+      { icon: List, label: 'Bullet List', cmd: 'insertUnorderedList', action: () => execFormat('insertUnorderedList') },
+      { icon: ListOrdered, label: 'Numbered List', cmd: 'insertOrderedList', action: () => execFormat('insertOrderedList') },
+    );
+
+    if (full) {
+      items.push(
+        { type: 'divider' },
+        { icon: Code, label: 'Code', cmd: 'code', action: () => {
+          const sel = window.getSelection();
+          if (sel && sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            const selectedText = range.toString();
+            
+            // Check if selection is already inside a pre or code tag
+            let node = sel.anchorNode;
+            let codeNode: HTMLElement | null = null;
+            let preNode: HTMLElement | null = null;
+            while (node && node !== editorRef.current) {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                const el = node as HTMLElement;
+                if (el.tagName.toLowerCase() === 'code') {
+                  codeNode = el;
+                }
+                if (el.tagName.toLowerCase() === 'pre') {
+                  preNode = el;
+                }
+              }
+              node = node.parentNode;
+            }
+
+            if (preNode || codeNode) {
+              const targetNode = preNode || codeNode!;
+              const parent = targetNode.parentNode;
+              if (parent) {
+                const contentSource = (preNode && codeNode) ? codeNode : targetNode;
+                // Check if the code block is empty
+                const textContent = (contentSource.textContent || '').replace(/[\u200b\u200c\s]/g, '');
+                
+                if (textContent === '') {
+                  // If it is empty, toggle it off (unwrap/remove it)
+                  const fragment = document.createDocumentFragment();
+                  while (contentSource.firstChild) {
+                    fragment.appendChild(contentSource.firstChild);
+                  }
+                  
+                  if (fragment.childNodes.length === 0) {
+                    fragment.appendChild(document.createTextNode('\u200b'));
+                  }
+                  
+                  const firstChild = fragment.firstChild;
+                  parent.replaceChild(fragment, targetNode);
+                  
+                  if (firstChild) {
+                    range.selectNodeContents(firstChild);
+                    range.collapse(false);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                  }
+                } else {
+                  // If something is written, exit the code block and go to the next line
+                  const p = document.createElement('p');
+                  p.innerHTML = '&#8203;'; // zero-width space
+                  
+                  if (targetNode.nextSibling) {
+                    parent.insertBefore(p, targetNode.nextSibling);
+                  } else {
+                    parent.appendChild(p);
+                  }
+                  
+                  // Move cursor to this new paragraph
+                  range.setStart(p.firstChild!, 1);
+                  range.collapse(true);
+                  sel.removeAllRanges();
+                  sel.addRange(range);
+                }
+                
+                // Dispatch selection change to update toolbar
+                document.dispatchEvent(new Event('selectionchange'));
+                return;
+              }
+            }
+            
+            // Check if selection is multiline or if the selection is collapsed but inside an empty block
+            let isBlockCode = selectedText.includes('\n') || selectedText.length > 60;
+            
+            if (range.collapsed) {
+              let parentNode = range.startContainer.parentNode as HTMLElement | null;
+              if (parentNode) {
+                const text = parentNode.innerText || '';
+                // If it's an empty line (or only contains zero-width space/placeholder helper), make it a block code
+                if (text.trim() === '' || text === '\u200b') {
+                  isBlockCode = true;
+                }
+              }
+            }
+            
+            if (isBlockCode) {
+              const pre = document.createElement('pre');
+              const code = document.createElement('code');
+              
+              if (range.collapsed) {
+                code.innerHTML = '&#8203;';
+                pre.appendChild(code);
+                range.insertNode(pre);
+                range.setStart(code.firstChild!, 1);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+              } else {
+                code.appendChild(range.extractContents());
+                pre.appendChild(code);
+                range.insertNode(pre);
+              }
+              document.dispatchEvent(new Event('selectionchange'));
+            } else {
+              toggleTag('code', 'background:rgba(127,127,127,0.15);padding:1.5px 5.5px;border-radius:4.5px;font-family:monospace;font-size:12px', 'language-javascript');
+            }
+          }
+        }},
+        { icon: Quote, label: 'Quote', cmd: 'quote', action: () => {
+          toggleTag('blockquote', 'border-left:3px solid rgba(127,127,127,0.4);padding-left:12px;margin:4px 0;color:inherit;opacity:0.8');
+        }},
+      );
+    }
+
+    return items;
+  }, [execFormat, toggleTag]);
+
+  // Render toolbar buttons with active state highlighting
+  const renderToolbar = useCallback((items: any[], keyPrefix: string) => {
+    return items.map((item: any, i: number) => {
+      if (item.type === 'divider') {
+        return <div key={`${keyPrefix}-${i}`} className="w-px h-5 bg-zinc-200 dark:bg-white/8 mx-1" />;
+      }
+      const Ic = item.icon;
+      const isActive = item.cmd && activeFormats[item.cmd];
+      return (
+        <button
+          key={`${keyPrefix}-${i}`}
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={item.action}
+          title={item.label}
+          className={`w-8 h-8 rounded-lg flex items-center justify-center bg-transparent border-none cursor-pointer transition-all ${
+            isActive
+              ? 'text-white bg-zinc-700 dark:bg-zinc-300 dark:text-zinc-900'
+              : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5'
+          }`}
+          style={isActive ? { backgroundColor: theme.rawColor, color: '#fff' } : undefined}
+        >
+          <Ic size={15} />
+        </button>
+      );
+    });
+  }, [activeFormats, theme.rawColor]);
   const [reqTitle, setReqTitle] = useState('');
   const [reqContent, setReqContent] = useState('');
   const [reqBounty, setReqBounty] = useState(50);
@@ -1222,6 +1762,11 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     loadCommunityData();
   }, [activeSubject.id, userProfile]);
 
+  // Trigger Highlight.js syntax highlighting on code segments
+  useEffect(() => {
+    hljs.highlightAll();
+  }, [discussions, requests, studyPacks, activeTab]);
+
   useEffect(() => {
     const handleDocClick = () => setActiveMenuFileId(null);
     document.addEventListener('click', handleDocClick);
@@ -1262,7 +1807,33 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     };
   }, [subjectCode, userProfile]);
 
+  // Real-time Database sync for posts, requests, collections in community_hub table
+  useEffect(() => {
+    const client = NexusServer.getClient();
+    if (!client) return;
 
+    const channel = client
+      .channel(`community_hub_realtime:${subjectCode}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'community_hub',
+          filter: `subject_id=eq.${subjectCode}`
+        },
+        () => {
+          loadCommunityData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (channel && channel.state !== 'closed') {
+        client.removeChannel(channel).catch(() => { /* ignore */ });
+      }
+    };
+  }, [subjectCode]);
 
   // Toggle Join (Notifications)
   const handleJoinToggle = async () => {
@@ -1305,8 +1876,9 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const handlePostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userProfile) return;
-    const editorContent = getEditorText(createEditorRef);
-    if (!postTitle.trim() || !editorContent) return;
+    const plainText = getEditorText(createEditorRef);
+    if (!postTitle.trim() || !plainText) return;
+    const editorContent = getEditorHtml(createEditorRef);
 
     try {
       const cleanTags = postTags.split(',').map(t => t.trim()).filter(t => t.startsWith('#') ? t : `#${t}`);
@@ -1338,8 +1910,9 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const handleRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userProfile) return;
-    const editorContent = getEditorText(reqEditorRef);
-    if (!reqTitle.trim() || !editorContent) return;
+    const plainText = getEditorText(reqEditorRef);
+    if (!reqTitle.trim() || !plainText) return;
+    const editorContent = getEditorHtml(reqEditorRef);
 
     try {
       await CommunityService.createMaterialRequest({
@@ -1367,8 +1940,9 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const handlePackSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userProfile) return;
-    const editorContent = getEditorText(packEditorRef);
-    if (!packTitle.trim() || !editorContent) return;
+    const plainText = getEditorText(packEditorRef);
+    if (!packTitle.trim() || !plainText) return;
+    const editorContent = getEditorHtml(packEditorRef);
 
     try {
       await CommunityService.createStudyPack({
@@ -2786,9 +3360,9 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                                       setEditPostContent(p.content);
                                       setEditPostCategory((p.category as any) || 'discussion');
                                       setTimeout(() => {
-                                        if (editEditorRef.current) {
-                                          editEditorRef.current.innerText = p.content;
-                                        }
+                                       if (editEditorRef.current) {
+                                         editEditorRef.current.innerHTML = p.content;
+                                       }
                                       }, 50);
                                     }}
                                     className="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 border-none bg-transparent cursor-pointer flex items-center gap-2"
@@ -2846,9 +3420,11 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     </div>
 
                     {/* Body text — clean, readable */}
-                    <p className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal mb-3" style={{ lineHeight: '1.7' }}>
-                      {p.content}
-                    </p>
+                    <div 
+                      className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal mb-3 wysiwyg-content" 
+                      style={{ lineHeight: '1.7' }}
+                      dangerouslySetInnerHTML={{ __html: autoLink(p.content) }}
+                    />
 
                     {/* Tags */}
                     {p.tags && p.tags.length > 0 && (
@@ -3054,9 +3630,10 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   <h4 className="text-xs font-black text-zinc-950 dark:text-white leading-tight">
                     {r.title}
                   </h4>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-                    {r.content}
-                  </p>
+                  <div 
+                    className="text-xs text-zinc-500 dark:text-zinc-400 font-medium wysiwyg-content"
+                    dangerouslySetInnerHTML={{ __html: autoLink(r.content) }}
+                  />
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
@@ -3120,9 +3697,10 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   <div className="text-xs font-black text-zinc-950 dark:text-white leading-tight">
                     {pack.title}
                   </div>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
-                    {pack.content}
-                  </p>
+                  <div 
+                    className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed wysiwyg-content"
+                    dangerouslySetInnerHTML={{ __html: autoLink(pack.content) }}
+                  />
                   <div className="text-[10px] text-zinc-400 font-semibold flex items-center gap-3">
                     <span>Created by {pack.user_username}</span>
                     <span>•</span>
@@ -3280,6 +3858,18 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
       )}
         </>
       )}
+
+      {/* Hidden file input for WYSIWYG image uploads */}
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleImageUpload(file, activeEditorForImageRef.current);
+        }}
+      />
 
       {/* Reddit-style Create Post Composer */}
       {createPortal(
@@ -3460,7 +4050,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       contentEditable
                       data-placeholder="Body text*"
                       onInput={() => setPostContent(getEditorText(createEditorRef))}
-                      className="w-full min-h-[200px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none"
+                      onKeyDown={handleEditorKeyDown}
+                      className="w-full min-h-[200px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
                       style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
                       suppressContentEditableWarning
                     />
@@ -3469,71 +4060,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   {/* Formatting Toolbar */}
                   <div className="px-5 pb-4">
                     <div className="flex items-center gap-0.5 flex-wrap">
-                      {[
-                        { icon: Link, label: 'Link', action: () => {
-                          const url = prompt('Enter URL:');
-                          if (url) execFormat('createLink', url);
-                        }},
-                        { icon: Image, label: 'Image', action: () => {
-                          const url = prompt('Enter image URL:');
-                          if (url) execFormat('insertImage', url);
-                        }},
-                        { icon: Smile, label: 'Emoji', action: () => {} },
-                        { type: 'divider' },
-                        { icon: Bold, label: 'Bold', action: () => execFormat('bold') },
-                        { icon: Italic, label: 'Italic', action: () => execFormat('italic') },
-                        { icon: Strikethrough, label: 'Strikethrough', action: () => execFormat('strikeThrough') },
-                        { type: 'divider' },
-                        { icon: Code, label: 'Code', action: () => {
-                          const sel = window.getSelection();
-                          if (sel && sel.rangeCount > 0) {
-                            const range = sel.getRangeAt(0);
-                            const code = document.createElement('code');
-                            code.style.cssText = 'background:rgba(127,127,127,0.15);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:12px';
-                            range.surroundContents(code);
-                          }
-                        }},
-                        { icon: AlertTriangle, label: 'Spoiler', action: () => {
-                          const sel = window.getSelection();
-                          if (sel && sel.rangeCount > 0) {
-                            const range = sel.getRangeAt(0);
-                            const span = document.createElement('span');
-                            span.style.cssText = 'background:#333;color:#333;border-radius:3px;padding:0 4px;cursor:pointer';
-                            span.title = 'Click to reveal';
-                            span.onclick = () => { span.style.color = 'inherit'; span.style.background = 'rgba(127,127,127,0.15)'; };
-                            range.surroundContents(span);
-                          }
-                        }},
-                        { type: 'divider' },
-                        { icon: List, label: 'Bullet List', action: () => execFormat('insertUnorderedList') },
-                        { icon: ListOrdered, label: 'Numbered List', action: () => execFormat('insertOrderedList') },
-                        { icon: Quote, label: 'Quote', action: () => {
-                          const sel = window.getSelection();
-                          if (sel && sel.rangeCount > 0) {
-                            const range = sel.getRangeAt(0);
-                            const bq = document.createElement('blockquote');
-                            bq.style.cssText = 'border-left:3px solid rgba(127,127,127,0.4);padding-left:12px;margin:4px 0;color:inherit;opacity:0.8';
-                            range.surroundContents(bq);
-                          }
-                        }},
-                      ].map((item, i) => {
-                        if ((item as any).type === 'divider') {
-                          return <div key={`d-${i}`} className="w-px h-5 bg-zinc-200 dark:bg-white/8 mx-1" />;
-                        }
-                        const Ic = (item as any).icon;
-                        return (
-                          <button
-                            key={i}
-                            type="button"
-                            onMouseDown={(e) => e.preventDefault()}
-                            onClick={(item as any).action}
-                            title={(item as any).label}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
-                          >
-                            <Ic size={15} />
-                          </button>
-                        );
-                      })}
+                      {renderToolbar(buildToolbarItems(createEditorRef), 'cp')}
+                      {imageUploading && <span className="text-[10px] text-zinc-400 ml-2 animate-pulse">Uploading...</span>}
                     </div>
                   </div>
 
@@ -3613,8 +4141,9 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   onSubmit={async (e) => {
                     e.preventDefault();
                     if (!editingPost) return;
-                    const content = getEditorText(editEditorRef);
-                    if (!editPostTitle.trim() || !content) return;
+                    const plainText = getEditorText(editEditorRef);
+                    if (!editPostTitle.trim() || !plainText) return;
+                    const content = getEditorHtml(editEditorRef);
                     const ok = await CommunityService.editPost(editingPost.id, editPostTitle, content);
                     if (ok) {
                       setDiscussions(prev => prev.map(post => {
@@ -3718,7 +4247,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       contentEditable
                       data-placeholder="Body text*"
                       onInput={() => setEditPostContent(getEditorText(editEditorRef))}
-                      className="w-full min-h-[200px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none"
+                      onKeyDown={handleEditorKeyDown}
+                      className="w-full min-h-[200px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
                       style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
                       suppressContentEditableWarning
                     />
@@ -3727,71 +4257,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   {/* Formatting Toolbar */}
                   <div className="px-5 pb-4">
                     <div className="flex items-center gap-0.5 flex-wrap">
-                      {[
-                        { icon: Link, label: 'Link', action: () => {
-                          const url = prompt('Enter URL:');
-                          if (url) execFormat('createLink', url);
-                        }},
-                        { icon: Image, label: 'Image', action: () => {
-                          const url = prompt('Enter image URL:');
-                          if (url) execFormat('insertImage', url);
-                        }},
-                        { icon: Smile, label: 'Emoji', action: () => {} },
-                        { type: 'divider' },
-                        { icon: Bold, label: 'Bold', action: () => execFormat('bold') },
-                        { icon: Italic, label: 'Italic', action: () => execFormat('italic') },
-                        { icon: Strikethrough, label: 'Strikethrough', action: () => execFormat('strikeThrough') },
-                        { type: 'divider' },
-                        { icon: Code, label: 'Code', action: () => {
-                          const sel = window.getSelection();
-                          if (sel && sel.rangeCount > 0) {
-                            const range = sel.getRangeAt(0);
-                            const code = document.createElement('code');
-                            code.style.cssText = 'background:rgba(127,127,127,0.15);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:12px';
-                            range.surroundContents(code);
-                          }
-                        }},
-                        { icon: AlertTriangle, label: 'Spoiler', action: () => {
-                          const sel = window.getSelection();
-                          if (sel && sel.rangeCount > 0) {
-                            const range = sel.getRangeAt(0);
-                            const span = document.createElement('span');
-                            span.style.cssText = 'background:#333;color:#333;border-radius:3px;padding:0 4px;cursor:pointer';
-                            span.title = 'Click to reveal';
-                            span.onclick = () => { span.style.color = 'inherit'; span.style.background = 'rgba(127,127,127,0.15)'; };
-                            range.surroundContents(span);
-                          }
-                        }},
-                        { type: 'divider' },
-                        { icon: List, label: 'Bullet List', action: () => execFormat('insertUnorderedList') },
-                        { icon: ListOrdered, label: 'Numbered List', action: () => execFormat('insertOrderedList') },
-                        { icon: Quote, label: 'Quote', action: () => {
-                          const sel = window.getSelection();
-                          if (sel && sel.rangeCount > 0) {
-                            const range = sel.getRangeAt(0);
-                            const bq = document.createElement('blockquote');
-                            bq.style.cssText = 'border-left:3px solid rgba(127,127,127,0.4);padding-left:12px;margin:4px 0;color:inherit;opacity:0.8';
-                            range.surroundContents(bq);
-                          }
-                        }},
-                      ].map((item, i) => {
-                        if ((item as any).type === 'divider') {
-                          return <div key={`ed-${i}`} className="w-px h-5 bg-zinc-200 dark:bg-white/8 mx-1" />;
-                        }
-                        const Ic = (item as any).icon;
-                        return (
-                          <button
-                            key={i}
-                            type="button"
-                            onMouseDown={(e) => e.preventDefault()}
-                            onClick={(item as any).action}
-                            title={(item as any).label}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
-                          >
-                            <Ic size={15} />
-                          </button>
-                        );
-                      })}
+                      {renderToolbar(buildToolbarItems(editEditorRef), 'ep')}
+                      {imageUploading && <span className="text-[10px] text-zinc-400 ml-2 animate-pulse">Uploading...</span>}
                     </div>
                   </div>
 
@@ -3916,7 +4383,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       contentEditable
                       data-placeholder="Describe what you need in detail — unit, topic, type of material...*"
                       onInput={() => setReqContent(getEditorText(reqEditorRef))}
-                      className="w-full min-h-[160px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none"
+                      onKeyDown={handleEditorKeyDown}
+                      className="w-full min-h-[160px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
                       style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
                       suppressContentEditableWarning
                     />
@@ -3925,45 +4393,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   {/* Formatting Toolbar */}
                   <div className="px-5 pb-4">
                     <div className="flex items-center gap-0.5 flex-wrap">
-                      {[
-                        { icon: Bold, label: 'Bold', action: () => execFormat('bold') },
-                        { icon: Italic, label: 'Italic', action: () => execFormat('italic') },
-                        { icon: Strikethrough, label: 'Strikethrough', action: () => execFormat('strikeThrough') },
-                        { type: 'divider' },
-                        { icon: List, label: 'Bullet List', action: () => execFormat('insertUnorderedList') },
-                        { icon: ListOrdered, label: 'Numbered List', action: () => execFormat('insertOrderedList') },
-                        { type: 'divider' },
-                        { icon: Link, label: 'Link', action: () => {
-                          const url = prompt('Enter URL:');
-                          if (url) execFormat('createLink', url);
-                        }},
-                        { icon: Code, label: 'Code', action: () => {
-                          const sel = window.getSelection();
-                          if (sel && sel.rangeCount > 0) {
-                            const range = sel.getRangeAt(0);
-                            const code = document.createElement('code');
-                            code.style.cssText = 'background:rgba(127,127,127,0.15);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:12px';
-                            range.surroundContents(code);
-                          }
-                        }},
-                      ].map((item, i) => {
-                        if ((item as any).type === 'divider') {
-                          return <div key={`rd-${i}`} className="w-px h-5 bg-zinc-200 dark:bg-white/8 mx-1" />;
-                        }
-                        const Ic = (item as any).icon;
-                        return (
-                          <button
-                            key={i}
-                            type="button"
-                            onMouseDown={(e) => e.preventDefault()}
-                            onClick={(item as any).action}
-                            title={(item as any).label}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
-                          >
-                            <Ic size={15} />
-                          </button>
-                        );
-                      })}
+                      {renderToolbar(buildToolbarItems(reqEditorRef, { full: true }), 'rq')}
+                      {imageUploading && <span className="text-[10px] text-zinc-400 ml-2 animate-pulse">Uploading...</span>}
                     </div>
                   </div>
 
@@ -4062,7 +4493,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       contentEditable
                       data-placeholder="Describe this study pack — what topics it covers, why it's useful...*"
                       onInput={() => setPackContent(getEditorText(packEditorRef))}
-                      className="w-full min-h-[100px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none"
+                      onKeyDown={handleEditorKeyDown}
+                      className="w-full min-h-[100px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
                       style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
                       suppressContentEditableWarning
                     />
@@ -4071,31 +4503,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   {/* Formatting Toolbar */}
                   <div className="px-5 pb-3">
                     <div className="flex items-center gap-0.5 flex-wrap">
-                      {[
-                        { icon: Bold, label: 'Bold', action: () => execFormat('bold') },
-                        { icon: Italic, label: 'Italic', action: () => execFormat('italic') },
-                        { icon: Strikethrough, label: 'Strikethrough', action: () => execFormat('strikeThrough') },
-                        { type: 'divider' },
-                        { icon: List, label: 'Bullet List', action: () => execFormat('insertUnorderedList') },
-                        { icon: ListOrdered, label: 'Numbered List', action: () => execFormat('insertOrderedList') },
-                      ].map((item, i) => {
-                        if ((item as any).type === 'divider') {
-                          return <div key={`pd-${i}`} className="w-px h-5 bg-zinc-200 dark:bg-white/8 mx-1" />;
-                        }
-                        const Ic = (item as any).icon;
-                        return (
-                          <button
-                            key={i}
-                            type="button"
-                            onMouseDown={(e) => e.preventDefault()}
-                            onClick={(item as any).action}
-                            title={(item as any).label}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
-                          >
-                            <Ic size={15} />
-                          </button>
-                        );
-                      })}
+                      {renderToolbar(buildToolbarItems(packEditorRef, { full: false }), 'pk')}
                     </div>
                   </div>
 

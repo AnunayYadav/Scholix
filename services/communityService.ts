@@ -44,6 +44,22 @@ const getSupabase = () => {
   }
 };
 
+// Upload a community image to Supabase storage and return the public URL
+export async function uploadCommunityImage(file: File): Promise<string> {
+  const client = getSupabase();
+  if (!client) throw new Error('Supabase not initialized');
+  const ext = file.name.split('.').pop() || 'png';
+  const safeName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext.replace(/[^a-zA-Z0-9]/g, '')}`;
+  const filePath = `community-images/${safeName}`;
+  const { error } = await client.storage.from('nexus-documents').upload(filePath, file, {
+    cacheControl: '3600',
+    upsert: false,
+  });
+  if (error) throw error;
+  const { data: { publicUrl } } = client.storage.from('nexus-documents').getPublicUrl(filePath);
+  return publicUrl;
+}
+
 // ═══════════════════════════════════════
 // SEED MOCK DATA FOR LOCALSTORAGE FALLBACK
 // ═══════════════════════════════════════

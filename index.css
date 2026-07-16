@@ -792,3 +792,58 @@ input[type=number] {
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
+/* ─── WYSIWYG Editor & Content Lists / Code overrides ─── */
+.wysiwyg-editor ul, .wysiwyg-content ul {
+  list-style-type: disc !important;
+  margin-left: 1.5rem !important;
+  padding-left: 0.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.wysiwyg-editor ol, .wysiwyg-content ol {
+  list-style-type: decimal !important;
+  margin-left: 1.5rem !important;
+  padding-left: 0.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.wysiwyg-editor li, .wysiwyg-content li {
+  display: list-item !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.wysiwyg-editor blockquote, .wysiwyg-content blockquote {
+  border-left: 3px solid rgba(127, 127, 127, 0.4) !important;
+  padding-left: 12px !important;
+  margin: 8px 0 !important;
+  opacity: 0.8 !important;
+  font-style: italic !important;
+}
+
+.wysiwyg-editor code, .wysiwyg-content code {
+  font-family: monospace !important;
+  font-size: 0.9em !important;
+  color: #ef4444 !important;
+}
+
+/* Highlight.js GitHub Dark Code Theme Overrides */
+.wysiwyg-editor pre, .wysiwyg-content pre {
+  background: #0d1117 !important;
+  color: #c9d1d9 !important;
+  font-family: monospace !important;
+  border-radius: 8px !important;
+  padding: 1rem !important;
+  margin: 0.75rem 0 !important;
+  overflow-x: auto !important;
+}
+
+.wysiwyg-editor pre code, .wysiwyg-content pre code {
+  background: transparent !important;
+  padding: 0 !important;
+  color: inherit !important;
+  border-radius: 0 !important;
+}
+
