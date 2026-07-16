@@ -1127,6 +1127,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         code: false,
         quote: false,
       };
+      let preEl: HTMLElement | null = null;
 
       const sel = window.getSelection();
       if (sel && sel.rangeCount > 0) {
@@ -1159,6 +1160,9 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               const el = node as HTMLElement;
               const tagName = el.tagName.toLowerCase();
               
+              if (tagName === 'pre') {
+                preEl = el;
+              }
               if (tagName === 'code') {
                 formats.code = true;
               }
@@ -1186,6 +1190,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         }
       }
       setActiveFormats(formats);
+      setActivePreNode(preEl);
     };
 
     document.addEventListener('selectionchange', updateFormats);
@@ -1446,6 +1451,92 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
       );
     });
   }, [activeFormats, theme.rawColor]);
+
+
+
+  const isNodeInside = (child: Node | null, parent: Node | null) => {
+    if (!child || !parent) return false;
+    let node: Node | null = child;
+    while (node) {
+      if (node === parent) return true;
+      node = node.parentNode;
+    }
+    return false;
+  };
+
+  const renderFloatingLanguageDropdown = (editorRef: React.RefObject<HTMLDivElement | null>) => {
+    if (!activePreNode || !editorRef.current || !isNodeInside(activePreNode, editorRef.current)) return null;
+    
+    // Find the relative offsetTop
+    let offsetTop = activePreNode.offsetTop;
+    let temp = activePreNode.offsetParent as HTMLElement;
+    
+    // Walk up until we reach a relative/absolute container or the editorRef container
+    while (temp && temp !== editorRef.current.parentNode && temp !== document.body) {
+      if (window.getComputedStyle(temp).position !== 'static') {
+        break;
+      }
+      offsetTop += temp.offsetTop;
+      temp = temp.offsetParent as HTMLElement;
+    }
+
+    return (
+      <div
+        style={{
+          position: 'absolute',
+          top: `${offsetTop + 8}px`,
+          right: '16px',
+          zIndex: 10,
+        }}
+        className="animate-fade-in flex items-center gap-1.5 bg-[#161b22] border border-[#30363d] rounded-lg px-2.5 py-1 shadow-md select-none"
+      >
+        <span className="text-[9px] font-bold text-[#8b949e] uppercase tracking-widest">Language:</span>
+        <select
+          value={(() => {
+            const code = activePreNode.querySelector('code');
+            if (code) {
+              const cls = (Array.from(code.classList) as string[]).find(c => c.startsWith('language-'));
+              return cls ? cls.replace('language-', '') : 'auto';
+            }
+            return 'auto';
+          })()}
+          onChange={(e) => {
+            const val = e.target.value;
+            const code = activePreNode.querySelector('code');
+            if (code) {
+              // Remove existing language classes
+              (Array.from(code.classList) as string[]).forEach(c => {
+                if (c.startsWith('language-')) code.classList.remove(c);
+              });
+              if (val !== 'auto') {
+                code.classList.add(`language-${val}`);
+              }
+              // Dispatch selection change to refresh state
+              document.dispatchEvent(new Event('selectionchange'));
+            }
+          }}
+          className="bg-transparent border-none outline-none text-[10px] font-bold text-[#c9d1d9] cursor-pointer"
+        >
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="auto">Auto Detect</option>
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="python">Python</option>
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="javascript">JavaScript</option>
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="typescript">TypeScript</option>
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="cpp">C++</option>
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="c">C</option>
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="java">Java</option>
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="csharp">C#</option>
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="rust">Rust</option>
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="go">Go</option>
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="html">HTML</option>
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="css">CSS</option>
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="sql">SQL</option>
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="json">JSON</option>
+          <option className="bg-[#161b22] text-[#c9d1d9]" value="bash">Bash / Shell</option>
+        </select>
+      </div>
+    );
+  };
+
   const [reqTitle, setReqTitle] = useState('');
   const [reqContent, setReqContent] = useState('');
   const [reqBounty, setReqBounty] = useState(50);
@@ -1763,11 +1854,128 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   useEffect(() => {
     loadCommunityData();
   }, [activeSubject.id, userProfile]);
-
-  // Trigger Highlight.js syntax highlighting on code segments
+  // Trigger Highlight.js syntax highlighting and premium block wrapping on code segments
   useEffect(() => {
-    hljs.highlightAll();
-  }, [discussions, requests, studyPacks, activeTab]);
+    // Helper function to wrap code blocks with language labels and copy buttons
+    const decorateCodeBlocks = () => {
+      const preElements = document.querySelectorAll('.wysiwyg-content pre, .comment-content pre, pre');
+      preElements.forEach((preElement) => {
+        const pre = preElement as HTMLElement;
+        // If it's inside a contenteditable editor, skip it
+        if (pre.closest('.wysiwyg-editor') || pre.closest('[contenteditable="true"]')) return;
+        
+        // If it's already decorated (inside a .premium-code-block), skip it
+        if (pre.closest('.premium-code-block')) return;
+
+        const code = pre.querySelector('code');
+        if (!code) return;
+
+        // Extract text content of code
+        const rawCodeText = code.textContent || '';
+        
+        // Auto-detect language or use language class if available
+        let lang = 'auto';
+        const classList = Array.from(code.classList);
+        const langClass = classList.find(c => c.startsWith('language-'));
+        if (langClass) {
+          lang = langClass.replace('language-', '');
+        } else {
+          // Use highlightAuto to get the guessed language
+          try {
+            const detection = hljs.highlightAuto(rawCodeText);
+            if (detection.language) {
+              lang = detection.language;
+            }
+          } catch (err) {
+            console.error("HighlightAuto failed:", err);
+          }
+        }
+
+        // Capitalize the language name nicely
+        const niceLangNames: Record<string, string> = {
+          javascript: 'JavaScript',
+          typescript: 'TypeScript',
+          js: 'JavaScript',
+          ts: 'TypeScript',
+          python: 'Python',
+          py: 'Python',
+          html: 'HTML',
+          css: 'CSS',
+          cpp: 'C++',
+          c: 'C',
+          java: 'Java',
+          csharp: 'C#',
+          cs: 'C#',
+          rust: 'Rust',
+          go: 'Go',
+          bash: 'Bash',
+          shell: 'Shell',
+          sql: 'SQL',
+          json: 'JSON',
+          xml: 'XML',
+          yaml: 'YAML',
+          markdown: 'Markdown',
+          md: 'Markdown',
+          php: 'PHP',
+          ruby: 'Ruby',
+        };
+        const displayLang = niceLangNames[lang.toLowerCase()] || (lang.charAt(0).toUpperCase() + lang.slice(1));
+
+        // Create wrapper container
+        const wrapper = document.createElement('div');
+        wrapper.className = 'premium-code-block relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 my-4 bg-[#0d1117] text-[#c9d1d9] font-mono shadow-sm';
+        
+        // Create header bar
+        const header = document.createElement('div');
+        header.className = 'flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-[#21262d] text-[11px] font-bold text-[#8b949e] select-none';
+        
+        const langLabel = document.createElement('span');
+        langLabel.className = 'code-lang-label tracking-wider font-semibold';
+        langLabel.textContent = displayLang;
+        
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'code-copy-btn flex items-center gap-1.5 bg-transparent hover:bg-white/5 border border-[#30363d] hover:border-[#8b949e] text-[10px] text-[#8b949e] hover:text-[#c9d1d9] px-2.5 py-1 rounded-md transition-all active:scale-95 cursor-pointer';
+        copyBtn.innerHTML = 'Copy <svg style="width:11px;height:11px;stroke-width:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+        copyBtn.type = 'button';
+        copyBtn.onclick = (e) => {
+          e.stopPropagation();
+          navigator.clipboard.writeText(rawCodeText).then(() => {
+            copyBtn.innerHTML = 'Copied! <svg style="width:11px;height:11px;stroke-width:2.5px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            setTimeout(() => {
+              copyBtn.innerHTML = 'Copy <svg style="width:11px;height:11px;stroke-width:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+            }, 2000);
+          });
+        };
+        
+        header.appendChild(langLabel);
+        header.appendChild(copyBtn);
+        
+        // Rearrange nodes
+        pre.parentNode?.insertBefore(wrapper, pre);
+        wrapper.appendChild(header);
+        wrapper.appendChild(pre);
+        
+        // Style pre and code to fit inside wrapper cleanly
+        pre.style.margin = '0';
+        pre.style.padding = '1rem';
+        pre.style.background = 'transparent';
+        pre.className = 'overflow-x-auto text-[13px] leading-relaxed m-0 no-scrollbar';
+        
+        // Highlight the code block using Highlight.js
+        if (langClass) {
+          hljs.highlightElement(code);
+        } else if (lang !== 'auto') {
+          code.className = `language-${lang}`;
+          hljs.highlightElement(code);
+        } else {
+          hljs.highlightElement(code);
+        }
+      });
+    };
+
+    // Decorate blocks
+    decorateCodeBlocks();
+  });
 
   useEffect(() => {
     const handleDocClick = () => setActiveMenuFileId(null);
@@ -3450,7 +3658,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   <div className="border-t border-zinc-100 dark:border-white/5" />
 
                   {/* WYSIWYG Body Editor */}
-                  <div className="pt-4 pb-3">
+                  <div className="relative pt-4 pb-3">
                     <div
                       ref={createEditorRef}
                       contentEditable
@@ -3461,6 +3669,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
                       suppressContentEditableWarning
                     />
+                    {renderFloatingLanguageDropdown(createEditorRef)}
                   </div>
 
                   {/* Formatting Toolbar */}
@@ -3499,6 +3708,186 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                 </form>
               </div>
             </div>
+          ) : editingPost ? (
+            // ────────────────────────────────────────────────────────
+            // INLINE EDIT POST VIEW
+            // ────────────────────────────────────────────────────────
+            <div className="space-y-4">
+              {/* Back button */}
+              <button 
+                type="button"
+                onClick={() => setEditingPost(null)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all self-start"
+              >
+                <ArrowLeft size={14} /> Back to Discussions
+              </button>
+
+              <div className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm flex flex-col">
+                {/* Header */}
+                <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100 dark:border-white/5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
+                      {subjectCode.slice(0, 2)}
+                    </div>
+                    <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
+                    <span className="text-[10px] font-semibold text-zinc-400 bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded-full">Editing</span>
+                  </div>
+                </div>
+
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    if (!editingPost) return;
+                    const plainText = getEditorText(editEditorRef);
+                    if (!editPostTitle.trim() || !plainText) return;
+                    const content = getEditorHtml(editEditorRef);
+                    const ok = await CommunityService.editPost(editingPost.id, editPostTitle, content);
+                    if (ok) {
+                      setDiscussions(prev => prev.map(post => {
+                        if (post.id === editingPost.id) {
+                          return { ...post, title: editPostTitle, content, category: editPostCategory, updated_at: new Date().toISOString() };
+                        }
+                        return post;
+                      }));
+                      showToast("Post edited successfully", "success");
+                      setEditingPost(null);
+                    } else {
+                      showToast("Failed to edit post", "error");
+                    }
+                  }}
+                  className="flex flex-col pt-4"
+                >
+                  <div className="pb-2">
+                    <input
+                      type="text"
+                      value={editPostTitle}
+                      onChange={(e) => setEditPostTitle(e.target.value)}
+                      placeholder="Title*"
+                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600 focus:ring-0"
+                      required
+                      autoFocus
+                    />
+                  </div>
+
+                  {/* Flair picker */}
+                  <div className="pb-3 flex flex-wrap items-center gap-2">
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowEditCategoryDropdown(!showEditCategoryDropdown)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold border cursor-pointer transition-all"
+                        style={{
+                          borderColor: `${theme.rawColor}40`,
+                          backgroundColor: `${theme.rawColor}08`,
+                          color: theme.rawColor
+                        }}
+                      >
+                        <Sparkles size={11} />
+                        {editPostCategory === 'discussion' && 'Discussion'}
+                        {editPostCategory === 'doubt' && 'Doubt'}
+                        {editPostCategory === 'poll' && 'Poll'}
+                        {editPostCategory === 'question' && 'Exam Prep'}
+                        {editPostCategory === 'resource' && 'Resource'}
+                        {editPostCategory === 'announcement' && '📢 Announcement'}
+                        <ChevronDown size={10} className={`transition-transform duration-200 ${showEditCategoryDropdown ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {showEditCategoryDropdown && (
+                        <>
+                          <div className="fixed inset-0 z-30" onClick={() => setShowEditCategoryDropdown(false)} />
+                          <div className="absolute left-0 z-40 mt-1.5 w-48 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1">
+                            {[
+                              { value: 'discussion', label: 'Discussion', icon: '💬' },
+                              { value: 'doubt', label: 'Doubt / Question', icon: '❓' },
+                              { value: 'poll', label: 'Poll', icon: '📊' },
+                              { value: 'question', label: 'Exam Prep', icon: '📝' },
+                              { value: 'resource', label: 'Resource', icon: '📎' },
+                              ...(userProfile?.is_admin ? [{ value: 'announcement', label: 'Announcement', icon: '📢' }] : [])
+                            ].map((opt) => {
+                              const isSelected = editPostCategory === opt.value;
+                              return (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={() => {
+                                    setEditPostCategory(opt.value as any);
+                                    setShowEditCategoryDropdown(false);
+                                  }}
+                                  style={isSelected ? {
+                                    backgroundColor: `${theme.rawColor}12`,
+                                    color: theme.rawColor
+                                  } : undefined}
+                                  className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold transition-all border-none bg-transparent cursor-pointer flex items-center gap-2.5 ${
+                                    isSelected
+                                      ? ''
+                                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.04]'
+                                  }`}
+                                >
+                                  <span>{opt.icon}</span>
+                                  <span>{opt.label}</span>
+                                  {isSelected && <Check size={12} className="ml-auto" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-zinc-100 dark:border-white/5" />
+
+                  {/* WYSIWYG Body Editor */}
+                  <div className="relative pt-4 pb-3">
+                    <div
+                      ref={editEditorRef}
+                      contentEditable
+                      data-placeholder="Body text*"
+                      onInput={() => setEditPostContent(getEditorText(editEditorRef))}
+                      onKeyDown={handleEditorKeyDown}
+                      className="w-full min-h-[220px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
+                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                      suppressContentEditableWarning
+                    />
+                    {renderFloatingLanguageDropdown(editEditorRef)}
+                  </div>
+
+                  {/* Formatting Toolbar */}
+                  <div className="pb-4">
+                    <div className="flex items-center gap-0.5 flex-wrap">
+                      {renderToolbar(buildToolbarItems(editEditorRef), 'ep')}
+                      {imageUploading && <span className="text-[10px] text-zinc-400 ml-2 animate-pulse">Uploading...</span>}
+                    </div>
+                  </div>
+
+                  {/* Footer actions */}
+                  <div className="flex items-center justify-end gap-2.5 pt-3.5 border-t border-zinc-100 dark:border-white/5">
+                    <button
+                      type="button"
+                      onClick={() => setEditingPost(null)}
+                      className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!editPostTitle.trim() || !editPostContent.trim()}
+                      style={{
+                        backgroundColor: (!editPostTitle.trim() || !editPostContent.trim()) ? undefined : theme.rawColor,
+                        opacity: (!editPostTitle.trim() || !editPostContent.trim()) ? 0.4 : 1
+                      }}
+                      className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
+                        (!editPostTitle.trim() || !editPostContent.trim())
+                          ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
+                          : 'text-white hover:opacity-90 active:scale-95'
+                      }`}
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
           ) : selectedPost ? (
             // ────────────────────────────────────────────────────────
             // POST DETAIL VIEW
@@ -3532,7 +3921,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     <ArrowLeft size={14} /> Back to Discussions
                   </button>
 
-                  <div className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-2xl overflow-hidden p-5 space-y-4">
+                  <div className="bg-white dark:bg-[#111113] border-none rounded-2xl overflow-hidden p-5 space-y-4">
                     {/* Header */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-[11px] min-w-0">
@@ -3728,7 +4117,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   </div>
 
                   {/* Comments Section (always open on details) */}
-                  <div className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-2xl p-5 space-y-4">
+                  <div className="bg-white dark:bg-[#111113] border-none rounded-2xl p-5 space-y-4">
                     <h4 className="text-xs font-bold text-zinc-400 tracking-wider flex items-center gap-1.5"><MessageSquare className="w-3.5 h-3.5" /> Comments</h4>
 
                     <form 
@@ -3839,9 +4228,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
             // FEED VIEW (COLLAPSED CARDS LIST)
             // ────────────────────────────────────────────────────────
             <>
-              <div className="flex justify-between items-center gap-4">
-                <h3 className="text-xs font-bold text-zinc-400 tracking-wider flex items-center gap-1.5"><MessageSquare className="w-3.5 h-3.5" /> Discussions</h3>
-              </div>
+
 
               {/* Reddit-style create post prompt bar */}
               <button
@@ -3887,7 +4274,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     <div
                       key={p.id}
                       onClick={() => setSelectedPost(p)}
-                      className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-2xl overflow-hidden hover:border-zinc-250 dark:hover:border-white/10 transition-colors cursor-pointer"
+                      className="bg-white dark:bg-[#111113] border-none rounded-2xl overflow-hidden transition-colors cursor-pointer"
                     >
                       <div className="px-4 pt-3.5 pb-1">
                         {/* Header */}
@@ -4169,7 +4556,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   <div className="border-t border-zinc-100 dark:border-white/5" />
 
                   {/* WYSIWYG Body Editor */}
-                  <div className="pt-4 pb-3">
+                  <div className="relative pt-4 pb-3">
                     <div
                       ref={reqEditorRef}
                       contentEditable
@@ -4180,6 +4567,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
                       suppressContentEditableWarning
                     />
+                    {renderFloatingLanguageDropdown(reqEditorRef)}
                   </div>
 
                   {/* Formatting Toolbar */}
@@ -4242,7 +4630,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               {/* Requests list */}
               <div className="space-y-4">
                 {requests.map((r) => (
-                  <div key={r.id} className="p-5 bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/5 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
+                  <div key={r.id} className="p-5 bg-white dark:bg-[#111113] border-none rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
                     <div className="min-w-0 flex-1 space-y-2">
                       <div className="flex items-center gap-2">
                         <img src={r.user_avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-6 h-6 rounded-full" />
@@ -4336,7 +4724,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   <div className="border-t border-zinc-100 dark:border-white/5" />
 
                   {/* WYSIWYG Description */}
-                  <div className="pt-4 pb-3">
+                  <div className="relative pt-4 pb-3">
                     <div
                       ref={packEditorRef}
                       contentEditable
@@ -4347,6 +4735,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
                       suppressContentEditableWarning
                     />
+                    {renderFloatingLanguageDropdown(packEditorRef)}
                   </div>
 
                   {/* Formatting Toolbar */}
@@ -4522,7 +4911,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                 {studyPacks.map((pack) => (
                   <div
                     key={pack.id}
-                    className="p-5 bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/5 rounded-3xl space-y-4 shadow-sm flex flex-col justify-between"
+                    className="p-5 bg-white dark:bg-[#121214] border-none rounded-3xl space-y-4 shadow-sm flex flex-col justify-between"
                   >
                     <div className="space-y-2">
                       <div className="text-xs font-black text-zinc-950 dark:text-white leading-tight">
@@ -4705,202 +5094,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
       />
 
 
-      {/* Reddit-style Edit Post Composer */}
-      {createPortal(
-        <AnimatePresence>
-          {editingPost && (
-            <div className="fixed inset-0 z-[9999] flex flex-col overflow-hidden">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                onClick={() => setEditingPost(null)}
-              />
 
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 40 }}
-                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                className="relative z-10 w-full max-w-2xl mx-auto mt-8 sm:mt-16 mb-8 flex flex-col bg-white dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/8 rounded-3xl shadow-2xl overflow-hidden"
-                style={{ maxHeight: 'calc(100vh - 4rem)' }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Header */}
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 dark:border-white/5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
-                      {subjectCode.slice(0, 2)}
-                    </div>
-                    <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
-                    <span className="text-[10px] font-semibold text-zinc-400 bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded-full">Editing</span>
-                  </div>
-                  <button
-                    onClick={() => setEditingPost(null)}
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
-                  >
-                    ×
-                  </button>
-                </div>
-
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    if (!editingPost) return;
-                    const plainText = getEditorText(editEditorRef);
-                    if (!editPostTitle.trim() || !plainText) return;
-                    const content = getEditorHtml(editEditorRef);
-                    const ok = await CommunityService.editPost(editingPost.id, editPostTitle, content);
-                    if (ok) {
-                      setDiscussions(prev => prev.map(post => {
-                        if (post.id === editingPost.id) {
-                          return { ...post, title: editPostTitle, content, category: editPostCategory, updated_at: new Date().toISOString() };
-                        }
-                        return post;
-                      }));
-                      showToast("Post edited successfully", "success");
-                      setEditingPost(null);
-                    } else {
-                      showToast("Failed to edit post", "error");
-                    }
-                  }}
-                  className="flex-1 overflow-y-auto flex flex-col"
-                >
-                  <div className="px-5 pt-5 pb-2">
-                    <input
-                      type="text"
-                      value={editPostTitle}
-                      onChange={(e) => setEditPostTitle(e.target.value)}
-                      placeholder="Title*"
-                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
-                      required
-                      autoFocus
-                    />
-                  </div>
-
-                  {/* Flair picker */}
-                  <div className="px-5 pb-3 flex flex-wrap items-center gap-2">
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => setShowEditCategoryDropdown(!showEditCategoryDropdown)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold border cursor-pointer transition-all"
-                        style={{
-                          borderColor: `${theme.rawColor}40`,
-                          backgroundColor: `${theme.rawColor}08`,
-                          color: theme.rawColor
-                        }}
-                      >
-                        <Sparkles size={11} />
-                        {editPostCategory === 'discussion' && 'Discussion'}
-                        {editPostCategory === 'doubt' && 'Doubt'}
-                        {editPostCategory === 'poll' && 'Poll'}
-                        {editPostCategory === 'question' && 'Exam Prep'}
-                        {editPostCategory === 'resource' && 'Resource'}
-                        {editPostCategory === 'announcement' && '📢 Announcement'}
-                        <ChevronDown size={10} className={`transition-transform duration-200 ${showEditCategoryDropdown ? 'rotate-180' : ''}`} />
-                      </button>
-
-                      {showEditCategoryDropdown && (
-                        <>
-                          <div className="fixed inset-0 z-30" onClick={() => setShowEditCategoryDropdown(false)} />
-                          <div className="absolute left-0 z-40 mt-1.5 w-48 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1">
-                            {[
-                              { value: 'discussion', label: 'Discussion', icon: '💬' },
-                              { value: 'doubt', label: 'Doubt / Question', icon: '❓' },
-                              { value: 'poll', label: 'Poll', icon: '📊' },
-                              { value: 'question', label: 'Exam Prep', icon: '📝' },
-                              { value: 'resource', label: 'Resource', icon: '📎' },
-                              ...(userProfile?.is_admin ? [{ value: 'announcement', label: 'Announcement', icon: '📢' }] : [])
-                            ].map((opt) => {
-                              const isSelected = editPostCategory === opt.value;
-                              return (
-                                <button
-                                  key={opt.value}
-                                  type="button"
-                                  onClick={() => {
-                                    setEditPostCategory(opt.value as any);
-                                    setShowEditCategoryDropdown(false);
-                                  }}
-                                  style={isSelected ? {
-                                    backgroundColor: `${theme.rawColor}12`,
-                                    color: theme.rawColor
-                                  } : undefined}
-                                  className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold transition-all border-none bg-transparent cursor-pointer flex items-center gap-2.5 ${
-                                    isSelected
-                                      ? ''
-                                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.04]'
-                                  }`}
-                                >
-                                  <span>{opt.icon}</span>
-                                  <span>{opt.label}</span>
-                                  {isSelected && <Check size={12} className="ml-auto" />}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mx-5 border-t border-zinc-100 dark:border-white/5" />
-
-                  {/* WYSIWYG Body Editor */}
-                  <div className="px-5 pt-4 pb-3 flex-1">
-                    <div
-                      ref={editEditorRef}
-                      contentEditable
-                      data-placeholder="Body text*"
-                      onInput={() => setEditPostContent(getEditorText(editEditorRef))}
-                      onKeyDown={handleEditorKeyDown}
-                      className="w-full min-h-[200px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
-                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
-                      suppressContentEditableWarning
-                    />
-                  </div>
-
-                  {/* Formatting Toolbar */}
-                  <div className="px-5 pb-4">
-                    <div className="flex items-center gap-0.5 flex-wrap">
-                      {renderToolbar(buildToolbarItems(editEditorRef), 'ep')}
-                      {imageUploading && <span className="text-[10px] text-zinc-400 ml-2 animate-pulse">Uploading...</span>}
-                    </div>
-                  </div>
-
-                  {/* Footer */}
-                  <div className="flex items-center justify-end gap-2.5 px-5 py-3.5 border-t border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
-                    <button
-                      type="button"
-                      onClick={() => setEditingPost(null)}
-                      className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={!editPostTitle.trim()}
-                      style={{
-                        backgroundColor: !editPostTitle.trim() ? undefined : theme.rawColor,
-                        opacity: !editPostTitle.trim() ? 0.4 : 1
-                      }}
-                      className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
-                        !editPostTitle.trim()
-                          ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
-                          : 'text-white hover:opacity-90 active:scale-95'
-                      }`}
-                    >
-                      Save Changes
-                    </button>
-                  </div>
-                </form>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
 
 
       {/* Admin Edit Modal */}
