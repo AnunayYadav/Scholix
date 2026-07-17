@@ -821,6 +821,38 @@ Welcome to **${cleanName}**! This course provides a structured curriculum to bui
 - **Ask Questions**: Participate in the Discussions tab to clear doubts and collaborate with peers.`;
 };
 
+const cleanHtmlForEditor = (content: string): string => {
+  if (!content) return '';
+  try {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    
+    // Remove all CodeMirror containers
+    tempDiv.querySelectorAll('.cm6-editor-container').forEach(c => c.remove());
+    
+    // Unwrap premium code block wrappers
+    tempDiv.querySelectorAll('.premium-code-block').forEach(wrapper => {
+      const pre = wrapper.querySelector('pre');
+      if (pre) {
+        pre.style.display = '';
+        wrapper.replaceWith(pre);
+      } else {
+        wrapper.remove();
+      }
+    });
+
+    // Make sure all pre tags are visible
+    tempDiv.querySelectorAll('pre').forEach(pre => {
+      pre.style.display = '';
+    });
+    
+    return tempDiv.innerHTML;
+  } catch (e) {
+    console.error("cleanHtmlForEditor failed:", e);
+    return content;
+  }
+};
+
 const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   activeSubject,
   activeSemester,
@@ -1281,11 +1313,37 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     // Find all CodeMirror containers, restore the original pre elements, and remove the wrappers
     const containers = clone.querySelectorAll('.cm6-editor-container');
     containers.forEach((container) => {
-      const pre = container.previousSibling as HTMLElement | null;
+      let pre = container.previousElementSibling as HTMLElement | null;
+      if (!pre && container.previousSibling) {
+        let sib = container.previousSibling;
+        while (sib) {
+          if (sib.nodeType === Node.ELEMENT_NODE && (sib as HTMLElement).tagName?.toLowerCase() === 'pre') {
+            pre = sib as HTMLElement;
+            break;
+          }
+          sib = sib.previousSibling;
+        }
+      }
       if (pre && pre.tagName?.toLowerCase() === 'pre') {
         pre.style.display = '';
       }
-      container.remove();
+      container.parentNode?.removeChild(container);
+    });
+
+    // Strip any premium-code-block wrapper that might have gotten in
+    clone.querySelectorAll('.premium-code-block').forEach(wrapper => {
+      const pre = wrapper.querySelector('pre');
+      if (pre) {
+        pre.style.display = '';
+        wrapper.replaceWith(pre);
+      } else {
+        wrapper.remove();
+      }
+    });
+
+    // Make sure all pre elements in the clone are visible
+    clone.querySelectorAll('pre').forEach((pre) => {
+      pre.style.display = '';
     });
     
     return clone.innerHTML;
@@ -4804,7 +4862,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                                       setEditPostCategory((p.category as any) || 'discussion');
                                       setTimeout(() => {
                                        if (editEditorRef.current) {
-                                         editEditorRef.current.innerHTML = p.content;
+                                         editEditorRef.current.innerHTML = cleanHtmlForEditor(p.content);
                                        }
                                       }, 50);
                                     }}
@@ -5317,7 +5375,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                                           setEditPostCategory((p.category as any) || 'discussion');
                                           setTimeout(() => {
                                            if (editEditorRef.current) {
-                                             editEditorRef.current.innerHTML = p.content;
+                                             editEditorRef.current.innerHTML = cleanHtmlForEditor(p.content);
                                            }
                                           }, 50);
                                         }}
