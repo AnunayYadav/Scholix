@@ -10,9 +10,6 @@
     "sitemap": "tsx scripts/generate-sitemap.ts"
   },
   "dependencies": {
-    "@capacitor/android": "^8.4.2",
-    "@capacitor/cli": "^8.4.2",
-    "@capacitor/core": "^8.4.2",
     "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/commands": "^6.10.4",
     "@codemirror/lang-cpp": "^6.0.3",
