@@ -1360,14 +1360,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   autoCorrect="off"
                   autoComplete="off"
                   spellCheck="false"
-                  className="w-full pl-10 pr-4 h-10 bg-zinc-100/80 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/[0.06] rounded-xl text-[11px] sm:text-xs font-medium outline-none focus:ring-1 focus:ring-orange-500 transition-all dark:text-white"
+                  className="w-full pl-10 pr-4 h-10 bg-zinc-100 dark:bg-[#141416] hover:bg-zinc-200/70 dark:hover:bg-[#1a1a1d] rounded-full text-[11px] sm:text-xs font-semibold outline-none border-none transition-colors text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500"
                 />
               </div>
 
               {/* Right Side: Actions */}
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 {userProfile?.is_admin && (
-                  <button onClick={toggleAdminView} className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all border shrink-0 hover:scale-[1.02] active:scale-[0.98] ${isAdminView ? 'bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/20' : 'bg-zinc-100/80 dark:bg-white/[0.03] text-zinc-450 dark:text-zinc-500 border-zinc-200/80 dark:border-white/[0.06] hover:bg-zinc-200/50 dark:hover:bg-white/[0.06]'}`} title="Review Hub">
+                  <button onClick={toggleAdminView} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all border-none shrink-0 cursor-pointer ${isAdminView ? 'bg-orange-500 text-white shadow-md' : 'bg-zinc-100 dark:bg-[#141416] text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-[#1a1a1d]'}`} title="Review Hub">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                   </button>
                 )}
@@ -1383,7 +1383,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     navigateTo(null, null, null); 
                     setIsAdminView(false); 
                   }} 
-                  className={`px-3.5 h-10 rounded-2xl flex items-center justify-center gap-1.5 transition-all text-xs font-extrabold border flex-1 sm:flex-initial hover:scale-[1.02] active:scale-[0.98] ${viewMode === 'my-uploads' ? 'bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/20' : 'bg-zinc-100/80 dark:bg-white/[0.03] text-zinc-600 dark:text-zinc-350 border-zinc-250/80 dark:border-white/[0.07] hover:bg-zinc-200/50 dark:hover:bg-white/[0.06]'}`}
+                  className={`px-4 h-10 rounded-full flex items-center justify-center gap-1.5 transition-all text-xs font-bold border-none cursor-pointer flex-1 sm:flex-initial ${viewMode === 'my-uploads' ? 'bg-orange-500 text-white shadow-md' : 'bg-zinc-100 dark:bg-[#141416] text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-[#1a1a1d]'}`}
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                   Vault
@@ -1398,7 +1398,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     } 
                     fileInputRef.current?.click(); 
                   }} 
-                  className="px-4.5 h-10 bg-orange-500 text-white rounded-2xl font-extrabold text-xs shadow-md shadow-orange-500/10 border-none hover:scale-[1.02] active:scale-[0.98] hover:bg-orange-600 transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial"
+                  className="px-5 h-10 bg-orange-500 hover:bg-orange-600 text-white rounded-full font-bold text-xs shadow-md border-none transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial cursor-pointer active:scale-95"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="w-3.5 h-3.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                   Upload {pendingUploads.length > 0 && `(${pendingUploads.length})`}
