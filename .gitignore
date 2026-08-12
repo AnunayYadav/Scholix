@@ -46,3 +46,6 @@ scripts/backup_data.cjs
 
 # Scratch/Temporary Scripts
 tmp/
+
+# Flutter Mobile App (contains env variables & build artifacts)
+scholix_mobile/
