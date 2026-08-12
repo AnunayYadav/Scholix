@@ -63,10 +63,6 @@ interface SubjectCommunityProps {
 const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: string) => {
   const c = nameOrCode.toUpperCase().trim();
   
-  // Resolve raw color
-  const rawColor = folderColor || '#ff7a00';
-  
-  // Resolve icon component
   const IconMap: { [key: string]: any } = {
     Code: <Code className="w-5 h-5 text-white" strokeWidth={3} />,
     Database: <Database className="w-5 h-5 text-white" strokeWidth={3} />,
@@ -86,113 +82,9 @@ const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: 
     Video: <Video className="w-5 h-5 text-white" strokeWidth={3} />
   };
 
-  const icon = folderIcon && IconMap[folderIcon] ? IconMap[folderIcon] : null;
+  const customIcon = folderIcon && IconMap[folderIcon] ? IconMap[folderIcon] : null;
 
-  // If custom color and icon are present, return custom theme properties
-  if (folderColor || icon) {
-    return {
-      text: `text-[${rawColor}]`,
-      bg: `bg-[${rawColor}]`,
-      lightBg: `${rawColor}10`,
-      border: `border-[${rawColor}]/20`,
-      gradient: `from-[${rawColor}] to-[${rawColor}]`,
-      icon: icon || <Folder className="w-5 h-5 text-white" strokeWidth={3} />,
-      rawColor: rawColor
-    };
-  }
-
-  // 1. Math / Calculus subjects
-  if (c.includes('MTH') || c.includes('MATH') || c.includes('CALCULUS') || c.includes('STATISTICS')) {
-    return {
-      text: 'text-emerald-500',
-      bg: 'bg-emerald-500',
-      lightBg: 'bg-emerald-500/10 dark:bg-emerald-500/10',
-      border: 'border-emerald-500/20',
-      gradient: 'from-emerald-500 to-teal-500',
-      icon: <Sigma className="w-5 h-5 text-white" strokeWidth={3} />,
-      rawColor: '#22c55e'
-    };
-  }
-
-  // 2. Coding / Programming / Development / Web labs
-  if (
-    c.includes('PROGRAMMING') || 
-    c.includes('PYTHON') || 
-    c.includes('CSE101') || 
-    c.includes('CSE326') || 
-    c.includes('INT108') || 
-    c.includes('JAVA') || 
-    c.includes('CPP') || 
-    c.includes('DEVELOPMENT') || 
-    c.includes('WEB')
-  ) {
-    return {
-      text: 'text-orange-500',
-      bg: 'bg-orange-500',
-      lightBg: 'bg-orange-500/10 dark:bg-orange-500/10',
-      border: 'border-orange-500/20',
-      gradient: 'from-orange-500 to-amber-500',
-      icon: <Code className="w-5 h-5 text-white" strokeWidth={3} />,
-      rawColor: '#ff7a00'
-    };
-  }
-
-  // 3. Electrical / Electronics / Hardware subjects
-  if (
-    c.includes('ECE') || 
-    c.includes('EEE') || 
-    c.includes('ELECTRICAL') || 
-    c.includes('ELECTRONICS') || 
-    c.includes('HARDWARE') || 
-    c.includes('DIGITAL ELECTRONICS')
-  ) {
-    return {
-      text: 'text-blue-500',
-      bg: 'bg-blue-500',
-      lightBg: 'bg-blue-500/10 dark:bg-blue-500/10',
-      border: 'border-blue-500/20',
-      gradient: 'from-blue-500 to-indigo-500',
-      icon: <Cpu className="w-5 h-5 text-white" strokeWidth={3} />,
-      rawColor: '#0ea5e9'
-    };
-  }
-
-  // 4. Other CSE Theory / Computing / Systems / Architecture
-  if (
-    c.includes('CSE') || 
-    c.includes('COMPUTING') || 
-    c.includes('ORIENTATION') || 
-    c.includes('INT') || 
-    c.includes('CAP') ||
-    c.includes('OPERATING') ||
-    c.includes('NETWORKS') ||
-    c.includes('SECURITY')
-  ) {
-    return {
-      text: 'text-teal-500',
-      bg: 'bg-teal-500',
-      lightBg: 'bg-teal-500/10 dark:bg-teal-500/10',
-      border: 'border-teal-500/20',
-      gradient: 'from-teal-500 to-emerald-500',
-      icon: <Monitor className="w-5 h-5 text-white" strokeWidth={3} />,
-      rawColor: '#14b8a6'
-    };
-  }
-
-  // 5. Database / DBMS subjects
-  if (c.includes('DATABASE') || c.includes('DBMS') || c.includes('SQL')) {
-    return {
-      text: 'text-purple-500',
-      bg: 'bg-purple-500',
-      lightBg: 'bg-purple-500/10 dark:bg-purple-500/10',
-      border: 'border-purple-500/20',
-      gradient: 'from-purple-500 to-pink-500',
-      icon: <Database className="w-5 h-5 text-white" strokeWidth={3} />,
-      rawColor: '#a855f7'
-    };
-  }
-
-  // 6. Languages / Communication / Soft Skills
+  // 1. Languages / Communication / Soft Skills / Language Electives -> PINK (#ec4899)
   if (
     c.includes('FRN') || 
     c.includes('GER') || 
@@ -202,9 +94,8 @@ const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: 
     c.includes('GERMAN') || 
     c.includes('JAPANESE') || 
     c.includes('SPANISH') || 
-    c.includes('LANG') ||
+    c.includes('LANGUAGE') ||
     c.includes('COMMUNICATION') ||
-    c.includes('COMM') ||
     c.includes('PEL')
   ) {
     return {
@@ -213,28 +104,83 @@ const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: 
       lightBg: 'bg-pink-500/10 dark:bg-pink-500/10',
       border: 'border-pink-500/20',
       gradient: 'from-pink-500 to-rose-500',
-      icon: <Languages className="w-5 h-5 text-white" strokeWidth={3} />,
+      icon: customIcon || <Languages className="w-5 h-5 text-white" strokeWidth={3} />,
       rawColor: '#ec4899'
     };
   }
 
-  // 7. General Fallback
+  // 2. Core Electives / Elective Baskets -> PURPLE (#a855f7)
+  if (
+    c.includes('ELECTIVE') || 
+    c.includes('MEC') || 
+    c.includes('ECE') || 
+    c.includes('EEE') || 
+    c.includes('ELECTRICAL') || 
+    c.includes('ELECTRONICS') || 
+    c.includes('EVS') || 
+    c.includes('PHYSICS') ||
+    c.includes('AUTOCAD') ||
+    c.includes('ENVIRONMENTAL') ||
+    c.includes('DRAWING')
+  ) {
+    return {
+      text: 'text-purple-500',
+      bg: 'bg-purple-500',
+      lightBg: 'bg-purple-500/10 dark:bg-purple-500/10',
+      border: 'border-purple-500/20',
+      gradient: 'from-purple-500 to-indigo-500',
+      icon: customIcon || <Cpu className="w-5 h-5 text-white" strokeWidth={3} />,
+      rawColor: '#a855f7'
+    };
+  }
+
+  // 3. Dedicated Project / Lab Basket -> AMBER / ORANGE (#ff7a00)
+  if (c.includes('PROJECT') || c.includes('COMMUNITY DEVELOPMENT')) {
+    return {
+      text: 'text-amber-500',
+      bg: 'bg-amber-500',
+      lightBg: 'bg-amber-500/10 dark:bg-amber-500/10',
+      border: 'border-amber-500/20',
+      gradient: 'from-amber-500 to-orange-500',
+      icon: customIcon || <Globe className="w-5 h-5 text-white" strokeWidth={3} />,
+      rawColor: '#ff7a00'
+    };
+  }
+
+  // 4. Custom theme if specifically customized (and not a system default color)
+  if (folderColor && folderColor !== '#ff7a00' && folderColor !== '#14b8a6' && folderColor !== '#ef4444' && folderColor !== '#22c55e' && folderColor !== '#06b6d4' && folderColor !== '#a855f7' && folderColor !== '#ec4899') {
+    return {
+      text: `text-[${folderColor}]`,
+      bg: `bg-[${folderColor}]`,
+      lightBg: `${folderColor}10`,
+      border: `border-[${folderColor}]/20`,
+      gradient: `from-[${folderColor}] to-[${folderColor}]`,
+      icon: customIcon || <Folder className="w-5 h-5 text-white" strokeWidth={3} />,
+      rawColor: folderColor
+    };
+  }
+
+  // 5. Core Courses & Default CSE / INT / MTH -> CYAN / TEAL (#06b6d4)
+  const isMath = c.includes('MTH') || c.includes('MATH') || c.includes('CALCULUS') || c.includes('STATISTICS');
+  const isCode = c.includes('PROGRAMMING') || c.includes('PYTHON') || c.includes('INT') || c.includes('CSE');
+  
   return {
-    text: 'text-indigo-500',
-    bg: 'bg-indigo-500',
-    lightBg: 'bg-indigo-500/10 dark:bg-indigo-500/10',
-    border: 'border-indigo-500/20',
-    gradient: 'from-indigo-500 to-purple-500',
-    icon: <Globe className="w-5 h-5 text-white" strokeWidth={3} />,
-    rawColor: '#6366f1'
+    text: 'text-cyan-500',
+    bg: 'bg-cyan-500',
+    lightBg: 'bg-cyan-500/10 dark:bg-cyan-500/10',
+    border: 'border-cyan-500/20',
+    gradient: 'from-cyan-500 to-blue-500',
+    icon: customIcon || (isMath ? <Sigma className="w-5 h-5 text-white" strokeWidth={3} /> : isCode ? <Code className="w-5 h-5 text-white" strokeWidth={3} /> : <Monitor className="w-5 h-5 text-white" strokeWidth={3} />),
+    rawColor: '#06b6d4'
   };
 };
 
-const getCategoryMetadata = (category: FolderType | string | null | undefined) => {
+const getCategoryMetadata = (category: FolderType | string | null | undefined, subjectColor?: string) => {
+  const activeColor = subjectColor || (typeof category === 'object' && category?.color ? category.color : "#ff7a00");
   if (!category) {
     return {
       description: "Custom study resources & files",
-      color: "#ff7a00",
+      color: activeColor,
       lightColorBg: "bg-orange-500/10 text-orange-500 dark:text-orange-400",
       gradientBgClass: "from-orange-500/10 dark:from-orange-500/15 to-transparent",
       borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-orange-500/20",
@@ -271,90 +217,72 @@ const getCategoryMetadata = (category: FolderType | string | null | undefined) =
     }
   }
 
-  // If a custom color or icon_name was explicitly set on the folder (e.g. from create/edit folder modal)
-  if (folderObj && ((folderObj.color && folderObj.color !== '#ff7a00') || (folderObj.icon_name && folderObj.icon_name !== 'Folder'))) {
-    const hex = folderObj.color || "#ff7a00";
-    const hexMap: { [key: string]: any } = {
-      '#ff7a00': {
-        lightColorBg: "bg-orange-500/10 text-orange-500 dark:text-orange-400",
-        gradientBgClass: "from-orange-500/10 dark:from-orange-500/15 to-transparent",
-        borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-orange-500/20",
-        glowShadowClass: "hover:shadow-[0_12px_30px_rgba(255,122,0,0.06)] hover:-translate-y-0.5",
-        iconColor: "text-orange-500 dark:text-orange-400",
-        progressRingColor: "stroke-orange-500 dark:stroke-orange-400"
-      },
-      '#22c55e': {
-        lightColorBg: "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400",
-        gradientBgClass: "from-emerald-500/10 dark:from-emerald-500/15 to-transparent",
-        borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-emerald-500/20",
-        glowShadowClass: "hover:shadow-[0_12px_30px_rgba(34,197,94,0.06)] hover:-translate-y-0.5",
-        iconColor: "text-emerald-500 dark:text-emerald-400",
-        progressRingColor: "stroke-emerald-500 dark:stroke-emerald-400"
-      },
-      '#0ea5e9': {
-        lightColorBg: "bg-sky-500/10 text-sky-500 dark:text-sky-400",
-        gradientBgClass: "from-sky-500/10 dark:from-sky-500/15 to-transparent",
-        borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-sky-500/20",
-        glowShadowClass: "hover:shadow-[0_12px_30px_rgba(14,165,233,0.06)] hover:-translate-y-0.5",
-        iconColor: "text-sky-500 dark:text-sky-400",
-        progressRingColor: "stroke-sky-500 dark:stroke-sky-400"
-      },
-      '#f43f5e': {
-        lightColorBg: "bg-rose-500/10 text-rose-500 dark:text-rose-400",
-        gradientBgClass: "from-rose-500/10 dark:from-rose-500/15 to-transparent",
-        borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-rose-500/20",
-        glowShadowClass: "hover:shadow-[0_12px_30px_rgba(244,63,94,0.06)] hover:-translate-y-0.5",
-        iconColor: "text-rose-500 dark:text-rose-400",
-        progressRingColor: "stroke-rose-500 dark:stroke-rose-400"
-      },
-      '#a855f7': {
-        lightColorBg: "bg-purple-500/10 text-purple-500 dark:text-purple-400",
-        gradientBgClass: "from-purple-500/10 dark:from-purple-500/15 to-transparent",
-        borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-purple-500/20",
-        glowShadowClass: "hover:shadow-[0_12px_30px_rgba(168,85,247,0.06)] hover:-translate-y-0.5",
-        iconColor: "text-purple-500 dark:text-purple-400",
-        progressRingColor: "stroke-purple-500 dark:stroke-purple-400"
-      },
-      '#10b981': {
-        lightColorBg: "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400",
-        gradientBgClass: "from-emerald-500/10 dark:from-emerald-500/15 to-transparent",
-        borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-emerald-500/20",
-        glowShadowClass: "hover:shadow-[0_12px_30px_rgba(16,185,129,0.06)] hover:-translate-y-0.5",
-        iconColor: "text-emerald-500 dark:text-emerald-400",
-        progressRingColor: "stroke-emerald-500 dark:stroke-emerald-400"
-      },
-      '#6366f1': {
-        lightColorBg: "bg-indigo-500/10 text-indigo-500 dark:text-indigo-400",
-        gradientBgClass: "from-indigo-500/10 dark:from-indigo-500/15 to-transparent",
-        borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-indigo-500/20",
-        glowShadowClass: "hover:shadow-[0_12px_30px_rgba(99,102,241,0.06)] hover:-translate-y-0.5",
-        iconColor: "text-indigo-500 dark:text-indigo-400",
-        progressRingColor: "stroke-indigo-500 dark:stroke-indigo-400"
-      }
-    };
-    const stylePreset = hexMap[hex] || hexMap['#ff7a00'];
-    return {
-      description: folderObj.description || "Custom study resources & files",
-      color: hex,
-      ...stylePreset,
-      icon: customIconComp || (
-        <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-        </svg>
-      )
-    };
-  }
+  const hex = subjectColor || (folderObj && folderObj.color ? folderObj.color : "#ff7a00");
+  const hexMap: { [key: string]: any } = {
+    '#ff7a00': {
+      lightColorBg: "bg-orange-500/10 text-orange-500 dark:text-orange-400",
+      gradientBgClass: "from-orange-500/10 dark:from-orange-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-orange-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(255,122,0,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-orange-500 dark:text-orange-400",
+      progressRingColor: "stroke-orange-500 dark:stroke-orange-400"
+    },
+    '#22c55e': {
+      lightColorBg: "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400",
+      gradientBgClass: "from-emerald-500/10 dark:from-emerald-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-emerald-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(34,197,94,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-emerald-500 dark:text-emerald-400",
+      progressRingColor: "stroke-emerald-500 dark:stroke-emerald-400"
+    },
+    '#0ea5e9': {
+      lightColorBg: "bg-sky-500/10 text-sky-500 dark:text-sky-400",
+      gradientBgClass: "from-sky-500/10 dark:from-sky-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-sky-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(14,165,233,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-sky-500 dark:text-sky-400",
+      progressRingColor: "stroke-sky-500 dark:stroke-sky-400"
+    },
+    '#f43f5e': {
+      lightColorBg: "bg-rose-500/10 text-rose-500 dark:text-rose-400",
+      gradientBgClass: "from-rose-500/10 dark:from-rose-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-rose-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(244,63,94,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-rose-500 dark:text-rose-400",
+      progressRingColor: "stroke-rose-500 dark:stroke-rose-400"
+    },
+    '#a855f7': {
+      lightColorBg: "bg-purple-500/10 text-purple-500 dark:text-purple-400",
+      gradientBgClass: "from-purple-500/10 dark:from-purple-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-purple-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(168,85,247,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-purple-500 dark:text-purple-400",
+      progressRingColor: "stroke-purple-500 dark:stroke-purple-400"
+    },
+    '#10b981': {
+      lightColorBg: "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400",
+      gradientBgClass: "from-emerald-500/10 dark:from-emerald-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-emerald-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(16,185,129,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-emerald-500 dark:text-emerald-400",
+      progressRingColor: "stroke-emerald-500 dark:stroke-emerald-400"
+    },
+    '#6366f1': {
+      lightColorBg: "bg-indigo-500/10 text-indigo-500 dark:text-indigo-400",
+      gradientBgClass: "from-indigo-500/10 dark:from-indigo-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-indigo-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(99,102,241,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-indigo-500 dark:text-indigo-400",
+      progressRingColor: "stroke-indigo-500 dark:stroke-indigo-400"
+    }
+  };
+  const stylePreset = hexMap[hex] || hexMap['#ff7a00'];
 
   if (n.includes('note')) {
     return {
       description: "All handwritten & digital notes",
-      color: "#3b82f6",
-      lightColorBg: "bg-blue-500/10 text-blue-500 dark:text-blue-400",
-      gradientBgClass: "from-blue-500/10 dark:from-blue-500/15 to-transparent",
-      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-blue-500/20",
-      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(59,130,246,0.06)] hover:-translate-y-0.5",
-      iconColor: "text-blue-500 dark:text-blue-400",
-      progressRingColor: "stroke-blue-500 dark:stroke-blue-400",
+      color: hex,
+      ...stylePreset,
       icon: customIconComp || (
         <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -369,13 +297,8 @@ const getCategoryMetadata = (category: FolderType | string | null | undefined) =
   if (n.includes('pyq') || n.includes('question') || n.includes('paper')) {
     return {
       description: "Previous year question papers",
-      color: "#a855f7",
-      lightColorBg: "bg-purple-500/10 text-purple-500 dark:text-purple-400",
-      gradientBgClass: "from-purple-500/10 dark:from-purple-500/15 to-transparent",
-      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-purple-500/20",
-      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(168,85,247,0.06)] hover:-translate-y-0.5",
-      iconColor: "text-purple-500 dark:text-purple-400",
-      progressRingColor: "stroke-purple-500 dark:stroke-purple-400",
+      color: hex,
+      ...stylePreset,
       icon: customIconComp || (
         <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -388,13 +311,8 @@ const getCategoryMetadata = (category: FolderType | string | null | undefined) =
   if (n.includes('lecture') || n.includes('slide') || n.includes('video') || n.includes('recording')) {
     return {
       description: "Slides, videos & recordings",
-      color: "#ef4444",
-      lightColorBg: "bg-red-500/10 text-red-500 dark:text-red-400",
-      gradientBgClass: "from-red-500/10 dark:from-red-500/15 to-transparent",
-      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-red-500/20",
-      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(239,68,68,0.06)] hover:-translate-y-0.5",
-      iconColor: "text-red-500 dark:text-red-400",
-      progressRingColor: "stroke-red-500 dark:stroke-red-400",
+      color: hex,
+      ...stylePreset,
       icon: customIconComp || (
         <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M23 7l-7 5 7 5V7z" />
@@ -406,13 +324,8 @@ const getCategoryMetadata = (category: FolderType | string | null | undefined) =
   if (n.includes('syllabus') || n.includes('syllabi') || n.includes('roadmap') || n.includes('curriculum')) {
     return {
       description: "Syllabus, docs & misc",
-      color: "#4b5563",
-      lightColorBg: "bg-zinc-500/10 text-zinc-500 dark:text-zinc-400",
-      gradientBgClass: "from-zinc-500/10 dark:from-zinc-500/15 to-transparent",
-      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-zinc-500/20",
-      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(107,114,128,0.06)] hover:-translate-y-0.5",
-      iconColor: "text-zinc-550 dark:text-zinc-400",
-      progressRingColor: "stroke-zinc-500 dark:stroke-zinc-400",
+      color: hex,
+      ...stylePreset,
       icon: customIconComp || (
         <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -427,13 +340,8 @@ const getCategoryMetadata = (category: FolderType | string | null | undefined) =
   if (isLabCategory) {
     return {
       description: "Lab manuals & practical files",
-      color: "#f97316",
-      lightColorBg: "bg-orange-500/10 text-orange-500 dark:text-orange-400",
-      gradientBgClass: "from-orange-500/10 dark:from-orange-500/15 to-transparent",
-      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-orange-500/20",
-      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(249,115,22,0.06)] hover:-translate-y-0.5",
-      iconColor: "text-orange-500 dark:text-orange-400",
-      progressRingColor: "stroke-orange-500 dark:stroke-orange-400",
+      color: hex,
+      ...stylePreset,
       icon: customIconComp || (
         <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M6 3h12" />
@@ -444,13 +352,8 @@ const getCategoryMetadata = (category: FolderType | string | null | undefined) =
   }
   return {
     description: "Reference books & materials",
-    color: "#22c55e",
-    lightColorBg: "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400",
-    gradientBgClass: "from-emerald-500/10 dark:from-emerald-500/15 to-transparent",
-    borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-emerald-500/20",
-    glowShadowClass: "hover:shadow-[0_12px_30px_rgba(34,197,94,0.06)] hover:-translate-y-0.5",
-    iconColor: "text-emerald-500 dark:text-emerald-400",
-    progressRingColor: "stroke-emerald-500 dark:stroke-emerald-400",
+    color: hex,
+    ...stylePreset,
     icon: customIconComp || (
       <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2V3z" />
@@ -1040,10 +943,10 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     // Ensure baseline standard categories exist if not present
     const activeSubId = activeSubject?.id || 'default-sub';
     const DEFAULT_CAT_DEFS: FolderType[] = [
-      { id: `default-lectures-${activeSubId}`, name: 'Lectures', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'Video', color: '#ef4444' },
-      { id: `default-notes-${activeSubId}`, name: 'Notes', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'FileText', color: '#3b82f6' },
-      { id: `default-pyqs-${activeSubId}`, name: 'PYQs', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'HelpCircle', color: '#a855f7' },
-      { id: `default-syllabus-${activeSubId}`, name: 'Syllabus', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'Calendar', color: '#4b5563' }
+      { id: `default-lectures-${activeSubId}`, name: 'Lectures', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'Video', color: theme.rawColor },
+      { id: `default-notes-${activeSubId}`, name: 'Notes', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'FileText', color: theme.rawColor },
+      { id: `default-pyqs-${activeSubId}`, name: 'PYQs', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'HelpCircle', color: theme.rawColor },
+      { id: `default-syllabus-${activeSubId}`, name: 'Syllabus', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'Calendar', color: theme.rawColor }
     ];
 
     DEFAULT_CAT_DEFS.forEach(defCat => {
@@ -3425,7 +3328,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
   // 2. Files Tab Category Folder opened view (replaces subject banner and tabs with category details)
   else if (activeTab === 'files' && activeCategoryFolder) {
-    const catMeta = getCategoryMetadata(activeCategoryFolder);
+    const catMeta = getCategoryMetadata(activeCategoryFolder, theme.rawColor);
     const catFilesCount = categoryFiles.length;
     
     mainContent = (
@@ -3965,7 +3868,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     })
                     .map((cat) => {
                       const filesInCat = subjectFiles.filter(f => isFileTypeMatchingCategory(f.type, cat.name));
-                      const meta = getCategoryMetadata(cat);
+                      const meta = getCategoryMetadata(cat, theme.rawColor);
                       
                       const progressList = userProgressList || [];
                       const totalPercent = filesInCat.reduce((sum, file) => {

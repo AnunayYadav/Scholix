@@ -35,7 +35,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 import VerifiedBadge from './VerifiedBadge.tsx';
-import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft, Plus, ArrowUp, ArrowDown, Pencil, Trash2 } from 'lucide-react';
+import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft, Plus, ArrowUp, ArrowDown, Pencil, Trash2, Archive } from 'lucide-react';
 import { getProgramCurriculum, findSubjectMetadata } from '../data/curriculumData.ts';
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
 
@@ -1513,12 +1513,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   spellCheck="false"
                   className="w-full pl-10 pr-4 h-10 bg-zinc-100 dark:bg-[#141416] hover:bg-zinc-200/70 dark:hover:bg-[#1a1a1d] rounded-full text-[11px] sm:text-xs font-semibold outline-none border-none transition-colors text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500"
                 />
-              </div>
-
-              {/* Right Side: Actions */}
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              </div>              {/* Right Side: Actions */}
+              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
                 {userProfile?.is_admin && (
-                  <button onClick={toggleAdminView} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all border-none shrink-0 cursor-pointer ${isAdminView ? 'bg-orange-500 text-white shadow-md' : 'bg-zinc-100 dark:bg-[#141416] text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-[#1a1a1d]'}`} title="Review Hub">
+                  <button onClick={toggleAdminView} className={`w-10 h-10 min-h-[40px] max-h-10 rounded-full flex items-center justify-center transition-all border-none shrink-0 cursor-pointer ${isAdminView ? 'bg-orange-500 text-white shadow-md' : 'bg-zinc-100 dark:bg-[#141416] text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-[#1a1a1d]'}`} title="Review Hub">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                   </button>
                 )}
@@ -1534,9 +1532,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     navigateTo(null, null, null); 
                     setIsAdminView(false); 
                   }} 
-                  className={`px-4 h-10 rounded-full flex items-center justify-center gap-1.5 transition-all text-xs font-bold border-none cursor-pointer flex-1 sm:flex-initial ${viewMode === 'my-uploads' ? 'bg-orange-500 text-white shadow-md' : 'bg-zinc-100 dark:bg-[#141416] text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-[#1a1a1d]'}`}
+                  className={`px-4 h-10 min-h-[40px] max-h-10 rounded-full flex items-center justify-center gap-1.5 transition-all text-xs font-bold border-none cursor-pointer shrink-0 ${viewMode === 'my-uploads' ? 'bg-orange-500 text-white shadow-md' : 'bg-zinc-100 dark:bg-[#141416] text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-[#1a1a1d]'}`}
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                  <Archive className="w-3.5 h-3.5" strokeWidth={2.5} />
                   Vault
                 </button>
 
@@ -1549,7 +1547,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     } 
                     fileInputRef.current?.click(); 
                   }} 
-                  className="px-5 h-10 bg-orange-500 hover:bg-orange-600 text-white rounded-full font-bold text-xs shadow-md border-none transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial cursor-pointer active:scale-95"
+                  className="px-4 h-10 min-h-[40px] max-h-10 bg-orange-500 hover:bg-orange-600 text-white rounded-full font-bold text-xs shadow-md border-none transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer active:scale-95"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="w-3.5 h-3.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                   Upload {pendingUploads.length > 0 && `(${pendingUploads.length})`}
@@ -2043,6 +2041,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                             selectedProgram={selectedProgram}
                                             userProfile={userProfile}
                                             fileCount={folderFileCounts[folder.id] || 0}
+                                            sectionName={group.name}
                                             onDragOver={() => setDraggingOverId(folder.id)}
                                             onDragLeave={() => setDraggingOverId(null)}
                                             onDrop={(e) => {
@@ -2968,102 +2967,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   );
 };
 
-const getSubjectTheme = (nameOrCode: string) => {
+const getSubjectTheme = (nameOrCode: string, sectionName?: string) => {
   const c = nameOrCode.toUpperCase().trim();
+  const sec = (sectionName || '').toUpperCase().trim();
   
-  // 1. Math / Calculus subjects
-  if (c.includes('MTH') || c.includes('MATH') || c.includes('CALCULUS') || c.includes('STATISTICS')) {
-    return {
-      text: 'text-emerald-500',
-      bg: 'bg-emerald-500',
-      lightBg: 'bg-emerald-500/10 dark:bg-emerald-500/10',
-      border: 'border-emerald-500/20',
-      gradient: 'from-emerald-500 to-teal-500',
-      icon: <Sigma className="w-5 h-5 text-white" strokeWidth={3} />,
-      rawColor: '#22c55e'
-    };
-  }
-
-  // 2. Coding / Programming / Development / Web labs
+  // 1. Languages / Communication / Soft Skills / Language Electives -> PINK (#ec4899)
   if (
-    c.includes('PROGRAMMING') || 
-    c.includes('PYTHON') || 
-    c.includes('CSE101') || 
-    c.includes('CSE326') || 
-    c.includes('INT108') || 
-    c.includes('JAVA') || 
-    c.includes('CPP') || 
-    c.includes('DEVELOPMENT') || 
-    c.includes('WEB')
-  ) {
-    return {
-      text: 'text-orange-500',
-      bg: 'bg-orange-500',
-      lightBg: 'bg-orange-500/10 dark:bg-orange-500/10',
-      border: 'border-orange-500/20',
-      gradient: 'from-orange-500 to-amber-500',
-      icon: <Code className="w-5 h-5 text-white" strokeWidth={3} />,
-      rawColor: '#ff7a00'
-    };
-  }
-
-  // 3. Electrical / Electronics / Hardware subjects
-  if (
-    c.includes('ECE') || 
-    c.includes('EEE') || 
-    c.includes('ELECTRICAL') || 
-    c.includes('ELECTRONICS') || 
-    c.includes('HARDWARE') || 
-    c.includes('DIGITAL ELECTRONICS')
-  ) {
-    return {
-      text: 'text-blue-500',
-      bg: 'bg-blue-500',
-      lightBg: 'bg-blue-500/10 dark:bg-blue-500/10',
-      border: 'border-blue-500/20',
-      gradient: 'from-blue-500 to-indigo-500',
-      icon: <Cpu className="w-5 h-5 text-white" strokeWidth={3} />,
-      rawColor: '#0ea5e9'
-    };
-  }
-
-  // 4. Other CSE Theory / Computing / Systems / Architecture
-  if (
-    c.includes('CSE') || 
-    c.includes('COMPUTING') || 
-    c.includes('ORIENTATION') || 
-    c.includes('INT') || 
-    c.includes('CAP') ||
-    c.includes('OPERATING') ||
-    c.includes('NETWORKS') ||
-    c.includes('SECURITY')
-  ) {
-    return {
-      text: 'text-teal-500',
-      bg: 'bg-teal-500',
-      lightBg: 'bg-teal-500/10 dark:bg-teal-500/10',
-      border: 'border-teal-500/20',
-      gradient: 'from-teal-500 to-emerald-500',
-      icon: <Monitor className="w-5 h-5 text-white" strokeWidth={3} />,
-      rawColor: '#14b8a6'
-    };
-  }
-
-  // 5. Database / DBMS subjects
-  if (c.includes('DATABASE') || c.includes('DBMS') || c.includes('SQL')) {
-    return {
-      text: 'text-purple-500',
-      bg: 'bg-purple-500',
-      lightBg: 'bg-purple-500/10 dark:bg-purple-500/10',
-      border: 'border-purple-500/20',
-      gradient: 'from-purple-500 to-pink-500',
-      icon: <Database className="w-5 h-5 text-white" strokeWidth={3} />,
-      rawColor: '#a855f7'
-    };
-  }
-
-  // 6. Languages / Communication / Soft Skills
-  if (
+    sec.includes('LANG') ||
     c.includes('FRN') || 
     c.includes('GER') || 
     c.includes('JAP') || 
@@ -3072,9 +2982,8 @@ const getSubjectTheme = (nameOrCode: string) => {
     c.includes('GERMAN') || 
     c.includes('JAPANESE') || 
     c.includes('SPANISH') || 
-    c.includes('LANG') ||
+    c.includes('LANGUAGE') ||
     c.includes('COMMUNICATION') ||
-    c.includes('COMM') ||
     c.includes('PEL')
   ) {
     return {
@@ -3088,15 +2997,44 @@ const getSubjectTheme = (nameOrCode: string) => {
     };
   }
 
-  // 7. General Fallback
+  // 2. Core Electives / Elective Baskets -> PURPLE (#a855f7)
+  if (sec.includes('ELECTIVE')) {
+    return {
+      text: 'text-purple-500',
+      bg: 'bg-purple-500',
+      lightBg: 'bg-purple-500/10 dark:bg-purple-500/10',
+      border: 'border-purple-500/20',
+      gradient: 'from-purple-500 to-indigo-500',
+      icon: <Code className="w-5 h-5 text-white" strokeWidth={3} />,
+      rawColor: '#a855f7'
+    };
+  }
+
+  // 3. Dedicated Project / Lab Basket -> AMBER / ORANGE (#ff7a00)
+  if (sec.includes('PROJECT') || sec.includes('COMMUNITY') || sec.includes('LAB')) {
+    return {
+      text: 'text-amber-500',
+      bg: 'bg-amber-500',
+      lightBg: 'bg-amber-500/10 dark:bg-amber-500/10',
+      border: 'border-amber-500/20',
+      gradient: 'from-amber-500 to-orange-500',
+      icon: <Globe className="w-5 h-5 text-white" strokeWidth={3} />,
+      rawColor: '#ff7a00'
+    };
+  }
+
+  // 4. Core Courses, Other & Custom Courses -> CYAN / TEAL (#06b6d4)
+  const isMath = c.includes('MTH') || c.includes('MATH') || c.includes('CALCULUS') || c.includes('STATISTICS');
+  const isCode = c.includes('PROGRAMMING') || c.includes('PYTHON') || c.includes('INT') || c.includes('CSE');
+  
   return {
-    text: 'text-indigo-500',
-    bg: 'bg-indigo-500',
-    lightBg: 'bg-indigo-500/10 dark:bg-indigo-500/10',
-    border: 'border-indigo-500/20',
-    gradient: 'from-indigo-500 to-purple-500',
-    icon: <Globe className="w-5 h-5 text-white" strokeWidth={3} />,
-    rawColor: '#6366f1'
+    text: 'text-cyan-500',
+    bg: 'bg-cyan-500',
+    lightBg: 'bg-cyan-500/10 dark:bg-cyan-500/10',
+    border: 'border-cyan-500/20',
+    gradient: 'from-cyan-500 to-blue-500',
+    icon: isMath ? <Sigma className="w-5 h-5 text-white" strokeWidth={3} /> : isCode ? <Code className="w-5 h-5 text-white" strokeWidth={3} /> : <Monitor className="w-5 h-5 text-white" strokeWidth={3} />,
+    rawColor: '#06b6d4'
   };
 };
 
@@ -3114,7 +3052,8 @@ const FolderCard: React.FC<{
   isDraggingOver: boolean;
   subjectsCount?: number;
   searchMatchText?: string | null;
-}> = ({ folder, selectedProgram, userProfile, fileCount, onDragOver, onDragLeave, onDrop, toPath, onRename, onDelete, isDraggingOver, subjectsCount, searchMatchText }) => {
+  sectionName?: string;
+}> = ({ folder, selectedProgram, userProfile, fileCount, onDragOver, onDragLeave, onDrop, toPath, onRename, onDelete, isDraggingOver, subjectsCount, searchMatchText, sectionName }) => {
   const isAdmin = userProfile?.is_admin || false;
   const isVirtual = folder.id.startsWith('v-');
 
@@ -3197,9 +3136,9 @@ const FolderCard: React.FC<{
       const meta = findSubjectMetadata(selectedProgram, folder.name);
       subjectName = meta?.title || folder.name;
     }
-    const defaultTheme = getSubjectTheme(folder.name);
+    const defaultTheme = getSubjectTheme(folder.name, sectionName);
     const rawTheme = {
-      rawColor: (folder.color && folder.color !== '#ff7a00') ? folder.color : defaultTheme.rawColor,
+      rawColor: defaultTheme.rawColor,
       icon: (folder.icon_name && folder.icon_name !== 'Folder') ? (
         <FolderIcon type="subject" name={folder.name} size="w-5 h-5" iconName={folder.icon_name} color="#ffffff" />
       ) : (
