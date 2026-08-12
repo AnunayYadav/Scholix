@@ -1641,6 +1641,24 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               }}
               searchQuery={searchQuery}
               onRefresh={() => fetchFromSource(false)}
+              isAdmin={userProfile?.is_admin}
+              onAddFolder={() => {
+                setNewFolderName('');
+                setFolderIcon('Folder');
+                setFolderColor('#ff7a00');
+                setShowFolderModal(true);
+              }}
+              onEditFolder={(catFolder, e) => {
+                e.stopPropagation();
+                setFolderToManage(catFolder);
+                setNewFolderName(catFolder.name);
+                setFolderIcon(catFolder.icon_name || 'Folder');
+                setFolderColor(catFolder.color || '#ff7a00');
+                setShowRenameModal(true);
+              }}
+              onDeleteFolder={(catFolder, e) => {
+                handleDeleteFolder(catFolder, e);
+              }}
             />
           ) : activeSubject && searchQuery.trim() !== '' ? (
             <div className="space-y-4 animate-fade-in">

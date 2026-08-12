@@ -8,7 +8,7 @@ import {
   Terminal, Globe, Book, Video, FlaskConical, ClipboardList, Scroll, Folder, MessageCircle, Pin,
   Languages, Bell, BellOff, MoreHorizontal, Cpu, Monitor, Sigma, ChevronDown, ChevronRight, Compass, Landmark,
   Link, Image, Smile, Bold, Italic, Strikethrough, List, ListOrdered, AlertTriangle, Quote, BarChart2,
-  Share2, ArrowBigUp, ArrowBigDown
+  Share2, ArrowBigUp, ArrowBigDown, Pencil, Trash2
 } from 'lucide-react';
 import { Folder as FolderType, LibraryFile, UserProfile } from '../types';
 import {
@@ -54,6 +54,10 @@ interface SubjectCommunityProps {
   onBack: () => void;
   searchQuery?: string;
   onRefresh?: () => void;
+  isAdmin?: boolean;
+  onAddFolder?: () => void;
+  onEditFolder?: (folder: FolderType, e: React.MouseEvent) => void;
+  onDeleteFolder?: (folder: FolderType, e: React.MouseEvent) => void;
 }
 
 const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: string) => {
@@ -226,8 +230,107 @@ const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: 
   };
 };
 
-const getCategoryMetadata = (catName: string) => {
+const getCategoryMetadata = (category: FolderType | string) => {
+  const catName = typeof category === 'string' ? category : category.name;
+  const folderObj = typeof category === 'string' ? null : category;
   const n = catName.toLowerCase().trim();
+
+  // Resolve custom icon if set on folder
+  let customIconComp: React.ReactElement | null = null;
+  if (folderObj?.icon_name) {
+    const IconMap: { [key: string]: React.ReactElement } = {
+      Folder: <Folder className="w-5.5 h-5.5 text-current shrink-0" strokeWidth={2.5} />,
+      Landmark: <Landmark className="w-5.5 h-5.5 text-current shrink-0" strokeWidth={2.5} />,
+      Sigma: <Sigma className="w-5.5 h-5.5 text-current shrink-0" strokeWidth={2.5} />,
+      Code: <Code className="w-5.5 h-5.5 text-current shrink-0" strokeWidth={2.5} />,
+      Cpu: <Cpu className="w-5.5 h-5.5 text-current shrink-0" strokeWidth={2.5} />,
+      Monitor: <Monitor className="w-5.5 h-5.5 text-current shrink-0" strokeWidth={2.5} />,
+      Globe: <Globe className="w-5.5 h-5.5 text-current shrink-0" strokeWidth={2.5} />,
+      Database: <Database className="w-5.5 h-5.5 text-current shrink-0" strokeWidth={2.5} />,
+      Terminal: <Terminal className="w-5.5 h-5.5 text-current shrink-0" strokeWidth={2.5} />,
+      BookOpen: <BookOpen className="w-5.5 h-5.5 text-current shrink-0" strokeWidth={2.5} />,
+      HelpCircle: <HelpCircle className="w-5.5 h-5.5 text-current shrink-0" strokeWidth={2.5} />,
+      Video: <Video className="w-5.5 h-5.5 text-current shrink-0" strokeWidth={2.5} />
+    };
+    if (IconMap[folderObj.icon_name]) {
+      customIconComp = IconMap[folderObj.icon_name];
+    }
+  }
+
+  // If a custom color or icon_name was explicitly set on the folder (e.g. from create/edit folder modal)
+  if (folderObj && (folderObj.color || folderObj.icon_name)) {
+    const hex = folderObj.color || "#ff7a00";
+    const hexMap: { [key: string]: any } = {
+      '#ff7a00': {
+        lightColorBg: "bg-orange-500/10 text-orange-500 dark:text-orange-400",
+        gradientBgClass: "from-orange-500/10 dark:from-orange-500/15 to-transparent",
+        borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-orange-500/20",
+        glowShadowClass: "hover:shadow-[0_12px_30px_rgba(255,122,0,0.06)] hover:-translate-y-0.5",
+        iconColor: "text-orange-500 dark:text-orange-400",
+        progressRingColor: "stroke-orange-500 dark:stroke-orange-400"
+      },
+      '#22c55e': {
+        lightColorBg: "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400",
+        gradientBgClass: "from-emerald-500/10 dark:from-emerald-500/15 to-transparent",
+        borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-emerald-500/20",
+        glowShadowClass: "hover:shadow-[0_12px_30px_rgba(34,197,94,0.06)] hover:-translate-y-0.5",
+        iconColor: "text-emerald-500 dark:text-emerald-400",
+        progressRingColor: "stroke-emerald-500 dark:stroke-emerald-400"
+      },
+      '#0ea5e9': {
+        lightColorBg: "bg-sky-500/10 text-sky-500 dark:text-sky-400",
+        gradientBgClass: "from-sky-500/10 dark:from-sky-500/15 to-transparent",
+        borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-sky-500/20",
+        glowShadowClass: "hover:shadow-[0_12px_30px_rgba(14,165,233,0.06)] hover:-translate-y-0.5",
+        iconColor: "text-sky-500 dark:text-sky-400",
+        progressRingColor: "stroke-sky-500 dark:stroke-sky-400"
+      },
+      '#f43f5e': {
+        lightColorBg: "bg-rose-500/10 text-rose-500 dark:text-rose-400",
+        gradientBgClass: "from-rose-500/10 dark:from-rose-500/15 to-transparent",
+        borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-rose-500/20",
+        glowShadowClass: "hover:shadow-[0_12px_30px_rgba(244,63,94,0.06)] hover:-translate-y-0.5",
+        iconColor: "text-rose-500 dark:text-rose-400",
+        progressRingColor: "stroke-rose-500 dark:stroke-rose-400"
+      },
+      '#a855f7': {
+        lightColorBg: "bg-purple-500/10 text-purple-500 dark:text-purple-400",
+        gradientBgClass: "from-purple-500/10 dark:from-purple-500/15 to-transparent",
+        borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-purple-500/20",
+        glowShadowClass: "hover:shadow-[0_12px_30px_rgba(168,85,247,0.06)] hover:-translate-y-0.5",
+        iconColor: "text-purple-500 dark:text-purple-400",
+        progressRingColor: "stroke-purple-500 dark:stroke-purple-400"
+      },
+      '#10b981': {
+        lightColorBg: "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400",
+        gradientBgClass: "from-emerald-500/10 dark:from-emerald-500/15 to-transparent",
+        borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-emerald-500/20",
+        glowShadowClass: "hover:shadow-[0_12px_30px_rgba(16,185,129,0.06)] hover:-translate-y-0.5",
+        iconColor: "text-emerald-500 dark:text-emerald-400",
+        progressRingColor: "stroke-emerald-500 dark:stroke-emerald-400"
+      },
+      '#6366f1': {
+        lightColorBg: "bg-indigo-500/10 text-indigo-500 dark:text-indigo-400",
+        gradientBgClass: "from-indigo-500/10 dark:from-indigo-500/15 to-transparent",
+        borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-indigo-500/20",
+        glowShadowClass: "hover:shadow-[0_12px_30px_rgba(99,102,241,0.06)] hover:-translate-y-0.5",
+        iconColor: "text-indigo-500 dark:text-indigo-400",
+        progressRingColor: "stroke-indigo-500 dark:stroke-indigo-400"
+      }
+    };
+    const stylePreset = hexMap[hex] || hexMap['#ff7a00'];
+    return {
+      description: folderObj.description || "Custom study resources & files",
+      color: hex,
+      ...stylePreset,
+      icon: customIconComp || (
+        <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+        </svg>
+      )
+    };
+  }
+
   if (n.includes('note')) {
     return {
       description: "All handwritten & digital notes",
@@ -238,7 +341,7 @@ const getCategoryMetadata = (catName: string) => {
       glowShadowClass: "hover:shadow-[0_12px_30px_rgba(59,130,246,0.06)] hover:-translate-y-0.5",
       iconColor: "text-blue-500 dark:text-blue-400",
       progressRingColor: "stroke-blue-500 dark:stroke-blue-400",
-      icon: (
+      icon: customIconComp || (
         <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
           <polyline points="14 2 14 8 20 8" />
@@ -259,7 +362,7 @@ const getCategoryMetadata = (catName: string) => {
       glowShadowClass: "hover:shadow-[0_12px_30px_rgba(168,85,247,0.06)] hover:-translate-y-0.5",
       iconColor: "text-purple-500 dark:text-purple-400",
       progressRingColor: "stroke-purple-500 dark:stroke-purple-400",
-      icon: (
+      icon: customIconComp || (
         <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
           <polyline points="14 2 14 8 20 8" />
@@ -278,7 +381,7 @@ const getCategoryMetadata = (catName: string) => {
       glowShadowClass: "hover:shadow-[0_12px_30px_rgba(239,68,68,0.06)] hover:-translate-y-0.5",
       iconColor: "text-red-500 dark:text-red-400",
       progressRingColor: "stroke-red-500 dark:stroke-red-400",
-      icon: (
+      icon: customIconComp || (
         <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M23 7l-7 5 7 5V7z" />
           <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
@@ -296,7 +399,7 @@ const getCategoryMetadata = (catName: string) => {
       glowShadowClass: "hover:shadow-[0_12px_30px_rgba(107,114,128,0.06)] hover:-translate-y-0.5",
       iconColor: "text-zinc-550 dark:text-zinc-400",
       progressRingColor: "stroke-zinc-500 dark:stroke-zinc-400",
-      icon: (
+      icon: customIconComp || (
         <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
           <polyline points="14 2 14 8 20 8" />
@@ -317,7 +420,7 @@ const getCategoryMetadata = (catName: string) => {
       glowShadowClass: "hover:shadow-[0_12px_30px_rgba(249,115,22,0.06)] hover:-translate-y-0.5",
       iconColor: "text-orange-500 dark:text-orange-400",
       progressRingColor: "stroke-orange-500 dark:stroke-orange-400",
-      icon: (
+      icon: customIconComp || (
         <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M6 3h12" />
           <path d="M9 3v8L4.3 19.3A2 2 0 0 0 6 22h12a2 2 0 0 0 1.7-2.7L15 11V3" />
@@ -334,7 +437,7 @@ const getCategoryMetadata = (catName: string) => {
     glowShadowClass: "hover:shadow-[0_12px_30px_rgba(34,197,94,0.06)] hover:-translate-y-0.5",
     iconColor: "text-emerald-500 dark:text-emerald-400",
     progressRingColor: "stroke-emerald-500 dark:stroke-emerald-400",
-    icon: (
+    icon: customIconComp || (
       <svg viewBox="0 0 24 24" fill="none" className="w-5.5 h-5.5 text-current shrink-0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2V3z" />
         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7V3z" />
@@ -865,7 +968,11 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   onUploadClick,
   onBack,
   searchQuery,
-  onRefresh
+  onRefresh,
+  isAdmin,
+  onAddFolder,
+  onEditFolder,
+  onDeleteFolder
 }) => {
   const subjectCodeMatch = activeSubject.name.match(/^([A-Za-z]+\d{3})/);
   const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : activeSubject.name.split(':')[0].trim();
@@ -3219,7 +3326,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
   // 2. Files Tab Category Folder opened view (replaces subject banner and tabs with category details)
   else if (activeTab === 'files' && activeCategoryFolder) {
-    const catMeta = getCategoryMetadata(activeCategoryFolder.name);
+    const catMeta = getCategoryMetadata(activeCategoryFolder);
     const catFilesCount = categoryFiles.length;
     
     mainContent = (
@@ -3737,7 +3844,19 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               )}
 
               <div className="space-y-4 animate-fade-in">
-                <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5"><Folder className="w-3.5 h-3.5" /> Study Sections</div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5"><Folder className="w-3.5 h-3.5" /> Study Sections</div>
+                  {(userProfile?.is_admin || isAdmin) && onAddFolder && (
+                    <button
+                      onClick={onAddFolder}
+                      style={{ color: theme.rawColor }}
+                      className="border-none bg-transparent hover:opacity-80 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold p-0 active:scale-95 shrink-0"
+                    >
+                      <Plus className="w-4 h-4" strokeWidth={2.5} style={{ color: theme.rawColor }} />
+                      <span>Create</span>
+                    </button>
+                  )}
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {categories
                     .filter(cat => {
@@ -3748,7 +3867,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     })
                     .map((cat) => {
                       const filesInCat = subjectFiles.filter(f => isFileTypeMatchingCategory(f.type, cat.name));
-                      const meta = getCategoryMetadata(cat.name);
+                      const meta = getCategoryMetadata(cat);
                       
                       const progressList = userProgressList || [];
                       const totalPercent = filesInCat.reduce((sum, file) => {
@@ -3807,8 +3926,31 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                                   </p>
                                 </div>
 
-                                {/* circular progress ring */}
-                                <div className="flex items-center gap-1 shrink-0">
+                                {/* circular progress ring & admin action buttons */}
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  {(userProfile?.is_admin || isAdmin) && (onEditFolder || onDeleteFolder) && (
+                                    <div className="flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity">
+                                      {onEditFolder && (
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); onEditFolder(cat, e); }}
+                                          title="Edit / Rename Folder"
+                                          className="w-6 h-6 rounded-lg bg-zinc-100 hover:bg-orange-500 hover:text-white dark:bg-white/10 dark:hover:bg-orange-500 dark:hover:text-white text-zinc-600 dark:text-zinc-300 flex items-center justify-center transition-all border-none cursor-pointer"
+                                        >
+                                          <Pencil size={11} />
+                                        </button>
+                                      )}
+                                      {onDeleteFolder && (
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); onDeleteFolder(cat, e); }}
+                                          title="Delete Folder"
+                                          className="w-6 h-6 rounded-lg bg-zinc-100 hover:bg-rose-500 hover:text-white dark:bg-white/10 dark:hover:bg-rose-500 dark:hover:text-white text-zinc-600 dark:text-zinc-300 flex items-center justify-center transition-all border-none cursor-pointer"
+                                        >
+                                          <Trash2 size={11} />
+                                        </button>
+                                      )}
+                                    </div>
+                                  )}
+
                                   <div className="relative w-9 h-9 flex items-center justify-center">
                                     <svg className="w-9 h-9 -rotate-90">
                                       <circle cx="18" cy="18" r="14" className="stroke-zinc-100 dark:stroke-white/5" strokeWidth="2.5" fill="transparent" />
