@@ -3186,16 +3186,10 @@ const FolderCard: React.FC<{
                   {searchMatchText}
                 </span>
               ) : (
-                <>
-                  <span className="whitespace-nowrap shrink-0">{creditsText}</span>
-                  <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-                  <span className="whitespace-nowrap shrink-0">{ltpText}</span>
-                  <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-                  <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
-                    <FileText className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
-                    {fileCount} Resources
-                  </span>
-                </>
+                <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
+                  <FileText className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
+                  {fileCount} Resources
+                </span>
               )}
             </div>
           </div>

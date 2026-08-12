@@ -20,6 +20,7 @@ import { askGeminiText } from '../services/geminiService';
 import FileDetailPage from './FileDetailPage';
 import { FileIcon } from './FileIcon';
 import { showToast } from './Toast';
+import { findSubjectMetadata } from '../data/curriculumData';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
 
@@ -922,6 +923,13 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const subjectCodeMatch = activeSubject.name.match(/^([A-Za-z]+\d{3})/);
   const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : activeSubject.name.split(':')[0].trim();
   const subjectName = activeSubject.name.split(':')[1]?.trim() || activeSubject.name;
+
+  const subjectMetadata = useMemo(() => {
+    return findSubjectMetadata(selectedProgram, activeSubject.name);
+  }, [selectedProgram, activeSubject.name]);
+
+  const creditsText = subjectMetadata ? `${subjectMetadata.credits} Credits` : "4 Credits";
+  const ltpText = subjectMetadata ? `L-T-P: ${subjectMetadata.l}-${subjectMetadata.t}-${subjectMetadata.p}` : "L-T-P: 3-0-2";
 
   const theme = useMemo(() => getSubjectTheme(activeSubject.name, activeSubject.color, activeSubject.icon_name), [activeSubject.name, activeSubject.color, activeSubject.icon_name]);
 
@@ -3709,6 +3717,18 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   {subjectCode}
                 </span>
                 <span className="text-[8px] sm:text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">
+                  {creditsText}
+                </span>
+                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none text-[8px] sm:text-[10px]">•</span>
+                <span className="text-[8px] sm:text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">
+                  {ltpText}
+                </span>
+                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none text-[8px] sm:text-[10px]">•</span>
+                <span className="inline-flex items-center gap-1.5 text-[8px] sm:text-[10px] font-bold uppercase tracking-wide" style={{ color: theme.rawColor }}>
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: theme.rawColor }}></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: theme.rawColor }}></span>
+                  </span>
                   {onlineCount} studying now
                 </span>
               </div>
