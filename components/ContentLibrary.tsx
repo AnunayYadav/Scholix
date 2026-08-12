@@ -690,6 +690,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const targetUploadCategoryRef = useRef<string>('');
   const [draggingOverId, setDraggingOverId] = useState<string | null>(null);
 
   const [activePdfFile, setActivePdfFile] = useState<LibraryFile | null>(null);
@@ -706,16 +707,55 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     return () => { document.body.style.overflow = 'unset'; };
   }, [showFolderModal, showRenameModal, showDetailsModal, showEditModal, showUploadModal]);
 
+  const autoDetectCategory = (filename: string): string => {
+    if (typeof filename !== 'string') return '';
+    const f = filename.toLowerCase();
+    if (
+      f.includes('question paper') || f.includes('pyq') || f.includes('mid term') ||
+      f.includes('end term') || f.includes('est') || f.includes('mst') ||
+      f.includes('st1') || f.includes('st2') || f.includes('endterm') ||
+      f.includes('midterm') || f.includes('paper') || f.includes('quiz') || f.includes('exam')
+    ) {
+      return 'PYQs';
+    }
+    if (
+      f.includes('lecture') || f.includes('slide') || f.includes('video') ||
+      f.includes('recording') || f.includes('ppt') || f.includes('presentation')
+    ) {
+      return 'Lectures';
+    }
+    if (
+      f.includes('note') || f.includes('handwritten') || f.includes('module') ||
+      f.includes('unit') || f.includes('chapter') || f.includes('tutorial')
+    ) {
+      return 'Notes';
+    }
+    if (
+      f.includes('syllabus') || f.includes('curriculum') || f.includes('roadmap') || f.includes('outline')
+    ) {
+      return 'Syllabus';
+    }
+    return '';
+  };
+
   const handleFilesSelected = useCallback((files: FileList | File[], forceProgram?: string, forceSemester?: string, forceSubject?: string, forceType?: string) => {
-    const newUploads = Array.from(files).map(f => ({
-      file: f,
-      name: f.name.replace(/\.[^/.]+$/, ""),
-      description: '',
-      semester: forceSemester || activeSemester?.name || '',
-      subject: forceSubject || activeSubject?.name || '',
-      type: forceType || activeCategory?.name || '',
-      program: forceProgram || selectedProgram
-    }));
+    const rawCategory = (typeof forceType === 'string' ? forceType : '') || 
+                        (typeof targetUploadCategoryRef.current === 'string' ? targetUploadCategoryRef.current : '') || 
+                        (typeof activeCategory?.name === 'string' ? activeCategory.name : '');
+    
+    const newUploads = Array.from(files).map(f => {
+      const detected = rawCategory || autoDetectCategory(f.name);
+      const finalType = typeof detected === 'string' ? detected : '';
+      return {
+        file: f,
+        name: f.name.replace(/\.[^/.]+$/, ""),
+        description: '',
+        semester: forceSemester || activeSemester?.name || '',
+        subject: forceSubject || activeSubject?.name || '',
+        type: finalType,
+        program: forceProgram || selectedProgram
+      };
+    });
 
     setPendingUploads(prev => [...prev, ...newUploads]);
     if (pendingUploads.length === 0) {
@@ -1692,7 +1732,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               allFiles={allFiles}
               userProgressList={userProgressList}
               onFileAccess={handleFileAccess}
-              onUploadClick={() => fileInputRef.current?.click()}
+              onUploadClick={(catName) => {
+                targetUploadCategoryRef.current = (typeof catName === 'string') ? catName : '';
+                fileInputRef.current?.click();
+              }}
               onBack={() => {
                 navigate(`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester?.name || '', 'semester')}`);
               }}
@@ -2946,7 +2989,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         )
       }
 
-      <input type="file" ref={fileInputRef} className="hidden" multiple onChange={e => { const files = e.target.files; if (files && files.length > 0) handleFilesSelected(files); }} />
+      <input type="file" ref={fileInputRef} className="hidden" multiple onChange={e => { const files = e.target.files; if (files && files.length > 0) { handleFilesSelected(files); targetUploadCategoryRef.current = ''; } }} />
 
       {
         activePdfFile && (

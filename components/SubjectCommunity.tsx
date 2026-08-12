@@ -51,7 +51,7 @@ interface SubjectCommunityProps {
   allFiles: LibraryFile[];
   userProgressList?: { document_id: string; progress_percentage: number; last_read_page: number }[];
   onFileAccess: (file: LibraryFile) => void;
-  onUploadClick: () => void;
+  onUploadClick: (categoryName?: string) => void;
   onBack: () => void;
   searchQuery?: string;
   onRefresh?: () => void;
@@ -3380,7 +3380,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
           <div className="flex items-center gap-1 shrink-0">
             {userProfile?.is_admin && (
               <button
-                onClick={onUploadClick}
+                onClick={() => onUploadClick?.(activeCategoryFolder?.name)}
                 style={{ backgroundColor: theme.rawColor }}
                 className="px-3.5 py-2 text-white rounded-xl text-xs font-bold hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all border-none cursor-pointer flex items-center gap-1.5"
               >
@@ -3400,7 +3400,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               </div>
               {userProfile?.is_admin && (
                 <button
-                  onClick={onUploadClick}
+                  onClick={() => onUploadClick?.(activeCategoryFolder?.name)}
                   className="px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold hover:scale-105 active:scale-95 transition-all border-none cursor-pointer inline-flex items-center gap-1.5"
                   style={{ backgroundColor: theme.rawColor }}
                 >
@@ -4129,7 +4129,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                 </div>
                 {userProfile?.is_admin && (
                   <button
-                    onClick={onUploadClick}
+                    onClick={() => onUploadClick?.(activeCategoryFolder?.name)}
                     style={{ backgroundColor: theme.rawColor }}
                     className="px-3.5 py-1.5 text-white rounded-xl text-xs font-bold hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all border-none cursor-pointer flex items-center gap-1.5"
                   >
@@ -4149,7 +4149,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       </div>
                       {userProfile?.is_admin && (
                         <button
-                          onClick={onUploadClick}
+                          onClick={() => onUploadClick?.(activeCategoryFolder?.name)}
                           className="px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold hover:scale-105 active:scale-95 transition-all border-none cursor-pointer inline-flex items-center gap-1.5"
                         >
                           <Plus size={14} /> Upload File
