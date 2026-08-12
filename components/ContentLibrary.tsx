@@ -36,7 +36,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 import VerifiedBadge from './VerifiedBadge.tsx';
 import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft } from 'lucide-react';
-import { BTECH_CSE_2025, findSubjectMetadata } from '../data/curriculumData.ts';
+import { getProgramCurriculum, findSubjectMetadata } from '../data/curriculumData.ts';
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
 
 const matchFolderSlug = (folderName: string, paramSlug: string): boolean => {
@@ -700,101 +700,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     }
   }, [activeSemester, activeSubject, activeCategory, selectedProgram, activePdfFile]);
 
-  // Helper function to dynamically merge curriculum with DB folders
+  // Derived folders list reading directly from Supabase DB
   const getMergedFolders = useCallback((prog: string, activeSub: Folder | null) => {
-    const isBtech = (prog || '').toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
-    if (!isBtech) {
-      return folders;
-    }
-
-    const virtualFolders: Folder[] = [];
-    const curriculum = BTECH_CSE_2025;
-
-    // 1. Add virtual semesters (Terms)
-    curriculum.terms.forEach(term => {
-      virtualFolders.push({
-        id: `v-sem-${term.termNumber}`,
-        name: term.termName,
-        type: 'semester',
-        parent_id: null,
-        program: prog,
-        display_order: term.termNumber
-      });
-
-      // 2. Add virtual subjects (Core and Electives flats under Term)
-      let subjectIndex = 0;
-      term.coreSubjects.forEach((subj) => {
-        virtualFolders.push({
-          id: `v-sub-${term.termNumber}-${subj.code.toLowerCase()}`,
-          name: `${subj.code}: ${subj.title}`,
-          type: 'subject',
-          parent_id: `v-sem-${term.termNumber}`,
-          program: prog,
-          display_order: subjectIndex++
-        });
-      });
-
-      term.electiveBaskets.forEach((basket) => {
-        basket.subjects.forEach((subj) => {
-          virtualFolders.push({
-            id: `v-sub-${term.termNumber}-${subj.code.toLowerCase()}`,
-            name: `${subj.code}: ${subj.title}`,
-            type: 'subject',
-            parent_id: `v-sem-${term.termNumber}`,
-            program: prog,
-            display_order: subjectIndex++
-          });
-        });
-      });
-    });
-
-    // 3. No virtual categories at deep level (only custom folders from DB)
-
-    // 4. Merge custom folders created in the database that don't duplicate virtual folders
-    const customFolders = folders.filter(dbF => {
-      if (dbF.type === 'semester') {
-        return !virtualFolders.some(v => v.type === 'semester' && matchSemesterName(v.name, dbF.name));
-      }
-      if (dbF.type === 'subject') {
-        const parentSem = folders.find(p => p.id === dbF.parent_id);
-        if (parentSem) {
-          const virtualParentSem = virtualFolders.find(v => v.type === 'semester' && matchSemesterName(v.name, parentSem.name));
-          if (virtualParentSem) {
-            return !virtualFolders.some(v => v.type === 'subject' && v.parent_id === virtualParentSem.id && (
-              v.name.toLowerCase() === dbF.name.toLowerCase() ||
-              v.name.split(':')[0].trim().toLowerCase() === dbF.name.split(':')[0].trim().toLowerCase()
-            ));
-          }
-        }
-      }
-
-      return true;
-    });
-
-    const mappedCustomFolders = customFolders.flatMap(dbF => {
-      if (dbF.parent_id) {
-        const dbParent = folders.find(p => p.id === dbF.parent_id);
-        if (dbParent) {
-          const matchingVirtuals = virtualFolders.filter(v => v.type === dbParent.type && (
-            (v.type === 'semester' && matchSemesterName(v.name, dbParent.name)) ||
-            (v.type === 'subject' && (
-              v.name.toLowerCase() === dbParent.name.toLowerCase() ||
-              v.name.split(':')[0].trim().toLowerCase() === dbParent.name.split(':')[0].trim().toLowerCase()
-            ))
-          ));
-          if (matchingVirtuals.length > 0) {
-            return matchingVirtuals.map((matchingVirtual, idx) => ({
-              ...dbF,
-              id: idx === 0 ? dbF.id : `${dbF.id}-dup-${idx}`,
-              parent_id: matchingVirtual.id
-            }));
-          }
-        }
-      }
-      return [dbF];
-    });
-
-    return [...virtualFolders, ...mappedCustomFolders];
+    return folders;
   }, [folders]);
 
   // Derived folders list merging virtualized BTech CSE curriculum schema
@@ -1837,8 +1745,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                               const meta = findSubjectMetadata(selectedProgram, f.name);
                               if (meta) {
                                 if (meta.type === 'CR') return 'Core Courses';
-                                const curriculum = BTECH_CSE_2025;
-                                const term = curriculum.terms.find(t => t.termName.toLowerCase() === activeSemester.name.toLowerCase());
+                                const curriculum = getProgramCurriculum(selectedProgram);
+                                const term = curriculum?.terms.find(t => t.termName.toLowerCase() === activeSemester.name.toLowerCase());
                                 if (term) {
                                   const basket = term.electiveBaskets.find(b => b.subjects.some(s => s.code === meta.code));
                                   if (basket) return basket.name;
@@ -2968,8 +2876,8 @@ const FolderCard: React.FC<{
 
   if (folder.type === 'semester') {
     const semNum = folder.name.match(/\d+/)?.[0] || '1';
-    const semIdx = (parseInt(semNum) - 1) % semesterColors.length;
-    const semColor = folder.color || semesterColors[semIdx];
+    const semIdx = Math.max(0, (parseInt(semNum) - 1)) % semesterColors.length;
+    const semColor = (folder.color && folder.color !== '#ff7a00') ? folder.color : semesterColors[semIdx];
     
     let subtitle = "Upcoming";
     if (semNum === '1') subtitle = "Foundation";
@@ -2984,8 +2892,18 @@ const FolderCard: React.FC<{
         onDragLeave={onDragLeave}
         onDrop={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDrop(e); }}
         onClick={(e) => { if (isDragging) e.preventDefault(); }}
-        className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99]"
+        className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden"
       >
+        {isAdmin && !isVirtual && (
+          <div className="absolute top-2.5 right-2.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRename(); }} className="p-1 bg-white dark:bg-[#0a0a0a] rounded-lg text-orange-500 hover:bg-orange-50 transition-colors shadow-sm border border-zinc-100 dark:border-white/5" title="Edit Semester">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+            </button>
+            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(e); }} className="p-1 bg-white dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red-50 transition-colors shadow-sm border border-zinc-100 dark:border-white/5" title="Delete Semester">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
+            </button>
+          </div>
+        )}
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: semColor }}>
             <FolderIcon type="semester" name={folder.name} size="w-5 h-5 text-white" iconName={folder.icon_name} color="#ffffff" />
@@ -3015,13 +2933,18 @@ const FolderCard: React.FC<{
   if (folder.type === 'subject') {
     const subjectCodeMatch = folder.name.match(/^([A-Za-z]+\d{3})/);
     const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : folder.name.split(':')[0].trim();
-    const subjectName = folder.name.split(':')[1]?.trim() || folder.name;
+    let subjectName = folder.name.split(':')[1]?.trim();
+    if (!subjectName || subjectName.toLowerCase() === subjectCode.toLowerCase()) {
+      const meta = findSubjectMetadata(selectedProgram, folder.name);
+      subjectName = meta?.title || folder.name;
+    }
+    const defaultTheme = getSubjectTheme(folder.name);
     const rawTheme = {
-      rawColor: folder.color || getSubjectTheme(folder.name).rawColor,
-      icon: folder.icon_name ? (
+      rawColor: (folder.color && folder.color !== '#ff7a00') ? folder.color : defaultTheme.rawColor,
+      icon: (folder.icon_name && folder.icon_name !== 'Folder') ? (
         <FolderIcon type="subject" name={folder.name} size="w-5 h-5" iconName={folder.icon_name} color="#ffffff" />
       ) : (
-        getSubjectTheme(folder.name).icon
+        defaultTheme.icon
       )
     };
     const metadata = findSubjectMetadata(selectedProgram, folder.name);
@@ -3112,18 +3035,22 @@ const StaticFolderCard: React.FC<{
   selectedProgram: string;
   fileCount: number;
 }> = ({ folder, selectedProgram, fileCount }) => {
+  const defaultTheme = getSubjectTheme(folder.name);
   const rawTheme = {
-    rawColor: folder.color || getSubjectTheme(folder.name).rawColor,
-    icon: folder.icon_name ? (
+    rawColor: (folder.color && folder.color !== '#ff7a00') ? folder.color : defaultTheme.rawColor,
+    icon: (folder.icon_name && folder.icon_name !== 'Folder') ? (
       <FolderIcon type="subject" name={folder.name} size="w-5 h-5" iconName={folder.icon_name} color="#ffffff" />
     ) : (
-      getSubjectTheme(folder.name).icon
+      defaultTheme.icon
     )
   };
   const subjectCodeMatch = folder.name.match(/^([A-Za-z]+\d{3})/);
   const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : folder.name.split(':')[0].trim();
-  const subjectName = folder.name.split(':')[1]?.trim() || folder.name;
   const metadata = findSubjectMetadata(selectedProgram, folder.name);
+  let subjectName = folder.name.split(':')[1]?.trim();
+  if (!subjectName || subjectName.toLowerCase() === subjectCode.toLowerCase()) {
+    subjectName = metadata?.title || folder.name;
+  }
   const creditsText = metadata ? `${metadata.credits} Credits` : "4 Credits";
   const ltpText = metadata ? `L-T-P: ${metadata.l}-${metadata.t}-${metadata.p}` : "L-T-P: 3-0-2";
 

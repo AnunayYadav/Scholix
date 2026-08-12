@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Star, Users, BookOpen, MessageSquare, HelpCircle, Calendar, Plus,
-  Search, Shield, Check, Flame, Trophy, Map, ArrowRight, ArrowLeft,
+  Search, Shield, Check, Flame, Trophy, Map as MapIcon, ArrowRight, ArrowLeft,
   Sparkles, Send, Edit, FileText, Download, Award, Code, Database,
   Terminal, Globe, Book, Video, FlaskConical, ClipboardList, Scroll, Folder, MessageCircle, Pin,
   Languages, Bell, BellOff, MoreHorizontal, Cpu, Monitor, Sigma, ChevronDown, ChevronRight, Compass, Landmark,
@@ -230,10 +230,24 @@ const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: 
   };
 };
 
-const getCategoryMetadata = (category: FolderType | string) => {
-  const catName = typeof category === 'string' ? category : category.name;
+const getCategoryMetadata = (category: FolderType | string | null | undefined) => {
+  if (!category) {
+    return {
+      description: "Custom study resources & files",
+      color: "#ff7a00",
+      lightColorBg: "bg-orange-500/10 text-orange-500 dark:text-orange-400",
+      gradientBgClass: "from-orange-500/10 dark:from-orange-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-orange-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(255,122,0,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-orange-500 dark:text-orange-400",
+      progressRingColor: "stroke-orange-500 dark:stroke-orange-400",
+      icon: <Folder className="w-5.5 h-5.5 text-current shrink-0" strokeWidth={2.5} />
+    };
+  }
+
+  const catName = typeof category === 'string' ? category : (category.name || '');
   const folderObj = typeof category === 'string' ? null : category;
-  const n = catName.toLowerCase().trim();
+  const n = (catName || '').toLowerCase().trim();
 
   // Resolve custom icon if set on folder
   let customIconComp: React.ReactElement | null = null;
@@ -258,7 +272,7 @@ const getCategoryMetadata = (category: FolderType | string) => {
   }
 
   // If a custom color or icon_name was explicitly set on the folder (e.g. from create/edit folder modal)
-  if (folderObj && (folderObj.color || folderObj.icon_name)) {
+  if (folderObj && ((folderObj.color && folderObj.color !== '#ff7a00') || (folderObj.icon_name && folderObj.icon_name !== 'Folder'))) {
     const hex = folderObj.color || "#ff7a00";
     const hexMap: { [key: string]: any } = {
       '#ff7a00': {
@@ -982,8 +996,41 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
   const isIITM = selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'bsdatascience';
 
+  const displayCategories = useMemo(() => {
+    const catMap = new globalThis.Map<string, FolderType>();
+
+    // Add db categories passed via prop safely, deduplicating by normalized name
+    (categories || []).forEach(cat => {
+      if (cat && cat.name) {
+        const normKey = cat.name.toLowerCase().trim();
+        if (!catMap.has(normKey)) {
+          catMap.set(normKey, cat);
+        }
+      }
+    });
+
+    // Ensure baseline standard categories exist if not present
+    const activeSubId = activeSubject?.id || 'default-sub';
+    const DEFAULT_CAT_DEFS: FolderType[] = [
+      { id: `default-lectures-${activeSubId}`, name: 'Lectures', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'Video', color: '#ef4444' },
+      { id: `default-notes-${activeSubId}`, name: 'Notes', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'FileText', color: '#3b82f6' },
+      { id: `default-pyqs-${activeSubId}`, name: 'PYQs', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'HelpCircle', color: '#a855f7' },
+      { id: `default-syllabus-${activeSubId}`, name: 'Syllabus', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'Calendar', color: '#4b5563' }
+    ];
+
+    DEFAULT_CAT_DEFS.forEach(defCat => {
+      const normKey = defCat.name.toLowerCase().trim();
+      if (!catMap.has(normKey)) {
+        catMap.set(normKey, defCat);
+      }
+    });
+
+    return Array.from(catMap.values());
+  }, [categories, activeSubject?.id, selectedProgram]);
+
   // Navigation / Tabs
-  const [activeTab, setActiveTab] = useState<'files' | 'discussions' | 'requests' | 'packs' | 'leaderboard' | 'people'>('files');
+  const [activeTab, setActiveTab] = useState<'files' | 'social' | 'discussions' | 'requests' | 'packs' | 'leaderboard' | 'people'>('files');
+  const [socialFilter, setSocialFilter] = useState<'all' | 'discussions' | 'requests'>('all');
   const [joined, setJoined] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -1390,12 +1437,13 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
   // Forms
   const [postTitle, setPostTitle] = useState('');
-  const [postCategory, setPostCategory] = useState<'discussion' | 'doubt' | 'poll' | 'question' | 'resource' | 'announcement'>('discussion');
+  const [postCategory, setPostCategory] = useState<'discussion' | 'request' | 'doubt' | 'poll' | 'question' | 'resource' | 'announcement'>('discussion');
   const [postContent, setPostContent] = useState('');
   const [postTags, setPostTags] = useState('');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showSubjectSelector, setShowSubjectSelector] = useState(false);
   const [showEditCategoryDropdown, setShowEditCategoryDropdown] = useState(false);
+  const [showSocialFilterDropdown, setShowSocialFilterDropdown] = useState(false);
   const [editPostCategory, setEditPostCategory] = useState<'discussion' | 'doubt' | 'poll' | 'question' | 'resource' | 'announcement'>('discussion');
   const [pollOptions, setPollOptions] = useState<string[]>(['', '']);
   const createEditorRef = useRef<HTMLDivElement>(null);
@@ -3085,7 +3133,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     }
   };
 
-  // Submit Post
+  // Submit Post or Material Request
   const handlePostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userProfile) return;
@@ -3094,28 +3142,42 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     const editorContent = getEditorHtml(createEditorRef);
 
     try {
-      const cleanTags = postTags.split(',').map(t => t.trim()).filter(t => t.startsWith('#') ? t : `#${t}`);
-      await CommunityService.createPost({
-        subject_id: subjectCode,
-        user_id: userProfile.id,
-        user_username: userProfile.username || 'Anonymous',
-        user_avatar: userProfile.avatar_url,
-        type: 'post',
-        category: postCategory,
-        title: postTitle.trim(),
-        content: editorContent,
-        tags: cleanTags,
-        verified_status: 'none'
-      });
+      if (postCategory === 'request') {
+        await CommunityService.createMaterialRequest({
+          subject_id: subjectCode,
+          user_id: userProfile.id,
+          user_username: userProfile.username || 'Anonymous',
+          user_avatar: userProfile.avatar_url,
+          type: 'request',
+          title: postTitle.trim(),
+          content: editorContent,
+          bounty_xp: Number(reqBounty)
+        });
+        showToast("Request bounty created!", "success");
+      } else {
+        const cleanTags = postTags.split(',').map(t => t.trim()).filter(t => t.startsWith('#') ? t : `#${t}`);
+        await CommunityService.createPost({
+          subject_id: subjectCode,
+          user_id: userProfile.id,
+          user_username: userProfile.username || 'Anonymous',
+          user_avatar: userProfile.avatar_url,
+          type: 'post',
+          category: postCategory,
+          title: postTitle.trim(),
+          content: editorContent,
+          tags: cleanTags,
+          verified_status: 'none'
+        });
+        showToast("Post created!", "success");
+      }
       setPostTitle('');
       setPostContent('');
       setPostTags('');
       if (createEditorRef.current) createEditorRef.current.innerHTML = '';
       setShowCreatePost(false);
       loadCommunityData();
-      showToast("Post created!", "success");
     } catch (e) {
-      showToast("Failed to create post", "error");
+      showToast("Failed to submit", "error");
     }
   };
 
@@ -3341,20 +3403,19 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
           </button>
         </div>
 
-        {/* Category Header Banner Box */}
-        <div className="relative overflow-visible bg-transparent sm:bg-gradient-to-br sm:from-zinc-50 sm:to-zinc-100/50 sm:dark:from-white/[0.01] sm:dark:to-transparent border-0 sm:border border-zinc-150 dark:border-white/5 rounded-none sm:rounded-3xl p-0 sm:p-6 flex flex-row items-center justify-between gap-3 sm:gap-6 shadow-none sm:shadow-sm">
-          <div className="absolute top-0 right-0 w-32 h-32 blur-3xl opacity-20 rounded-full pointer-events-none hidden sm:block" style={{ backgroundColor: theme.rawColor }} />
-
+        {/* Category Header Banner (Clean & Boxless) */}
+        <div className="relative overflow-visible p-0 flex flex-row items-center justify-between gap-3 sm:gap-6 py-1">
           {/* Category Logo & Info */}
-          <div className="flex items-center gap-3 sm:gap-5 min-w-0">
+          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
             <div 
-              className={`w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm shrink-0 border border-white/20 dark:border-white/10 overflow-hidden backdrop-blur-md ${catMeta.lightColorBg}`}
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm shrink-0 border border-white/20 dark:border-white/10 overflow-hidden backdrop-blur-md"
+              style={{ backgroundColor: `${theme.rawColor}15` }}
             >
-              {React.cloneElement(catMeta.icon as React.ReactElement, { className: `w-5 h-5 sm:w-6.5 sm:h-6.5 ${catMeta.iconColor}` })}
+              {React.cloneElement(catMeta.icon as React.ReactElement, { className: `w-5.5 h-5.5 sm:w-6 sm:h-6`, style: { color: theme.rawColor } })}
             </div>
             <div className="min-w-0 space-y-0.5 sm:space-y-1">
               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                <span className="px-1.5 py-0.5 rounded-md sm:rounded-lg text-[8px] sm:text-[9px] font-black text-white capitalize" style={{ backgroundColor: theme.rawColor }}>
+                <span className="px-1.5 py-0.5 rounded-md text-[8px] sm:text-[9px] font-black text-white capitalize" style={{ backgroundColor: theme.rawColor }}>
                   {activeCategoryFolder.name}
                 </span>
                 <span className="text-[8px] sm:text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">
@@ -3686,7 +3747,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         } : undefined}
       >
         {/* Back button */}
-        <div className="mb-4 sm:mb-6">
+        <div className="mb-3">
           <button
             onClick={onBack}
             className="flex items-center gap-2 text-xs font-bold text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 bg-transparent border-none cursor-pointer transition-colors"
@@ -3695,18 +3756,16 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
           </button>
         </div>
 
-        {/* Subject Header Banner Box */}
-        <div className="relative overflow-visible bg-transparent sm:bg-gradient-to-br sm:from-zinc-50 sm:to-zinc-100/50 sm:dark:from-white/[0.01] sm:dark:to-transparent border-0 sm:border border-zinc-150 dark:border-white/5 rounded-none sm:rounded-3xl p-0 sm:p-6 flex flex-row items-center justify-between gap-3 sm:gap-6 shadow-none sm:shadow-sm">
-          <div className="absolute top-0 right-0 w-32 h-32 blur-3xl opacity-20 rounded-full pointer-events-none hidden sm:block" style={{ backgroundColor: theme.rawColor }} />
-
+        {/* Subject Header Banner (Clean & Boxless) */}
+        <div className="relative overflow-visible p-0 flex flex-row items-center justify-between gap-3 sm:gap-6 py-1">
           {/* Course Logo & Info */}
-          <div className="flex items-center gap-3 sm:gap-5 min-w-0">
-            <div className="w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm shrink-0 text-white" style={{ backgroundColor: theme.rawColor }}>
-              {React.cloneElement(theme.icon as React.ReactElement, { className: 'w-5 h-5 sm:w-6.5 sm:h-6.5 text-white' })}
+          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm shrink-0 text-white" style={{ backgroundColor: theme.rawColor }}>
+              {React.cloneElement(theme.icon as React.ReactElement, { className: 'w-5.5 h-5.5 sm:w-6 sm:h-6 text-white' })}
             </div>
             <div className="min-w-0 space-y-0.5 sm:space-y-1">
               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                <span className="px-1.5 py-0.5 rounded-md sm:rounded-lg text-[8px] sm:text-[9px] font-black text-white" style={{ backgroundColor: theme.rawColor }}>
+                <span className="px-1.5 py-0.5 rounded-md text-[8px] sm:text-[9px] font-black text-white" style={{ backgroundColor: theme.rawColor }}>
                   {subjectCode}
                 </span>
                 <span className="text-[8px] sm:text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">
@@ -3782,26 +3841,26 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
       <div className="flex border-b border-zinc-150 dark:border-white/5 overflow-x-auto no-scrollbar scroll-smooth mb-6">
         {[
           { id: 'files', label: 'Files', icon: <Folder className="w-3.5 h-3.5 text-zinc-500" /> },
-          { id: 'discussions', label: 'Discussions', icon: <MessageSquare className="w-3.5 h-3.5 text-zinc-500" /> },
-          { id: 'requests', label: 'Requests', icon: <HelpCircle className="w-3.5 h-3.5 text-zinc-500" /> },
+          { id: 'social', label: 'Social', icon: <MessageSquare className="w-3.5 h-3.5 text-zinc-500" /> },
           { id: 'packs', label: 'Study Packs', icon: <BookOpen className="w-3.5 h-3.5 text-zinc-500" /> },
-          { id: 'leaderboard', label: 'Leaderboard', icon: <Trophy className="w-3.5 h-3.5 text-zinc-500" /> },
           { id: 'people', label: 'People', icon: <Users className="w-3.5 h-3.5 text-zinc-500" /> }
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => { setActiveTab(tab.id as any); setActiveCategoryFolder(null); }}
-            style={activeTab === tab.id ? { borderColor: theme.rawColor, color: theme.rawColor } : {}}
-            className={`pb-3 px-4 text-xs font-semibold border-b-2 bg-transparent cursor-pointer shrink-0 transition-all flex items-center gap-1.5 ${activeTab === tab.id
-                ? 'font-bold'
-                : 'border-transparent text-zinc-400 hover:text-zinc-700'
-              }`}
-          >
-            {tab.icon}
-            {tab.id === 'files' && stats ? `Files (${stats.filesCount})` :
-              tab.id === 'requests' && stats ? `Requests (${stats.requestsCount})` : tab.label}
-          </button>
-        ))}
+        ].map((tab) => {
+          const isActive = activeTab === tab.id || (tab.id === 'social' && (activeTab === 'discussions' || activeTab === 'requests'));
+          return (
+            <button
+              key={tab.id}
+              onClick={() => { setActiveTab(tab.id as any); setActiveCategoryFolder(null); }}
+              style={isActive ? { borderColor: theme.rawColor, color: theme.rawColor } : {}}
+              className={`pb-3 px-4 text-xs font-semibold border-b-2 bg-transparent cursor-pointer shrink-0 transition-all flex items-center gap-1.5 ${isActive
+                  ? 'font-bold'
+                  : 'border-transparent text-zinc-400 hover:text-zinc-700'
+                }`}
+            >
+              {tab.icon}
+              {tab.id === 'files' ? `Files (${subjectFiles.length})` : tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Tab Contents */}
@@ -3819,15 +3878,16 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
             />
           ) : !activeCategoryFolder ? (
             <div className="space-y-6 animate-fade-in">
-              {/* Continue Studying Card */}
+              {/* Continue Studying Card (Thin & Clean) */}
               {userProfile && continueStudyingFile && (
-                <div className="p-4 bg-zinc-100/50 dark:bg-[#161619]/90 border border-zinc-200 dark:border-white/5 rounded-2xl flex flex-row items-center justify-between gap-4 shadow-sm">
-                  <div className="space-y-1 min-w-0">
-                    <div className="text-[9px] font-bold uppercase tracking-widest" style={{ color: theme.rawColor }}>
-                      {continueStudyingFile.percent === 0 ? "Start Studying" : continueStudyingFile.percent === 100 ? "Completed Studying" : "Continue Studying"}
-                    </div>
-                    <div className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 truncate">{continueStudyingFile.doc.name}</div>
-                    <div className="w-24 xs:w-48 bg-zinc-200 dark:bg-zinc-850 h-1.5 rounded-full overflow-hidden mt-1.5">
+                <div className="p-2.5 sm:p-3 bg-white dark:bg-[#111113] border border-zinc-200/60 dark:border-white/[0.06] rounded-2xl flex items-center justify-between gap-3 shadow-sm hover:border-zinc-300 dark:hover:border-white/10 transition-all">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <span className="text-xs font-bold shrink-0" style={{ color: theme.rawColor }}>
+                      {continueStudyingFile.percent === 0 ? "Start Studying" : continueStudyingFile.percent === 100 ? "Completed" : "Continue Studying"}
+                    </span>
+                    <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+                    <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">{continueStudyingFile.doc.name}</span>
+                    <div className="hidden sm:block w-24 bg-zinc-100 dark:bg-zinc-800/80 h-1 rounded-full overflow-hidden shrink-0 ml-1">
                       <div className="h-full rounded-full" style={{ width: `${continueStudyingFile.percent}%`, backgroundColor: theme.rawColor }} />
                     </div>
                   </div>
@@ -3836,16 +3896,17 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       onFileAccess(continueStudyingFile.doc);
                     }}
                     style={{ backgroundColor: theme.rawColor }}
-                    className="px-3 py-1.5 xs:px-4 xs:py-2 text-white rounded-xl text-xs font-bold border-none flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition-all shrink-0"
+                    className="px-3 py-1.5 text-white rounded-xl text-xs font-bold border-none flex items-center gap-1.5 cursor-pointer hover:opacity-90 active:scale-95 transition-all shrink-0"
                   >
-                    {continueStudyingFile.percent === 0 ? "Start" : continueStudyingFile.percent === 100 ? "Review (100%)" : `Resume (${continueStudyingFile.percent}%)`} <ArrowRight size={12} />
+                    <span>{continueStudyingFile.percent === 0 ? "Start" : continueStudyingFile.percent === 100 ? "Review (100%)" : `Resume (${continueStudyingFile.percent}%)`}</span>
+                    <ArrowRight size={12} />
                   </button>
                 </div>
               )}
 
               <div className="space-y-4 animate-fade-in">
                 <div className="flex items-center justify-between gap-2">
-                  <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5"><Folder className="w-3.5 h-3.5" /> Study Sections</div>
+                  <div className="text-xs sm:text-sm font-semibold text-zinc-600 dark:text-zinc-400 flex items-center gap-1.5"><Folder className="w-3.5 h-3.5" /> Study Sections</div>
                   {(userProfile?.is_admin || isAdmin) && onAddFolder && (
                     <button
                       onClick={onAddFolder}
@@ -3857,8 +3918,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     </button>
                   )}
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {categories
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {displayCategories
                     .filter(cat => {
                       if (!searchQuery || searchQuery.trim() === '') return true;
                       const filesInCat = subjectFiles.filter(f => isFileTypeMatchingCategory(f.type, cat.name));
@@ -3875,125 +3936,57 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                         return sum + (prog ? prog.progress_percentage : 0);
                       }, 0);
                       const averagePercent = filesInCat.length > 0 ? Math.round(totalPercent / filesInCat.length) : 0;
-                      
-                      const strokeDasharray = 2 * Math.PI * 16;
-                      const strokeDashoffset = strokeDasharray - (averagePercent / 100) * strokeDasharray;
-
-                      const latestFile = filesInCat.length > 0 
-                        ? [...filesInCat].sort((a, b) => {
-                            const aTime = a.uploadDate || (a.created_at ? Date.parse(a.created_at) : 0);
-                            const bTime = b.uploadDate || (b.created_at ? Date.parse(b.created_at) : 0);
-                            return bTime - aTime;
-                          })[0]
-                        : null;
-                      const latestFileRelativeTime = latestFile
-                        ? getRelativeTime(latestFile.uploadDate || (latestFile.created_at ? Date.parse(latestFile.created_at) : Date.now()))
-                        : '';
 
                       return (
                         <div
                           key={cat.id}
                           onClick={() => setActiveCategoryFolder(cat)}
-                          className={`group relative overflow-hidden rounded-[24px] flex flex-col justify-between cursor-pointer transition-all duration-300 border ${meta.borderClass} bg-white dark:bg-[#0a0a0b] ${meta.glowShadowClass}`}
+                          className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden cursor-pointer"
                         >
-                          {/* Colored Background Gradient Overlay */}
-                          <div className={`absolute inset-0 opacity-[0.8] dark:opacity-[0.9] group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br ${meta.gradientBgClass} z-0 pointer-events-none`} />
-
-                          {/* Top Left Radial Glossy Highlight */}
-                          <div className="absolute -top-12 -left-12 w-32 h-32 bg-white/10 dark:bg-white/[0.02] blur-[40px] rounded-full pointer-events-none z-0" />
-
-                          {/* Giant faint background icon on bottom right */}
-                          <div className={`absolute -bottom-4 -right-4 ${meta.iconColor} opacity-[0.03] dark:opacity-[0.06] transform transition-all duration-700 group-hover:scale-110 group-hover:-translate-x-1 group-hover:-translate-y-1 pointer-events-none z-0`}>
-                            {React.cloneElement(meta.icon, { className: "w-24 h-24 text-current" })}
-                          </div>
-
-                          {/* Inner card padding content */}
-                          <div className="p-4 flex items-start gap-3.5 flex-1 min-w-0 relative z-10">
-                            {/* Left Column: Glassmorphic colored icon container */}
-                            <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 border border-white/20 dark:border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.05),inset_0_1px_1px_rgba(255,255,255,0.1)] overflow-hidden backdrop-blur-md ${meta.lightColorBg}`}>
-                              {React.cloneElement(meta.icon, { className: `w-5.5 h-5.5 ${meta.iconColor}` })}
-                            </div>
-
-                            {/* Right Column: Title, description, resources count and progress ring */}
-                            <div className="flex-1 min-w-0 flex flex-col justify-between h-full">
-                              <div className="flex items-start justify-between gap-2 w-full">
-                                <div className="min-w-0">
-                                  <h4 className="text-xs sm:text-sm font-extrabold text-zinc-900 dark:text-white capitalize truncate tracking-wide group-hover:text-brand-primary transition-colors duration-300">
-                                    {cat.name}
-                                  </h4>
-                                  <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold line-clamp-1 mt-0.5">
-                                    {meta.description}
-                                  </p>
-                                </div>
-
-                                {/* circular progress ring & admin action buttons */}
-                                <div className="flex items-center gap-1.5 shrink-0">
-                                  {(userProfile?.is_admin || isAdmin) && (onEditFolder || onDeleteFolder) && (
-                                    <div className="flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity">
-                                      {onEditFolder && (
-                                        <button
-                                          onClick={(e) => { e.stopPropagation(); onEditFolder(cat, e); }}
-                                          title="Edit / Rename Folder"
-                                          className="w-6 h-6 rounded-lg bg-zinc-100 hover:bg-orange-500 hover:text-white dark:bg-white/10 dark:hover:bg-orange-500 dark:hover:text-white text-zinc-600 dark:text-zinc-300 flex items-center justify-center transition-all border-none cursor-pointer"
-                                        >
-                                          <Pencil size={11} />
-                                        </button>
-                                      )}
-                                      {onDeleteFolder && (
-                                        <button
-                                          onClick={(e) => { e.stopPropagation(); onDeleteFolder(cat, e); }}
-                                          title="Delete Folder"
-                                          className="w-6 h-6 rounded-lg bg-zinc-100 hover:bg-rose-500 hover:text-white dark:bg-white/10 dark:hover:bg-rose-500 dark:hover:text-white text-zinc-600 dark:text-zinc-300 flex items-center justify-center transition-all border-none cursor-pointer"
-                                        >
-                                          <Trash2 size={11} />
-                                        </button>
-                                      )}
-                                    </div>
-                                  )}
-
-                                  <div className="relative w-9 h-9 flex items-center justify-center">
-                                    <svg className="w-9 h-9 -rotate-90">
-                                      <circle cx="18" cy="18" r="14" className="stroke-zinc-100 dark:stroke-white/5" strokeWidth="2.5" fill="transparent" />
-                                      <circle 
-                                        cx="18" 
-                                        cy="18" 
-                                        r="14" 
-                                        className={meta.progressRingColor} 
-                                        strokeWidth="2.5" 
-                                        fill="transparent" 
-                                        strokeDasharray={2 * Math.PI * 14} 
-                                        strokeDashoffset={2 * Math.PI * 14 - (averagePercent / 100) * (2 * Math.PI * 14)} 
-                                        strokeLinecap="round" 
-                                      />
-                                    </svg>
-                                    <span className="absolute text-[9px] font-black text-zinc-800 dark:text-zinc-200">{averagePercent}%</span>
-                                  </div>
-                                  
-                                  {/* Right Chevron arrow */}
-                                  <ChevronRight size={14} className="text-zinc-400 dark:text-zinc-650 group-hover:text-brand-primary transition-colors shrink-0" />
-                                </div>
-                              </div>
-
-                              {/* Resources count with file prefix */}
-                              <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 dark:text-zinc-400 font-bold mt-2">
-                                <FileText className="w-3.5 h-3.5 opacity-80" />
-                                <span>{filesInCat.length} Resources</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Bottom strip: Latest file uploaded info */}
-                          <div className="w-full bg-zinc-50/40 dark:bg-black/20 px-4 py-2 border-t border-zinc-100 dark:border-white/[0.04] flex items-center justify-between gap-2 text-[9px] text-zinc-500 dark:text-zinc-400 font-semibold hover:bg-zinc-100/50 dark:hover:bg-black/30 transition-all shrink-0 relative z-10">
-                            <span className="truncate max-w-[85%]">
-                              {latestFile ? (
-                                <>
-                                  Latest: <span className="font-bold text-zinc-800 dark:text-zinc-200">{latestFile.name}</span> uploaded {latestFileRelativeTime}
-                                </>
-                              ) : (
-                                "No resources uploaded yet"
+                          {(userProfile?.is_admin || isAdmin) && (onEditFolder || onDeleteFolder) && (
+                            <div className="absolute top-2.5 right-2.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                              {onEditFolder && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); onEditFolder(cat, e); }}
+                                  title="Edit / Rename Folder"
+                                  className="p-1 bg-white dark:bg-[#0a0a0a] rounded-lg text-orange-500 hover:bg-orange-50 transition-colors shadow-sm border border-zinc-100 dark:border-white/5"
+                                >
+                                  <Pencil className="w-2.5 h-2.5" strokeWidth={3} />
+                                </button>
                               )}
-                            </span>
+                              {onDeleteFolder && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); onDeleteFolder(cat, e); }}
+                                  title="Delete Folder"
+                                  className="p-1 bg-white dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red-50 transition-colors shadow-sm border border-zinc-100 dark:border-white/5"
+                                >
+                                  <Trash2 className="w-3 h-3" strokeWidth={3} />
+                                </button>
+                              )}
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-3.5 min-w-0">
+                            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white animate-fade-in" style={{ backgroundColor: meta.color }}>
+                              {React.isValidElement(meta.icon) ? React.cloneElement(meta.icon as React.ReactElement, { className: 'w-5 h-5 text-white' }) : meta.icon}
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white leading-snug truncate pr-6">{cat.name}</h4>
+                              <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+                                <span className="flex items-center gap-1 font-semibold whitespace-nowrap shrink-0" style={{ color: meta.color }}>
+                                  <FileText className="w-3.5 h-3.5" />
+                                  {filesInCat.length} Resources
+                                </span>
+                                {averagePercent > 0 && (
+                                  <>
+                                    <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
+                                    <span className="whitespace-nowrap shrink-0 font-semibold text-zinc-500 dark:text-zinc-400">{averagePercent}% Completed</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
                           </div>
+                          <ChevronRight className="w-4 h-4 text-zinc-300 dark:text-zinc-600 group-hover:translate-x-0.5 transition-transform shrink-0" style={{ color: meta.color }} />
                         </div>
                       );
                     })}
@@ -4027,11 +4020,11 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     <div className="hidden sm:block overflow-x-auto no-scrollbar border border-zinc-150 dark:border-white/5 rounded-2xl bg-white dark:bg-[#111113]">
                       <table className="w-full text-left border-collapse min-w-[600px]">
                         <thead>
-                          <tr className="border-b border-zinc-150 dark:border-white/5 text-[10px] sm:text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider bg-zinc-50/50 dark:bg-white/[0.005]">
+                          <tr className="border-b border-zinc-150 dark:border-white/5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 bg-zinc-50/50 dark:bg-white/[0.005]">
                             <th className="py-3 px-4">Name</th>
                             <th className="py-3 px-4">Type</th>
-                            <th className="py-3 px-4">Added By</th>
-                            <th className="py-3 px-4">Added On</th>
+                            <th className="py-3 px-4">Added by</th>
+                            <th className="py-3 px-4">Added on</th>
                             <th className="py-3 px-4 w-10"></th>
                           </tr>
                         </thead>
@@ -4490,206 +4483,242 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
 
 
-      {/* 3. DISCUSSIONS TAB */}
-      {activeTab === 'discussions' && (
-        <div className="space-y-5 animate-fade-in">
-          {showCreatePost ? (
-            // ────────────────────────────────────────────────────────
-            // INLINE CREATE POST VIEW
-            // ────────────────────────────────────────────────────────
-            <div className="space-y-4">
-              {/* Back button */}
-              <button 
-                type="button"
-                onClick={() => setShowCreatePost(false)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all self-start"
+
+
+      {/* 3. SOCIAL TAB (Unified Discussions & Material Requests) */}
+      {(activeTab === 'social' || activeTab === 'discussions' || activeTab === 'requests') && (
+        <div className="space-y-4 animate-fade-in">
+          {/* Top Bar: Always Single Row with Avatar + Trigger/Header + Filter Dropdown */}
+          <div className="flex items-center justify-between gap-3">
+            {/* Standalone Avatar on Left */}
+            {userProfile?.avatar_url ? (
+              <img src={userProfile.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-zinc-200 dark:ring-white/10" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 text-xs font-bold flex items-center justify-center shrink-0">
+                {userProfile?.username?.slice(0, 1).toUpperCase() || 'U'}
+              </div>
+            )}
+
+            {/* Clean Borderless Input Pill (when closed) */}
+            {!showCreatePost ? (
+              <div
+                onClick={() => setShowCreatePost(true)}
+                className="flex-1 bg-zinc-100 dark:bg-[#141416] hover:bg-zinc-200/70 dark:hover:bg-[#1a1a1d] rounded-2xl px-5 py-2.5 cursor-pointer flex items-center transition-all duration-300 border-none outline-none"
               >
-                <ArrowLeft size={14} /> Back to Discussions
+                <span className="text-xs sm:text-sm font-semibold text-zinc-400 dark:text-zinc-500 transition-colors">
+                  Create Post
+                </span>
+              </div>
+            ) : (
+              <div className="flex-1 flex items-center px-2">
+                <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                  New Post in <span style={{ color: theme.rawColor }}>{subjectCode}</span>
+                </span>
+              </div>
+            )}
+
+            {/* Custom Sleek Filter Dropdown on Right */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowSocialFilterDropdown(prev => !prev)}
+                className="flex items-center gap-1.5 px-3 py-2 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/[0.04] rounded-xl text-xs font-semibold text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all cursor-pointer border-none outline-none group whitespace-nowrap"
+              >
+                <span>
+                  {socialFilter === 'all' && `All Activity (${discussions.length + requests.length})`}
+                  {socialFilter === 'discussions' && `Discussions (${discussions.length})`}
+                  {socialFilter === 'requests' && `Material Requests (${requests.length})`}
+                </span>
+                <ChevronDown size={13} className={`transition-transform duration-200 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 ${showSocialFilterDropdown ? 'rotate-180' : ''}`} />
               </button>
 
-              <div className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm flex flex-col">
-                {/* Header with subject selector */}
-                <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100 dark:border-white/5">
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowSubjectSelector(!showSubjectSelector)}
-                      className="flex items-center gap-2.5 px-1 py-1 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors bg-transparent border-none cursor-pointer"
-                    >
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
-                        {subjectCode.slice(0, 2)}
-                      </div>
-                      <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
-                      <ChevronDown size={12} className={`text-zinc-400 transition-transform duration-200 ${showSubjectSelector ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {showSubjectSelector && (
-                      <>
-                        <div className="fixed inset-0 z-30" onClick={() => setShowSubjectSelector(false)} />
-                        <div className="absolute left-0 top-full z-40 mt-1.5 w-64 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1 max-h-60 overflow-y-auto">
-                          <div className="px-3 py-2 text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Post to community</div>
-                          {categories.map((cat) => {
-                            const catCode = cat.name.match(/^([A-Za-z]+\d{3})/)?.[1]?.toUpperCase() || cat.name.split(':')[0].trim();
-                            const catTheme = getSubjectTheme(cat.name, cat.color, cat.icon_name);
-                            const isActive = catCode === subjectCode;
-                            return (
-                              <button
-                                key={cat.id}
-                                type="button"
-                                onClick={() => setShowSubjectSelector(false)}
-                                style={isActive ? { backgroundColor: `${catTheme.rawColor}12`, color: catTheme.rawColor } : undefined}
-                                className={`w-full text-left px-3 py-2.5 text-xs font-semibold transition-all border-none bg-transparent cursor-pointer flex items-center gap-2.5 ${
-                                  isActive ? '' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.04]'
-                                }`}
-                              >
-                                <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-black flex-shrink-0" style={{ backgroundColor: catTheme.rawColor }}>
-                                  {catCode.slice(0, 2)}
-                                </div>
-                                <span className="truncate">{catCode}</span>
-                                {isActive && <Check size={12} className="ml-auto flex-shrink-0" />}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </>
-                    )}
+              {showSocialFilterDropdown && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowSocialFilterDropdown(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-1.5 w-52 bg-white dark:bg-[#141416] border border-zinc-200/80 dark:border-white/[0.08] rounded-2xl shadow-xl p-1.5 z-50 animate-fade-in backdrop-blur-md">
+                    {[
+                      { id: 'all', label: 'All Activity', count: discussions.length + requests.length },
+                      { id: 'discussions', label: 'Discussions', count: discussions.length },
+                      { id: 'requests', label: 'Material Requests', count: requests.length },
+                    ].map((option) => {
+                      const isSelected = socialFilter === option.id;
+                      return (
+                        <button
+                          key={option.id}
+                          type="button"
+                          onClick={() => {
+                            setSocialFilter(option.id as any);
+                            setShowSocialFilterDropdown(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all text-left border-none cursor-pointer ${
+                            isSelected
+                              ? 'bg-zinc-100 dark:bg-white/10 font-bold'
+                              : 'hover:bg-zinc-50 dark:hover:bg-white/[0.04] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium'
+                          }`}
+                          style={isSelected ? { color: theme.rawColor } : {}}
+                        >
+                          <span className="flex items-center gap-2">
+                            {isSelected && (
+                              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: theme.rawColor }} />
+                            )}
+                            <span>{option.label}</span>
+                          </span>
+                          <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500">
+                            {option.count}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Smooth Borderless Expanded Editor Form */}
+          {showCreatePost && (
+            <div className="bg-zinc-100 dark:bg-[#141416] rounded-3xl p-5 border-none shadow-sm flex flex-col space-y-4 animate-fade-in origin-top">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-200/50 dark:border-white/5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
+                    {subjectCode.slice(0, 2)}
+                  </div>
+                  <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
+                </div>
+                <div className="flex items-center gap-2 relative">
+                  <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500">Category:</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowCategoryDropdown(prev => !prev)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-200/60 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 border-none rounded-xl text-xs font-bold text-zinc-800 dark:text-zinc-200 cursor-pointer transition-all outline-none"
+                  >
+                    <span>
+                      {postCategory === 'discussion' && 'Discussion'}
+                      {postCategory === 'request' && '🏆 Material Request'}
+                      {postCategory === 'doubt' && 'Doubt / Question'}
+                      {postCategory === 'poll' && 'Poll'}
+                      {postCategory === 'question' && 'Exam Prep'}
+                      {postCategory === 'resource' && 'Resource'}
+                      {postCategory === 'announcement' && 'Announcement'}
+                    </span>
+                    <ChevronDown size={13} className={`transition-transform duration-200 text-zinc-400 ${showCategoryDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {showCategoryDropdown && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowCategoryDropdown(false)} />
+                      <div className="absolute right-0 top-full mt-1.5 w-56 bg-white dark:bg-[#141416] border border-zinc-200/80 dark:border-white/[0.08] rounded-2xl shadow-xl p-1.5 z-50 animate-fade-in backdrop-blur-md">
+                        {[
+                          { id: 'discussion', label: 'Discussion' },
+                          { id: 'request', label: 'Material Request', isBounty: true },
+                          { id: 'doubt', label: 'Doubt / Question' },
+                          { id: 'poll', label: 'Poll' },
+                          { id: 'question', label: 'Exam Prep' },
+                          { id: 'resource', label: 'Resource' },
+                          ...(userProfile?.is_admin ? [{ id: 'announcement', label: 'Announcement' }] : [])
+                        ].map((cat) => {
+                          const isSelected = postCategory === cat.id;
+                          return (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => {
+                                setPostCategory(cat.id as any);
+                                setShowCategoryDropdown(false);
+                              }}
+                              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all text-left border-none cursor-pointer ${
+                                isSelected
+                                  ? 'bg-zinc-100 dark:bg-white/10 font-bold'
+                                  : 'hover:bg-zinc-50 dark:hover:bg-white/[0.04] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium'
+                              }`}
+                              style={isSelected ? { color: theme.rawColor } : {}}
+                            >
+                              <span className="flex items-center gap-2">
+                                {isSelected && (
+                                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: theme.rawColor }} />
+                                )}
+                                <span>{cat.label}</span>
+                              </span>
+                              {cat.isBounty && (
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500">
+                                  XP Bounty
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <form onSubmit={handlePostSubmit} className="space-y-3">
+                <input
+                  type="text"
+                  placeholder={postCategory === 'request' ? "Material Request Title (e.g. Need Unit 3 Lecture Notes)*" : "Title of your post..."}
+                  value={postTitle}
+                  onChange={(e) => setPostTitle(e.target.value)}
+                  className="w-full bg-transparent border-none outline-none text-sm sm:text-base font-bold text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600"
+                />
+
+                {postCategory === 'request' && (
+                  <div className="py-2 px-1 my-1 flex items-center gap-2.5 animate-fade-in border-t border-zinc-200/50 dark:border-white/5 overflow-x-auto no-scrollbar">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-amber-500 shrink-0">
+                      <Trophy size={13} />
+                      <span>Bounty:</span>
+                    </div>
+
+                    {/* Quick XP Preset Chips */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {[25, 50, 100, 200, 500].map(val => (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() => setReqBounty(val)}
+                          className={`px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer whitespace-nowrap ${
+                            reqBounty === val
+                              ? 'bg-amber-500/20 text-amber-400 border-amber-400/40 shadow-sm scale-105'
+                              : 'bg-zinc-200/60 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border-transparent hover:bg-zinc-300/60 dark:hover:bg-white/10'
+                          }`}
+                        >
+                          +{val} XP
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="border-t border-zinc-200/50 dark:border-white/5" />
+
+                <div className="relative pt-2 pb-2">
+                  <div
+                    ref={createEditorRef}
+                    contentEditable
+                    data-placeholder={postCategory === 'request' ? "Describe what you need in detail — unit, topic, type of material...*" : "Share detailed context, code, images, equations or ask a doubt...*"}
+                    onInput={() => setPostContent(getEditorText(createEditorRef))}
+                    onKeyDown={handleEditorKeyDown}
+                    className="w-full min-h-[160px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-400 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
+                    style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                    suppressContentEditableWarning
+                  />
+                  {renderFloatingLanguageDropdown(createEditorRef)}
                 </div>
 
-                {/* Form body */}
-                <form onSubmit={handlePostSubmit} className="flex flex-col pt-4">
-                  <div className="pb-2 space-y-1">
-                    <input
-                      type="text"
-                      value={postTitle}
-                      onChange={(e) => setPostTitle(e.target.value)}
-                      placeholder="Title*"
-                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600 focus:ring-0"
-                      required
-                      autoFocus
-                    />
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-zinc-200/50 dark:border-white/5">
+                  <div className="flex items-center gap-0.5 flex-wrap">
+                    {renderToolbar(buildToolbarItems(createEditorRef, { full: true }), 'cp')}
+                    {imageUploading && <span className="text-[10px] text-zinc-400 ml-2 animate-pulse">Uploading...</span>}
                   </div>
 
-                  {/* Flair & Tags row */}
-                  <div className="pb-3 flex flex-wrap items-center gap-2">
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold border cursor-pointer transition-all"
-                        style={{
-                          borderColor: `${theme.rawColor}40`,
-                          backgroundColor: `${theme.rawColor}08`,
-                          color: theme.rawColor
-                        }}
-                      >
-                        <Sparkles size={11} />
-                        {postCategory === 'discussion' && 'Discussion'}
-                        {postCategory === 'doubt' && 'Doubt'}
-                        {postCategory === 'poll' && 'Poll'}
-                        {postCategory === 'question' && 'Exam Prep'}
-                        {postCategory === 'resource' && 'Resource'}
-                        {postCategory === 'announcement' && '📢 Announcement'}
-                        <ChevronDown size={10} className={`transition-transform duration-200 ${showCategoryDropdown ? 'rotate-180' : ''}`} />
-                      </button>
-
-                      {showCategoryDropdown && (
-                        <>
-                          <div className="fixed inset-0 z-30" onClick={() => setShowCategoryDropdown(false)} />
-                          <div className="absolute left-0 z-40 mt-1.5 w-48 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1">
-                            {[
-                              { value: 'discussion', label: 'Discussion', icon: '💬' },
-                              { value: 'doubt', label: 'Doubt / Question', icon: '❓' },
-                              { value: 'poll', label: 'Poll', icon: '📊' },
-                              { value: 'question', label: 'Exam Prep', icon: '📝' },
-                              { value: 'resource', label: 'Resource', icon: '📎' },
-                              ...(userProfile?.is_admin ? [{ value: 'announcement', label: 'Announcement', icon: '📢' }] : [])
-                            ].map((opt) => {
-                              const isSelected = postCategory === opt.value;
-                              return (
-                                <button
-                                  key={opt.value}
-                                  type="button"
-                                  onClick={() => {
-                                    setPostCategory(opt.value as any);
-                                    setShowCategoryDropdown(false);
-                                  }}
-                                  style={isSelected ? {
-                                    backgroundColor: `${theme.rawColor}12`,
-                                    color: theme.rawColor
-                                  } : undefined}
-                                  className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold transition-all border-none bg-transparent cursor-pointer flex items-center gap-2.5 ${
-                                    isSelected
-                                      ? ''
-                                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.04]'
-                                  }`}
-                                >
-                                  <span>{opt.icon}</span>
-                                  <span>{opt.label}</span>
-                                  {isSelected && <Check size={12} className="ml-auto" />}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    {postTags.split(',').filter(t => t.trim()).map((tag, i) => (
-                      <span key={i} className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400">
-                        #{tag.trim()}
-                      </span>
-                    ))}
-
-                    <input
-                      type="text"
-                      value={postTags}
-                      onChange={(e) => setPostTags(e.target.value)}
-                      placeholder="+ Add tags"
-                      className="bg-transparent border-none outline-none text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 w-20"
-                    />
-                  </div>
-
-                  <div className="border-t border-zinc-100 dark:border-white/5" />
-
-                  {/* WYSIWYG Body Editor */}
-                  <div className="relative pt-4 pb-3">
-                    <div
-                      ref={createEditorRef}
-                      contentEditable
-                      data-placeholder="Body text*"
-                      onInput={() => {
-                        const text = getEditorText(createEditorRef);
-                        setPostContent(text);
-                        const sel = window.getSelection();
-                        if (sel && sel.rangeCount > 0) {
-                          const range = sel.getRangeAt(0);
-                          handleInputAutocomplete(text, range.startOffset, 'post-create', 'create-post-editor');
-                        }
-                      }}
-                      onKeyDown={handleEditorKeyDown}
-                      className="w-full min-h-[220px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
-                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
-                      suppressContentEditableWarning
-                    />
-                    {renderFloatingLanguageDropdown(createEditorRef)}
-                    {renderAutocompleteDropdown('create-post-editor')}
-                  </div>
-
-                  {/* Formatting Toolbar */}
-                  <div className="pb-4">
-                    <div className="flex items-center gap-0.5 flex-wrap">
-                      {renderToolbar(buildToolbarItems(createEditorRef), 'cp')}
-                      {imageUploading && <span className="text-[10px] text-zinc-400 ml-2 animate-pulse">Uploading...</span>}
-                    </div>
-                  </div>
-
-                  {/* Footer actions */}
-                  <div className="flex items-center justify-end gap-2.5 pt-3.5 border-t border-zinc-100 dark:border-white/5">
+                  <div className="flex items-center gap-2.5 ml-auto">
                     <button
                       type="button"
                       onClick={() => setShowCreatePost(false)}
-                      className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
+                      className="px-5 py-2 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200/60 dark:hover:bg-white/5 bg-transparent border border-zinc-300 dark:border-zinc-700/50 cursor-pointer transition-all outline-none"
                     >
                       Cancel
                     </button>
@@ -4700,1152 +4729,199 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                         backgroundColor: (!postTitle.trim() || !postContent.trim()) ? undefined : theme.rawColor,
                         opacity: (!postTitle.trim() || !postContent.trim()) ? 0.4 : 1
                       }}
-                      className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
+                      className={`px-6 py-2 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
                         (!postTitle.trim() || !postContent.trim())
                           ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
                           : 'text-white hover:opacity-90 active:scale-95'
                       }`}
                     >
-                      Post
+                      {postCategory === 'request' ? 'Post Bounty Request' : 'Publish Post'}
                     </button>
                   </div>
-                </form>
-              </div>
+                </div>
+              </form>
             </div>
-          ) : editingPost ? (
-            // ────────────────────────────────────────────────────────
-            // INLINE EDIT POST VIEW
-            // ────────────────────────────────────────────────────────
-            <div className="space-y-4">
-              {/* Back button */}
-              <button 
-                type="button"
-                onClick={() => setEditingPost(null)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all self-start"
-              >
-                <ArrowLeft size={14} /> Back to Discussions
-              </button>
+          )}
 
-              <div className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm flex flex-col">
-                {/* Header */}
-                <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100 dark:border-white/5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
-                      {subjectCode.slice(0, 2)}
-                    </div>
-                    <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
-                    <span className="text-[10px] font-semibold text-zinc-400 bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded-full">Editing</span>
-                  </div>
-                </div>
-
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    if (!editingPost) return;
-                    const plainText = getEditorText(editEditorRef);
-                    if (!editPostTitle.trim() || !plainText) return;
-                    const content = getEditorHtml(editEditorRef);
-                    const ok = await CommunityService.editPost(editingPost.id, editPostTitle, content);
-                    if (ok) {
-                      setDiscussions(prev => prev.map(post => {
-                        if (post.id === editingPost.id) {
-                          return { ...post, title: editPostTitle, content, category: editPostCategory, updated_at: new Date().toISOString() };
-                        }
-                        return post;
-                      }));
-                      showToast("Post edited successfully", "success");
-                      setEditingPost(null);
-                    } else {
-                      showToast("Failed to edit post", "error");
-                    }
-                  }}
-                  className="flex flex-col pt-4"
-                >
-                  <div className="pb-2">
-                    <input
-                      type="text"
-                      value={editPostTitle}
-                      onChange={(e) => setEditPostTitle(e.target.value)}
-                      placeholder="Title*"
-                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600 focus:ring-0"
-                      required
-                      autoFocus
-                    />
-                  </div>
-
-                  {/* Flair picker */}
-                  <div className="pb-3 flex flex-wrap items-center gap-2">
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => setShowEditCategoryDropdown(!showEditCategoryDropdown)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold border cursor-pointer transition-all"
-                        style={{
-                          borderColor: `${theme.rawColor}40`,
-                          backgroundColor: `${theme.rawColor}08`,
-                          color: theme.rawColor
-                        }}
-                      >
-                        <Sparkles size={11} />
-                        {editPostCategory === 'discussion' && 'Discussion'}
-                        {editPostCategory === 'doubt' && 'Doubt'}
-                        {editPostCategory === 'poll' && 'Poll'}
-                        {editPostCategory === 'question' && 'Exam Prep'}
-                        {editPostCategory === 'resource' && 'Resource'}
-                        {editPostCategory === 'announcement' && '📢 Announcement'}
-                        <ChevronDown size={10} className={`transition-transform duration-200 ${showEditCategoryDropdown ? 'rotate-180' : ''}`} />
-                      </button>
-
-                      {showEditCategoryDropdown && (
-                        <>
-                          <div className="fixed inset-0 z-30" onClick={() => setShowEditCategoryDropdown(false)} />
-                          <div className="absolute left-0 z-40 mt-1.5 w-48 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1">
-                            {[
-                              { value: 'discussion', label: 'Discussion', icon: '💬' },
-                              { value: 'doubt', label: 'Doubt / Question', icon: '❓' },
-                              { value: 'poll', label: 'Poll', icon: '📊' },
-                              { value: 'question', label: 'Exam Prep', icon: '📝' },
-                              { value: 'resource', label: 'Resource', icon: '📎' },
-                              ...(userProfile?.is_admin ? [{ value: 'announcement', label: 'Announcement', icon: '📢' }] : [])
-                            ].map((opt) => {
-                              const isSelected = editPostCategory === opt.value;
-                              return (
-                                <button
-                                  key={opt.value}
-                                  type="button"
-                                  onClick={() => {
-                                    setEditPostCategory(opt.value as any);
-                                    setShowEditCategoryDropdown(false);
-                                  }}
-                                  style={isSelected ? {
-                                    backgroundColor: `${theme.rawColor}12`,
-                                    color: theme.rawColor
-                                  } : undefined}
-                                  className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold transition-all border-none bg-transparent cursor-pointer flex items-center gap-2.5 ${
-                                    isSelected
-                                      ? ''
-                                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.04]'
-                                  }`}
-                                >
-                                  <span>{opt.icon}</span>
-                                  <span>{opt.label}</span>
-                                  {isSelected && <Check size={12} className="ml-auto" />}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="border-t border-zinc-100 dark:border-white/5" />
-
-                  {/* WYSIWYG Body Editor */}
-                  <div className="relative pt-4 pb-3">
-                    <div
-                      ref={editEditorRef}
-                      contentEditable
-                      data-placeholder="Body text*"
-                      onInput={() => {
-                        const text = getEditorText(editEditorRef);
-                        setEditPostContent(text);
-                        const sel = window.getSelection();
-                        if (sel && sel.rangeCount > 0) {
-                          const range = sel.getRangeAt(0);
-                          handleInputAutocomplete(text, range.startOffset, 'post-edit', 'edit-post-editor');
-                        }
-                      }}
-                      onKeyDown={handleEditorKeyDown}
-                      className="w-full min-h-[220px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
-                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
-                      suppressContentEditableWarning
-                    />
-                    {renderFloatingLanguageDropdown(editEditorRef)}
-                    {renderAutocompleteDropdown('edit-post-editor')}
-                  </div>
-
-                  {/* Formatting Toolbar */}
-                  <div className="pb-4">
-                    <div className="flex items-center gap-0.5 flex-wrap">
-                      {renderToolbar(buildToolbarItems(editEditorRef), 'ep')}
-                      {imageUploading && <span className="text-[10px] text-zinc-400 ml-2 animate-pulse">Uploading...</span>}
-                    </div>
-                  </div>
-
-                  {/* Footer actions */}
-                  <div className="flex items-center justify-end gap-2.5 pt-3.5 border-t border-zinc-100 dark:border-white/5">
-                    <button
-                      type="button"
-                      onClick={() => setEditingPost(null)}
-                      className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={!editPostTitle.trim() || !editPostContent.trim()}
-                      style={{
-                        backgroundColor: (!editPostTitle.trim() || !editPostContent.trim()) ? undefined : theme.rawColor,
-                        opacity: (!editPostTitle.trim() || !editPostContent.trim()) ? 0.4 : 1
-                      }}
-                      className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
-                        (!editPostTitle.trim() || !editPostContent.trim())
-                          ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
-                          : 'text-white hover:opacity-90 active:scale-95'
-                      }`}
-                    >
-                      Save Changes
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          ) : selectedPost ? (
-            // ────────────────────────────────────────────────────────
-            // POST DETAIL VIEW
-            // ────────────────────────────────────────────────────────
-            (() => {
-              const p = discussions.find(d => d.id === selectedPost.id) || selectedPost;
-              const helpfulCount = p.reactions?.helpful?.length || 0;
-              const downvoteCount = p.reactions?.quality?.length || 0;
-              const netScore = helpfulCount - downvoteCount;
-              const isHelpful = userProfile ? p.reactions?.helpful?.includes(userProfile.id) : false;
-              const isDownvoted = userProfile ? p.reactions?.quality?.includes(userProfile.id) : false;
-              const commentsCount = p.comments?.length || 0;
-              const timeAgo = (() => {
-                const diff = Date.now() - new Date(p.created_at).getTime();
-                const mins = Math.floor(diff / 60000);
-                if (mins < 60) return `${mins}m ago`;
-                const hrs = Math.floor(mins / 60);
-                if (hrs < 24) return `${hrs}h ago`;
-                const days = Math.floor(hrs / 24);
-                if (days < 30) return `${days}d ago`;
-                return new Date(p.created_at).toLocaleDateString();
-              })();
-
-              return (
-                <div className="space-y-4">
-                  {/* Back button */}
-                  <button 
-                    onClick={() => setSelectedPost(null)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all self-start"
-                  >
-                    <ArrowLeft size={14} /> Back to Discussions
-                  </button>
-
-                  <div className="bg-white dark:bg-[#111113] border-none rounded-2xl overflow-hidden p-5 space-y-4">
-                    {/* Header */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-[11px] min-w-0">
-                        <img src={p.user_avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-7 h-7 rounded-full flex-shrink-0" />
-                        <span className="font-bold text-zinc-800 dark:text-zinc-200 truncate">{p.user_username}</span>
-                        <span className="text-zinc-400 dark:text-zinc-500 font-medium flex-shrink-0">• {timeAgo}</span>
-                        {p.is_pinned && (
-                          <span className="flex items-center gap-0.5 font-bold px-2 py-0.5 rounded-full text-[9px] flex-shrink-0" style={{ color: theme.rawColor, backgroundColor: `${theme.rawColor}12` }}>
-                            <Pin size={9} /> Pinned
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Dropdown Menu (only if user is admin or creator) */}
-                      {(userProfile?.is_admin || userProfile?.id === p.user_id) && (
-                        <div className="relative flex-shrink-0 ml-2">
-                          <button
-                            onClick={() => setActivePostMenuId(activePostMenuId === p.id ? null : p.id)}
-                            className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 bg-transparent border-none cursor-pointer transition-all hover:bg-zinc-100 dark:hover:bg-white/5"
-                          >
-                            <MoreHorizontal size={16} />
-                          </button>
-
-                          {activePostMenuId === p.id && (
-                            <>
-                              <div className="fixed inset-0 z-10" onClick={() => setActivePostMenuId(null)} />
-                              <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/8 rounded-xl shadow-xl py-1 z-20">
-                                {userProfile?.is_admin && (
-                                  <button
-                                    onClick={async (e) => {
-                                      e.stopPropagation();
-                                      setActivePostMenuId(null);
-                                      setPinningPostId(p.id);
-                                      const nextPinStatus = !p.is_pinned;
-                                      const ok = await CommunityService.updatePostPinStatus(p.id, nextPinStatus);
-                                      if (ok) {
-                                        setDiscussions(prev => {
-                                          const updated = prev.map(post => post.id === p.id ? { ...post, is_pinned: nextPinStatus } : post);
-                                          return [...updated].sort((a, b) => {
-                                            const pinA = a.is_pinned ? 1 : 0;
-                                            const pinB = b.is_pinned ? 1 : 0;
-                                            if (pinA !== pinB) return pinB - pinA;
-                                            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-                                          });
-                                        });
-                                        showToast(nextPinStatus ? "Post pinned!" : "Post unpinned!", "success");
-                                      } else {
-                                        showToast("Failed to update pin status", "error");
-                                      }
-                                      setPinningPostId(null);
-                                    }}
-                                    disabled={pinningPostId === p.id}
-                                    className="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                  >
-                                    <Pin size={12} /> {p.is_pinned ? "Unpin" : "Pin Post"}
-                                  </button>
-                                )}
-
-                                {userProfile?.id === p.user_id && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setActivePostMenuId(null);
-                                      setEditingPost(p);
-                                      setEditPostTitle(p.title);
-                                      setEditPostContent(p.content);
-                                      setEditPostCategory((p.category as any) || 'discussion');
-                                      setTimeout(() => {
-                                       if (editEditorRef.current) {
-                                         editEditorRef.current.innerHTML = cleanHtmlForEditor(p.content);
-                                       }
-                                      }, 50);
-                                    }}
-                                    className="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                  >
-                                    <Edit size={12} /> Edit
-                                  </button>
-                                )}
-
-                                <button
-                                  onClick={async (e) => {
-                                    e.stopPropagation();
-                                    if (confirm("Are you sure you want to delete this post?")) {
-                                      setActivePostMenuId(null);
-                                      const ok = await CommunityService.deletePost(p.id);
-                                      if (ok) {
-                                        setSelectedPost(null);
-                                        setDiscussions(prev => prev.filter(post => post.id !== p.id));
-                                        showToast("Post deleted successfully", "success");
-                                      } else {
-                                        showToast("Failed to delete post", "error");
-                                      }
-                                    }
-                                  }}
-                                  className="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-white/5 text-red-500 border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="text-base sm:text-lg font-black text-zinc-950 dark:text-white leading-snug">
-                      {p.title}
-                    </h3>
-
-                    {/* Category flair pill */}
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold"
-                        style={{ 
-                          backgroundColor: p.category === 'announcement' ? '#ff444412' : `${theme.rawColor}12`, 
-                          color: p.category === 'announcement' ? '#ff4444' : theme.rawColor 
-                        }}
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: p.category === 'announcement' ? '#ff4444' : theme.rawColor }} />
-                        {p.category === 'discussion' && 'Discussion'}
-                        {p.category === 'doubt' && 'Doubt'}
-                        {p.category === 'poll' && 'Poll'}
-                        {p.category === 'question' && 'Exam Prep'}
-                        {p.category === 'resource' && 'Resource'}
-                        {p.category === 'announcement' && '📢 Announcement'}
-                      </span>
-                    </div>
-
-                    {/* Body text — clean, readable (fully expanded!) */}
-                    <div 
-                      className="text-[13px] text-zinc-700 dark:text-zinc-300 leading-relaxed font-normal wysiwyg-content" 
-                      style={{ lineHeight: '1.7' }}
-                      onClick={handleContentClick}
-                      dangerouslySetInnerHTML={{ __html: renderFormattedContent(p.content) }}
-                    />
-
-                    {/* Tags */}
-                    {p.tags && p.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {p.tags.map(t => (
-                          <span key={t} className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400">{t}</span>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Actions Row */}
-                    <div className="flex items-center gap-1.5 border-t border-zinc-100 dark:border-white/5 pt-3.5">
-                      <div className="flex items-center bg-zinc-100 dark:bg-white/[0.06] rounded-full">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleReaction(p.id, 'post', 'helpful'); }}
-                          className={`w-9 h-9 rounded-full flex items-center justify-center border-none cursor-pointer transition-all ${
-                            isHelpful
-                              ? 'text-white'
-                              : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent hover:bg-zinc-200 dark:hover:bg-white/10'
-                          }`}
-                          style={isHelpful ? { color: theme.rawColor } : undefined}
-                        >
-                          <ArrowBigUp size={20} fill={isHelpful ? theme.rawColor : 'none'} />
-                        </button>
-                        <span className={`text-xs font-bold min-w-[20px] text-center ${
-                          isHelpful || isDownvoted ? '' : 'text-zinc-600 dark:text-zinc-300'
-                        }`} style={isHelpful ? { color: theme.rawColor } : isDownvoted ? { color: '#3b82f6' } : undefined}>
-                          {netScore}
-                        </span>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleReaction(p.id, 'post', 'quality'); }}
-                          className={`w-9 h-9 rounded-full flex items-center justify-center border-none cursor-pointer transition-all ${
-                            isDownvoted
-                              ? 'text-white'
-                              : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent hover:bg-zinc-200 dark:hover:bg-white/10'
-                          }`}
-                          style={isDownvoted ? { color: '#3b82f6' } : undefined}
-                        >
-                          <ArrowBigDown size={20} fill={isDownvoted ? '#3b82f6' : 'none'} />
-                        </button>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 bg-zinc-100/50 dark:bg-white/[0.04]">
-                        <MessageSquare size={16} /> {commentsCount} comments
-                      </div>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigator.clipboard.writeText(window.location.href);
-                          showToast('Link copied!', 'success');
-                        }}
-                        className="flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.06] bg-transparent border-none cursor-pointer transition-all"
-                      >
-                        <Share2 size={15} /> Share
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Comments Section (always open on details) */}
-                  <div className="bg-white dark:bg-[#111113] border-none rounded-2xl p-5 space-y-4">
-                    <h4 className="text-xs font-bold text-zinc-400 tracking-wider flex items-center gap-1.5"><MessageSquare className="w-3.5 h-3.5" /> Comments</h4>
-
-                    <form 
-                      onSubmit={async (e) => {
-                        e.preventDefault();
-                        if (!userProfile) {
-                          showToast("Please login to post a comment.", "info");
-                          return;
-                        }
-                        const text = newCommentTexts[p.id] || '';
-                        if (!text.trim()) return;
-
-                        setSubmittingCommentId(p.id);
-                        try {
-                          const added = await CommunityService.addCommentToItem(p.id, 'post', {
-                            user_id: userProfile.id,
-                            username: userProfile.username,
-                            avatar_url: userProfile.avatar_url || '',
-                            content: text.trim()
-                          });
-
-                          setDiscussions(prev => prev.map(post => {
-                            if (post.id === p.id) {
-                              return { ...post, comments: [...(post.comments || []), added] };
-                            }
-                            return post;
-                          }));
-
-                          setNewCommentTexts(prev => ({ ...prev, [p.id]: '' }));
-                          showToast("Comment posted!", "success");
-                        } catch (err) {
-                          showToast("Failed to post comment", "error");
-                        } finally {
-                          setSubmittingCommentId(null);
-                        }
-                      }}
-                      className="flex gap-2.5 items-start py-2 border-b border-zinc-100 dark:border-white/5 pb-4"
-                    >
-                      <img src={userProfile?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-7 h-7 rounded-full shrink-0 mt-0.5" />
-                      <div className="flex-1 min-w-0 flex flex-col gap-2">
-                        <div className="relative w-full">
-                          <input
-                            type="text"
-                            placeholder="Add a comment..."
-                            value={newCommentTexts[p.id] || ''}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setNewCommentTexts(prev => ({ ...prev, [p.id]: val }));
-                              handleInputAutocomplete(val, e.target.selectionStart || 0, 'comment', p.id);
-                            }}
-                            onKeyDown={handleAutocompleteKeyDown}
-                            className="w-full bg-transparent border border-zinc-200 dark:border-white/8 rounded-xl px-3.5 py-2.5 text-xs text-zinc-800 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none transition-colors"
-                            style={{ borderColor: (newCommentTexts[p.id] || '').trim() ? theme.rawColor : undefined }}
-                            disabled={submittingCommentId === p.id}
-                          />
-                          {renderAutocompleteDropdown(p.id)}
-                        </div>
-                        {(newCommentTexts[p.id] || '').trim() && (
-                          <div className="flex justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setNewCommentTexts(prev => ({ ...prev, [p.id]: '' }));
-                                setAcState(prev => ({ ...prev, active: false }));
-                              }}
-                              className="px-3.5 py-1.5 rounded-full text-xs font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              type="submit"
-                              style={{ backgroundColor: theme.rawColor }}
-                              className="px-4 py-1.5 text-white rounded-full text-xs font-bold border-none cursor-pointer hover:opacity-90 active:scale-95 transition-all"
-                              disabled={submittingCommentId === p.id}
-                            >
-                              {submittingCommentId === p.id ? '...' : 'Comment'}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </form>
-
-                    {p.comments && p.comments.length > 0 ? (
-                      <div className="space-y-4 pt-2">
-                        {p.comments.map((comment) => {
-                          const commentTimeAgo = (() => {
-                            const diff = Date.now() - new Date(comment.created_at).getTime();
-                            const mins = Math.floor(diff / 60000);
-                            if (mins < 60) return `${mins}m ago`;
-                            const hrs = Math.floor(mins / 60);
-                            if (hrs < 24) return `${hrs}h ago`;
-                            const days = Math.floor(hrs / 24);
-                            if (days < 30) return `${days}d ago`;
-                            return new Date(comment.created_at).toLocaleDateString();
-                          })();
-                          return (
-                            <div key={comment.id} className="py-3.5 border-t border-zinc-100 dark:border-white/[0.04] first:border-t-0 space-y-3">
-                              {/* Main Comment */}
-                              <div className="flex gap-2.5 items-start">
-                                <img src={comment.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-6.5 h-6.5 rounded-full shrink-0 mt-0.5" />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-1.5 mb-0.5">
-                                    <span className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200">{comment.username}</span>
-                                    <span className="text-[10px] text-zinc-450 dark:text-zinc-550 font-medium">• {commentTimeAgo}</span>
-                                  </div>
-                                  <p 
-                                    className="text-[12px] text-zinc-700 dark:text-zinc-300 leading-relaxed font-normal break-words"
-                                    onClick={handleContentClick}
-                                    dangerouslySetInnerHTML={{ __html: renderFormattedContent(comment.content) }}
-                                  />
-                                  <div className="flex items-center gap-3.5 text-[9px] font-bold text-zinc-450 mt-1">
-                                    <button 
-                                      onClick={() => {
-                                        setReplyTarget({ commentId: comment.id, username: comment.username, postId: p.id });
-                                        setReplyText(`@${comment.username} `);
-                                      }}
-                                      className="bg-transparent border-none text-zinc-400 dark:text-zinc-550 hover:text-zinc-750 dark:hover:text-zinc-200 cursor-pointer text-[9px] font-bold p-0"
-                                    >
-                                      Reply
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Nested Replies */}
-                              {comment.replies && comment.replies.length > 0 && (
-                                <div className="ml-7 pl-3.5 border-l border-zinc-150 dark:border-white/5 space-y-3">
-                                  {comment.replies.map((reply) => {
-                                    const replyTimeAgo = (() => {
-                                      const diff = Date.now() - new Date(reply.created_at).getTime();
-                                      const mins = Math.floor(diff / 60000);
-                                      if (mins < 60) return `${mins}m ago`;
-                                      const hrs = Math.floor(mins / 60);
-                                      if (hrs < 24) return `${hrs}h ago`;
-                                      const days = Math.floor(hrs / 24);
-                                      if (days < 30) return `${days}d ago`;
-                                      return new Date(reply.created_at).toLocaleDateString();
-                                    })();
-                                    return (
-                                      <div key={reply.id} className="flex gap-2.5 items-start">
-                                        <img src={reply.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-5.5 h-5.5 rounded-full shrink-0 mt-0.5" />
-                                        <div className="flex-1 min-w-0">
-                                          <div className="flex items-center gap-1.5 mb-0.5">
-                                            <span className="text-[10px] font-bold text-zinc-800 dark:text-zinc-200">{reply.username}</span>
-                                            <span className="text-[9px] text-zinc-450 dark:text-zinc-550 font-medium">• {replyTimeAgo}</span>
-                                          </div>
-                                          <p 
-                                            className="text-[11.5px] text-zinc-700 dark:text-zinc-300 leading-relaxed font-normal break-words"
-                                            onClick={handleContentClick}
-                                            dangerouslySetInnerHTML={{ __html: renderFormattedContent(reply.content) }}
-                                          />
-                                          <div className="flex items-center gap-3.5 text-[8.5px] font-bold text-zinc-450 mt-0.5">
-                                            <button 
-                                              onClick={() => {
-                                                setReplyTarget({ commentId: comment.id, username: reply.username, postId: p.id });
-                                                setReplyText(`@${reply.username} `);
-                                              }}
-                                              className="bg-transparent border-none text-zinc-400 dark:text-zinc-550 hover:text-zinc-750 dark:hover:text-zinc-200 cursor-pointer text-[8.5px] font-bold p-0"
-                                            >
-                                              Reply
-                                            </button>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              )}
-
-                              {/* Reply Form */}
-                              {replyTarget && replyTarget.commentId === comment.id && replyTarget.postId === p.id && (
-                                <form 
-                                  onSubmit={async (e) => {
-                                    e.preventDefault();
-                                    if (!userProfile) return;
-                                    if (!replyText.trim()) return;
-
-                                    try {
-                                      const added = await CommunityService.addReplyToComment(p.id, 'post', comment.id, {
-                                        user_id: userProfile.id,
-                                        username: userProfile.username,
-                                        avatar_url: userProfile.avatar_url || '',
-                                        content: replyText.trim()
-                                      });
-
-                                      setDiscussions(prev => prev.map(post => {
-                                        if (post.id === p.id) {
-                                          const comments = (post.comments || []).map(c => {
-                                            if (c.id === comment.id) {
-                                              return {
-                                                ...c,
-                                                replies: [...(c.replies || []), added]
-                                              };
-                                            }
-                                            return c;
-                                          });
-                                          return { ...post, comments };
-                                        }
-                                        return post;
-                                      }));
-
-                                      setReplyText('');
-                                      setReplyTarget(null);
-                                      showToast("Reply posted!", "success");
-                                    } catch (err) {
-                                      showToast("Failed to post reply", "error");
-                                    }
-                                  }}
-                                  className="ml-7 pl-3.5 border-l border-zinc-150 dark:border-white/5 py-2 flex gap-2.5 items-start"
-                                >
-                                  <img src={userProfile?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-5.5 h-5.5 rounded-full shrink-0 mt-0.5" />
-                                  <div className="flex-1 min-w-0 flex flex-col gap-2">
-                                    <div className="relative w-full">
-                                      <input
-                                        type="text"
-                                        placeholder={`Reply to @${replyTarget.username}...`}
-                                        value={replyText}
-                                        onChange={(e) => {
-                                          const val = e.target.value;
-                                          setReplyText(val);
-                                          handleInputAutocomplete(val, e.target.selectionStart || 0, 'reply', comment.id);
-                                        }}
-                                        onKeyDown={handleAutocompleteKeyDown}
-                                        className="w-full bg-transparent border border-zinc-200 dark:border-white/8 rounded-xl px-3 py-2 text-xs text-zinc-800 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-550 focus:outline-none transition-colors"
-                                        style={{ borderColor: replyText.trim() ? theme.rawColor : undefined }}
-                                        autoFocus
-                                      />
-                                      {renderAutocompleteDropdown(comment.id)}
-                                    </div>
-                                    <div className="flex justify-end gap-2">
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          setReplyTarget(null);
-                                          setReplyText('');
-                                        }}
-                                        className="px-3 py-1 rounded-full text-[10px] font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border-none cursor-pointer transition-all"
-                                      >
-                                        Cancel
-                                      </button>
-                                      <button
-                                        type="submit"
-                                        style={{ backgroundColor: theme.rawColor }}
-                                        className="px-3.5 py-1 text-white rounded-full text-[10px] font-bold border-none cursor-pointer hover:opacity-90 active:scale-95 transition-all"
-                                      >
-                                        Reply
-                                      </button>
-                                    </div>
-                                  </div>
-                                </form>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-zinc-400 dark:text-zinc-550 py-6 text-center font-medium">No comments yet — be the first to reply!</div>
-                    )}
-                  </div>
-                </div>
-              );
-            })()
-          ) : (
-            // ────────────────────────────────────────────────────────
-            // FEED VIEW (COLLAPSED CARDS LIST)
-            // ────────────────────────────────────────────────────────
-            <>
-
-
-              {/* Reddit-style create post prompt bar */}
-              <button
-                onClick={() => setShowCreatePost(true)}
-                className="w-full flex items-center gap-3 py-2 bg-transparent border-none cursor-pointer transition-all group"
-                style={{ outline: 'none' }}
-              >
-                <img
-                  src={userProfile?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'}
-                  className="w-8 h-8 rounded-full flex-shrink-0 border-2 border-zinc-100 dark:border-white/10"
-                  alt=""
-                />
-                <div className="flex-1 text-left px-3 py-2 bg-zinc-50 dark:bg-white/[0.04] rounded-xl text-xs text-zinc-400 dark:text-zinc-500 font-medium group-hover:bg-zinc-100 dark:group-hover:bg-white/[0.06] transition-colors">
-                  Create Post
-                </div>
-                <div className="flex items-center gap-1.5 flex-shrink-0 pr-1">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"><Image size={16} /></div>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"><Link size={16} /></div>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"><BarChart2 size={16} /></div>
-                </div>
-              </button>
-
+              {/* Feed List */}
               <div className="space-y-3">
-                {discussions.map((p) => {
-                  const helpfulCount = p.reactions?.helpful?.length || 0;
-                  const downvoteCount = p.reactions?.quality?.length || 0;
-                  const netScore = helpfulCount - downvoteCount;
-                  const isHelpful = userProfile ? p.reactions?.helpful?.includes(userProfile.id) : false;
-                  const isDownvoted = userProfile ? p.reactions?.quality?.includes(userProfile.id) : false;
-                  const commentsCount = p.comments?.length || 0;
-                  const timeAgo = (() => {
-                    const diff = Date.now() - new Date(p.created_at).getTime();
-                    const mins = Math.floor(diff / 60000);
-                    if (mins < 60) return `${mins}m ago`;
-                    const hrs = Math.floor(mins / 60);
-                    if (hrs < 24) return `${hrs}h ago`;
-                    const days = Math.floor(hrs / 24);
-                    if (days < 30) return `${days}d ago`;
-                    return new Date(p.created_at).toLocaleDateString();
-                  })();
+                {(() => {
+                  const feedItems: Array<{ type: 'discussion' | 'request'; date: number; data: any }> = [];
+                  if (socialFilter === 'all' || socialFilter === 'discussions') {
+                    discussions.forEach(p => feedItems.push({ type: 'discussion', date: new Date(p.created_at).getTime(), data: p }));
+                  }
+                  if (socialFilter === 'all' || socialFilter === 'requests') {
+                    requests.forEach(r => feedItems.push({ type: 'request', date: new Date(r.created_at).getTime(), data: r }));
+                  }
+                  feedItems.sort((a, b) => b.date - a.date);
 
-                  return (
-                    <div
-                      key={p.id}
-                      onClick={() => setSelectedPost(p)}
-                      className="bg-white dark:bg-[#111113] border-none rounded-2xl overflow-hidden transition-colors cursor-pointer"
-                    >
-                      <div className="px-4 pt-3.5 pb-1">
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-2.5">
-                          <div className="flex items-center gap-2 text-[11px] min-w-0">
-                            <img src={p.user_avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-7 h-7 rounded-full flex-shrink-0" />
-                            <span className="font-bold text-zinc-800 dark:text-zinc-200 truncate">{p.user_username}</span>
-                            <span className="text-zinc-400 dark:text-zinc-500 font-medium flex-shrink-0">• {timeAgo}</span>
-                            {p.is_pinned && (
-                              <span className="flex items-center gap-0.5 font-bold px-2 py-0.5 rounded-full text-[9px] flex-shrink-0" style={{ color: theme.rawColor, backgroundColor: `${theme.rawColor}12` }}>
-                                <Pin size={9} /> Pinned
+                  if (feedItems.length === 0) {
+                    return (
+                      <div className="p-8 text-center bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/5 rounded-2xl text-xs text-zinc-400">
+                        No activity found in Social tab yet. Be the first to start a post or request material!
+                      </div>
+                    );
+                  }
+
+                  return feedItems.map(item => {
+                    if (item.type === 'discussion') {
+                      const p = item.data;
+                      const helpfulCount = p.reactions?.helpful?.length || 0;
+                      const downvoteCount = p.reactions?.quality?.length || 0;
+                      const netScore = helpfulCount - downvoteCount;
+                      const isHelpful = userProfile ? p.reactions?.helpful?.includes(userProfile.id) : false;
+                      const isDownvoted = userProfile ? p.reactions?.quality?.includes(userProfile.id) : false;
+                      const commentsCount = p.comments?.length || 0;
+                      const timeAgo = (() => {
+                        const diff = Date.now() - new Date(p.created_at).getTime();
+                        const mins = Math.floor(diff / 60000);
+                        if (mins < 60) return `${mins}m ago`;
+                        const hrs = Math.floor(mins / 60);
+                        if (hrs < 24) return `${hrs}h ago`;
+                        const days = Math.floor(hrs / 24);
+                        if (days < 30) return `${days}d ago`;
+                        return new Date(p.created_at).toLocaleDateString();
+                      })();
+
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => setSelectedPost(p)}
+                          className="bg-white dark:bg-[#111113] border border-zinc-200/60 dark:border-white/[0.06] rounded-2xl overflow-hidden transition-all hover:border-zinc-300 dark:hover:border-white/10 cursor-pointer shadow-sm"
+                        >
+                          <div className="px-4 pt-3.5 pb-1">
+                            {/* Header */}
+                            <div className="flex items-center justify-between mb-2.5">
+                              <div className="flex items-center gap-2 text-[11px] min-w-0">
+                                <img src={p.user_avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-7 h-7 rounded-full flex-shrink-0" />
+                                <span className="font-bold text-zinc-800 dark:text-zinc-200 truncate">{p.user_username}</span>
+                                <span className="text-zinc-400 dark:text-zinc-500 font-medium flex-shrink-0">• {timeAgo}</span>
+                                {p.is_pinned && (
+                                  <span className="flex items-center gap-0.5 font-bold px-2 py-0.5 rounded-full text-[9px] flex-shrink-0" style={{ color: theme.rawColor, backgroundColor: `${theme.rawColor}12` }}>
+                                    <Pin size={9} /> Pinned
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Title */}
+                            <h3 className="text-[15px] sm:text-base font-extrabold text-zinc-900 dark:text-white leading-snug mb-1.5">
+                              {p.title}
+                            </h3>
+
+                            {/* Category flair pill */}
+                            <div className="flex items-center gap-2 mb-3">
+                              <span
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold"
+                                style={{ 
+                                  backgroundColor: p.category === 'announcement' ? '#ff444412' : `${theme.rawColor}12`, 
+                                  color: p.category === 'announcement' ? '#ff4444' : theme.rawColor 
+                                }}
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: p.category === 'announcement' ? '#ff4444' : theme.rawColor }} />
+                                {p.category === 'discussion' && 'Discussion'}
+                                {p.category === 'doubt' && 'Doubt'}
+                                {p.category === 'poll' && 'Poll'}
+                                {p.category === 'question' && 'Exam Prep'}
+                                {p.category === 'resource' && 'Resource'}
+                                {p.category === 'announcement' && '📢 Announcement'}
                               </span>
+                            </div>
+
+                            {/* Body text */}
+                            <div 
+                              className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal mb-3 wysiwyg-content post-collapsed-content" 
+                              style={{ lineHeight: '1.7' }}
+                              dangerouslySetInnerHTML={{ __html: renderFormattedContent(p.content) }}
+                            />
+                          </div>
+
+                          {/* Bottom action bar */}
+                          <div className="flex items-center gap-1 px-2.5 pb-2.5 pt-0.5">
+                            <div className="flex items-center bg-zinc-100 dark:bg-white/[0.06] rounded-full">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleReaction(p.id, 'post', 'helpful'); }}
+                                className={`w-9 h-9 rounded-full flex items-center justify-center border-none cursor-pointer transition-all ${
+                                  isHelpful
+                                    ? 'text-white'
+                                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent hover:bg-zinc-200 dark:hover:bg-white/10'
+                                }`}
+                                style={isHelpful ? { color: theme.rawColor } : undefined}
+                              >
+                                <ArrowBigUp size={20} fill={isHelpful ? theme.rawColor : 'none'} />
+                              </button>
+                              <span className={`text-xs font-bold min-w-[20px] text-center ${
+                                isHelpful || isDownvoted ? '' : 'text-zinc-600 dark:text-zinc-300'
+                              }`} style={isHelpful ? { color: theme.rawColor } : isDownvoted ? { color: '#3b82f6' } : undefined}>
+                                {netScore}
+                              </span>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleReaction(p.id, 'post', 'quality'); }}
+                                className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center border-none cursor-pointer transition-all ${
+                                  isDownvoted
+                                    ? 'text-white'
+                                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent hover:bg-zinc-200 dark:hover:bg-white/10'
+                                }`}
+                                style={isDownvoted ? { color: '#3b82f6' } : undefined}
+                              >
+                                <ArrowBigDown size={20} fill={isDownvoted ? '#3b82f6' : 'none'} />
+                              </button>
+                            </div>
+
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setSelectedPost(p); }}
+                              className="flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.06] bg-transparent border-none cursor-pointer transition-all"
+                            >
+                              <MessageSquare size={16} /> {commentsCount}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      const r = item.data;
+                      return (
+                        <div key={r.id} className="p-4 sm:p-5 bg-white dark:bg-[#111113] border border-zinc-200/60 dark:border-white/[0.06] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+                          <div className="min-w-0 flex-1 space-y-2">
+                            <div className="flex items-center gap-2">
+                              <img src={r.user_avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-6 h-6 rounded-full" />
+                              <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">{r.user_username} requested • {new Date(r.created_at).toLocaleDateString()}</span>
+                            </div>
+                            <h4 className="text-xs sm:text-sm font-black text-zinc-950 dark:text-white leading-tight flex items-center gap-2">
+                              <span>{r.title}</span>
+                              <span className="text-[10px] font-semibold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full inline-flex items-center gap-1"><Trophy size={9} /> Material Request</span>
+                            </h4>
+                          </div>
+
+                          <div className="flex items-center gap-3 shrink-0">
+                            <div className="px-3 py-1.5 border rounded-xl text-xs font-semibold" style={{ backgroundColor: `${theme.rawColor}15`, borderColor: `${theme.rawColor}30`, color: theme.rawColor }}>
+                              +{r.bounty_xp} XP Bounty
+                            </div>
+
+                            {r.status === 'open' ? (
+                              <button
+                                onClick={() => {
+                                  if (!userProfile) {
+                                    showToast("Please login to solve requests", "info");
+                                    return;
+                                  }
+                                  onUploadClick();
+                                  showToast("Upload the file to this subject folder first to solve!", "info");
+                                }}
+                                style={{ backgroundColor: theme.rawColor }}
+                                className="px-4 py-2 text-white rounded-xl text-xs font-bold border-none cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                              >
+                                Solve Request
+                              </button>
+                            ) : (
+                              <span className="px-3 py-1.5 bg-emerald-500/10 text-emerald-500 rounded-xl text-xs font-bold">Solved</span>
                             )}
                           </div>
-
-                          {/* Dropdown Menu */}
-                          {(userProfile?.is_admin || userProfile?.id === p.user_id) && (
-                            <div className="relative flex-shrink-0 ml-2">
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setActivePostMenuId(activePostMenuId === p.id ? null : p.id); }}
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 bg-transparent border-none cursor-pointer transition-all hover:bg-zinc-100 dark:hover:bg-white/5"
-                              >
-                                <MoreHorizontal size={16} />
-                              </button>
-
-                              {activePostMenuId === p.id && (
-                                <>
-                                  <div className="fixed inset-0 z-10" onClick={(e) => { e.stopPropagation(); setActivePostMenuId(null); }} />
-                                  <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/8 rounded-xl shadow-xl py-1 z-20">
-                                    {userProfile?.is_admin && (
-                                      <button
-                                        onClick={async (e) => {
-                                          e.stopPropagation();
-                                          setActivePostMenuId(null);
-                                          setPinningPostId(p.id);
-                                          const nextPinStatus = !p.is_pinned;
-                                          const ok = await CommunityService.updatePostPinStatus(p.id, nextPinStatus);
-                                          if (ok) {
-                                            setDiscussions(prev => {
-                                              const updated = prev.map(post => post.id === p.id ? { ...post, is_pinned: nextPinStatus } : post);
-                                              return [...updated].sort((a, b) => {
-                                                const pinA = a.is_pinned ? 1 : 0;
-                                                const pinB = b.is_pinned ? 1 : 0;
-                                                if (pinA !== pinB) return pinB - pinA;
-                                                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-                                              });
-                                            });
-                                            showToast(nextPinStatus ? "Post pinned!" : "Post unpinned!", "success");
-                                          } else {
-                                            showToast("Failed to update pin status", "error");
-                                          }
-                                          setPinningPostId(null);
-                                        }}
-                                        disabled={pinningPostId === p.id}
-                                        className="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                      >
-                                        <Pin size={12} /> {p.is_pinned ? "Unpin" : "Pin Post"}
-                                      </button>
-                                    )}
-
-                                    {userProfile?.id === p.user_id && (
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setActivePostMenuId(null);
-                                          setEditingPost(p);
-                                          setEditPostTitle(p.title);
-                                          setEditPostContent(p.content);
-                                          setEditPostCategory((p.category as any) || 'discussion');
-                                          setTimeout(() => {
-                                           if (editEditorRef.current) {
-                                             editEditorRef.current.innerHTML = cleanHtmlForEditor(p.content);
-                                           }
-                                          }, 50);
-                                        }}
-                                        className="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                      >
-                                        <Edit size={12} /> Edit
-                                      </button>
-                                    )}
-
-                                    <button
-                                      onClick={async (e) => {
-                                        e.stopPropagation();
-                                        if (confirm("Are you sure you want to delete this post?")) {
-                                          setActivePostMenuId(null);
-                                          const ok = await CommunityService.deletePost(p.id);
-                                          if (ok) {
-                                            setDiscussions(prev => prev.filter(post => post.id !== p.id));
-                                            showToast("Post deleted successfully", "success");
-                                          } else {
-                                            showToast("Failed to delete post", "error");
-                                          }
-                                        }
-                                      }}
-                                      className="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-white/5 text-red-500 border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                    >
-                                      Delete
-                                    </button>
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          )}
                         </div>
-
-                        {/* Title */}
-                        <h3 className="text-[15px] sm:text-base font-extrabold text-zinc-900 dark:text-white leading-snug mb-1.5">
-                          {p.title}
-                        </h3>
-
-                        {/* Category flair pill */}
-                        <div className="flex items-center gap-2 mb-3">
-                          <span
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold"
-                            style={{ 
-                              backgroundColor: p.category === 'announcement' ? '#ff444412' : `${theme.rawColor}12`, 
-                              color: p.category === 'announcement' ? '#ff4444' : theme.rawColor 
-                            }}
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: p.category === 'announcement' ? '#ff4444' : theme.rawColor }} />
-                            {p.category === 'discussion' && 'Discussion'}
-                            {p.category === 'doubt' && 'Doubt'}
-                            {p.category === 'poll' && 'Poll'}
-                            {p.category === 'question' && 'Exam Prep'}
-                            {p.category === 'resource' && 'Resource'}
-                            {p.category === 'announcement' && '📢 Announcement'}
-                          </span>
-                        </div>
-
-                        {/* Body text — clean, readable (Reddit-style collapsed) */}
-                        <div 
-                          className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal mb-3 wysiwyg-content post-collapsed-content" 
-                          style={{ lineHeight: '1.7' }}
-                          dangerouslySetInnerHTML={{ __html: renderFormattedContent(p.content) }}
-                        />
-
-                        {/* Tags */}
-                        {p.tags && p.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mb-3">
-                            {p.tags.map(t => (
-                              <span key={t} className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400">{t}</span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Bottom action bar — Reddit style */}
-                      <div className="flex items-center gap-1 px-2.5 pb-2.5 pt-0.5">
-                        {/* Upvote / count / Downvote pill */}
-                        <div className="flex items-center bg-zinc-100 dark:bg-white/[0.06] rounded-full">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleReaction(p.id, 'post', 'helpful'); }}
-                            className={`w-9 h-9 rounded-full flex items-center justify-center border-none cursor-pointer transition-all ${
-                              isHelpful
-                                ? 'text-white'
-                                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent hover:bg-zinc-200 dark:hover:bg-white/10'
-                            }`}
-                            style={isHelpful ? { color: theme.rawColor } : undefined}
-                          >
-                            <ArrowBigUp size={20} fill={isHelpful ? theme.rawColor : 'none'} />
-                          </button>
-                          <span className={`text-xs font-bold min-w-[20px] text-center ${
-                            isHelpful || isDownvoted ? '' : 'text-zinc-600 dark:text-zinc-300'
-                          }`} style={isHelpful ? { color: theme.rawColor } : isDownvoted ? { color: '#3b82f6' } : undefined}>
-                            {netScore}
-                          </span>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleReaction(p.id, 'post', 'quality'); }}
-                            className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center border-none cursor-pointer transition-all ${
-                              isDownvoted
-                                ? 'text-white'
-                                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent hover:bg-zinc-200 dark:hover:bg-white/10'
-                            }`}
-                            style={isDownvoted ? { color: '#3b82f6' } : undefined}
-                          >
-                            <ArrowBigDown size={20} fill={isDownvoted ? '#3b82f6' : 'none'} />
-                          </button>
-                        </div>
-
-                        {/* Comments button */}
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setSelectedPost(p); }}
-                          className="flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.06] bg-transparent border-none cursor-pointer transition-all"
-                        >
-                          <MessageSquare size={16} /> {commentsCount}
-                        </button>
-
-                        {/* Share button */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigator.clipboard.writeText(window.location.href);
-                            showToast('Link copied!', 'success');
-                          }}
-                          className="flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.06] bg-transparent border-none cursor-pointer transition-all"
-                        >
-                          <Share2 size={15} /> Share
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
+                      );
+                    }
+                  });
+                })()}
               </div>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* 4. REQUESTS TAB */}
-      {activeTab === 'requests' && (
-        <div className="space-y-5 animate-fade-in">
-          {showCreateRequest ? (
-            // ────────────────────────────────────────────────────────
-            // INLINE CREATE REQUEST VIEW
-            // ────────────────────────────────────────────────────────
-            <div className="space-y-4">
-              {/* Back button */}
-              <button 
-                type="button"
-                onClick={() => setShowCreateRequest(false)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all self-start"
-              >
-                <ArrowLeft size={14} /> Back to Requests
-              </button>
-
-              <div className="bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/[0.06] rounded-3xl p-6 shadow-sm flex flex-col">
-                {/* Header */}
-                <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100 dark:border-white/5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black" style={{ backgroundColor: theme.rawColor }}>
-                      {subjectCode.slice(0, 2)}
-                    </div>
-                    <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{subjectCode}</span>
-                    <span className="text-[10px] font-semibold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full flex items-center gap-1"><Trophy size={9} /> Bounty Request</span>
-                  </div>
-                </div>
-
-                <form onSubmit={handleRequestSubmit} className="flex flex-col pt-4">
-                  {/* Title */}
-                  <div className="pb-2">
-                    <input
-                      type="text"
-                      value={reqTitle}
-                      onChange={(e) => setReqTitle(e.target.value)}
-                      placeholder="What material do you need?*"
-                      className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-bold text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-600 focus:ring-0"
-                      required
-                      autoFocus
-                    />
-                  </div>
-
-                  {/* Bounty XP row */}
-                  <div className="pb-3 flex items-center gap-3">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold border border-amber-400/40 bg-amber-400/8 text-amber-500">
-                      <Trophy size={11} />
-                      <span>{reqBounty} XP Bounty</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={10}
-                      max={500}
-                      step={10}
-                      value={reqBounty}
-                      onChange={(e) => setReqBounty(Number(e.target.value))}
-                      className="flex-1 h-1.5 rounded-full appearance-none bg-zinc-200 dark:bg-white/10 cursor-pointer"
-                      style={{ accentColor: theme.rawColor }}
-                    />
-                    <input
-                      type="number"
-                      value={reqBounty}
-                      onChange={(e) => setReqBounty(Number(e.target.value))}
-                      min={10}
-                      max={500}
-                      className="w-16 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-[11px] font-bold text-center outline-none text-zinc-800 dark:text-white"
-                    />
-                  </div>
-
-                  <div className="border-t border-zinc-100 dark:border-white/5" />
-
-                  {/* WYSIWYG Body Editor */}
-                  <div className="relative pt-4 pb-3">
-                    <div
-                      ref={reqEditorRef}
-                      contentEditable
-                      data-placeholder="Describe what you need in detail — unit, topic, type of material...*"
-                      onInput={() => setReqContent(getEditorText(reqEditorRef))}
-                      onKeyDown={handleEditorKeyDown}
-                      className="w-full min-h-[180px] bg-transparent border-none outline-none text-[13px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-300 dark:empty:before:text-zinc-600 empty:before:pointer-events-none wysiwyg-editor"
-                      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
-                      suppressContentEditableWarning
-                    />
-                    {renderFloatingLanguageDropdown(reqEditorRef)}
-                  </div>
-
-                  {/* Formatting Toolbar */}
-                  <div className="pb-4">
-                    <div className="flex items-center gap-0.5 flex-wrap">
-                      {renderToolbar(buildToolbarItems(reqEditorRef, { full: true }), 'rq')}
-                      {imageUploading && <span className="text-[10px] text-zinc-400 ml-2 animate-pulse">Uploading...</span>}
-                    </div>
-                  </div>
-
-                  {/* Footer */}
-                  <div className="flex items-center justify-end gap-2.5 pt-3.5 border-t border-zinc-100 dark:border-white/5">
-                    <button
-                      type="button"
-                      onClick={() => setShowCreateRequest(false)}
-                      className="px-5 py-2.5 rounded-full text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 bg-transparent border border-zinc-200 dark:border-white/10 cursor-pointer transition-all outline-none"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={!reqTitle.trim() || !reqContent.trim()}
-                      style={{
-                        backgroundColor: (!reqTitle.trim() || !reqContent.trim()) ? undefined : theme.rawColor,
-                        opacity: (!reqTitle.trim() || !reqContent.trim()) ? 0.4 : 1
-                      }}
-                      className={`px-6 py-2.5 rounded-full text-xs font-bold border-none cursor-pointer transition-all outline-none ${
-                        (!reqTitle.trim() || !reqContent.trim())
-                          ? 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
-                          : 'text-white hover:opacity-90 active:scale-95'
-                      }`}
-                    >
-                      Post Bounty Request
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          ) : (
-            // ────────────────────────────────────────────────────────
-            // REGULAR REQUESTS FEED
-            // ────────────────────────────────────────────────────────
-            <>
-              {/* Reddit-style create request prompt */}
-              <div
-                onClick={() => setShowCreateRequest(true)}
-                className="flex items-center gap-3 p-3 bg-white dark:bg-[#111113] border border-zinc-200 dark:border-white/8 rounded-2xl cursor-pointer hover:border-zinc-300 dark:hover:border-white/15 transition-all group"
-              >
-                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${theme.rawColor}15` }}>
-                  <HelpCircle size={16} style={{ color: theme.rawColor }} />
-                </div>
-                <div className="flex-1 py-2 px-3 rounded-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/8 group-hover:border-zinc-300 dark:group-hover:border-white/15 transition-colors">
-                  <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Request study material with bounty...</span>
-                </div>
-                <div className="px-3 py-1.5 rounded-full text-[10px] font-bold flex items-center gap-1" style={{ backgroundColor: `${theme.rawColor}12`, color: theme.rawColor }}>
-                  <Trophy size={11} /> Bounty
-                </div>
-              </div>
-
-              {/* Requests list */}
-              <div className="space-y-4">
-                {requests.map((r) => (
-                  <div key={r.id} className="p-5 bg-white dark:bg-[#111113] border-none rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
-                    <div className="min-w-0 flex-1 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <img src={r.user_avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'} className="w-6 h-6 rounded-full" />
-                        <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">{r.user_username} asked {new Date(r.created_at).toLocaleDateString()}</span>
-                      </div>
-                      <h4 className="text-xs font-black text-zinc-950 dark:text-white leading-tight">
-                        {r.title}
-                      </h4>
-                      <div 
-                        className="text-xs text-zinc-500 dark:text-zinc-400 font-medium wysiwyg-content"
-                        dangerouslySetInnerHTML={{ __html: renderFormattedContent(r.content) }}
-                      />
-                    </div>
-
-                    <div className="flex items-center gap-3 shrink-0">
-                      <div className="px-3 py-1.5 border rounded-xl text-xs font-semibold" style={{ backgroundColor: `${theme.rawColor}15`, borderColor: `${theme.rawColor}30`, color: theme.rawColor }}>
-                        +{r.bounty_xp} XP Bounty
-                      </div>
-
-                      {r.status === 'open' ? (
-                        <button
-                          onClick={() => {
-                            if (!userProfile) {
-                              showToast("Please login to solve requests", "info");
-                              return;
-                            }
-                            // Fire file uploader
-                            onUploadClick();
-                            showToast("Upload the file to this subject folder first to solve!", "info");
-                          }}
-                          style={{ backgroundColor: theme.rawColor }}
-                          className="px-4 py-2 text-white rounded-xl text-xs font-bold border-none cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                        >
-                          Solve Request
-                        </button>
-                      ) : (
-                        <span className="px-3 py-1.5 bg-emerald-500/10 text-emerald-500 rounded-xl text-xs font-bold">Solved</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
         </div>
       )}
 
@@ -6134,52 +5210,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
 
 
-      {/* 7. LEADERBOARD TAB */}
-      {activeTab === 'leaderboard' && (
-        <div className="max-w-xl mx-auto bg-gradient-to-br from-white to-zinc-50/50 dark:from-[#121214] dark:to-[#0c0c0e] border border-zinc-150 dark:border-white/5 rounded-3xl p-5 md:p-6 space-y-6 shadow-sm animate-fade-in">
-          <div className="text-center space-y-1">
-            <h3 className="text-sm font-semibold text-zinc-950 dark:text-white uppercase tracking-wider flex items-center justify-center gap-2">
-              <Trophy className="w-4 h-4 text-amber-500" /> Subject Leaders (All-Time)
-            </h3>
-            <p className="text-[10px] text-zinc-400 font-medium">Top contributors by study XP earned in {subjectCode}</p>
-          </div>
-
-          <div className="space-y-3.5 pt-3">
-            {leaderboardList.length > 0 ? (
-              leaderboardList.map((s, idx) => (
-                <div key={idx} className="flex justify-between items-center gap-4 bg-zinc-50/30 dark:bg-white/[0.02] border border-zinc-150/40 dark:border-white/5 p-3.5 rounded-2xl hover:bg-zinc-100/50 dark:hover:bg-white/[0.04] transition-all duration-200">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0" style={{ backgroundColor: `${theme.rawColor}15`, color: theme.rawColor }}>
-                      {idx + 1}
-                    </div>
-                    <div>
-                      <div className="text-xs sm:text-sm font-semibold text-zinc-800 dark:text-zinc-200">{s.username || 'Anonymous Verto'}</div>
-                      <div className="text-[9px] text-zinc-400 dark:text-zinc-500 font-medium">
-                        {s.level_title || 'Scholar'} • Lv.{s.level || 1}
-                        {s.files_count !== undefined && (
-                          <span className="ml-1.5 opacity-80">
-                            • {s.files_count} {s.files_count === 1 ? 'file' : 'files'} • {s.posts_count} {s.posts_count === 1 ? 'post' : 'posts'} • {s.requests_count} {s.requests_count === 1 ? 'request' : 'requests'}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-xs sm:text-sm font-bold" style={{ color: theme.rawColor }}>
-                    +{s.total_xp} XP
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-10 text-zinc-450 dark:text-zinc-500 text-xs">No contributors on the leaderboard yet.</div>
-            )}
-          </div>
-        </div>
-      )}
-
-
-
-      {/* 9. PEOPLE TAB */}
-      {activeTab === 'people' && (
+      {/* 9. PEOPLE TAB (Faculty, Top Contributors & Moderators) */}
+      {(activeTab === 'people' || activeTab === 'leaderboard') && (
         <div className="space-y-6 animate-fade-in">
           {/* Faculty section */}
           <div className="space-y-3">
@@ -6213,13 +5245,15 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5"><Trophy className="w-3.5 h-3.5" /> Top Contributors</h3>
               <div className="divide-y divide-zinc-100 dark:divide-white/5 border border-zinc-150 dark:border-white/5 rounded-2xl overflow-hidden bg-white dark:bg-[#0c0c0e]">
                 {leaderboardList.length > 0 ? (
-                  leaderboardList.slice(0, 3).map((c, idx) => (
+                  leaderboardList.map((c, idx) => (
                     <div key={idx} className="p-3.5 flex items-center justify-between text-xs">
                       <div className="font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
                         <span className="text-[10px] font-black px-1.5 py-0.5 bg-zinc-100 dark:bg-white/5 rounded text-zinc-500">{idx + 1}</span>
                         {c.username || 'Anonymous Verto'}
                       </div>
-                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-lg" style={{ color: theme.rawColor, backgroundColor: `${theme.rawColor}15` }}>{c.level_title || 'Scholar'}</span>
+                      <span className="text-xs font-bold" style={{ color: theme.rawColor }}>
+                        +{c.total_xp} XP
+                      </span>
                     </div>
                   ))
                 ) : (

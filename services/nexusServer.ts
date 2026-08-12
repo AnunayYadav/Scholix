@@ -1227,6 +1227,7 @@ class NexusServer {
     
     // Primary sort: display_order, Secondary sort: name
     const { data } = await query
+      .range(0, 9999)
       .order('display_order', { ascending: true, nullsFirst: false })
       .order('name', { ascending: true });
       
@@ -1296,6 +1297,12 @@ class NexusServer {
     if (!client) return;
     
     const dbId = folder.id.split('-dup-')[0];
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(dbId)) {
+      // If it's a default/virtual ID, create it as a real folder in DB
+      return await this.createFolder(newName, folder.type, folder.parent_id, folder.program, iconName || folder.icon_name, color || folder.color, (folder as any).university);
+    }
+
     const updateData: any = { name: newName };
     if (iconName !== undefined) updateData.icon_name = iconName;
     if (color !== undefined) updateData.color = color;
@@ -1303,6 +1310,27 @@ class NexusServer {
     const { error } = await client.from('library_items').update(updateData).eq('id', dbId);
     if (error) {
       console.error("Rename Folder Error:", error);
+      throw new Error(error.message);
+    }
+  }
+
+  static async deleteFolder(id: string) {
+    const client = getSupabase();
+    if (!client) return;
+    const dbId = id.split('-dup-')[0];
+
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(dbId)) {
+      console.log("Delete Folder skipped for non-DB virtual/default ID:", id);
+      return;
+    }
+
+    // Delete subfolders if any
+    await client.from('library_items').delete().eq('parent_id', dbId);
+
+    const { error } = await client.from('library_items').delete().eq('id', dbId);
+    if (error) {
+      console.error("Delete Folder Error:", error);
       throw new Error(error.message);
     }
   }
@@ -1367,16 +1395,7 @@ class NexusServer {
     }
   }
 
-  static async deleteFolder(id: string) {
-    const client = getSupabase();
-    if (!client) return;
-    const dbId = id.split('-dup-')[0];
-    const { error } = await client.from('library_items').delete().eq('id', dbId);
-    if (error) {
-      console.error("Delete Folder Error:", error);
-      throw new Error(error.message);
-    }
-  }
+
 
   static async fetchFiles(program: string, q?: string): Promise<LibraryFile[]> {
     const client = getSupabase();
