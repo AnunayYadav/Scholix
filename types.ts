@@ -296,6 +296,7 @@ export interface Folder {
   color?: string;
   display_order?: number;
   description?: string;
+  semester?: string;
 }
 
 export interface Flashcard {

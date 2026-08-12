@@ -1335,16 +1335,80 @@ class NexusServer {
     }
   }
 
-  static async updateSubjectSection(subjectId: string, sectionName: string, sectionOrder?: number) {
+  static async updateSubjectSection(folderOrId: Folder | string, sectionName: string, sectionOrder?: number) {
     const client = getSupabase();
     if (!client) return;
-    const dbId = subjectId.split('-dup-')[0];
 
+    let dbId = typeof folderOrId === 'string' ? folderOrId.split('-dup-')[0] : folderOrId.id.split('-dup-')[0];
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(dbId)) return;
+
+    let descObj: any = {};
+    const newDesc = JSON.stringify({ section: sectionName, section_order: sectionOrder });
+
+    if (!uuidRegex.test(dbId)) {
+      if (typeof folderOrId === 'object') {
+        const folder = folderOrId;
+        let parentId = folder.parent_id ? folder.parent_id.split('-dup-')[0] : null;
+
+        // Ensure parent semester exists in DB if it's virtual
+        if (parentId && !uuidRegex.test(parentId)) {
+          const { data: semRow } = await client.from('library_items')
+            .select('id')
+            .eq('type', 'semester')
+            .eq('program', folder.program)
+            .ilike('name', folder.semester || '')
+            .maybeSingle();
+          if (semRow) {
+            parentId = semRow.id;
+          } else if (folder.semester) {
+            await this.createFolder(folder.semester, 'semester', null, folder.program);
+            const { data: newSemRow } = await client.from('library_items')
+              .select('id')
+              .eq('type', 'semester')
+              .eq('program', folder.program)
+              .ilike('name', folder.semester)
+              .maybeSingle();
+            if (newSemRow) parentId = newSemRow.id;
+          }
+        }
+
+        // Check if a row with matching name & program already exists in DB
+        const { data: existingSub } = await client.from('library_items')
+          .select('id, description')
+          .eq('type', 'subject')
+          .eq('program', folder.program)
+          .ilike('name', folder.name)
+          .maybeSingle();
+
+        if (existingSub) {
+          let curDesc: any = {};
+          if (existingSub.description) {
+            try { curDesc = JSON.parse(existingSub.description); } catch (e) { curDesc = { text: existingSub.description }; }
+          }
+          curDesc.section = sectionName;
+          if (sectionOrder !== undefined) curDesc.section_order = sectionOrder;
+
+          await client.from('library_items').update({
+            description: JSON.stringify(curDesc)
+          }).eq('id', existingSub.id);
+        } else {
+          // Insert new row into library_items
+          await client.from('library_items').insert([{
+            name: folder.name,
+            type: 'subject',
+            parent_id: parentId,
+            program: folder.program,
+            description: newDesc,
+            icon_name: folder.icon_name || 'Folder',
+            color: folder.color || '#ff7a00',
+            university: (folder as any).university || (isIITMProgram(folder.program) ? 'iitmuni' : 'lpu')
+          }]);
+        }
+      }
+      return;
+    }
 
     const { data } = await client.from('library_items').select('description').eq('id', dbId).maybeSingle();
-    let descObj: any = {};
     if (data?.description) {
       try {
         descObj = JSON.parse(data.description);
@@ -1360,9 +1424,9 @@ class NexusServer {
     }).eq('id', dbId);
   }
 
-  static async batchUpdateSubjectSections(updates: { subjectId: string; sectionName: string; sectionOrder?: number }[]) {
+  static async batchUpdateSubjectSections(updates: { folder: Folder; sectionName: string; sectionOrder?: number }[]) {
     try {
-      const promises = updates.map(u => this.updateSubjectSection(u.subjectId, u.sectionName, u.sectionOrder));
+      const promises = updates.map(u => this.updateSubjectSection(u.folder, u.sectionName, u.sectionOrder));
       await Promise.all(promises);
     } catch (e) {
       console.error("batchUpdateSubjectSections failed:", e);

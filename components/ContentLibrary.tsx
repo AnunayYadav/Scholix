@@ -591,7 +591,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     setIsProcessing(true);
     try {
       const updates = groupItems.map(f => ({
-        subjectId: f.id,
+        folder: f,
         sectionName: cleanNewName,
         sectionOrder: sectionOrders[oldName]
       }));
@@ -631,12 +631,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
     // Assign explicit sequential orders to ALL groups
     const newOrders: Record<string, number> = {};
-    const updates: { subjectId: string; sectionName: string; sectionOrder: number }[] = [];
+    const updates: { folder: Folder; sectionName: string; sectionOrder: number }[] = [];
 
     newGroups.forEach((g, idx) => {
       newOrders[g.name] = idx;
       g.items.forEach(f => {
-        updates.push({ subjectId: f.id, sectionName: g.name, sectionOrder: idx });
+        updates.push({ folder: f, sectionName: g.name, sectionOrder: idx });
       });
     });
 
@@ -652,6 +652,36 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       showToast("Error saving section order: " + e.message, "error");
     }
   };
+
+  // Restore saved section orders and custom sections from Supabase library_items on load
+  useEffect(() => {
+    if (!folders || folders.length === 0) return;
+    const loadedOrders: Record<string, number> = {};
+    const loadedExtra: string[] = [];
+
+    folders.forEach(f => {
+      if (f.description) {
+        try {
+          const parsed = JSON.parse(f.description);
+          if (parsed && parsed.section) {
+            if (parsed.section_order !== undefined) {
+              loadedOrders[parsed.section] = parsed.section_order;
+            }
+            if (!loadedExtra.includes(parsed.section)) {
+              loadedExtra.push(parsed.section);
+            }
+          }
+        } catch (e) {}
+      }
+    });
+
+    if (Object.keys(loadedOrders).length > 0) {
+      setSectionOrders(prev => ({ ...loadedOrders, ...prev }));
+    }
+    if (loadedExtra.length > 0) {
+      setExtraSections(prev => Array.from(new Set([...prev, ...loadedExtra])));
+    }
+  }, [folders]);
 
   useEffect(() => {
     if (showUploadModal || showEditModal) {
