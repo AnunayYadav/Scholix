@@ -2593,9 +2593,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 <div className="space-y-2">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Choose Icon Logo</p>
                   <div className="grid grid-cols-6 gap-2 bg-zinc-100 dark:bg-[#0a0a0a]/40 p-3 rounded-xl border border-transparent dark:border-white/5">
-                    {['Folder', 'Landmark', 'Sigma', 'Code', 'Cpu', 'Monitor', 'Globe', 'Database', 'Terminal', 'BookOpen', 'HelpCircle', 'Video'].map(ico => {
-                      const IconMap: { [key: string]: any } = { Folder: FolderIconLucide, Landmark, Sigma, Code, Cpu, Monitor, Globe, Database, Terminal, BookOpen, HelpCircle, Video };
-                      const IconComponent = IconMap[ico];
+                    {['Folder', 'Landmark', 'Sigma', 'Code', 'Cpu', 'Monitor', 'Globe', 'Database', 'Terminal', 'BookOpen', 'HelpCircle', 'Video', 'Languages', 'MessageSquare', 'Compass', 'FileText', 'Star'].map(ico => {
+                      const IconMap: { [key: string]: any } = { Folder: FolderIconLucide, Landmark, Sigma, Code, Cpu, Monitor, Globe, Database, Terminal, BookOpen, HelpCircle, Video, Languages, MessageSquare, Compass, FileText, Star };
+                      const IconComponent = IconMap[ico] || FolderIconLucide;
                       const isSel = folderIcon === ico;
                       return (
                         <button
@@ -2656,9 +2656,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 <div className="space-y-2">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Choose Icon Logo</p>
                   <div className="grid grid-cols-6 gap-2 bg-zinc-100 dark:bg-[#0a0a0a]/40 p-3 rounded-xl border border-transparent dark:border-white/5">
-                    {['Folder', 'Landmark', 'Sigma', 'Code', 'Cpu', 'Monitor', 'Globe', 'Database', 'Terminal', 'BookOpen', 'HelpCircle', 'Video'].map(ico => {
-                      const IconMap: { [key: string]: any } = { Folder: FolderIconLucide, Landmark, Sigma, Code, Cpu, Monitor, Globe, Database, Terminal, BookOpen, HelpCircle, Video };
-                      const IconComponent = IconMap[ico];
+                    {['Folder', 'Landmark', 'Sigma', 'Code', 'Cpu', 'Monitor', 'Globe', 'Database', 'Terminal', 'BookOpen', 'HelpCircle', 'Video', 'Languages', 'MessageSquare', 'Compass', 'FileText', 'Star'].map(ico => {
+                      const IconMap: { [key: string]: any } = { Folder: FolderIconLucide, Landmark, Sigma, Code, Cpu, Monitor, Globe, Database, Terminal, BookOpen, HelpCircle, Video, Languages, MessageSquare, Compass, FileText, Star };
+                      const IconComponent = IconMap[ico] || FolderIconLucide;
                       const isSel = folderIcon === ico;
                       return (
                         <button
@@ -3153,7 +3153,7 @@ const FolderCard: React.FC<{
         onDragLeave={onDragLeave}
         onDrop={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDrop(e); }}
         onClick={(e) => { if (isDragging) e.preventDefault(); }}
-        className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden"
+        className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border-none bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden"
       >
         {isAdmin && !isVirtual && (
           <div className="absolute top-2.5 right-2.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
@@ -3219,7 +3219,7 @@ const FolderCard: React.FC<{
         onDragLeave={onDragLeave}
         onDrop={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDrop(e); }}
         onClick={(e) => { if (isDragging) e.preventDefault(); }}
-        className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden"
+        className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border-none bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden"
       >
         {isAdmin && !isVirtual && (
           <div className="absolute top-2.5 right-2.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
@@ -3314,7 +3314,7 @@ const StaticFolderCard: React.FC<{
   const ltpText = metadata ? `L-T-P: ${metadata.l}-${metadata.t}-${metadata.p}` : "L-T-P: 3-0-2";
 
   return (
-    <div className="p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] flex items-center justify-between min-h-[70px] relative overflow-hidden">
+    <div className="p-3 sm:p-3.5 rounded-2xl border-none bg-white dark:bg-[#111113] flex items-center justify-between min-h-[70px] relative overflow-hidden">
       <div className="flex items-center gap-3.5 min-w-0">
         <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: rawTheme.rawColor }}>
           {React.isValidElement(rawTheme.icon) ? React.cloneElement(rawTheme.icon as React.ReactElement, { className: 'w-5 h-5 text-white' }) : rawTheme.icon}

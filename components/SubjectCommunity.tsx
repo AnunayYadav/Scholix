@@ -3500,7 +3500,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
           ) : (
             <>
               {/* Desktop Table View */}
-              <div className="hidden sm:block w-full overflow-hidden border border-zinc-150 dark:border-white/5 rounded-3xl bg-white dark:bg-[#111113] shadow-sm">
+              <div className="hidden sm:block w-full overflow-hidden border-none rounded-3xl bg-white dark:bg-[#111113] shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-left">
                     <thead>
@@ -3685,7 +3685,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                     <div 
                       key={file.id}
                       onClick={() => handleOpenFile(file)}
-                      className="p-4 bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/5 rounded-2xl flex flex-col gap-3 relative hover:border-zinc-200 dark:hover:border-white/10 transition-all cursor-pointer"
+                      className="p-4 bg-white dark:bg-[#111113] border-none rounded-2xl flex flex-col gap-3 relative transition-all cursor-pointer"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
@@ -3917,7 +3917,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
             <div className="space-y-6 animate-fade-in">
               {/* Continue Studying Card (Thin & Clean) */}
               {userProfile && continueStudyingFile && (
-                <div className="p-2.5 sm:p-3 bg-white dark:bg-[#111113] border border-zinc-200/60 dark:border-white/[0.06] rounded-2xl flex items-center justify-between gap-3 shadow-sm hover:border-zinc-300 dark:hover:border-white/10 transition-all">
+                <div className="p-2.5 sm:p-3 bg-white dark:bg-[#111113] border-none rounded-2xl flex items-center justify-between gap-3 shadow-sm transition-all">
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     <span className="text-xs font-bold shrink-0" style={{ color: theme.rawColor }}>
                       {continueStudyingFile.percent === 0 ? "Start Studying" : continueStudyingFile.percent === 100 ? "Completed" : "Continue Studying"}
@@ -3978,7 +3978,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                         <div
                           key={cat.id}
                           onClick={() => setActiveCategoryFolder(cat)}
-                          className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden cursor-pointer"
+                          className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border-none bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden cursor-pointer"
                         >
                           {(userProfile?.is_admin || isAdmin) && (onEditFolder || onDeleteFolder) && (
                             <div className="absolute top-2.5 right-2.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
@@ -4054,7 +4054,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                 ) : (
                   <>
                     {/* Desktop Table View */}
-                    <div className="hidden sm:block overflow-x-auto no-scrollbar border border-zinc-150 dark:border-white/5 rounded-2xl bg-white dark:bg-[#111113]">
+                    <div className="hidden sm:block overflow-x-auto no-scrollbar border-none rounded-2xl bg-white dark:bg-[#111113]">
                       <table className="w-full text-left border-collapse min-w-[600px]">
                         <thead>
                           <tr className="border-b border-zinc-150 dark:border-white/5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 bg-zinc-50/50 dark:bg-white/[0.005]">
@@ -4137,7 +4137,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                           <div 
                             key={file.id}
                             onClick={() => handleOpenFile(file)}
-                            className="p-4 bg-white dark:bg-[#111113] border border-zinc-150 dark:border-white/5 rounded-2xl flex flex-col gap-3 relative hover:border-zinc-200 dark:hover:border-white/10 transition-all cursor-pointer"
+                            className="p-4 bg-white dark:bg-[#111113] border-none rounded-2xl flex flex-col gap-3 relative transition-all cursor-pointer"
                           >
                             <div className="flex items-start justify-between gap-3">
                               <div className="flex items-center gap-3 min-w-0">
