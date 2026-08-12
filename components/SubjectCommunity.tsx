@@ -970,6 +970,34 @@ const cleanHtmlForEditor = (content: string): string => {
   }
 };
 
+const getUnitLabel = (fileName: string, description?: string): string | null => {
+  const text = `${fileName || ''} ${description || ''}`;
+
+  // 1. Match Unit ranges e.g. "Unit 1 to Unit 6", "Unit 1 - Unit 6", "Unit 1 to 6", "Unit 1-6", "Unit 1 - 6", "U1 to U6", "U1-U6"
+  const rangeMatch = text.match(/Unit\s*(\d+)\s*(?:to|-|through|until|~)\s*(?:Unit\s*)?(\d+)/i) ||
+                     text.match(/\bU(\d+)\s*(?:to|-|through|~)\s*(?:U)?(\d+)\b/i);
+  if (rangeMatch) {
+    const start = rangeMatch[1];
+    const end = rangeMatch[2];
+    if (start === end) return `Unit ${start}`;
+    return `Unit ${start}-${end}`;
+  }
+
+  // 2. Match Multiple units e.g. "Unit 1 & 2", "Unit 1 and 2", "Unit 1, 2"
+  const multiMatch = text.match(/Unit\s*(\d+)\s*(?:&|and|,)\s*(?:Unit\s*)?(\d+)/i);
+  if (multiMatch) {
+    return `Unit ${multiMatch[1]} & ${multiMatch[2]}`;
+  }
+
+  // 3. Match Single unit e.g. "Unit 1", "Unit1", "U1"
+  const singleMatch = text.match(/Unit\s*(\d+)/i) || text.match(/\bU(\d+)\b/i);
+  if (singleMatch) {
+    return `Unit ${singleMatch[1]}`;
+  }
+
+  return null;
+};
+
 const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   activeSubject,
   activeSemester,
@@ -2928,15 +2956,24 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     try {
       const client = NexusServer.getClient();
       if (!client) return;
+
+      const catFolder = categories.find(c => c.name.toLowerCase().trim() === editForm.type.toLowerCase().trim());
+
+      const updatePayload: any = {
+        name: editForm.name,
+        description: editForm.description,
+        type: 'file',
+        display_order: editForm.display_order,
+        updated_at: new Date().toISOString()
+      };
+
+      if (catFolder) {
+        updatePayload.parent_id = catFolder.id;
+      }
+
       const { error } = await client
         .from('library_items')
-        .update({
-          name: editForm.name,
-          description: editForm.description,
-          type: editForm.type,
-          display_order: editForm.display_order,
-          updated_at: new Date().toISOString()
-        })
+        .update(updatePayload)
         .eq('id', selectedFileToEdit.id);
 
       if (error) throw error;
@@ -3642,7 +3679,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
                   const avatarSeed = file.uploader_username || file.uploader_id || file.name;
                   const uploaderName = file.uploader_username || file.faculty_name || "Faculty";
-                  const unitMatch = file.name.match(/Unit\s*(\d+)/i) || (file.description && file.description.match(/Unit\s*(\d+)/i));
+                  const unitText = getUnitLabel(file.name, file.description);
 
                   return (
                     <div 
@@ -3680,9 +3717,9 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                               <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase">
                                 {ext || 'pdf'} • {file.size || '2.4 MB'}
                               </span>
-                              {unitMatch && (
+                              {unitText && (
                                 <span className="px-1.5 py-0.5 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-white/5 rounded text-[8px] font-bold text-zinc-500 dark:text-zinc-400">
-                                  Unit {unitMatch[1]}
+                                  {unitText}
                                 </span>
                               )}
                             </div>
@@ -4295,11 +4332,11 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                                   {/* Unit column */}
                                   <td className="py-3.5 px-3 text-center">
                                     {(() => {
-                                      const match = file.name.match(/Unit\s*(\d+)/i) || (file.description && file.description.match(/Unit\s*(\d+)/i));
-                                      if (match) {
+                                      const unitText = getUnitLabel(file.name, file.description);
+                                      if (unitText) {
                                         return (
                                           <span className="px-2.5 py-1 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-white/5 rounded-lg text-[9px] font-bold text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
-                                            Unit {match[1]}
+                                            {unitText}
                                           </span>
                                         );
                                       }
@@ -4389,7 +4426,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
                         const avatarSeed = file.uploader_username || file.uploader_id || file.name;
                         const uploaderName = file.uploader_username || file.faculty_name || "Faculty";
-                        const unitMatch = file.name.match(/Unit\s*(\d+)/i) || (file.description && file.description.match(/Unit\s*(\d+)/i));
+                        const unitText = getUnitLabel(file.name, file.description);
 
                         return (
                           <div 
@@ -4427,11 +4464,11 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                                     <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase">
                                       {ext || 'pdf'} • {file.size || '2.4 MB'}
                                     </span>
-                                    {unitMatch && (
-                                      <span className="px-1.5 py-0.5 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-white/5 rounded text-[8px] font-bold text-zinc-500 dark:text-zinc-400">
-                                        Unit {unitMatch[1]}
-                                      </span>
-                                    )}
+                                    {unitText && (
+                                       <span className="px-1.5 py-0.5 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-white/5 rounded text-[8px] font-bold text-zinc-500 dark:text-zinc-400">
+                                         {unitText}
+                                       </span>
+                                     )}
                                   </div>
                                 </div>
                               </div>
@@ -5700,10 +5737,11 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   setMenuAnchorRect(null);
                   if (file) {
                     setSelectedFileToEdit(file);
+                    const parentCatFolder = categories.find(c => c.id === file.parent_id);
                     setEditForm({
                       name: file.name,
                       description: file.description || '',
-                      type: file.type || '',
+                      type: parentCatFolder?.name || 'Notes',
                       display_order: file.display_order || 0
                     });
                     setShowEditModal(true);
