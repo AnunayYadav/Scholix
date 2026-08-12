@@ -579,8 +579,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     const secName = window.prompt("Enter new Section Name (e.g. Project & Lab Elective Basket):");
     if (!secName || !secName.trim()) return;
     const cleanSecName = secName.trim();
-    setExtraSections(prev => Array.from(new Set([...prev, cleanSecName])));
-    showToast(`Section "${cleanSecName}" created!`, "success");
+    handleAddSubjectToSection(cleanSecName);
   };
 
   const handleRenameSection = async (oldName: string, groupItems: Folder[]) => {
@@ -1894,12 +1893,6 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           {(() => {
                             const groups: { name: string; items: Folder[] }[] = [];
 
-                            extraSections.forEach(secName => {
-                              if (!groups.some(g => g.name === secName)) {
-                                groups.push({ name: secName, items: [] });
-                              }
-                            });
-
                             currentFolders.forEach(f => {
                               const groupName = getFolderNameSection(f);
                               let group = groups.find(g => g.name === groupName);
@@ -1910,7 +1903,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                               group.items.push(f);
                             });
 
-                            groups.sort((a, b) => {
+                            const visibleGroups = groups.filter(g => g.items.length > 0);
+
+                            visibleGroups.sort((a, b) => {
                               const orderA = sectionOrders[a.name];
                               const orderB = sectionOrders[b.name];
                               if (orderA !== undefined && orderB !== undefined) return orderA - orderB;
@@ -1929,7 +1924,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
                             return (
                               <>
-                                {groups.map((group, groupIdx) => (
+                                {visibleGroups.map((group, groupIdx) => (
                                   <div key={group.name} className="space-y-4">
                                     <div className="flex items-center justify-between border-b border-zinc-150 dark:border-white/5 pb-2.5 mb-2 mt-4">
                                       <div className="flex items-center gap-2 min-w-0">
@@ -3149,10 +3144,6 @@ const FolderCard: React.FC<{
     const semIdx = Math.max(0, (parseInt(semNum) - 1)) % semesterColors.length;
     const semColor = (folder.color && folder.color !== '#ff7a00') ? folder.color : semesterColors[semIdx];
     
-    let subtitle = "Upcoming";
-    if (semNum === '1') subtitle = "Foundation";
-    else if (semNum === '2') subtitle = "In Progress";
-
     return (
       <Link
         to={toPath}
@@ -3181,8 +3172,6 @@ const FolderCard: React.FC<{
           <div className="min-w-0">
             <h4 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white leading-snug">{folder.name}</h4>
             <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
-              <span className="whitespace-nowrap shrink-0">{subtitle}</span>
-              <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
               <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
                 <BookOpen className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
                 {subjectsCount || 0} Subjects
