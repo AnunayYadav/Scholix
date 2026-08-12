@@ -1335,6 +1335,40 @@ class NexusServer {
     }
   }
 
+  static async updateSubjectSection(subjectId: string, sectionName: string, sectionOrder?: number) {
+    const client = getSupabase();
+    if (!client) return;
+    const dbId = subjectId.split('-dup-')[0];
+
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(dbId)) return;
+
+    const { data } = await client.from('library_items').select('description').eq('id', dbId).maybeSingle();
+    let descObj: any = {};
+    if (data?.description) {
+      try {
+        descObj = JSON.parse(data.description);
+      } catch (e) {
+        descObj = { text: data.description };
+      }
+    }
+    descObj.section = sectionName;
+    if (sectionOrder !== undefined) descObj.section_order = sectionOrder;
+
+    await client.from('library_items').update({
+      description: JSON.stringify(descObj)
+    }).eq('id', dbId);
+  }
+
+  static async batchUpdateSubjectSections(updates: { subjectId: string; sectionName: string; sectionOrder?: number }[]) {
+    try {
+      const promises = updates.map(u => this.updateSubjectSection(u.subjectId, u.sectionName, u.sectionOrder));
+      await Promise.all(promises);
+    } catch (e) {
+      console.error("batchUpdateSubjectSections failed:", e);
+    }
+  }
+
   static async updateSubjectDetails(
     subjectId: string, 
     oldSubjectName: string, 

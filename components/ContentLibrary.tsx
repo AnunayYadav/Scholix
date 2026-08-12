@@ -35,7 +35,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 import VerifiedBadge from './VerifiedBadge.tsx';
-import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft } from 'lucide-react';
+import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft, Plus, ArrowUp, ArrowDown, Pencil, Trash2 } from 'lucide-react';
 import { getProgramCurriculum, findSubjectMetadata } from '../data/curriculumData.ts';
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
 
@@ -538,6 +538,120 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     }, 250);
   };
   const [metaForm, setMetaForm] = useState({ name: '', description: '', semester: '', subject: '', type: '', program: selectedProgram });
+
+  // Section Management State & Handlers
+  const [targetSectionName, setTargetSectionName] = useState<string | null>(null);
+  const [sectionOrders, setSectionOrders] = useState<Record<string, number>>({});
+  const [extraSections, setExtraSections] = useState<string[]>([]);
+  const [activeSectionMenu, setActiveSectionMenu] = useState<string | null>(null);
+
+  const getFolderNameSection = useCallback((f: Folder) => {
+    if (f.description) {
+      try {
+        const parsed = JSON.parse(f.description);
+        if (parsed && parsed.section) return parsed.section as string;
+      } catch (e) {
+        if (!f.description.startsWith('{')) return f.description;
+      }
+    }
+    const meta = findSubjectMetadata(selectedProgram, f.name);
+    if (meta) {
+      if (meta.type === 'CR') return 'Core Courses';
+      const curriculum = getProgramCurriculum(selectedProgram);
+      const term = curriculum?.terms.find(t => t.termName.toLowerCase() === (activeSemester?.name || '').toLowerCase());
+      if (term) {
+        const basket = term.electiveBaskets.find(b => b.subjects.some(s => s.code === meta.code));
+        if (basket) return basket.name;
+      }
+    }
+    return 'Other / Custom Courses';
+  }, [selectedProgram, activeSemester]);
+
+  const handleAddSubjectToSection = (sectionName: string) => {
+    setTargetSectionName(sectionName);
+    setNewFolderName('');
+    setFolderIcon('Folder');
+    setFolderColor('#ff7a00');
+    setShowFolderModal(true);
+  };
+
+  const handleCreateNewSection = () => {
+    const secName = window.prompt("Enter new Section Name (e.g. Project & Lab Elective Basket):");
+    if (!secName || !secName.trim()) return;
+    const cleanSecName = secName.trim();
+    setExtraSections(prev => Array.from(new Set([...prev, cleanSecName])));
+    showToast(`Section "${cleanSecName}" created!`, "success");
+  };
+
+  const handleRenameSection = async (oldName: string, groupItems: Folder[]) => {
+    const newSecName = window.prompt(`Rename Section "${oldName}" to:`, oldName);
+    if (!newSecName || !newSecName.trim() || newSecName.trim() === oldName) return;
+    const cleanNewName = newSecName.trim();
+
+    setIsProcessing(true);
+    try {
+      const updates = groupItems.map(f => ({
+        subjectId: f.id,
+        sectionName: cleanNewName,
+        sectionOrder: sectionOrders[oldName]
+      }));
+      await NexusServer.batchUpdateSubjectSections(updates);
+
+      setSectionOrders(prev => {
+        const next = { ...prev };
+        if (next[oldName] !== undefined) {
+          next[cleanNewName] = next[oldName];
+          delete next[oldName];
+        }
+        return next;
+      });
+
+      setExtraSections(prev => prev.map(s => s === oldName ? cleanNewName : s));
+
+      showToast(`Section renamed to "${cleanNewName}"`, "success");
+      fetchFromSource(false);
+    } catch (e: any) {
+      showToast("Error renaming section: " + e.message, "error");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleMoveSection = async (sectionName: string, direction: 'up' | 'down', sortedGroups: { name: string; items: Folder[] }[]) => {
+    const currentIndex = sortedGroups.findIndex(g => g.name === sectionName);
+    if (currentIndex === -1) return;
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= sortedGroups.length) return;
+
+    // Swap adjacent groups
+    const newGroups = [...sortedGroups];
+    const temp = newGroups[currentIndex];
+    newGroups[currentIndex] = newGroups[targetIndex];
+    newGroups[targetIndex] = temp;
+
+    // Assign explicit sequential orders to ALL groups
+    const newOrders: Record<string, number> = {};
+    const updates: { subjectId: string; sectionName: string; sectionOrder: number }[] = [];
+
+    newGroups.forEach((g, idx) => {
+      newOrders[g.name] = idx;
+      g.items.forEach(f => {
+        updates.push({ subjectId: f.id, sectionName: g.name, sectionOrder: idx });
+      });
+    });
+
+    setSectionOrders(newOrders);
+
+    try {
+      if (updates.length > 0) {
+        await NexusServer.batchUpdateSubjectSections(updates);
+      }
+      showToast("Section order saved to Supabase!", "success");
+      fetchFromSource(false);
+    } catch (e: any) {
+      showToast("Error saving section order: " + e.message, "error");
+    }
+  };
 
   useEffect(() => {
     if (showUploadModal || showEditModal) {
@@ -1137,6 +1251,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       }
 
       await NexusServer.createFolder(newFolderName.trim(), type, parentId, selectedProgram, folderIcon, folderColor, uniSlug === 'iitm' ? 'iitmuni' : 'lpu');
+      if (targetSectionName) {
+        const freshFolders = await NexusServer.fetchFolders(selectedProgram);
+        const createdSub = freshFolders.find(f => f.type === 'subject' && f.name.toLowerCase() === newFolderName.trim().toLowerCase() && f.parent_id === parentId);
+        if (createdSub) {
+          await NexusServer.updateSubjectSection(createdSub.id, targetSectionName);
+        }
+        setTargetSectionName(null);
+      }
       setNewFolderName('');
       setFolderIcon('Folder');
       setFolderColor('#ff7a00');
@@ -1737,26 +1859,19 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       strategy={rectSortingStrategy}
                       disabled={!userProfile?.is_admin}
                     >
-                      {selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse' && activeSemester && !activeSubject ? (
+                      {activeSemester && !activeSubject ? (
                         <div className="space-y-8 col-span-full">
                           {(() => {
                             const groups: { name: string; items: Folder[] }[] = [];
-                            const getGroupName = (f: Folder) => {
-                              const meta = findSubjectMetadata(selectedProgram, f.name);
-                              if (meta) {
-                                if (meta.type === 'CR') return 'Core Courses';
-                                const curriculum = getProgramCurriculum(selectedProgram);
-                                const term = curriculum?.terms.find(t => t.termName.toLowerCase() === activeSemester.name.toLowerCase());
-                                if (term) {
-                                  const basket = term.electiveBaskets.find(b => b.subjects.some(s => s.code === meta.code));
-                                  if (basket) return basket.name;
-                                }
+
+                            extraSections.forEach(secName => {
+                              if (!groups.some(g => g.name === secName)) {
+                                groups.push({ name: secName, items: [] });
                               }
-                              return 'Other / Custom Courses';
-                            };
+                            });
 
                             currentFolders.forEach(f => {
-                              const groupName = getGroupName(f);
+                              const groupName = getFolderNameSection(f);
                               let group = groups.find(g => g.name === groupName);
                               if (!group) {
                                 group = { name: groupName, items: [] };
@@ -1766,6 +1881,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                             });
 
                             groups.sort((a, b) => {
+                              const orderA = sectionOrders[a.name];
+                              const orderB = sectionOrders[b.name];
+                              if (orderA !== undefined && orderB !== undefined) return orderA - orderB;
+                              if (orderA !== undefined) return -1;
+                              if (orderB !== undefined) return 1;
+
                               if (a.name === 'Core Courses') return -1;
                               if (b.name === 'Core Courses') return 1;
                               if (a.name.includes('Core Elective')) {
@@ -1776,48 +1897,167 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                               return a.name.localeCompare(b.name);
                             });
 
-                            return groups.map(group => (
-                              <div key={group.name} className="space-y-4">
-                                <div className="flex items-center justify-between border-b border-zinc-150 dark:border-white/5 pb-2.5 mb-2 mt-4">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-1 h-3 rounded-full bg-orange-500" />
-                                    <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{group.name}</span>
+                            return (
+                              <>
+                                {groups.map((group, groupIdx) => (
+                                  <div key={group.name} className="space-y-4">
+                                    <div className="flex items-center justify-between border-b border-zinc-150 dark:border-white/5 pb-2.5 mb-2 mt-4">
+                                      <div className="flex items-center gap-2 min-w-0">
+                                        <div className="w-1 h-3.5 rounded-full bg-orange-500 shrink-0" />
+                                        <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 truncate">
+                                          {group.name}
+                                        </span>
+
+                                        {/* Section Three-Dots Menu Button */}
+                                        {userProfile?.is_admin && (
+                                          <div className="relative shrink-0 ml-1">
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setActiveSectionMenu(activeSectionMenu === group.name ? null : group.name);
+                                              }}
+                                              className="p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-400 hover:text-zinc-700 dark:hover:text-white bg-transparent border-none cursor-pointer transition-colors flex items-center justify-center"
+                                              title="Section Options"
+                                            >
+                                              <MoreHorizontal className="w-4 h-4" />
+                                            </button>
+
+                                            {/* Section Options Dropdown */}
+                                            {activeSectionMenu === group.name && (
+                                              <>
+                                                <div 
+                                                  className="fixed inset-0 z-40" 
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setActiveSectionMenu(null);
+                                                  }} 
+                                                />
+                                                <div 
+                                                  className="absolute left-0 mt-1 w-44 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/10 py-1.5 shadow-xl z-50 text-left overflow-hidden animate-fade-in"
+                                                  onClick={(e) => e.stopPropagation()}
+                                                >
+                                                  {/* Add Course */}
+                                                  <button
+                                                    onClick={() => {
+                                                      setActiveSectionMenu(null);
+                                                      handleAddSubjectToSection(group.name);
+                                                    }}
+                                                    className="w-full px-3.5 py-2 text-left text-xs font-bold text-orange-500 hover:bg-orange-500/10 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                                  >
+                                                    <Plus className="w-3.5 h-3.5" />
+                                                    Add Course
+                                                  </button>
+
+                                                  {/* Move Up */}
+                                                  <button
+                                                    disabled={groupIdx === 0}
+                                                    onClick={() => {
+                                                      setActiveSectionMenu(null);
+                                                      handleMoveSection(group.name, 'up', groups);
+                                                    }}
+                                                    className={`w-full px-3.5 py-2 text-left text-xs font-bold transition-colors border-none bg-transparent flex items-center gap-2 ${
+                                                      groupIdx === 0 
+                                                        ? 'opacity-30 cursor-not-allowed text-zinc-400' 
+                                                        : 'text-zinc-650 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer'
+                                                    }`}
+                                                  >
+                                                    <ArrowUp className="w-3.5 h-3.5" />
+                                                    Move Up
+                                                  </button>
+
+                                                  {/* Move Down */}
+                                                  <button
+                                                    disabled={groupIdx === groups.length - 1}
+                                                    onClick={() => {
+                                                      setActiveSectionMenu(null);
+                                                      handleMoveSection(group.name, 'down', groups);
+                                                    }}
+                                                    className={`w-full px-3.5 py-2 text-left text-xs font-bold transition-colors border-none bg-transparent flex items-center gap-2 ${
+                                                      groupIdx === groups.length - 1 
+                                                        ? 'opacity-30 cursor-not-allowed text-zinc-400' 
+                                                        : 'text-zinc-650 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer'
+                                                    }`}
+                                                  >
+                                                    <ArrowDown className="w-3.5 h-3.5" />
+                                                    Move Down
+                                                  </button>
+
+                                                  {/* Rename Section */}
+                                                  <button
+                                                    onClick={() => {
+                                                      setActiveSectionMenu(null);
+                                                      handleRenameSection(group.name, group.items);
+                                                    }}
+                                                    className="w-full px-3.5 py-2 text-left text-xs font-bold text-zinc-650 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2 border-t border-zinc-100 dark:border-white/5"
+                                                  >
+                                                    <Pencil className="w-3.5 h-3.5" />
+                                                    Rename Section
+                                                  </button>
+                                                </div>
+                                              </>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      <span className="px-2 py-0.5 bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5 rounded-full text-[9px] font-medium text-zinc-500 dark:text-zinc-400 shrink-0">
+                                        {group.items.length} Course{group.items.length !== 1 ? 's' : ''}
+                                      </span>
+                                    </div>
+
+                                    {group.items.length === 0 ? (
+                                      <div className="p-6 text-center bg-zinc-50/50 dark:bg-white/[0.005] border border-dashed border-zinc-200 dark:border-white/5 rounded-2xl text-xs text-zinc-400">
+                                        No courses in this section yet. Click <span className="font-bold text-orange-500">+</span> above to add a course!
+                                      </div>
+                                    ) : (
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {group.items.map(folder => (
+                                          <FolderCard
+                                            key={folder.id}
+                                            folder={folder}
+                                            selectedProgram={selectedProgram}
+                                            userProfile={userProfile}
+                                            fileCount={folderFileCounts[folder.id] || 0}
+                                            onDragOver={() => setDraggingOverId(folder.id)}
+                                            onDragLeave={() => setDraggingOverId(null)}
+                                            onDrop={(e) => {
+                                              setDraggingOverId(null);
+                                              const droppedFiles = e.dataTransfer.files;
+                                              if (droppedFiles && droppedFiles.length > 0) {
+                                                handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : '');
+                                              }
+                                            }}
+                                            toPath={getFolderToPath(folder)}
+                                            onRename={() => {
+                                              setFolderToManage(folder);
+                                              setNewFolderName(folder.name);
+                                              setFolderIcon(folder.icon_name || 'Folder');
+                                              setFolderColor(folder.color || '#ff7a00');
+                                              setShowRenameModal(true);
+                                            }}
+                                            isDraggingOver={draggingOverId === folder.id}
+                                            subjectsCount={finalFolders.filter(f => f.type === 'subject' && f.parent_id === folder.id).length}
+                                            searchMatchText={getSubjectSearchMatchText(folder)}
+                                          />
+                                        ))}
+                                      </div>
+                                    )}
                                   </div>
-                                  <span className="px-2 py-0.5 bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5 rounded-full text-[9px] font-medium text-zinc-500 dark:text-zinc-400">{group.items.length} Course{group.items.length !== 1 ? 's' : ''}</span>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  {group.items.map(folder => (
-                                    <FolderCard
-                                      key={folder.id}
-                                      folder={folder}
-                                      selectedProgram={selectedProgram}
-                                      userProfile={userProfile}
-                                      fileCount={folderFileCounts[folder.id] || 0}
-                                      onDragOver={() => setDraggingOverId(folder.id)}
-                                      onDragLeave={() => setDraggingOverId(null)}
-                                      onDrop={(e) => {
-                                        setDraggingOverId(null);
-                                        const droppedFiles = e.dataTransfer.files;
-                                        if (droppedFiles && droppedFiles.length > 0) {
-                                          handleFilesSelected(droppedFiles, folder.program, folder.type === 'semester' ? folder.name : activeSemester?.name, folder.type === 'subject' ? folder.name : activeSubject?.name, folder.type === 'category' ? folder.name : '');
-                                        }
-                                      }}
-                                      toPath={getFolderToPath(folder)}
-                                      onRename={() => {
-                                        setFolderToManage(folder);
-                                        setNewFolderName(folder.name);
-                                        setFolderIcon(folder.icon_name || 'Folder');
-                                        setFolderColor(folder.color || '#ff7a00');
-                                        setShowRenameModal(true);
-                                      }}
-                                      isDraggingOver={draggingOverId === folder.id}
-                                      subjectsCount={finalFolders.filter(f => f.type === 'subject' && f.parent_id === folder.id).length}
-                                      searchMatchText={getSubjectSearchMatchText(folder)}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                            ));
+                                ))}
+
+                                {/* Admin Only: Bottom Create Section Button */}
+                                {userProfile?.is_admin && (
+                                  <div className="flex justify-center pt-6">
+                                    <button
+                                      onClick={handleCreateNewSection}
+                                      className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition-all border-none cursor-pointer flex items-center gap-2 shadow-md active:scale-95"
+                                    >
+                                      <Plus className="w-4 h-4" /> Create Section
+                                    </button>
+                                  </div>
+                                )}
+                              </>
+                            );
                           })()}
                         </div>
                       ) : (
