@@ -254,22 +254,21 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
 
   const MealCard = ({ title, items, icon, accentColor }: { title: string, items: MealCategories, icon: React.ReactNode, accentColor: string }) => {
     return (
-      <div className="glass-panel group relative overflow-hidden rounded-[2.5rem] border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900/40 backdrop-blur-xl p-6 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
-        <div className="flex items-center justify-between mb-8 relative z-10">
-          <div className="flex items-center space-x-4">
-            <div className={`p-4 rounded-2xl transition-all duration-500 group-hover:scale-110 border border-zinc-200/50 dark:border-white/5 bg-zinc-50/50 dark:bg-white/5 ${accentColor}`}>
-              {React.cloneElement(icon as React.ReactElement, { className: "w-6 h-6" })}
+      <div className="p-6 sm:p-7 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-200/50 dark:bg-white/5 transition-all duration-300 hover:scale-[1.01] group">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3.5">
+            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center bg-zinc-200/80 dark:bg-white/10 border-none shadow-none ${accentColor} transition-transform group-hover:scale-105`}>
+              {React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5" })}
             </div>
             <div>
-              <h4 className="font-semibold uppercase tracking-[0.15em] text-xs leading-none text-zinc-900 dark:text-white/90">
+              <h4 className="font-bold uppercase tracking-wider text-xs leading-none text-zinc-900 dark:text-white">
                 {title}
               </h4>
             </div>
-
           </div>
         </div>
 
-        <div className="space-y-6 relative z-10 pl-1">
+        <div className="space-y-5">
           {Object.entries(items).map(([category, dishes]) => {
             // Check if any part of the dish matches the selected nutrient category
             const isMatch = matchesCategory(dishes, activeFoodCategory);
@@ -277,12 +276,12 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
 
             return (
               <div key={category} className="group/item animate-fade-in">
-                <span className="font-semibold text-[10px] uppercase tracking-widest block mb-1.5 text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">
+                <span className="font-bold text-[10px] uppercase tracking-widest block mb-1 text-zinc-400 dark:text-zinc-500 group-hover/item:text-brand-primary transition-colors">
                   {category}
                 </span>
 
                 <div className="flex items-start gap-2">
-                  <span className="text-zinc-800 dark:text-zinc-200 font-semibold text-[15px] leading-snug transition-all group-hover/item:translate-x-1 duration-300">
+                  <span className="text-zinc-800 dark:text-zinc-200 font-bold text-sm leading-snug">
                     {dishes}
                   </span>
                 </div>
@@ -291,7 +290,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
           })}
           {activeFoodCategory !== 'all' && Object.values(items).every(d => !matchesCategory(d, activeFoodCategory)) && (
             <div className="py-4 text-center">
-              <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest opacity-50">No matches found</span>
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest opacity-60">No matches found</span>
             </div>
           )}
         </div>
@@ -330,9 +329,9 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
           <p className="text-[10px] font-semibold tracking-wider text-zinc-500 mb-1 ml-0.5">
             {userProfile ? `Welcome, ${userProfile.full_name?.split(' ')[0] || 'User'}` : 'Exploration Mode'}
           </p>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
             {{
-            'mess': <>{universityInfo?.shortName || ''} Mess <span className="text-brand-primary">Menu</span></>,
+            'mess': <h2 className="text-3xl font-bold text-zinc-800 dark:text-white tracking-tighter">Mess <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Menu</span></h2>,
             'map': (
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold tracking-tight">{universityInfo?.shortName || ''} Campus <span className="text-brand-secondary">Map</span></span>
@@ -374,7 +373,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
         {activeTab && (
           <button 
             onClick={() => handleTabChange('')}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 font-semibold text-[10px] tracking-tight hover:bg-brand-primary/10 hover:text-brand-primary transition-all border-none active:scale-95 group shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-200/60 dark:bg-[#1c1c20] hover:bg-zinc-200 dark:hover:bg-[#242429] text-zinc-600 dark:text-zinc-300 font-bold text-xs border-none shadow-none transition-all cursor-pointer active:scale-95 group"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 transition-transform group-hover:-translate-x-0.5"><polyline points="15 18 9 12 15 6" /></svg>
             Campus Hub
@@ -518,20 +517,27 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
           {activeTab === 'mess' && (
             <div className="space-y-6 animate-fade-in">
               {/* Mess Menu Content */}
-              <div className="flex justify-center space-x-3 mb-6">
+              <div className="flex justify-center space-x-2 mb-6">
                 <button
                   onClick={() => setCurrentWeek(1)}
-                  className={`px-5 py-2 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all border ${currentWeek === 1 ? 'bg-brand-primary text-white border-brand-primary shadow-md shadow-brand-primary/20' : 'bg-transparent border-zinc-200 dark:border-white/10 text-zinc-500'}`}
+                  className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer border-none shadow-none ${
+                    currentWeek === 1 
+                      ? 'bg-brand-primary text-white font-bold' 
+                      : 'bg-zinc-200/50 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white'
+                  }`}
                 >
                   Week 1
                 </button>
                 <button
                   onClick={() => setCurrentWeek(2)}
-                  className={`px-5 py-2 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all border ${currentWeek === 2 ? 'bg-brand-primary text-white border-brand-primary shadow-md shadow-brand-primary/20' : 'bg-transparent border-zinc-200 dark:border-white/10 text-zinc-500'}`}
+                  className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer border-none shadow-none ${
+                    currentWeek === 2 
+                      ? 'bg-brand-primary text-white font-bold' 
+                      : 'bg-zinc-200/50 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white'
+                  }`}
                 >
                   Week 2
                 </button>
-
               </div>
 
               <div
@@ -548,33 +554,28 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                       data-day={day}
                       onClick={() => setSelectedDay(day)}
                       className={`
-                        flex-none snap-center flex flex-col items-center justify-center w-20 h-24 rounded-[2.5rem] border transition-all duration-500 relative overflow-hidden group/day
+                        flex-none snap-center flex flex-col items-center justify-center w-20 h-24 rounded-[2.5rem] transition-all duration-300 relative overflow-hidden group/day cursor-pointer border-none shadow-none
                         ${isSelected
-                          ? 'bg-brand-primary border-brand-primary text-white shadow-2xl scale-[1.05] shadow-brand-primary/30'
-                          : 'bg-white/80 dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-500 hover:border-zinc-300 dark:hover:border-white/20'
+                          ? 'bg-brand-primary text-white scale-[1.05]'
+                          : 'bg-zinc-200/50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white'
                         }
                       `}
                     >
-                      {/* Subtle inner glow for selected day */}
-                      {isSelected && (
-                        <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
-                      )}
                       {isToday && (
                         <div className="absolute top-2.5 left-1/2 -translate-x-1/2 z-10">
-                          <div className={`px-2 py-0.5 rounded-full text-[6px] font-black uppercase tracking-[0.15em] border transition-all duration-500 ${
+                          <div className={`px-2 py-0.5 rounded-full text-[6px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${
                             isSelected 
-                              ? 'bg-white text-brand-primary border-white shadow-sm' 
-                              : 'bg-brand-primary text-white border-brand-primary shadow-lg animate-pulse-gentle'
+                              ? 'bg-white text-brand-primary' 
+                              : 'bg-brand-primary text-white'
                           }`}>
                             Today
                           </div>
                         </div>
                       )}
-                      <div className={`flex flex-col items-center justify-center transition-all duration-500 ${isToday ? 'mt-4' : ''}`}>
-                        <span className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-1 transition-opacity ${isSelected ? 'opacity-90' : 'opacity-40'}`}>{day.slice(0, 3)}</span>
-                        <span className="text-2xl font-bold tracking-tight">{day.slice(0,1)}</span>
+                      <div className={`flex flex-col items-center justify-center transition-all duration-300 ${isToday ? 'mt-3' : ''}`}>
+                        <span className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-1 ${isSelected ? 'opacity-90' : 'opacity-60'}`}>{day.slice(0, 3)}</span>
+                        <span className="text-xl font-black tracking-tight">{day.slice(0, 1)}</span>
                       </div>
-
                     </button>
                   );
                 })}
@@ -586,15 +587,15 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                     key={cat.id}
                     onClick={() => setActiveFoodCategory(cat.id)}
                     className={`
-                      flex-none px-4 py-2.5 rounded-2xl border transition-all duration-300 flex items-center space-x-2
+                      flex-none px-4 py-2.5 rounded-full transition-all duration-300 flex items-center space-x-2 cursor-pointer border-none shadow-none
                       ${activeFoodCategory === cat.id 
-                        ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white shadow-lg' 
-                        : 'bg-white dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-500 hover:border-zinc-300 dark:hover:border-white/20'
+                        ? 'bg-brand-primary text-white font-bold' 
+                        : 'bg-zinc-200/50 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white'
                       }
                     `}
                   >
                     <span className="text-xs">{cat.icon}</span>
-                    <span className={`text-[11px] font-semibold tracking-tight capitalize ${activeFoodCategory === cat.id ? 'text-white dark:text-zinc-900' : 'text-zinc-600 dark:text-zinc-400'}`}>
+                    <span className={`text-xs font-bold tracking-tight capitalize ${activeFoodCategory === cat.id ? 'text-white' : 'text-zinc-600 dark:text-zinc-400'}`}>
                       {cat.label}
                     </span>
                   </button>
@@ -610,8 +611,8 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
               ) : selectedMeals ? (
                 <div className="space-y-4 animate-fade-in">
                   <div className="flex items-center justify-between mb-4 px-2">
-                    <h3 className="text-xl font-bold text-zinc-800 dark:text-white tracking-tight uppercase">{selectedDay} Menu</h3>
-                    <span className="text-[11px] sm:text-xs text-zinc-500 font-bold uppercase tracking-widest">W{currentWeek} Cycle</span>
+                    <h3 className="text-xl font-extrabold text-zinc-800 dark:text-white tracking-tight uppercase">{selectedDay} Menu</h3>
+                    <span className="text-[11px] sm:text-xs text-brand-primary font-bold uppercase tracking-widest">W{currentWeek} Cycle</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-10">
@@ -628,16 +629,14 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                 </div>
               )}
 
-              <div className="pt-10 flex justify-center pb-20">
+              <div className="pt-6 flex justify-center pb-20">
                 <button
                   onClick={() => setIsReportModalOpen(true)}
-                  className="flex items-center px-6 py-3 bg-zinc-100 dark:bg-white/5 hover:bg-brand-primary/10 hover:text-brand-primary border border-transparent dark:border-white/5 hover:border-brand-primary/30 rounded-2xl transition-all group"
+                  className="flex items-center gap-2 px-6 py-3 bg-zinc-200/60 dark:bg-[#1c1c20] hover:bg-zinc-200 dark:hover:bg-[#242429] text-zinc-600 dark:text-zinc-300 rounded-full transition-all border-none shadow-none cursor-pointer group"
                 >
                   <IconAlert />
-                  <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-widest">Report Issue / Outdated Data</span>
+                  <span className="text-xs font-bold uppercase tracking-widest">Report Issue / Outdated Data</span>
                 </button>
-
-
               </div>
             </div>
           )}
@@ -684,46 +683,45 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
         <div className={`modal-overlay ${isClosing ? 'closing' : ''}`}
           style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
           onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
-          <div ref={reportModalRef} className={`nexus-modal w-full max-w-md p-6 relative ${isClosing ? 'closing' : ''}`}>
+          <div ref={reportModalRef} className={`nexus-modal w-full max-w-md p-6 sm:p-8 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] relative overflow-hidden ${isClosing ? 'closing' : ''}`}>
             <button
               onClick={handleClose}
-              className="absolute top-5 right-5 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors border-none bg-transparent"
+              className="absolute top-6 right-6 w-8 h-8 rounded-full bg-zinc-200/60 dark:bg-[#1c1c20] hover:bg-zinc-200 dark:hover:bg-[#242429] text-zinc-400 hover:text-zinc-800 dark:hover:text-white flex items-center justify-center border-none shadow-none transition-all cursor-pointer"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
 
             <header className="mb-6">
-              <h3 className="text-xl font-bold text-zinc-800 dark:text-white mb-1 tracking-tight">Report Issue</h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">Help us keep the mess menu accurate.</p>
+              <h3 className="text-2xl font-bold text-zinc-800 dark:text-white mb-1 tracking-tight">Report Issue</h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Help us keep the mess menu accurate.</p>
             </header>
 
-
-            <form onSubmit={handleReportSubmit} className="space-y-4">
+            <form onSubmit={handleReportSubmit} className="space-y-5">
               <div>
-                <label className="block text-[11px] sm:text-xs font-black uppercase tracking-widest text-zinc-500 mb-2 ml-1">Hostel Name</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-2 ml-1">Hostel Name</label>
                 <input
                   type="text"
                   placeholder="e.g., BH-1, GH-4, Sun Hostel"
                   value={reportForm.hostelName}
                   onChange={(e) => setReportForm(prev => ({ ...prev, hostelName: e.target.value }))}
-                  className="w-full px-5 py-4 rounded-2xl bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent dark:border-white/5 focus:ring-2 focus:ring-orange-500 outline-none text-zinc-800 dark:text-zinc-200 transition-all font-bold"
+                  className="w-full px-5 py-4 rounded-[24px] bg-zinc-200/50 dark:bg-[#18181b] border-none shadow-none focus:ring-2 focus:ring-brand-primary/50 outline-none text-zinc-800 dark:text-white font-medium text-sm transition-all"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] sm:text-xs font-black uppercase tracking-widest text-zinc-500 mb-2 ml-1">What's the issue?</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-2 ml-1">What's the issue?</label>
                 <textarea
                   placeholder="e.g., Sunday breakfast items are swapped..."
                   value={reportForm.issueDetails}
                   onChange={(e) => setReportForm(prev => ({ ...prev, issueDetails: e.target.value }))}
-                  className="w-full h-32 px-5 py-4 rounded-2xl bg-zinc-100 dark:bg-[#0a0a0a] border border-transparent dark:border-white/5 focus:ring-2 focus:ring-orange-500 outline-none text-zinc-800 dark:text-zinc-200 transition-all font-bold resize-none"
+                  className="w-full h-32 px-5 py-4 rounded-[24px] bg-zinc-200/50 dark:bg-[#18181b] border-none shadow-none focus:ring-2 focus:ring-brand-primary/50 outline-none text-zinc-800 dark:text-white font-medium text-sm transition-all resize-none"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] sm:text-xs font-black uppercase tracking-widest text-zinc-500 mb-2 ml-1">Image Proof (Optional)</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-2 ml-1">Image Proof (Optional)</label>
                 <div className="relative group">
                   <input
                     type="file"
@@ -731,33 +729,33 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                     onChange={handleImageUpload}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   />
-                  <div className={`w-full py-6 rounded-2xl border-2 border-dashed border-zinc-300 dark:border-white/10 bg-zinc-50 dark:bg-[#0a0a0a]/40 flex flex-col items-center justify-center transition-all ${reportForm.imageProof ? 'border-orange-500 bg-orange-500/5' : 'group-hover:border-orange-500/50'}`}>
+                  <div className={`w-full py-6 rounded-[24px] border-2 border-dashed border-zinc-300/60 dark:border-white/10 bg-zinc-200/40 dark:bg-[#18181b] flex flex-col items-center justify-center transition-all ${reportForm.imageProof ? 'border-brand-primary bg-brand-primary/10' : 'group-hover:border-brand-primary/40'}`}>
                     {reportForm.imageProof ? (
                       <div className="flex flex-col items-center">
-                        <img src={reportForm.imageProof} alt="Proof" className="h-16 w-16 object-cover rounded-lg mb-2 shadow-lg" />
-                        <span className="text-[11px] sm:text-xs font-black text-orange-600 uppercase tracking-widest">Image Added</span>
+                        <img src={reportForm.imageProof} alt="Proof" className="h-16 w-16 object-cover rounded-xl mb-2 shadow-md" />
+                        <span className="text-xs font-bold text-brand-primary uppercase tracking-wider">Image Added</span>
                       </div>
                     ) : (
                       <>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-zinc-400 mb-2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
-                        <span className="text-[11px] sm:text-xs font-black text-zinc-400 uppercase tracking-widest text-center px-4">Tap to upload photo of menu board</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-7 h-7 text-zinc-400 mb-2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+                        <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider text-center px-4">Tap to upload photo of menu board</span>
                       </>
                     )}
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-4 pt-2">
+              <div className="flex items-center gap-3 pt-2">
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="flex-1 py-3 text-[11px] sm:text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors border-none bg-transparent"
+                  className="flex-1 py-3.5 rounded-full bg-zinc-200/60 dark:bg-[#1c1c20] hover:bg-zinc-200 dark:hover:bg-[#242429] text-zinc-600 dark:text-zinc-300 font-bold text-xs border-none shadow-none transition-all cursor-pointer text-center"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-[2] py-3 bg-brand-primary hover:opacity-90 text-white rounded-xl font-black text-[11px] sm:text-xs uppercase tracking-widest transition-all shadow-xl shadow-brand-primary/20 active:scale-[0.98] border-none"
+                  className="flex-[2] py-3.5 rounded-full bg-gradient-to-r from-brand-primary via-orange-500 to-brand-secondary text-white font-bold text-xs shadow-lg shadow-brand-primary/25 border-none transition-all cursor-pointer hover:opacity-95 active:scale-95 text-center"
                 >
                   Submit Report
                 </button>

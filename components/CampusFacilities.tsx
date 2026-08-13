@@ -54,7 +54,7 @@ const CampusFacilities: React.FC = () => {
             placeholder="Search stores, ATMs, or items..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-14 pr-6 py-4 rounded-2xl bg-zinc-100/50 dark:bg-white/5 border border-zinc-200 dark:border-white/5 shadow-none focus:bg-white dark:focus:bg-white/10 focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30 outline-none text-zinc-800 dark:text-zinc-200 transition-all font-medium text-sm"
+            className="w-full pl-14 pr-6 py-4 rounded-[28px] md:rounded-full bg-zinc-200/50 dark:bg-[#18181b] border-none shadow-none focus:ring-2 focus:ring-brand-primary/50 outline-none text-zinc-800 dark:text-white font-medium text-sm transition-all placeholder:text-zinc-400"
           />
         </div>
 
@@ -63,10 +63,10 @@ const CampusFacilities: React.FC = () => {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`flex-none px-5 py-2.5 rounded-xl text-[13px] font-medium transition-all border ${
+              className={`flex-none px-5 py-2.5 rounded-full text-xs font-bold transition-all border-none shadow-none cursor-pointer ${
                 selectedCategory === cat 
-                  ? 'bg-brand-primary text-white border-brand-primary shadow-lg shadow-brand-primary/20' 
-                  : 'bg-white dark:bg-white/5 border-zinc-200 dark:border-white/10 text-zinc-500 hover:border-zinc-300 dark:hover:border-white/20'
+                  ? 'bg-brand-primary text-white font-bold' 
+                  : 'bg-zinc-200/60 dark:bg-[#1c1c20] hover:bg-zinc-200 dark:hover:bg-[#242429] text-zinc-600 dark:text-zinc-300'
               }`}
             >
               {cat}
@@ -75,7 +75,7 @@ const CampusFacilities: React.FC = () => {
         </div>
 
         <div className="flex justify-between items-center max-w-3xl mx-auto px-1">
-          <p className="text-[11px] font-semibold text-zinc-400">
+          <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
             Showing {filteredFacilities.length} {filteredFacilities.length === 1 ? 'facility' : 'facilities'}
           </p>
         </div>
@@ -86,36 +86,36 @@ const CampusFacilities: React.FC = () => {
         {filteredFacilities.map((facility, idx) => (
           <div 
             key={`${facility.name}-${idx}`}
-            className="glass-panel group p-6 rounded-[2rem] border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900/10 hover:border-brand-primary/30 transition-all duration-500 hover:shadow-2xl hover:shadow-brand-primary/5 hover:-translate-y-1"
+            className="group p-6 sm:p-7 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-200/50 dark:bg-white/5 transition-all"
           >
             <div className="flex justify-between items-start mb-5">
               <div>
-                <h3 className="text-lg font-semibold text-zinc-900 dark:text-white group-hover:text-brand-primary transition-colors tracking-tight">
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white group-hover:text-brand-primary transition-colors tracking-tight">
                   {facility.name}
                 </h3>
                 <div className="flex items-center gap-2 mt-1.5">
-                  <span className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-white/5 text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/5">
+                  <span className="px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-[#222226] text-[10px] font-bold text-zinc-500 dark:text-zinc-400 border-none shadow-none">
                     {facility.category}
                   </span>
                 </div>
               </div>
-              <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 text-zinc-400 group-hover:text-brand-primary group-hover:bg-brand-primary/10 transition-all duration-300">
+              <div className="p-3 rounded-2xl bg-zinc-200/60 dark:bg-[#222226] border-none shadow-none text-zinc-400 group-hover:text-brand-primary group-hover:bg-brand-primary/10 transition-all duration-300">
                 <IconLocation />
               </div>
             </div>
 
             <div className="flex items-start gap-3 mb-6">
-              <div className="mt-1 text-brand-primary/40 flex-none scale-90">
+              <div className="mt-1 text-brand-primary flex-none scale-90">
                 <IconLocation />
               </div>
-              <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-300 leading-relaxed">
                 {facility.location}
               </p>
             </div>
 
             {facility.itemsOffered && facility.itemsOffered.length > 0 && (
-              <div className="pt-5 border-t border-zinc-100 dark:border-white/5">
-                <span className="text-[11px] font-semibold text-zinc-400/80 block mb-3">Popular Items</span>
+              <div className="pt-5 border-t border-zinc-200/40 dark:border-white/5">
+                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block mb-3">Popular Items</span>
                 <div className="flex flex-wrap gap-2">
                   {facility.itemsOffered.map((item, i) => {
                     const priceMatch = item.match(/\(₹(\d+)\)/);
@@ -125,11 +125,11 @@ const CampusFacilities: React.FC = () => {
                     return (
                       <div 
                         key={i}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 text-xs font-medium border border-transparent dark:border-white/5 hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
+                        className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-200/50 dark:bg-[#222226] text-zinc-700 dark:text-zinc-300 text-xs font-semibold border-none shadow-none"
                       >
                         <span>{name}</span>
                         {price && (
-                          <span className="text-brand-primary font-bold text-[10px] bg-brand-primary/10 px-1.5 py-0.5 rounded-md">
+                          <span className="text-brand-primary font-bold text-[10px] bg-brand-primary/10 px-2 py-0.5 rounded-full">
                             ₹{price}
                           </span>
                         )}
