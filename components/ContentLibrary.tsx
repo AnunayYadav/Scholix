@@ -3214,12 +3214,12 @@ const FolderCard: React.FC<{
           </div>
         )}
 
-        <div className="flex items-center gap-3.5 min-w-0">
+        <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-1 sm:pr-2">
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white animate-fade-in" style={{ backgroundColor: rawTheme.rawColor }}>
             {React.isValidElement(rawTheme.icon) ? React.cloneElement(rawTheme.icon as React.ReactElement, { className: 'w-5 h-5 text-white' }) : rawTheme.icon}
           </div>
-          <div className="min-w-0">
-            <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white leading-snug truncate pr-6">{subjectName}</h4>
+          <div className="min-w-0 flex-1">
+            <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white leading-snug break-words">{subjectName}</h4>
             <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
               <span className="font-semibold whitespace-nowrap shrink-0" style={{ color: rawTheme.rawColor }}>{subjectCode}</span>
               <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
@@ -3256,7 +3256,7 @@ const FolderCard: React.FC<{
       <div className="flex items-center gap-3">
         <FolderIcon type={folder.type} name={folder.name} size="w-8 h-8" iconName={folder.icon_name} color={folder.color} />
         <div>
-          <h4 className="text-xs sm:text-sm font-semibold text-zinc-800 dark:text-zinc-100">{folder.name}</h4>
+          <h4 className="text-xs sm:text-sm font-semibold text-zinc-800 dark:text-zinc-100 break-words">{folder.name}</h4>
           <p className="text-[9px] text-zinc-400 dark:text-zinc-500 font-medium">{fileCount} resources</p>
         </div>
       </div>
@@ -3291,12 +3291,12 @@ const StaticFolderCard: React.FC<{
 
   return (
     <div className="p-3 sm:p-3.5 rounded-2xl border-none bg-white dark:bg-[#111113] flex items-center justify-between min-h-[70px] relative overflow-hidden">
-      <div className="flex items-center gap-3.5 min-w-0">
+      <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-1 sm:pr-2">
         <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: rawTheme.rawColor }}>
           {React.isValidElement(rawTheme.icon) ? React.cloneElement(rawTheme.icon as React.ReactElement, { className: 'w-5 h-5 text-white' }) : rawTheme.icon}
         </div>
-        <div className="min-w-0">
-          <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white truncate pr-6">{subjectName}</h4>
+        <div className="min-w-0 flex-1">
+          <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white leading-snug break-words">{subjectName}</h4>
           <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
             <span className="font-semibold whitespace-nowrap shrink-0" style={{ color: rawTheme.rawColor }}>{subjectCode}</span>
             <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>

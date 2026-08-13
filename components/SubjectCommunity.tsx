@@ -3705,26 +3705,30 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         </div>
 
         {/* Subject Header Banner (Clean & Boxless) */}
-        <div className="relative overflow-visible p-0 flex flex-row items-center justify-between gap-3 sm:gap-6 py-1">
+        <div className="relative overflow-visible p-0 flex flex-row items-start justify-between gap-3 sm:gap-6 py-1">
           {/* Course Logo & Info */}
-          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm shrink-0 text-white" style={{ backgroundColor: theme.rawColor }}>
+          <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm shrink-0 text-white mt-0.5" style={{ backgroundColor: theme.rawColor }}>
               {React.cloneElement(theme.icon as React.ReactElement, { className: 'w-5.5 h-5.5 sm:w-6 sm:h-6 text-white' })}
             </div>
-            <div className="min-w-0 space-y-0.5 sm:space-y-1">
+            <div className="min-w-0 flex-1 space-y-1">
+              <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-black text-zinc-900 dark:text-white leading-tight break-words">
+                {subjectName}
+              </h2>
               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                <span className="px-1.5 py-0.5 rounded-md text-[8px] sm:text-[9px] font-black text-white" style={{ backgroundColor: theme.rawColor }}>
+                <span className="px-1.5 py-0.5 rounded-md text-[8px] sm:text-[9px] font-black text-white shrink-0" style={{ backgroundColor: theme.rawColor }}>
                   {subjectCode}
                 </span>
-                <span className="text-[8px] sm:text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">
+                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none text-[8px] sm:text-[10px] shrink-0">•</span>
+                <span className="text-[8px] sm:text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap shrink-0">
                   {creditsText}
                 </span>
-                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none text-[8px] sm:text-[10px]">•</span>
-                <span className="text-[8px] sm:text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">
+                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none text-[8px] sm:text-[10px] shrink-0">•</span>
+                <span className="text-[8px] sm:text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap shrink-0">
                   {ltpText}
                 </span>
-                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none text-[8px] sm:text-[10px]">•</span>
-                <span className="inline-flex items-center gap-1.5 text-[8px] sm:text-[10px] font-bold uppercase tracking-wide" style={{ color: theme.rawColor }}>
+                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none text-[8px] sm:text-[10px] shrink-0">•</span>
+                <span className="inline-flex items-center gap-1.5 text-[8px] sm:text-[10px] font-bold uppercase tracking-wide whitespace-nowrap shrink-0" style={{ color: theme.rawColor }}>
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: theme.rawColor }}></span>
                     <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: theme.rawColor }}></span>
@@ -3732,14 +3736,11 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   {onlineCount} studying now
                 </span>
               </div>
-              <h2 className="text-sm xs:text-base md:text-lg lg:text-xl font-black text-zinc-900 dark:text-white leading-tight truncate">
-                {subjectName}
-              </h2>
             </div>
           </div>
 
           {/* Notifications & Options Controls */}
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1 shrink-0 mt-0.5">
             <button
               onClick={handleJoinToggle}
               title={joined ? "Notifications are ON" : "Notifications are OFF"}
@@ -3926,12 +3927,12 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                             </div>
                           )}
 
-                          <div className="flex items-center gap-3.5 min-w-0">
+                          <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-1 sm:pr-2">
                             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white animate-fade-in" style={{ backgroundColor: meta.color }}>
                               {React.isValidElement(meta.icon) ? React.cloneElement(meta.icon as React.ReactElement, { className: 'w-5 h-5 text-white' }) : meta.icon}
                             </div>
-                            <div className="min-w-0">
-                              <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white leading-snug truncate pr-6">{cat.name}</h4>
+                            <div className="min-w-0 flex-1">
+                              <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white leading-snug break-words">{cat.name}</h4>
                               <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
                                 <span className="flex items-center gap-1 font-semibold whitespace-nowrap shrink-0" style={{ color: meta.color }}>
                                   <FileText className="w-3.5 h-3.5" />
