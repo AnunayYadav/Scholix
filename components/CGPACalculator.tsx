@@ -101,7 +101,7 @@ const serializePayload = (data: any): string => {
     const escapedName = encodeURIComponent(s.n);
     return `${escapedName}:${s.c}:${s.g}:${s.m}`;
   }).join(',');
-  
+
   const parts = [
     'v1',
     encodeURIComponent(data.vName),
@@ -297,10 +297,10 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
 
   const activeProgramSubjects = useMemo(() => {
     const result: Record<number, Array<{ name: string; credits: number }>> = {};
-    
+
     currentCurriculum.terms.forEach(term => {
       const list: Array<{ name: string; credits: number }> = [];
-      
+
       // Core subjects
       term.coreSubjects.forEach(s => {
         list.push({
@@ -308,7 +308,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
           credits: s.credits
         });
       });
-      
+
       // Elective subjects from baskets
       term.electiveBaskets.forEach(basket => {
         basket.subjects.forEach(s => {
@@ -320,10 +320,10 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
           }
         });
       });
-      
+
       result[term.termNumber] = list;
     });
-    
+
     return result;
   }, [currentCurriculum]);
 
@@ -390,17 +390,17 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
   };
 
   const handleGenerateLink = () => {
-    const data = { 
-      sgpa: currentStats.sgpa.toFixed(2), 
-      cgpa: overallCGPA, 
-      sem: currentSemester, 
-      credits: currentStats.totalCredits, 
-      subjects: courses.map((c, idx) => ({ 
-        n: c.name.trim() || `Subject ${idx + 1}`, 
-        c: c.credits, 
+    const data = {
+      sgpa: currentStats.sgpa.toFixed(2),
+      cgpa: overallCGPA,
+      sem: currentSemester,
+      credits: currentStats.totalCredits,
+      subjects: courses.map((c, idx) => ({
+        n: c.name.trim() || `Subject ${idx + 1}`,
+        c: c.credits,
         g: c.grade,
         m: c.marks || 0
-      })), 
+      })),
       ts: Date.now(),
       uni: selectedUniversity,
       vName: vertoName.trim() || 'Verto Student'
@@ -410,7 +410,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
     const currentBaseUrl = window.location.origin;
     const linkPrefix = uniSlug ? `/${uniSlug}` : '';
     setShareUrl(`${currentBaseUrl}${linkPrefix}/share-cgpa?d=${encoded}`);
-    
+
     setIsClosingName(true);
     setTimeout(() => {
       setIsNameModalOpen(false);
@@ -524,8 +524,8 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
   useEffect(() => {
     if (currentStats.totalCredits > 0) {
       const timeout = setTimeout(() => {
-        NexusServer.saveRecord(userProfile?.id || null, 'cgpa_calc', 'Calculated SGPA/CGPA', { 
-          sgpa: currentStats.sgpa, 
+        NexusServer.saveRecord(userProfile?.id || null, 'cgpa_calc', 'Calculated SGPA/CGPA', {
+          sgpa: currentStats.sgpa,
           credits: currentStats.totalCredits,
           semester: currentSemester
         });
@@ -636,7 +636,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
         </div>
         <button onClick={addCourse} className="text-[11px] sm:text-xs font-bold text-brand-primary bg-brand-primary/10 hover:bg-brand-primary/20 px-6 py-2.5 rounded-full transition-all border-none shadow-none cursor-pointer">+ Add field</button>
       </div>
-      
+
       {courses.length === 0 ? (
         <div className="py-16 text-center bg-white dark:bg-[#18181b] rounded-[28px] opacity-60 text-[11px] sm:text-xs text-zinc-400 border-none shadow-none">No courses added yet</div>
       ) : (
@@ -658,11 +658,10 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                     onChange={(e) => updateCourse(c.id, { name: e.target.value })}
                     className="w-full bg-zinc-100 dark:bg-[#111113] border-none shadow-none rounded-2xl px-5 py-3.5 text-sm font-medium dark:text-white outline-none focus:ring-2 focus:ring-brand-primary/50"
                   />
-                  <div className={`absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-[#111113] border-none rounded-[28px] shadow-2xl max-h-64 overflow-y-auto z-50 py-2 custom-scrollbar transition-all duration-100 ease-out origin-top ${
-                    focusedCourseId === c.id && filtered.length > 0
+                  <div className={`absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-[#111113] border-none rounded-[28px] shadow-2xl max-h-64 overflow-y-auto z-50 py-2 custom-scrollbar transition-all duration-100 ease-out origin-top ${focusedCourseId === c.id && filtered.length > 0
                       ? 'opacity-100 scale-y-100 translate-y-0 pointer-events-auto'
                       : 'opacity-0 scale-y-95 -translate-y-2 pointer-events-none'
-                  }`}>
+                    }`}>
                     {filtered.map((sub, idx) => (
                       <div
                         key={idx}
@@ -715,13 +714,12 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
         <div className="text-[11px] sm:text-xs text-zinc-400 font-semibold">
           {selectedUniversity === 'iitm_bs' ? 'Total Level Credits' : 'Total Semester Credits'}: <span className="text-zinc-800 dark:text-white font-bold">{currentStats.totalCredits}</span>
         </div>
-        <button 
+        <button
           onClick={() => setShowForecast(!showForecast)}
-          className={`px-6 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 transition-all border-none shadow-none cursor-pointer ${
-            showForecast 
-              ? 'bg-brand-primary text-white' 
+          className={`px-6 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 transition-all border-none shadow-none cursor-pointer ${showForecast
+              ? 'bg-brand-primary text-white'
               : 'bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20'
-          }`}
+            }`}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
             <path d="M3 3v18h18M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
@@ -738,14 +736,14 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
               <p className="text-[10px] text-zinc-400 mt-0.5">Forecast individual semester performance required for target CGPA</p>
             </div>
             <div className="relative">
-              <input 
-                type="number" 
-                step="0.1" 
-                max="10" 
-                value={targetCGPA} 
-                onChange={(e) => setTargetCGPA(e.target.value)} 
-                className="w-24 bg-zinc-100 dark:bg-[#111113] border-none shadow-none rounded-2xl px-3 py-2.5 text-sm text-center font-bold text-brand-primary outline-none" 
-                placeholder="9.0" 
+              <input
+                type="number"
+                step="0.1"
+                max="10"
+                value={targetCGPA}
+                onChange={(e) => setTargetCGPA(e.target.value)}
+                className="w-24 bg-zinc-100 dark:bg-[#111113] border-none shadow-none rounded-2xl px-3 py-2.5 text-sm text-center font-bold text-brand-primary outline-none"
+                placeholder="9.0"
               />
               <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-brand-primary rounded-full flex items-center justify-center text-white text-[9px] font-black">!</span>
             </div>
@@ -817,9 +815,8 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
     <div className="flex items-center gap-3">
       <button
         onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-        className={`p-3 rounded-full transition-all border-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200 dark:hover:bg-[#161618] cursor-pointer flex items-center justify-center ${
-          isHistoryOpen ? 'text-brand-primary' : 'text-zinc-400 hover:text-brand-primary'
-        }`}
+        className={`p-3 rounded-full transition-all border-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200 dark:hover:bg-[#161618] cursor-pointer flex items-center justify-center ${isHistoryOpen ? 'text-brand-primary' : 'text-zinc-400 hover:text-brand-primary'
+          }`}
         title="Archived Reports"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M12 8v4l3 3" /><circle cx="12" cy="12" r="10" /></svg>
@@ -828,9 +825,8 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
       <button
         onClick={saveSnapshot}
         disabled={isSaving}
-        className={`p-3 rounded-full transition-all border-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200 dark:hover:bg-[#161618] cursor-pointer flex items-center justify-center ${
-          isSaving ? 'opacity-50' : 'text-zinc-400 hover:text-emerald-500'
-        }`}
+        className={`p-3 rounded-full transition-all border-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200 dark:hover:bg-[#161618] cursor-pointer flex items-center justify-center ${isSaving ? 'opacity-50' : 'text-zinc-400 hover:text-emerald-500'
+          }`}
         title="Save to Vault"
       >
         {isSaving ? <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" /> : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>}
@@ -856,7 +852,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
         {/* Glow Effects */}
         <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/10 blur-[30px] rounded-full pointer-events-none transition-transform group-hover:scale-125 duration-700" />
         <div className="absolute -top-10 -left-10 w-32 h-32 bg-white/5 blur-[30px] rounded-full pointer-events-none transition-transform group-hover:scale-125 duration-700" />
-        
+
         <div className="grid grid-cols-2 gap-4 relative z-10 divide-x divide-white/15">
           {/* SGPA Section */}
           <div className="text-center px-2">
@@ -1025,7 +1021,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
       </div>
 
       <div className="flex justify-center mt-4">
-        <button 
+        <button
           onClick={() => setShowGradingStandards(!showGradingStandards)}
           className="text-xs font-semibold text-zinc-400 hover:text-brand-primary transition-all flex items-center gap-2 px-6 py-3 rounded-full bg-zinc-100 dark:bg-[#111113] border-none shadow-none hover:bg-zinc-200 dark:hover:bg-[#161618] active:scale-95 duration-100 cursor-pointer"
         >

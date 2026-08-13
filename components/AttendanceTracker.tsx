@@ -173,15 +173,15 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
 
   const processAllFiles = async () => {
     if (selectedFiles.length === 0) return;
-    
+
     setIsAiProcessing(true);
     let totalExtracted = 0;
-    
+
     try {
       for (let i = 0; i < selectedFiles.length; i++) {
         setProcessingIndex(i);
         const file = selectedFiles[i];
-        
+
         const reader = new FileReader();
         const base64Promise = new Promise<string>((resolve) => {
           reader.onload = (event) => resolve(event.target?.result as string);
@@ -416,11 +416,10 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
 
           <button
             onClick={() => setShowArchived(!showArchived)}
-            className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-full text-xs font-bold transition-all border-none cursor-pointer shadow-none ${
-              showArchived
+            className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-full text-xs font-bold transition-all border-none cursor-pointer shadow-none ${showArchived
                 ? 'bg-orange-500 text-white'
                 : 'bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/70 dark:hover:bg-[#161618] text-zinc-600 dark:text-zinc-400'
-            }`}
+              }`}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
             <span>{showArchived ? 'Active' : 'Archived'}</span>
@@ -487,7 +486,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
             >
               Track
             </button>
-            
+
             <button
               onClick={() => setIsUploadModalOpen(true)}
               className="flex-1 w-full h-12 md:h-14 rounded-full transition-all flex items-center justify-center gap-2 border-none bg-zinc-200/60 dark:bg-[#18181b] text-orange-500 hover:bg-orange-500 hover:text-white active:scale-95 whitespace-nowrap shadow-none cursor-pointer"
@@ -795,15 +794,15 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                   ${isAiProcessing ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
               >
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  onChange={(e) => handleFiles(e.target.files)} 
-                  multiple 
-                  accept="image/*" 
-                  className="hidden" 
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={(e) => handleFiles(e.target.files)}
+                  multiple
+                  accept="image/*"
+                  className="hidden"
                 />
-                
+
                 <div className="relative">
                   <div className="w-20 h-20 bg-brand-primary/10 rounded-full flex items-center justify-center text-brand-primary group-hover:scale-110 transition-transform">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
@@ -819,7 +818,7 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                 </div>
 
                 {!isAiProcessing && (
-                  <button 
+                  <button
                     onClick={() => fileInputRef.current?.click()}
                     className="mt-2 px-6 py-2.5 bg-brand-primary text-white text-xs font-bold rounded-xl shadow-lg shadow-brand-primary/20 hover:opacity-90 active:scale-95 transition-all border-none"
                   >
@@ -843,13 +842,13 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                   <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 max-h-[180px] overflow-y-auto pr-2 custom-scrollbar p-1">
                     {selectedFiles.map((file, idx) => (
                       <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden group border border-zinc-200 dark:border-white/10 shadow-sm">
-                        <img 
-                          src={URL.createObjectURL(file)} 
-                          className="w-full h-full object-cover" 
-                          alt="preview" 
+                        <img
+                          src={URL.createObjectURL(file)}
+                          className="w-full h-full object-cover"
+                          alt="preview"
                         />
                         {!isAiProcessing && (
-                          <button 
+                          <button
                             onClick={(e) => { e.stopPropagation(); removeFile(idx); }}
                             className="absolute top-1.5 right-1.5 bg-black/60 text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity border-none backdrop-blur-md"
                           >
@@ -883,8 +882,8 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                     <p className="text-sm font-black text-brand-primary">{ocrProgress}%</p>
                   </div>
                   <div className="h-2.5 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner">
-                    <div 
-                      className="h-full bg-brand-primary transition-all duration-300 relative overflow-hidden" 
+                    <div
+                      className="h-full bg-brand-primary transition-all duration-300 relative overflow-hidden"
                       style={{ width: `${ocrProgress}%` }}
                     >
                       <div className="absolute inset-0 bg-white/20 animate-shimmer" />

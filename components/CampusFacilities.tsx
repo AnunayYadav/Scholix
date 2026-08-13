@@ -54,7 +54,7 @@ const CampusFacilities: React.FC = () => {
             placeholder="Search stores, ATMs, or items..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-14 pr-6 py-4 rounded-[28px] md:rounded-full bg-zinc-200/50 dark:bg-[#18181b] border-none shadow-none focus:ring-2 focus:ring-brand-primary/50 outline-none text-zinc-800 dark:text-white font-medium text-sm transition-all placeholder:text-zinc-400"
+            className="w-full pl-14 pr-6 py-4 rounded-[28px] md:rounded-full bg-zinc-200/50 dark:bg-white/5 border-none shadow-none focus:ring-2 focus:ring-brand-primary/50 outline-none text-zinc-800 dark:text-white font-medium text-sm transition-all placeholder:text-zinc-400"
           />
         </div>
 
@@ -66,7 +66,7 @@ const CampusFacilities: React.FC = () => {
               className={`flex-none px-5 py-2.5 rounded-full text-xs font-bold transition-all border-none shadow-none cursor-pointer ${
                 selectedCategory === cat 
                   ? 'bg-brand-primary text-white font-bold' 
-                  : 'bg-zinc-200/60 dark:bg-[#1c1c20] hover:bg-zinc-200 dark:hover:bg-[#242429] text-zinc-600 dark:text-zinc-300'
+                  : 'bg-zinc-200/50 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-600 dark:text-zinc-300'
               }`}
             >
               {cat}
