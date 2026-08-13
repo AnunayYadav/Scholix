@@ -48,7 +48,7 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center gap-4 px-5 py-3 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-2xl text-[11px] sm:text-xs font-bold outline-none hover:border-orange-500/50 transition-all dark:text-white cursor-pointer min-w-[180px] justify-between group shadow-sm active:scale-95 ${buttonClassName}`}
+                className={`flex items-center gap-4 px-6 py-3.5 bg-zinc-100 dark:bg-[#111113] border-none shadow-none rounded-full text-[11px] sm:text-xs font-bold outline-none hover:bg-zinc-200/70 dark:hover:bg-[#161618] transition-all dark:text-white cursor-pointer min-w-[180px] justify-between group active:scale-95 ${buttonClassName}`}
             >
                 <div className="flex items-center gap-3">
                     {icon && <span className="opacity-50">{icon}</span>}
@@ -69,7 +69,7 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
             </button>
 
             {isOpen && (
-                <div className={`absolute top-[calc(100%+8px)] ${align === 'right' ? 'right-0' : 'left-0'} min-w-full w-max max-w-[92vw] sm:max-w-[400px] bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-2xl border border-zinc-200 dark:border-white/10 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-fade-in-up origin-top p-2 space-y-1 z-50`}>
+                <div className={`absolute top-[calc(100%+8px)] ${align === 'right' ? 'right-0' : 'left-0'} min-w-full w-max max-w-[92vw] sm:max-w-[400px] bg-white dark:bg-[#111113] border-none rounded-[28px] shadow-2xl overflow-hidden animate-fade-in-up origin-top p-2 space-y-1 z-50`}>
                     <div className="max-h-[300px] overflow-y-auto no-scrollbar">
                         {renderCustomMenu ? renderCustomMenu(() => setIsOpen(false)) : (
                             options.map(option => (

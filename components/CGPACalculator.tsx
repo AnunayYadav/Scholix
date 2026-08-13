@@ -624,21 +624,21 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
   };
 
   const courseEntriesEl = (
-    <div className="glass-panel p-8 rounded-[40px] space-y-6 shadow-sm border dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 relative z-20">
+    <div className="p-6 sm:p-8 md:p-9 rounded-[32px] md:rounded-[40px] space-y-6 border-none shadow-none bg-zinc-100 dark:bg-[#111113] relative z-20">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h3 className="text-[11px] sm:text-xs text-zinc-400">Course entries</h3>
+          <h3 className="text-[11px] sm:text-xs text-zinc-400 font-bold uppercase tracking-wider">Course entries</h3>
           {courses.length > 0 && (
-            <span className="text-[9px] sm:text-[10px] font-bold bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded-full">
+            <span className="text-[9px] sm:text-[10px] font-bold bg-brand-primary/10 text-brand-primary px-2.5 py-0.5 rounded-full">
               {courses.length} {courses.length === 1 ? 'subject' : 'subjects'}
             </span>
           )}
         </div>
-        <button onClick={addCourse} className="text-[11px] sm:text-xs font-medium text-brand-primary bg-brand-primary/5 hover:bg-brand-primary/10 px-6 py-2.5 rounded-xl border border-brand-primary/20 transition-all border-none">+ Add field</button>
+        <button onClick={addCourse} className="text-[11px] sm:text-xs font-bold text-brand-primary bg-brand-primary/10 hover:bg-brand-primary/20 px-6 py-2.5 rounded-full transition-all border-none shadow-none cursor-pointer">+ Add field</button>
       </div>
       
       {courses.length === 0 ? (
-        <div className="py-16 text-center border-4 border-dashed border-zinc-100 dark:border-white/5 rounded-[40px] opacity-40 text-[11px] sm:text-xs">No courses added yet</div>
+        <div className="py-16 text-center bg-white dark:bg-[#18181b] rounded-[28px] opacity-60 text-[11px] sm:text-xs text-zinc-400 border-none shadow-none">No courses added yet</div>
       ) : (
         <div className="space-y-4">
           {courses.map((c) => {
@@ -647,7 +647,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
               ? allProgramSubjects.filter(s => s.name.toLowerCase().includes(query))
               : (activeProgramSubjects[currentSemester] || []);
             return (
-              <div key={c.id} className="flex flex-col md:flex-row items-center gap-4 bg-zinc-50 dark:bg-[#0a0a0a]/40 p-5 rounded-[32px] border border-zinc-100 dark:border-white/5 transition-all hover:border-brand-primary/20">
+              <div key={c.id} className="flex flex-col md:flex-row items-center gap-4 bg-white dark:bg-[#18181b] p-4 sm:p-5 rounded-[28px] border-none shadow-none transition-all">
                 <div className="flex-1 w-full relative">
                   <input
                     type="text"
@@ -656,9 +656,9 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                     onFocus={() => setFocusedCourseId(c.id)}
                     onBlur={() => setTimeout(() => setFocusedCourseId(null), 150)}
                     onChange={(e) => updateCourse(c.id, { name: e.target.value })}
-                    className="w-full bg-white dark:bg-white/5 border dark:border-white/10 rounded-2xl px-5 py-3 text-sm font-medium dark:text-white outline-none focus:ring-2 focus:ring-brand-primary/50"
+                    className="w-full bg-zinc-100 dark:bg-[#111113] border-none shadow-none rounded-2xl px-5 py-3.5 text-sm font-medium dark:text-white outline-none focus:ring-2 focus:ring-brand-primary/50"
                   />
-                  <div className={`absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl max-h-64 overflow-y-auto z-50 py-1.5 custom-scrollbar transition-all duration-100 ease-out origin-top ${
+                  <div className={`absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-[#111113] border-none rounded-[28px] shadow-2xl max-h-64 overflow-y-auto z-50 py-2 custom-scrollbar transition-all duration-100 ease-out origin-top ${
                     focusedCourseId === c.id && filtered.length > 0
                       ? 'opacity-100 scale-y-100 translate-y-0 pointer-events-auto'
                       : 'opacity-0 scale-y-95 -translate-y-2 pointer-events-none'
@@ -679,30 +679,31 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                 </div>
                 <div className="flex items-center gap-3 w-full md:w-auto">
                   <div className="space-y-1">
-                    <p className="text-[11px] sm:text-xs text-zinc-400 text-center">Credits</p>
+                    <p className="text-[11px] sm:text-xs text-zinc-400 text-center font-bold">Credits</p>
                     <input
                       type="number"
                       min="0"
                       max="20"
                       value={c.credits}
                       onChange={(e) => updateCourse(c.id, { credits: parseInt(e.target.value) || 0 })}
-                      className="w-16 bg-white dark:bg-white/5 border dark:border-white/10 rounded-2xl px-3 py-3 text-xs text-center font-semibold dark:text-white outline-none"
+                      className="w-16 bg-zinc-100 dark:bg-[#111113] border-none shadow-none rounded-2xl px-3 py-3.5 text-xs text-center font-bold dark:text-white outline-none"
                     />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[11px] sm:text-xs text-zinc-400 text-center">{inputMode === 'marks' ? 'Marks' : 'Grade'}</p>
+                    <p className="text-[11px] sm:text-xs text-zinc-400 text-center font-bold">{inputMode === 'marks' ? 'Marks' : 'Grade'}</p>
                     {inputMode === 'marks' ? (
-                      <input type="number" min="0" max="100" value={c.marks} onChange={(e) => updateCourse(c.id, { marks: parseInt(e.target.value) || 0 })} className="w-20 bg-white dark:bg-white/5 border dark:border-white/10 rounded-2xl px-3 py-3 text-xs text-center font-semibold dark:text-white outline-none" />
+                      <input type="number" min="0" max="100" value={c.marks} onChange={(e) => updateCourse(c.id, { marks: parseInt(e.target.value) || 0 })} className="w-20 bg-zinc-100 dark:bg-[#111113] border-none shadow-none rounded-2xl px-3 py-3.5 text-xs text-center font-bold dark:text-white outline-none" />
                     ) : (
                       <NexusDropdown
                         options={getGradeList(selectedUniversity)}
                         value={c.grade}
                         onChange={(val) => updateCourse(c.id, { grade: val })}
                         className="w-24"
+                        buttonClassName="min-w-0 w-24 bg-zinc-100 dark:bg-[#111113] border-none shadow-none rounded-2xl px-3 py-3.5"
                       />
                     )}
                   </div>
-                  <button onClick={() => removeCourse(c.id)} className="p-3 text-brand-secondary opacity-20 hover:opacity-100 border-none bg-transparent mt-4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+                  <button onClick={() => removeCourse(c.id)} className="p-3 text-red-500 opacity-40 hover:opacity-100 border-none bg-transparent mt-4 cursor-pointer transition-opacity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
                 </div>
               </div>
             );
@@ -710,16 +711,16 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
         </div>
       )}
 
-      <div className="border-t border-zinc-100 dark:border-white/5 pt-6 flex items-center justify-between">
+      <div className="pt-2 flex items-center justify-between">
         <div className="text-[11px] sm:text-xs text-zinc-400 font-semibold">
           {selectedUniversity === 'iitm_bs' ? 'Total Level Credits' : 'Total Semester Credits'}: <span className="text-zinc-800 dark:text-white font-bold">{currentStats.totalCredits}</span>
         </div>
         <button 
           onClick={() => setShowForecast(!showForecast)}
-          className={`px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all border-none ${
+          className={`px-6 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 transition-all border-none shadow-none cursor-pointer ${
             showForecast 
-              ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' 
-              : 'bg-brand-primary/5 text-brand-primary hover:bg-brand-primary/10'
+              ? 'bg-brand-primary text-white' 
+              : 'bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20'
           }`}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
@@ -730,7 +731,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
       </div>
 
       {showForecast && (
-        <div className="search-dropdown-anim border border-brand-primary/20 bg-brand-primary/[0.02] p-6 sm:p-8 rounded-[32px] space-y-6 mt-4">
+        <div className="search-dropdown-anim bg-white dark:bg-[#18181b] border-none shadow-none p-6 sm:p-8 rounded-[32px] md:rounded-[40px] space-y-6 mt-4">
           <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h4 className="text-[11px] sm:text-xs font-bold text-brand-primary uppercase tracking-wider">Degree target</h4>
@@ -743,7 +744,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                 max="10" 
                 value={targetCGPA} 
                 onChange={(e) => setTargetCGPA(e.target.value)} 
-                className="w-24 bg-white dark:bg-[#0a0a0a]/60 border border-brand-primary/30 rounded-xl px-3 py-2 text-sm text-center font-bold text-brand-primary outline-none focus:ring-4 focus:ring-brand-primary/10" 
+                className="w-24 bg-zinc-100 dark:bg-[#111113] border-none shadow-none rounded-2xl px-3 py-2.5 text-sm text-center font-bold text-brand-primary outline-none" 
                 placeholder="9.0" 
               />
               <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-brand-primary rounded-full flex items-center justify-center text-white text-[9px] font-black">!</span>
@@ -754,7 +755,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
             <div className="space-y-6 animate-fade-in">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {roadmapData.roadmap.map((item) => (
-                  <div key={item.sem} className={`p-4 rounded-2xl border transition-all flex flex-col items-center justify-center text-center relative overflow-hidden ${item.isManual ? 'bg-brand-primary/10 border-brand-primary/30 shadow-lg' : 'bg-white dark:bg-[#0a0a0a] border-zinc-100 dark:border-white/5'}`}>
+                  <div key={item.sem} className={`p-4 rounded-[24px] border-none shadow-none transition-all flex flex-col items-center justify-center text-center relative overflow-hidden ${item.isManual ? 'bg-brand-primary/15' : 'bg-zinc-100 dark:bg-[#111113]'}`}>
                     <p className="text-[10px] text-zinc-400 mb-2">
                       {(() => {
                         const isIITM = selectedUniversity === 'iitm_bs';
@@ -767,17 +768,17 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                     </p>
 
                     <div className="flex items-center gap-1.5 relative z-10">
-                      <button onClick={() => adjustSemTarget(item.sem, -0.1)} className="w-6 h-6 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-brand-primary hover:text-white transition-all border-none">
+                      <button onClick={() => adjustSemTarget(item.sem, -0.1)} className="w-6 h-6 rounded-full bg-zinc-200/60 dark:bg-white/10 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-brand-primary hover:text-white transition-all border-none cursor-pointer">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5"><path d="M5 12h14" /></svg>
                       </button>
                       <span className={`text-base font-bold tracking-tight text-brand-primary`}>{item.sgpa.toFixed(1)}</span>
-                      <button onClick={() => adjustSemTarget(item.sem, 0.1)} className="w-6 h-6 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-brand-primary hover:text-white transition-all border-none">
+                      <button onClick={() => adjustSemTarget(item.sem, 0.1)} className="w-6 h-6 rounded-full bg-zinc-200/60 dark:bg-white/10 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-brand-primary hover:text-white transition-all border-none cursor-pointer">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5"><path d="M12 5v14M5 12h14" /></svg>
                       </button>
                     </div>
 
                     {item.isManual ? (
-                      <button onClick={() => resetManual(item.sem)} className="mt-2 text-[9px] text-brand-primary hover:underline border-none bg-transparent flex items-center gap-1">
+                      <button onClick={() => resetManual(item.sem)} className="mt-2 text-[9px] text-brand-primary hover:underline border-none bg-transparent flex items-center gap-1 cursor-pointer">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2 h-2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                         Locked • Reset
                       </button>
@@ -790,7 +791,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                 ))}
               </div>
 
-              <div className={`p-4 rounded-2xl border flex items-center gap-3 ${roadmapData.summary.isImpossible ? 'bg-brand-secondary/10 border-brand-secondary/20' : 'bg-brand-primary/5 border-brand-primary/10'}`}>
+              <div className={`p-4 rounded-[24px] border-none shadow-none flex items-center gap-3 ${roadmapData.summary.isImpossible ? 'bg-brand-secondary/15' : 'bg-brand-primary/10'}`}>
                 <div className={`w-8 h-8 rounded-full text-white flex items-center justify-center flex-shrink-0 font-black text-xs ${roadmapData.summary.isImpossible ? 'bg-brand-secondary' : 'bg-brand-primary'}`}>
                   {roadmapData.summary.isImpossible ? '!' : 'i'}
                 </div>
@@ -803,8 +804,8 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
               </div>
             </div>
           ) : (
-            <div className="py-8 text-center border border-dashed border-zinc-200 dark:border-white/5 rounded-2xl opacity-40">
-              <p className="text-[11px] sm:text-xs text-zinc-500">Enter target CGPA to run simulation</p>
+            <div className="py-8 text-center border-none bg-zinc-100 dark:bg-[#111113] rounded-[24px] opacity-60">
+              <p className="text-[11px] sm:text-xs text-zinc-400 font-medium">Enter target CGPA to run simulation</p>
             </div>
           )}
         </div>
@@ -816,7 +817,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
     <div className="flex items-center gap-3">
       <button
         onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-        className={`p-2 transition-all border-none bg-transparent flex items-center justify-center ${
+        className={`p-3 rounded-full transition-all border-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200 dark:hover:bg-[#161618] cursor-pointer flex items-center justify-center ${
           isHistoryOpen ? 'text-brand-primary' : 'text-zinc-400 hover:text-brand-primary'
         }`}
         title="Archived Reports"
@@ -827,7 +828,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
       <button
         onClick={saveSnapshot}
         disabled={isSaving}
-        className={`p-2 transition-all border-none bg-transparent flex items-center justify-center ${
+        className={`p-3 rounded-full transition-all border-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200 dark:hover:bg-[#161618] cursor-pointer flex items-center justify-center ${
           isSaving ? 'opacity-50' : 'text-zinc-400 hover:text-emerald-500'
         }`}
         title="Save to Vault"
@@ -837,7 +838,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
 
       <button onClick={() => {
         setIsNameModalOpen(true);
-      }} className="px-4 py-2.5 bg-brand-primary hover:bg-brand-primary/95 text-white rounded-xl text-[10px] md:text-xs font-semibold shadow-lg shadow-brand-primary/20 active:scale-95 transition-all flex items-center gap-1.5 border-none">
+      }} className="px-6 py-3 bg-brand-primary hover:bg-brand-primary/95 text-white rounded-full text-[10px] md:text-xs font-bold shadow-none active:scale-95 transition-all flex items-center gap-1.5 border-none cursor-pointer">
         Generate Link
       </button>
     </div>
@@ -851,7 +852,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
       </div>
 
       {/* Unified Score Card Box */}
-      <div className="bg-gradient-to-br from-brand-primary to-brand-secondary text-white border-none shadow-xl relative overflow-hidden group rounded-[40px] p-8 min-h-[150px]">
+      <div className="bg-gradient-to-br from-brand-primary to-brand-secondary text-white border-none shadow-none relative overflow-hidden group rounded-[32px] md:rounded-[40px] p-6 sm:p-8 min-h-[150px]">
         {/* Glow Effects */}
         <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/10 blur-[30px] rounded-full pointer-events-none transition-transform group-hover:scale-125 duration-700" />
         <div className="absolute -top-10 -left-10 w-32 h-32 bg-white/5 blur-[30px] rounded-full pointer-events-none transition-transform group-hover:scale-125 duration-700" />
@@ -882,7 +883,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
       </div>
 
       {/* Grade distribution */}
-      <div className="glass-panel p-8 rounded-[40px] border border-zinc-200 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/20">
+      <div className="p-6 sm:p-8 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-100 dark:bg-[#111113]">
         <h4 className="text-[11px] sm:text-xs text-zinc-400 mb-4 uppercase tracking-wider font-bold">Grade distribution</h4>
         <div className="space-y-3">
           {Object.entries(currentStats.gradeCounts)
@@ -891,7 +892,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
               <div key={grade} className="flex items-center justify-between text-xs">
                 <span className="font-semibold dark:text-white">Grade {grade}</span>
                 <div className="flex items-center gap-3">
-                  <div className="h-1.5 w-24 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-1.5 w-24 bg-white dark:bg-[#18181b] rounded-full overflow-hidden">
                     <div className="h-full bg-brand-primary" style={{ width: `${((count as number) / courses.length) * 100}%` }} />
                   </div>
                   <span className="font-bold text-brand-primary w-4 text-right">{count}</span>
@@ -906,17 +907,17 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
 
       {/* Inline Vault History Panel */}
       {isHistoryOpen && (
-        <div ref={historyPanelRef} className="glass-panel p-6 rounded-[32px] border border-brand-primary/20 bg-brand-primary/[0.03] animate-fade-in space-y-4">
+        <div ref={historyPanelRef} className="p-6 rounded-[32px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] animate-fade-in space-y-4">
           <h3 className="text-[11px] sm:text-xs font-semibold text-brand-primary uppercase tracking-wider">Saved reports</h3>
           {history.length === 0 ? <p className="text-[10px] font-bold text-zinc-400 uppercase italic opacity-60 text-center py-4">Vault empty.</p> : (
             <div className="space-y-3">
               {history.map(h => (
-                <div key={h.id} onClick={() => loadSnapshot(h)} className="p-4 bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-white/5 rounded-2xl cursor-pointer hover:border-brand-primary/50 transition-all flex items-center justify-between shadow-sm">
+                <div key={h.id} onClick={() => loadSnapshot(h)} className="p-4 bg-white dark:bg-[#18181b] border-none shadow-none rounded-[24px] cursor-pointer hover:bg-zinc-50 dark:hover:bg-[#222226] transition-all flex items-center justify-between">
                   <div className="min-w-0 flex-1 pr-2">
                     <p className="text-xs font-semibold dark:text-white truncate">{h.label}</p>
                     <p className="text-[9px] font-bold text-zinc-400 uppercase mt-0.5">{new Date(h.created_at).toLocaleDateString()}</p>
                   </div>
-                  <button onClick={(e) => deleteHistory(h.id, e)} className="p-1.5 text-brand-secondary opacity-25 hover:opacity-100 border-none bg-transparent flex-shrink-0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+                  <button onClick={(e) => deleteHistory(h.id, e)} className="p-1.5 text-red-500 opacity-40 hover:opacity-100 border-none bg-transparent flex-shrink-0 cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
                 </div>
               ))}
             </div>
@@ -926,11 +927,9 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
     </div>
   );
 
-
-
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20 px-4 md:px-0">
-      <div className="flex flex-row items-center justify-between gap-4 mb-8 border-b border-zinc-100 dark:border-white/5 pb-6 w-full">
+      <div className="flex flex-row items-center justify-between gap-4 mb-6 pb-2 w-full">
         <div>
           <h2 className="text-3xl font-bold text-zinc-800 dark:text-white tracking-tighter">
             CGPA <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Hub</span>
@@ -959,13 +958,13 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
       {/* Vault history moved inline into performanceOverviewEl */}
 
       {currentSemester > 1 && (
-        <div className="glass-panel p-8 rounded-[40px] border border-brand-primary/20 bg-brand-primary/[0.02] shadow-sm mb-8 animate-fade-in">
-          <h3 className="text-[11px] sm:text-xs font-medium text-brand-primary mb-6">
+        <div className="p-6 sm:p-8 md:p-9 rounded-[32px] md:rounded-[40px] bg-zinc-100 dark:bg-[#111113] border-none shadow-none mb-8 animate-fade-in">
+          <h3 className="text-[11px] sm:text-xs font-bold text-brand-primary mb-6">
             {selectedUniversity === 'iitm_bs' ? `Academic history (Terms 1 – ${currentSemester - 1})` : `Academic history (Sems 1 – ${currentSemester - 1})`}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-[11px] sm:text-xs text-zinc-400 mb-2 ml-1">
+              <label className="block text-[11px] sm:text-xs text-zinc-400 mb-2 ml-1 font-semibold">
                 {selectedUniversity === 'iitm_bs' ? `CGPA till Term ${currentSemester - 1}` : `CGPA till Sem ${currentSemester - 1}`}
               </label>
               <input
@@ -973,17 +972,17 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                 value={prevCGPA}
                 onChange={(e) => setPrevCGPA(e.target.value)}
                 placeholder="e.g. 8.45"
-                className="w-full bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-sm font-semibold dark:text-white outline-none focus:ring-2 focus:ring-brand-primary"
+                className="w-full bg-white dark:bg-[#18181b] border-none shadow-none rounded-2xl px-6 py-4 text-sm font-semibold dark:text-white outline-none focus:ring-2 focus:ring-brand-primary"
               />
             </div>
             <div>
-              <label className="block text-[11px] sm:text-xs text-zinc-400 mb-2 ml-1">Total credits earned</label>
+              <label className="block text-[11px] sm:text-xs text-zinc-400 mb-2 ml-1 font-semibold">Total credits earned</label>
               <input
                 type="number"
                 value={prevTotalCredits}
                 onChange={(e) => setPrevTotalCredits(e.target.value)}
                 placeholder={`Default: ${archivedCredits}`}
-                className="w-full bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-sm font-semibold dark:text-white outline-none focus:ring-2 focus:ring-brand-primary"
+                className="w-full bg-white dark:bg-[#18181b] border-none shadow-none rounded-2xl px-6 py-4 text-sm font-semibold dark:text-white outline-none focus:ring-2 focus:ring-brand-primary"
               />
             </div>
           </div>
@@ -1028,7 +1027,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
       <div className="flex justify-center mt-4">
         <button 
           onClick={() => setShowGradingStandards(!showGradingStandards)}
-          className="text-xs font-semibold text-zinc-400 hover:text-brand-primary transition-all flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 hover:border-brand-primary/30 active:scale-95 duration-100"
+          className="text-xs font-semibold text-zinc-400 hover:text-brand-primary transition-all flex items-center gap-2 px-6 py-3 rounded-full bg-zinc-100 dark:bg-[#111113] border-none shadow-none hover:bg-zinc-200 dark:hover:bg-[#161618] active:scale-95 duration-100 cursor-pointer"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`w-4 h-4 transition-transform duration-200 ${showGradingStandards ? 'rotate-180' : ''}`}>
             <path d="M6 9l6 6 6-6" />
@@ -1038,16 +1037,16 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
       </div>
 
       {showGradingStandards && (
-        <div className="search-dropdown-anim glass-panel p-8 rounded-[40px] border border-zinc-200 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/60 shadow-sm overflow-hidden">
+        <div className="search-dropdown-anim p-6 sm:p-8 md:p-9 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] overflow-hidden">
           <header className="flex items-center justify-between mb-8">
-            <h3 className="text-[11px] sm:text-xs font-semibold text-brand-primary">
+            <h3 className="text-[11px] sm:text-xs font-bold text-brand-primary uppercase tracking-wider">
               {selectedUniversity === 'iitm_bs' ? 'IIT Madras' : shortBrandName} grading standards
             </h3>
-            <span className="text-[11px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-3 py-1 rounded-full">Standard Reference</span>
+            <span className="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-widest bg-white dark:bg-[#18181b] px-3.5 py-1 rounded-full">Standard Reference</span>
           </header>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {getStandards(selectedUniversity).map((s) => (
-              <div key={s.grade} className="p-4 rounded-[28px] bg-zinc-50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 flex flex-col items-center text-center group hover:border-brand-primary/30 transition-all">
+              <div key={s.grade} className="p-5 rounded-[28px] bg-white dark:bg-[#18181b] border-none shadow-none flex flex-col items-center text-center group transition-all">
                 <span className="text-xl font-bold text-zinc-900 dark:text-white mb-1 group-hover:scale-110 transition-transform">{s.grade}</span>
                 <p className="text-xs text-brand-primary mb-2">{s.points} Points</p>
                 <p className="text-[11px] sm:text-xs font-bold text-zinc-500 dark:text-zinc-400 mb-0.5">{s.range} Marks</p>

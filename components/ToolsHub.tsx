@@ -367,29 +367,19 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
         </div>
       ) : (
         <div className="max-w-5xl mx-auto px-4 sm:px-0">
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 mb-4">
             <button 
               onClick={() => navigate(prefix + '/tools')} 
-              className="flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white transition-colors bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 px-4 py-2 rounded-xl shadow-sm hover:shadow-md cursor-pointer self-start"
+              className="flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white transition-colors bg-zinc-100 dark:bg-[#111113] border-none shadow-none hover:bg-zinc-200/70 dark:hover:bg-[#161618] px-5 py-2.5 rounded-full cursor-pointer self-start active:scale-95"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
               Back to Hub
             </button>
-            {activeTab !== 'cgpa' && activeTab !== 'lectures' && (
+            {activeTab !== 'cgpa' && activeTab !== 'attendance' && activeTab !== 'placement' && activeTab !== 'lectures' && (
               <div>
                 <h1 className="text-2xl md:text-3xl font-semibold text-zinc-800 dark:text-white tracking-tight leading-none mb-2">
-                  {activeTab === 'attendance' && 'Attendance Tracker'}
-                  {activeTab === 'placement' && 'Placement Prefect'}
-                  {activeTab === 'lectures' && (
-                    <>
-                      YouTube <span className="text-brand-primary">Lectures</span>
-                    </>
-                  )}
                 </h1>
                 <p className="text-zinc-500 dark:text-zinc-400 font-medium text-[11px] sm:text-xs">
-                  {activeTab === 'attendance' && 'Log and monitor your daily course attendance'}
-                  {activeTab === 'placement' && 'Track applications and prepare for placements'}
-                  {activeTab === 'lectures' && 'Browse and watch university lectures inline without distraction'}
                 </p>
               </div>
             )}
@@ -404,12 +394,12 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
 
       <div className="relative">
         <div className="transition-all duration-500 transform">
-          {activeTab === 'attendance' && <AttendanceTracker userProfile={userProfile} hideHeader={true} />}
+          {activeTab === 'attendance' && <AttendanceTracker userProfile={userProfile} hideHeader={false} />}
           {activeTab === 'cgpa' && <CGPACalculator userProfile={userProfile} hideHeader={true} />}
           {activeTab === 'placement' && (
             <PlacementPrefect 
               userProfile={userProfile} 
-              hideHeader={true} 
+              hideHeader={false} 
               reportIdOverride={new URLSearchParams(location.search).get('id') || undefined} 
             />
           )}

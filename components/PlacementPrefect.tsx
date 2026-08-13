@@ -1132,46 +1132,46 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
 
   if (result) {
     return (
-      <div ref={reportRef} className="max-w-6xl mx-auto space-y-10 animate-fade-in pb-20 px-4 md:px-0 relative">
+      <div ref={reportRef} className="max-w-6xl mx-auto space-y-8 animate-fade-in pb-20 px-4 md:px-0 relative">
         <ScanlineStyles />
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-1">
           {!hideHeader ? (
             <div>
-              <h2 className="text-2xl md:text-3xl font-semibold text-zinc-900 dark:text-white tracking-tight mb-1">Resume Diagnostic</h2>
-              <p className="text-zinc-500 font-medium tracking-wide text-[11px] flex items-center gap-2">
-                Scanning <span className="text-zinc-400 font-mono italic">{fileName || 'Untitled'}</span>
+              <h2 className="text-3xl font-bold text-zinc-800 dark:text-white tracking-tighter">Resume <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Diagnostic</span></h2>
+              <p className="text-zinc-500 font-medium tracking-wide text-[11px] flex items-center gap-2 mt-1">
+                Scanning <span className="text-brand-primary font-bold italic">{fileName || 'Untitled'}</span>
               </p>
             </div>
           ) : <div />}
-          <div className="flex flex-wrap gap-2 ml-auto md:ml-0 header-actions">
+          <div className="flex flex-wrap gap-2.5 ml-auto md:ml-0 header-actions">
             <button 
               onClick={handleShareReport} 
               disabled={shareLoading}
-              className="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-xl font-semibold text-[11px] tracking-wide transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+              className="px-5 py-2.5 bg-zinc-100 dark:bg-[#111113] border-none shadow-none text-zinc-600 dark:text-zinc-300 rounded-full font-bold text-xs tracking-wide transition-all hover:bg-zinc-200 dark:hover:bg-[#161618] flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               {shareLoading ? (
                 <div className="w-3.5 h-3.5 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
               ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
               )}
               Share
             </button>
             <button 
               onClick={handleSaveReport} 
-              className="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-xl font-semibold text-[11px] tracking-wide transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm"
+              className="px-5 py-2.5 bg-zinc-100 dark:bg-[#111113] border-none shadow-none text-zinc-600 dark:text-zinc-300 rounded-full font-bold text-xs tracking-wide transition-all hover:bg-zinc-200 dark:hover:bg-[#161618] flex items-center gap-1.5 cursor-pointer"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
               Save History
             </button>
             <button 
               onClick={handleDownloadReport}
               disabled={downloadLoading}
-              className="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-xl font-semibold text-[11px] tracking-wide transition-all hover:border-brand-primary flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+              className="px-5 py-2.5 bg-zinc-100 dark:bg-[#111113] border-none shadow-none text-zinc-600 dark:text-zinc-300 rounded-full font-bold text-xs tracking-wide transition-all hover:bg-zinc-200 dark:hover:bg-[#161618] flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               {downloadLoading ? (
                 <div className="w-3.5 h-3.5 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
               ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               )}
               Download
             </button>
@@ -1180,7 +1180,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                 setResult(null);
                 setSearchParams({ tab: 'placement' }, { replace: true });
               }} 
-              className="px-5 py-2 bg-brand-primary text-white rounded-full font-semibold text-[11px] tracking-wide active:scale-95 transition-all border-none shadow-md shadow-brand-primary/20"
+              className="px-6 py-2.5 bg-brand-primary text-white rounded-full font-bold text-xs tracking-wide active:scale-95 transition-all border-none shadow-none cursor-pointer"
             >
               Analyze New
             </button>
@@ -1190,7 +1190,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
         {/* Top Section Layout */}
         <div className="space-y-4">
           {/* Resume Score Card (Wide, Ring on Left, Text on Right) */}
-          <div className="p-6 md:p-8 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex flex-col sm:flex-row items-center gap-6 md:gap-10">
+          <div className="p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] flex flex-col sm:flex-row items-center gap-6 md:gap-10">
             <ResumeScoreRing score={result.totalScore} size={140} />
             <div className="text-center sm:text-left space-y-1.5 flex-1">
               <div className="flex items-center justify-center sm:justify-start gap-1.5 text-zinc-400 dark:text-zinc-500">
@@ -1219,7 +1219,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
           {/* Bottom Grid: 2 columns */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             {/* Score Breakdown (Left Column, col-span-3) */}
-            <div className="lg:col-span-3 p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex flex-col justify-between">
+            <div className="lg:col-span-3 p-6 md:p-7 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] flex flex-col justify-between">
               <div>
                 <h3 className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider mb-4">Score Breakdown</h3>
                 <div className="space-y-3.5">
@@ -1255,7 +1255,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             {/* Quick Summary & File Analyzed (Right Column, col-span-2) */}
             <div className="lg:col-span-2 flex flex-col gap-4">
               {/* Quick Summary */}
-              <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex flex-col justify-between flex-1">
+              <div className="p-6 rounded-[28px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] flex flex-col justify-between flex-1">
                 <h3 className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider mb-3">Quick Summary</h3>
                 <div className="space-y-2 flex-1 flex flex-col justify-center">
                   <SummaryRow 
@@ -1277,10 +1277,10 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
               </div>
 
               {/* File Analyzed */}
-              <div className="p-4 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex flex-col justify-center">
+              <div className="p-5 rounded-[28px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] flex flex-col justify-center">
                 <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2.5">File analyzed</span>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
+                  <div className="w-9 h-9 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
                     <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
                       <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9.5 8.5c0 .8-.7 1.5-1.5 1.5H7v2H5.5V9H8c.8 0 1.5.7 1.5 1.5v1zm5 2c0 .8-.7 1.5-1.5 1.5h-2.5V9H13c.8 0 1.5.7 1.5 1.5v3zm3.5-3.5H16.5v1.5h2V13h-2v2H15V9h3.5v1.5zm-6.5 0h1v3h-1v-3zm-4.5 0H7v1h.5v-1z"/>
                     </svg>
@@ -1298,10 +1298,10 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
 
         {/* Competency Radar - Compact */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm">
+          <div className="p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-100 dark:bg-[#111113]">
             <div className="flex items-start justify-between mb-2">
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Competency Radar</h3>
-              <div className="flex items-center gap-3 text-[9px] text-zinc-400">
+              <h3 className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Competency Radar</h3>
+              <div className="flex items-center gap-3 text-[9px] text-zinc-400 font-semibold">
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-blue-500 inline-block" /> Ideal</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-orange-500 inline-block" /> Average</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-emerald-500 inline-block" /> You</span>
@@ -1328,26 +1328,26 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
           </div>
 
           {/* Recruiter Verdict */}
-          <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex flex-col">
+          <div className="p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] flex flex-col">
             <div className="flex items-center gap-2 mb-3">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-brand-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-brand-primary">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
               </svg>
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Recruiter verdict</h3>
+              <h3 className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Recruiter verdict</h3>
             </div>
-            <p className="text-[12px] text-zinc-600 dark:text-zinc-400 leading-relaxed italic flex-1">
+            <p className="text-[12px] text-zinc-600 dark:text-zinc-400 leading-relaxed italic flex-1 font-medium">
               "{result.summary}"
             </p>
             {result.simulation && (
-              <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-white/5 flex items-center gap-6">
+              <div className="mt-4 pt-3 border-t border-zinc-200/40 dark:border-white/5 flex items-center gap-6">
                 <div>
-                  <p className="text-[9px] text-zinc-400 uppercase tracking-wider mb-0.5">Current chance</p>
-                  <span className="text-lg font-semibold text-zinc-700 dark:text-zinc-300">{result.simulation.currentShortlistChance}%</span>
+                  <p className="text-[9px] text-zinc-400 uppercase font-bold tracking-wider mb-0.5">Current chance</p>
+                  <span className="text-lg font-bold text-zinc-700 dark:text-zinc-300">{result.simulation.currentShortlistChance}%</span>
                 </div>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-zinc-300"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                 <div>
-                  <p className="text-[9px] text-brand-primary uppercase tracking-wider mb-0.5">Optimized target</p>
-                  <span className="text-lg font-semibold text-brand-primary">{result.simulation.projectedShortlistChance}%</span>
+                  <p className="text-[9px] text-brand-primary uppercase font-bold tracking-wider mb-0.5">Optimized target</p>
+                  <span className="text-lg font-bold text-brand-primary">{result.simulation.projectedShortlistChance}%</span>
                 </div>
               </div>
             )}
@@ -1355,9 +1355,9 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
         </div>
 
         {/* Strategic Action Plan */}
-        <section className="pt-5">
-          <h3 className="text-base font-semibold text-zinc-900 dark:text-white mb-3">Strategic Action Plan</h3>
-          <div className="rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm divide-y divide-zinc-100/50 dark:divide-white/5">
+        <section className="pt-2">
+          <h3 className="text-xs font-bold text-brand-primary uppercase tracking-wider mb-3 px-1">Strategic Action Plan</h3>
+          <div className="p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] space-y-3">
             {result.actionPlan.tasks.map((task, idx) => {
               const colorMap: Record<string, string> = {
                 Build: 'bg-blue-500', Practice: 'bg-purple-500', Add: 'bg-emerald-500', Refactor: 'bg-orange-500'
@@ -1367,14 +1367,14 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                 Add: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10', Refactor: 'text-orange-600 bg-orange-50 dark:bg-orange-500/10'
               };
               return (
-                <div key={idx} className="flex items-start gap-3 px-4 py-3">
+                <div key={idx} className="flex items-start gap-3 p-4 rounded-2xl bg-white dark:bg-[#18181b] border-none shadow-none">
                   <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${colorMap[task.action] || 'bg-zinc-400'}`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase ${badgeMap[task.action] || 'text-zinc-500 bg-zinc-100'}`}>{task.action}</span>
-                      <h4 className="text-[12px] font-semibold text-zinc-900 dark:text-white truncate">{task.task}</h4>
+                      <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase ${badgeMap[task.action] || 'text-zinc-500 bg-zinc-100'}`}>{task.action}</span>
+                      <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate">{task.task}</h4>
                     </div>
-                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">{task.description}</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">{task.description}</p>
                   </div>
                 </div>
               );
@@ -1384,10 +1384,10 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
 
 
         {/* Deep Dive Improvements */}
-        <section className="pt-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-semibold text-zinc-900 dark:text-white">Deep Dive Improvements</h3>
-            <div className="flex gap-3 text-[9px] text-zinc-400">
+        <section className="pt-2">
+          <div className="flex items-center justify-between mb-3 px-1">
+            <h3 className="text-xs font-bold text-brand-primary uppercase tracking-wider">Deep Dive Improvements</h3>
+            <div className="flex gap-3 text-[9px] text-zinc-400 font-semibold">
               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" /> Gaps</span>
               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" /> Optimized</span>
             </div>
@@ -1398,8 +1398,8 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
               <ComparisonCard key={idx} suggestion={suggestion} />
             ))}
             {(!result.improvementSuggestions?.length) && (
-              <div className="p-12 text-center rounded-2xl bg-zinc-50/50 dark:bg-white/[0.02] border-2 border-dashed border-zinc-200/60 dark:border-white/[0.08]">
-                <p className="text-zinc-400 font-medium text-xs uppercase tracking-widest">No major improvements needed</p>
+              <div className="p-12 text-center rounded-[28px] bg-white dark:bg-[#18181b] border-none shadow-none">
+                <p className="text-zinc-400 font-bold text-xs uppercase tracking-widest">No major improvements needed</p>
               </div>
             )}
           </div>
@@ -1407,18 +1407,18 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
 
         {/* Success Indicators */}
         {result.passedChecks && result.passedChecks.length > 0 && (
-          <section className="pt-5">
-            <h3 className="text-base font-semibold text-emerald-600 dark:text-emerald-400 mb-3">Success Indicators</h3>
+          <section className="pt-2">
+            <h3 className="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-3 px-1">Success Indicators</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {result.passedChecks.map((check, idx) => (
-                <div key={idx} className="p-3 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm flex items-start gap-3 hover:border-emerald-300/50 dark:hover:border-emerald-500/20 transition-colors">
-                  <div className="w-5 h-5 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0 mt-0.5">
+                <div key={idx} className="p-4 rounded-[28px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0 mt-0.5">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><polyline points="20 6 9 17 4 12" /></svg>
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[9px] text-emerald-500 uppercase tracking-wider mb-0.5">{check.category}</p>
-                    <h4 className="text-[12px] font-semibold text-zinc-900 dark:text-white leading-tight">{check.checkName}</h4>
-                    <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1">{check.insight}</p>
+                    <p className="text-[9px] text-emerald-500 uppercase font-bold tracking-wider mb-0.5">{check.category}</p>
+                    <h4 className="text-xs font-bold text-zinc-900 dark:text-white leading-tight">{check.checkName}</h4>
+                    <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 font-medium">{check.insight}</p>
                   </div>
                 </div>
               ))}
@@ -1427,10 +1427,10 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
         )}
 
         {/* Skill Diversity Matrix */}
-        <section className="pt-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-semibold text-zinc-900 dark:text-white">Skill Diversity Matrix</h3>
-            <div className="flex gap-3 text-[9px] text-zinc-400">
+        <section className="pt-2">
+          <div className="flex items-center justify-between mb-3 px-1">
+            <h3 className="text-xs font-bold text-brand-primary uppercase tracking-wider">Skill Diversity Matrix</h3>
+            <div className="flex gap-3 text-[9px] text-zinc-400 font-semibold">
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-brand-primary inline-block" /> Mandatory</span>
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sky-500 inline-block" /> Desired</span>
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> Matched</span>
@@ -1439,10 +1439,10 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {result.skillDiversity?.map((cat, idx) => (
-              <div key={idx} className="p-4 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm space-y-3 flex flex-col h-full hover:border-brand-primary/20 transition-colors">
+              <div key={idx} className="p-5 rounded-[28px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] space-y-3 flex flex-col h-full">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-[12px] font-semibold text-zinc-900 dark:text-white">{cat.category}</h4>
-                  <span className="text-[10px] text-zinc-400">{cat.skills.filter(s => s.found).length}/{cat.skills.length}</span>
+                  <h4 className="text-xs font-bold text-zinc-900 dark:text-white">{cat.category}</h4>
+                  <span className="text-[10px] font-bold text-zinc-400">{cat.skills.filter(s => s.found).length}/{cat.skills.length}</span>
                 </div>
                 <div className="flex flex-wrap gap-1.5 flex-1 items-start content-start">
                   {cat.skills.map((skill, sIdx) => {
@@ -1457,10 +1457,10 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                     return (
                       <span 
                         key={sIdx}
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] border transition-all ${
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] border-none shadow-none font-bold transition-all ${
                           isFound 
-                            ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 shadow-sm shadow-emerald-500/5' 
-                            : 'bg-zinc-50/80 dark:bg-zinc-900 border-zinc-200/60 dark:border-white/[0.08] text-zinc-500 dark:text-zinc-400'
+                            ? 'bg-emerald-500/10 text-emerald-500' 
+                            : 'bg-white dark:bg-[#18181b] text-zinc-400'
                         }`}
                       >
                         {isFound ? (
@@ -1479,31 +1479,31 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
         </section>
 
         {/* Annotated Resume X-Ray */}
-        <section className="pt-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-semibold text-zinc-900 dark:text-white">Annotated Resume X-Ray</h3>
-            <div className="flex gap-3 text-[9px] text-zinc-400">
+        <section className="pt-2">
+          <div className="flex items-center justify-between mb-3 px-1">
+            <h3 className="text-xs font-bold text-brand-primary uppercase tracking-wider">Annotated Resume X-Ray</h3>
+            <div className="flex gap-3 text-[9px] text-zinc-400 font-semibold">
               <span className="flex items-center gap-1"><span className="w-3 h-[2px] bg-emerald-500 rounded-full inline-block" /> Optimized</span>
               <span className="flex items-center gap-1"><span className="w-3 h-[2px] bg-red-500 rounded-full inline-block" /> Flagged</span>
             </div>
           </div>
           
           <div className="relative group/xray">
-            <div className="p-5 md:p-8 rounded-2xl bg-zinc-950 border border-white/[0.08] shadow-lg relative">
+            <div className="p-6 md:p-8 rounded-[32px] md:rounded-[40px] bg-zinc-100 dark:bg-[#111113] border-none shadow-none relative">
               <div className="max-h-[600px] overflow-y-auto custom-scrollbar pr-4 relative z-20">
-                <div className="text-[12px] md:text-[13px] text-zinc-400 font-medium leading-relaxed whitespace-pre-wrap font-mono tracking-tight">
+                <div className="text-[12px] md:text-[13px] text-zinc-700 dark:text-zinc-300 font-medium leading-relaxed whitespace-pre-wrap font-mono tracking-tight">
                   {result.annotatedContent.map((fragment, i) => (
                     <FragmentHighlight key={i} fragment={fragment} onHover={handleFragmentHover} />
                   ))}
                 </div>
               </div>
             </div>
-            <p className="text-[9px] text-zinc-500 mt-3 text-center">Hover highlighted text for insights</p>
+            <p className="text-[9px] text-zinc-400 mt-3 text-center font-medium">Hover highlighted text for insights</p>
           </div>
         </section>
 
         {/* Category Breakdown */}
-        <div className="pt-5 space-y-4">
+        <div className="pt-2 space-y-4">
            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
             {CATEGORIES.map((cat) => {
               const catData = result.categories?.[cat.id] || { score: 0 };
@@ -1512,49 +1512,49 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`px-3.5 py-1.5 rounded-full border whitespace-nowrap transition-all flex items-center gap-2 shrink-0 text-[11px] ${isActive ? 'bg-brand-primary border-brand-primary text-white shadow-md shadow-brand-primary/20' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-white/10 text-zinc-500 hover:border-brand-primary/30'}`}
+                  className={`px-4 py-2 rounded-full border-none shadow-none whitespace-nowrap transition-all flex items-center gap-2 shrink-0 text-xs font-bold cursor-pointer ${isActive ? 'bg-brand-primary text-white' : 'bg-zinc-100 dark:bg-[#111113] text-zinc-400 hover:text-zinc-600 dark:hover:text-white'}`}
                 >
-                  <span className={`font-semibold ${isActive ? 'text-white' : 'text-zinc-900 dark:text-white'}`}>{catData.score}%</span>
+                  <span className={`font-black ${isActive ? 'text-white' : 'text-zinc-800 dark:text-white'}`}>{catData.score}%</span>
                   <span>{cat.label}</span>
                 </button>
               );
             })}
           </div>
 
-          <div className="p-5 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm">
+          <div className="p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-100 dark:bg-[#111113]">
             <div className="flex flex-col md:flex-row gap-6">
               <div className="w-full md:w-1/4 space-y-3">
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-primary/5 to-brand-primary/[0.02] border border-brand-primary/10">
-                  <p className="text-[9px] text-brand-primary uppercase tracking-wider mb-1">Score</p>
-                  <span className="text-3xl font-semibold text-zinc-900 dark:text-white">{result.categories?.[activeCategory]?.score || 0}%</span>
+                <div className="p-4 rounded-2xl bg-brand-primary/10 border-none shadow-none">
+                  <p className="text-[9px] text-brand-primary font-bold uppercase tracking-wider mb-1">Score</p>
+                  <span className="text-3xl font-extrabold text-zinc-900 dark:text-white">{result.categories?.[activeCategory]?.score || 0}%</span>
                 </div>
-                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
                   {result.categories?.[activeCategory]?.details || "Evaluating specific metrics for this category..."}
                 </p>
               </div>
 
               <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <h4 className="text-[10px] font-semibold text-emerald-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Key assets
                   </h4>
                   <div className="space-y-2">
                     {(result.categories?.[activeCategory]?.strengths || []).map((s, i) => (
-                      <p key={i} className="px-3 py-2 rounded-xl bg-emerald-50/50 dark:bg-emerald-500/[0.04] border border-emerald-100/60 dark:border-emerald-500/10 text-[11px] text-emerald-700 dark:text-emerald-400">{s}</p>
+                      <p key={i} className="px-3.5 py-2.5 rounded-2xl bg-white dark:bg-[#18181b] border-none text-[11px] font-bold text-emerald-600 dark:text-emerald-400">{s}</p>
                     ))}
-                    {(!result.categories?.[activeCategory]?.strengths?.length) && <p className="text-[11px] text-zinc-400 italic">Standard baseline metadata.</p>}
+                    {(!result.categories?.[activeCategory]?.strengths?.length) && <p className="text-[11px] text-zinc-400 italic font-medium">Standard baseline metadata.</p>}
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="text-[10px] font-semibold text-brand-primary uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="text-[10px] font-bold text-brand-primary uppercase tracking-wider flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-primary" /> Critical fixes
                   </h4>
                   <div className="space-y-2">
                     {(result.categories?.[activeCategory]?.weaknesses || []).map((w, i) => (
-                      <p key={i} className="px-3 py-2 rounded-xl bg-brand-primary/[0.03] dark:bg-brand-primary/[0.04] border border-brand-primary/10 text-[11px] text-brand-primary">{w}</p>
+                      <p key={i} className="px-3.5 py-2.5 rounded-2xl bg-white dark:bg-[#18181b] border-none text-[11px] font-bold text-brand-primary">{w}</p>
                     ))}
-                    {(!result.categories?.[activeCategory]?.weaknesses?.length) && <p className="text-[11px] text-zinc-400 italic">No immediate refinements detected.</p>}
+                    {(!result.categories?.[activeCategory]?.weaknesses?.length) && <p className="text-[11px] text-zinc-400 italic font-medium">No immediate refinements detected.</p>}
                   </div>
                 </div>
               </div>
@@ -1607,36 +1607,43 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-10 animate-fade-in pb-20 px-4 md:px-0">
+    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20 px-4 md:px-0">
       {!hideHeader && (
-        <header className="text-center space-y-3">
-          <h2 className="text-3xl md:text-4xl font-semibold text-zinc-900 dark:text-white tracking-tight leading-tight">Placement <span className="text-transparent bg-clip-text bg-gradient-to-br from-brand-primary to-brand-secondary">Prefect</span></h2>
-          <p className="text-zinc-500 font-medium tracking-wide text-xs">Unlock your career potential with advanced AI resume intelligence</p>
+        <header className="flex flex-row items-center justify-between gap-4 mb-6 w-full text-left">
+          <div>
+            <h2 className="text-3xl font-bold text-zinc-800 dark:text-white tracking-tighter">
+              Placement <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Prefect</span>
+            </h2>
+            <p className="text-zinc-500 dark:text-zinc-400 font-medium text-[11px] sm:text-xs mt-1">
+              Track applications and prepare for placements
+            </p>
+          </div>
         </header>
       )}
 
       {error && (
-        <div className="p-5 bg-red-50 dark:bg-red-950/20 border border-red-200/60 dark:border-red-500/15 rounded-2xl text-center space-y-2">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-          <button onClick={() => setError(null)} className="px-4 py-1.5 bg-red-100/80 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-full text-xs hover:bg-red-200 transition-colors">Dismiss</button>
+        <div className="p-5 bg-red-50 dark:bg-red-950/20 border-none shadow-none rounded-2xl text-center space-y-2">
+          <p className="text-sm text-red-600 dark:text-red-400 font-medium">{error}</p>
+          <button onClick={() => setError(null)} className="px-5 py-2 bg-red-100/80 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-full text-xs font-bold hover:bg-red-200 transition-colors border-none cursor-pointer">Dismiss</button>
         </div>
       )}
 
-      <div className="p-5 md:p-6 rounded-2xl border border-zinc-200 dark:border-white/[0.08] bg-white dark:bg-zinc-950 shadow-sm space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          <div className="space-y-5">
+      <div className="p-6 sm:p-8 md:p-9 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10 items-start">
+          {/* Box 1: Your Resume */}
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-semibold text-[10px] shrink-0 border border-brand-primary/20`}>
-              1
+              <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-xs shrink-0">
+                1
+              </div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Your Resume</h3>
             </div>
-            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-zinc-800 dark:text-zinc-200">Your Resume</h3>
-            </div>
-            <div className="relative border-2 border-dashed border-zinc-200 dark:border-white/10 rounded-2xl p-6 text-center hover:border-brand-primary/40 transition-all bg-zinc-50 dark:bg-zinc-950 group cursor-pointer overflow-hidden min-h-[120px] flex flex-col items-center justify-center">
+            <div className="relative border-2 border-dashed border-zinc-300/60 dark:border-white/10 rounded-[28px] p-6 text-center hover:border-brand-primary/40 transition-all bg-zinc-200/40 dark:bg-[#18181b] hover:dark:bg-[#1c1c20] group cursor-pointer overflow-hidden min-h-[140px] flex flex-col items-center justify-center border border-zinc-300/30 dark:border-white/5 shadow-none">
               {isUploading ? (
                 <div className="space-y-3 animate-in fade-in zoom-in-95 duration-300">
                   <div className="relative w-10 h-10 mx-auto">
-                    <div className="absolute inset-0 border-2 border-brand-primary/20 rounded-xl" />
-                    <div className="absolute inset-0 border-2 border-brand-primary border-t-transparent rounded-xl animate-spin" />
+                    <div className="absolute inset-0 border-2 border-brand-primary/20 rounded-full" />
+                    <div className="absolute inset-0 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] font-bold text-brand-primary uppercase tracking-widest">Processing</p>
@@ -1647,7 +1654,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                 <>
                   <input type="file" accept=".pdf,image/*" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                   <IconFile />
-                  <p className="text-sm font-medium text-zinc-400 group-hover:text-brand-primary transition-colors">
+                  <p className="text-sm font-semibold text-zinc-400 group-hover:text-brand-primary transition-colors">
                     {fileName ? fileName : "Upload PDF or Image Resume"}
                   </p>
                 </>
@@ -1655,15 +1662,16 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
             </div>
           </div>
 
-          <div className="space-y-5">
+          {/* Box 2: Target Role */}
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-semibold text-[10px]">2</div>
-                <label className="text-[10px] font-semibold text-zinc-400 tracking-wider block uppercase">Target Role</label>
+                <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-xs">2</div>
+                <label className="text-xs font-bold text-zinc-400 tracking-wider block uppercase">Target Role</label>
               </div>
-              <div className="flex bg-zinc-100/80 dark:bg-zinc-900 p-1 rounded-full">
-                <button onClick={() => setAnalysisMode('trend')} className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${analysisMode === 'trend' ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/20' : 'text-zinc-500'}`}>Presets</button>
-                <button onClick={() => setAnalysisMode('custom')} className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${analysisMode === 'custom' ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/20' : 'text-zinc-500'}`}>Paste JD</button>
+              <div className="flex bg-zinc-200/60 dark:bg-[#18181b] p-1 rounded-full border-none shadow-none">
+                <button onClick={() => setAnalysisMode('trend')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border-none cursor-pointer ${analysisMode === 'trend' ? 'bg-brand-primary text-white' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-white'}`}>Presets</button>
+                <button onClick={() => setAnalysisMode('custom')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border-none cursor-pointer ${analysisMode === 'custom' ? 'bg-brand-primary text-white' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-white'}`}>Paste JD</button>
               </div>
             </div>
             {analysisMode === 'trend' ? (
@@ -1672,14 +1680,14 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                   <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">AI Prompt</span>
-                      <button onClick={() => setShowAiInput(false)} className="text-[10px] font-bold text-brand-primary uppercase tracking-widest hover:underline">Back to presets</button>
+                      <button onClick={() => setShowAiInput(false)} className="text-[10px] font-bold text-brand-primary uppercase tracking-widest hover:underline bg-transparent border-none cursor-pointer">Back to presets</button>
                     </div>
                     <div className="relative group">
                       <input
                         autoFocus
                         type="text"
                         placeholder="e.g. Software Engineer at Google"
-                        className="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/10 rounded-2xl p-4 pr-12 text-sm text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
+                        className="w-full bg-zinc-200/50 dark:bg-[#18181b] border-none shadow-none rounded-2xl p-4 pr-12 text-sm text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-brand-primary/50 transition-all font-medium"
                         value={aiPrompt}
                         onChange={(e) => setAiPrompt(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleGenerateAiJd()}
@@ -1687,7 +1695,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                       <button 
                         onClick={handleGenerateAiJd}
                         disabled={isGeneratingJd || !aiPrompt.trim()}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-brand-primary text-white flex items-center justify-center disabled:opacity-50 transition-all hover:scale-105"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-brand-primary text-white flex items-center justify-center disabled:opacity-50 transition-all hover:scale-105 border-none cursor-pointer"
                       >
                         {isGeneratingJd ? (
                           <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -1696,23 +1704,23 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                         )}
                       </button>
                     </div>
-                    <p className="text-[10px] text-zinc-400 italic">Describe the company and role for a tailored analysis.</p>
+                    <p className="text-[10px] text-zinc-400 italic font-medium">Describe the company and role for a tailored analysis.</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2 animate-in fade-in duration-300">
+                  <div className="grid grid-cols-2 gap-2.5 animate-in fade-in duration-300">
                     {INDUSTRY_ROLES.map(role => (
-                      <button key={role.id} onClick={() => handleRoleSelect(role.id)} className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-3 ${selectedRoleId === role.id ? 'bg-brand-primary/10 border-brand-primary text-brand-primary shadow-sm shadow-brand-primary/10' : 'bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-white/5 text-zinc-500 hover:border-brand-primary/30'}`}>
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${selectedRoleId === role.id ? 'bg-brand-primary text-white border-brand-primary' : 'bg-white dark:bg-white/5 border-zinc-100 dark:border-white/10'}`}>
+                      <button key={role.id} onClick={() => handleRoleSelect(role.id)} className={`p-3.5 rounded-[24px] border-none shadow-none text-left transition-all flex items-center gap-3 cursor-pointer ${selectedRoleId === role.id ? 'bg-gradient-to-r from-brand-primary to-brand-secondary text-white font-bold shadow-md shadow-brand-primary/20' : 'bg-zinc-200/50 dark:bg-[#1c1c20] text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-[#232328]'}`}>
+                        <div className={`w-8 h-8 rounded-2xl flex items-center justify-center shrink-0 border-none ${selectedRoleId === role.id ? 'bg-white/20 text-white' : 'bg-zinc-300/50 dark:bg-white/5 text-zinc-400'}`}>
                           {role.icon}
                         </div>
-                        <p className="text-[10px] font-semibold tracking-tight leading-tight">{role.name}</p>
+                        <p className="text-[10px] font-bold tracking-tight leading-tight">{role.name}</p>
                       </button>
                     ))}
-                      <button 
-                        onClick={() => setShowAiInput(true)} 
-                        className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/50 border-brand-primary/20 text-brand-primary hover:border-brand-primary/40 group`}
-                      >
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border border-brand-primary/20 bg-brand-primary/10 text-brand-primary group-hover:scale-110 transition-transform">
+                    <button 
+                      onClick={() => setShowAiInput(true)} 
+                      className={`p-3.5 rounded-[24px] border-none shadow-none text-left transition-all flex items-center gap-3 bg-amber-500/10 dark:bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 group cursor-pointer border border-amber-500/20`}
+                    >
+                      <div className="w-8 h-8 rounded-2xl flex items-center justify-center shrink-0 bg-amber-500/20 text-amber-500 group-hover:scale-110 transition-transform">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
                           <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
                           <path d="m5 3 1 1"/><path d="m19 3-1 1"/><path d="m5 21 1-1"/><path d="m19 21-1-1"/>
@@ -1720,7 +1728,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
                       </div>
                       <div className="flex flex-col">
                         <p className="text-[10px] font-bold tracking-tight leading-tight">Generate with AI</p>
-                        <p className="text-[8px] opacity-60 font-medium">Any role or company</p>
+                        <p className="text-[8px] opacity-70 font-semibold">Any role or company</p>
                       </div>
                     </button>
                   </div>
@@ -1728,7 +1736,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
               </div>
             ) : (
               <textarea
-                className="w-full h-[180px] bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/10 rounded-2xl p-4 text-sm text-zinc-800 dark:text-white focus:ring-2 focus:ring-brand-primary/20 outline-none resize-none transition-all font-normal leading-relaxed placeholder:opacity-40"
+                className="w-full h-[180px] bg-zinc-200/50 dark:bg-[#18181b] border-none shadow-none rounded-[28px] p-5 text-sm text-zinc-800 dark:text-white focus:ring-2 focus:ring-brand-primary/50 outline-none resize-none transition-all font-medium leading-relaxed placeholder:opacity-40"
                 placeholder="Paste job description here..."
                 value={jdText}
                 onChange={(e) => setJdText(e.target.value)}
@@ -1737,10 +1745,11 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4 pt-4 border-t border-zinc-100 dark:border-white/5">
+        {/* Bottom Actions Row: Equal height h-12 */}
+        <div className="flex items-center justify-between gap-4 pt-4 border-t border-zinc-200/40 dark:border-white/5">
           <button
             onClick={() => setDeepAnalysis(!deepAnalysis)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-full border transition-all cursor-pointer group text-[11px] ${deepAnalysis ? 'bg-brand-primary border-brand-primary text-white shadow-md shadow-brand-primary/20' : 'bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-white/10 text-zinc-500 hover:border-brand-primary/40'}`}
+            className={`h-12 px-6 rounded-full border-none shadow-none transition-all cursor-pointer group text-xs font-bold flex items-center justify-center gap-2.5 ${deepAnalysis ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/20' : 'bg-zinc-200/70 dark:bg-[#1c1c20] hover:bg-zinc-200 dark:hover:bg-[#242429] text-zinc-700 dark:text-zinc-300'}`}
           >
             <div className={`w-2 h-2 rounded-full transition-all ${deepAnalysis ? 'bg-white' : 'bg-zinc-400'}`} />
             Detailed Review
@@ -1748,7 +1757,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
           <button
             onClick={handleAnalyze}
             disabled={!resumeText || !jdText || loading || isUploading}
-            className={`flex-1 py-2.5 rounded-full font-medium text-xs transition-all flex items-center justify-center gap-2 ${!resumeText || !jdText || loading || isUploading ? 'bg-zinc-100/80 dark:bg-zinc-800/10 text-zinc-400 cursor-not-allowed border border-zinc-200/60 dark:border-white/[0.08]' : 'bg-brand-primary text-white hover:opacity-90 active:scale-[0.98] shadow-md shadow-brand-primary/20'}`}
+            className={`h-12 flex-1 rounded-full font-extrabold text-xs md:text-sm transition-all border-none flex items-center justify-center gap-2 ${!resumeText || !jdText || loading || isUploading ? 'bg-zinc-200/80 dark:bg-[#222226] text-zinc-400 dark:text-zinc-400 border border-zinc-300/50 dark:border-white/10 cursor-not-allowed opacity-70' : 'bg-gradient-to-r from-brand-primary via-orange-500 to-brand-secondary text-white hover:opacity-95 active:scale-[0.98] cursor-pointer shadow-lg shadow-brand-primary/25'}`}
           >
             Analyze Resume
           </button>
@@ -1756,28 +1765,28 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
       </div>
 
       {savedReports.length > 0 && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="flex items-center justify-between px-2">
-            <h3 className="text-lg font-semibold text-zinc-800 dark:text-white tracking-tight">Past Reviews</h3>
-            <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider">{savedReports.length}/10 Stored</span>
+            <h3 className="text-xs font-bold text-brand-primary uppercase tracking-wider">Past Reviews</h3>
+            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{savedReports.length}/10 Stored</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {savedReports.map((report, idx) => (
               <button
                 key={idx}
                 onClick={() => setSearchParams({ tab: 'placement', id: idx.toString() })}
-                className="group p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/[0.08] text-left hover:border-brand-primary/30 transition-all flex items-center justify-between shadow-sm"
+                className="group p-5 rounded-[28px] bg-zinc-100 dark:bg-[#111113] border-none shadow-none text-left hover:bg-zinc-200/60 dark:hover:bg-[#161618] transition-all flex items-center justify-between cursor-pointer"
               >
-                <div className="space-y-1">
-                  <p className="text-xs font-semibold text-zinc-900 dark:text-white tracking-tight truncate max-w-[150px]">{report.label}</p>
-                  <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider">Score: {report.totalScore}%</p>
+                <div className="space-y-1 min-w-0 flex-1 pr-2">
+                  <p className="text-xs font-bold text-zinc-900 dark:text-white tracking-tight truncate">{report.label}</p>
+                  <p className="text-[10px] font-bold text-brand-primary uppercase tracking-wider">Score: {report.totalScore}%</p>
                 </div>
-                <div className="flex items-center gap-2">
-                   <div onClick={(e) => handleDeleteReport(idx, e)} className="p-2.5 rounded-xl text-zinc-400 hover:bg-brand-primary/10 hover:text-brand-primary border-none bg-transparent transition-all">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" /></svg>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                   <div onClick={(e) => handleDeleteReport(idx, e)} className="p-2.5 rounded-full text-zinc-400 hover:bg-red-500/10 hover:text-red-500 border-none bg-transparent transition-all">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" /></svg>
                   </div>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 bg-brand-primary/5 text-brand-primary`}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><path d="M9 18l6-6-6-6" /></svg>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 bg-brand-primary/10 text-brand-primary`}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M9 18l6-6-6-6" /></svg>
                   </div>
                 </div>
               </button>
