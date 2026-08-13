@@ -238,7 +238,6 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
     <div className="w-full min-h-full animate-fade-in space-y-6">
       {activeTab === null ? (
         <div className="max-w-4xl mx-auto px-4 sm:px-0 relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-brand-primary/5 blur-[120px] rounded-full pointer-events-none -z-10" />
           <header className="pt-2 mb-8 animate-fade-in">
             <p className="text-[10px] font-semibold tracking-wider text-zinc-500 mb-1 ml-0.5">
               Welcome, {userProfile?.name || 'User'}
@@ -256,18 +255,16 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
                 <div
                   key={tab.id}
                   onClick={() => switchTab(tab.id as any)}
-                  className="relative flex flex-col items-start p-5 rounded-[2.2rem] border transition-all duration-500 text-left group overflow-hidden active:scale-95 border-zinc-200/50 dark:border-white/10 bg-white dark:bg-zinc-900/50 hover:border-brand-primary/30 hover:shadow-2xl hover:-translate-y-1.5 cursor-pointer w-full"
+                  className="relative flex flex-col items-start p-5 rounded-[2.2rem] border-none shadow-none transition-all duration-500 text-left group overflow-hidden active:scale-95 bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/60 dark:hover:bg-[#161618] hover:shadow-2xl hover:-translate-y-1.5 cursor-pointer w-full"
                 >
-                  {/* Custom Glow Background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-transparent to-zinc-500/[0.01] dark:to-white/[0.01] pointer-events-none" />
+                  {/* Glow overlay on hover */}
                   <div 
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" 
                     style={{ background: `radial-gradient(circle at 50% 50%, ${detail.glow} 0%, transparent 100%)` }} 
                   />
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.01)_130%)] dark:bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.1)_140%)] pointer-events-none" />
 
                   {/* Icon container */}
-                  <div className={`relative p-3 rounded-2xl mb-4 transition-all duration-500 bg-zinc-50 dark:bg-zinc-800 lg:dark:bg-white/5 border border-zinc-200/50 dark:border-white/5 shadow-sm group-hover:shadow-lg group-hover:scale-110 ${detail.color}`}>
+                  <div className={`relative p-3 rounded-2xl mb-4 transition-all duration-500 border-none shadow-none group-hover:scale-110 group-hover:shadow-md ${detail.color}`}>
                     {React.cloneElement(tab.icon, { className: "w-5 h-5 sm:w-6 sm:h-6" })}
                   </div>
                   
@@ -308,13 +305,13 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
             
             <div className="space-y-3 w-full">
               {/* Feature 1 */}
-              <div className="group relative p-4 rounded-2xl border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/20 hover:bg-zinc-50 dark:hover:bg-white/[0.03] transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="group relative p-5 rounded-[24px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/60 dark:hover:bg-[#161618] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer">
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="text-2xl font-black text-emerald-500/90 dark:text-emerald-400/90 tracking-tighter font-mono w-8">01</span>
-                  <span className="text-[8px] font-extrabold bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full uppercase tracking-wider">Track</span>
+                  <span className="text-2xl font-black text-emerald-500/90 dark:text-emerald-400/90 tracking-tighter font-mono w-8 group-hover:scale-105 transition-transform duration-300">01</span>
+                  <span className="text-[8px] font-extrabold bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full uppercase tracking-wider group-hover:scale-105 transition-transform duration-300">Track</span>
                 </div>
                 <div className="space-y-1 flex-1">
-                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Smart Attendance Tracking</h4>
+                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors duration-300">Smart Attendance Tracking</h4>
                   <p className="text-[10.5px] text-zinc-500 dark:text-zinc-400 leading-normal font-medium">
                     Calculates exact class safety margins, tracks how many lectures you can safely skip, and logs attendance histories with automatic threshold alerts.
                   </p>
@@ -322,13 +319,13 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
               </div>
 
               {/* Feature 2 */}
-              <div className="group relative p-4 rounded-2xl border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/20 hover:bg-zinc-50 dark:hover:bg-white/[0.03] transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="group relative p-5 rounded-[24px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/60 dark:hover:bg-[#161618] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer">
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="text-2xl font-black text-orange-500/90 dark:text-orange-400/90 tracking-tighter font-mono w-8">02</span>
-                  <span className="text-[8px] font-extrabold bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full uppercase tracking-wider">Simulate</span>
+                  <span className="text-2xl font-black text-orange-500/90 dark:text-orange-400/90 tracking-tighter font-mono w-8 group-hover:scale-105 transition-transform duration-300">02</span>
+                  <span className="text-[8px] font-extrabold bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full uppercase tracking-wider group-hover:scale-105 transition-transform duration-300">Simulate</span>
                 </div>
                 <div className="space-y-1 flex-1">
-                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">CGPA & TGPA Forecasts</h4>
+                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300">CGPA & TGPA Forecasts</h4>
                   <p className="text-[10.5px] text-zinc-500 dark:text-zinc-400 leading-normal font-medium">
                     Predicts term TGPA based on marks or grades, references official grading standards, and includes collapsible degree forecasts to model future semesters.
                   </p>
@@ -336,13 +333,13 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
               </div>
 
               {/* Feature 3 */}
-              <div className="group relative p-4 rounded-2xl border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/20 hover:bg-zinc-50 dark:hover:bg-white/[0.03] transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="group relative p-5 rounded-[24px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/60 dark:hover:bg-[#161618] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer">
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="text-2xl font-black text-blue-500/90 dark:text-blue-400/90 tracking-tighter font-mono w-8">03</span>
-                  <span className="text-[8px] font-extrabold bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-wider">Prepare</span>
+                  <span className="text-2xl font-black text-blue-500/90 dark:text-blue-400/90 tracking-tighter font-mono w-8 group-hover:scale-105 transition-transform duration-300">03</span>
+                  <span className="text-[8px] font-extrabold bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-wider group-hover:scale-105 transition-transform duration-300">Prepare</span>
                 </div>
                 <div className="space-y-1 flex-1">
-                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Placement Readiness Analyzer</h4>
+                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-300">Placement Readiness Analyzer</h4>
                   <p className="text-[10.5px] text-zinc-500 dark:text-zinc-400 leading-normal font-medium">
                     Evaluates resume ATS compatibility score, tracks active job applications, and builds custom placement readiness reports to target profiles.
                   </p>
@@ -350,13 +347,13 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
               </div>
 
               {/* Feature 4 */}
-              <div className="group relative p-4 rounded-2xl border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/20 hover:bg-zinc-50 dark:hover:bg-white/[0.03] transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="group relative p-5 rounded-[24px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/60 dark:hover:bg-[#161618] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer">
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="text-2xl font-black text-red-500/90 dark:text-red-400/90 tracking-tighter font-mono w-8">04</span>
-                  <span className="text-[8px] font-extrabold bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider">Stream</span>
+                  <span className="text-2xl font-black text-red-500/90 dark:text-red-400/90 tracking-tighter font-mono w-8 group-hover:scale-105 transition-transform duration-300">04</span>
+                  <span className="text-[8px] font-extrabold bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider group-hover:scale-105 transition-transform duration-300">Stream</span>
                 </div>
                 <div className="space-y-1 flex-1">
-                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">Ad-Free YouTube Lectures</h4>
+                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors duration-300">Ad-Free YouTube Lectures</h4>
                   <p className="text-[10.5px] text-zinc-500 dark:text-zinc-400 leading-normal font-medium">
                     Browse and stream curriculum-mapped lectures inline with a distraction-free, ad-free video player to keep your study sessions focused.
                   </p>

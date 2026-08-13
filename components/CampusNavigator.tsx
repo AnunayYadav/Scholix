@@ -321,8 +321,6 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20 px-4 relative">
-      {/* Background Glow Effect */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-brand-primary/5 blur-[120px] rounded-full pointer-events-none -z-10" />
       {/* Persistent Header for Hub & Sections */}
       <header className="pt-2 flex items-center justify-between">
         <div className="animate-fade-in">
@@ -393,41 +391,41 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                   label: 'Mess Menu',
                   desc: 'Food & Timing',
                   icon: <IconMess />,
-                  bgColor: 'from-brand-primary/20 via-brand-primary/5 to-transparent',
-                  accentColor: 'text-brand-primary',
-                  gradient: 'radial-gradient(circle at center, var(--brand-glow), transparent 70%)'
+                  bgColor: 'from-orange-500/15 via-orange-500/5 to-transparent',
+                  accentColor: 'text-orange-500 dark:text-orange-400',
+                  gradient: 'radial-gradient(circle at center, rgba(249, 115, 22, 0.15), transparent 70%)'
                 },
                 map: {
                   label: '3D Map',
                   desc: 'Virtual Tour',
                   icon: <IconMap />,
-                  bgColor: 'from-emerald-500/20 via-emerald-500/5 to-transparent',
-                  accentColor: 'text-emerald-500',
+                  bgColor: 'from-emerald-500/15 via-emerald-500/5 to-transparent',
+                  accentColor: 'text-emerald-500 dark:text-emerald-400',
                   gradient: 'radial-gradient(circle at center, rgba(16, 185, 129, 0.15), transparent 70%)'
                 },
                 market: {
                   label: 'Nexus Market',
                   desc: 'Buy & Sell',
                   icon: <IconMarket />,
-                  bgColor: 'from-blue-500/20 via-blue-500/5 to-transparent',
-                  accentColor: 'text-blue-500',
+                  bgColor: 'from-blue-500/15 via-blue-500/5 to-transparent',
+                  accentColor: 'text-blue-500 dark:text-blue-400',
                   gradient: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.15), transparent 70%)'
                 },
                 roommate: {
                   label: 'Roommate',
                   desc: 'Find Peers',
                   icon: <IconRoommate />,
-                  bgColor: 'from-purple-500/20 via-purple-500/5 to-transparent',
-                  accentColor: 'text-purple-500',
+                  bgColor: 'from-purple-500/15 via-purple-500/5 to-transparent',
+                  accentColor: 'text-purple-500 dark:text-purple-400',
                   gradient: 'radial-gradient(circle at center, rgba(168, 85, 247, 0.15), transparent 70%)'
                 },
                 facilities: {
                   label: 'Facilities',
                   desc: 'Shops & Services',
                   icon: <IconGlobe />,
-                  bgColor: 'from-brand-primary/20 via-brand-primary/5 to-transparent',
-                  accentColor: 'text-brand-primary',
-                  gradient: 'radial-gradient(circle at center, var(--brand-glow), transparent 70%)'
+                  bgColor: 'from-orange-500/15 via-orange-500/5 to-transparent',
+                  accentColor: 'text-orange-500 dark:text-orange-400',
+                  gradient: 'radial-gradient(circle at center, rgba(249, 115, 22, 0.15), transparent 70%)'
                 }
               }[tabId];
 
@@ -437,26 +435,24 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                 <button
                   key={tabId}
                   onClick={() => handleTabChange(tabId)}
-                  className={`relative flex flex-col items-start p-5 sm:p-6 rounded-[2.5rem] border transition-all duration-500 text-left group overflow-hidden active:scale-95 border-zinc-200/50 dark:border-white/10 bg-white dark:bg-zinc-900/50 hover:border-brand-primary/30 hover:shadow-2xl hover:-translate-y-1.5`}
+                  className="relative flex flex-col items-start p-5 sm:p-6 rounded-[2.2rem] border-none shadow-none transition-all duration-500 text-left group overflow-hidden active:scale-95 bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/60 dark:hover:bg-[#161618] hover:shadow-2xl hover:-translate-y-1.5 cursor-pointer w-full"
                 >
-                  {/* Custom Glow Background */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${config.bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
-                  <div className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-700" style={{ background: config.gradient }} />
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.01)_130%)] dark:bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.1)_140%)] pointer-events-none" />
+                  {/* Custom Radial Glow Overlay on Hover */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style={{ background: config.gradient }} />
 
-                  <div className={`relative p-3 sm:p-4 rounded-2xl mb-4 transition-all duration-500 bg-white dark:bg-zinc-800 lg:dark:bg-white/5 text-zinc-400 group-hover:${config.accentColor} shadow-sm group-hover:shadow-lg group-hover:scale-110`}>
+                  {/* Icon container */}
+                  <div className={`relative p-3 sm:p-4 rounded-2xl mb-4 transition-all duration-500 bg-zinc-200/60 dark:bg-[#18181b] border-none shadow-none text-zinc-400 group-hover:${config.accentColor} shadow-sm group-hover:shadow-lg group-hover:scale-110`}>
                     {React.cloneElement(config.icon as React.ReactElement, { className: 'w-5 h-5 sm:w-6 sm:h-6' })}
                   </div>
                   
                   <div className="relative">
-                    <span className={`block text-[11px] sm:text-[12px] font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors duration-500`}>
+                    <span className="block text-[11px] sm:text-[12px] font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors duration-500 font-sans">
                       {config.label}
                     </span>
-                    <span className={`block text-[10px] sm:text-[11px] font-medium mt-1 text-zinc-500 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors duration-500`}>
+                    <span className="block text-[10px] sm:text-[11px] font-medium mt-1 text-zinc-500 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors duration-500">
                       {config.desc}
                     </span>
                   </div>
-
                 </button>
               );
             })}
@@ -474,7 +470,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
             <div className="flex items-center justify-between px-2">
               <h3 className="text-lg font-bold text-zinc-800 dark:text-white tracking-tight">Student Toolkit</h3>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-2 py-1 rounded-lg">Essentials</span>
+                <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest bg-zinc-100 dark:bg-[#111113] px-3 py-1.5 rounded-full border-none shadow-none">Essentials</span>
               </div>
             </div>
 
@@ -491,9 +487,9 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                     const prefix = uniKey ? `/${uniKey}` : '';
                     navigate(tool.path.startsWith('/') ? `${prefix}${tool.path}` : `${prefix}/${tool.path}`);
                   }}
-                  className="group relative flex flex-col items-start p-6 rounded-[2.5rem] border border-zinc-200/50 dark:border-white/5 bg-white dark:bg-zinc-900/40 transition-all hover:border-brand-primary/20 hover:shadow-xl hover:shadow-brand-primary/5 text-left border-none cursor-pointer"
+                  className="group relative flex flex-col items-start p-6 rounded-[2.2rem] border-none shadow-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/60 dark:hover:bg-[#161618] hover:-translate-y-1.5 hover:shadow-2xl active:scale-95 transition-all duration-500 text-left cursor-pointer w-full"
                 >
-                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${tool.color} flex items-center justify-center text-xl shadow-lg mb-4 group-hover:scale-110 transition-transform`}>
+                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${tool.color} flex items-center justify-center text-xl shadow-lg mb-4 group-hover:scale-110 transition-transform duration-500`}>
                     <span className="filter drop-shadow-md">{tool.icon}</span>
                   </div>
                   <h4 className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100 mb-1.5">{tool.title}</h4>
