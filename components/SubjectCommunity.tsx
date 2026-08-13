@@ -3739,20 +3739,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
             </div>
           </div>
 
-          {/* Notifications & Options Controls */}
+          {/* Options Controls */}
           <div className="flex items-center gap-1 shrink-0 mt-0.5">
-            <button
-              onClick={handleJoinToggle}
-              title={joined ? "Notifications are ON" : "Notifications are OFF"}
-              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-none bg-transparent sm:hover:bg-zinc-100 sm:dark:hover:bg-white/5 outline-none text-zinc-500 dark:text-zinc-400 active:scale-95 shrink-0"
-            >
-              {joined ? (
-                <Bell className="w-5 h-5" strokeWidth={2.5} style={{ color: theme.rawColor }} />
-              ) : (
-                <BellOff className="w-5 h-5" strokeWidth={2.5} />
-              )}
-            </button>
-            
             <div className="relative">
               <button
                 onClick={() => setShowSubjectOptions(!showSubjectOptions)}
