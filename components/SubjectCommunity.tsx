@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Star, Users, BookOpen, MessageSquare, HelpCircle, Calendar, Plus,
-  Search, Shield, Check, Flame, Trophy, Map as MapIcon, ArrowRight, ArrowLeft,
+  Search, Shield, Check, Flame, Trophy, Map as MapIcon, ArrowRight, ArrowLeft, ArrowUp, ArrowDown,
   Sparkles, Send, Edit, FileText, Download, Award, Code, Database,
   Terminal, Globe, Book, Video, FlaskConical, ClipboardList, Scroll, Folder, MessageCircle, Pin,
   Languages, Bell, BellOff, MoreHorizontal, Cpu, Monitor, Sigma, ChevronDown, ChevronRight, Compass, Landmark,
@@ -49,6 +49,7 @@ interface SubjectCommunityProps {
   userProfile: UserProfile | null;
   categories: FolderType[];
   allFiles: LibraryFile[];
+  allFolders?: FolderType[];
   userProgressList?: { document_id: string; progress_percentage: number; last_read_page: number }[];
   onFileAccess: (file: LibraryFile) => void;
   onUploadClick: (categoryName?: string) => void;
@@ -874,6 +875,14 @@ const cleanHtmlForEditor = (content: string): string => {
   }
 };
 
+const formatCleanFileName = (fileName: string) => {
+  if (!fileName) return '';
+  if (/\.(pdf|doc|docx|ppt|pptx|xls|xlsx|txt|png|jpg|jpeg|zip|rar|mp4|csv)$/i.test(fileName)) {
+    return fileName.replace(/\.(pdf|doc|docx|ppt|pptx|xls|xlsx|txt|png|jpg|jpeg|zip|rar|mp4|csv)$/i, '');
+  }
+  return fileName;
+};
+
 const getUnitLabel = (fileName: string, description?: string): string | null => {
   const text = `${fileName || ''} ${description || ''}`;
 
@@ -909,6 +918,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   userProfile,
   categories,
   allFiles,
+  allFolders,
   userProgressList,
   onFileAccess,
   onUploadClick,
@@ -2743,9 +2753,32 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         return true;
       }
 
-      // 2. If file parent_id is set to a valid UUID of another category folder, exclude it from this category
+      // 2. If file parent_id is set to a valid UUID of another category folder
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       if (fileParentId && uuidRegex.test(fileParentId) && catId && uuidRegex.test(catId) && fileParentId !== catId) {
+        // Support common subjects shared across semesters (e.g. MEC136 in Sem 1 vs Sem 2)
+        const searchList = (allFolders && allFolders.length > 0) ? allFolders : (categories || []);
+        const parentCategory = searchList.find(item => item.id === fileParentId) || (allFiles as any[])?.find(item => item.id === fileParentId);
+        
+        if (parentCategory && parentCategory.name) {
+          const isSameCategoryName = parentCategory.name.toLowerCase().trim() === cat.name.toLowerCase().trim();
+          const parentSubject = searchList.find(item => item.id === parentCategory.parent_id);
+          const isSameSubjectCode = parentSubject && activeSubject && (
+            parentSubject.name.split(':')[0].trim().toLowerCase() === activeSubject.name.split(':')[0].trim().toLowerCase()
+          );
+          if (isSameCategoryName && (isSameSubjectCode || !parentSubject)) {
+            return true;
+          }
+        }
+
+        // Secondary fallback matching by file name keywords
+        const fn = (typeof file === 'object' ? (file.name || '') : '').toLowerCase().trim();
+        const cn = (catName || '').toLowerCase().trim();
+        if (cn.includes('note') && (fn.includes('shortcut') || fn.includes('note') || fn.includes('chapter'))) return true;
+        if ((cn.includes('pyq') || cn.includes('question') || cn.includes('paper')) && (fn.includes('pyq') || fn.includes('question'))) return true;
+        if ((cn.includes('lecture') || cn.includes('slide')) && (fn.includes('unit') || fn.includes('projection') || fn.includes('instrument') || fn.includes('scale') || fn.includes('letter') || fn.includes('line') || fn.includes('point') || fn.includes('dimension'))) return true;
+        if (cn.includes('syllabus') && (fn.includes('syllabus') || fn === 'mec136')) return true;
+
         return false;
       }
     }
@@ -2825,6 +2858,51 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     if (days === 1) return `1 day ago`;
     if (days < 7) return `${days} days ago`;
     return new Date(timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const handleMoveFile = async (fileId: string, direction: 'up' | 'down') => {
+    if (!activeCategoryFolder) return;
+    const client = NexusServer.getClient();
+
+    const currentFiles = subjectFiles
+      .filter(f => isFileTypeMatchingCategory(f, activeCategoryFolder))
+      .sort((a, b) => {
+        const orderA = a.display_order ?? Number.MAX_SAFE_INTEGER;
+        const orderB = b.display_order ?? Number.MAX_SAFE_INTEGER;
+        if (orderA !== orderB) return orderA - orderB;
+        return a.name.localeCompare(b.name);
+      });
+
+    const currentIndex = currentFiles.findIndex(f => f.id === fileId);
+    if (currentIndex === -1) return;
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= currentFiles.length) return;
+
+    const reordered = [...currentFiles];
+    const temp = reordered[currentIndex];
+    reordered[currentIndex] = reordered[targetIndex];
+    reordered[targetIndex] = temp;
+
+    showToast("Updating file position...", "info");
+
+    try {
+      if (client) {
+        for (let i = 0; i < reordered.length; i++) {
+          const newOrder = (i + 1) * 10;
+          reordered[i].display_order = newOrder;
+          await client
+            .from('library_items')
+            .update({ display_order: newOrder })
+            .eq('id', reordered[i].id);
+        }
+      }
+      showToast("File order updated!", "success");
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error("Error moving file:", err);
+      showToast("Failed to update file order", "error");
+    }
   };
 
   const loadCommunityData = async () => {
@@ -3320,10 +3398,17 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     }
   };
 
-  // Filtered files in selected category folder
+  // Filtered files in selected category folder (sorted by display_order)
   const categoryFiles = useMemo(() => {
     if (!activeCategoryFolder) return [];
-    return subjectFiles.filter(f => isFileTypeMatchingCategory(f, activeCategoryFolder));
+    return subjectFiles
+      .filter(f => isFileTypeMatchingCategory(f, activeCategoryFolder))
+      .sort((a, b) => {
+        const orderA = a.display_order ?? Number.MAX_SAFE_INTEGER;
+        const orderB = b.display_order ?? Number.MAX_SAFE_INTEGER;
+        if (orderA !== orderB) return orderA - orderB;
+        return a.name.localeCompare(b.name);
+      });
   }, [activeCategoryFolder, subjectFiles]);
 
   // Render helper for files tab detail view or category folder view
@@ -3449,7 +3534,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       {categoryFiles.map((file) => {
                         const realNameWithExt = file.name;
                         const ext = file.storage_path ? file.storage_path.split('.').pop()?.toLowerCase() || '' : '';
-                        const cleanName = realNameWithExt.replace(/\.[^/.]+$/, "");
+                        const cleanName = formatCleanFileName(realNameWithExt);
 
                         const ratingVal = (() => {
                           if (file.rating_votes) {
@@ -3581,7 +3666,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                 {categoryFiles.map((file) => {
                   const realNameWithExt = file.name;
                   const ext = file.storage_path ? file.storage_path.split('.').pop()?.toLowerCase() || '' : '';
-                  const cleanName = realNameWithExt.replace(/\.[^/.]+$/, "");
+                  const cleanName = formatCleanFileName(realNameWithExt);
 
                   const ratingVal = (() => {
                     if (file.rating_votes) {
@@ -4203,7 +4288,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                               // Extract real name from storage path (e.g. community/6yc9oo_UNIT 1 (O).pdf -> UNIT 1 (O).pdf)
                               const realNameWithExt = file.name;
                               const ext = file.storage_path ? file.storage_path.split('.').pop()?.toLowerCase() || '' : '';
-                              const cleanName = realNameWithExt.replace(/\.[^/.]+$/, ""); // Strip extension for clean text
+                              const cleanName = formatCleanFileName(realNameWithExt);
 
                               const ratingVal = (() => {
                                 if (file.rating_votes) {
@@ -4344,7 +4429,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                       {categoryFiles.map((file) => {
                         const realNameWithExt = file.name;
                         const ext = file.storage_path ? file.storage_path.split('.').pop()?.toLowerCase() || '' : '';
-                        const cleanName = realNameWithExt.replace(/\.[^/.]+$/, "");
+                        const cleanName = formatCleanFileName(realNameWithExt);
 
                         const ratingVal = (() => {
                           if (file.rating_votes) {
@@ -5662,6 +5747,52 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
               Details
             </button>
+
+            {/* Move Up & Move Down (Admin only) */}
+            {userProfile?.is_admin && activeCategoryFolder && (() => {
+              const activeCategoryFiles = subjectFiles
+                .filter(f => isFileTypeMatchingCategory(f, activeCategoryFolder))
+                .sort((a, b) => {
+                  const orderA = a.display_order ?? Number.MAX_SAFE_INTEGER;
+                  const orderB = b.display_order ?? Number.MAX_SAFE_INTEGER;
+                  if (orderA !== orderB) return orderA - orderB;
+                  return a.name.localeCompare(b.name);
+                });
+              const fileIdx = activeCategoryFiles.findIndex(f => f.id === activeMenuFileId);
+              const isFirstFile = fileIdx <= 0;
+              const isLastFile = fileIdx >= activeCategoryFiles.length - 1;
+
+              return (
+                <>
+                  <button
+                    disabled={isFirstFile}
+                    onClick={() => {
+                      const fileId = activeMenuFileId;
+                      setActiveMenuFileId(null);
+                      setMenuAnchorRect(null);
+                      if (fileId) handleMoveFile(fileId, 'up');
+                    }}
+                    className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ArrowUp size={14} className="text-zinc-400" />
+                    Move Up
+                  </button>
+                  <button
+                    disabled={isLastFile}
+                    onClick={() => {
+                      const fileId = activeMenuFileId;
+                      setActiveMenuFileId(null);
+                      setMenuAnchorRect(null);
+                      if (fileId) handleMoveFile(fileId, 'down');
+                    }}
+                    className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ArrowDown size={14} className="text-zinc-400" />
+                    Move Down
+                  </button>
+                </>
+              );
+            })()}
 
             {/* Edit (Admin only) */}
             {userProfile?.is_admin && (
