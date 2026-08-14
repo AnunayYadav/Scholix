@@ -235,6 +235,31 @@ const PageRenderer = React.memo<{
     );
 });
 
+/**
+ * Sanitizes PDF bytes by finding the first occurrence of %PDF- header
+ * (0x25, 0x50, 0x44, 0x46, 0x2D) and trimming any BOM or preamble bytes.
+ */
+const sanitizePdfBytes = (bytes: Uint8Array): Uint8Array => {
+    if (!bytes || bytes.length < 5) return bytes;
+    if (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46 && bytes[4] === 0x2D) {
+        return bytes;
+    }
+    const pdfHeaderPattern = [0x25, 0x50, 0x44, 0x46, 0x2D];
+    const searchLimit = Math.min(bytes.length - 4, 4096);
+    for (let i = 0; i < searchLimit; i++) {
+        if (
+            bytes[i] === pdfHeaderPattern[0] &&
+            bytes[i + 1] === pdfHeaderPattern[1] &&
+            bytes[i + 2] === pdfHeaderPattern[2] &&
+            bytes[i + 3] === pdfHeaderPattern[3] &&
+            bytes[i + 4] === pdfHeaderPattern[4]
+        ) {
+            return bytes.subarray(i);
+        }
+    }
+    return bytes;
+};
+
 const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileName, userProfile, onAuthRequired }) => {
     const { fullBrandName } = useUniversity();
 
@@ -538,7 +563,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                                 throw error;
                             }
                             const arrayBuffer = await data.arrayBuffer();
-                            pdfBytes = new Uint8Array(arrayBuffer);
+                            pdfBytes = sanitizePdfBytes(new Uint8Array(arrayBuffer));
                             pdfBytesRef.current = pdfBytes;
                         } else {
                             throw new Error("Supabase client not initialized.");
@@ -560,14 +585,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                                 let errorMsg = "Vault access denied.";
                                 try {
                                     const errJson = await response.json();
-                                    if (errJson && errJson.message) {
-                                        errorMsg = `Vault error: ${errJson.message}`;
+                                    if (errJson && (errJson.error || errJson.message)) {
+                                        errorMsg = `Vault error: ${errJson.error || errJson.message}`;
                                     }
                                 } catch (_) {}
                                 throw new Error(errorMsg);
                             }
                             const arrayBuffer = await response.arrayBuffer();
-                            pdfBytes = new Uint8Array(arrayBuffer);
+                            pdfBytes = sanitizePdfBytes(new Uint8Array(arrayBuffer));
                             pdfBytesRef.current = pdfBytes;
                         } catch (err: any) {
                             console.error("Failed to fetch PDF from vault:", err);
@@ -592,14 +617,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                             let errorMsg = "Failed to fetch document bytes.";
                             try {
                                 const errJson = await response.json();
-                                if (errJson && errJson.message) {
-                                    errorMsg = `Vault error: ${errJson.message}`;
+                                if (errJson && (errJson.error || errJson.message)) {
+                                    errorMsg = `Vault error: ${errJson.error || errJson.message}`;
                                 }
                             } catch (_) {}
                             throw new Error(errorMsg);
                         }
                         const arrayBuffer = await response.arrayBuffer();
-                        pdfBytes = new Uint8Array(arrayBuffer);
+                        pdfBytes = sanitizePdfBytes(new Uint8Array(arrayBuffer));
                         pdfBytesRef.current = pdfBytes;
                     } catch (err: any) {
                         console.error("Failed to fetch targetUrl bytes:", err);
@@ -1099,10 +1124,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
         jumpToPage(searchResults[prev].pageIndex);
     };
 
-    // 💾 Authenticated Download with Cover Page
+    // 💾 Authenticated Download with Cover Page & Watermark
     const handleDownload = async () => {
         if (isDownloading) return;
-        if (!url && !pdfBytesRef.current) return;
+        if (!url && !file && !pdfBytesRef.current) return;
 
         const STORAGE_KEY = 'nexus_pdf_downloads';
         const today = new Date().toISOString().split('T')[0];
@@ -1136,139 +1161,207 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
         try {
             showToast('Preparing Secure Download...', 'info');
             
-            let originalPdfBytes: Uint8Array;
-            if (pdfBytesRef.current) {
-                originalPdfBytes = pdfBytesRef.current;
-            } else {
-                const downloadUrl = url;
-                if (!downloadUrl) throw new Error("No source URL available.");
-                const { data: { session } } = await NexusServer.getSession();
+            let originalPdfBytes: Uint8Array | null = pdfBytesRef.current;
 
-                // 1. Fetch the original PDF bytes
-                const fetchOptions: RequestInit = {};
-                if (!downloadUrl.startsWith('blob:')) {
-                    fetchOptions.headers = {
-                        'Authorization': session ? `Bearer ${session.access_token}` : ''
-                    };
-                }
-                const pdfResponse = await fetch(downloadUrl, fetchOptions);
-                if (!pdfResponse.ok) {
-                    let errorMsg = "Vault re-verification failed.";
-                    try {
-                        const errJson = await pdfResponse.json();
-                        if (errJson && errJson.message) {
-                            errorMsg = `Vault error: ${errJson.message}`;
+            if (!originalPdfBytes || originalPdfBytes.length === 0) {
+                if (file) {
+                    const client = NexusServer.getClient();
+                    if (client) {
+                        try {
+                            const { data, error } = await client.storage.from('nexus-documents').download(file.storage_path);
+                            if (!error && data) {
+                                const buffer = await data.arrayBuffer();
+                                originalPdfBytes = new Uint8Array(buffer);
+                            }
+                        } catch (e) {
+                            console.warn("Direct download failed in handleDownload, trying proxy...", e);
                         }
-                    } catch (_) {}
-                    throw new Error(errorMsg);
+                    }
+                    if (!originalPdfBytes) {
+                        const sessionRes = await NexusServer.getSession();
+                        const token = sessionRes?.data?.session?.access_token;
+                        const resolvedUrl = NexusServer.getFileUrl(file.storage_path, token);
+                        if (resolvedUrl) {
+                            const resp = await fetch(resolvedUrl, {
+                                headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                            });
+                            if (resp.ok) {
+                                const buffer = await resp.arrayBuffer();
+                                originalPdfBytes = new Uint8Array(buffer);
+                            }
+                        }
+                    }
+                } else if (url) {
+                    const sessionRes = await NexusServer.getSession();
+                    const token = sessionRes?.data?.session?.access_token;
+                    const fetchOptions: RequestInit = {};
+                    if (!url.startsWith('blob:') && token) {
+                        fetchOptions.headers = { 'Authorization': `Bearer ${token}` };
+                    }
+                    const pdfResponse = await fetch(url, fetchOptions);
+                    if (pdfResponse.ok) {
+                        const fetchedArrayBuffer = await pdfResponse.arrayBuffer();
+                        originalPdfBytes = new Uint8Array(fetchedArrayBuffer);
+                    } else {
+                        let errorMsg = "Vault re-verification failed.";
+                        try {
+                            const errJson = await pdfResponse.json();
+                            if (errJson && (errJson.error || errJson.message)) {
+                                errorMsg = `Vault error: ${errJson.error || errJson.message}`;
+                            }
+                        } catch (_) {}
+                        throw new Error(errorMsg);
+                    }
                 }
-                const fetchedArrayBuffer = await pdfResponse.arrayBuffer();
-                originalPdfBytes = new Uint8Array(fetchedArrayBuffer);
             }
 
-            // 2. Fetch the cover page image
-            const coverResponse = await fetch('/pdfcover.png');
-            if (!coverResponse.ok) throw new Error("Cover page asset not found.");
-            const coverImageBytes = await coverResponse.arrayBuffer();
-
-            // 3. Load original PDF and create the final output PDF
-            const originalPdf = await PDFDocument.load(originalPdfBytes);
-            const finalPdf = await PDFDocument.create();
-
-            // 4. Copy first page from original PDF
-            const [firstPage] = await finalPdf.copyPages(originalPdf, [0]);
-            finalPdf.addPage(firstPage);
-
-            // 5. Add cover image as second page — sized to match original pages
-            const origFirstPage = originalPdf.getPage(0);
-            const { width: pageWidth, height: pageHeight } = origFirstPage.getSize();
-
-            const coverImage = await finalPdf.embedPng(coverImageBytes);
-            const coverDims = coverImage.scale(1);
-
-            // Scale cover to fit within page dimensions while preserving aspect ratio
-            const scaleX = pageWidth / coverDims.width;
-            const scaleY = pageHeight / coverDims.height;
-            const fitScale = Math.min(scaleX, scaleY);
-            const drawWidth = coverDims.width * fitScale;
-            const drawHeight = coverDims.height * fitScale;
-
-            const coverPage = finalPdf.addPage([pageWidth, pageHeight]);
-            // Center the image on the page
-            coverPage.drawImage(coverImage, {
-                x: (pageWidth - drawWidth) / 2,
-                y: (pageHeight - drawHeight) / 2,
-                width: drawWidth,
-                height: drawHeight,
-            });
-
-            // 6. Copy remaining pages from the original PDF (page 2 onward)
-            const remainingIndices = originalPdf.getPageIndices().slice(1);
-            if (remainingIndices.length > 0) {
-                const remainingPages = await finalPdf.copyPages(originalPdf, remainingIndices);
-                remainingPages.forEach(page => finalPdf.addPage(page));
+            if (!originalPdfBytes || originalPdfBytes.length === 0) {
+                throw new Error("Unable to retrieve document source file.");
             }
 
-            // 6.5. Apply watermark to all content pages (except the cover page at index 1)
-            const helveticaBoldFont = await finalPdf.embedFont(StandardFonts.HelveticaBold);
-            const helveticaFont = await finalPdf.embedFont(StandardFonts.Helvetica);
-            const watermarkText = 'SCHOLIX';
-            const watermarkSize = 60;
-            const pages = finalPdf.getPages();
-            
-            for (let i = 0; i < pages.length; i++) {
-                if (i === 1) continue; // Skip cover page
-                
-                const page = pages[i];
-                const { width, height } = page.getSize();
-                
-                // Center-aligned diagonal watermark text
-                const textWidth = helveticaBoldFont.widthOfTextAtSize(watermarkText, watermarkSize);
-                const textHeight = watermarkSize;
-                
-                const rad = 45 * Math.PI / 180;
-                const cosTheta = Math.cos(rad);
-                const sinTheta = Math.sin(rad);
-                
-                const cxRel = (textWidth / 2) * cosTheta - (textHeight / 2) * sinTheta;
-                const cyRel = (textWidth / 2) * sinTheta + (textHeight / 2) * cosTheta;
-                
-                const x0 = (width / 2) - cxRel;
-                const y0 = (height / 2) - cyRel;
-                
-                page.drawText(watermarkText, {
-                    x: x0,
-                    y: y0,
-                    size: watermarkSize,
-                    font: helveticaBoldFont,
-                    color: rgb(0.7, 0.7, 0.7),
-                    opacity: 0.12,
-                    rotate: degrees(45),
-                });
+            // Sanitize PDF bytes to trim BOM / preambles before %PDF-
+            originalPdfBytes = sanitizePdfBytes(originalPdfBytes);
+            pdfBytesRef.current = originalPdfBytes;
 
-                // Subtle footer branding at the bottom center of each page
-                const footerText = 'Downloaded from scholix.app | Secure Learning Platform';
-                const footerSize = 8;
-                const footerWidth = helveticaFont.widthOfTextAtSize(footerText, footerSize);
-                
-                page.drawText(footerText, {
-                    x: (width - footerWidth) / 2,
-                    y: 20,
-                    size: footerSize,
-                    font: helveticaFont,
-                    color: rgb(0.5, 0.5, 0.5),
-                    opacity: 0.4,
-                });
+            // Validate that sanitized bytes contain valid PDF header
+            const isPdfHeaderPresent = (
+                originalPdfBytes.length >= 5 &&
+                originalPdfBytes[0] === 0x25 && // %
+                originalPdfBytes[1] === 0x50 && // P
+                originalPdfBytes[2] === 0x44 && // D
+                originalPdfBytes[3] === 0x46 && // F
+                originalPdfBytes[4] === 0x2D    // -
+            );
+
+            if (!isPdfHeaderPresent) {
+                // Check if response body is JSON or HTML error page
+                const textPreview = new TextDecoder().decode(originalPdfBytes.subarray(0, 300)).trim();
+                if (textPreview.startsWith('{') || textPreview.startsWith('[')) {
+                    try {
+                        const errJson = JSON.parse(textPreview);
+                        throw new Error(errJson.error || errJson.message || "Server returned an error response.");
+                    } catch (e: any) {
+                        if (e.message && !e.message.startsWith("JSON")) throw e;
+                    }
+                } else if (textPreview.toLowerCase().includes('<html') || textPreview.toLowerCase().includes('<!doctype')) {
+                    throw new Error("Document session expired or invalid server response.");
+                }
+                throw new Error("Invalid document format: No PDF header found.");
             }
 
-            // 6. Serialize and download
-            const finalPdfBytes = await finalPdf.save();
-            const blob = new Blob([new Uint8Array(finalPdfBytes)], { type: 'application/pdf' });
-            const blobUrl = URL.createObjectURL(blob);
-            
+            let downloadBlob: Blob;
+
+            try {
+                // 2. Fetch the cover page image if available
+                let coverImageBytes: ArrayBuffer | null = null;
+                try {
+                    const coverResponse = await fetch('/pdfcover.png');
+                    if (coverResponse.ok) {
+                        coverImageBytes = await coverResponse.arrayBuffer();
+                    }
+                } catch (coverErr) {
+                    console.warn("Cover image fetch skipped:", coverErr);
+                }
+
+                // 3. Load original PDF and create output PDF with pdf-lib
+                const originalPdf = await PDFDocument.load(originalPdfBytes, { ignoreEncryption: true });
+                const finalPdf = await PDFDocument.create();
+
+                // 4. Copy first page from original PDF
+                const [firstPage] = await finalPdf.copyPages(originalPdf, [0]);
+                finalPdf.addPage(firstPage);
+
+                // 5. Add cover image as second page (if available)
+                if (coverImageBytes) {
+                    const origFirstPage = originalPdf.getPage(0);
+                    const { width: pageWidth, height: pageHeight } = origFirstPage.getSize();
+
+                    const coverImage = await finalPdf.embedPng(coverImageBytes);
+                    const coverDims = coverImage.scale(1);
+
+                    const scaleX = pageWidth / coverDims.width;
+                    const scaleY = pageHeight / coverDims.height;
+                    const fitScale = Math.min(scaleX, scaleY);
+                    const drawWidth = coverDims.width * fitScale;
+                    const drawHeight = coverDims.height * fitScale;
+
+                    const coverPage = finalPdf.addPage([pageWidth, pageHeight]);
+                    coverPage.drawImage(coverImage, {
+                        x: (pageWidth - drawWidth) / 2,
+                        y: (pageHeight - drawHeight) / 2,
+                        width: drawWidth,
+                        height: drawHeight,
+                    });
+                }
+
+                // 6. Copy remaining pages from original PDF
+                const remainingIndices = originalPdf.getPageIndices().slice(1);
+                if (remainingIndices.length > 0) {
+                    const remainingPages = await finalPdf.copyPages(originalPdf, remainingIndices);
+                    remainingPages.forEach(p => finalPdf.addPage(p));
+                }
+
+                // 6.5 Apply watermark & footer to all content pages
+                const helveticaBoldFont = await finalPdf.embedFont(StandardFonts.HelveticaBold);
+                const helveticaFont = await finalPdf.embedFont(StandardFonts.Helvetica);
+                const watermarkText = 'SCHOLIX';
+                const watermarkSize = 60;
+                const pages = finalPdf.getPages();
+                
+                for (let i = 0; i < pages.length; i++) {
+                    if (coverImageBytes && i === 1) continue; // Skip cover page
+                    
+                    const page = pages[i];
+                    const { width, height } = page.getSize();
+                    
+                    const textWidth = helveticaBoldFont.widthOfTextAtSize(watermarkText, watermarkSize);
+                    const textHeight = watermarkSize;
+                    
+                    const rad = 45 * Math.PI / 180;
+                    const cosTheta = Math.cos(rad);
+                    const sinTheta = Math.sin(rad);
+                    
+                    const cxRel = (textWidth / 2) * cosTheta - (textHeight / 2) * sinTheta;
+                    const cyRel = (textWidth / 2) * sinTheta + (textHeight / 2) * cosTheta;
+                    
+                    const x0 = (width / 2) - cxRel;
+                    const y0 = (height / 2) - cyRel;
+                    
+                    page.drawText(watermarkText, {
+                        x: x0,
+                        y: y0,
+                        size: watermarkSize,
+                        font: helveticaBoldFont,
+                        color: rgb(0.7, 0.7, 0.7),
+                        opacity: 0.12,
+                        rotate: degrees(45),
+                    });
+
+                    const footerText = 'Downloaded from scholix.app | Secure Learning Platform';
+                    const footerSize = 8;
+                    const footerWidth = helveticaFont.widthOfTextAtSize(footerText, footerSize);
+                    
+                    page.drawText(footerText, {
+                        x: (width - footerWidth) / 2,
+                        y: 20,
+                        size: footerSize,
+                        font: helveticaFont,
+                        color: rgb(0.5, 0.5, 0.5),
+                        opacity: 0.4,
+                    });
+                }
+
+                const finalPdfBytes = await finalPdf.save();
+                downloadBlob = new Blob([new Uint8Array(finalPdfBytes)], { type: 'application/pdf' });
+            } catch (pdfLibErr) {
+                console.warn("pdf-lib enhancement failed, falling back to raw PDF bytes download:", pdfLibErr);
+                downloadBlob = new Blob([new Uint8Array(originalPdfBytes)], { type: 'application/pdf' });
+            }
+
+            const blobUrl = URL.createObjectURL(downloadBlob);
             const link = document.createElement('a');
             link.href = blobUrl;
-            const baseName = (fileName || 'document.pdf').replace(/\.pdf$/i, '');
+            const baseName = (displayFileName || fileName || 'document.pdf').replace(/\.pdf$/i, '');
             const downloadName = `(scholix.app) ${baseName}.pdf`;
             link.setAttribute('download', downloadName);
             document.body.appendChild(link);
