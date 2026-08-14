@@ -1745,6 +1745,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 targetUploadCategoryRef.current = (typeof catName === 'string') ? catName : '';
                 fileInputRef.current?.click();
               }}
+              onDropFiles={(droppedFiles, catName) => {
+                targetUploadCategoryRef.current = (typeof catName === 'string') ? catName : '';
+                handleFilesSelected(droppedFiles, selectedProgram, activeSemester?.name, activeSubject?.name, catName);
+                setShowUploadModal(true);
+              }}
               onBack={() => {
                 navigate(`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester?.name || '', 'semester')}`);
               }}

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Star, Users, BookOpen, MessageSquare, HelpCircle, Calendar, Plus,
   Search, Shield, Check, Flame, Trophy, Map as MapIcon, ArrowRight, ArrowLeft, ArrowUp, ArrowDown,
-  Sparkles, Send, Edit, FileText, Download, Award, Code, Database,
+  Sparkles, Send, Edit, FileText, Download, Upload, Award, Code, Database,
   Terminal, Globe, Book, Video, FlaskConical, ClipboardList, Scroll, Folder, MessageCircle, Pin,
   Languages, Bell, BellOff, MoreHorizontal, Cpu, Monitor, Sigma, ChevronDown, ChevronRight, Compass, Landmark,
   Link, Image, Smile, Bold, Italic, Strikethrough, List, ListOrdered, AlertTriangle, Quote, BarChart2,
@@ -60,6 +60,7 @@ interface SubjectCommunityProps {
   onAddFolder?: () => void;
   onEditFolder?: (folder: FolderType, e: React.MouseEvent) => void;
   onDeleteFolder?: (folder: FolderType, e: React.MouseEvent) => void;
+  onDropFiles?: (files: File[], categoryName?: string) => void;
 }
 
 const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: string) => {
@@ -928,7 +929,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   isAdmin,
   onAddFolder,
   onEditFolder,
-  onDeleteFolder
+  onDeleteFolder,
+  onDropFiles
 }) => {
   const subjectCodeMatch = activeSubject.name.match(/^([A-Za-z]+\d{3})/);
   const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : activeSubject.name.split(':')[0].trim();
@@ -963,9 +965,11 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
   // Navigation / Tabs
   const [activeTab, setActiveTab] = useState<'files' | 'social' | 'discussions' | 'requests' | 'packs' | 'leaderboard' | 'people'>('files');
+  const [activeCategoryFolder, setActiveCategoryFolder] = useState<FolderType | null>(null);
   const [socialFilter, setSocialFilter] = useState<'all' | 'discussions' | 'requests'>('all');
   const [joined, setJoined] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
@@ -973,6 +977,58 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Full-screen window drag and drop listener with nested counter
+  useEffect(() => {
+    let dragCounter = 0;
+
+    const handleDragEnter = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.dataTransfer?.types?.includes('Files')) {
+        dragCounter++;
+        setIsDraggingOver(true);
+      }
+    };
+
+    const handleDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter--;
+      if (dragCounter <= 0) {
+        dragCounter = 0;
+        setIsDraggingOver(false);
+      }
+    };
+
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter = 0;
+      setIsDraggingOver(false);
+      if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
+        const droppedFiles = Array.from(e.dataTransfer.files);
+        onDropFiles?.(droppedFiles, activeCategoryFolder?.name);
+      }
+    };
+
+    window.addEventListener('dragenter', handleDragEnter);
+    window.addEventListener('dragleave', handleDragLeave);
+    window.addEventListener('dragover', handleDragOver);
+    window.addEventListener('drop', handleDrop);
+
+    return () => {
+      window.removeEventListener('dragenter', handleDragEnter);
+      window.removeEventListener('dragleave', handleDragLeave);
+      window.removeEventListener('dragover', handleDragOver);
+      window.removeEventListener('drop', handleDrop);
+    };
+  }, [activeCategoryFolder, onDropFiles]);
 
   // Scoped subject data
   const [stats, setStats] = useState<SubjectStats | null>(null);
@@ -2691,8 +2747,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
 
 
-  // Selected Section inside Files tab (null means listing categories, Folder means viewing files inside that category)
-  const [activeCategoryFolder, setActiveCategoryFolder] = useState<FolderType | null>(null);
+
 
   const handleSaveSubjectDetails = async () => {
     if (!editSubjectCode.trim() || !editSubjectName.trim()) {
@@ -5841,6 +5896,24 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
           </div>
         </>
         , document.body
+      )}
+
+      {/* 6. Full-screen Greyish Glassmorphism Drag & Drop Overlay */}
+      {isDraggingOver && createPortal(
+        <div className="fixed inset-0 z-[99999] bg-black/60 dark:bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-6 animate-fade-in pointer-events-none select-none">
+          <div className="bg-zinc-900/90 dark:bg-[#161618] border border-zinc-700/60 dark:border-white/10 rounded-[32px] p-8 max-w-md w-full flex flex-col items-center justify-center text-center space-y-4 shadow-2xl">
+            <div className="w-16 h-16 rounded-2xl bg-zinc-800 dark:bg-[#202024] text-zinc-100 flex items-center justify-center shadow-inner">
+              <Upload className="w-8 h-8 text-zinc-200 dark:text-zinc-100 animate-bounce" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-extrabold text-white leading-tight">Drop files to upload</h3>
+              <p className="text-xs text-zinc-400 font-medium">
+                Uploading to <span className="font-bold text-white">{activeCategoryFolder?.name || 'Category'}</span> material
+              </p>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );
