@@ -948,24 +948,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
       }
     });
 
-    // Ensure baseline standard categories exist if not present
-    const activeSubId = activeSubject?.id || 'default-sub';
-    const DEFAULT_CAT_DEFS: FolderType[] = [
-      { id: `default-lectures-${activeSubId}`, name: 'Lectures', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'Video', color: theme.rawColor },
-      { id: `default-notes-${activeSubId}`, name: 'Notes', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'FileText', color: theme.rawColor },
-      { id: `default-pyqs-${activeSubId}`, name: 'PYQs', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'HelpCircle', color: theme.rawColor },
-      { id: `default-syllabus-${activeSubId}`, name: 'Syllabus', type: 'category', parent_id: activeSubId, program: selectedProgram || '', icon_name: 'Calendar', color: theme.rawColor }
-    ];
-
-    DEFAULT_CAT_DEFS.forEach(defCat => {
-      const normKey = defCat.name.toLowerCase().trim();
-      if (!catMap.has(normKey)) {
-        catMap.set(normKey, defCat);
-      }
-    });
-
     return Array.from(catMap.values());
-  }, [categories, activeSubject?.id, selectedProgram]);
+  }, [categories]);
 
   // Navigation / Tabs
   const [activeTab, setActiveTab] = useState<'files' | 'social' | 'discussions' | 'requests' | 'packs' | 'leaderboard' | 'people'>('files');
@@ -2745,9 +2729,33 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
 
   // Robust file-type to category name matcher
-  const isFileTypeMatchingCategory = (fileType: string, catName: string) => {
-    const ft = fileType.toLowerCase().trim();
-    const cn = catName.toLowerCase().trim();
+  const isFileTypeMatchingCategory = (file: LibraryFile | string, cat: FolderType | string) => {
+    let fileType = typeof file === 'string' ? file : file.type;
+    let catName = typeof cat === 'string' ? cat : cat.name;
+    
+    if (typeof file === 'object' && typeof cat === 'object') {
+      const rawParentId = (file as any).parent_id || file.folder_id;
+      const fileParentId = rawParentId ? rawParentId.split('-dup-')[0] : null;
+      const catId = cat.id ? cat.id.split('-dup-')[0] : null;
+      
+      // 1. Direct parent ID match in Supabase DB
+      if (fileParentId && catId && fileParentId === catId) {
+        return true;
+      }
+
+      // 2. If file parent_id is set to a valid UUID of another category folder, exclude it from this category
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (fileParentId && uuidRegex.test(fileParentId) && catId && uuidRegex.test(catId) && fileParentId !== catId) {
+        return false;
+      }
+    }
+
+    const ft = (fileType || '').toLowerCase().trim();
+    const cn = (catName || '').toLowerCase().trim();
+
+    if (!ft || ft === 'file') {
+      return false;
+    }
     
     if (cn.includes('note')) {
       return ft.includes('note');
@@ -2764,7 +2772,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     
     const isLabCategory = cn === 'lab' || cn === 'labs' || cn.startsWith('lab ') || cn.endsWith(' lab') || cn.includes('laboratory') || cn.includes('manual') || cn.includes('practical');
     if (isLabCategory) {
-      return ft.includes('lab') || ft.includes('manual') || ft.includes('practical') || ft.includes('file');
+      return ft.includes('lab') || ft.includes('manual') || ft.includes('practical');
     }
     
     if (cn.includes('book') || cn.includes('textbook')) {
@@ -3315,7 +3323,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   // Filtered files in selected category folder
   const categoryFiles = useMemo(() => {
     if (!activeCategoryFolder) return [];
-    return subjectFiles.filter(f => isFileTypeMatchingCategory(f.type, activeCategoryFolder.name));
+    return subjectFiles.filter(f => isFileTypeMatchingCategory(f, activeCategoryFolder));
   }, [activeCategoryFolder, subjectFiles]);
 
   // Render helper for files tab detail view or category folder view
@@ -3868,15 +3876,30 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {displayCategories
+                  {displayCategories.length === 0 ? (
+                    <div className="col-span-full p-8 text-center bg-white dark:bg-[#111113] rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800/80 flex flex-col items-center justify-center gap-3">
+                      <Folder className="w-8 h-8 text-zinc-400 opacity-60" />
+                      <div className="text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400">No study sections found for this subject.</div>
+                      {(userProfile?.is_admin || isAdmin) && onAddFolder && (
+                        <button
+                          onClick={onAddFolder}
+                          style={{ backgroundColor: theme.rawColor }}
+                          className="px-3.5 py-1.5 text-white rounded-xl text-xs font-bold border-none flex items-center gap-1.5 cursor-pointer hover:opacity-90 active:scale-95 transition-all shadow-sm"
+                        >
+                          <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+                          <span>Create Study Section</span>
+                        </button>
+                      )}
+                    </div>
+                  ) : displayCategories
                     .filter(cat => {
                       if (!searchQuery || searchQuery.trim() === '') return true;
-                      const filesInCat = subjectFiles.filter(f => isFileTypeMatchingCategory(f.type, cat.name));
+                      const filesInCat = subjectFiles.filter(f => isFileTypeMatchingCategory(f, cat));
                       const nameMatches = cat.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
                       return filesInCat.length > 0 || nameMatches;
                     })
                     .map((cat) => {
-                      const filesInCat = subjectFiles.filter(f => isFileTypeMatchingCategory(f.type, cat.name));
+                      const filesInCat = subjectFiles.filter(f => isFileTypeMatchingCategory(f, cat));
                       const meta = getCategoryMetadata(cat, theme.rawColor);
                       
                       const progressList = userProgressList || [];
@@ -4128,7 +4151,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               </div>
 
               {(() => {
-                const categoryFiles = subjectFiles.filter(f => isFileTypeMatchingCategory(f.type, activeCategoryFolder.name));
+                const categoryFiles = subjectFiles.filter(f => isFileTypeMatchingCategory(f, activeCategoryFolder));
                 if (categoryFiles.length === 0) {
                   return (
                     <div className="text-center py-10 bg-zinc-50/50 dark:bg-white/[0.005] border border-dashed border-zinc-250 dark:border-white/5 rounded-3xl space-y-4">

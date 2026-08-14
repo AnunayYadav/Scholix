@@ -1276,7 +1276,7 @@ class NexusServer {
       }
     }
     
-    const { error } = await client.from('library_items').insert([{
+    const { data: createdRows, error } = await client.from('library_items').insert([{
       name,
       type,
       parent_id: parentId ? parentId.split('-dup-')[0] : null,
@@ -1284,11 +1284,35 @@ class NexusServer {
       icon_name: iconName || 'Folder',
       color: color || '#ff7a00',
       university
-    }]);
+    }]).select();
     
     if (error) {
       console.error("Create Folder Error:", error);
       throw new Error(error.message);
+    }
+
+    // Auto-create standard category folders in Supabase for newly created subjects
+    if (type === 'subject' && createdRows && createdRows.length > 0) {
+      const subjectId = createdRows[0].id;
+      const defaultCategories = [
+        { name: 'Lectures', icon: 'Video', color: color || '#ef4444' },
+        { name: 'Notes', icon: 'FileText', color: color || '#3b82f6' },
+        { name: 'PYQs', icon: 'HelpCircle', color: color || '#a855f7' },
+        { name: 'Syllabus', icon: 'Calendar', color: color || '#4b5563' }
+      ];
+
+      const categoryInserts = defaultCategories.map((cat, idx) => ({
+        name: cat.name,
+        type: 'category',
+        parent_id: subjectId,
+        program,
+        icon_name: cat.icon,
+        color: cat.color,
+        display_order: idx + 1,
+        university
+      }));
+
+      await client.from('library_items').insert(categoryInserts);
     }
   }
 

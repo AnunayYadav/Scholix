@@ -275,6 +275,7 @@ export interface LibraryFile {
   program: string;
   display_order?: number;
   folder_id?: string;
+  parent_id?: string;
   pending_update?: {
     name: string;
     description: string;
