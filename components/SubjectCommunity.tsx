@@ -18,6 +18,7 @@ import CommunityService, { uploadCommunityImage } from '../services/communitySer
 import NexusServer from '../services/nexusServer';
 import { askGeminiText } from '../services/geminiService';
 import FileDetailPage from './FileDetailPage';
+import PDFViewer from './PDFViewer.tsx';
 import { FileIcon } from './FileIcon';
 import { showToast } from './Toast';
 import { findSubjectMetadata } from '../data/curriculumData';
@@ -1056,6 +1057,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
   // Interaction overlays
   const [selectedFileDetail, setSelectedFileDetail] = useState<LibraryFile | null>(null);
+  const [activePdfFile, setActivePdfFile] = useState<LibraryFile | null>(null);
+
   const [activeMenuFileId, setActiveMenuFileId] = useState<string | null>(null);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showCreateRequest, setShowCreateRequest] = useState(false);
@@ -3171,7 +3174,11 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   };
 
   const handleOpenFile = (file: LibraryFile) => {
-    onFileAccess(file);
+    if (onFileAccess) {
+      onFileAccess(file);
+    } else {
+      setActivePdfFile(file);
+    }
   };
 
   // Upvote/Downvote reactions
@@ -5914,6 +5921,35 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
           </div>
         </div>,
         document.body
+      )}
+
+      {/* 7. File Details Modal */}
+      {selectedFileDetail && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md overflow-y-auto" onClick={() => setSelectedFileDetail(null)}>
+          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <FileDetailPage
+              file={selectedFileDetail}
+              userProfile={userProfile}
+              onClose={() => setSelectedFileDetail(null)}
+              onOpenViewer={(f) => {
+                setSelectedFileDetail(null);
+                handleOpenFile(f);
+              }}
+              themeColor={theme.rawColor}
+            />
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* 8. In-App PDF / Image Viewer Modal */}
+      {activePdfFile && (
+        <PDFViewer
+          file={activePdfFile}
+          fileName={activePdfFile.name}
+          userProfile={userProfile as any}
+          onClose={() => setActivePdfFile(null)}
+        />
       )}
     </div>
   );

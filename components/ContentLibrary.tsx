@@ -1466,8 +1466,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       return;
     }
 
-    if (file.storage_path.toLowerCase().endsWith('.pdf')) {
-      // 1. Open the viewer instantly
+    const isViewableInApp = /\.(pdf|png|jpg|jpeg|webp|svg|gif)$/i.test(file.storage_path || file.name);
+
+    if (isViewableInApp) {
+      // 1. Open the viewer in-app instantly
       setActivePdfFile(file);
     } else {
       (async () => {
@@ -3021,7 +3023,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         )
       }
 
-      <input type="file" ref={fileInputRef} className="hidden" multiple onChange={e => { const files = e.target.files; if (files && files.length > 0) { handleFilesSelected(files); targetUploadCategoryRef.current = ''; } }} />
+      <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.csv" onChange={e => { const files = e.target.files; if (files && files.length > 0) { handleFilesSelected(files); targetUploadCategoryRef.current = ''; } }} />
 
       {
         activePdfFile && (

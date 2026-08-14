@@ -282,6 +282,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
     const lastSavedProgress = useRef(0);
     const lastSavedPage = useRef(1);
     const [displayFileName, setDisplayFileName] = useState(fileName);
+    const [isImage, setIsImage] = useState(false);
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [imageRotation, setImageRotation] = useState(0);
 
     useEffect(() => {
         setDisplayFileName(fileName);
@@ -464,20 +467,24 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
     }, []);
 
     const handleZoom = useCallback((nextScale: number) => {
+        const clamped = Math.min(4, Math.max(0.2, nextScale));
+        if (clamped === scaleRef.current) return;
+
+        scaleRef.current = clamped;
+        setScale(clamped);
+
         const container = containerRef.current;
         if (!container) return;
-        if (nextScale === scaleRef.current) return;
 
         isInteractingRef.current = true;
         container.classList.add('is-zooming');
 
         const rect = container.getBoundingClientRect();
         const focalY = rect.height / 2;
-        const ratio = nextScale / scaleRef.current;
+        const ratio = clamped / scaleRef.current;
         const nextTop = (container.scrollTop + focalY) * ratio - focalY;
 
-        scaleRef.current = nextScale;
-        updateDOMScale(nextScale, undefined, nextTop);
+        updateDOMScale(clamped, undefined, nextTop);
     }, [updateDOMScale]);
 
     const registerPageRef = useCallback((pageNum: number, el: HTMLDivElement | null) => {
@@ -509,12 +516,52 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                 let targetUrl = url;
                 let pdfBytes: Uint8Array | null = null;
 
+                const pathToCheck = file?.storage_path || url || fileName || '';
+                const isImg = /\.(png|jpg|jpeg|webp|svg|gif)$/i.test(pathToCheck);
+
+                if (isImg) {
+                    setIsImage(true);
+                    let targetImgUrl = url;
+
+                    if (!targetImgUrl && file) {
+                        setDisplayFileName(file.name);
+                        try {
+                            const client = NexusServer.getClient();
+                            if (client) {
+                                const { data, error } = await client.storage.from('nexus-documents').download(file.storage_path);
+                                if (!error && data) {
+                                    targetImgUrl = URL.createObjectURL(data);
+                                }
+                            }
+                        } catch (imgErr) {
+                            console.warn("Direct storage image download failed, falling back...", imgErr);
+                        }
+
+                        if (!targetImgUrl) {
+                            const sessionRes = await NexusServer.getSession();
+                            const token = sessionRes?.data?.session?.access_token;
+                            targetImgUrl = NexusServer.getFileUrl(file.storage_path, token) || undefined;
+                        }
+                    }
+
+                    if (targetImgUrl) {
+                        setImageUrl(targetImgUrl);
+                        setIsLoading(false);
+                        setNumPages(1);
+                        if (userProfile && file) {
+                            NexusServer.saveRecord(userProfile.id, 'file_access', `Opened image ${file.name}`, { fileId: file.id, fileName: file.name, path: file.storage_path });
+                        }
+                        return;
+                    }
+                }
+
                 if (!targetUrl && file) {
                     const fileObj = file;
                     setDisplayFileName(fileObj.name);
 
-                    // Check if it is a PDF first
-                    if (!fileObj.storage_path.toLowerCase().endsWith('.pdf')) {
+                    // Check if it is a viewable format (PDF or Image)
+                    const isViewableDoc = /\.(pdf|png|jpg|jpeg|webp|svg|gif)$/i.test(fileObj.storage_path || fileObj.name);
+                    if (!isViewableDoc) {
                         const client = NexusServer.getClient();
                         if (client) {
                             try {
@@ -1503,6 +1550,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                                 </svg>
                             )}
                         </button>
+                        {isImage && (
+                            <button
+                                onClick={() => setImageRotation(prev => (prev + 90) % 360)}
+                                className="w-6.5 h-6.5 rounded-lg flex items-center justify-center text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 transition-all border-none bg-transparent ml-1"
+                                title="Rotate Image Clockwise"
+                            >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" /></svg>
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -1591,32 +1647,60 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                             <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest animate-pulse">Loading Document... {loadProgress > 0 && `${loadProgress}%`}</h4>
                         </div>
                     ) : (
-                        <div 
-                            ref={zoomWrapperRef}
-                            className="flex flex-col items-center min-w-max mx-auto px-4 md:px-8"
-                            style={{
-                                transform: 'scale(var(--pdf-scale)) translateZ(0)',
-                                transformOrigin: window.innerWidth < 768 ? 'top left' : 'top center',
-                                willChange: 'transform',
-                                paddingTop: '0px',
-                                paddingBottom: 'calc(48px * var(--pdf-scale))',
-                            }}
-                        >
-                            {Array.from({ length: numPages }).map((_, i) => (
-                                <PageRenderer
-                                    key={i}
-                                    pageNum={i + 1}
-                                    pdfDoc={pdfDoc}
-                                    userProfile={userProfile}
-                                    searchQuery={searchQuery}
-                                    currentSearchIndex={currentSearchIndex}
-                                    searchResults={searchResults}
-                                    pdfjsLib={pdfjsLibState}
-                                    registerRef={registerPageRef}
-                                    isInteractingRef={isInteractingRef}
-                                />
-                            ))}
-                        </div>
+                        <>
+                            {isImage && imageUrl ? (
+                                <div 
+                                    className="w-full h-full flex flex-col items-center justify-center p-4 sm:p-8 overflow-auto min-h-[60vh] select-none"
+                                    onWheel={(e) => {
+                                        e.preventDefault();
+                                        const delta = e.deltaY < 0 ? 0.15 : -0.15;
+                                        handleZoom(Math.min(4, Math.max(0.2, scaleRef.current + delta)));
+                                    }}
+                                >
+                                    <div 
+                                        className="transition-transform duration-150 ease-out flex items-center justify-center max-w-full max-h-full"
+                                        style={{
+                                            transform: `scale(${scale}) rotate(${imageRotation}deg)`,
+                                            willChange: 'transform',
+                                        }}
+                                    >
+                                        <img 
+                                            src={imageUrl} 
+                                            alt={displayFileName} 
+                                            className="max-w-full max-h-[78vh] rounded-2xl shadow-2xl object-contain border border-zinc-200 dark:border-white/10"
+                                            draggable={false}
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div 
+                                    ref={zoomWrapperRef}
+                                    className="flex flex-col items-center min-w-max mx-auto px-4 md:px-8"
+                                    style={{
+                                        transform: 'scale(var(--pdf-scale)) translateZ(0)',
+                                        transformOrigin: window.innerWidth < 768 ? 'top left' : 'top center',
+                                        willChange: 'transform',
+                                        paddingTop: '0px',
+                                        paddingBottom: 'calc(48px * var(--pdf-scale))',
+                                    }}
+                                >
+                                    {Array.from({ length: numPages }).map((_, i) => (
+                                        <PageRenderer
+                                            key={i}
+                                            pageNum={i + 1}
+                                            pdfDoc={pdfDoc}
+                                            userProfile={userProfile}
+                                            searchQuery={searchQuery}
+                                            currentSearchIndex={currentSearchIndex}
+                                            searchResults={searchResults}
+                                            pdfjsLib={pdfjsLibState}
+                                            registerRef={registerPageRef}
+                                            isInteractingRef={isInteractingRef}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </>
                     )}
                 </main>
 

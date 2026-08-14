@@ -17,9 +17,10 @@ interface FileDetailPageProps {
   onClose: () => void;
   onRefresh?: () => void;
   themeColor?: string;
+  onOpenViewer?: (file: LibraryFile) => void;
 }
 
-const FileDetailPage: React.FC<FileDetailPageProps> = ({ file, userProfile, onClose, onRefresh, themeColor }) => {
+const FileDetailPage: React.FC<FileDetailPageProps> = ({ file, userProfile, onClose, onRefresh, themeColor, onOpenViewer }) => {
   const [comments, setComments] = useState<PostComment[]>([]);
   const [reactions, setReactions] = useState<ReactionContainer>({ helpful: [], quality: [], important: [] });
   const [averageRating, setAverageRating] = useState(0);
@@ -80,9 +81,16 @@ const FileDetailPage: React.FC<FileDetailPageProps> = ({ file, userProfile, onCl
     showToast("Link copied to clipboard!", "success");
   };
 
+  const isViewableInApp = /\.(pdf|png|jpg|jpeg|webp|svg|gif)$/i.test(file.storage_path || file.name);
+
   const handleDownload = async () => {
     CommunityService.recordFileDownload(file.id);
     setDownloads(prev => prev + 1);
+
+    if (isViewableInApp && onOpenViewer) {
+      onOpenViewer(file);
+      return;
+    }
     
     try {
       const sessionRes = await NexusServer.getSession();
