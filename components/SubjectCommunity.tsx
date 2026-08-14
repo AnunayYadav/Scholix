@@ -2860,9 +2860,8 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     return new Date(timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  const handleMoveFile = async (fileId: string, direction: 'up' | 'down') => {
+  const handleMoveFile = (fileId: string, direction: 'up' | 'down') => {
     if (!activeCategoryFolder) return;
-    const client = NexusServer.getClient();
 
     const currentFiles = subjectFiles
       .filter(f => isFileTypeMatchingCategory(f, activeCategoryFolder))
@@ -2879,29 +2878,33 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     if (targetIndex < 0 || targetIndex >= currentFiles.length) return;
 
+    // 1. INSTANT frontend optimistic update (0ms delay)
     const reordered = [...currentFiles];
     const temp = reordered[currentIndex];
     reordered[currentIndex] = reordered[targetIndex];
     reordered[targetIndex] = temp;
 
-    showToast("Updating file position...", "info");
+    // Mutate display_order in memory immediately for instant re-render
+    for (let i = 0; i < reordered.length; i++) {
+      reordered[i].display_order = (i + 1) * 10;
+    }
 
-    try {
-      if (client) {
-        for (let i = 0; i < reordered.length; i++) {
-          const newOrder = (i + 1) * 10;
-          reordered[i].display_order = newOrder;
-          await client
+    // Force active category re-render
+    setActiveCategoryFolder({ ...activeCategoryFolder });
+
+    // 2. Non-blocking parallel background sync to Supabase DB
+    const client = NexusServer.getClient();
+    if (client) {
+      Promise.all(
+        reordered.map((file, idx) =>
+          client
             .from('library_items')
-            .update({ display_order: newOrder })
-            .eq('id', reordered[i].id);
-        }
-      }
-      showToast("File order updated!", "success");
-      if (onRefresh) onRefresh();
-    } catch (err) {
-      console.error("Error moving file:", err);
-      showToast("Failed to update file order", "error");
+            .update({ display_order: (idx + 1) * 10 })
+            .eq('id', file.id)
+        )
+      ).catch(err => {
+        console.error("Background file order sync failed:", err);
+      });
     }
   };
 
