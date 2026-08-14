@@ -63,8 +63,9 @@ interface SubjectCommunityProps {
   onDropFiles?: (files: File[], categoryName?: string) => void;
 }
 
-const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: string) => {
+const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: string, sectionName?: string) => {
   const c = nameOrCode.toUpperCase().trim();
+  const sec = (sectionName || '').toUpperCase().trim();
   
   const IconMap: { [key: string]: any } = {
     Code: <Code className="w-5 h-5 text-white" strokeWidth={3} />,
@@ -87,8 +88,23 @@ const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: 
 
   const customIcon = folderIcon && IconMap[folderIcon] ? IconMap[folderIcon] : null;
 
-  // 1. Languages / Communication / Soft Skills / Language Electives -> PINK (#ec4899)
+  // 1. If explicit custom color from Supabase DB exists (and isn't default #ff7a00), use it!
+  const isDefaultColor = !folderColor || folderColor === '#ff7a00';
+  if (!isDefaultColor) {
+    return {
+      text: `text-[${folderColor}]`,
+      bg: `bg-[${folderColor}]`,
+      lightBg: `${folderColor}15`,
+      border: `border-[${folderColor}]/20`,
+      gradient: `from-[${folderColor}] to-[${folderColor}]`,
+      icon: customIcon || <Folder className="w-5 h-5 text-white" strokeWidth={3} />,
+      rawColor: folderColor
+    };
+  }
+
+  // 2. Languages / Communication / Soft Skills / Language Electives -> PINK (#ec4899)
   if (
+    sec.includes('LANG') ||
     c.includes('FRN') || 
     c.includes('GER') || 
     c.includes('JAP') || 
@@ -112,8 +128,9 @@ const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: 
     };
   }
 
-  // 2. Core Electives / Elective Baskets -> PURPLE (#a855f7)
+  // 3. Core Electives / Elective Baskets -> PURPLE (#a855f7)
   if (
+    sec.includes('ELECTIVE') ||
     c.includes('ELECTIVE') || 
     c.includes('MEC') || 
     c.includes('ECE') || 
@@ -137,33 +154,7 @@ const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: 
     };
   }
 
-  // 3. Dedicated Project / Lab Basket -> AMBER / ORANGE (#ff7a00)
-  if (c.includes('PROJECT') || c.includes('COMMUNITY DEVELOPMENT')) {
-    return {
-      text: 'text-amber-500',
-      bg: 'bg-amber-500',
-      lightBg: 'bg-amber-500/10 dark:bg-amber-500/10',
-      border: 'border-amber-500/20',
-      gradient: 'from-amber-500 to-orange-500',
-      icon: customIcon || <Globe className="w-5 h-5 text-white" strokeWidth={3} />,
-      rawColor: '#ff7a00'
-    };
-  }
-
-  // 4. Custom theme if specifically customized (and not a system default color)
-  if (folderColor && folderColor !== '#ff7a00' && folderColor !== '#14b8a6' && folderColor !== '#ef4444' && folderColor !== '#22c55e' && folderColor !== '#06b6d4' && folderColor !== '#a855f7' && folderColor !== '#ec4899') {
-    return {
-      text: `text-[${folderColor}]`,
-      bg: `bg-[${folderColor}]`,
-      lightBg: `${folderColor}10`,
-      border: `border-[${folderColor}]/20`,
-      gradient: `from-[${folderColor}] to-[${folderColor}]`,
-      icon: customIcon || <Folder className="w-5 h-5 text-white" strokeWidth={3} />,
-      rawColor: folderColor
-    };
-  }
-
-  // 5. Core Courses & Default CSE / INT / MTH -> CYAN / TEAL (#06b6d4)
+  // 4. Core Courses, Other & Custom Courses -> CYAN / TEAL (#06b6d4)
   const isMath = c.includes('MTH') || c.includes('MATH') || c.includes('CALCULUS') || c.includes('STATISTICS');
   const isCode = c.includes('PROGRAMMING') || c.includes('PYTHON') || c.includes('INT') || c.includes('CSE');
   
@@ -943,7 +934,16 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const creditsText = subjectMetadata ? `${subjectMetadata.credits} Credits` : "4 Credits";
   const ltpText = subjectMetadata ? `L-T-P: ${subjectMetadata.l}-${subjectMetadata.t}-${subjectMetadata.p}` : "L-T-P: 3-0-2";
 
-  const theme = useMemo(() => getSubjectTheme(activeSubject.name, activeSubject.color, activeSubject.icon_name), [activeSubject.name, activeSubject.color, activeSubject.icon_name]);
+  const theme = useMemo(() => {
+    let sectionName = '';
+    try {
+      if (activeSubject.description && activeSubject.description.startsWith('{')) {
+        const parsed = JSON.parse(activeSubject.description);
+        if (parsed.section) sectionName = parsed.section;
+      }
+    } catch (e) {}
+    return getSubjectTheme(activeSubject.name, activeSubject.color, activeSubject.icon_name, sectionName);
+  }, [activeSubject.name, activeSubject.color, activeSubject.icon_name, activeSubject.description]);
 
   const isIITM = selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'bsdatascience';
 
