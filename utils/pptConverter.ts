@@ -12,16 +12,23 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 function dataUrlToBlob(dataUrl: string): Blob {
+  if (!dataUrl || !dataUrl.includes(',')) {
+    return new Blob([], { type: 'application/pdf' });
+  }
   const arr = dataUrl.split(',');
   const mimeMatch = arr[0].match(/:(.*?);/);
   const mime = mimeMatch ? mimeMatch[1] : 'application/pdf';
-  const bstr = window.atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
+  try {
+    const bstr = window.atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  } catch (e) {
+    return new Blob([], { type: 'application/pdf' });
   }
-  return new Blob([u8arr], { type: mime });
 }
 
 function pathBasename(pathStr: string): string {
@@ -37,7 +44,7 @@ interface SlideContent {
 
 export async function convertPptToPdf(file: File): Promise<File> {
   const isPpt = /\.(ppt|pptx)$/i.test(file.name);
-  if (!file || !isPpt) {
+  if (!file || !isPpt || file.size === 0) {
     return file;
   }
 
@@ -61,7 +68,7 @@ export async function convertPptToPdf(file: File): Promise<File> {
       const data = await response.json();
       if (data.success && data.fileData) {
         const pdfBlob = dataUrlToBlob(data.fileData);
-        if (pdfBlob.size > 1000) {
+        if (pdfBlob.size > 2000) {
           return new File([pdfBlob], pdfName, { type: 'application/pdf', lastModified: Date.now() });
         }
       }
@@ -89,11 +96,13 @@ export async function convertPptToPdf(file: File): Promise<File> {
 
       try {
         const imgBuffer = await imgFile.async('arraybuffer');
-        const imgBase64 = arrayBufferToBase64(imgBuffer);
-        mediaImages[imgName] = {
-          base64: `data:${mime};base64,${imgBase64}`,
-          format
-        };
+        if (imgBuffer.byteLength > 100) {
+          const imgBase64 = arrayBufferToBase64(imgBuffer);
+          mediaImages[imgName] = {
+            base64: `data:${mime};base64,${imgBase64}`,
+            format
+          };
+        }
       } catch (e) {}
     }
 
@@ -117,7 +126,6 @@ export async function convertPptToPdf(file: File): Promise<File> {
       try {
         const xmlText = await slideItem.file.async('text');
         
-        // Parse slide using DOMParser for clean, noise-free text extraction
         const parser = new DOMParser();
         const doc = parser.parseFromString(xmlText, 'text/xml');
         
@@ -127,7 +135,6 @@ export async function convertPptToPdf(file: File): Promise<File> {
         for (const p of paragraphs) {
           const textNodes = Array.from(p.getElementsByTagName('a:t'));
           const lineStr = textNodes.map(t => t.textContent || '').join(' ').trim();
-          // Filter out XML markup junk and noise
           if (lineStr && !lineStr.startsWith('<') && !lineStr.includes('a:') && !lineStr.includes('p:')) {
             slideTexts.push(lineStr);
           }
@@ -146,98 +153,90 @@ export async function convertPptToPdf(file: File): Promise<File> {
       }
     }
 
-    if (slides.length === 0) {
-      slides.push({
-        slideNumber: 1,
-        title: file.name.replace(/\.(ppt|pptx)$/i, ''),
-        texts: [`Presentation Document (${(file.size / 1024 / 1024).toFixed(2)} MB)`]
+    if (slides.length > 0) {
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'pt',
+        format: [960, 540]
       });
-    }
 
-    // Generate 16:9 Landscape PDF (960pt x 540pt)
-    const pdf = new jsPDF({
-      orientation: 'landscape',
-      unit: 'pt',
-      format: [960, 540]
-    });
+      const allMediaImages = Object.values(mediaImages);
 
-    const allMediaImages = Object.values(mediaImages);
-
-    for (let idx = 0; idx < slides.length; idx++) {
-      if (idx > 0) {
-        pdf.addPage([960, 540], 'landscape');
-      }
-
-      const slide = slides[idx];
-
-      // Dark Slide Background
-      pdf.setFillColor(15, 15, 18);
-      pdf.rect(0, 0, 960, 540, 'F');
-
-      // Top Header Accent Bar
-      pdf.setFillColor(255, 122, 0);
-      pdf.rect(40, 36, 6, 32, 'F');
-
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(20);
-      pdf.setFont('helvetica', 'bold');
-
-      const titleText = slide.title.length > 65 ? slide.title.substring(0, 62) + '...' : slide.title;
-      pdf.text(titleText, 56, 58);
-
-      pdf.setDrawColor(40, 40, 48);
-      pdf.setLineWidth(1);
-      pdf.line(40, 80, 920, 80);
-
-      // Slide Content Layout: Split into Text Column & Image Column if images exist
-      const slideImg = allMediaImages[idx % Math.max(1, allMediaImages.length)];
-      const hasImg = !!slideImg && allMediaImages.length > 0;
-      const textWidth = hasImg ? 500 : 830;
-
-      let currentY = 115;
-      pdf.setTextColor(220, 220, 230);
-      pdf.setFontSize(13);
-      pdf.setFont('helvetica', 'normal');
-
-      if (slide.texts.length === 0) {
-        pdf.setTextColor(140, 140, 150);
-        pdf.setFontSize(12);
-        pdf.text('• [Slide visual content / diagram]', 56, currentY);
-      } else {
-        for (const lineText of slide.texts) {
-          if (currentY > 460) break;
-
-          pdf.setFillColor(255, 122, 0);
-          pdf.circle(60, currentY - 4, 3, 'F');
-
-          const wrapped = pdf.splitTextToSize(lineText, textWidth);
-          pdf.text(wrapped, 72, currentY);
-          currentY += (wrapped.length * 18) + 10;
+      for (let idx = 0; idx < slides.length; idx++) {
+        if (idx > 0) {
+          pdf.addPage([960, 540], 'landscape');
         }
+
+        const slide = slides[idx];
+
+        // Dark Slide Background
+        pdf.setFillColor(15, 15, 18);
+        pdf.rect(0, 0, 960, 540, 'F');
+
+        // Top Header Accent Bar
+        pdf.setFillColor(255, 122, 0);
+        pdf.rect(40, 36, 6, 32, 'F');
+
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(20);
+        pdf.setFont('helvetica', 'bold');
+
+        const titleText = slide.title.length > 65 ? slide.title.substring(0, 62) + '...' : slide.title;
+        pdf.text(titleText, 56, 58);
+
+        pdf.setDrawColor(40, 40, 48);
+        pdf.setLineWidth(1);
+        pdf.line(40, 80, 920, 80);
+
+        const slideImg = allMediaImages[idx % Math.max(1, allMediaImages.length)];
+        const hasImg = !!slideImg && allMediaImages.length > 0;
+        const textWidth = hasImg ? 500 : 830;
+
+        let currentY = 115;
+        pdf.setTextColor(220, 220, 230);
+        pdf.setFontSize(13);
+        pdf.setFont('helvetica', 'normal');
+
+        if (slide.texts.length === 0) {
+          pdf.setTextColor(140, 140, 150);
+          pdf.setFontSize(12);
+          pdf.text('• [Slide visual content / diagram]', 56, currentY);
+        } else {
+          for (const lineText of slide.texts) {
+            if (currentY > 460) break;
+
+            pdf.setFillColor(255, 122, 0);
+            pdf.circle(60, currentY - 4, 3, 'F');
+
+            const wrapped = pdf.splitTextToSize(lineText, textWidth);
+            pdf.text(wrapped, 72, currentY);
+            currentY += (wrapped.length * 18) + 10;
+          }
+        }
+
+        if (hasImg) {
+          try {
+            pdf.addImage(slideImg.base64, slideImg.format, 580, 110, 320, 240, undefined, 'FAST');
+          } catch (e) {}
+        }
+
+        // Slide Footer
+        pdf.setTextColor(100, 100, 110);
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(`Scholix Presentation Reader • Slide ${idx + 1} of ${slides.length}`, 56, 515);
+        pdf.text(file.name.substring(0, 50), 904, 515, { align: 'right' });
       }
 
-      // Render slide image if extracted
-      if (hasImg) {
-        try {
-          pdf.addImage(slideImg.base64, slideImg.format, 580, 110, 320, 240, undefined, 'FAST');
-        } catch (e) {}
+      const pdfBlob = pdf.output('blob');
+      if (pdfBlob && pdfBlob.size > 2000) {
+        return new File([pdfBlob], pdfName, { type: 'application/pdf', lastModified: Date.now() });
       }
-
-      // Slide Footer
-      pdf.setTextColor(100, 100, 110);
-      pdf.setFontSize(9);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(`Scholix Presentation Reader • Slide ${idx + 1} of ${slides.length}`, 56, 515);
-      pdf.text(file.name.substring(0, 50), 904, 515, { align: 'right' });
-    }
-
-    const pdfBlob = pdf.output('blob');
-    if (pdfBlob.size > 500) {
-      return new File([pdfBlob], pdfName, { type: 'application/pdf', lastModified: Date.now() });
     }
   } catch (err: any) {
     console.error('Client PPTX ZIP Parser error:', err);
   }
 
+  // Safety Fallback: Return original file if conversion failed or produced corrupted file
   return file;
 }

@@ -35,7 +35,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 import VerifiedBadge from './VerifiedBadge.tsx';
-import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft, Plus, ArrowUp, ArrowDown, Pencil, Trash2, Archive, Layers } from 'lucide-react';
+import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft, Plus, ArrowUp, ArrowDown, Pencil, Trash2, Archive, Layers, Loader2 } from 'lucide-react';
 import { getProgramCurriculum, findSubjectMetadata } from '../data/curriculumData.ts';
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
 import { mergePDFFiles } from '../utils/pdfMerger.ts';
@@ -523,6 +523,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     program: string;
   }[]>([]);
   const [activeUploadIndex, setActiveUploadIndex] = useState(0);
+  const [convertingFiles, setConvertingFiles] = useState<{ name: string; originalFile: File }[]>([]);
 
   // PDF Merge State & Handlers
   const [showMergePdfModal, setShowMergePdfModal] = useState(false);
@@ -877,62 +878,109 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   };
 
   const handleFilesSelected = useCallback(async (files: FileList | File[], forceProgram?: string, forceSemester?: string, forceSubject?: string, forceType?: string) => {
+    const fileList = Array.from(files);
+    if (fileList.length === 0) return;
+
     const rawCategory = (typeof forceType === 'string' ? forceType : '') || 
                         (typeof targetUploadCategoryRef.current === 'string' ? targetUploadCategoryRef.current : '') || 
                         (typeof activeCategory?.name === 'string' ? activeCategory.name : '');
     
-    // Automatically convert any .ppt or .pptx files to .pdf
-    const convertedFiles: File[] = [];
-    for (const f of Array.from(files)) {
-      if (/\.(ppt|pptx)$/i.test(f.name)) {
-        showToast(`Converting "${f.name}" to PDF...`, 'info');
-        try {
-          const pdfFile = await convertPptToPdf(f);
-          convertedFiles.push(pdfFile);
-          showToast(`Successfully converted "${f.name}" to PDF!`, 'success');
-        } catch (err) {
-          console.warn(`Failed to convert "${f.name}" to PDF, keeping original:`, err);
-          convertedFiles.push(f);
-        }
-      } else {
-        convertedFiles.push(f);
-      }
-    }
+    // Instantly open upload modal so user sees progress in Pending files section
+    setShowUploadModal(true);
 
-    const newUploads = convertedFiles.map(f => {
+    const pptFiles = fileList.filter(f => /\.(ppt|pptx)$/i.test(f.name));
+    const nonPptFiles = fileList.filter(f => !/\.(ppt|pptx)$/i.test(f.name));
+
+    // Instantly add non-PPT files to pending uploads
+    const immediateUploads = nonPptFiles.map(f => {
       const detected = rawCategory || autoDetectCategory(f.name);
-      const finalType = typeof detected === 'string' ? detected : '';
       return {
         file: f,
         name: formatCleanFileName(f.name),
         description: '',
         semester: forceSemester || activeSemester?.name || '',
         subject: forceSubject || activeSubject?.name || '',
-        type: finalType,
+        type: typeof detected === 'string' ? detected : '',
         program: forceProgram || selectedProgram
       };
     });
 
-    // Sort uploads naturally by unit / lecture number (e.g. Lecture 1, Lecture 2, Lecture 4...)
-    newUploads.sort((a, b) => 
-      (a.name || a.file.name).localeCompare((b.name || b.file.name), undefined, { numeric: true, sensitivity: 'base' })
-    );
-
-    setPendingUploads(prev => [...prev, ...newUploads]);
-    if (pendingUploads.length === 0) {
-      setActiveUploadIndex(0);
-      const first = newUploads[0];
-      setMetaForm({
-        name: first.name,
-        description: first.description,
-        semester: first.semester,
-        subject: first.subject,
-        type: first.type,
-        program: first.program
+    if (immediateUploads.length > 0) {
+      setPendingUploads(prev => {
+        const combined = [...prev, ...immediateUploads];
+        combined.sort((a, b) => (a.name || a.file.name).localeCompare((b.name || b.file.name), undefined, { numeric: true, sensitivity: 'base' }));
+        return combined;
       });
+      if (pendingUploads.length === 0) {
+        setActiveUploadIndex(0);
+        const first = immediateUploads[0];
+        setMetaForm({
+          name: first.name,
+          description: first.description,
+          semester: first.semester,
+          subject: first.subject,
+          type: first.type,
+          program: first.program
+        });
+      }
     }
-    setShowUploadModal(true);
-  }, [activeSemester, activeSubject, activeCategory, selectedProgram, availablePrograms, pendingUploads.length]);
+
+    if (pptFiles.length > 0) {
+      // Add PPT files to converting list to show loader cards in Pending Files sidebar!
+      const newConverting = pptFiles.map(f => ({ name: f.name, originalFile: f }));
+      setConvertingFiles(prev => [...prev, ...newConverting]);
+
+      for (const pptFile of pptFiles) {
+        showToast(`Converting "${pptFile.name}" to PDF...`, 'info');
+        let processedFile = pptFile;
+        try {
+          const resFile = await convertPptToPdf(pptFile);
+          if (resFile && resFile.size >= 500) {
+            processedFile = resFile;
+            showToast(`Successfully converted "${pptFile.name}" to PDF!`, 'success');
+          } else {
+            console.warn(`Conversion for "${pptFile.name}" resulted in 0-byte file (${resFile?.size || 0} bytes). Reverting to original file.`);
+            processedFile = pptFile;
+          }
+        } catch (err) {
+          console.warn(`Failed to convert "${pptFile.name}" to PDF, keeping original:`, err);
+          processedFile = pptFile;
+        }
+
+        const detected = rawCategory || autoDetectCategory(processedFile.name);
+        const newUploadItem = {
+          file: processedFile,
+          name: formatCleanFileName(processedFile.name),
+          description: '',
+          semester: forceSemester || activeSemester?.name || '',
+          subject: forceSubject || activeSubject?.name || '',
+          type: typeof detected === 'string' ? detected : '',
+          program: forceProgram || selectedProgram
+        };
+
+        // Remove from converting list and push to pending uploads
+        setConvertingFiles(prev => prev.filter(item => item.name !== pptFile.name));
+        setPendingUploads(prev => {
+          const combined = [...prev, newUploadItem];
+          combined.sort((a, b) => (a.name || a.file.name).localeCompare((b.name || b.file.name), undefined, { numeric: true, sensitivity: 'base' }));
+          
+          if (prev.length === 0 && immediateUploads.length === 0) {
+            setActiveUploadIndex(0);
+            setMetaForm({
+              name: newUploadItem.name,
+              description: newUploadItem.description,
+              semester: newUploadItem.semester,
+              subject: newUploadItem.subject,
+              type: newUploadItem.type,
+              program: newUploadItem.program
+            });
+          }
+
+          return combined;
+        });
+      }
+    }
+  }, [activeSemester, activeSubject, activeCategory, selectedProgram, pendingUploads.length]);
 
   // Sync current metaForm back to pendingUploads
   useEffect(() => {
@@ -2937,7 +2985,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 <div>
                   <h3 className="text-base sm:text-lg font-extrabold text-zinc-900 dark:text-white leading-tight">{showUploadModal ? 'Contribute to Library' : 'Edit Metadata'}</h3>
                   <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 mt-1">
-                    {showUploadModal ? `Batch Processing: ${pendingUploads.length} File${pendingUploads.length > 1 ? 's' : ''}` : 'Refine document properties'}
+                    {showUploadModal 
+                      ? `Batch Processing: ${pendingUploads.length + convertingFiles.length} File${(pendingUploads.length + convertingFiles.length) !== 1 ? 's' : ''}${convertingFiles.length > 0 ? ` (${convertingFiles.length} Converting...)` : ''}` 
+                      : 'Refine document properties'}
                   </p>
                 </div>
                 <button onClick={() => { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); }} className="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-white/5 rounded-xl transition-all border-none bg-transparent cursor-pointer">
@@ -2962,6 +3012,20 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                         </button>
                       )}
                     </div>
+
+                    {/* Converting Files Loader Cards */}
+                    {convertingFiles.map((cFile, cIdx) => (
+                      <div key={`converting-${cIdx}`} className="w-full p-3 rounded-xl bg-orange-500/10 dark:bg-orange-500/15 border border-orange-500/30 flex items-center gap-3 animate-pulse min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-500 flex items-center justify-center shrink-0">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-orange-600 dark:text-orange-400 truncate leading-tight">{cFile.name}</p>
+                          <p className="text-[10px] font-medium text-orange-500/80 dark:text-orange-400/80 mt-0.5 truncate">Converting PPT to PDF...</p>
+                        </div>
+                      </div>
+                    ))}
+
                     {pendingUploads.map((up, idx) => (
                       <div key={idx} className="relative group min-w-0">
                         <button
@@ -3184,11 +3248,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   </button>
                   <button
                     onClick={showUploadModal ? handleUpload : handleEditSubmission}
-                    disabled={isProcessing || !metaForm.name || !metaForm.semester || !metaForm.subject || (showUploadModal && pendingUploads.some(u => !u.name || !u.semester || !u.subject))}
+                    disabled={isProcessing || convertingFiles.length > 0 || pendingUploads.length === 0 || !metaForm.name || !metaForm.semester || !metaForm.subject || (showUploadModal && pendingUploads.some(u => !u.name || !u.semester || !u.subject))}
                     className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white rounded-xl font-bold text-xs shadow-md shadow-orange-500/20 disabled:opacity-50 disabled:hover:scale-100 transition-all border-none cursor-pointer flex items-center gap-2"
                   >
                     {isProcessing ? (
                       <span>Processing Batch...</span>
+                    ) : convertingFiles.length > 0 ? (
+                      <span className="flex items-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Converting PPT...</span>
                     ) : (
                       <>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>

@@ -34,6 +34,10 @@ export default async function handler(req: any, res: any) {
     const base64Content = fileData.includes(',') ? fileData.split(',')[1] : fileData;
     const inputBuffer = Buffer.from(base64Content, 'base64');
 
+    if (inputBuffer.length === 0) {
+      return res.status(400).json({ error: 'Input file buffer is empty.' });
+    }
+
     const tmpDir = os.tmpdir();
     const uniqueId = Date.now() + '_' + Math.random().toString(36).substring(2, 7);
     const ext = path.extname(fileName || 'presentation.pptx') || '.pptx';
@@ -58,15 +62,18 @@ export default async function handler(req: any, res: any) {
         await execAsync(cmd);
         const expectedPdfPath = path.join(tmpDir, `input_${uniqueId}.pdf`);
         if (fs.existsSync(expectedPdfPath)) {
-          pdfBuffer = await fs.promises.readFile(expectedPdfPath);
+          const tempBuf = await fs.promises.readFile(expectedPdfPath);
           try { await fs.promises.unlink(expectedPdfPath); } catch (e) {}
-          if (pdfBuffer && pdfBuffer.length > 0) break;
+          if (tempBuf && tempBuf.length > 2000) {
+            pdfBuffer = tempBuf;
+            break;
+          }
         }
       } catch (e) {}
     }
 
     // 2. Try Cloud LibreOffice conversion engine if local CLI absent
-    if (!pdfBuffer || pdfBuffer.length === 0) {
+    if (!pdfBuffer || pdfBuffer.length < 2000) {
       try {
         const formData = new FormData();
         const blob = new Blob([inputBuffer], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
@@ -79,7 +86,7 @@ export default async function handler(req: any, res: any) {
 
         if (cloudRes.ok) {
           const resArrayBuf = await cloudRes.arrayBuffer();
-          if (resArrayBuf.byteLength > 1000) {
+          if (resArrayBuf.byteLength > 2000) {
             pdfBuffer = Buffer.from(resArrayBuf);
           }
         }
@@ -91,7 +98,7 @@ export default async function handler(req: any, res: any) {
     // Clean up input file
     try { if (fs.existsSync(inputPath)) await fs.promises.unlink(inputPath); } catch (e) {}
 
-    if (pdfBuffer && pdfBuffer.length > 0) {
+    if (pdfBuffer && pdfBuffer.length > 2000) {
       const pdfBase64 = pdfBuffer.toString('base64');
       const cleanName = (fileName || 'presentation').replace(/\.(ppt|pptx)$/i, '') + '.pdf';
       return res.status(200).json({
