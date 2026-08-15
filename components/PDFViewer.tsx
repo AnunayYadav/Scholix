@@ -5,7 +5,6 @@ import { LibraryFile, UserProfile } from '../types.ts';
 import { showToast } from './Toast.tsx';
 import NexusServer from '../services/nexusServer.ts';
 import { useUniversity } from '../hooks/useUniversity.tsx';
-import { getGDriveFileId, getGDriveDownloadUrl, getGDriveImageUrl } from '../utils/gdriveMapper.ts';
 
 interface PDFViewerProps {
     url?: string;
@@ -526,27 +525,22 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
                     if (!targetImgUrl && file) {
                         setDisplayFileName(file.name);
-                        const gdriveId = getGDriveFileId(file);
-                        if (gdriveId) {
-                            targetImgUrl = getGDriveImageUrl(gdriveId);
-                        } else {
-                            try {
-                                const client = NexusServer.getClient();
-                                if (client) {
-                                    const { data, error } = await client.storage.from('nexus-documents').download(file.storage_path);
-                                    if (!error && data) {
-                                        targetImgUrl = URL.createObjectURL(data);
-                                    }
+                        try {
+                            const client = NexusServer.getClient();
+                            if (client) {
+                                const { data, error } = await client.storage.from('nexus-documents').download(file.storage_path);
+                                if (!error && data) {
+                                    targetImgUrl = URL.createObjectURL(data);
                                 }
-                            } catch (imgErr) {
-                                console.warn("Direct storage image download failed, falling back...", imgErr);
                             }
+                        } catch (imgErr) {
+                            console.warn("Direct storage image download failed, falling back...", imgErr);
+                        }
 
-                            if (!targetImgUrl) {
-                                const sessionRes = await NexusServer.getSession();
-                                const token = sessionRes?.data?.session?.access_token;
-                                targetImgUrl = NexusServer.getFileUrl(file.storage_path, token) || undefined;
-                            }
+                        if (!targetImgUrl) {
+                            const sessionRes = await NexusServer.getSession();
+                            const token = sessionRes?.data?.session?.access_token;
+                            targetImgUrl = NexusServer.getFileUrl(file.storage_path, token) || undefined;
                         }
                     }
 
@@ -608,10 +602,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
                     NexusServer.saveRecord(userProfile.id, 'file_access', `Opened ${fileObj.name}`, { fileId: fileObj.id, fileName: fileObj.name, path: fileObj.storage_path });
                     try {
-                        const gdriveId = getGDriveFileId(fileObj);
-                        if (gdriveId) {
-                            const gdriveUrl = getGDriveDownloadUrl(gdriveId);
-                            console.log(`[PDFViewer] Streaming document from Google Drive (ID: ${gdriveId})`);
+                        if ((fileObj as any).gdrive_file_id) {
+                            const gdriveUrl = `https://drive.google.com/uc?export=download&id=${(fileObj as any).gdrive_file_id}`;
                             const gRes = await fetch(gdriveUrl);
                             if (!gRes.ok) throw new Error(`Google Drive download failed with status ${gRes.status}`);
                             const arrayBuffer = await gRes.arrayBuffer();
