@@ -49,3 +49,15 @@ tmp/
 
 # Flutter Mobile App (contains env variables & build artifacts)
 scholix_mobile/
+
+# Google Drive Credentials & OAuth Tokens
+keen-answer-*.json
+gdrive_token.json
+scripts/gdrive_token.json
+
+# Migration & Scratch Scripts
+scripts/inspect_gdrive_folder.cjs
+scripts/list_all_db_files.cjs
+scripts/migrate_supabase_to_gdrive.cjs
+scripts/migrate_supabase_to_gdrive_oauth.cjs
+

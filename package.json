@@ -36,6 +36,7 @@
     "axios": "^1.15.0",
     "cheerio": "^1.2.0",
     "framer-motion": "^12.38.0",
+    "googleapis": "^174.0.1",
     "highlight.js": "^11.11.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.1.0",
