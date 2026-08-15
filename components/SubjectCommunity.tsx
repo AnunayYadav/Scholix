@@ -21,7 +21,7 @@ import FileDetailPage from './FileDetailPage';
 import PDFViewer from './PDFViewer.tsx';
 import { FileIcon } from './FileIcon';
 import { showToast } from './Toast';
-import { findSubjectMetadata } from '../data/curriculumData';
+import { findSubjectMetadata, getProgramCurriculum } from '../data/curriculumData';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
 
@@ -89,21 +89,7 @@ const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: 
 
   const customIcon = folderIcon && IconMap[folderIcon] ? IconMap[folderIcon] : null;
 
-  // 1. If explicit custom color from Supabase DB exists (and isn't default #ff7a00), use it!
-  const isDefaultColor = !folderColor || folderColor === '#ff7a00';
-  if (!isDefaultColor) {
-    return {
-      text: `text-[${folderColor}]`,
-      bg: `bg-[${folderColor}]`,
-      lightBg: `${folderColor}15`,
-      border: `border-[${folderColor}]/20`,
-      gradient: `from-[${folderColor}] to-[${folderColor}]`,
-      icon: customIcon || <Folder className="w-5 h-5 text-white" strokeWidth={3} />,
-      rawColor: folderColor
-    };
-  }
-
-  // 2. Languages / Communication / Soft Skills / Language Electives -> PINK (#ec4899)
+  // 1. Languages / Communication / Soft Skills / Language Electives -> PINK (#ec4899)
   if (
     sec.includes('LANG') ||
     c.includes('FRN') || 
@@ -129,29 +115,29 @@ const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: 
     };
   }
 
-  // 3. Core Electives / Elective Baskets -> PURPLE (#a855f7)
-  if (
-    sec.includes('ELECTIVE') ||
-    c.includes('ELECTIVE') || 
-    c.includes('MEC') || 
-    c.includes('ECE') || 
-    c.includes('EEE') || 
-    c.includes('ELECTRICAL') || 
-    c.includes('ELECTRONICS') || 
-    c.includes('EVS') || 
-    c.includes('PHYSICS') ||
-    c.includes('AUTOCAD') ||
-    c.includes('ENVIRONMENTAL') ||
-    c.includes('DRAWING')
-  ) {
+  // 2. Core Electives / Elective Baskets -> PURPLE (#a855f7)
+  if (sec.includes('ELECTIVE')) {
     return {
       text: 'text-purple-500',
       bg: 'bg-purple-500',
       lightBg: 'bg-purple-500/10 dark:bg-purple-500/10',
       border: 'border-purple-500/20',
       gradient: 'from-purple-500 to-indigo-500',
-      icon: customIcon || <Cpu className="w-5 h-5 text-white" strokeWidth={3} />,
+      icon: customIcon || <Code className="w-5 h-5 text-white" strokeWidth={3} />,
       rawColor: '#a855f7'
+    };
+  }
+
+  // 3. Dedicated Project / Lab Basket -> AMBER / ORANGE (#ff7a00)
+  if (sec.includes('PROJECT') || sec.includes('COMMUNITY') || sec.includes('LAB')) {
+    return {
+      text: 'text-amber-500',
+      bg: 'bg-amber-500',
+      lightBg: 'bg-amber-500/10 dark:bg-amber-500/10',
+      border: 'border-amber-500/20',
+      gradient: 'from-amber-500 to-orange-500',
+      icon: customIcon || <Globe className="w-5 h-5 text-white" strokeWidth={3} />,
+      rawColor: '#ff7a00'
     };
   }
 
@@ -261,6 +247,22 @@ const getCategoryMetadata = (category: FolderType | string | null | undefined, s
       glowShadowClass: "hover:shadow-[0_12px_30px_rgba(16,185,129,0.06)] hover:-translate-y-0.5",
       iconColor: "text-emerald-500 dark:text-emerald-400",
       progressRingColor: "stroke-emerald-500 dark:stroke-emerald-400"
+    },
+    '#06b6d4': {
+      lightColorBg: "bg-cyan-500/10 text-cyan-500 dark:text-cyan-400",
+      gradientBgClass: "from-cyan-500/10 dark:from-cyan-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-cyan-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(6,182,212,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-cyan-500 dark:text-cyan-400",
+      progressRingColor: "stroke-cyan-500 dark:stroke-cyan-400"
+    },
+    '#ec4899': {
+      lightColorBg: "bg-pink-500/10 text-pink-500 dark:text-pink-400",
+      gradientBgClass: "from-pink-500/10 dark:from-pink-500/15 to-transparent",
+      borderClass: "border-zinc-150 dark:border-white/[0.04] hover:border-pink-500/20",
+      glowShadowClass: "hover:shadow-[0_12px_30px_rgba(236,72,153,0.06)] hover:-translate-y-0.5",
+      iconColor: "text-pink-500 dark:text-pink-400",
+      progressRingColor: "stroke-pink-500 dark:stroke-pink-400"
     },
     '#6366f1': {
       lightColorBg: "bg-indigo-500/10 text-indigo-500 dark:text-indigo-400",
@@ -935,16 +937,31 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const creditsText = subjectMetadata ? `${subjectMetadata.credits} Credits` : "4 Credits";
   const ltpText = subjectMetadata ? `L-T-P: ${subjectMetadata.l}-${subjectMetadata.t}-${subjectMetadata.p}` : "L-T-P: 3-0-2";
 
-  const theme = useMemo(() => {
-    let sectionName = '';
-    try {
-      if (activeSubject.description && activeSubject.description.startsWith('{')) {
+  const sectionName = useMemo(() => {
+    if (activeSubject.description) {
+      try {
         const parsed = JSON.parse(activeSubject.description);
-        if (parsed.section) sectionName = parsed.section;
+        if (parsed && parsed.section) return parsed.section as string;
+      } catch (e) {
+        if (!activeSubject.description.startsWith('{')) return activeSubject.description;
       }
-    } catch (e) {}
+    }
+    const meta = findSubjectMetadata(selectedProgram, activeSubject.name);
+    if (meta) {
+      if (meta.type === 'CR') return 'Core Courses';
+      const curriculum = getProgramCurriculum(selectedProgram);
+      const term = curriculum?.terms.find(t => t.termName.toLowerCase() === (activeSemester?.name || '').toLowerCase());
+      if (term) {
+        const basket = term.electiveBaskets.find(b => b.subjects.some(s => s.code === meta.code));
+        if (basket) return basket.name;
+      }
+    }
+    return 'Other / Custom Courses';
+  }, [activeSubject, selectedProgram, activeSemester]);
+
+  const theme = useMemo(() => {
     return getSubjectTheme(activeSubject.name, activeSubject.color, activeSubject.icon_name, sectionName);
-  }, [activeSubject.name, activeSubject.color, activeSubject.icon_name, activeSubject.description]);
+  }, [activeSubject.name, activeSubject.color, activeSubject.icon_name, sectionName]);
 
   const isIITM = selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'bsdatascience';
 
