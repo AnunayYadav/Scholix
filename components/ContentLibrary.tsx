@@ -35,10 +35,10 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 import VerifiedBadge from './VerifiedBadge.tsx';
-import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft, Plus, ArrowUp, ArrowDown, Pencil, Trash2, Archive, Layers, Loader2 } from 'lucide-react';
+import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft, Plus, ArrowUp, ArrowDown, Pencil, Trash2, Archive, Layers, Loader2, Image as ImageIcon, FileImage } from 'lucide-react';
 import { getProgramCurriculum, findSubjectMetadata } from '../data/curriculumData.ts';
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
-import { mergePDFFiles } from '../utils/pdfMerger.ts';
+import { mergePDFFiles, convertImagesToPdf, isImageFile } from '../utils/pdfMerger.ts';
 import { convertPptToPdf } from '../utils/pptConverter.ts';
 
 const matchFolderSlug = (folderName: string, paramSlug: string): boolean => {
@@ -632,6 +632,144 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [isClosingDetails, setIsClosingDetails] = useState(false);
   const [isClosingFolder, setIsClosingFolder] = useState(false);
   const [isClosingRename, setIsClosingRename] = useState(false);
+  // Image to PDF Modal state & functions
+  const [showImageToPdfModal, setShowImageToPdfModal] = useState(false);
+  const [imageToPdfList, setImageToPdfList] = useState<{
+    file: File;
+    name: string;
+    description: string;
+    semester: string;
+    subject: string;
+    type: string;
+    program: string;
+  }[]>([]);
+  const [imageToPdfOutputName, setImageToPdfOutputName] = useState('');
+  const [isConvertingImagesToPdf, setIsConvertingImagesToPdf] = useState(false);
+
+  const handleOpenImageToPdfModal = (specificFile?: File) => {
+    let images = pendingUploads.filter(up => isImageFile(up.file.name, up.file.type));
+    if (specificFile) {
+      const match = pendingUploads.filter(up => up.file === specificFile);
+      if (match.length > 0) images = match;
+    }
+    if (images.length === 0) {
+      showToast("No image files available to convert to PDF.", "info");
+      return;
+    }
+
+    const sortedImages = [...images].sort((a, b) => 
+      (a.name || a.file.name).localeCompare((b.name || b.file.name), undefined, { numeric: true, sensitivity: 'base' })
+    );
+
+    setImageToPdfList(sortedImages);
+    
+    let baseName = sortedImages[0].name.replace(/\.(png|jpg|jpeg|webp|gif|bmp|heic|tiff|svg)$/i, '').trim();
+    if (sortedImages.length > 1) {
+      baseName = baseName.replace(/\s*(part|pt|vol|volume|v|page|p|img|image|scan|doc)\s*\d+/gi, '').trim();
+    }
+    if (!baseName) baseName = 'Images_Document';
+    setImageToPdfOutputName(baseName);
+    setShowImageToPdfModal(true);
+  };
+
+  const handleMoveImageToPdfItem = (index: number, direction: 'up' | 'down') => {
+    setImageToPdfList(prev => {
+      const next = [...prev];
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= next.length) return prev;
+      const temp = next[index];
+      next[index] = next[targetIndex];
+      next[targetIndex] = temp;
+      return next;
+    });
+  };
+
+  const handleRemoveImageToPdfItem = (index: number) => {
+    setImageToPdfList(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleExecuteImageToPdf = async () => {
+    if (imageToPdfList.length === 0) {
+      showToast("Please select at least 1 image to convert.", "info");
+      return;
+    }
+    if (!imageToPdfOutputName.trim()) {
+      showToast("Please enter a name for the output PDF.", "info");
+      return;
+    }
+
+    setIsConvertingImagesToPdf(true);
+    try {
+      const filesToConvert = imageToPdfList.map(item => item.file);
+      const convertedPdfFile = await convertImagesToPdf(filesToConvert, imageToPdfOutputName);
+
+      const firstItem = imageToPdfList[0];
+      const pdfUploadItem = {
+        file: convertedPdfFile,
+        name: formatCleanFileName(convertedPdfFile.name),
+        description: firstItem.description || '',
+        semester: firstItem.semester,
+        subject: firstItem.subject,
+        type: firstItem.type || 'Notes',
+        program: firstItem.program
+      };
+
+      setPendingUploads(prev => {
+        const imageFileNames = new Set(imageToPdfList.map(m => m.file.name));
+        const remaining = prev.filter(up => !imageFileNames.has(up.file.name));
+        return [pdfUploadItem, ...remaining];
+      });
+
+      setActiveUploadIndex(0);
+      setMetaForm({
+        name: pdfUploadItem.name,
+        description: pdfUploadItem.description,
+        semester: pdfUploadItem.semester,
+        subject: pdfUploadItem.subject,
+        type: pdfUploadItem.type,
+        program: pdfUploadItem.program
+      });
+
+      setShowImageToPdfModal(false);
+      showToast(`Successfully converted ${imageToPdfList.length} image${imageToPdfList.length > 1 ? 's' : ''} to "${pdfUploadItem.name}.pdf"!`, "success");
+    } catch (err: any) {
+      console.error("Failed to convert images to PDF:", err);
+      showToast(`Error converting images to PDF: ${err.message || 'Unknown error'}`, "error");
+    } finally {
+      setIsConvertingImagesToPdf(false);
+    }
+  };
+
+  const handleConvertSingleImageToPdf = async (index: number) => {
+    const item = pendingUploads[index];
+    if (!item || !isImageFile(item.file.name, item.file.type)) return;
+
+    showToast(`Converting "${item.name || item.file.name}" to PDF...`, "info");
+    try {
+      const outputName = (item.name || item.file.name).replace(/\.(png|jpg|jpeg|webp|gif|bmp|heic|tiff|svg)$/i, '');
+      const convertedPdfFile = await convertImagesToPdf([item.file], outputName);
+
+      const pdfUploadItem = {
+        file: convertedPdfFile,
+        name: formatCleanFileName(convertedPdfFile.name),
+        description: item.description,
+        semester: item.semester,
+        subject: item.subject,
+        type: item.type || 'Notes',
+        program: item.program
+      };
+
+      setPendingUploads(prev => prev.map((up, i) => i === index ? pdfUploadItem : up));
+      if (activeUploadIndex === index) {
+        setMetaForm(prev => ({ ...prev, name: pdfUploadItem.name }));
+      }
+      showToast(`Converted "${pdfUploadItem.name}" to PDF!`, "success");
+    } catch (err: any) {
+      console.error("Single image conversion failed:", err);
+      showToast(`Failed to convert image to PDF: ${err.message || 'Unknown error'}`, "error");
+    }
+  };
+
   const [isClosingUpload, setIsClosingUpload] = useState(false);
   const [isClosingEdit, setIsClosingEdit] = useState(false);
 
@@ -3000,17 +3138,30 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   <div className="w-full md:w-64 border-none bg-zinc-50/50 dark:bg-[#141416]/50 overflow-y-auto custom-scrollbar shrink-0 p-3 space-y-2 max-h-[160px] md:max-h-none">
                     <div className="flex items-center justify-between px-2 py-1 gap-1">
                       <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Pending files</p>
-                      {pendingUploads.filter(up => up.file.type === 'application/pdf' || up.file.name.toLowerCase().endsWith('.pdf')).length >= 2 && (
-                        <button
-                          type="button"
-                          onClick={handleOpenMergePdfModal}
-                          className="px-2 py-1 text-[10px] font-bold text-orange-500 hover:text-orange-600 dark:text-orange-400 bg-orange-500/10 hover:bg-orange-500/20 active:scale-95 rounded-lg border-none cursor-pointer transition-all flex items-center gap-1 shrink-0"
-                          title="Merge multiple PDFs into 1 document"
-                        >
-                          <Layers className="w-3 h-3" />
-                          <span>Merge PDFs</span>
-                        </button>
-                      )}
+                      <div className="flex items-center gap-1 shrink-0">
+                        {pendingUploads.filter(up => up.file.type === 'application/pdf' || up.file.name.toLowerCase().endsWith('.pdf')).length >= 2 && (
+                          <button
+                            type="button"
+                            onClick={handleOpenMergePdfModal}
+                            className="px-2 py-1 text-[10px] font-bold text-orange-500 hover:text-orange-600 dark:text-orange-400 bg-orange-500/10 hover:bg-orange-500/20 active:scale-95 rounded-lg border-none cursor-pointer transition-all flex items-center gap-1 shrink-0"
+                            title="Merge multiple PDFs into 1 document"
+                          >
+                            <Layers className="w-3 h-3" />
+                            <span>Merge PDFs</span>
+                          </button>
+                        )}
+                        {pendingUploads.filter(up => isImageFile(up.file.name, up.file.type)).length >= 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenImageToPdfModal()}
+                            className="px-2 py-1 text-[10px] font-bold text-purple-500 hover:text-purple-600 dark:text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 active:scale-95 rounded-lg border-none cursor-pointer transition-all flex items-center gap-1 shrink-0"
+                            title="Convert uploaded images into a PDF document"
+                          >
+                            <ImageIcon className="w-3 h-3" />
+                            <span>Images to PDF</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     {/* Converting Files Loader Cards */}
@@ -3041,9 +3192,28 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           </div>
                           <div className="min-w-0 flex-1 pr-4">
                             <p className="text-xs font-semibold truncate leading-tight">{up.name || up.file.name}</p>
-                            <p className={`text-[10px] font-medium mt-0.5 truncate ${activeUploadIndex === idx ? 'text-white/80' : 'text-zinc-400'}`}>
-                              {(up.file.size / 1024 / 1024).toFixed(2)} MB
-                            </p>
+                            <div className="flex items-center gap-2 mt-0.5 min-w-0">
+                              <p className={`text-[10px] font-medium truncate ${activeUploadIndex === idx ? 'text-white/80' : 'text-zinc-400'}`}>
+                                {(up.file.size / 1024 / 1024).toFixed(2)} MB
+                              </p>
+                              {isImageFile(up.file.name, up.file.type) && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleConvertSingleImageToPdf(idx);
+                                  }}
+                                  className={`px-1.5 py-0.5 text-[9px] font-bold rounded border-none cursor-pointer transition-all shrink-0 ${
+                                    activeUploadIndex === idx
+                                      ? 'bg-white/20 text-white hover:bg-white/30'
+                                      : 'bg-purple-500/15 text-purple-600 dark:text-purple-400 hover:bg-purple-500/25'
+                                  }`}
+                                  title="Make PDF from this image"
+                                >
+                                  Make PDF
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </button>
                         {pendingUploads.length > 1 && (
@@ -3390,6 +3560,144 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     <>
                       <Layers className="w-4 h-4" />
                       <span>Combine {mergePdfList.length} PDFs</span>
+                    </>
+                  )}
+                </button>
+              </footer>
+            </div>
+          </div>,
+          document.getElementById('modal-root') || document.body
+        )
+      }
+
+      {
+        showImageToPdfModal && createPortal(
+          <div
+            className="modal-overlay"
+            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+            onClick={(e) => { if (e.target === e.currentTarget && !isConvertingImagesToPdf) setShowImageToPdfModal(false); }}
+          >
+            <div className="nexus-modal w-full max-w-lg overflow-hidden rounded-[24px] sm:rounded-[32px] border-none shadow-2xl bg-white dark:bg-[#111113] flex flex-col animate-fade-in">
+              <header className="p-5 sm:p-6 border-none bg-zinc-50/80 dark:bg-[#161618]/80 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center font-bold shrink-0">
+                    <ImageIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-extrabold text-zinc-900 dark:text-white leading-tight">Convert Images to PDF</h3>
+                    <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 mt-0.5">Compile image pages into 1 clean PDF document</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => { if (!isConvertingImagesToPdf) setShowImageToPdfModal(false); }}
+                  className="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-white/5 rounded-xl transition-all border-none bg-transparent cursor-pointer"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+              </header>
+
+              <div className="p-5 sm:p-6 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Output PDF Title</label>
+                  <input
+                    type="text"
+                    value={imageToPdfOutputName}
+                    onChange={(e) => setImageToPdfOutputName(e.target.value)}
+                    placeholder="e.g. Unit 1 Notes"
+                    className="w-full px-4 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-bold text-zinc-900 dark:text-white focus:outline-none focus:border-purple-500 transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                    <span>Page Order ({imageToPdfList.length} image{imageToPdfList.length !== 1 ? 's' : ''})</span>
+                    <span className="text-[10px] font-normal text-zinc-400">Re-order with arrows</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {imageToPdfList.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-[#161618] border border-zinc-150 dark:border-white/5 gap-3"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <span className="w-5 h-5 rounded-md bg-purple-500/10 text-purple-500 text-[10px] font-bold flex items-center justify-center shrink-0">
+                            {idx + 1}
+                          </span>
+                          <div className="w-9 h-9 rounded-lg bg-zinc-200 dark:bg-zinc-800 overflow-hidden shrink-0 flex items-center justify-center border border-zinc-300 dark:border-zinc-700">
+                            <img
+                              src={URL.createObjectURL(item.file)}
+                              alt={item.name || item.file.name}
+                              className="w-full h-full object-cover"
+                              onLoad={(e) => URL.revokeObjectURL((e.target as HTMLImageElement).src)}
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-bold text-zinc-900 dark:text-white truncate">{item.name || item.file.name}</p>
+                            <p className="text-[10px] font-medium text-zinc-400 truncate">{(item.file.size / 1024 / 1024).toFixed(2)} MB</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            disabled={idx === 0}
+                            onClick={() => handleMoveImageToPdfItem(idx, 'up')}
+                            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 border-none bg-transparent cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                            title="Move Up"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={idx === imageToPdfList.length - 1}
+                            onClick={() => handleMoveImageToPdfItem(idx, 'down')}
+                            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 border-none bg-transparent cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                            title="Move Down"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                          {imageToPdfList.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImageToPdfItem(idx)}
+                              className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 border-none bg-transparent cursor-pointer transition-all ml-1"
+                              title="Exclude from PDF"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <footer className="p-5 sm:p-6 bg-zinc-50/80 dark:bg-[#161618]/80 flex items-center justify-end gap-3 shrink-0 border-t border-zinc-150 dark:border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setShowImageToPdfModal(false)}
+                  disabled={isConvertingImagesToPdf}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExecuteImageToPdf}
+                  disabled={isConvertingImagesToPdf || imageToPdfList.length === 0 || !imageToPdfOutputName.trim()}
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 shadow-md shadow-purple-500/20 active:scale-95 transition-all border-none cursor-pointer disabled:opacity-50 disabled:scale-100 flex items-center gap-2"
+                >
+                  {isConvertingImagesToPdf ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Creating PDF...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ImageIcon className="w-4 h-4" />
+                      <span>Convert to 1 PDF</span>
                     </>
                   )}
                 </button>
