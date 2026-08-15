@@ -53,7 +53,7 @@ const FeaturedQuizCard: React.FC<FeaturedQuizCardProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className="relative overflow-hidden rounded-[32px] border border-zinc-200 dark:border-white/5 bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:from-orange-950/10 dark:via-dark-950/60 dark:to-amber-950/10 shadow-xl"
+      className="relative overflow-hidden rounded-[28px] border-none shadow-none bg-zinc-100 dark:bg-[#111113]"
     >
       {/* Decorative gradient blur */}
       <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-orange-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
@@ -82,7 +82,7 @@ const FeaturedQuizCard: React.FC<FeaturedQuizCardProps> = ({
             {quiz.units && quiz.units.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {quiz.units.slice(0, 3).map(unit => (
-                  <span key={unit} className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-white/5 text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-white/5">
+                  <span key={unit} className="px-2.5 py-1 rounded-lg bg-zinc-200/60 dark:bg-white/5 text-[10px] font-bold text-zinc-600 dark:text-zinc-400 border-none">
                     {unit}
                   </span>
                 ))}

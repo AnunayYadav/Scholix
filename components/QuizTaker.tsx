@@ -2978,7 +2978,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             whileHover={{ scale: 1.02, cursor: 'pointer' }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowProgressModal(true)}
-            className="bg-white dark:bg-white/[0.03] p-6 rounded-[24px] border border-zinc-100 dark:border-white/5 shadow-sm relative overflow-hidden group hover:shadow-md transition-all flex flex-col gap-4"
+            className="bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/50 dark:hover:bg-[#141416] p-6 rounded-[24px] border-none shadow-none relative overflow-hidden group transition-all flex flex-col gap-4 cursor-pointer"
           >
             <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-40 transition-opacity">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
@@ -2991,7 +2991,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 <p className="text-[10px] font-black text-orange-500/90 uppercase tracking-widest leading-none">Level {level.level}</p>
                 <h3 className="text-4xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter leading-none">{level.title}</h3>
               </div>
-              <div className="w-14 h-14 rounded-[18px] bg-orange-500/5 dark:bg-orange-500/10 flex items-center justify-center text-2xl">
+              <div className="w-14 h-14 rounded-[18px] bg-zinc-200/60 dark:bg-white/5 flex items-center justify-center text-2xl">
                 {level.icon || '🌱'}
               </div>
             </div>
@@ -3009,7 +3009,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
               {/* High Contrast Progress Line */}
               <div className="space-y-2">
-                <div className="h-2 w-full bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
+                <div className="h-2 w-full bg-zinc-200/80 dark:bg-white/10 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     whileInView={{ width: `${level.progress}%` }}
@@ -3033,7 +3033,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="bg-white dark:bg-white/[0.03] p-5 rounded-[24px] border border-zinc-100 dark:border-white/5 shadow-sm relative overflow-hidden flex flex-col items-center justify-between transition-all"
+            className="bg-zinc-100 dark:bg-[#111113] p-5 rounded-[24px] border-none shadow-none relative overflow-hidden flex flex-col items-center justify-between transition-all"
           >
             <div className="flex flex-col items-center w-full">
               <div className="flex items-center justify-center gap-3 mb-1">
@@ -3050,7 +3050,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               </div>
               <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Day Streak</p>
               
-              <div className="px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 mb-4">
+              <div className="px-3 py-1 rounded-full bg-orange-500/10 border-none mb-4">
                 <p className="text-[9px] font-black text-orange-500 dark:text-orange-400 uppercase tracking-widest leading-none">Best: {longestStreak}</p>
               </div>
             </div>
@@ -3063,7 +3063,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   return (
                     <div key={i} className="flex flex-col items-center gap-2 flex-1">
                       <span className={`text-[8px] font-bold ${isCompleted ? 'text-orange-500' : 'text-zinc-400'}`}>{label}</span>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isCompleted ? 'bg-orange-500 border-orange-500 shadow-lg shadow-orange-500/20' : 'border-zinc-100 dark:border-white/5'}`}>
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${isCompleted ? 'bg-orange-500 shadow-lg shadow-orange-500/20' : 'bg-zinc-200/60 dark:bg-white/5'}`}>
                         {isCompleted && (
                           <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" className="w-3 h-3">
                             <polyline points="20 6 9 17 4 12" strokeLinecap="round" strokeLinejoin="round" />
@@ -3407,10 +3407,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => { handleSubjectChange(s); setSelectedUnits([]); }}
-                  className={`relative p-5 rounded-[24px] border text-left transition-all group overflow-hidden ${
+                  className={`relative p-5 rounded-[24px] border-none shadow-none text-left transition-all group overflow-hidden ${
                     selectedSubject?.id === s.id 
-                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 border-transparent text-white shadow-xl shadow-orange-500/20' 
-                      : 'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 text-zinc-600 dark:text-zinc-400 hover:border-orange-500/30 hover:bg-white dark:hover:bg-white/[0.04]'
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-xl shadow-orange-500/20' 
+                      : 'bg-zinc-100 dark:bg-[#111113] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/60 dark:hover:bg-[#161618]'
                     }`}
                 >
                   <div className="flex items-center justify-between pointer-events-none">

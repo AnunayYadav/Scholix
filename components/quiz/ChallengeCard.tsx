@@ -56,12 +56,12 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 + index * 0.1, ease: [0.16, 1, 0.3, 1] }}
         whileHover={!isLocked && !isCompleted ? { y: -4, transition: { duration: 0.2 } } : {}}
-        className={`relative overflow-hidden p-5 md:p-6 rounded-[28px] border transition-all ${
+        className={`relative overflow-hidden p-5 md:p-6 rounded-[28px] border-none shadow-none transition-all ${
           isLocked
-            ? 'bg-zinc-50 dark:bg-dark-950/30 border-zinc-200 dark:border-white/5 opacity-60'
+            ? 'bg-zinc-100/60 dark:bg-[#111113]/60 opacity-60'
             : isCompleted
-            ? 'bg-emerald-50/50 dark:bg-emerald-900/5 border-emerald-200 dark:border-emerald-500/20'
-            : 'bg-white dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 shadow-lg hover:shadow-xl hover:border-orange-500/20'
+            ? 'bg-emerald-500/10'
+            : 'bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/60 dark:hover:bg-[#161618]'
         }`}
       >
         {isLocked && (

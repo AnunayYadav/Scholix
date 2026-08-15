@@ -37,7 +37,7 @@ const HistorySection: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
               onClick={() => navigate(`/quiz/${slugify(q.subject)}/${q.id}`)}
-              className="glass-panel p-6 rounded-[40px] text-left hover:border-orange-500/30 transition-all group"
+              className="p-6 rounded-[28px] bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/60 dark:hover:bg-[#161618] border-none shadow-none text-left transition-all group"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="p-3 rounded-2xl bg-orange-500/10 text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-colors">
