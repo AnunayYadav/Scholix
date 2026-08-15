@@ -1596,6 +1596,33 @@ class NexusServer {
     };
   }
 
+  static getFileContentType(file: File): string {
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    if (['dwg', 'dxf', 'dwfx'].includes(ext)) {
+      return 'image/vnd.dwg';
+    }
+    if (file.type && file.type !== 'application/octet-stream') {
+      return file.type;
+    }
+    const mimeMap: Record<string, string> = {
+      pdf: 'application/pdf',
+      doc: 'application/msword',
+      docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ppt: 'application/vnd.ms-powerpoint',
+      pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      xls: 'application/vnd.ms-excel',
+      xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      png: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      zip: 'application/zip',
+      rar: 'application/x-rar-compressed',
+      dwg: 'image/vnd.dwg',
+      dxf: 'image/vnd.dxf'
+    };
+    return mimeMap[ext] || 'application/pdf';
+  }
+
   static async uploadFile(file: File, name: string, desc: string, sub: string, sem: string, type: string, uid: string, admin: boolean, program: string) {
     const client = getSupabase();
     if (!client) return;
@@ -1624,7 +1651,21 @@ class NexusServer {
 
     const cleanName = this.sanitizeStoragePath(file.name);
     const path = `community/${Math.random().toString(36).substring(7)}_${cleanName}`;
-    const { error: storageErr } = await client.storage.from('nexus-documents').upload(path, file);
+    let contentType = this.getFileContentType(file);
+
+    let { error: storageErr } = await client.storage.from('nexus-documents').upload(path, file, {
+      contentType,
+      upsert: true
+    });
+
+    if (storageErr && storageErr.message?.toLowerCase().includes('mime type')) {
+      const fallbackResult = await client.storage.from('nexus-documents').upload(path, file, {
+        contentType: 'application/pdf',
+        upsert: true
+      });
+      storageErr = fallbackResult.error;
+    }
+
     if (storageErr) throw storageErr;
 
     let university = 'lpu';

@@ -39,6 +39,7 @@ import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Lan
 import { getProgramCurriculum, findSubjectMetadata } from '../data/curriculumData.ts';
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
 import { mergePDFFiles } from '../utils/pdfMerger.ts';
+import { convertPptToPdf } from '../utils/pptConverter.ts';
 
 const matchFolderSlug = (folderName: string, paramSlug: string): boolean => {
   return matchLibrarySlug(folderName, paramSlug, 'subject');
@@ -204,6 +205,30 @@ const getFileStyle = (fileName: string): FileStyleConfig => {
       glowColor: 'rgba(16, 185, 129, 0.15)',
       actionText: 'text-emerald-500 dark:text-emerald-400',
       actionHoverBg: 'hover:bg-emerald-500 dark:hover:bg-emerald-500'
+    },
+    dwg: {
+      iconBg: 'bg-cyan-500/10 dark:bg-cyan-500/10',
+      iconText: 'text-cyan-500 dark:text-cyan-400',
+      badgeBg: 'bg-cyan-500/10 dark:bg-cyan-500/20',
+      badgeText: 'text-cyan-600 dark:text-cyan-300',
+      hoverBorder: 'hover:border-cyan-500/40 dark:hover:border-cyan-500/30',
+      hoverText: 'group-hover:text-cyan-500 dark:group-hover:text-cyan-400',
+      label: 'DWG',
+      glowColor: 'rgba(6, 182, 212, 0.15)',
+      actionText: 'text-cyan-500 dark:text-cyan-400',
+      actionHoverBg: 'hover:bg-cyan-500 dark:hover:bg-cyan-500'
+    },
+    dxf: {
+      iconBg: 'bg-cyan-500/10 dark:bg-cyan-500/10',
+      iconText: 'text-cyan-500 dark:text-cyan-400',
+      badgeBg: 'bg-cyan-500/10 dark:bg-cyan-500/20',
+      badgeText: 'text-cyan-600 dark:text-cyan-300',
+      hoverBorder: 'hover:border-cyan-500/40 dark:hover:border-cyan-500/30',
+      hoverText: 'group-hover:text-cyan-500 dark:group-hover:text-cyan-400',
+      label: 'DXF',
+      glowColor: 'rgba(6, 182, 212, 0.15)',
+      actionText: 'text-cyan-500 dark:text-cyan-400',
+      actionHoverBg: 'hover:bg-cyan-500 dark:hover:bg-cyan-500'
     }
   };
 
@@ -225,8 +250,8 @@ const getFileStyle = (fileName: string): FileStyleConfig => {
 
 const formatCleanFileName = (fileName: string) => {
   if (!fileName) return '';
-  if (/\.(pdf|doc|docx|ppt|pptx|xls|xlsx|txt|png|jpg|jpeg|zip|rar|mp4|csv)$/i.test(fileName)) {
-    return fileName.replace(/\.(pdf|doc|docx|ppt|pptx|xls|xlsx|txt|png|jpg|jpeg|zip|rar|mp4|csv)$/i, '');
+  if (/\.(pdf|doc|docx|ppt|pptx|xls|xlsx|txt|png|jpg|jpeg|zip|rar|mp4|csv|dwg|dxf|dwfx)$/i.test(fileName)) {
+    return fileName.replace(/\.(pdf|doc|docx|ppt|pptx|xls|xlsx|txt|png|jpg|jpeg|zip|rar|mp4|csv|dwg|dxf|dwfx)$/i, '');
   }
   return fileName;
 };
@@ -851,12 +876,30 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     return '';
   };
 
-  const handleFilesSelected = useCallback((files: FileList | File[], forceProgram?: string, forceSemester?: string, forceSubject?: string, forceType?: string) => {
+  const handleFilesSelected = useCallback(async (files: FileList | File[], forceProgram?: string, forceSemester?: string, forceSubject?: string, forceType?: string) => {
     const rawCategory = (typeof forceType === 'string' ? forceType : '') || 
                         (typeof targetUploadCategoryRef.current === 'string' ? targetUploadCategoryRef.current : '') || 
                         (typeof activeCategory?.name === 'string' ? activeCategory.name : '');
     
-    const newUploads = Array.from(files).map(f => {
+    // Automatically convert any .ppt or .pptx files to .pdf
+    const convertedFiles: File[] = [];
+    for (const f of Array.from(files)) {
+      if (/\.(ppt|pptx)$/i.test(f.name)) {
+        showToast(`Converting "${f.name}" to PDF...`, 'info');
+        try {
+          const pdfFile = await convertPptToPdf(f);
+          convertedFiles.push(pdfFile);
+          showToast(`Successfully converted "${f.name}" to PDF!`, 'success');
+        } catch (err) {
+          console.warn(`Failed to convert "${f.name}" to PDF, keeping original:`, err);
+          convertedFiles.push(f);
+        }
+      } else {
+        convertedFiles.push(f);
+      }
+    }
+
+    const newUploads = convertedFiles.map(f => {
       const detected = rawCategory || autoDetectCategory(f.name);
       const finalType = typeof detected === 'string' ? detected : '';
       return {
@@ -1582,16 +1625,22 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       // 1. Open the viewer in-app instantly
       setActivePdfFile(file);
     } else {
+      // 2. For non-viewable files (like .dwg, .zip, .docx), trigger direct download immediately
       (async () => {
-        // Try direct download first via Supabase client
         try {
           const client = NexusServer.getClient();
           if (client) {
             const { data, error } = await client.storage.from('nexus-documents').download(file.storage_path);
             if (!error && data) {
               const blobUrl = URL.createObjectURL(data);
-              window.open(blobUrl, '_blank');
-              showToast("Opening file...", "success");
+              const a = document.createElement('a');
+              a.href = blobUrl;
+              a.download = file.name || 'document';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+              showToast("Downloading file...", "success");
               return;
             }
           }
@@ -1599,14 +1648,23 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
           console.warn("Direct download failed, trying proxy route...", e);
         }
 
-        // Fallback to proxy route
+        // Fallback to proxy route download
         try {
           const sessionRes = await NexusServer.getSession();
           const token = sessionRes?.data?.session?.access_token;
           const url = NexusServer.getFileUrl(file.storage_path, token);
-          if (url) window.open(url, '_blank');
+          if (url) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name || 'document';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast("Downloading file...", "success");
+          }
         } catch (err) {
           console.error("Access Error:", err);
+          showToast("Failed to download file.", "error");
         }
       })();
     }
@@ -2453,10 +2511,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                                   setActiveMenuFileId(null);
                                                   const confirmed = await showConfirm("Permanently delete this file?");
                                                   if (confirmed) {
-                                                    setIsProcessing(true);
+                                                    setAllFiles(prev => prev.filter(f => f.id !== file.id));
+                                                    showToast("File deleted successfully!", "success");
                                                     NexusServer.deleteFile(file.id, file.storage_path)
-                                                      .then(() => fetchFromSource(false))
-                                                      .finally(() => setIsProcessing(false));
+                                                      .then(() => fetchFromSource(false));
                                                   }
                                                 }}
                                                 className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
@@ -2471,10 +2529,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                                     setActiveMenuFileId(null);
                                                     const confirmed = await showConfirm("Reject and remove this file?");
                                                     if (confirmed) {
-                                                      setIsProcessing(true);
+                                                      setAllFiles(prev => prev.filter(f => f.id !== file.id));
+                                                      showToast("File rejected successfully!", "success");
                                                       NexusServer.rejectFile(file.id)
-                                                        .then(() => fetchFromSource(false))
-                                                        .finally(() => setIsProcessing(false));
+                                                        .then(() => fetchFromSource(false));
                                                     }
                                                   }}
                                                   className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
@@ -2577,10 +2635,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                   setIsProcessing(false);
                                 }
                               }}
-                              onReject={async () => { const confirmed = await showConfirm("Reject and remove this file?"); if (confirmed) { setIsProcessing(true); NexusServer.rejectFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
+                              onReject={async () => { const confirmed = await showConfirm("Reject and remove this file?"); if (confirmed) { setAllFiles(prev => prev.filter(f => f.id !== file.id)); showToast("File rejected successfully!", "success"); NexusServer.rejectFile(file.id).then(() => fetchFromSource(false)); } }}
                               onDemote={async () => { const confirmed = await showConfirm("Send this file back to pending review?"); if (confirmed) { setIsProcessing(true); NexusServer.demoteFile(file.id).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
                               onEdit={() => { setSelectedFile(file); setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type, program: file.program || selectedProgram }); setShowEditModal(true); }}
-                              onDelete={async () => { const confirmed = await showConfirm("Permanently delete this file?"); if (confirmed) { setIsProcessing(true); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)).finally(() => setIsProcessing(false)); } }}
+                              onDelete={async () => { const confirmed = await showConfirm("Permanently delete this file?"); if (confirmed) { setAllFiles(prev => prev.filter(f => f.id !== file.id)); showToast("File deleted successfully!", "success"); NexusServer.deleteFile(file.id, file.storage_path).then(() => fetchFromSource(false)); } }}
                               onAccess={() => handleFileAccess(file)}
                               onShowDetails={() => { setSelectedFile(file); setShowDetailsModal(true); }}
                             />
@@ -3276,7 +3334,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         )
       }
 
-      <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.csv" onChange={e => { const files = e.target.files; if (files && files.length > 0) { handleFilesSelected(files); targetUploadCategoryRef.current = ''; } }} />
+      <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.csv,.dwg,.dxf,.dwfx" onChange={e => { const files = e.target.files; if (files && files.length > 0) { handleFilesSelected(files); targetUploadCategoryRef.current = ''; } }} />
 
       {
         activePdfFile && (

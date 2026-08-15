@@ -21,6 +21,9 @@ export const FileIcon = ({ fileName, size = "w-5 h-5", className = "" }: { fileN
   } else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
     colorClass = 'text-amber-500';
     label = 'ZIP';
+  } else if (['dwg', 'dxf', 'dwfx'].includes(ext)) {
+    colorClass = 'text-cyan-500';
+    label = 'DWG';
   } else if (['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif'].includes(ext)) {
     colorClass = 'text-purple-500';
     label = 'IMG';

@@ -2817,44 +2817,38 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const isFileTypeMatchingCategory = (file: LibraryFile | string, cat: FolderType | string) => {
     let fileType = typeof file === 'string' ? file : file.type;
     let catName = typeof cat === 'string' ? cat : cat.name;
-    
+
     if (typeof file === 'object' && typeof cat === 'object') {
       const rawParentId = (file as any).parent_id || file.folder_id;
       const fileParentId = rawParentId ? rawParentId.split('-dup-')[0] : null;
       const catId = cat.id ? cat.id.split('-dup-')[0] : null;
-      
-      // 1. Direct parent ID match in Supabase DB
-      if (fileParentId && catId && fileParentId === catId) {
-        return true;
-      }
 
-      // 2. If file parent_id is set to a valid UUID of another category folder
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (fileParentId && uuidRegex.test(fileParentId) && catId && uuidRegex.test(catId) && fileParentId !== catId) {
-        // Support common subjects shared across semesters (e.g. MEC136 in Sem 1 vs Sem 2)
-        const searchList = (allFolders && allFolders.length > 0) ? allFolders : (categories || []);
-        const parentCategory = searchList.find(item => item.id === fileParentId) || (allFiles as any[])?.find(item => item.id === fileParentId);
-        
-        if (parentCategory && parentCategory.name) {
-          const isSameCategoryName = parentCategory.name.toLowerCase().trim() === cat.name.toLowerCase().trim();
-          const parentSubject = searchList.find(item => item.id === parentCategory.parent_id);
-          const isSameSubjectCode = parentSubject && activeSubject && (
-            parentSubject.name.split(':')[0].trim().toLowerCase() === activeSubject.name.split(':')[0].trim().toLowerCase()
-          );
-          if (isSameCategoryName && (isSameSubjectCode || !parentSubject)) {
-            return true;
-          }
+      // 1. Direct parent ID match in Supabase DB
+      if (fileParentId && catId) {
+        if (fileParentId === catId) {
+          return true;
         }
 
-        // Secondary fallback matching by file name keywords
-        const fn = (typeof file === 'object' ? (file.name || '') : '').toLowerCase().trim();
-        const cn = (catName || '').toLowerCase().trim();
-        if (cn.includes('note') && (fn.includes('shortcut') || fn.includes('note') || fn.includes('chapter'))) return true;
-        if ((cn.includes('pyq') || cn.includes('question') || cn.includes('paper')) && (fn.includes('pyq') || fn.includes('question'))) return true;
-        if ((cn.includes('lecture') || cn.includes('slide')) && (fn.includes('unit') || fn.includes('projection') || fn.includes('instrument') || fn.includes('scale') || fn.includes('letter') || fn.includes('line') || fn.includes('point') || fn.includes('dimension'))) return true;
-        if (cn.includes('syllabus') && (fn.includes('syllabus') || fn === 'mec136')) return true;
+        // 2. If file parent_id is set to a valid UUID of another category folder
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (uuidRegex.test(fileParentId) && uuidRegex.test(catId)) {
+          const searchList = (allFolders && allFolders.length > 0) ? allFolders : (categories || []);
+          const parentCategory = searchList.find(item => item.id === fileParentId) || (allFiles as any[])?.find(item => item.id === fileParentId);
 
-        return false;
+          if (parentCategory && parentCategory.name) {
+            const isSameCategoryName = parentCategory.name.toLowerCase().trim() === cat.name.toLowerCase().trim();
+            const parentSubject = searchList.find(item => item.id === parentCategory.parent_id);
+            const isSameSubjectCode = parentSubject && activeSubject && (
+              parentSubject.name.split(':')[0].trim().toLowerCase() === activeSubject.name.split(':')[0].trim().toLowerCase()
+            );
+            if (isSameCategoryName && (isSameSubjectCode || !parentSubject)) {
+              return true;
+            }
+          }
+
+          // File is explicitly linked in DB to a DIFFERENT category folder -> Return false!
+          return false;
+        }
       }
     }
 
@@ -2864,29 +2858,34 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     if (!ft || ft === 'file') {
       return false;
     }
-    
-    if (cn.includes('note')) {
-      return ft.includes('note');
+
+    // Match by file.type vs category name
+    const cleanFt = ft.replace(/s$/, ''); // e.g. 'notes' -> 'note', 'lectures' -> 'lecture'
+    const cleanCn = cn.replace(/s$/, '');
+
+    if (cleanCn.includes('note') || cleanCn === 'note') {
+      return cleanFt.includes('note');
     }
-    if (cn.includes('pyq') || cn.includes('question') || cn.includes('paper')) {
-      return ft.includes('pyq') || ft.includes('question') || ft.includes('paper');
+    if (cleanCn.includes('pyq') || cleanCn.includes('question') || cleanCn.includes('paper')) {
+      return cleanFt.includes('pyq') || cleanFt.includes('question') || cleanFt.includes('paper');
     }
-    if (cn.includes('lecture') || cn.includes('slide') || cn.includes('video') || cn.includes('recording')) {
-      return ft.includes('lecture') || ft.includes('slide') || ft.includes('video') || ft.includes('recording');
+    if (cleanCn.includes('lecture') || cleanCn.includes('slide') || cleanCn.includes('video') || cleanCn.includes('recording')) {
+      return cleanFt.includes('lecture') || cleanFt.includes('slide') || cleanFt.includes('video') || cleanFt.includes('recording');
     }
-    if (cn.includes('syllabus') || cn.includes('syllabi') || cn.includes('roadmap') || cn.includes('curriculum')) {
-      return ft.includes('syllabus') || ft.includes('curriculum');
+    if (cleanCn.includes('syllabus') || cleanCn.includes('syllabi') || cleanCn.includes('roadmap') || cleanCn.includes('curriculum')) {
+      return cleanFt.includes('syllabus') || cleanFt.includes('curriculum');
     }
-    
-    const isLabCategory = cn === 'lab' || cn === 'labs' || cn.startsWith('lab ') || cn.endsWith(' lab') || cn.includes('laboratory') || cn.includes('manual') || cn.includes('practical');
+
+    const isLabCategory = cleanCn === 'lab' || cleanCn.startsWith('lab ') || cleanCn.endsWith(' lab') || cleanCn.includes('laboratory') || cleanCn.includes('manual') || cleanCn.includes('practical');
     if (isLabCategory) {
-      return ft.includes('lab') || ft.includes('manual') || ft.includes('practical');
+      return cleanFt.includes('lab') || cleanFt.includes('manual') || cleanFt.includes('practical');
     }
-    
-    if (cn.includes('book') || cn.includes('textbook')) {
-      return ft.includes('book') || ft.includes('material');
+
+    if (cleanCn.includes('book') || cleanCn.includes('textbook')) {
+      return cleanFt.includes('book') || cleanFt.includes('material');
     }
-    return ft === cn || ft.includes(cn) || cn.includes(ft);
+
+    return cleanFt === cleanCn || cleanFt.includes(cleanCn) || cleanCn.includes(cleanFt);
   };
 
 
@@ -3017,12 +3016,14 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const handleDeleteFile = async (file: LibraryFile) => {
     const confirmed = window.confirm("Are you sure you want to permanently delete this file?");
     if (!confirmed) return;
+    
     try {
       await NexusServer.deleteFile(file.id, file.storage_path);
       showToast("File deleted successfully!", "success");
-      window.location.reload();
+      onRefresh?.();
     } catch (e: any) {
       showToast("Error deleting file: " + e.message, "error");
+      onRefresh?.();
     }
   };
 
@@ -3054,7 +3055,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
       if (error) throw error;
       showToast("File updated successfully!", "success");
       setShowEditModal(false);
-      window.location.reload();
+      loadCommunityData();
     } catch (e: any) {
       showToast("Error updating file: " + e.message, "error");
     }
