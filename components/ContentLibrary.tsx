@@ -35,9 +35,10 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 import VerifiedBadge from './VerifiedBadge.tsx';
-import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft, Plus, ArrowUp, ArrowDown, Pencil, Trash2, Archive } from 'lucide-react';
+import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft, Plus, ArrowUp, ArrowDown, Pencil, Trash2, Archive, Layers } from 'lucide-react';
 import { getProgramCurriculum, findSubjectMetadata } from '../data/curriculumData.ts';
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
+import { mergePDFFiles } from '../utils/pdfMerger.ts';
 
 const matchFolderSlug = (folderName: string, paramSlug: string): boolean => {
   return matchLibrarySlug(folderName, paramSlug, 'subject');
@@ -498,6 +499,110 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   }[]>([]);
   const [activeUploadIndex, setActiveUploadIndex] = useState(0);
 
+  // PDF Merge State & Handlers
+  const [showMergePdfModal, setShowMergePdfModal] = useState(false);
+  const [mergePdfList, setMergePdfList] = useState<{
+    file: File;
+    name: string;
+    description: string;
+    semester: string;
+    subject: string;
+    type: string;
+    program: string;
+  }[]>([]);
+  const [mergedOutputName, setMergedOutputName] = useState('');
+  const [isMergingPdfs, setIsMergingPdfs] = useState(false);
+
+  const handleOpenMergePdfModal = () => {
+    const pdfs = pendingUploads.filter(up => 
+      up.file.type === 'application/pdf' || up.file.name.toLowerCase().endsWith('.pdf')
+    );
+    if (pdfs.length < 2) {
+      showToast("Please upload at least 2 PDF files to merge.", "info");
+      return;
+    }
+
+    // Sort files naturally by Unit / Lecture number (e.g. Lecture 1, Lecture 2, Lecture 4, Lecture 5...)
+    const sortedPdfs = [...pdfs].sort((a, b) => 
+      (a.name || a.file.name).localeCompare((b.name || b.file.name), undefined, { numeric: true, sensitivity: 'base' })
+    );
+
+    setMergePdfList(sortedPdfs);
+    
+    let baseName = sortedPdfs[0].name.replace(/\s*(part|pt|vol|volume|v|lecture|lec|unit|u)\s*\d+/gi, '').replace(/\.(pdf)$/i, '').trim();
+    if (!baseName) baseName = 'Merged_Document';
+    setMergedOutputName(baseName);
+    setShowMergePdfModal(true);
+  };
+
+  const handleMoveMergeItem = (index: number, direction: 'up' | 'down') => {
+    setMergePdfList(prev => {
+      const next = [...prev];
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= next.length) return prev;
+      const temp = next[index];
+      next[index] = next[targetIndex];
+      next[targetIndex] = temp;
+      return next;
+    });
+  };
+
+  const handleRemoveMergeItem = (index: number) => {
+    setMergePdfList(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleExecutePdfMerge = async () => {
+    if (mergePdfList.length < 2) {
+      showToast("You need at least 2 PDFs to merge.", "info");
+      return;
+    }
+    if (!mergedOutputName.trim()) {
+      showToast("Please enter a name for the merged PDF.", "info");
+      return;
+    }
+
+    setIsMergingPdfs(true);
+    try {
+      const filesToMerge = mergePdfList.map(item => item.file);
+      const mergedFile = await mergePDFFiles(filesToMerge, mergedOutputName);
+
+      const firstItem = mergePdfList[0];
+      const mergedUploadItem = {
+        file: mergedFile,
+        name: formatCleanFileName(mergedFile.name),
+        description: firstItem.description || '',
+        semester: firstItem.semester,
+        subject: firstItem.subject,
+        type: firstItem.type,
+        program: firstItem.program
+      };
+
+      setPendingUploads(prev => {
+        const pdfFileNames = new Set(mergePdfList.map(m => m.file.name));
+        const remaining = prev.filter(up => !pdfFileNames.has(up.file.name));
+        return [mergedUploadItem, ...remaining];
+      });
+
+      setActiveUploadIndex(0);
+      setMetaForm({
+        name: mergedUploadItem.name,
+        description: mergedUploadItem.description,
+        semester: mergedUploadItem.semester,
+        subject: mergedUploadItem.subject,
+        type: mergedUploadItem.type,
+        program: mergedUploadItem.program
+      });
+
+      setShowMergePdfModal(false);
+      showToast(`Merged ${mergePdfList.length} PDFs into "${mergedUploadItem.name}" (${(mergedFile.size / 1024 / 1024).toFixed(2)} MB)!`, "success");
+    } catch (err: any) {
+      console.error("PDF Merge Error:", err);
+      showToast(err.message || "Failed to merge PDF files.", "error");
+    } finally {
+      setIsMergingPdfs(false);
+    }
+  };
+
   const [isClosingDetails, setIsClosingDetails] = useState(false);
   const [isClosingFolder, setIsClosingFolder] = useState(false);
   const [isClosingRename, setIsClosingRename] = useState(false);
@@ -764,6 +869,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         program: forceProgram || selectedProgram
       };
     });
+
+    // Sort uploads naturally by unit / lecture number (e.g. Lecture 1, Lecture 2, Lecture 4...)
+    newUploads.sort((a, b) => 
+      (a.name || a.file.name).localeCompare((b.name || b.file.name), undefined, { numeric: true, sensitivity: 'base' })
+    );
 
     setPendingUploads(prev => [...prev, ...newUploads]);
     if (pendingUploads.length === 0) {
@@ -2780,7 +2890,20 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               <div className="flex flex-col md:flex-row flex-1 min-h-0 min-w-0 md:h-[60vh] overflow-hidden">
                 {showUploadModal && (
                   <div className="w-full md:w-64 border-none bg-zinc-50/50 dark:bg-[#141416]/50 overflow-y-auto custom-scrollbar shrink-0 p-3 space-y-2 max-h-[160px] md:max-h-none">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 px-2 py-1">Pending files</p>
+                    <div className="flex items-center justify-between px-2 py-1 gap-1">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Pending files</p>
+                      {pendingUploads.filter(up => up.file.type === 'application/pdf' || up.file.name.toLowerCase().endsWith('.pdf')).length >= 2 && (
+                        <button
+                          type="button"
+                          onClick={handleOpenMergePdfModal}
+                          className="px-2 py-1 text-[10px] font-bold text-orange-500 hover:text-orange-600 dark:text-orange-400 bg-orange-500/10 hover:bg-orange-500/20 active:scale-95 rounded-lg border-none cursor-pointer transition-all flex items-center gap-1 shrink-0"
+                          title="Merge multiple PDFs into 1 document"
+                        >
+                          <Layers className="w-3 h-3" />
+                          <span>Merge PDFs</span>
+                        </button>
+                      )}
+                    </div>
                     {pendingUploads.map((up, idx) => (
                       <div key={idx} className="relative group min-w-0">
                         <button
@@ -3016,6 +3139,136 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     )}
                   </button>
                 </div>
+              </footer>
+            </div>
+          </div>,
+          document.getElementById('modal-root') || document.body
+        )
+      }
+
+      {
+        showMergePdfModal && createPortal(
+          <div
+            className="modal-overlay"
+            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+            onClick={(e) => { if (e.target === e.currentTarget && !isMergingPdfs) setShowMergePdfModal(false); }}
+          >
+            <div className="nexus-modal w-full max-w-lg overflow-hidden rounded-[24px] sm:rounded-[32px] border-none shadow-2xl bg-white dark:bg-[#111113] flex flex-col animate-fade-in">
+              <header className="p-5 sm:p-6 border-none bg-zinc-50/80 dark:bg-[#161618]/80 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center font-bold shrink-0">
+                    <Layers className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-extrabold text-zinc-900 dark:text-white leading-tight">Merge PDFs into 1 Document</h3>
+                    <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 mt-0.5">Combine parts or modules in sequence before upload</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => { if (!isMergingPdfs) setShowMergePdfModal(false); }}
+                  className="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-white/5 rounded-xl transition-all border-none bg-transparent cursor-pointer"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+              </header>
+
+              <div className="p-5 sm:p-6 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Merged File Title</label>
+                  <input
+                    type="text"
+                    value={mergedOutputName}
+                    onChange={(e) => setMergedOutputName(e.target.value)}
+                    placeholder="e.g. Unit 1"
+                    className="w-full px-4 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-bold text-zinc-900 dark:text-white focus:outline-none focus:border-orange-500 transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                    <span>PDF Sequence ({mergePdfList.length} files)</span>
+                    <span className="text-[10px] font-normal text-zinc-400">Re-order with arrows</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {mergePdfList.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-[#161618] border border-zinc-150 dark:border-white/5 gap-3"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <span className="w-5 h-5 rounded-md bg-orange-500/10 text-orange-500 text-[10px] font-bold flex items-center justify-center shrink-0">
+                            {idx + 1}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-bold text-zinc-900 dark:text-white truncate">{item.name || item.file.name}</p>
+                            <p className="text-[10px] font-medium text-zinc-400 truncate">{(item.file.size / 1024 / 1024).toFixed(2)} MB</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            disabled={idx === 0}
+                            onClick={() => handleMoveMergeItem(idx, 'up')}
+                            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 border-none bg-transparent cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                            title="Move Up"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={idx === mergePdfList.length - 1}
+                            onClick={() => handleMoveMergeItem(idx, 'down')}
+                            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 border-none bg-transparent cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                            title="Move Down"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                          {mergePdfList.length > 2 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveMergeItem(idx)}
+                              className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 border-none bg-transparent cursor-pointer transition-all ml-1"
+                              title="Exclude from merge"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <footer className="p-5 sm:p-6 bg-zinc-50/80 dark:bg-[#161618]/80 flex items-center justify-end gap-3 shrink-0 border-t border-zinc-150 dark:border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setShowMergePdfModal(false)}
+                  disabled={isMergingPdfs}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExecutePdfMerge}
+                  disabled={isMergingPdfs || mergePdfList.length < 2 || !mergedOutputName.trim()}
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 shadow-md shadow-orange-500/20 active:scale-95 transition-all border-none cursor-pointer disabled:opacity-50 disabled:scale-100 flex items-center gap-2"
+                >
+                  {isMergingPdfs ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Merging PDFs...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Layers className="w-4 h-4" />
+                      <span>Combine {mergePdfList.length} PDFs</span>
+                    </>
+                  )}
+                </button>
               </footer>
             </div>
           </div>,
