@@ -1065,12 +1065,137 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   // Admin edit overlay states
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedFileToEdit, setSelectedFileToEdit] = useState<LibraryFile | null>(null);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [isCreatingNewSubjectInEdit, setIsCreatingNewSubjectInEdit] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
     description: '',
-    type: '',
+    program: '',
+    semester: '',
+    subject: '',
+    type: 'Notes',
     display_order: 0
   });
+
+  const editModalSemesters = useMemo(() => {
+    const list: string[] = [];
+    const prog = editForm.program || selectedProgram || 'BTech CSE';
+
+    // 1. From Curriculum Data
+    const curr = getProgramCurriculum(prog);
+    if (curr && curr.terms) {
+      curr.terms.forEach(t => {
+        const name = `Semester ${t.termNumber}`;
+        if (!list.includes(name)) list.push(name);
+      });
+    }
+
+    // 2. From DB folders for this program
+    if (allFolders && allFolders.length > 0) {
+      const dbSems = allFolders.filter(f => f.type === 'semester' && (f.program === prog || !f.program));
+      dbSems.forEach(s => {
+        if (!list.includes(s.name)) list.push(s.name);
+      });
+    }
+
+    // Fallback standard 8 semesters if empty
+    if (list.length === 0) {
+      for (let i = 1; i <= 8; i++) list.push(`Semester ${i}`);
+    }
+
+    return list;
+  }, [editForm.program, selectedProgram, allFolders]);
+
+  const editModalSubjects = useMemo(() => {
+    const list: string[] = [];
+    const prog = editForm.program || selectedProgram || 'BTech CSE';
+    const semStr = editForm.semester || activeSemester?.name || 'Semester 1';
+
+    // 1. From Curriculum Data for program & semester
+    const curr = getProgramCurriculum(prog);
+    if (curr && curr.terms) {
+      const semNumStr = semStr.replace(/\D/g, '');
+      const semNum = parseInt(semNumStr, 10);
+
+      curr.terms.forEach((term, idx) => {
+        const termNum = term.termNumber || (idx + 1);
+
+        if (termNum === semNum || !semNum) {
+          (term.coreSubjects || []).forEach(sub => {
+            const formatted = `${sub.code}: ${sub.title}`;
+            if (!list.includes(formatted)) list.push(formatted);
+          });
+          (term.electiveBaskets || []).forEach(b => {
+            (b.subjects || []).forEach(sub => {
+              const formatted = `${sub.code}: ${sub.title}`;
+              if (!list.includes(formatted)) list.push(formatted);
+            });
+          });
+        }
+      });
+    }
+
+    // 2. From DB folders
+    if (allFolders && allFolders.length > 0) {
+      const semFolder = allFolders.find(f => f.type === 'semester' && f.name.trim() === semStr.trim());
+      if (semFolder) {
+        const dbSubjs = allFolders.filter(f => f.type === 'subject' && f.parent_id === semFolder.id);
+        dbSubjs.forEach(s => {
+          if (!list.includes(s.name)) list.push(s.name);
+        });
+      }
+    }
+
+    // 3. Ensure current subject is in the list
+    if (editForm.subject && !list.includes(editForm.subject)) {
+      list.unshift(editForm.subject);
+    }
+    if (activeSubject && activeSubject.name && !list.includes(activeSubject.name)) {
+      if (!list.includes(activeSubject.name)) list.unshift(activeSubject.name);
+    }
+
+    return list;
+  }, [editForm.program, editForm.semester, editForm.subject, selectedProgram, activeSemester, activeSubject, allFolders]);
+
+  const editModalCategories = useMemo(() => {
+    const list: string[] = [];
+
+    // 1. Check allFolders in DB for category folders under the selected subject
+    if (allFolders && allFolders.length > 0) {
+      const targetSubjName = (editForm.subject || activeSubject?.name || '').trim();
+      const targetSemName = (editForm.semester || activeSemester?.name || '').trim();
+      
+      const semFolder = allFolders.find(f => f.type === 'semester' && f.name.trim() === targetSemName);
+      if (semFolder) {
+        const subjFolder = allFolders.find(f => f.type === 'subject' && f.name.trim() === targetSubjName && f.parent_id === semFolder.id);
+        if (subjFolder) {
+          const dbCats = allFolders.filter(f => f.type === 'category' && f.parent_id === subjFolder.id);
+          dbCats.forEach(c => {
+            if (!list.includes(c.name)) list.push(c.name);
+          });
+        }
+      }
+    }
+
+    // 2. Check active subject categories state
+    if (list.length === 0 && categories && categories.length > 0) {
+      categories.forEach(c => {
+        if (!list.includes(c.name)) list.push(c.name);
+      });
+    }
+
+    // Fallback standard category folders if no DB categories found for this subject
+    if (list.length === 0) {
+      return ["Notes", "Lectures", "PYQs", "Syllabus", "Lab", "Books"];
+    }
+
+    // Ensure current selected file category type is present
+    if (editForm.type && !list.includes(editForm.type)) {
+      list.push(editForm.type);
+    }
+
+    return list;
+  }, [categories, allFolders, editForm.subject, editForm.semester, editForm.type, activeSubject, activeSemester]);
 
   // Interaction overlays
   const [selectedFileDetail, setSelectedFileDetail] = useState<LibraryFile | null>(null);
@@ -3029,15 +3154,42 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
   const handleSaveEdit = async () => {
     if (!selectedFileToEdit) return;
+    setIsSavingEdit(true);
     try {
       const client = NexusServer.getClient();
-      if (!client) return;
+      if (!client) throw new Error("Database connection offline.");
 
-      const catFolder = categories.find(c => c.name.toLowerCase().trim() === editForm.type.toLowerCase().trim());
+      const prog = (editForm.program || selectedProgram || 'BTech CSE').trim();
+      const sem = (editForm.semester || activeSemester?.name || 'Semester 1').trim();
+      const sub = (editForm.subject || activeSubject?.name || 'Subject').trim();
+      const type = (editForm.type || 'Notes').trim();
+
+      // Ensure Target Semester -> Target Subject -> Target Category folders exist in DB
+      let semFolder = (allFolders || []).find(f => f.type === 'semester' && f.name.trim() === sem && (f.program === prog || !f.program));
+      if (!semFolder) {
+        await NexusServer.createFolder(sem, 'semester', null, prog);
+        const fresh = await NexusServer.fetchFolders(prog);
+        semFolder = fresh.find(f => f.type === 'semester' && f.name.trim() === sem);
+      }
+
+      let subjFolder = (allFolders || []).find(f => f.type === 'subject' && f.name.trim() === sub && f.parent_id === semFolder?.id);
+      if (!subjFolder && semFolder) {
+        await NexusServer.createFolder(sub, 'subject', semFolder.id, prog);
+        const fresh = await NexusServer.fetchFolders(prog);
+        subjFolder = fresh.find(f => f.type === 'subject' && f.name.trim() === sub && f.parent_id === semFolder.id);
+      }
+
+      let catFolder = (allFolders || []).find(f => f.type === 'category' && f.name.trim() === type && f.parent_id === subjFolder?.id);
+      if (!catFolder && subjFolder) {
+        await NexusServer.createFolder(type, 'category', subjFolder.id, prog);
+        const fresh = await NexusServer.fetchFolders(prog);
+        catFolder = fresh.find(f => f.type === 'category' && f.name.trim() === type && f.parent_id === subjFolder.id);
+      }
 
       const updatePayload: any = {
-        name: editForm.name,
-        description: editForm.description,
+        name: editForm.name.trim(),
+        description: editForm.description.trim(),
+        program: prog,
         type: 'file',
         display_order: editForm.display_order,
         updated_at: new Date().toISOString()
@@ -3053,11 +3205,15 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         .eq('id', selectedFileToEdit.id);
 
       if (error) throw error;
-      showToast("File updated successfully!", "success");
+
+      showToast("File metadata & location updated successfully!", "success");
       setShowEditModal(false);
+      onRefresh?.();
       loadCommunityData();
     } catch (e: any) {
       showToast("Error updating file: " + e.message, "error");
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
@@ -5442,72 +5598,237 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
 
 
-      {/* Admin Edit Modal */}
+      {/* Admin Edit File Metadata & Location Modal */}
       {showEditModal && selectedFileToEdit && createPortal(
-        <div className="modal-overlay" style={{ zIndex: 1000, backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }} onClick={() => setShowEditModal(false)}>
-          <div className="bg-white dark:bg-[#0c0c0e] border border-zinc-150 dark:border-white/5 w-full max-w-md rounded-3xl p-6 shadow-2xl relative space-y-4 m-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-black text-zinc-800 dark:text-zinc-100 uppercase tracking-wider">Edit File Metadata</h3>
-            
-            <div className="space-y-3 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold text-zinc-500 dark:text-zinc-400">File Name</label>
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto"
+          onClick={() => setShowEditModal(false)}
+        >
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-md"
+            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          />
+
+          <div 
+            className="relative w-full max-w-lg bg-white dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/10 rounded-[32px] p-6 sm:p-8 shadow-2xl space-y-5 z-10 my-8 overflow-hidden flex flex-col animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-white/5 pb-4 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center font-bold shrink-0">
+                  <Pencil className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-zinc-900 dark:text-white leading-tight">Edit File Metadata & Location</h3>
+                  <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500 mt-0.5">Move file to a different subject, semester, or folder</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowEditModal(false)}
+                className="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-all border-none bg-transparent cursor-pointer"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+
+            {/* Form Fields */}
+            <div className="space-y-4 text-xs overflow-y-auto max-h-[60vh] custom-scrollbar pr-1">
+              {/* Document Title */}
+              <div className="space-y-1.5">
+                <label className="font-bold text-zinc-700 dark:text-zinc-300 ml-0.5 block">File Name</label>
                 <input 
                   type="text" 
                   value={editForm.name} 
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-150 dark:border-white/5 rounded-xl outline-none focus:ring-1 focus:ring-orange-500 dark:text-white"
+                  className="w-full px-4 py-3 bg-zinc-100 dark:bg-[#161618] border border-transparent focus:border-orange-500/50 rounded-2xl outline-none text-zinc-900 dark:text-white font-semibold transition-all"
+                  placeholder="Enter file name..."
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="font-bold text-zinc-500 dark:text-zinc-400">Description</label>
-                <textarea 
-                  value={editForm.description} 
-                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                  rows={3}
-                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-150 dark:border-white/5 rounded-xl outline-none focus:ring-1 focus:ring-orange-500 dark:text-white resize-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="font-bold text-zinc-500 dark:text-zinc-400">Category Type</label>
-                  <select 
-                    value={editForm.type} 
-                    onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-150 dark:border-white/5 rounded-xl outline-none focus:ring-1 focus:ring-orange-500 dark:text-white"
+              {/* Location Selectors: Program & Semester */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="space-y-1.5">
+                  <label className="font-bold text-zinc-700 dark:text-zinc-300 ml-0.5 block">Target Program</label>
+                  <select
+                    value={editForm.program}
+                    onChange={(e) => {
+                      const newProg = e.target.value;
+                      const curr = getProgramCurriculum(newProg);
+                      let nextSem = 'Semester 1';
+                      if (curr && curr.terms && curr.terms.length > 0) {
+                        nextSem = `Semester ${curr.terms[0].termNumber}`;
+                      }
+                      const nextSubjs: string[] = [];
+                      if (curr && curr.terms) {
+                        const termObj = curr.terms.find(t => t.termNumber === 1);
+                        if (termObj && termObj.coreSubjects) {
+                          termObj.coreSubjects.forEach(s => nextSubjs.push(`${s.code}: ${s.title}`));
+                        }
+                      }
+                      setEditForm(prev => ({
+                        ...prev,
+                        program: newProg,
+                        semester: nextSem,
+                        subject: nextSubjs[0] || ''
+                      }));
+                      setIsCreatingNewSubjectInEdit(false);
+                    }}
+                    className="w-full px-3.5 py-3 bg-zinc-100 dark:bg-[#161618] border border-transparent focus:border-orange-500/50 rounded-2xl outline-none text-zinc-900 dark:text-white font-semibold transition-all cursor-pointer"
                   >
-                    <option value="Notes">Notes</option>
-                    <option value="PYQs">PYQs</option>
-                    <option value="Lectures">Lectures</option>
-                    <option value="Syllabus">Syllabus</option>
+                    {["BTech CSE", "BTech IT", "BCA", "MCA", "MBA", "BCom", "BA", "BS Data Science"].map(prog => (
+                      <option key={prog} value={prog} className="bg-white dark:bg-[#161618] text-zinc-900 dark:text-white">{prog}</option>
+                    ))}
                   </select>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-zinc-500 dark:text-zinc-400">Display Order</label>
-                  <input 
-                    type="number" 
-                    value={editForm.display_order} 
-                    onChange={(e) => setEditForm({ ...editForm, display_order: parseInt(e.target.value, 10) || 0 })}
-                    className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-white/5 border border-zinc-150 dark:border-white/5 rounded-xl outline-none focus:ring-1 focus:ring-orange-500 dark:text-white"
-                  />
+                <div className="space-y-1.5">
+                  <label className="font-bold text-zinc-700 dark:text-zinc-300 ml-0.5 block">Semester</label>
+                  <select
+                    value={editForm.semester}
+                    onChange={(e) => {
+                      const newSem = e.target.value;
+                      const curr = getProgramCurriculum(editForm.program || selectedProgram);
+                      const nextSubjs: string[] = [];
+                      if (curr && curr.terms) {
+                        const semNumStr = newSem.replace(/\D/g, '');
+                        const semNum = parseInt(semNumStr, 10);
+                        const termObj = curr.terms.find(t => t.termNumber === semNum);
+                        if (termObj && termObj.coreSubjects) {
+                          termObj.coreSubjects.forEach(s => nextSubjs.push(`${s.code}: ${s.title}`));
+                        }
+                      }
+                      if (allFolders) {
+                        const semFolder = allFolders.find(f => f.type === 'semester' && f.name.trim() === newSem.trim());
+                        if (semFolder) {
+                          const dbSubjs = allFolders.filter(f => f.type === 'subject' && f.parent_id === semFolder.id);
+                          dbSubjs.forEach(s => {
+                            if (!nextSubjs.includes(s.name)) nextSubjs.push(s.name);
+                          });
+                        }
+                      }
+                      setEditForm(prev => ({
+                        ...prev,
+                        semester: newSem,
+                        subject: nextSubjs[0] || prev.subject
+                      }));
+                      setIsCreatingNewSubjectInEdit(false);
+                    }}
+                    className="w-full px-3.5 py-3 bg-zinc-100 dark:bg-[#161618] border border-transparent focus:border-orange-500/50 rounded-2xl outline-none text-zinc-900 dark:text-white font-semibold transition-all cursor-pointer"
+                  >
+                    {editModalSemesters.map(sem => (
+                      <option key={sem} value={sem} className="bg-white dark:bg-[#161618] text-zinc-900 dark:text-white">{sem}</option>
+                    ))}
+                  </select>
                 </div>
+              </div>
+
+              {/* Location Selectors: Subject & Folder Category */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="space-y-1.5">
+                  <label className="font-bold text-zinc-700 dark:text-zinc-300 ml-0.5 block">Target Subject</label>
+                  {!isCreatingNewSubjectInEdit ? (
+                    <select
+                      value={editForm.subject}
+                      onChange={(e) => {
+                        if (e.target.value === '__NEW_SUBJECT__') {
+                          setIsCreatingNewSubjectInEdit(true);
+                          setEditForm({ ...editForm, subject: '' });
+                        } else {
+                          setEditForm({ ...editForm, subject: e.target.value });
+                        }
+                      }}
+                      className="w-full px-3.5 py-3 bg-zinc-100 dark:bg-[#161618] border border-transparent focus:border-orange-500/50 rounded-2xl outline-none text-zinc-900 dark:text-white font-semibold transition-all cursor-pointer truncate"
+                    >
+                      <option value="" disabled className="bg-white dark:bg-[#161618] text-zinc-400">Select Subject</option>
+                      {editModalSubjects.map(subName => (
+                        <option key={subName} value={subName} className="bg-white dark:bg-[#161618] text-zinc-900 dark:text-white truncate">
+                          {subName}
+                        </option>
+                      ))}
+                      <option value="__NEW_SUBJECT__" className="bg-white dark:bg-[#161618] font-bold text-orange-500">
+                        + Add Custom Subject...
+                      </option>
+                    </select>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        autoFocus
+                        type="text"
+                        value={editForm.subject}
+                        onChange={(e) => setEditForm({ ...editForm, subject: e.target.value })}
+                        placeholder="New Subject Name..."
+                        className="flex-1 px-3.5 py-3 bg-zinc-100 dark:bg-[#161618] border border-transparent focus:border-orange-500/50 rounded-2xl outline-none text-zinc-900 dark:text-white font-semibold text-xs transition-all"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsCreatingNewSubjectInEdit(false);
+                          setEditForm({ ...editForm, subject: editModalSubjects[0] || activeSubject?.name || '' });
+                        }}
+                        className="px-3 bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 border-none rounded-2xl text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
+                        title="Back to dropdown"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-bold text-zinc-700 dark:text-zinc-300 ml-0.5 block">Folder Category</label>
+                  <select 
+                    value={editForm.type} 
+                    onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}
+                    className="w-full px-3.5 py-3 bg-zinc-100 dark:bg-[#161618] border border-transparent focus:border-orange-500/50 rounded-2xl outline-none text-zinc-900 dark:text-white font-semibold transition-all cursor-pointer"
+                  >
+                    {editModalCategories.map(cat => (
+                      <option key={cat} value={cat} className="bg-white dark:bg-[#161618] text-zinc-900 dark:text-white">
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-1.5">
+                <label className="font-bold text-zinc-700 dark:text-zinc-300 ml-0.5 block">Short Description</label>
+                <textarea 
+                  value={editForm.description} 
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  rows={2}
+                  placeholder="Tell us more about this file..."
+                  className="w-full p-4 bg-zinc-100 dark:bg-[#161618] border border-transparent focus:border-orange-500/50 rounded-2xl outline-none text-zinc-900 dark:text-white font-medium resize-none transition-all custom-scrollbar"
+                />
+              </div>
+
+              {/* Display Order */}
+              <div className="space-y-1.5">
+                <label className="font-bold text-zinc-700 dark:text-zinc-300 ml-0.5 block">Display Order</label>
+                <input 
+                  type="number" 
+                  value={editForm.display_order} 
+                  onChange={(e) => setEditForm({ ...editForm, display_order: parseInt(e.target.value, 10) || 0 })}
+                  className="w-full px-4 py-3 bg-zinc-100 dark:bg-[#161618] border border-transparent focus:border-orange-500/50 rounded-2xl outline-none text-zinc-900 dark:text-white font-semibold transition-all"
+                />
               </div>
             </div>
 
-            <div className="flex gap-3.5 pt-2">
+            {/* Actions */}
+            <div className="flex items-center gap-3 pt-3 border-t border-zinc-100 dark:border-white/5">
               <button 
                 onClick={() => setShowEditModal(false)}
-                className="flex-1 py-2.5 border border-zinc-150 dark:border-white/5 hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-500 dark:text-zinc-400 rounded-xl text-xs font-bold cursor-pointer transition-all"
+                className="flex-1 py-3 px-4 bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200/70 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-300 rounded-2xl text-xs font-bold transition-all border-none cursor-pointer"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleSaveEdit}
-                className="flex-1 py-2.5 bg-orange-500 text-white rounded-xl text-xs font-bold hover:scale-[1.02] active:scale-[0.98] cursor-pointer transition-all border-none"
+                disabled={isSavingEdit || !(editForm.name || '').trim() || !(editForm.subject || '').trim()}
+                className="flex-1 py-3 px-4 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white rounded-2xl text-xs font-bold shadow-lg shadow-orange-500/20 disabled:opacity-50 transition-all border-none cursor-pointer flex items-center justify-center gap-2"
               >
-                Save Changes
+                {isSavingEdit ? 'Saving Changes...' : 'Save Changes'}
               </button>
             </div>
           </div>
@@ -5886,13 +6207,38 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                   setMenuAnchorRect(null);
                   if (file) {
                     setSelectedFileToEdit(file);
-                    const parentCatFolder = categories.find(c => c.id === file.parent_id);
+
+                    let fileProg = file.program || selectedProgram || 'BTech CSE';
+                    let fileSem = activeSemester?.name || 'Semester 1';
+                    let fileSubj = activeSubject?.name || 'Subject';
+                    let fileCat = 'Notes';
+
+                    if (file.parent_id) {
+                      const parentCatFolder = (allFolders || []).find(c => c.id === file.parent_id);
+                      if (parentCatFolder) {
+                        fileCat = parentCatFolder.name;
+                        const parentSubjFolder = (allFolders || []).find(s => s.id === parentCatFolder.parent_id);
+                        if (parentSubjFolder) {
+                          fileSubj = parentSubjFolder.name;
+                          const parentSemFolder = (allFolders || []).find(sm => sm.id === parentSubjFolder.parent_id);
+                          if (parentSemFolder) {
+                            fileSem = parentSemFolder.name;
+                            if (parentSemFolder.program) fileProg = parentSemFolder.program;
+                          }
+                        }
+                      }
+                    }
+
                     setEditForm({
                       name: file.name,
                       description: file.description || '',
-                      type: parentCatFolder?.name || 'Notes',
+                      program: fileProg,
+                      semester: fileSem,
+                      subject: fileSubj,
+                      type: fileCat,
                       display_order: file.display_order || 0
                     });
+                    setIsCreatingNewSubjectInEdit(false);
                     setShowEditModal(true);
                   }
                 }}
