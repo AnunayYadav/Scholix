@@ -1653,17 +1653,35 @@ class NexusServer {
     const path = `community/${Math.random().toString(36).substring(7)}_${cleanName}`;
     let contentType = this.getFileContentType(file);
 
-    let { error: storageErr } = await client.storage.from('nexus-documents').upload(path, file, {
-      contentType,
-      upsert: true
-    });
-
-    if (storageErr && storageErr.message?.toLowerCase().includes('mime type')) {
-      const fallbackResult = await client.storage.from('nexus-documents').upload(path, file, {
-        contentType: 'application/pdf',
+    let storageErr: any = null;
+    try {
+      const uploadRes = await client.storage.from('nexus-documents').upload(path, file, {
+        contentType,
         upsert: true
       });
-      storageErr = fallbackResult.error;
+      storageErr = uploadRes.error;
+    } catch (e: any) {
+      storageErr = e;
+    }
+
+    if (storageErr && (
+      storageErr.message?.toLowerCase().includes('mime type') ||
+      storageErr.statusCode === '415' ||
+      storageErr.statusCode === 415 ||
+      storageErr.status === 415 ||
+      storageErr.error === 'Invalid MIME type'
+    )) {
+      try {
+        const fileBuffer = await file.arrayBuffer();
+        const safeBlob = new Blob([fileBuffer], { type: 'application/pdf' });
+        const fallbackResult = await client.storage.from('nexus-documents').upload(path, safeBlob, {
+          contentType: 'application/pdf',
+          upsert: true
+        });
+        storageErr = fallbackResult.error;
+      } catch (fbErr: any) {
+        storageErr = fbErr;
+      }
     }
 
     if (storageErr) throw storageErr;

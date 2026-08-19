@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
+import { renderAsync } from 'docx-preview';
 import { LibraryFile, UserProfile } from '../types.ts';
 import { showToast } from './Toast.tsx';
 import NexusServer from '../services/nexusServer.ts';
@@ -285,10 +286,31 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
     const [isImage, setIsImage] = useState(false);
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [imageRotation, setImageRotation] = useState(0);
+    const [isDocx, setIsDocx] = useState(false);
+    const [isLegacyDoc, setIsLegacyDoc] = useState(false);
+    const [docxBuffer, setDocxBuffer] = useState<ArrayBuffer | null>(null);
+    const [docxRenderFailed, setDocxRenderFailed] = useState(false);
+    const docxContainerRef = useRef<HTMLDivElement>(null);
+    const rawDocBytesRef = useRef<Uint8Array | null>(null);
 
     useEffect(() => {
         setDisplayFileName(fileName);
     }, [fileName]);
+
+    useEffect(() => {
+        if (isDocx && docxBuffer && docxContainerRef.current) {
+            docxContainerRef.current.innerHTML = '';
+            renderAsync(docxBuffer, docxContainerRef.current, undefined, {
+                inWrapper: false,
+                ignoreWidth: false,
+                ignoreHeight: false,
+                breakPages: true
+            }).catch(err => {
+                console.error("DOCX render failed:", err);
+                setDocxRenderFailed(true);
+            });
+        }
+    }, [isDocx, docxBuffer, isLoading]);
 
     useEffect(() => {
         const raf = requestAnimationFrame(() => {
@@ -518,6 +540,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
                 const pathToCheck = file?.storage_path || url || fileName || '';
                 const isImg = /\.(png|jpg|jpeg|webp|svg|gif)$/i.test(pathToCheck);
+                const isDocxFile = /\.docx$/i.test(pathToCheck);
+                const isLegacyDocFile = /\.doc$/i.test(pathToCheck);
 
                 if (isImg) {
                     setIsImage(true);
@@ -555,12 +579,73 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     }
                 }
 
+                if (isDocxFile || isLegacyDocFile) {
+                    if (isDocxFile) setIsDocx(true);
+                    if (isLegacyDocFile) setIsLegacyDoc(true);
+                    if (file) setDisplayFileName(file.name);
+
+                    let arrayBuffer: ArrayBuffer | null = null;
+                    if (file) {
+                        try {
+                            const client = NexusServer.getClient();
+                            if (client) {
+                                const { data, error } = await client.storage.from('nexus-documents').download(file.storage_path);
+                                if (!error && data) {
+                                    arrayBuffer = await data.arrayBuffer();
+                                }
+                            }
+                        } catch (e) {
+                            console.warn("Direct download failed for Word doc, falling back to proxy...", e);
+                        }
+
+                        if (!arrayBuffer) {
+                            try {
+                                const sessionRes = await NexusServer.getSession();
+                                const token = sessionRes?.data?.session?.access_token;
+                                const resolvedUrl = NexusServer.getFileUrl(file.storage_path, token);
+                                if (resolvedUrl) {
+                                    const resp = await fetch(resolvedUrl, {
+                                        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                                    });
+                                    if (resp.ok) {
+                                        arrayBuffer = await resp.arrayBuffer();
+                                    }
+                                }
+                            } catch (proxyErr) {
+                                console.warn("Proxy download failed for Word doc:", proxyErr);
+                            }
+                        }
+                    } else if (url) {
+                        try {
+                            const resp = await fetch(url);
+                            if (resp.ok) {
+                                arrayBuffer = await resp.arrayBuffer();
+                            }
+                        } catch (urlErr) {
+                            console.warn("URL fetch failed for Word doc:", urlErr);
+                        }
+                    }
+
+                    if (arrayBuffer) {
+                        rawDocBytesRef.current = new Uint8Array(arrayBuffer);
+                        if (isDocxFile) {
+                            setDocxBuffer(arrayBuffer);
+                        }
+                        setIsLoading(false);
+                        setNumPages(1);
+                        if (userProfile && file) {
+                            NexusServer.saveRecord(userProfile.id, 'file_access', `Opened document ${file.name}`, { fileId: file.id, fileName: file.name, path: file.storage_path });
+                        }
+                        return;
+                    }
+                }
+
                 if (!targetUrl && file) {
                     const fileObj = file;
                     setDisplayFileName(fileObj.name);
 
-                    // Check if it is a viewable format (PDF or Image)
-                    const isViewableDoc = /\.(pdf|png|jpg|jpeg|webp|svg|gif)$/i.test(fileObj.storage_path || fileObj.name);
+                    // Check if it is a viewable format (PDF, Image, DOCX, DOC)
+                    const isViewableDoc = /\.(pdf|png|jpg|jpeg|webp|svg|gif|docx|doc)$/i.test(fileObj.storage_path || fileObj.name);
                     if (!isViewableDoc) {
                         const client = NexusServer.getClient();
                         if (client) {
@@ -1275,6 +1360,37 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                 throw new Error("Unable to retrieve document source file.");
             }
 
+            // If this is a Word Document (.docx / .doc), Image, or non-PDF file, download the original bytes directly
+            if (isDocx || isLegacyDoc || isImage || !displayFileName.toLowerCase().endsWith('.pdf')) {
+                const downloadBlob = new Blob([originalPdfBytes as any]);
+                const blobUrl = URL.createObjectURL(downloadBlob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                const downloadName = displayFileName || fileName || 'document';
+                link.setAttribute('download', downloadName);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+
+                if (!isAdmin) {
+                    try {
+                        await NexusServer.saveRecord(
+                            userProfile ? userProfile.id : null,
+                            'pdf_download',
+                            `Downloaded ${downloadName}`,
+                            { fileId: fileId || (file ? file.id : undefined), fileName: downloadName }
+                        );
+                    } catch (dbErr) {
+                        console.error("Failed to save download record to registry:", dbErr);
+                    }
+                }
+
+                showToast('Download Verified & Complete.', 'success');
+                setIsDownloading(false);
+                return;
+            }
+
             // Sanitize PDF bytes to trim BOM / preambles before %PDF-
             originalPdfBytes = sanitizePdfBytes(originalPdfBytes);
             pdfBytesRef.current = originalPdfBytes;
@@ -1408,10 +1524,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                 }
 
                 const finalPdfBytes = await finalPdf.save();
-                downloadBlob = new Blob([new Uint8Array(finalPdfBytes)], { type: 'application/pdf' });
+                downloadBlob = new Blob([finalPdfBytes as any], { type: 'application/pdf' });
             } catch (pdfLibErr) {
                 console.warn("pdf-lib enhancement failed, falling back to raw PDF bytes download:", pdfLibErr);
-                downloadBlob = new Blob([new Uint8Array(originalPdfBytes)], { type: 'application/pdf' });
+                downloadBlob = new Blob([originalPdfBytes as any], { type: 'application/pdf' });
             }
 
             const blobUrl = URL.createObjectURL(downloadBlob);
@@ -1492,7 +1608,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                     </button>
                     <div className="hidden sm:block truncate">
-                        <h3 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 tracking-tight truncate max-w-[180px]">{displayFileName}</h3>
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 tracking-tight truncate max-w-[180px]">{displayFileName}</h3>
+                            {isDocx && <span className="px-1.5 py-0.5 rounded text-[8px] font-black bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 uppercase tracking-wide shrink-0">DOCX</span>}
+                            {isLegacyDoc && <span className="px-1.5 py-0.5 rounded text-[8px] font-black bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 uppercase tracking-wide shrink-0">DOC</span>}
+                            {isImage && <span className="px-1.5 py-0.5 rounded text-[8px] font-black bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20 uppercase tracking-wide shrink-0">IMG</span>}
+                            {!isDocx && !isLegacyDoc && !isImage && <span className="px-1.5 py-0.5 rounded text-[8px] font-black bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/20 uppercase tracking-wide shrink-0">PDF</span>}
+                        </div>
                         <p className="text-[9px] font-semibold tracking-wide leading-none mt-0.5" style={{ color: 'var(--brand-primary)' }}>{fullBrandName} Secure Protocol</p>
                     </div>
                 </div>
@@ -1681,6 +1803,76 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                                         />
                                     </div>
                                 </div>
+                            ) : isDocx && !docxRenderFailed ? (
+                                <div 
+                                    className="w-full flex flex-col items-center justify-start p-4 sm:p-8 overflow-auto min-h-[80vh]"
+                                    onWheel={(e) => {
+                                        if (e.ctrlKey) {
+                                            e.preventDefault();
+                                            const delta = e.deltaY < 0 ? 0.1 : -0.1;
+                                            handleZoom(Math.min(2.5, Math.max(0.4, scaleRef.current + delta)));
+                                        }
+                                    }}
+                                >
+                                    <div
+                                        className="transition-transform duration-150 ease-out origin-top flex flex-col items-center max-w-full"
+                                        style={{
+                                            transform: `scale(${scale})`,
+                                            transformOrigin: 'top center',
+                                            willChange: 'transform',
+                                            marginBottom: '80px'
+                                        }}
+                                    >
+                                        <div 
+                                            ref={docxContainerRef} 
+                                            className="docx-preview-root bg-white text-zinc-900 rounded-xl shadow-2xl p-6 sm:p-12 max-w-[850px] w-full min-h-[1000px] border border-zinc-200 dark:border-white/10 select-text overflow-hidden"
+                                        />
+                                    </div>
+                                </div>
+                            ) : isLegacyDoc || (isDocx && docxRenderFailed) ? (
+                                <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center min-h-[60vh]">
+                                    <div className="bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl flex flex-col items-center space-y-5 animate-fade-in">
+                                        <div className="w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-500 border border-blue-500/20 flex items-center justify-center">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                                <polyline points="14 2 14 8 20 8" />
+                                                <line x1="16" y1="13" x2="8" y2="13" />
+                                                <line x1="16" y1="17" x2="8" y2="17" />
+                                                <polyline points="10 9 9 9 8 9" />
+                                            </svg>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <h4 className="text-base font-extrabold text-zinc-900 dark:text-white truncate max-w-[320px]">
+                                                {displayFileName}
+                                            </h4>
+                                            <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+                                                {isLegacyDoc ? "Microsoft Word Document (.doc)" : "Word Document (.docx)"}
+                                            </p>
+                                        </div>
+                                        <p className="text-xs text-zinc-400 dark:text-zinc-500 max-w-xs">
+                                            {isLegacyDoc 
+                                                ? "Binary Word format (.doc) can be viewed by downloading directly to your device."
+                                                : "Direct preview is unavailable for this document. You can download and open it in Word or Google Docs."}
+                                        </p>
+                                        <button
+                                            onClick={handleDownload}
+                                            disabled={isDownloading}
+                                            className="w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 border-none cursor-pointer"
+                                        >
+                                            {isDownloading ? (
+                                                <span className="flex items-center gap-2">
+                                                    <svg className="w-4 h-4 animate-spin text-white" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" /></svg>
+                                                    Downloading...
+                                                </span>
+                                            ) : (
+                                                <>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                                                    Download Document
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
                             ) : (
                                 <div 
                                     ref={zoomWrapperRef}
@@ -1863,6 +2055,39 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     }
                 }
                 
+                /* DOCX Preview Styles */
+                .docx-preview-root {
+                    font-family: Calibri, 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+                    color: #1a1a1a;
+                    line-height: 1.6;
+                }
+                .docx-preview-root p {
+                    margin-bottom: 0.8em;
+                }
+                .docx-preview-root h1, .docx-preview-root h2, .docx-preview-root h3, .docx-preview-root h4 {
+                    font-weight: bold;
+                    margin-top: 1em;
+                    margin-bottom: 0.5em;
+                    color: #111827;
+                }
+                .docx-preview-root table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin: 1rem 0;
+                }
+                .docx-preview-root td, .docx-preview-root th {
+                    border: 1px solid #d1d5db;
+                    padding: 6px 10px;
+                }
+                .docx-preview-root img {
+                    max-width: 100%;
+                    height: auto;
+                    border-radius: 4px;
+                }
+                .docx-preview-root section {
+                    margin-bottom: 2rem;
+                }
+
                 @media screen {
                     .pdf-print-shield {
                         display: none;

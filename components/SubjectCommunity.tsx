@@ -3355,6 +3355,62 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     }
   };
 
+  const handleDownloadFile = async (file: LibraryFile) => {
+    try {
+      showToast("Starting download...", "info");
+
+      // Record download stats
+      CommunityService.recordFileDownload(file.id).catch(console.error);
+      if (userProfile) {
+        NexusServer.saveRecord(userProfile.id, 'pdf_download', `Downloaded ${file.name}`, {
+          fileId: file.id,
+          fileName: file.name,
+          path: file.storage_path
+        }).catch(console.error);
+      }
+
+      const client = NexusServer.getClient();
+      if (client) {
+        try {
+          const { data, error } = await client.storage.from('nexus-documents').download(file.storage_path);
+          if (!error && data) {
+            const blobUrl = URL.createObjectURL(data);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = file.name || 'document';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+            showToast("Download started!", "success");
+            return;
+          }
+        } catch (storageErr) {
+          console.warn("Direct storage download failed, trying proxy route...", storageErr);
+        }
+      }
+
+      // Proxy fallback
+      const sessionRes = await NexusServer.getSession();
+      const token = sessionRes?.data?.session?.access_token;
+      const url = NexusServer.getFileUrl(file.storage_path, token);
+      if (url) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.name || 'document';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast("Download started!", "success");
+      } else {
+        throw new Error("Unable to resolve download URL");
+      }
+    } catch (err: any) {
+      console.error("Direct download failed:", err);
+      showToast("Failed to download file.", "error");
+    }
+  };
+
   // Upvote/Downvote reactions
   const handleReaction = async (itemId: string, type: 'post' | 'request', reaction: 'helpful' | 'quality' | 'important') => {
     if (!userProfile) {
@@ -6150,6 +6206,20 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
               Details
+            </button>
+
+            {/* Download */}
+            <button
+              onClick={() => {
+                const file = allFiles.find(f => f.id === activeMenuFileId);
+                setActiveMenuFileId(null);
+                setMenuAnchorRect(null);
+                if (file) handleDownloadFile(file);
+              }}
+              className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+            >
+              <Download size={14} className="text-zinc-400" />
+              Download
             </button>
 
             {/* Move Up & Move Down (Admin only) */}

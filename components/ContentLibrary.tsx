@@ -35,7 +35,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 import VerifiedBadge from './VerifiedBadge.tsx';
-import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft, Plus, ArrowUp, ArrowDown, Pencil, Trash2, Archive, Layers, Loader2, Image as ImageIcon, FileImage } from 'lucide-react';
+import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft, Plus, ArrowUp, ArrowDown, Pencil, Trash2, Archive, Layers, Loader2, Image as ImageIcon, FileImage, Download } from 'lucide-react';
 import { getProgramCurriculum, findSubjectMetadata } from '../data/curriculumData.ts';
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
 import { mergePDFFiles, convertImagesToPdf, isImageFile } from '../utils/pdfMerger.ts';
@@ -1798,6 +1798,50 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     }
   };
 
+  const handleDirectDownload = async (file: LibraryFile) => {
+    try {
+      showToast("Starting download...", "info");
+      const client = NexusServer.getClient();
+      if (client) {
+        try {
+          const { data, error } = await client.storage.from('nexus-documents').download(file.storage_path);
+          if (!error && data) {
+            const blobUrl = URL.createObjectURL(data);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = file.name || 'document';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+            showToast("Download started!", "success");
+            return;
+          }
+        } catch (storageErr) {
+          console.warn("Direct storage download failed, trying proxy route...", storageErr);
+        }
+      }
+
+      const sessionRes = await NexusServer.getSession();
+      const token = sessionRes?.data?.session?.access_token;
+      const url = NexusServer.getFileUrl(file.storage_path, token);
+      if (url) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.name || 'document';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast("Download started!", "success");
+      } else {
+        throw new Error("Unable to resolve download URL");
+      }
+    } catch (err: any) {
+      console.error("Download failed:", err);
+      showToast("Failed to download file.", "error");
+    }
+  };
+
   const handleFileAccess = (file: LibraryFile) => {
     if (!userProfile) {
       showToast("Please login to view this file.", "info");
@@ -1805,54 +1849,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       return;
     }
 
-    const isViewableInApp = /\.(pdf|png|jpg|jpeg|webp|svg|gif)$/i.test(file.storage_path || file.name);
+    const isViewableInApp = /\.(pdf|png|jpg|jpeg|webp|svg|gif|docx|doc)$/i.test(file.storage_path || file.name);
 
     if (isViewableInApp) {
       // 1. Open the viewer in-app instantly
       setActivePdfFile(file);
     } else {
-      // 2. For non-viewable files (like .dwg, .zip, .docx), trigger direct download immediately
-      (async () => {
-        try {
-          const client = NexusServer.getClient();
-          if (client) {
-            const { data, error } = await client.storage.from('nexus-documents').download(file.storage_path);
-            if (!error && data) {
-              const blobUrl = URL.createObjectURL(data);
-              const a = document.createElement('a');
-              a.href = blobUrl;
-              a.download = file.name || 'document';
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
-              showToast("Downloading file...", "success");
-              return;
-            }
-          }
-        } catch (e) {
-          console.warn("Direct download failed, trying proxy route...", e);
-        }
-
-        // Fallback to proxy route download
-        try {
-          const sessionRes = await NexusServer.getSession();
-          const token = sessionRes?.data?.session?.access_token;
-          const url = NexusServer.getFileUrl(file.storage_path, token);
-          if (url) {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = file.name || 'document';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            showToast("Downloading file...", "success");
-          }
-        } catch (err) {
-          console.error("Access Error:", err);
-          showToast("Failed to download file.", "error");
-        }
-      })();
+      // 2. For non-viewable files (like .dwg, .zip), trigger direct download immediately
+      handleDirectDownload(file);
     }
   };
 
@@ -2270,6 +2274,17 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
                                         Details
                                       </button>
+
+                                      <button
+                                        onClick={() => {
+                                          setActiveMenuFileId(null);
+                                          handleDirectDownload(file);
+                                        }}
+                                        className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-655 dark:text-zinc-350 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                      >
+                                        <Download size={14} className="text-zinc-400" />
+                                        Download
+                                      </button>
                                     </div>
                                   )}
                                 </td>
@@ -2674,6 +2689,18 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                             >
                                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
                                               Details
+                                            </button>
+
+                                            {/* Download */}
+                                            <button
+                                              onClick={() => {
+                                                setActiveMenuFileId(null);
+                                                handleDirectDownload(file);
+                                              }}
+                                              className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-655 dark:text-zinc-350 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                            >
+                                              <Download size={14} className="text-zinc-400" />
+                                              Download
                                             </button>
 
                                             {/* Edit */}
