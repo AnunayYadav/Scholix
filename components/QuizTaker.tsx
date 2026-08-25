@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import { slugify } from '../utils/slugify';
 import Editor from '@monaco-editor/react';
-import { UserProfile, QuizQuestion, LibraryFile } from '../types.ts';
+import { UserProfile, QuizQuestion, LibraryFile, ExamPaper, ExamCategory } from '../types.ts';
 import NexusServer from '../services/nexusServer';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import { generateQuizFromSyllabus } from '../services/geminiService.ts';
@@ -26,6 +26,8 @@ import XPBreakdown from './quiz/XPBreakdown.tsx';
 import LevelUpOverlay from './quiz/LevelUpOverlay.tsx';
 import StreakToast from './quiz/StreakToast.tsx';
 import HistorySection from './quiz/HistorySection.tsx';
+import OfficialExamPapersExplorer from './quiz/OfficialExamPapersExplorer.tsx';
+import CompactCustomQuizBuilder from './quiz/CompactCustomQuizBuilder.tsx';
 
 
 // Dashboard hooks & store
@@ -250,6 +252,15 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null, onAuthRequired?: ()
   const [subjectsWithSyllabi, setSubjectsWithSyllabi] = useState<SubjectWithSyllabus[]>([]);
   const [showProgressModal, setShowProgressModal] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<SubjectWithSyllabus | null>(null);
+  
+  // ═══════════ Official Exam Papers State ═══════════
+  const [quizModeTab, setQuizModeTab] = useState<'official' | 'custom'>('official');
+  const [examPapers, setExamPapers] = useState<ExamPaper[]>([]);
+  const [isFetchingExamPapers, setIsFetchingExamPapers] = useState(false);
+  const [selectedExamCategory, setSelectedExamCategory] = useState<ExamCategory>('all');
+  const [selectedExamYear, setSelectedExamYear] = useState<number | 'all'>('all');
+  const [activeExamPaper, setActiveExamPaper] = useState<ExamPaper | null>(null);
+
   const [selectedUnits, setSelectedUnits] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
@@ -600,36 +611,100 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     }
   }, [quizCompleted]);
 
-  // Fetch questions for selected subject to populate filters
+  // Fetch questions and official exam papers for selected subject
   useEffect(() => {
     const fetchSubjectData = async () => {
       if (!selectedSubject) {
         setSubjectQuestions([]);
+        setExamPapers([]);
         return;
       }
       
       setIsFetchingQuestions(true);
+      setIsFetchingExamPapers(true);
       try {
-        // Smart normalization: extract code like CHE110 using regex
         const subjectName = selectedSubject.name || '';
         const subjectMatch = subjectName.match(/[A-Za-z]+[0-9]+/);
         const subjectCode = subjectMatch ? subjectMatch[0].toUpperCase() : subjectName.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
         
-        // 1. Fetch metadata (units/topics) to build filters efficiently 
-        const metadata = await NexusServer.fetchSubjectMetadata(subjectCode);
-        
-        // 2. Fetch full question pool for initial view
+        // 1. Fetch official exam papers catalog
+        const papers = await NexusServer.fetchExamPapers(subjectCode);
+        setExamPapers(papers);
+        if (papers.length > 0) {
+          setQuizModeTab('official');
+        }
+
+        // 2. Fetch full question pool for custom builder & metadata
         const questions = await NexusServer.fetchQuestions(subjectCode);
         setSubjectQuestions(questions);
       } catch (err) {
-        console.error("Error fetching subject questions:", err);
+        console.error("Error fetching subject data:", err);
       } finally {
         setIsFetchingQuestions(false);
+        setIsFetchingExamPapers(false);
       }
     };
     
     fetchSubjectData();
   }, [selectedSubject]);
+
+  const handleStartExamPaper = async (paper: ExamPaper, isPractice: boolean = false) => {
+    setLoading(true);
+    setStatus(`Preparing ${paper.title}...`);
+    try {
+      const questions = await NexusServer.fetchExamQuestions({
+        paperId: paper.id,
+        subjectCode: paper.subject_code,
+        year: paper.year,
+        examType: paper.exam_type,
+      });
+
+      if (!questions || questions.length === 0) {
+        showToast(`No questions found in database for ${paper.title}.`, 'info');
+        setLoading(false);
+        return;
+      }
+
+      setActiveExamPaper(paper);
+      setQuizQuestions(questions);
+      setCurrentQuestionIdx(0);
+      setUserAnswers({});
+      setVisitedQuestions(new Set([0]));
+      setMarkedForReview(new Set());
+      setTimeSpentByQuestion({});
+      setQuizCompleted(false);
+      setReviewMode(false);
+      setIsShowingExplanation(false);
+
+      const durationMins = paper.duration_minutes || (paper.exam_type === 'endterm' ? 120 : paper.exam_type === 'midterm' ? 60 : 45);
+      setTimerMinutes(durationMins);
+      setTimeLeft(durationMins * 60);
+      setTimerActive(!isPractice);
+      setIsPracticeMode(isPractice);
+      setNegativeMarking(paper.exam_type === 'endterm' || paper.exam_type === 'midterm');
+      setActiveQuizType('custom');
+      setShowCustomQuizBuilder(false);
+    } catch (err: any) {
+      console.error('Error starting exam paper:', err);
+      showToast('Failed to load exam questions: ' + err.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredExamPapers = useMemo(() => {
+    return examPapers.filter(paper => {
+      const matchesCat = selectedExamCategory === 'all' || paper.exam_type === selectedExamCategory;
+      const matchesYear = selectedExamYear === 'all' || paper.year === selectedExamYear;
+      return matchesCat && matchesYear;
+    });
+  }, [examPapers, selectedExamCategory, selectedExamYear]);
+
+  const availableExamYears = useMemo(() => {
+    const years = new Set<number>();
+    examPapers.forEach(p => { if (p.year) years.add(p.year); });
+    return Array.from(years).sort((a, b) => b - a);
+  }, [examPapers]);
 
   const availableUnitsForSubject = useMemo(() => {
     if (subjectQuestions.length === 0) return [1, 2, 3, 4, 5, 6]; // Default fallback
@@ -637,6 +712,16 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     subjectQuestions.forEach(q => units.add(Number(q.unit)));
     return Array.from(units).sort((a, b) => a - b);
   }, [subjectQuestions]);
+
+  const selectAllUnits = () => {
+    const all = availableUnitsForSubject;
+    const isAll = all.length > 0 && all.every(u => selectedUnits.includes(u));
+    if (isAll) {
+      setSelectedUnits([]);
+    } else {
+      setSelectedUnits(all);
+    }
+  };
 
   const availableTopicsByUnit = useMemo(() => {
     const topicsMap: Record<number, Set<string>> = {};
@@ -2935,7 +3020,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   );
 
   // ═══════════ Dashboard View ═══════════
-  if (!showCustomQuizBuilder && quizQuestions.length === 0 && !quizCompleted && !reviewMode && dashboardView === 'dashboard') {
+  if (quizQuestions.length === 0 && !quizCompleted && !reviewMode && dashboardView === 'dashboard') {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-20 px-4 md:px-0">
         {globalOverlays}
@@ -2962,7 +3047,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         <div className="space-y-3">
           <h3 className="text-[10px] font-semibold text-zinc-400 tracking-wider px-1">Quick Start</h3>
           <QuickStartBar
-            onCustomQuiz={() => setShowCustomQuizBuilder(true)}
+            onOfficialPapers={() => {
+              setShowCustomQuizBuilder(false);
+              setDashboardView('official');
+            }}
+            onCustomQuiz={() => {
+              setShowCustomQuizBuilder(true);
+              setDashboardView('custom');
+            }}
             onMyHistory={() => setDashboardView('history')}
           />
         </div>
@@ -3340,424 +3432,93 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     );
   }
 
-  // ═══════════ Original Quiz Builder / Selection View ═══════════
+  // ═══════════ Custom Quiz Builder View ═══════════
+  if (dashboardView === 'custom' && quizQuestions.length === 0 && !quizCompleted && !reviewMode) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20 px-4 md:px-0">
+        {globalOverlays}
+
+        <CompactCustomQuizBuilder
+          subjects={subjectsWithSyllabi}
+          selectedSubject={selectedSubject}
+          onSelectSubject={(s) => {
+            handleSubjectChange(s);
+            setSelectedUnits([]);
+          }}
+          availableUnits={availableUnitsForSubject}
+          selectedUnits={selectedUnits}
+          onToggleUnit={toggleUnit}
+          onSelectAllUnits={selectAllUnits}
+          selectedDifficulties={selectedDifficulties}
+          onToggleDifficulty={(lvl) => {
+            setSelectedDifficulties(prev => prev.includes(lvl) ? prev.filter(d => d !== lvl) : [...prev, lvl]);
+          }}
+          numMCQ={numMCQ}
+          setNumMCQ={setNumMCQ}
+          hasMCQs={hasMCQs}
+          numSubjective={numSubjective}
+          setNumSubjective={setNumSubjective}
+          hasSubjective={hasSubjective}
+          numCoding={numCoding}
+          setNumCoding={setNumCoding}
+          hasCoding={hasCoding}
+          timerMinutes={timerMinutes}
+          setTimerMinutes={setTimerMinutes}
+          isPracticeMode={isPracticeMode}
+          setIsPracticeMode={setIsPracticeMode}
+          negativeMarking={negativeMarking}
+          setNegativeMarking={setNegativeMarking}
+          includeSolved={includeSolved}
+          setIncludeSolved={setIncludeSolved}
+          solvedCount={solvedQuestionIds.size}
+          availableTopicsByUnit={availableTopicsByUnit}
+          selectedTopics={selectedTopics}
+          onToggleTopic={(t) => {
+            setSelectedTopics(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
+          }}
+          onClearTopics={() => setSelectedTopics([])}
+          showTopics={showTopics}
+          setShowTopics={setShowTopics}
+          onStartQuiz={handleGenerate}
+          onSwitchToOfficialPapers={() => {
+            setShowCustomQuizBuilder(false);
+            setDashboardView('official');
+          }}
+          onBackToDashboard={() => {
+            setShowCustomQuizBuilder(false);
+            setDashboardView('dashboard');
+          }}
+          isLoading={loading || isFetchingQuestions}
+          maxSubjectMCQs={subjectQuestions.filter(q => q.type === 'mcq').length}
+        />
+      </div>
+    );
+  }
+
+  // ═══════════ Official Exam Papers Explorer View ═══════════
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20 px-4 md:px-0">
+    <div className="max-w-5xl mx-auto space-y-8 animate-fade-in pb-20 px-4 md:px-0">
       {globalOverlays}
 
-      <header className="text-center space-y-2 py-4">
-        <div className="flex items-center justify-center gap-4">
-          {showCustomQuizBuilder && quizQuestions.length === 0 && (
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowCustomQuizBuilder(false)}
-              className="p-3 rounded-2xl bg-zinc-100 dark:bg-white/5 hover:bg-orange-500/10 text-zinc-400 hover:text-orange-500 transition-colors border border-zinc-200 dark:border-white/10"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-            </motion.button>
-          )}
-          <div>
-            <h2 className="text-3xl md:text-5xl font-bold text-zinc-900 dark:text-white tracking-tight leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600">taker</span></h2>
-            <p className="text-zinc-500 font-semibold text-[11px] tracking-wider mt-1 opacity-60">Comprehensive Assessment</p>
-          </div>
-        </div>
-      </header>
-
-      {error && (
-        <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-[32px] text-center space-y-3 animate-fade-in shadow-xl shadow-red-500/5">
-          <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center mx-auto text-red-500">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-          </div>
-          <h4 className="text-xs font-semibold text-red-500 tracking-wide">Attempt failed</h4>
-          <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{error}</p>
-          <button onClick={() => setError(null)} className="text-[10px] font-semibold text-zinc-400 hover:text-orange-500 transition-colors tracking-wide">Dismiss</button>
-        </div>
-      )}
-
-      <div className="glass-panel p-8 md:p-12 rounded-[48px] shadow-2xl border border-white/5 space-y-12 relative overflow-hidden">
-        {/* Background Decorative Blurs */}
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-orange-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-red-500/5 rounded-full blur-[100px] pointer-events-none" />
-
-        <div className={`grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10 ${!selectedSubject ? 'pt-4' : ''}`}>
-
-          {/* Step 1: Subject Selection */}
-          <div className="space-y-6">
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-4"
-            >
-              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm shadow-lg transition-all duration-500 ${selectedSubject ? 'bg-emerald-500 text-white rotate-[360deg]' : 'bg-gradient-to-br from-orange-500 to-orange-600 text-white'}`}>
-                {selectedSubject ? '✓' : '1'}
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-zinc-900 dark:text-white">Select subject</label>
-                <p className="text-[10px] text-zinc-500 font-medium opacity-60">Step 1: Choose Subject</p>
-              </div>
-            </motion.div>
-
-            <div className="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto no-scrollbar pr-2 py-2">
-              {subjectsWithSyllabi.map((s, i) => (
-                <motion.button
-                  key={s.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + i * 0.05 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => { handleSubjectChange(s); setSelectedUnits([]); }}
-                  className={`relative p-5 rounded-[24px] border-none shadow-none text-left transition-all group overflow-hidden ${
-                    selectedSubject?.id === s.id 
-                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-xl shadow-orange-500/20' 
-                      : 'bg-zinc-100 dark:bg-[#111113] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/60 dark:hover:bg-[#161618]'
-                    }`}
-                >
-                  <div className="flex items-center justify-between pointer-events-none">
-                    <p className={`text-sm font-normal ${selectedSubject?.id === s.id ? 'text-white' : 'text-zinc-900 dark:text-white group-hover:text-orange-500'}`}>{s.name}</p>
-                    {selectedSubject?.id === s.id && (
-                      <motion.div layoutId="selection-active" className="w-2 h-2 rounded-full bg-white shadow-[0_0_10px_white]" />
-                    )}
-                  </div>
-                  {/* Subtle inner glow for selected */}
-                  {selectedSubject?.id === s.id && (
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
-                  )}
-                </motion.button>
-              ))}
-              
-              {subjectsWithSyllabi.length === 0 && !initializing && (
-                <div className="py-16 text-center space-y-4">
-                  <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto opacity-20">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3A2.5 2.5 0 0 1 6.5 0.5H20" /></svg>
-                  </div>
-                  <p className="text-[10px] font-semibold text-zinc-500 tracking-widest opacity-40">Library is empty</p>
-                  <p className="text-xs text-zinc-400 max-w-[200px] mx-auto leading-relaxed">Connect a subject syllabus to the repository to initialize testing modules.</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Step 2: Unit Selection */}
-          <div className={`space-y-8 transition-all duration-700 ${!selectedSubject ? 'opacity-20 grayscale pointer-events-none scale-95 blur-[2px]' : 'opacity-100'}`}>
-            <motion.div 
-              animate={selectedSubject ? { opacity: 1, x: 0 } : { opacity: 0.5, x: -10 }}
-              className="flex items-center gap-4"
-            >
-              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-semibold text-sm shadow-lg transition-all duration-500 ${selectedUnits.length > 0 && selectedDifficulties.length > 0 ? 'bg-emerald-500 text-white rotate-[360deg]' : 'bg-gradient-to-br from-orange-500 to-orange-600 text-white'}`}>
-                {selectedUnits.length > 0 && selectedDifficulties.length > 0 ? '✓' : '2'}
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-zinc-900 dark:text-white tracking-tight">Configure scope</label>
-                <p className="text-[10px] text-zinc-500 font-semibold tracking-wide opacity-60">Step 2: Subject Scope</p>
-              </div>
-            </motion.div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {[1, 2, 3, 4, 5, 6].map((u, i) => {
-                const isAvailable = availableUnitsForSubject.includes(u);
-                const isSelected = selectedUnits.includes(u);
-                return (
-                  <motion.button
-                    key={u}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2 + i * 0.05 }}
-                    disabled={!isAvailable}
-                    onClick={() => toggleUnit(u)}
-                    whileHover={isAvailable ? { scale: 1.05, y: -2 } : {}}
-                    whileTap={isAvailable ? { scale: 0.95 } : {}}
-                    className={`relative p-8 rounded-[28px] border transition-all flex flex-col items-center justify-center group ${!isAvailable ? 'bg-zinc-100/50 dark:bg-dark-950/20 border-zinc-200 dark:border-white/5 opacity-40 grayscale cursor-not-allowed' :
-                      isSelected ? 'bg-orange-500/10 border-orange-500 shadow-xl shadow-orange-500/5' :
-                        'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 hover:border-orange-500/30'
-                      }`}
-                  >
-                    {selectedSubject && !isAvailable && (
-                      <span className="absolute top-2 left-1/2 -translate-x-1/2 -translate-y-full group-hover:translate-y-4 opacity-0 group-hover:opacity-100 transition-all px-2 py-1 rounded-full bg-zinc-800 text-white text-[8px] font-bold uppercase tracking-tighter whitespace-nowrap z-20">
-                        Locked unit
-                      </span>
-                    )}
-                    
-                    <span className={`text-3xl font-semibold tracking-tighter mb-1 transition-all duration-300 ${isSelected ? 'text-orange-500 scale-110 drop-shadow-[0_0_8px_rgba(249,115,22,0.3)]' : 'text-zinc-200 dark:text-zinc-800 group-hover:text-zinc-300 dark:group-hover:text-zinc-700'}`}>
-                      0{u}
-                    </span>
-                    <span className={`text-[10px] font-semibold tracking-wider transition-colors ${isSelected ? 'text-orange-500' : 'text-zinc-400 dark:text-zinc-500'}`}>
-                      Unit {u}
-                    </span>
-                  </motion.button>
-                );
-              })}
-            </div>
-
-            <div className="pt-2">
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { id: 'easy', num: 'L1', label: 'Easy', color: 'emerald' },
-                  { id: 'medium', num: 'L2', label: 'Medium', color: 'amber' },
-                  { id: 'hard', num: 'L3', label: 'Hard', color: 'red' }
-                ].map((lvl, i) => {
-                  const isSelected = selectedDifficulties.includes(lvl.id);
-                  const colorMap = {
-                    emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/50', text: 'text-emerald-500', hover: 'hover:border-emerald-500/30' },
-                    amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/50', text: 'text-amber-500', hover: 'hover:border-amber-500/30' },
-                    red: { bg: 'bg-red-500/10', border: 'border-red-500/50', text: 'text-red-500', hover: 'hover:border-red-500/30' }
-                  }[lvl.color];
-
-                  return (
-                    <motion.button
-                      key={lvl.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 + i * 0.1 }}
-                      whileHover={{ y: -2, scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setSelectedDifficulties(prev => prev.includes(lvl.id) ? prev.filter(d => d !== lvl.id) : [...prev, lvl.id])}
-                      className={`relative p-5 rounded-[24px] border transition-all flex flex-col items-center justify-center group overflow-hidden ${
-                        isSelected ? `${colorMap.bg} ${colorMap.border} shadow-lg shadow-black/5` :
-                        `bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 ${colorMap.hover}`
-                      }`}
-                    >
-                      <span className={`text-xl font-semibold tracking-tight transition-all duration-300 ${isSelected ? colorMap.text : 'text-zinc-400 dark:text-zinc-700'}`}>{lvl.num}</span>
-                      <span className={`text-[10px] font-semibold tracking-wide mt-1 transition-colors ${isSelected ? colorMap.text : 'text-zinc-500/60'}`}>{lvl.label}</span>
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Step 3: Customization - Progressive Disclosure */}
-          <div className="md:col-span-2">
-            {selectedUnits.length > 0 && selectedDifficulties.length > 0 && (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="pt-10 border-t border-zinc-100 dark:border-white/5 space-y-12"
-              >
-                <div className="space-y-10">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg">3</div>
-                    <div>
-                      <label className="text-sm font-semibold text-zinc-900 dark:text-white tracking-tight">Final configuration</label>
-                      <p className="text-[10px] text-zinc-500 font-semibold tracking-wide opacity-60">Step 3: Final Configuration</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-                    {hasMCQs && (
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between ml-1">
-                          <p className="text-[10px] font-semibold text-zinc-500 tracking-wider">MCQ assessment</p>
-                          <button 
-                            onClick={() => {
-                              const count = subjectQuestions.filter(q => q.type === 'mcq' && selectedUnits.includes(q.unit)).length;
-                              setNumMCQ(count || 100);
-                            }}
-                            className="text-[9px] font-bold text-orange-500 hover:text-orange-500 uppercase tracking-tighter"
-                          >
-                            Set Max
-                          </button>
-                        </div>
-                        <div className="relative group">
-                          <input
-                            type="number" min="0" max="500" value={numMCQ}
-                            onChange={(e) => setNumMCQ(parseInt(e.target.value) || 0)}
-                            className="w-full px-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-zinc-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
-                          />
-                          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-zinc-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">qty</div>
-                        </div>
-                      </div>
-                    )}
-
-                    {hasSubjective && (
-                      <div className="space-y-3">
-                        <p className="text-[10px] font-semibold text-zinc-500 tracking-wider ml-1">Subjective questions</p>
-                        <div className="relative group">
-                          <input
-                            type="number" min="0" max="500" value={numSubjective}
-                            onChange={(e) => setNumSubjective(parseInt(e.target.value) || 0)}
-                            className="w-full px-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-zinc-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
-                          />
-                          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-zinc-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">qty</div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    <div className="space-y-3">
-                      <p className="text-[10px] font-semibold text-zinc-500 tracking-wider ml-1">Time limit</p>
-                      <div className="relative group">
-                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400 group-hover:text-orange-500 transition-colors">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
-                        </div>
-                        <input
-                          type="number" min="1" max="180" value={timerMinutes}
-                          onChange={(e) => setTimerMinutes(parseInt(e.target.value) || 0)}
-                          className="w-full pl-12 pr-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-zinc-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
-                        />
-                        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-zinc-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">min</div>
-                      </div>
-                    </div>
-
-                    {hasCoding && (
-                      <div className="space-y-3">
-                        <p className="text-[10px] font-semibold text-zinc-500 tracking-wider ml-1">Coding logic</p>
-                        <div className="relative group">
-                          <input
-                            type="number" min="0" max="50" value={numCoding}
-                            onChange={(e) => setNumCoding(parseInt(e.target.value) || 0)}
-                            disabled={selectedSubject?.name.includes('CSE101')}
-                            className={`w-full px-5 py-4 bg-white/50 dark:bg-dark-900/50 border border-zinc-200 dark:border-white/5 rounded-[24px] text-sm font-semibold text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm ${selectedSubject?.name.includes('CSE101') ? 'opacity-30 cursor-not-allowed' : ''}`}
-                          />
-                          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-zinc-400 tracking-wider pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">qty</div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Move Topics to Step 3 below inputs */}
-                  {selectedUnits.length > 0 && Object.keys(availableTopicsByUnit).length > 0 && (
-                    <div className="space-y-4 pt-2">
-                      <button 
-                        onClick={() => setShowTopics(!showTopics)}
-                        className="flex items-center justify-between w-full px-5 py-4 rounded-[24px] bg-zinc-50 dark:bg-white/5 hover:bg-orange-500/5 transition-all group border border-zinc-100 dark:border-white/5"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={`p-2.5 rounded-2xl transition-colors ${showTopics ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-orange-500/10 text-orange-500'}`}>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M4 6h16M4 12h16m-7 6h7" /></svg>
-                          </div>
-                          <div className="text-left">
-                            <span className="block text-sm font-semibold tracking-tight text-zinc-900 dark:text-white">Refine by topics</span>
-                            <span className="block text-[11px] text-zinc-500 font-semibold tracking-wide opacity-60">Fine-tune assessment focus</span>
-                          </div>
-                        </div>
-                        <motion.div animate={{ rotate: showTopics ? 180 : 0 }}>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 text-zinc-400"><path d="M19 9l-7 7-7-7" /></svg>
-                        </motion.div>
-                      </button>
-
-                      {showTopics && (
-                        <motion.div 
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="grid grid-cols-2 md:grid-cols-4 gap-2 px-1"
-                        >
-                          <button
-                            onClick={() => setSelectedTopics([])}
-                            className={`px-4 py-3 rounded-2xl text-[10px] font-semibold tracking-wider text-center transition-all border ${
-                              selectedTopics.length === 0 
-                                ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20' 
-                                : 'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 text-zinc-500 hover:border-orange-500/30'
-                            }`}
-                          >
-                            All topics
-                          </button>
-
-                          {selectedUnits.flatMap(u => availableTopicsByUnit[u] || []).map((topic, idx) => {
-                            const isSelected = selectedTopics.includes(topic);
-                            return (
-                              <button
-                                key={`${topic}-${idx}`}
-                                onClick={() => setSelectedTopics(prev => isSelected ? prev.filter(t => t !== topic) : [...prev, topic])}
-                                className={`px-4 py-3 rounded-2xl text-[10px] font-semibold text-center transition-all border ${
-                                  isSelected 
-                                    ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20' 
-                                    : 'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 text-zinc-500 hover:border-orange-500/30'
-                                }`}
-                              >
-                                {topic}
-                              </button>
-                            );
-                          })}
-                        </motion.div>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <motion.button
-                      whileHover={{ y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setIsPracticeMode(!isPracticeMode)}
-                      className={`relative p-5 rounded-[28px] border transition-all flex items-center justify-between group overflow-hidden ${isPracticeMode ? 'bg-orange-500/5 border-orange-500/30' : 'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 hover:border-orange-500/20'}`}
-                    >
-                      <div className="flex items-center gap-4 z-10">
-                        <div className={`p-3 rounded-2xl transition-colors ${isPracticeMode ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'bg-zinc-100 dark:bg-dark-800 text-zinc-500'}`}>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 2v8m0 4v2m-7.5-6h15" strokeLinecap="round"/><circle cx="12" cy="12" r="10"/></svg>
-                        </div>
-                        <div className="text-left">
-                          <p className={`text-sm font-semibold tracking-tight ${isPracticeMode ? 'text-orange-500' : 'text-zinc-900 dark:text-white'}`}>Practice Mode</p>
-                          <p className="text-[10px] text-zinc-500 font-semibold tracking-wider opacity-60">Instant feedback enabled</p>
-                        </div>
-                      </div>
-                      <div className={`w-12 h-6 rounded-full relative transition-colors z-10 ${isPracticeMode ? 'bg-orange-500' : 'bg-zinc-200 dark:bg-dark-800'}`}>
-                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${isPracticeMode ? 'right-1 bg-white' : 'left-1 bg-zinc-400 dark:bg-zinc-600'}`} />
-                      </div>
-                    </motion.button>
-
-                    <motion.button
-                      whileHover={{ y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setNegativeMarking(!negativeMarking)}
-                      className={`relative p-5 rounded-[28px] border transition-all flex items-center justify-between group overflow-hidden ${negativeMarking ? 'bg-red-500/5 border-red-500/30' : 'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 hover:border-red-500/20'}`}
-                    >
-                      <div className="flex items-center gap-4 z-10">
-                        <div className={`p-3 rounded-2xl transition-colors ${negativeMarking ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-zinc-100 dark:bg-dark-800 text-zinc-500'}`}>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="w-4 h-4"><path d="M18 6 6 18M6 6l12 12" /></svg>
-                        </div>
-                        <div className="text-left">
-                          <p className={`text-sm font-semibold tracking-tight ${negativeMarking ? 'text-red-500' : 'text-zinc-900 dark:text-white'}`}>Negative Marking</p>
-                          <p className="text-[10px] text-zinc-500 font-semibold tracking-wider opacity-60">Strict mode enabled</p>
-                        </div>
-                      </div>
-                      <div className={`w-12 h-6 rounded-full relative transition-colors z-10 ${negativeMarking ? 'bg-red-500' : 'bg-zinc-200 dark:bg-dark-800'}`}>
-                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${negativeMarking ? 'right-1 bg-white' : 'left-1 bg-zinc-400 dark:bg-zinc-600'}`} />
-                      </div>
-                    </motion.button>
-
-                    <motion.button
-                      whileHover={{ y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setIncludeSolved(!includeSolved)}
-                      className={`relative p-5 rounded-[28px] border transition-all flex items-center justify-between group overflow-hidden ${includeSolved ? 'bg-orange-500/5 border-orange-500/30' : 'bg-white/50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5 hover:border-orange-500/20'}`}
-                    >
-                      <div className="flex items-center gap-4 z-10">
-                        <div className={`p-3 rounded-2xl transition-colors ${includeSolved ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'bg-zinc-100 dark:bg-dark-800 text-zinc-500'}`}>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /></svg>
-                        </div>
-                        <div className="text-left">
-                          <p className={`text-sm font-semibold tracking-tight ${includeSolved ? 'text-orange-500' : 'text-zinc-900 dark:text-white'}`}>Include Solved</p>
-                          <p className="text-[10px] text-zinc-500 font-semibold tracking-wider opacity-60">{solvedQuestionIds.size} questions already mastered</p>
-                        </div>
-                      </div>
-                      <div className={`w-12 h-6 rounded-full relative transition-colors z-10 ${includeSolved ? 'bg-orange-500' : 'bg-zinc-200 dark:bg-dark-800'}`}>
-                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all ${includeSolved ? 'right-1 bg-white' : 'left-1 bg-zinc-400 dark:bg-zinc-600'}`} />
-                      </div>
-                    </motion.button>
-                  </div>
-
-                  <div className="pt-8 flex justify-center">
-                    <motion.button
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleGenerate}
-                      className="group relative px-6 py-2.5 rounded-[20px] overflow-hidden"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 bg-[length:200%_auto] animate-gradient-x" />
-                      <div className="relative flex items-center gap-3">
-                        <div className="w-6 h-6 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3 h-3 group-hover:translate-x-0.5 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                        </div>
-                        <span className="text-sm font-semibold text-white drop-shadow-lg">{loading ? 'Processing...' : 'Start Quiz'}</span>
-                      </div>
-                      {/* Outer Glow */}
-                      <div className="absolute inset-0 bg-orange-500/30 blur-3xl group-hover:bg-orange-500/50 transition-all -z-10" />
-                    </motion.button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </div>
-        </div>
-      </div>
+      <OfficialExamPapersExplorer
+        subjects={subjectsWithSyllabi}
+        selectedSubject={selectedSubject}
+        onSelectSubject={(s) => {
+          handleSubjectChange(s);
+          setSelectedUnits([]);
+        }}
+        examPapers={examPapers}
+        isLoading={isFetchingExamPapers || loading}
+        onStartExamPaper={handleStartExamPaper}
+        onSwitchToCustomBuilder={() => {
+          setShowCustomQuizBuilder(true);
+          setDashboardView('custom');
+        }}
+        onBackToDashboard={() => {
+          setShowCustomQuizBuilder(false);
+          setDashboardView('dashboard');
+        }}
+      />
     </div>
   );
 }

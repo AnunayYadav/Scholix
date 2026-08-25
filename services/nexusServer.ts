@@ -1,6 +1,6 @@
 
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
-import { LibraryFile, UserProfile, Folder, QuizQuestion, TimetableData, NexusNotification } from '../types.ts';
+import { LibraryFile, UserProfile, Folder, QuizQuestion, TimetableData, NexusNotification, ExamPaper, ExamCategory } from '../types.ts';
 
 const getEnvVar = (name: string): string => {
   try {
@@ -202,15 +202,25 @@ class NexusServer {
       subject: subjectCode,
       unit,
       topic: q.topic,
-      difficulty: q.difficulty,
+      difficulty: q.difficulty || 'medium',
       question_type: q.questionType || 'MCQ',
       type: q.type || 'mcq',
       question: q.question,
       options: Array.isArray(q.options) ? q.options : [], // JSONB handles arrays automatically
       correct_answer: q.correctAnswer,
-      explanation: q.explanation,
+      explanation: q.explanation || '',
       starter_code: q.starterCode,
-      test_cases: Array.isArray(q.testCases) ? q.testCases : []
+      test_cases: Array.isArray(q.testCases) ? q.testCases : [],
+      exam_type: q.exam_type || 'practice',
+      year: q.year,
+      term: q.term,
+      exam_title: q.exam_title,
+      section: q.section,
+      marks: q.marks || 1,
+      negative_marks: q.negative_marks || 0,
+      source_pdf_id: q.source_pdf_id || null,
+      is_official: q.is_official ?? false,
+      paper_id: q.paper_id || null,
     }));
 
     const { error } = await client
@@ -266,7 +276,6 @@ class NexusServer {
     }
 
     // Increase limit significantly and ensure we fetch all subject questions
-    // Using a larger range for custom generation to avoid missing high-unit questions
     query = query.range(0, 5000).order('unit', { ascending: true });
 
     const { data, error } = await query;
@@ -296,13 +305,10 @@ class NexusServer {
         } else {
           const strAns = String(rawAns).trim();
           if (strAns.length === 1 && /^[A-D]$/i.test(strAns)) {
-            // Handle letters A, B, C, D
             finalCorrectIdx = strAns.toUpperCase().charCodeAt(0) - 65;
           } else if (!isNaN(Number(strAns))) {
-            // Handle numeric strings "0", "1"
             finalCorrectIdx = Number(strAns);
           } else {
-            // Check if matches any option text exactly
             const idx = options.findIndex((opt: any) => 
               String(opt).trim().toLowerCase() === strAns.toLowerCase()
             );
@@ -313,19 +319,223 @@ class NexusServer {
 
       return {
         id: q.id,
-        unit: Number(q.unit),
+        unit: Number(q.unit || 1),
         topic: q.topic,
-        difficulty: q.difficulty,
-        questionType: q.question_type as any,
-        type: q.type as any,
+        difficulty: q.difficulty || 'medium',
+        questionType: q.question_type as any || 'MCQ',
+        type: q.type as any || 'mcq',
         question: q.question,
         options,
         correctAnswer: finalCorrectIdx,
-        explanation: q.explanation,
+        explanation: q.explanation || '',
         starterCode: q.starter_code,
-        testCases: typeof q.test_cases === 'string' ? JSON.parse(q.test_cases) : (q.test_cases || [])
+        testCases: typeof q.test_cases === 'string' ? JSON.parse(q.test_cases) : (q.test_cases || []),
+        exam_type: q.exam_type,
+        year: q.year ? Number(q.year) : undefined,
+        term: q.term,
+        exam_title: q.exam_title,
+        section: q.section,
+        marks: q.marks ? Number(q.marks) : 1,
+        negative_marks: q.negative_marks ? Number(q.negative_marks) : 0,
+        source_pdf_id: q.source_pdf_id,
+        is_official: q.is_official ?? false,
+        paper_id: q.paper_id,
       };
     });
+  }
+
+  /**
+   * Fetch official exam papers catalog (End-Term, Mid-Term, CA, etc.)
+   */
+  static async fetchExamPapers(subjectCode?: string, examType?: string): Promise<ExamPaper[]> {
+    const client = getSupabase();
+    if (!client) return [];
+
+    let query = client.from('exam_papers').select('*');
+    if (subjectCode) {
+      const code = subjectCode.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+      query = query.eq('subject_code', code);
+    }
+    if (examType && examType !== 'all') {
+      query = query.eq('exam_type', examType);
+    }
+
+    query = query.order('year', { ascending: false }).order('created_at', { ascending: false });
+
+    const { data, error } = await query;
+    if (error || !data) {
+      console.warn('Fetch Exam Papers Error:', error);
+      return [];
+    }
+
+    return data as ExamPaper[];
+  }
+
+  /**
+   * Fetch questions for an official exam paper or subject/year/exam_type
+   */
+  static async fetchExamQuestions(params: {
+    paperId?: string;
+    subjectCode?: string;
+    year?: number;
+    examType?: string;
+  }): Promise<QuizQuestion[]> {
+    const client = getSupabase();
+    if (!client) return [];
+
+    let query = client.from('questions').select('*');
+    if (params.paperId) {
+      query = query.eq('paper_id', params.paperId);
+    } else {
+      if (params.subjectCode) {
+        const code = params.subjectCode.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+        query = query.eq('subject', code);
+      }
+      if (params.year) {
+        query = query.eq('year', params.year);
+      }
+      if (params.examType && params.examType !== 'all') {
+        query = query.eq('exam_type', params.examType);
+      }
+    }
+
+    query = query.order('id', { ascending: true }).limit(500);
+
+    const { data, error } = await query;
+    if (error || !data) {
+      console.warn('Fetch Exam Questions Error:', error);
+      return [];
+    }
+
+    return data.map(q => {
+      let options = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || []);
+      if (!Array.isArray(options)) {
+        options = options && typeof options === 'object' ? Object.values(options) : [];
+      }
+      
+      let finalCorrectIdx: number | undefined = undefined;
+      const rawAns = q.correct_answer;
+      if (rawAns !== null && rawAns !== undefined) {
+        if (typeof rawAns === 'number') {
+          finalCorrectIdx = rawAns;
+        } else {
+          const strAns = String(rawAns).trim();
+          if (strAns.length === 1 && /^[A-D]$/i.test(strAns)) {
+            finalCorrectIdx = strAns.toUpperCase().charCodeAt(0) - 65;
+          } else if (!isNaN(Number(strAns))) {
+            finalCorrectIdx = Number(strAns);
+          } else {
+            const idx = options.findIndex((opt: any) => String(opt).trim().toLowerCase() === strAns.toLowerCase());
+            if (idx !== -1) finalCorrectIdx = idx;
+          }
+        }
+      }
+
+      return {
+        id: q.id,
+        unit: Number(q.unit || 1),
+        topic: q.topic,
+        difficulty: q.difficulty || 'medium',
+        questionType: q.question_type as any || 'MCQ',
+        type: q.type as any || 'mcq',
+        question: q.question,
+        options,
+        correctAnswer: finalCorrectIdx,
+        explanation: q.explanation || '',
+        starterCode: q.starter_code,
+        testCases: typeof q.test_cases === 'string' ? JSON.parse(q.test_cases) : (q.test_cases || []),
+        exam_type: q.exam_type,
+        year: q.year ? Number(q.year) : undefined,
+        term: q.term,
+        exam_title: q.exam_title,
+        section: q.section,
+        marks: q.marks ? Number(q.marks) : 1,
+        negative_marks: q.negative_marks ? Number(q.negative_marks) : 0,
+        source_pdf_id: q.source_pdf_id,
+        is_official: q.is_official ?? true,
+        paper_id: q.paper_id,
+      };
+    });
+  }
+
+  /**
+   * Save a complete Exam Paper with its questions
+   */
+  static async saveExamPaperWithQuestions(
+    paper: Partial<ExamPaper>,
+    questions: QuizQuestion[]
+  ): Promise<ExamPaper | null> {
+    const client = getSupabase();
+    if (!client) return null;
+
+    const subjectCode = (paper.subject_code || '').split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+    
+    // 1. Insert or update the exam paper in exam_papers
+    const paperPayload = {
+      id: paper.id || undefined,
+      subject_code: subjectCode,
+      subject_name: paper.subject_name || subjectCode,
+      title: paper.title || `${subjectCode} ${paper.exam_type?.toUpperCase() || 'Exam'} ${paper.year || 2024}`,
+      exam_type: paper.exam_type || 'endterm',
+      year: paper.year || 2024,
+      term: paper.term || 'Regular',
+      duration_minutes: paper.duration_minutes || (paper.exam_type === 'endterm' ? 120 : paper.exam_type === 'midterm' ? 60 : 45),
+      total_marks: paper.total_marks || (paper.exam_type === 'endterm' ? 50 : 30),
+      total_questions: questions.length,
+      source_pdf_id: paper.source_pdf_id || null,
+      is_verified: true,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data: savedPaper, error: paperErr } = await client
+      .from('exam_papers')
+      .upsert([paperPayload])
+      .select()
+      .single();
+
+    if (paperErr) {
+      console.error('Save Exam Paper Error:', paperErr);
+      throw paperErr;
+    }
+
+    const createdPaperId = savedPaper?.id || paper.id;
+
+    // 2. Insert all questions linked to this paper
+    if (questions.length > 0) {
+      const dbRows = questions.map((q, idx) => ({
+        id: q.id || `ep-${createdPaperId}-${idx + 1}`,
+        subject: subjectCode,
+        unit: q.unit || 1,
+        topic: q.topic || paper.title,
+        difficulty: q.difficulty || 'medium',
+        question_type: q.questionType || 'MCQ',
+        type: q.type || 'mcq',
+        question: q.question,
+        options: Array.isArray(q.options) ? q.options : [],
+        correct_answer: q.correctAnswer,
+        explanation: q.explanation || '',
+        starter_code: q.starterCode,
+        test_cases: Array.isArray(q.testCases) ? q.testCases : [],
+        exam_type: paper.exam_type || 'endterm',
+        year: paper.year || 2024,
+        term: paper.term || 'Regular',
+        exam_title: paper.title,
+        section: q.section || (q.marks && q.marks > 1 ? 'Section B' : 'Section A'),
+        marks: q.marks || 1,
+        negative_marks: q.negative_marks || 0,
+        source_pdf_id: paper.source_pdf_id || null,
+        is_official: true,
+        paper_id: createdPaperId,
+      }));
+
+      const { error: qErr } = await client.from('questions').upsert(dbRows, { onConflict: 'id' });
+      if (qErr) {
+        console.error('Save Exam Questions Error:', qErr);
+        throw qErr;
+      }
+    }
+
+    return savedPaper as ExamPaper;
   }
 
   /**

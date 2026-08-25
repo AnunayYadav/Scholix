@@ -229,6 +229,24 @@ export interface ResumeAnalysisResult {
   analysisDate: number;
 }
 
+export type ExamCategory = 'all' | 'endterm' | 'midterm' | 'ca1' | 'ca2' | 'ca3' | 'mock' | 'practice';
+
+export interface ExamPaper {
+  id: string;
+  subject_code: string;
+  subject_name?: string;
+  title: string;
+  exam_type: 'endterm' | 'midterm' | 'ca1' | 'ca2' | 'ca3' | 'mock' | 'practice';
+  year: number;
+  term?: string;
+  duration_minutes: number;
+  total_marks: number;
+  total_questions?: number;
+  source_pdf_id?: string;
+  is_verified?: boolean;
+  created_at?: string;
+}
+
 export interface QuizQuestion {
   id: string;
   unit: number;
@@ -242,6 +260,17 @@ export interface QuizQuestion {
   topic?: string;
   starterCode?: string;
   testCases?: { input: string; output: string; isHidden?: boolean }[];
+  // Official Exam specific properties
+  exam_type?: 'endterm' | 'midterm' | 'ca1' | 'ca2' | 'ca3' | 'mock' | 'practice' | string;
+  year?: number;
+  term?: string;
+  exam_title?: string;
+  section?: string;
+  marks?: number;
+  negative_marks?: number;
+  source_pdf_id?: string;
+  is_official?: boolean;
+  paper_id?: string;
 }
 
 

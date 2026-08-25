@@ -149,8 +149,8 @@ interface QuizDashboardState {
   setStreakToastMessage: (msg: string | null) => void;
 
   // Dashboard view
-  dashboardView: 'dashboard' | 'history' | 'quiz' | 'results';
-  setDashboardView: (view: 'dashboard' | 'history' | 'quiz' | 'results') => void;
+  dashboardView: 'dashboard' | 'history' | 'quiz' | 'results' | 'official' | 'custom';
+  setDashboardView: (view: 'dashboard' | 'history' | 'quiz' | 'results' | 'official' | 'custom') => void;
 
 
   // User completions for today
