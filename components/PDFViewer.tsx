@@ -1,288 +1,48 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
-import { renderAsync } from 'docx-preview';
 import { LibraryFile, UserProfile } from '../types.ts';
-import { showToast } from './Toast.tsx';
-import NexusServer from '../services/nexusServer.ts';
 import { useUniversity } from '../hooks/useUniversity.tsx';
+import NexusServer from '../services/nexusServer.ts';
+import { showToast } from './Toast.tsx';
 
-interface PDFViewerProps {
-    url?: string;
-    fileId?: string;
-    file?: LibraryFile;
-    onClose: (resolvedFile?: LibraryFile) => void;
-    fileName: string;
-    userProfile?: UserProfile | null;
-    onAuthRequired?: () => void;
-}
+// Modular PDF components
+import { PDFViewerProps, SearchResult, PDFOutlineItem, ReadingTheme, ViewFitMode } from './pdf/types.ts';
+import { PDFToolbar } from './pdf/toolbar/PDFToolbar.tsx';
+import { PDFSidebar } from './pdf/sidebar/PDFSidebar.tsx';
+import { PDFPageRenderer } from './pdf/PDFPageRenderer.tsx';
+import { PDFFloatingToolbar } from './pdf/PDFFloatingToolbar.tsx';
+import { DocxRenderer } from './pdf/renderers/DocxRenderer.tsx';
+import { ImageRenderer } from './pdf/renderers/ImageRenderer.tsx';
+import { LegacyDocFallback } from './pdf/renderers/LegacyDocFallback.tsx';
+import { executeSecureDownload } from './pdf/utils/pdfDownloader.ts';
 
-interface SearchResult {
-    pageIndex: number;
-    matchIndex: number;
-    totalMatchesInPage: number;
-}
-
-const PageRenderer = React.memo<{
-    pageNum: number;
-    pdfDoc: any;
-    userProfile: UserProfile | null | undefined;
-    searchQuery: string;
-    currentSearchIndex: number;
-    searchResults: SearchResult[];
-    pdfjsLib: any;
-    registerRef: (pageNum: number, el: HTMLDivElement | null) => void;
-    isInteractingRef: React.MutableRefObject<boolean>;
-}>(({ pageNum, pdfDoc, userProfile, searchQuery, currentSearchIndex, searchResults, pdfjsLib, registerRef, isInteractingRef }) => {
-
-    const containerRef = useRef<HTMLDivElement>(null);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const textLayerRef = useRef<HTMLDivElement>(null);
-    const renderTaskRef = useRef<any>(null);
-    const [pageInfo, setPageInfo] = useState<{ width: number; height: number } | null>(null);
-    const [isRendered, setIsRendered] = useState(false);
-
-    useEffect(() => {
-        let active = true;
-        const render = async () => {
-            if (!pdfDoc || !canvasRef.current || !textLayerRef.current || !pdfjsLib) return;
-
-            if (renderTaskRef.current) {
-                renderTaskRef.current.cancel();
-            }
-
-            try {
-                const page = await pdfDoc.getPage(pageNum);
-                const baseViewport = page.getViewport({ scale: 1.0 });
-                if (!active) return;
-                setPageInfo({ width: baseViewport.width, height: baseViewport.height });
-
-                // Render canvas at a high-quality fixed scale (1.6x base scale * devicePixelRatio)
-                const renderResolution = 1.6;
-                const maxPixelRatio = window.innerWidth < 768 ? 1.5 : 2;
-                const pixelRatio = Math.min(window.devicePixelRatio || 1, maxPixelRatio);
-                const viewport = page.getViewport({ scale: renderResolution * pixelRatio });
-                
-                const canvas = canvasRef.current;
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-
-                const context = canvas.getContext('2d', { alpha: false });
-                if (!context || !active) return;
-
-                renderTaskRef.current = page.render({
-                    canvasContext: context,
-                    viewport: viewport,
-                });
-
-                await renderTaskRef.current.promise;
-                if (!active) return;
-
-                setIsRendered(true);
-
-                // Render text layer at 1.0 base scale
-                while (textLayerRef.current.firstChild) textLayerRef.current.removeChild(textLayerRef.current.firstChild);
-                const textContent = await page.getTextContent();
-                if (!active) return;
-
-                await pdfjsLib.renderTextLayer({
-                    textContentSource: textContent,
-                    container: textLayerRef.current,
-                    viewport: baseViewport,
-                    textDivs: []
-                }).promise;
-
-            } catch (err: any) {
-                if (err.name !== 'RenderingCancelledException') {
-                    console.error('Page render error:', err);
-                }
-            }
-        };
-
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting && active) {
-                    render();
-                    observer.disconnect(); // Render once and cache forever!
-                }
-            },
-            { threshold: 0.01 }
-        );
-
-        if (containerRef.current) observer.observe(containerRef.current);
-
-        return () => {
-            active = false;
-            observer.disconnect();
-            if (renderTaskRef.current) renderTaskRef.current.cancel();
-        };
-    }, [pageNum, pdfDoc, pdfjsLib]);
-
-    // Independent search highlighting effect
-    useEffect(() => {
-        if (!isRendered || !textLayerRef.current) return;
-
-        const marks = textLayerRef.current.querySelectorAll('mark.pdf-search-match');
-        marks.forEach(mark => {
-            const textNode = document.createTextNode(mark.textContent || '');
-            mark.parentNode?.replaceChild(textNode, mark);
-        });
-        textLayerRef.current.normalize();
-
-        if (!searchQuery.trim()) return;
-
-        const spans = textLayerRef.current.querySelectorAll('span');
-        const query = searchQuery.trim().toLowerCase();
-        const regex = new RegExp(`(${query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
-
-        const activeResult = searchResults[currentSearchIndex];
-        const isActivePage = activeResult?.pageIndex === pageNum;
-
-        let globalMatchCount = 0;
-
-        spans.forEach(span => {
-            const originalText = span.textContent || '';
-            if (originalText.toLowerCase().includes(query)) {
-                const fragment = document.createDocumentFragment();
-                let lastIndex = 0;
-                let match: RegExpExecArray | null;
-                const safeRegex = new RegExp(regex.source, regex.flags);
-                while ((match = safeRegex.exec(originalText)) !== null) {
-                    if (match.index > lastIndex) {
-                        fragment.appendChild(document.createTextNode(originalText.slice(lastIndex, match.index)));
-                    }
-                    const mark = document.createElement('mark');
-                    mark.className = `pdf-search-match ${isActivePage && globalMatchCount === activeResult?.matchIndex ? 'active-match' : ''}`;
-                    mark.textContent = match[0];
-                    fragment.appendChild(mark);
-                    globalMatchCount++;
-                    lastIndex = match.index + match[0].length;
-                }
-                if (lastIndex < originalText.length) {
-                    fragment.appendChild(document.createTextNode(originalText.slice(lastIndex)));
-                }
-                span.textContent = '';
-                span.appendChild(fragment);
-            }
-        });
-    }, [searchQuery, currentSearchIndex, searchResults, pageNum, isRendered]);
-
-    // Dedicated effect for scrolling to match
-    const lastScrollMatchRef = useRef<number>(-1);
-    useEffect(() => {
-        if (currentSearchIndex !== lastScrollMatchRef.current && textLayerRef.current) {
-            const activeResult = searchResults[currentSearchIndex];
-            if (activeResult?.pageIndex === pageNum) {
-                const activeEl = textLayerRef.current.querySelector('.active-match');
-                if (activeEl) {
-                    activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    lastScrollMatchRef.current = currentSearchIndex;
-                }
-            }
-        }
-    }, [currentSearchIndex, searchResults, pageNum]);
-
-    return (
-        <div
-            ref={el => {
-                if (el) {
-                    containerRef.current = el;
-                    registerRef(pageNum, el);
-                }
-            }}
-            data-page={pageNum}
-            className="relative bg-white dark:bg-[#0a0a0a] rounded-xl origin-top-left select-none border border-zinc-200 dark:border-white/5 overflow-visible page-container shadow-md"
-            style={{
-                width: pageInfo ? `${pageInfo.width}px` : '100%',
-                height: pageInfo ? `${pageInfo.height}px` : '100%',
-                marginBottom: '24px',
-                contain: 'layout size',
-                willChange: 'transform'
-            } as any}
-        >
-            <div className="absolute inset-0 overflow-hidden rounded-xl">
-                <canvas
-                    ref={canvasRef}
-                    className="absolute inset-0 block w-full h-full rounded-xl"
-                    style={{
-                        backfaceVisibility: 'hidden',
-                        pointerEvents: 'none',
-                    }}
-                />
-
-                <div
-                    ref={textLayerRef}
-                    className="textLayer absolute pointer-events-none select-text z-20 opacity-20 transition-opacity duration-200"
-                    style={{
-                        width: pageInfo ? `${pageInfo.width}px` : '100%',
-                        height: pageInfo ? `${pageInfo.height}px` : '100%',
-                        transform: 'scale(1.0)',
-                        transformOrigin: 'top left',
-                        '--scale-factor': '1.0'
-                    } as any}
-                />
-
-                {/* Optimized Watermark */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.03] select-none z-30 watermark-overlay" />
-            </div>
-            {!isRendered && (
-                <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 dark:bg-[#060606] rounded-xl z-30">
-                    <svg className="w-6 h-6 animate-spin text-zinc-300 dark:text-zinc-800" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" />
-                    </svg>
-                </div>
-            )}
-        </div>
-    );
-});
-
-/**
- * Sanitizes PDF bytes by finding the first occurrence of %PDF- header
- * (0x25, 0x50, 0x44, 0x46, 0x2D) and trimming any BOM or preamble bytes.
- */
-const sanitizePdfBytes = (bytes: Uint8Array): Uint8Array => {
-    if (!bytes || bytes.length < 5) return bytes;
-    if (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46 && bytes[4] === 0x2D) {
-        return bytes;
-    }
-    const pdfHeaderPattern = [0x25, 0x50, 0x44, 0x46, 0x2D];
-    const searchLimit = Math.min(bytes.length - 4, 4096);
-    for (let i = 0; i < searchLimit; i++) {
-        if (
-            bytes[i] === pdfHeaderPattern[0] &&
-            bytes[i + 1] === pdfHeaderPattern[1] &&
-            bytes[i + 2] === pdfHeaderPattern[2] &&
-            bytes[i + 3] === pdfHeaderPattern[3] &&
-            bytes[i + 4] === pdfHeaderPattern[4]
-        ) {
-            return bytes.subarray(i);
-        }
-    }
-    return bytes;
-};
-
-const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileName, userProfile, onAuthRequired }) => {
+const PDFViewer: React.FC<PDFViewerProps> = ({
+    url,
+    fileId,
+    file,
+    onClose,
+    fileName,
+    userProfile,
+    onAuthRequired,
+}) => {
     const { fullBrandName } = useUniversity();
+    const isAdmin = userProfile?.is_admin || false;
 
+    // Document State
     const [numPages, setNumPages] = useState<number>(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [scale, setScale] = useState(1.0);
+    const [viewMode, setViewMode] = useState<ViewFitMode>('width');
     const [isLoading, setIsLoading] = useState(true);
     const [loadProgress, setLoadProgress] = useState(0);
     const [error, setError] = useState<string | null>(null);
     const [pdfDoc, setPdfDoc] = useState<any>(null);
     const [pdfjsLibState, setPdfjsLibState] = useState<any>(null);
-    const [isPrintBlocked, setIsPrintBlocked] = useState(false);
-    const [isDownloading, setIsDownloading] = useState(false);
-
-    const [isFullscreen, setIsFullscreen] = useState(false);
-    const [active, setActive] = useState(false);
-    const targetFileId = fileId || file?.id;
-    const [progressPercent, setProgressPercent] = useState(0);
-    const [hasRestoredPage, setHasRestoredPage] = useState(false);
-    const lastSavedProgress = useRef(0);
-    const lastSavedPage = useRef(1);
+    const [outline, setOutline] = useState<PDFOutlineItem[]>([]);
     const [displayFileName, setDisplayFileName] = useState(fileName);
+    const [active, setActive] = useState(false);
+
+    // Multi-format state
     const [isImage, setIsImage] = useState(false);
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [imageRotation, setImageRotation] = useState(0);
@@ -290,43 +50,57 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
     const [isLegacyDoc, setIsLegacyDoc] = useState(false);
     const [docxBuffer, setDocxBuffer] = useState<ArrayBuffer | null>(null);
     const [docxRenderFailed, setDocxRenderFailed] = useState(false);
-    const docxContainerRef = useRef<HTMLDivElement>(null);
     const rawDocBytesRef = useRef<Uint8Array | null>(null);
+    const pdfBytesRef = useRef<Uint8Array | null>(null);
 
+    // UI & Navigation State
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [showToolbar, setShowToolbar] = useState(true);
+    const [readingTheme, setReadingTheme] = useState<ReadingTheme>(() => {
+        return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    });
+    const [progressPercent, setProgressPercent] = useState(0);
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    // Search State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+    const [searchSnippets, setSearchSnippets] = useState<{ pageIndex: number; snippet: string }[]>([]);
+    const [currentSearchIndex, setCurrentSearchIndex] = useState(-1);
+
+    // Text Selection & Floating Menu State
+    const [floatingMenuPos, setFloatingMenuPos] = useState<{ x: number; y: number } | null>(null);
+    const [selectedText, setSelectedText] = useState('');
+
+    // Refs
+    const containerRef = useRef<HTMLDivElement>(null);
+    const zoomWrapperRef = useRef<HTMLDivElement>(null);
+    const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+    const visiblePages = useRef<Set<number>>(new Set());
+    const observerRef = useRef<IntersectionObserver | null>(null);
+    const scaleRef = useRef(scale);
+    const lastScrollYRef = useRef(0);
+    const pendingUpdate = useRef<{ scale: number; scrollTop?: number } | null>(null);
+    const animationFrameId = useRef<number | null>(null);
+    const zoomingTimeoutRef = useRef<any>(null);
+
+    // Fade-in animation on mount
+    useEffect(() => {
+        const raf = requestAnimationFrame(() => setActive(true));
+        return () => cancelAnimationFrame(raf);
+    }, []);
+
+    // Sync file name
     useEffect(() => {
         setDisplayFileName(fileName);
     }, [fileName]);
 
-    useEffect(() => {
-        if (isDocx && docxBuffer && docxContainerRef.current) {
-            docxContainerRef.current.innerHTML = '';
-            renderAsync(docxBuffer, docxContainerRef.current, undefined, {
-                inWrapper: false,
-                ignoreWidth: false,
-                ignoreHeight: false,
-                breakPages: true
-            }).catch(err => {
-                console.error("DOCX render failed:", err);
-                setDocxRenderFailed(true);
-            });
-        }
-    }, [isDocx, docxBuffer, isLoading]);
-
-    useEffect(() => {
-        const raf = requestAnimationFrame(() => {
-            setActive(true);
-        });
-        return () => cancelAnimationFrame(raf);
-    }, []);
-
-    // Track study time spent viewing this file
+    // Study Time Heartbeat Telemetry (30s)
     const lastTrackTimeRef = useRef<number>(Date.now());
-    const TRACK_INTERVAL = 30000; // 30 seconds
-
     useEffect(() => {
         if (!userProfile?.id) return;
-
-        // Set up the periodic interval to update backend
+        const TRACK_INTERVAL = 30000;
         const intervalId = setInterval(async () => {
             const now = Date.now();
             const elapsedSeconds = Math.floor((now - lastTrackTimeRef.current) / 1000);
@@ -335,187 +109,33 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                 try {
                     await NexusServer.incrementStudyStats({ pdfStudyTime: elapsedSeconds });
                 } catch (e) {
-                    console.error("Failed to update PDF study time heartbeat:", e);
+                    console.error("Study time heartbeat failed:", e);
                 }
             }
         }, TRACK_INTERVAL);
 
-        // Final cleanup to capture remaining seconds
         return () => {
             clearInterval(intervalId);
             const now = Date.now();
             const elapsedSeconds = Math.floor((now - lastTrackTimeRef.current) / 1000);
             if (elapsedSeconds > 0) {
-                NexusServer.incrementStudyStats({ pdfStudyTime: elapsedSeconds }).catch(e => 
-                    console.error("Failed to save final PDF study time:", e)
-                );
+                NexusServer.incrementStudyStats({ pdfStudyTime: elapsedSeconds }).catch(() => {});
             }
         };
     }, [userProfile?.id]);
 
-    const zoomWrapperRef = useRef<HTMLDivElement>(null);
-    const pageOriginalWidthRef = useRef<number>(612);
-    const pdfBytesRef = useRef<Uint8Array | null>(null);
-    const animationFrameId = useRef<number | null>(null);
-    const pendingUpdate = useRef<{
-        scale: number;
-        scrollLeft?: number;
-        scrollTop?: number;
-    } | null>(null);
-
+    // Handle Close
     const handleClose = (resolvedFile?: any) => {
         setActive(false);
         setTimeout(() => {
-            const fileObj = (resolvedFile && typeof resolvedFile === 'object' && 'id' in resolvedFile) ? resolvedFile as LibraryFile : undefined;
+            const fileObj = (resolvedFile && typeof resolvedFile === 'object' && 'id' in resolvedFile)
+                ? resolvedFile as LibraryFile
+                : undefined;
             onClose(fileObj);
         }, 300);
     };
 
-    const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
-    const [showToolbar, setShowToolbar] = useState(true);
-    const lastScrollYRef = useRef(0);
-
-    const toggleTheme = () => {
-        const newTheme = !isDarkMode;
-        setIsDarkMode(newTheme);
-        if (newTheme) {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-        }
-    };
-
-    const handleScroll = (e: React.UIEvent<HTMLElement>) => {
-        const currentScrollY = e.currentTarget.scrollTop;
-        if (currentScrollY > lastScrollYRef.current + 20) {
-            setShowToolbar(false);
-        } else if (currentScrollY < lastScrollYRef.current - 20 || currentScrollY < 50) {
-            setShowToolbar(true);
-        }
-        lastScrollYRef.current = currentScrollY;
-    };
-
-    // Touch/Pinch State
-    const touchState = useRef<{
-        lastDist: number;
-        lastTap: number;
-        lastTapX: number;
-        lastTapY: number;
-        lastFocalX: number;
-        lastFocalY: number;
-        isPinching: boolean;
-        wasScrolling: boolean;
-    }>({
-        lastDist: 0,
-        lastTap: 0,
-        lastTapX: 0,
-        lastTapY: 0,
-        lastFocalX: 0,
-        lastFocalY: 0,
-        isPinching: false,
-        wasScrolling: false
-    });
-
-    // Search State
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-    const [currentSearchIndex, setCurrentSearchIndex] = useState(-1);
-    const [isSearching, setIsSearching] = useState(false);
-    const [viewMode, setViewMode] = useState<'width' | 'page'>('width');
-    const [isZooming, setIsZooming] = useState(false);
-    const zoomTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-    const isAdmin = userProfile?.is_admin || false;
-    const pdfDocRef = useRef<any>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-    const visiblePages = useRef<Set<number>>(new Set());
-    const currentPageRef = useRef(1);
-    const scaleRef = useRef(scale);
-
-    useEffect(() => {
-        currentPageRef.current = currentPage;
-    }, [currentPage]);
-
-    const isInteractingRef = useRef(false);
-    const zoomingTimeoutRef = useRef<any>(null);
-    const observerRef = useRef<IntersectionObserver | null>(null);
-
-    const [isInteracting, setIsInteracting] = useState(false); 
-
-    const getCenteringOffset = useCallback((s: number) => {
-        if (!containerRef.current) return 0;
-        const containerWidth = containerRef.current.clientWidth;
-        const pageWidth = pageOriginalWidthRef.current * s;
-        const padding = window.innerWidth < 768 ? 32 : 64;
-        return Math.max(0, (containerWidth - (pageWidth + padding)) / 2);
-    }, []);
-
-    // Optimized DOM-only scale update via requestAnimationFrame
-    const updateDOMScale = useCallback((currentScale: number, scrollLeft?: number, scrollTop?: number) => {
-        pendingUpdate.current = { scale: currentScale, scrollLeft, scrollTop };
-        
-        if (animationFrameId.current === null) {
-            animationFrameId.current = requestAnimationFrame(() => {
-                if (pendingUpdate.current && containerRef.current) {
-                    const { scale: s, scrollLeft: left, scrollTop: top } = pendingUpdate.current;
-                    containerRef.current.style.setProperty('--pdf-scale', s.toString());
-                    if (left !== undefined) containerRef.current.scrollLeft = left;
-                    if (top !== undefined) containerRef.current.scrollTop = top;
-                }
-                animationFrameId.current = null;
-                pendingUpdate.current = null;
-            });
-        }
-
-        // Sync to React only after interaction settles to prevent re-render churn
-        if (zoomingTimeoutRef.current) clearTimeout(zoomingTimeoutRef.current);
-        zoomingTimeoutRef.current = setTimeout(() => {
-            isInteractingRef.current = false;
-            if (containerRef.current) {
-                containerRef.current.classList.remove('is-zooming');
-            }
-            setScale(currentScale);
-            setIsInteracting(false);
-            
-            // Sync current page after interaction ends
-            if (visiblePages.current.size > 0) {
-                const sorted = Array.from(visiblePages.current).sort((a: number, b: number) => a - b);
-                setCurrentPage(sorted[0]);
-            }
-        }, 200); 
-    }, []);
-
-    const handleZoom = useCallback((nextScale: number) => {
-        const clamped = Math.min(4, Math.max(0.2, nextScale));
-        if (clamped === scaleRef.current) return;
-
-        scaleRef.current = clamped;
-        setScale(clamped);
-
-        const container = containerRef.current;
-        if (!container) return;
-
-        isInteractingRef.current = true;
-        container.classList.add('is-zooming');
-
-        const rect = container.getBoundingClientRect();
-        const focalY = rect.height / 2;
-        const ratio = clamped / scaleRef.current;
-        const nextTop = (container.scrollTop + focalY) * ratio - focalY;
-
-        updateDOMScale(clamped, undefined, nextTop);
-    }, [updateDOMScale]);
-
-    const registerPageRef = useCallback((pageNum: number, el: HTMLDivElement | null) => {
-        pageRefs.current[pageNum] = el;
-        if (el && observerRef.current) {
-            observerRef.current.observe(el);
-        }
-    }, []);
-// Load PDF.js locally to bypass COEP restrictions
+    // Load PDF.js engine and Document
     useEffect(() => {
         document.body.style.overflow = 'hidden';
 
@@ -536,17 +156,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                 setError(null);
 
                 let targetUrl = url;
-                let pdfBytes: Uint8Array | null = null;
-
                 const pathToCheck = file?.storage_path || url || fileName || '';
                 const isImg = /\.(png|jpg|jpeg|webp|svg|gif)$/i.test(pathToCheck);
                 const isDocxFile = /\.docx$/i.test(pathToCheck);
                 const isLegacyDocFile = /\.doc$/i.test(pathToCheck);
 
+                // 1. Image Handler
                 if (isImg) {
                     setIsImage(true);
                     let targetImgUrl = url;
-
                     if (!targetImgUrl && file) {
                         setDisplayFileName(file.name);
                         try {
@@ -558,7 +176,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                                 }
                             }
                         } catch (imgErr) {
-                            console.warn("Direct storage image download failed, falling back...", imgErr);
+                            console.warn("Image direct download failed, trying proxy...", imgErr);
                         }
 
                         if (!targetImgUrl) {
@@ -572,13 +190,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                         setImageUrl(targetImgUrl);
                         setIsLoading(false);
                         setNumPages(1);
-                        if (userProfile && file) {
-                            NexusServer.saveRecord(userProfile.id, 'file_access', `Opened image ${file.name}`, { fileId: file.id, fileName: file.name, path: file.storage_path });
-                        }
                         return;
                     }
                 }
 
+                // 2. Word Document Handler
                 if (isDocxFile || isLegacyDocFile) {
                     if (isDocxFile) setIsDocx(true);
                     if (isLegacyDocFile) setIsLegacyDoc(true);
@@ -595,7 +211,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                                 }
                             }
                         } catch (e) {
-                            console.warn("Direct download failed for Word doc, falling back to proxy...", e);
+                            console.warn("Direct download failed for Word doc:", e);
                         }
 
                         if (!arrayBuffer) {
@@ -607,9 +223,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                                     const resp = await fetch(resolvedUrl, {
                                         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                                     });
-                                    if (resp.ok) {
-                                        arrayBuffer = await resp.arrayBuffer();
-                                    }
+                                    if (resp.ok) arrayBuffer = await resp.arrayBuffer();
                                 }
                             } catch (proxyErr) {
                                 console.warn("Proxy download failed for Word doc:", proxyErr);
@@ -618,9 +232,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     } else if (url) {
                         try {
                             const resp = await fetch(url);
-                            if (resp.ok) {
-                                arrayBuffer = await resp.arrayBuffer();
-                            }
+                            if (resp.ok) arrayBuffer = await resp.arrayBuffer();
                         } catch (urlErr) {
                             console.warn("URL fetch failed for Word doc:", urlErr);
                         }
@@ -628,628 +240,267 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
 
                     if (arrayBuffer) {
                         rawDocBytesRef.current = new Uint8Array(arrayBuffer);
-                        if (isDocxFile) {
-                            setDocxBuffer(arrayBuffer);
-                        }
+                        if (isDocxFile) setDocxBuffer(arrayBuffer);
                         setIsLoading(false);
                         setNumPages(1);
-                        if (userProfile && file) {
-                            NexusServer.saveRecord(userProfile.id, 'file_access', `Opened document ${file.name}`, { fileId: file.id, fileName: file.name, path: file.storage_path });
-                        }
                         return;
                     }
                 }
 
+                // 3. PDF Handler
                 if (!targetUrl && file) {
-                    const fileObj = file;
-                    setDisplayFileName(fileObj.name);
-
-                    // Check if it is a viewable format (PDF, Image, DOCX, DOC)
-                    const isViewableDoc = /\.(pdf|png|jpg|jpeg|webp|svg|gif|docx|doc)$/i.test(fileObj.storage_path || fileObj.name);
-                    if (!isViewableDoc) {
-                        const client = NexusServer.getClient();
-                        if (client) {
-                            try {
-                                const { data, error } = await client.storage.from('nexus-documents').download(fileObj.storage_path);
-                                if (error) throw error;
-                                const blobUrl = URL.createObjectURL(data);
-                                window.open(blobUrl, '_blank');
-                                handleClose(fileObj);
-                                return;
-                            } catch (e) {
-                                console.warn("Direct download failed, falling back to proxy...", e);
-                            }
-                        }
-
-                        const sessionRes = await NexusServer.getSession();
-                        const session = sessionRes?.data?.session;
-                        if (!session) {
-                            showToast("Please login to view this file.", "info");
-                            handleClose();
-                            onAuthRequired?.();
-                            return;
-                        }
-                        const token = session.access_token;
-                        const resolvedUrl = NexusServer.getFileUrl(fileObj.storage_path, token);
-                        if (resolvedUrl) {
-                            window.open(resolvedUrl, '_blank');
-                        }
-                        handleClose(fileObj);
-                        return;
-                    }
-
-                    if (!userProfile) {
-                        showToast("Please login to view this file.", "info");
-                        handleClose();
-                        onAuthRequired?.();
-                        return;
-                    }
-
-                    NexusServer.saveRecord(userProfile.id, 'file_access', `Opened ${fileObj.name}`, { fileId: fileObj.id, fileName: fileObj.name, path: fileObj.storage_path });
-                    try {
-                        if ((fileObj as any).gdrive_file_id) {
-                            const gdriveUrl = `https://drive.google.com/uc?export=download&id=${(fileObj as any).gdrive_file_id}`;
-                            const gRes = await fetch(gdriveUrl);
-                            if (!gRes.ok) throw new Error(`Google Drive download failed with status ${gRes.status}`);
-                            const arrayBuffer = await gRes.arrayBuffer();
-                            pdfBytes = sanitizePdfBytes(new Uint8Array(arrayBuffer));
-                            pdfBytesRef.current = pdfBytes;
-                        } else {
-                            const client = NexusServer.getClient();
-                            if (client) {
-                                const { data, error } = await client.storage.from('nexus-documents').download(fileObj.storage_path);
-                                if (error) {
-                                    console.warn("Direct storage download failed, trying proxy fallback...", error);
-                                    throw error;
-                                }
-                                const arrayBuffer = await data.arrayBuffer();
-                                pdfBytes = sanitizePdfBytes(new Uint8Array(arrayBuffer));
-                                pdfBytesRef.current = pdfBytes;
-                            } else {
-                                throw new Error("Supabase client not initialized.");
-                            }
-                        }
-                    } catch (directErr) {
+                    const client = NexusServer.getClient();
+                    if (client) {
                         try {
-                            const sessionRes = await NexusServer.getSession();
-                            const session = sessionRes?.data?.session;
-                            if (!session) throw new Error("Authentication session not found.");
-                            
-                            const token = session.access_token;
-                            const resolvedUrl = NexusServer.getFileUrl(fileObj.storage_path, token);
-                            const response = await fetch(resolvedUrl, {
-                                headers: {
-                                    'Authorization': `Bearer ${token}`
-                                }
-                            });
-                            if (!response.ok) {
-                                let errorMsg = "Vault access denied.";
-                                try {
-                                    const errJson = await response.json();
-                                    if (errJson && (errJson.error || errJson.message)) {
-                                        errorMsg = `Vault error: ${errJson.error || errJson.message}`;
-                                    }
-                                } catch (_) {}
-                                throw new Error(errorMsg);
+                            const { data, error } = await client.storage.from('nexus-documents').download(file.storage_path);
+                            if (!error && data) {
+                                const buffer = await data.arrayBuffer();
+                                pdfBytesRef.current = new Uint8Array(buffer);
+                                targetUrl = URL.createObjectURL(data);
                             }
-                            const arrayBuffer = await response.arrayBuffer();
-                            pdfBytes = sanitizePdfBytes(new Uint8Array(arrayBuffer));
-                            pdfBytesRef.current = pdfBytes;
-                        } catch (err: any) {
-                            console.error("Failed to fetch PDF from vault:", err);
-                            setError('Failed to retrieve document from storage.');
-                            setIsLoading(false);
-                            return;
+                        } catch (downloadErr) {
+                            console.warn("Direct storage download failed, falling back...", downloadErr);
                         }
                     }
-                } else if (targetUrl) {
-                    try {
-                        let session = null;
-                        if (!targetUrl.startsWith('blob:')) {
-                            const sessionRes = await NexusServer.getSession();
-                            session = sessionRes?.data?.session;
-                        }
-                        const response = await fetch(targetUrl, {
-                            headers: !targetUrl.startsWith('blob:') && session ? {
-                                'Authorization': `Bearer ${session.access_token}`
-                            } : {}
-                        });
-                        if (!response.ok) {
-                            let errorMsg = "Failed to fetch document bytes.";
-                            try {
-                                const errJson = await response.json();
-                                if (errJson && (errJson.error || errJson.message)) {
-                                    errorMsg = `Vault error: ${errJson.error || errJson.message}`;
-                                }
-                            } catch (_) {}
-                            throw new Error(errorMsg);
-                        }
-                        const arrayBuffer = await response.arrayBuffer();
-                        pdfBytes = sanitizePdfBytes(new Uint8Array(arrayBuffer));
-                        pdfBytesRef.current = pdfBytes;
-                    } catch (err: any) {
-                        console.error("Failed to fetch targetUrl bytes:", err);
-                        setError(err.message || 'Failed to retrieve document.');
-                        setIsLoading(false);
-                        return;
-                    }
-                }
 
-                let loadingTask;
-                if (pdfBytes) {
-                    loadingTask = pdfjsLib.getDocument({
-                        data: pdfBytes
-                    });
-                } else if (targetUrl) {
-                    let session = null;
-                    if (!targetUrl.startsWith('blob:')) {
+                    if (!targetUrl) {
                         const sessionRes = await NexusServer.getSession();
-                        session = sessionRes?.data?.session;
+                        const token = sessionRes?.data?.session?.access_token;
+                        targetUrl = NexusServer.getFileUrl(file.storage_path, token) || undefined;
                     }
-                    
-                    // Load PDF progressively using PDF.js native stream & range-request transport
-                    const docParams: any = {
-                        url: targetUrl,
-                        disableRange: targetUrl.startsWith('blob:'),
-                        disableAutoFetch: targetUrl.startsWith('blob:'),
-                        disableStream: targetUrl.startsWith('blob:'),
-                    };
-                    if (!targetUrl.startsWith('blob:')) {
-                        docParams.httpHeaders = {
-                            'Authorization': session ? `Bearer ${session.access_token}` : ''
-                        };
-                    }
-                    loadingTask = pdfjsLib.getDocument(docParams);
-                } else {
-                    return;
                 }
 
-                // Track progressive loading progress
-                loadingTask.onProgress = ({ loaded, total }) => {
-                    if (total > 0) {
-                        setLoadProgress(Math.round((loaded / total) * 100));
-                    } else {
-                        // Fallback progress if total size is unknown
-                        setLoadProgress(prev => Math.min(prev + 5, 90));
+                if (!targetUrl) {
+                    throw new Error("Unable to resolve document URL.");
+                }
+
+                const loadingTask = pdfjsLib.getDocument({
+                    url: targetUrl,
+                    cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+                    cMapPacked: true,
+                });
+
+                loadingTask.onProgress = (progressData: { loaded: number; total: number }) => {
+                    if (progressData.total > 0) {
+                        setLoadProgress(Math.round((progressData.loaded / progressData.total) * 100));
                     }
                 };
 
-                const pdf = await loadingTask.promise;
-                pdfDocRef.current = pdf;
-                setPdfDoc(pdf);
-                setNumPages(pdf.numPages);
-                setLoadProgress(100);
+                const loadedPdf = await loadingTask.promise;
+                setPdfDoc(loadedPdf);
+                setNumPages(loadedPdf.numPages);
 
-                // Get first page to calculate initial scale
-                const firstPage = await pdf.getPage(1);
-                const originalViewport = firstPage.getViewport({ scale: 1.0 });
-                pageOriginalWidthRef.current = originalViewport.width;
-                setScale(window.innerWidth < 768 ? (window.innerWidth - 40) / originalViewport.width : 1.0);
+                // Fetch Table of Contents / Outlines
+                try {
+                    const outlineData = await loadedPdf.getOutline();
+                    if (outlineData && Array.isArray(outlineData)) {
+                        // Resolve page numbers for outline items
+                        const resolvedOutline: PDFOutlineItem[] = [];
+                        for (const item of outlineData) {
+                            let pageNum: number | undefined;
+                            if (item.dest) {
+                                if (typeof item.dest === 'string') {
+                                    const dest = await loadedPdf.getDestination(item.dest);
+                                    if (dest && dest[0]) {
+                                        const pageIndex = await loadedPdf.getPageIndex(dest[0]);
+                                        pageNum = pageIndex + 1;
+                                    }
+                                } else if (Array.isArray(item.dest) && item.dest[0]) {
+                                    const pageIndex = await loadedPdf.getPageIndex(item.dest[0]);
+                                    pageNum = pageIndex + 1;
+                                }
+                            }
+                            resolvedOutline.push({
+                                title: item.title,
+                                dest: item.dest,
+                                pageNumber: pageNum,
+                                items: item.items,
+                            });
+                        }
+                        setOutline(resolvedOutline);
+                    }
+                } catch (outlineErr) {
+                    console.warn("Failed to load PDF outline:", outlineErr);
+                }
 
                 setIsLoading(false);
             } catch (err: any) {
-                console.error('Error loading PDF:', err);
-                setError('Failed to load document.');
+                console.error("PDF viewer loading error:", err);
+                setError(err.message || "Failed to load document.");
                 setIsLoading(false);
             }
         };
 
         initPdf();
 
-        // Security: Enhanced Event Blocking
-        const handleContextMenu = (e: MouseEvent) => e.preventDefault();
-        const handleKeyDown = (e: KeyboardEvent) => {
-            // Block Print, Save, Inspect
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 's' || e.key === 'u' || e.shiftKey && e.key === 'i')) {
-                if (!isAdmin) {
-                    e.preventDefault();
-                    showToast('Security Protocol Active: Download Protected.', 'error');
-                }
-            }
-            // Block F12
-            if (e.key === 'F12' && !isAdmin) {
-                e.preventDefault();
-                showToast('Developer Console Access Prohibited.', 'error');
-            }
-            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-                e.preventDefault();
-                jumpToPage(Math.min(currentPageRef.current + 1, numPages));
-            }
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-                e.preventDefault();
-                jumpToPage(Math.max(currentPageRef.current - 1, 1));
-            }
-        };
-
-        const handleCopy = (e: ClipboardEvent) => {
-            if (!isAdmin) {
-                e.preventDefault();
-                showToast('Content Copying Restricted.', 'error');
-            }
-        };
-
-        const handleBeforePrint = () => {
-            if (!isAdmin) {
-                setIsPrintBlocked(true);
-            }
-        };
-
-        const handleAfterPrint = () => {
-            setIsPrintBlocked(false);
-        };
-
-        window.addEventListener('contextmenu', handleContextMenu);
-        window.addEventListener('keydown', handleKeyDown);
-        window.addEventListener('copy', handleCopy);
-        window.addEventListener('beforeprint', handleBeforePrint);
-        window.addEventListener('afterprint', handleAfterPrint);
-
         return () => {
-            document.body.style.overflow = 'auto';
-            window.removeEventListener('contextmenu', handleContextMenu);
-            window.removeEventListener('keydown', handleKeyDown);
-            window.removeEventListener('copy', handleCopy);
-            window.removeEventListener('beforeprint', handleBeforePrint);
-            window.removeEventListener('afterprint', handleAfterPrint);
-            if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
+            document.body.style.overflow = '';
         };
-    }, [file, isAdmin]);
+    }, [url, file, fileName]);
 
-
-    // Handle Resize
+    // Active page observation during scrolling
     useEffect(() => {
-        const handleResize = () => {
-            if (window.innerWidth < 768) {
-                // Potential auto-adjust logic here
-            }
-        };
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+        if (!containerRef.current || numPages === 0) return;
 
-    const fitToWidth = async () => {
-        if (!pdfDocRef.current) return;
-        const page = await pdfDocRef.current.getPage(1);
-        const originalViewport = page.getViewport({ scale: 1.0 });
-        const containerWidth = containerRef.current?.clientWidth || window.innerWidth;
-        const padding = window.innerWidth < 768 ? 20 : 120; // More padding for desktop centering
-        const newScale = (containerWidth - padding) / originalViewport.width;
-        handleZoom(newScale);
-        setViewMode('page'); // Next click will fit to page
-    };
-
-    const fitToPage = async () => {
-        if (!pdfDocRef.current) return;
-        const page = await pdfDocRef.current.getPage(1);
-        const originalViewport = page.getViewport({ scale: 1.0 });
-        const containerHeight = containerRef.current?.clientHeight || window.innerHeight;
-        // Subtract toolbar (80px) and padding (80px)
-        const availableHeight = containerHeight - 160;
-        const newScale = availableHeight / originalViewport.height;
-        handleZoom(newScale);
-        setViewMode('width'); // Next click will fit to width
-    };
-
-    const toggleFit = () => {
-        if (viewMode === 'width') {
-            fitToWidth();
-        } else {
-            fitToPage();
-        }
-    };
-
-    useEffect(() => {
-        scaleRef.current = scale;
-        if (containerRef.current) {
-            containerRef.current.style.setProperty('--pdf-scale', scale.toString());
-        }
-    }, [scale]);
-
-
-    // Simplified focal point logic removed in favor of direct gesture scroll handling
-
-    // Native Non-Passive Event Listeners for Touch/Wheel to guarantee smoothness
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
-
-        const handleWheel = (e: WheelEvent) => {
-            if (e.ctrlKey) {
-                e.preventDefault();
-                isInteractingRef.current = true;
-                setIsInteracting(true);
-                container.classList.add('is-zooming');
-
-                // Normalize delta to keep trackpads fast/sensitive and mice capped/smooth
-                const deltaY = Math.min(Math.max(e.deltaY, -25), 25);
-                const factor = Math.exp(-deltaY * 0.015);
-                const nextScale = Math.min(Math.max(0.3, scaleRef.current * factor), 4);
-
-                const rect = container.getBoundingClientRect();
-                const focalY = e.clientY - rect.top;
-                const ratio = nextScale / scaleRef.current;
-                const nextTop = (container.scrollTop + focalY) * ratio - focalY;
-
-                scaleRef.current = nextScale;
-                updateDOMScale(nextScale, undefined, nextTop);
-            }
-        };
-
-        const onTouchStart = (e: TouchEvent) => {
-            if (e.touches.length === 2) {
-                e.preventDefault();
-                const touch1 = e.touches[0];
-                const touch2 = e.touches[1];
-                touchState.current.isPinching = true;
-                touchState.current.lastDist = Math.hypot(
-                    touch1.pageX - touch2.pageX,
-                    touch1.pageY - touch2.pageY
-                );
-                touchState.current.lastFocalX = (touch1.clientX + touch2.clientX) / 2;
-                touchState.current.lastFocalY = (touch1.clientY + touch2.clientY) / 2;
-                isInteractingRef.current = true;
-                setIsInteracting(true);
-                container.classList.add('is-zooming');
-            } else if (e.touches.length === 1) {
-                const touch = e.touches[0];
-                const now = Date.now();
-                const { lastTap, lastTapX, lastTapY } = touchState.current;
-                const dist = Math.hypot(touch.clientX - lastTapX, touch.clientY - lastTapY);
-
-                if (now - lastTap < 300 && dist < 30) {
-                    e.preventDefault();
-                    const rect = container.getBoundingClientRect();
-                    const focalY = touch.clientY - rect.top;
-                    const nextScale = scaleRef.current > 1.2 ? 1.0 : 2.0;
-                    const ratio = nextScale / scaleRef.current;
-                    const nextTop = (container.scrollTop + focalY) * ratio - focalY;
-
-                    scaleRef.current = nextScale;
-                    updateDOMScale(nextScale, undefined, nextTop);
-                    touchState.current.lastTap = 0;
-                } else {
-                    touchState.current.lastTap = now;
-                }
-                touchState.current.lastTapX = touch.clientX;
-                touchState.current.lastTapY = touch.clientY;
-                touchState.current.wasScrolling = false;
-            }
-        };
-
-        const onTouchMove = (e: TouchEvent) => {
-            if (touchState.current.isPinching && e.touches.length === 2) {
-                e.preventDefault();
-                const touch1 = e.touches[0];
-                const touch2 = e.touches[1];
-                const dist = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
-                const currentFocalY = (touch1.clientY + touch2.clientY) / 2;
-
-                if (touchState.current.lastDist > 0) {
-                    const ratio = dist / touchState.current.lastDist;
-                    const nextScale = Math.min(Math.max(0.3, scaleRef.current * ratio), 4);
-
-                    const rect = container.getBoundingClientRect();
-                    const localFocalY = currentFocalY - rect.top;
-
-                    const deltaY = currentFocalY - touchState.current.lastFocalY;
-                    const translatedScrollTop = container.scrollTop - deltaY;
-                    const realRatio = nextScale / scaleRef.current;
-                    const nextTop = (translatedScrollTop + localFocalY) * realRatio - localFocalY;
-
-                    scaleRef.current = nextScale;
-                    updateDOMScale(nextScale, undefined, nextTop);
-                }
-                touchState.current.lastDist = dist;
-                touchState.current.lastFocalY = currentFocalY;
-            } else if (e.touches.length === 1) {
-                touchState.current.wasScrolling = true;
-            }
-        };
-
-        const onTouchEnd = () => {
-            if (touchState.current.wasScrolling) {
-                touchState.current.lastTap = 0;
-            }
-            touchState.current.isPinching = false;
-            touchState.current.lastDist = 0;
-            // No direct isInteractingRef.current = false here, let the timeout handle it
-            // for smoother transition between pinch-stop and redraw
-        };
-
-        container.addEventListener('wheel', handleWheel, { passive: false });
-        container.addEventListener('touchstart', onTouchStart, { passive: false });
-        container.addEventListener('touchmove', onTouchMove, { passive: false });
-        container.addEventListener('touchend', onTouchEnd);
-
-        return () => {
-            container.removeEventListener('wheel', handleWheel);
-            container.removeEventListener('touchstart', onTouchStart);
-            container.removeEventListener('touchmove', onTouchMove);
-            container.removeEventListener('touchend', onTouchEnd);
-        };
-    }, [updateDOMScale]);
-
-    // Intersection Observer for lazy loading and current page tracking
-    useEffect(() => {
-        if (!numPages) return;
-
-        const observer = new IntersectionObserver(
+        observerRef.current = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
-                    const pageNum = parseInt(entry.target.getAttribute('data-page') || '0');
+                    const page = Number(entry.target.getAttribute('data-page'));
                     if (entry.isIntersecting) {
-                        visiblePages.current.add(pageNum);
+                        visiblePages.current.add(page);
                     } else {
-                        visiblePages.current.delete(pageNum);
+                        visiblePages.current.delete(page);
                     }
                 });
 
                 if (visiblePages.current.size > 0) {
-                    const sorted = Array.from(visiblePages.current).sort((a: number, b: number) => a - b);
-                    if (!isInteractingRef.current) {
-                        setCurrentPage(sorted[0]);
-                    }
+                    const sorted = Array.from<number>(visiblePages.current).sort((a, b) => a - b);
+                    const topPage: number = sorted[0];
+                    setCurrentPage(topPage);
+                    setProgressPercent(Math.round((topPage / numPages) * 100));
                 }
             },
-            { threshold: 0, rootMargin: '20%' } // Zero threshold handles extreme zoom cases
+            {
+                root: containerRef.current,
+                threshold: 0.1,
+            }
         );
 
-        observerRef.current = observer;
-
-        // Observe all currently registered pages
-        const currentRefs = pageRefs.current;
-        Object.values(currentRefs).forEach(ref => {
-            if (ref) observer.observe(ref as Element);
-        });
-
         return () => {
-            observer.disconnect();
-            observerRef.current = null;
+            observerRef.current?.disconnect();
         };
-    }, [numPages, isLoading, pdfDoc]);
+    }, [numPages]);
 
-    const jumpToPage = (pageNum: number) => {
-        const target = pageRefs.current[pageNum];
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
+    const registerPageRef = useCallback((pageNum: number, el: HTMLDivElement | null) => {
+        pageRefs.current[pageNum] = el;
+        if (el && observerRef.current) {
+            observerRef.current.observe(el);
         }
-    };
-
-    // 1. Fetch initial progress and last read page from Supabase
-    useEffect(() => {
-        if (!userProfile?.id || !targetFileId) return;
-
-        let active = true;
-        const loadInitialProgress = async () => {
-            try {
-                const data = await NexusServer.fetchDocumentProgress(targetFileId);
-                if (data && active) {
-                    setProgressPercent(data.progress_percentage || 0);
-                    lastSavedProgress.current = data.progress_percentage || 0;
-                    if (data.last_read_page) {
-                        lastSavedPage.current = data.last_read_page;
-                    }
-                }
-            } catch (e) {
-                console.error("Error loading initial document progress:", e);
-            }
-        };
-
-        loadInitialProgress();
-        return () => {
-            active = false;
-        };
-    }, [targetFileId, userProfile?.id]);
-
-    // 2. Restore reading scroll position once pdfDoc is loaded
-    useEffect(() => {
-        if (pdfDoc && !hasRestoredPage && targetFileId && userProfile?.id) {
-            const restorePage = async () => {
-                try {
-                    const data = await NexusServer.fetchDocumentProgress(targetFileId);
-                    if (data && data.last_read_page && data.last_read_page > 1) {
-                        // Wait slightly for canvas/page nodes to register in DOM, then scroll
-                        setTimeout(() => {
-                            jumpToPage(data.last_read_page);
-                        }, 800);
-                    }
-                    setHasRestoredPage(true);
-                } catch (e) {
-                    console.error("Error restoring page:", e);
-                    setHasRestoredPage(true);
-                }
-            };
-            restorePage();
-        }
-    }, [pdfDoc, targetFileId, userProfile?.id, hasRestoredPage]);
-
-    // 3. Debounced tracking of page scroll to save reading progress
-    useEffect(() => {
-        if (!targetFileId || numPages <= 0 || !userProfile?.id) return;
-
-        const calculatedProgress = Math.round((currentPage / numPages) * 100);
-        setProgressPercent(calculatedProgress);
-
-        const delayDbSave = setTimeout(async () => {
-            // Only upsert if progress has increased OR the current page has changed
-            if (calculatedProgress !== lastSavedProgress.current || currentPage !== lastSavedPage.current) {
-                lastSavedProgress.current = calculatedProgress;
-                lastSavedPage.current = currentPage;
-
-                try {
-                    await NexusServer.updateDocumentProgress(targetFileId, calculatedProgress, currentPage);
-                } catch (e) {
-                    console.error("Failed to save document reading progress:", e);
-                }
-            }
-        }, 2000); // 2 second debounce to prevent network write spam
-
-        return () => clearTimeout(delayDbSave);
-    }, [currentPage, numPages, targetFileId, userProfile?.id]);
-
-    const toggleFullscreen = () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                showToast(`Error attempting to enable full-screen mode: ${err.message}`, 'error');
-            });
-            setIsFullscreen(true);
-        } else {
-            document.exitFullscreen();
-            setIsFullscreen(false);
-        }
-    };
-
-    useEffect(() => {
-        const handleFullscreenChange = () => {
-            setIsFullscreen(!!document.fullscreenElement);
-        };
-        document.addEventListener('fullscreenchange', handleFullscreenChange);
-        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
     }, []);
 
-    // Search Implementation
-    const performSearch = async () => {
-        if (!searchQuery.trim() || !pdfDocRef.current) {
+    // 2-Phase Zoom: GPU CSS Scale + Debounced crisp state sync
+    const updateDOMScale = useCallback((currentScale: number, scrollTop?: number) => {
+        pendingUpdate.current = { scale: currentScale, scrollTop };
+
+        if (animationFrameId.current === null) {
+            animationFrameId.current = requestAnimationFrame(() => {
+                if (pendingUpdate.current && containerRef.current) {
+                    const { scale: s, scrollTop: top } = pendingUpdate.current;
+                    containerRef.current.style.setProperty('--pdf-scale', s.toString());
+                    if (top !== undefined) containerRef.current.scrollTop = top;
+                }
+                animationFrameId.current = null;
+                pendingUpdate.current = null;
+            });
+        }
+
+        if (zoomingTimeoutRef.current) clearTimeout(zoomingTimeoutRef.current);
+        zoomingTimeoutRef.current = setTimeout(() => {
+            setScale(currentScale);
+            scaleRef.current = currentScale;
+        }, 220);
+    }, []);
+
+    const handleZoom = useCallback((nextScale: number) => {
+        const clamped = Math.min(3.5, Math.max(0.3, nextScale));
+        if (clamped === scaleRef.current) return;
+
+        const container = containerRef.current;
+        if (!container) return;
+
+        const rect = container.getBoundingClientRect();
+        const focalY = rect.height / 2;
+        const ratio = clamped / scaleRef.current;
+        const nextTop = (container.scrollTop + focalY) * ratio - focalY;
+
+        scaleRef.current = clamped;
+        updateDOMScale(clamped, nextTop);
+    }, [updateDOMScale]);
+
+    const toggleFit = useCallback(() => {
+        if (!containerRef.current) return;
+        const containerWidth = containerRef.current.clientWidth - 48;
+        if (viewMode === 'width') {
+            // Switch to fit whole page
+            const containerHeight = containerRef.current.clientHeight - 80;
+            const targetScale = Math.min(containerWidth / 612, containerHeight / 792, 1.0);
+            setViewMode('page');
+            handleZoom(targetScale);
+        } else {
+            // Fit to width
+            const targetScale = Math.min(2.0, Math.max(0.6, containerWidth / 612));
+            setViewMode('width');
+            handleZoom(targetScale);
+        }
+    }, [viewMode, handleZoom]);
+
+    // Jump to specific page
+    const jumpToPage = useCallback((pageNum: number) => {
+        const target = Math.max(1, Math.min(numPages, pageNum));
+        setCurrentPage(target);
+        const pageEl = pageRefs.current[target];
+        if (pageEl) {
+            pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [numPages]);
+
+    // In-document Search Engine
+    const performSearch = useCallback(async () => {
+        if (!searchQuery.trim() || !pdfDoc) {
             setSearchResults([]);
+            setSearchSnippets([]);
             setCurrentSearchIndex(-1);
             return;
         }
 
-        setIsSearching(true);
+        const query = searchQuery.trim().toLowerCase();
         const results: SearchResult[] = [];
-        const query = searchQuery.toLowerCase();
+        const snippets: { pageIndex: number; snippet: string }[] = [];
 
-        for (let i = 1; i <= numPages; i++) {
-            const page = await pdfDocRef.current.getPage(i);
-            const textContent = await page.getTextContent();
+        for (let i = 1; i <= pdfDoc.numPages; i++) {
+            try {
+                const page = await pdfDoc.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map((item: any) => item.str).join(' ');
+                const pageTextLower = pageText.toLowerCase();
 
-            // Search within individual items for more precise match counting per span
-            let pageMatchCount = 0;
-            textContent.items.forEach((item: any) => {
-                const str = item.str.toLowerCase();
-                let pos = str.indexOf(query);
-                while (pos !== -1) {
+                let matchIndex = 0;
+                let lastPos = 0;
+                while ((lastPos = pageTextLower.indexOf(query, lastPos)) !== -1) {
                     results.push({
                         pageIndex: i,
-                        matchIndex: pageMatchCount,
-                        totalMatchesInPage: 0
+                        matchIndex,
+                        totalMatchesInPage: 0,
                     });
-                    pageMatchCount++;
-                    pos = str.indexOf(query, pos + 1);
+
+                    // Build snippet around the match
+                    const snippetStart = Math.max(0, lastPos - 40);
+                    const snippetEnd = Math.min(pageText.length, lastPos + query.length + 40);
+                    const snippet = (snippetStart > 0 ? '...' : '') +
+                        pageText.substring(snippetStart, snippetEnd).trim() +
+                        (snippetEnd < pageText.length ? '...' : '');
+
+                    snippets.push({ pageIndex: i, snippet });
+
+                    matchIndex++;
+                    lastPos += query.length;
                 }
-            });
+            } catch (searchErr) {
+                console.warn(`Search failed on page ${i}:`, searchErr);
+            }
         }
 
-
         setSearchResults(results);
-        setIsSearching(false);
+        setSearchSnippets(snippets);
+
         if (results.length > 0) {
             setCurrentSearchIndex(0);
             jumpToPage(results[0].pageIndex);
         } else {
             setCurrentSearchIndex(-1);
+            showToast(`No matches found for "${searchQuery}"`, 'info');
         }
-    };
+    }, [searchQuery, pdfDoc, jumpToPage]);
 
     const nextSearch = () => {
         if (searchResults.length === 0) return;
@@ -1265,331 +516,106 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
         jumpToPage(searchResults[prev].pageIndex);
     };
 
-    // 💾 Authenticated Download with Cover Page & Watermark
-    const handleDownload = async () => {
-        if (isDownloading) return;
-        if (!url && !file && !pdfBytesRef.current) return;
-
-        const STORAGE_KEY = 'nexus_pdf_downloads';
-        const today = new Date().toISOString().split('T')[0];
-        if (!isAdmin) {
-            try {
-                const records = await NexusServer.fetchRecords(userProfile ? userProfile.id : null, 'pdf_download');
-                const todayStr = new Date().toDateString();
-                const todayDownloads = records.filter(r => {
-                    if (!r.created_at) return false;
-                    return new Date(r.created_at).toDateString() === todayStr;
-                });
-                
-                if (todayDownloads.length >= 3) {
-                    showToast('Daily limit (3 downloads) reached. Please try again tomorrow.', 'error');
-                    return;
-                }
-            } catch (e) {
-                console.warn("Could not check download history from registry, falling back to local cache", e);
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) {
-                    const parsed = JSON.parse(stored);
-                    if (parsed.date === today && parsed.count >= 3) {
-                        showToast('Daily limit (3 downloads) reached. Please try again tomorrow.', 'error');
-                        return;
-                    }
-                }
-            }
-        }
-
-        setIsDownloading(true);
-        try {
-            showToast('Preparing Secure Download...', 'info');
-            
-            let originalPdfBytes: Uint8Array | null = pdfBytesRef.current;
-
-            if (!originalPdfBytes || originalPdfBytes.length === 0) {
-                if (file) {
-                    const client = NexusServer.getClient();
-                    if (client) {
-                        try {
-                            const { data, error } = await client.storage.from('nexus-documents').download(file.storage_path);
-                            if (!error && data) {
-                                const buffer = await data.arrayBuffer();
-                                originalPdfBytes = new Uint8Array(buffer);
-                            }
-                        } catch (e) {
-                            console.warn("Direct download failed in handleDownload, trying proxy...", e);
-                        }
-                    }
-                    if (!originalPdfBytes) {
-                        const sessionRes = await NexusServer.getSession();
-                        const token = sessionRes?.data?.session?.access_token;
-                        const resolvedUrl = NexusServer.getFileUrl(file.storage_path, token);
-                        if (resolvedUrl) {
-                            const resp = await fetch(resolvedUrl, {
-                                headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-                            });
-                            if (resp.ok) {
-                                const buffer = await resp.arrayBuffer();
-                                originalPdfBytes = new Uint8Array(buffer);
-                            }
-                        }
-                    }
-                } else if (url) {
-                    const sessionRes = await NexusServer.getSession();
-                    const token = sessionRes?.data?.session?.access_token;
-                    const fetchOptions: RequestInit = {};
-                    if (!url.startsWith('blob:') && token) {
-                        fetchOptions.headers = { 'Authorization': `Bearer ${token}` };
-                    }
-                    const pdfResponse = await fetch(url, fetchOptions);
-                    if (pdfResponse.ok) {
-                        const fetchedArrayBuffer = await pdfResponse.arrayBuffer();
-                        originalPdfBytes = new Uint8Array(fetchedArrayBuffer);
-                    } else {
-                        let errorMsg = "Vault re-verification failed.";
-                        try {
-                            const errJson = await pdfResponse.json();
-                            if (errJson && (errJson.error || errJson.message)) {
-                                errorMsg = `Vault error: ${errJson.error || errJson.message}`;
-                            }
-                        } catch (_) {}
-                        throw new Error(errorMsg);
-                    }
-                }
-            }
-
-            if (!originalPdfBytes || originalPdfBytes.length === 0) {
-                throw new Error("Unable to retrieve document source file.");
-            }
-
-            // If this is a Word Document (.docx / .doc), Image, or non-PDF file, download the original bytes directly
-            if (isDocx || isLegacyDoc || isImage || !displayFileName.toLowerCase().endsWith('.pdf')) {
-                const downloadBlob = new Blob([originalPdfBytes as any]);
-                const blobUrl = URL.createObjectURL(downloadBlob);
-                const link = document.createElement('a');
-                link.href = blobUrl;
-                const downloadName = displayFileName || fileName || 'document';
-                link.setAttribute('download', downloadName);
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
-
-                if (!isAdmin) {
-                    try {
-                        await NexusServer.saveRecord(
-                            userProfile ? userProfile.id : null,
-                            'pdf_download',
-                            `Downloaded ${downloadName}`,
-                            { fileId: fileId || (file ? file.id : undefined), fileName: downloadName }
-                        );
-                    } catch (dbErr) {
-                        console.error("Failed to save download record to registry:", dbErr);
-                    }
-                }
-
-                showToast('Download Verified & Complete.', 'success');
-                setIsDownloading(false);
-                return;
-            }
-
-            // Sanitize PDF bytes to trim BOM / preambles before %PDF-
-            originalPdfBytes = sanitizePdfBytes(originalPdfBytes);
-            pdfBytesRef.current = originalPdfBytes;
-
-            // Validate that sanitized bytes contain valid PDF header
-            const isPdfHeaderPresent = (
-                originalPdfBytes.length >= 5 &&
-                originalPdfBytes[0] === 0x25 && // %
-                originalPdfBytes[1] === 0x50 && // P
-                originalPdfBytes[2] === 0x44 && // D
-                originalPdfBytes[3] === 0x46 && // F
-                originalPdfBytes[4] === 0x2D    // -
-            );
-
-            if (!isPdfHeaderPresent) {
-                // Check if response body is JSON or HTML error page
-                const textPreview = new TextDecoder().decode(originalPdfBytes.subarray(0, 300)).trim();
-                if (textPreview.startsWith('{') || textPreview.startsWith('[')) {
-                    try {
-                        const errJson = JSON.parse(textPreview);
-                        throw new Error(errJson.error || errJson.message || "Server returned an error response.");
-                    } catch (e: any) {
-                        if (e.message && !e.message.startsWith("JSON")) throw e;
-                    }
-                } else if (textPreview.toLowerCase().includes('<html') || textPreview.toLowerCase().includes('<!doctype')) {
-                    throw new Error("Document session expired or invalid server response.");
-                }
-                throw new Error("Invalid document format: No PDF header found.");
-            }
-
-            let downloadBlob: Blob;
-
-            try {
-                // 2. Fetch the cover page image if available
-                let coverImageBytes: ArrayBuffer | null = null;
-                try {
-                    const coverResponse = await fetch('/pdfcover.png');
-                    if (coverResponse.ok) {
-                        coverImageBytes = await coverResponse.arrayBuffer();
-                    }
-                } catch (coverErr) {
-                    console.warn("Cover image fetch skipped:", coverErr);
-                }
-
-                // 3. Load original PDF and create output PDF with pdf-lib
-                const originalPdf = await PDFDocument.load(originalPdfBytes, { ignoreEncryption: true });
-                const finalPdf = await PDFDocument.create();
-
-                // 4. Copy first page from original PDF
-                const [firstPage] = await finalPdf.copyPages(originalPdf, [0]);
-                finalPdf.addPage(firstPage);
-
-                // 5. Add cover image as second page (if available)
-                if (coverImageBytes) {
-                    const origFirstPage = originalPdf.getPage(0);
-                    const { width: pageWidth, height: pageHeight } = origFirstPage.getSize();
-
-                    const coverImage = await finalPdf.embedPng(coverImageBytes);
-                    const coverDims = coverImage.scale(1);
-
-                    const scaleX = pageWidth / coverDims.width;
-                    const scaleY = pageHeight / coverDims.height;
-                    const fitScale = Math.min(scaleX, scaleY);
-                    const drawWidth = coverDims.width * fitScale;
-                    const drawHeight = coverDims.height * fitScale;
-
-                    const coverPage = finalPdf.addPage([pageWidth, pageHeight]);
-                    coverPage.drawImage(coverImage, {
-                        x: (pageWidth - drawWidth) / 2,
-                        y: (pageHeight - drawHeight) / 2,
-                        width: drawWidth,
-                        height: drawHeight,
-                    });
-                }
-
-                // 6. Copy remaining pages from original PDF
-                const remainingIndices = originalPdf.getPageIndices().slice(1);
-                if (remainingIndices.length > 0) {
-                    const remainingPages = await finalPdf.copyPages(originalPdf, remainingIndices);
-                    remainingPages.forEach(p => finalPdf.addPage(p));
-                }
-
-                // 6.5 Apply watermark & footer to all content pages
-                const helveticaBoldFont = await finalPdf.embedFont(StandardFonts.HelveticaBold);
-                const helveticaFont = await finalPdf.embedFont(StandardFonts.Helvetica);
-                const watermarkText = 'SCHOLIX';
-                const watermarkSize = 60;
-                const pages = finalPdf.getPages();
-                
-                for (let i = 0; i < pages.length; i++) {
-                    if (coverImageBytes && i === 1) continue; // Skip cover page
-                    
-                    const page = pages[i];
-                    const { width, height } = page.getSize();
-                    
-                    const textWidth = helveticaBoldFont.widthOfTextAtSize(watermarkText, watermarkSize);
-                    const textHeight = watermarkSize;
-                    
-                    const rad = 45 * Math.PI / 180;
-                    const cosTheta = Math.cos(rad);
-                    const sinTheta = Math.sin(rad);
-                    
-                    const cxRel = (textWidth / 2) * cosTheta - (textHeight / 2) * sinTheta;
-                    const cyRel = (textWidth / 2) * sinTheta + (textHeight / 2) * cosTheta;
-                    
-                    const x0 = (width / 2) - cxRel;
-                    const y0 = (height / 2) - cyRel;
-                    
-                    page.drawText(watermarkText, {
-                        x: x0,
-                        y: y0,
-                        size: watermarkSize,
-                        font: helveticaBoldFont,
-                        color: rgb(0.7, 0.7, 0.7),
-                        opacity: 0.12,
-                        rotate: degrees(45),
-                    });
-
-                    const footerText = 'Downloaded from scholix.app | Secure Learning Platform';
-                    const footerSize = 8;
-                    const footerWidth = helveticaFont.widthOfTextAtSize(footerText, footerSize);
-                    
-                    page.drawText(footerText, {
-                        x: (width - footerWidth) / 2,
-                        y: 20,
-                        size: footerSize,
-                        font: helveticaFont,
-                        color: rgb(0.5, 0.5, 0.5),
-                        opacity: 0.4,
-                    });
-                }
-
-                const finalPdfBytes = await finalPdf.save();
-                downloadBlob = new Blob([finalPdfBytes as any], { type: 'application/pdf' });
-            } catch (pdfLibErr) {
-                console.warn("pdf-lib enhancement failed, falling back to raw PDF bytes download:", pdfLibErr);
-                downloadBlob = new Blob([originalPdfBytes as any], { type: 'application/pdf' });
-            }
-
-            const blobUrl = URL.createObjectURL(downloadBlob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            const baseName = (displayFileName || fileName || 'document.pdf').replace(/\.pdf$/i, '');
-            const downloadName = `(scholix.app) ${baseName}.pdf`;
-            link.setAttribute('download', downloadName);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
-            
-            if (!isAdmin) {
-                try {
-                    await NexusServer.saveRecord(
-                        userProfile ? userProfile.id : null,
-                        'pdf_download',
-                        `Downloaded ${fileName}`,
-                        { fileId: fileId || (file ? file.id : undefined), fileName: fileName }
-                    );
-                } catch (dbErr) {
-                    console.error("Failed to save download record to registry:", dbErr);
-                }
-
-                try {
-                    const stored = localStorage.getItem('nexus_pdf_downloads');
-                    let count = 0;
-                    const today = new Date().toISOString().split('T')[0];
-                    if (stored) {
-                        const parsed = JSON.parse(stored);
-                        if (parsed.date === today) count = parsed.count;
-                    }
-                    localStorage.setItem('nexus_pdf_downloads', JSON.stringify({ date: today, count: count + 1 }));
-                } catch (e) {
-                    console.warn("Could not update download history", e);
-                }
-            }
-
-            showToast('Download Verified & Complete.', 'success');
-        } catch (err: any) {
-            console.error("Download failure:", err);
-            showToast(err?.message || 'Download Blocked: Protocol Fault.', 'error');
-        } finally {
-            setIsDownloading(false);
+    // Text Selection Event Listener for Floating Action Bar
+    const handleMouseUp = () => {
+        const selection = window.getSelection();
+        if (selection && selection.toString().trim().length > 2) {
+            const range = selection.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+            setSelectedText(selection.toString());
+            setFloatingMenuPos({
+                x: rect.left + rect.width / 2,
+                y: rect.top,
+            });
+        } else {
+            setFloatingMenuPos(null);
+            setSelectedText('');
         }
     };
 
+    // Fullscreen Toggle
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+            setIsFullscreen(true);
+        } else {
+            document.exitFullscreen().catch(() => {});
+            setIsFullscreen(false);
+        }
+    };
 
-    // Thumbnail Renderer Removed
+    // Scroll Handler for Toolbar Autohide
+    const handleScroll = (e: React.UIEvent<HTMLElement>) => {
+        const currentScrollY = e.currentTarget.scrollTop;
+        if (currentScrollY > lastScrollYRef.current + 30 && currentScrollY > 100) {
+            setShowToolbar(false);
+        } else if (currentScrollY < lastScrollYRef.current - 20 || currentScrollY < 60) {
+            setShowToolbar(true);
+        }
+        lastScrollYRef.current = currentScrollY;
+    };
+
+    // Keyboard Shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+            if (e.key === 'Escape') {
+                if (isSidebarOpen) setIsSidebarOpen(false);
+                else handleClose();
+            } else if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                setShowToolbar(true);
+                const searchInput = document.querySelector('input[placeholder="Find..."]') as HTMLInputElement;
+                searchInput?.focus();
+            } else if (e.key === '=' || e.key === '+') {
+                handleZoom(scaleRef.current + 0.15);
+            } else if (e.key === '-') {
+                handleZoom(scaleRef.current - 0.15);
+            } else if (e.key === '0' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                handleZoom(1.0);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isSidebarOpen, handleZoom]);
+
+    // Download handler
+    const triggerDownload = async () => {
+        setIsDownloading(true);
+        await executeSecureDownload({
+            url,
+            fileId,
+            file,
+            displayFileName,
+            fileName,
+            userProfile,
+            isAdmin,
+            isDocx,
+            isLegacyDoc,
+            isImage,
+            pdfBytes: pdfBytesRef.current,
+        });
+        setIsDownloading(false);
+    };
 
     if (error) {
         return createPortal(
-            <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center p-6">
+            <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center p-6 animate-fade-in">
                 <div className="text-center space-y-6 max-w-sm">
-                    <div className="w-20 h-20 bg-red-500/10 rounded-[40px] flex items-center justify-center text-red-500 border border-red-500/20 mx-auto">
+                    <div className="w-20 h-20 bg-red-500/10 rounded-[32px] flex items-center justify-center text-red-500 border border-red-500/20 mx-auto">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
                     </div>
-                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Connection Fault</h3>
-                    <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest leading-relaxed">{error}</p>
-                    <button onClick={handleClose} className="bg-white text-black px-10 py-4 rounded-3xl text-[10px] font-medium hover:scale-105 active:scale-95 transition-all shadow-xl">Abort Protocol</button>
+                    <h3 className="text-2xl font-black text-white uppercase tracking-tight">Document Unavailable</h3>
+                    <p className="text-xs text-zinc-400 font-medium leading-relaxed">{error}</p>
+                    <button
+                        onClick={handleClose}
+                        className="bg-white text-black px-8 py-3.5 rounded-2xl text-xs font-bold hover:scale-105 active:scale-95 transition-all shadow-xl border-none cursor-pointer"
+                    >
+                        Return to Library
+                    </button>
                 </div>
             </div>,
             document.getElementById('modal-root') || document.body
@@ -1597,306 +623,149 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
     }
 
     return createPortal(
-        <div className={`fixed inset-0 z-[9999] flex flex-col bg-zinc-100 dark:bg-[#0a0a0a] overflow-hidden pdf-viewer-overlay ${active ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-[0.98] pointer-events-none'} ${isFullscreen ? 'p-0' : ''}`}>
-            {/* Toolbar */}
-            <div className={`absolute top-0 left-0 right-0 flex items-center justify-between px-2 md:px-5 h-12 md:h-14 bg-white/95 dark:bg-[#060606]/95 backdrop-blur-2xl border-b border-zinc-200 dark:border-white/5 z-50 transition-transform duration-300 ${showToolbar ? 'translate-y-0' : '-translate-y-full'}`}>
-                <div className="flex items-center gap-1 overflow-hidden">
-                    <button
-                        onClick={handleClose}
-                        className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-transparent text-zinc-500 dark:text-white/60 hover:text-zinc-900 dark:hover:text-white transition-all border-none group pdf-back-btn animate-fade-in"
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-                    </button>
-                    <div className="hidden sm:block truncate">
-                        <div className="flex items-center gap-2">
-                            <h3 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 tracking-tight truncate max-w-[180px]">{displayFileName}</h3>
-                            {isDocx && <span className="px-1.5 py-0.5 rounded text-[8px] font-black bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 uppercase tracking-wide shrink-0">DOCX</span>}
-                            {isLegacyDoc && <span className="px-1.5 py-0.5 rounded text-[8px] font-black bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 uppercase tracking-wide shrink-0">DOC</span>}
-                            {isImage && <span className="px-1.5 py-0.5 rounded text-[8px] font-black bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20 uppercase tracking-wide shrink-0">IMG</span>}
-                            {!isDocx && !isLegacyDoc && !isImage && <span className="px-1.5 py-0.5 rounded text-[8px] font-black bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/20 uppercase tracking-wide shrink-0">PDF</span>}
-                        </div>
-                        <p className="text-[9px] font-semibold tracking-wide leading-none mt-0.5" style={{ color: 'var(--brand-primary)' }}>{fullBrandName} Secure Protocol</p>
-                    </div>
-                </div>
+        <div
+            className={`fixed inset-0 z-[9999] flex flex-col overflow-hidden pdf-viewer-overlay transition-all duration-300 ${
+                readingTheme === 'light'
+                    ? 'bg-zinc-100 text-zinc-900'
+                    : 'bg-[#09090b] text-zinc-100'
+            } ${active ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-[0.98] pointer-events-none'}`}
+            onMouseUp={handleMouseUp}
+        >
+            {/* Top Toolbar */}
+            <PDFToolbar
+                showToolbar={showToolbar}
+                displayFileName={displayFileName}
+                fullBrandName={fullBrandName}
+                isDocx={isDocx}
+                isLegacyDoc={isLegacyDoc}
+                isImage={isImage}
+                isSidebarOpen={isSidebarOpen}
+                onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+                onClose={handleClose}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onSearchSubmit={performSearch}
+                searchResults={searchResults}
+                currentSearchIndex={currentSearchIndex}
+                onPrevSearch={prevSearch}
+                onNextSearch={nextSearch}
+                scale={scale}
+                onZoomIn={() => handleZoom(scaleRef.current + 0.15)}
+                onZoomOut={() => handleZoom(scaleRef.current - 0.15)}
+                viewMode={viewMode}
+                onToggleFit={toggleFit}
+                onRotateImage={isImage ? () => setImageRotation(prev => (prev + 90) % 360) : undefined}
+                currentPage={currentPage}
+                numPages={numPages}
+                onJumpToPage={jumpToPage}
+                progressPercent={progressPercent}
+                readingTheme={readingTheme}
+                onSetTheme={setReadingTheme}
+                isFullscreen={isFullscreen}
+                onToggleFullscreen={toggleFullscreen}
+                isDownloading={isDownloading}
+                onDownload={triggerDownload}
+            />
 
-                {/* Center: Search & Zoom */}
-                <div className="flex items-center gap-1 md:gap-4">
-                    {/* Search Bar */}
-                    <div className="hidden sm:flex items-center bg-zinc-100 dark:bg-white/5 rounded-xl border border-zinc-200/50 dark:border-white/5 px-2.5 h-8 md:h-9 focus-within:border-orange-600/50 transition-all group">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-zinc-400 dark:text-white/20 group-focus-within:text-orange-500"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-                        <input
-                            type="text"
-                            placeholder="Find..."
-                            value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && performSearch()}
-                            autoCapitalize="none"
-                            autoCorrect="off"
-                            autoComplete="off"
-                            spellCheck="false"
-                            className="bg-transparent border-none outline-none text-xs font-medium text-zinc-900 dark:text-white px-2 w-20 md:w-28 placeholder:text-zinc-400 dark:placeholder:text-white/20"
-                        />
-                        {searchResults.length > 0 && (
-                            <div className="flex items-center gap-1.5 pr-1">
-                                <span className="text-[9px] font-black text-orange-500 whitespace-nowrap">{currentSearchIndex + 1} / {searchResults.length}</span>
-                                <div className="h-3 w-px bg-zinc-200 dark:bg-white/10 mx-0.5" />
-                                <button onClick={prevSearch} className="text-zinc-400 dark:text-white/35 hover:text-zinc-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5"><path d="m15 18-6-6 6-6" /></svg></button>
-                                <button onClick={nextSearch} className="text-zinc-400 dark:text-white/35 hover:text-zinc-900 dark:hover:text-white border-none bg-transparent active:scale-90"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5"><path d="m9 18 6-6-6-6" /></svg></button>
-                            </div>
-                        )}
-                    </div>
+            {/* Sidebar (Thumbnails, Outline, Search) */}
+            <PDFSidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+                numPages={numPages}
+                currentPage={currentPage}
+                pdfDoc={pdfDoc}
+                outline={outline}
+                searchResults={searchResults}
+                searchSnippets={searchSnippets}
+                currentSearchIndex={currentSearchIndex}
+                searchQuery={searchQuery}
+                onJumpToPage={jumpToPage}
+                onSelectSearchResult={(idx) => {
+                    setCurrentSearchIndex(idx);
+                    jumpToPage(searchResults[idx].pageIndex);
+                }}
+            />
 
-                    {/* Scale Controls */}
-                    <div className="flex items-center bg-zinc-100 dark:bg-white/5 rounded-xl h-8 md:h-9 p-0.5 border border-zinc-200/50 dark:border-white/5">
-                        <button
-                            onClick={() => handleZoom(Math.max(0.2, scaleRef.current - 0.1))}
-                            className="w-6.5 h-6.5 rounded-lg flex items-center justify-center text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 transition-all border-none bg-transparent"
-                        >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                        </button>
-                        <span className="text-[10px] font-bold text-zinc-900 dark:text-white px-1.5 min-w-[32px] md:min-w-[38px] text-center select-none">{Math.round(scale * 100)}%</span>
-                        <button
-                            onClick={() => handleZoom(Math.min(3, scaleRef.current + 0.1))}
-                            className="w-6.5 h-6.5 rounded-lg flex items-center justify-center text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 transition-all border-none bg-transparent"
-                        >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                        </button>
+            {/* Floating Context Menu on Selection */}
+            <PDFFloatingToolbar
+                position={floatingMenuPos}
+                selectedText={selectedText}
+                currentPage={currentPage}
+                fileName={displayFileName}
+                onClose={() => {
+                    setFloatingMenuPos(null);
+                    setSelectedText('');
+                }}
+            />
 
-                        <div className="w-px h-4 bg-zinc-200 dark:bg-white/10 mx-0.5" />
-
-                        <button
-                            onClick={toggleFit}
-                            className="w-6.5 h-6.5 rounded-lg flex items-center justify-center text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 transition-all border-none bg-transparent"
-                            title={viewMode === 'width' ? "Fit to Width" : "Fit to Page"}
-                        >
-                            {viewMode === 'width' ? (
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                                    <path d="M2 12h20" />
-                                    <path d="M7 7l-5 5 5 5" />
-                                    <path d="M17 7l5 5-5 5" />
-                                </svg>
-                            ) : (
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m14 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                                </svg>
-                            )}
-                        </button>
-                        {isImage && (
-                            <button
-                                onClick={() => setImageRotation(prev => (prev + 90) % 360)}
-                                className="w-6.5 h-6.5 rounded-lg flex items-center justify-center text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 transition-all border-none bg-transparent ml-1"
-                                title="Rotate Image Clockwise"
-                            >
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" /></svg>
-                            </button>
-                        )}
-                    </div>
-                </div>
-
-                {/* Right: Actions */}
-                <div className="flex items-center gap-1.5 md:gap-2">
-                    <div className="hidden sm:flex items-center h-8 md:h-9 bg-zinc-100 dark:bg-white/5 border border-zinc-200/50 dark:border-white/5 rounded-xl px-2 gap-1">
-                        <input
-                            type="number"
-                            min={1}
-                            max={numPages}
-                            value={currentPage}
-                            onChange={e => jumpToPage(parseInt(e.target.value) || 1)}
-                            className="w-7 bg-transparent border-none outline-none text-center text-xs font-bold text-zinc-900 dark:text-white"
-                        />
-                        <span className="text-[10px] font-semibold text-zinc-400 dark:text-white/30 tracking-wide select-none">/ {numPages}</span>
-                    </div>
-
-                    {/* Circular progress bar percentage indicator */}
-                    <div className="hidden sm:flex relative w-8.5 h-8.5 md:w-9 md:h-9 items-center justify-center shrink-0 select-none cursor-default" title={`${progressPercent}% Read`}>
-                        <svg className="w-7 h-7 -rotate-90" viewBox="0 0 32 32">
-                            <circle cx="16" cy="16" r="13" className="stroke-zinc-200 dark:stroke-white/10" strokeWidth="2.5" fill="transparent" />
-                            <circle cx="16" cy="16" r="13" className="stroke-orange-500" strokeWidth="2.5" fill="transparent" strokeDasharray={2 * Math.PI * 13} strokeDashoffset={2 * Math.PI * 13 - (progressPercent / 100) * (2 * Math.PI * 13)} strokeLinecap="round" />
-                        </svg>
-                        <span className="absolute text-[7.5px] md:text-[8px] font-black tracking-tighter text-zinc-800 dark:text-zinc-200">{progressPercent}%</span>
-                    </div>
-
-                    <button
-                        onClick={toggleTheme}
-                        className="hidden md:flex w-8 h-8 md:w-9 md:h-9 rounded-xl items-center justify-center bg-zinc-100 dark:bg-white/5 border border-zinc-200/50 dark:border-white/5 text-zinc-500 dark:text-white/35 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 transition-all border-none group"
-                        title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-                    >
-                        {isDarkMode ? (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 group-hover:text-amber-400 transition-colors"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
-                        ) : (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 group-hover:text-blue-500 transition-colors"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
-                        )}
-                    </button>
-
-                    <button
-                        onClick={toggleFullscreen}
-                        className="hidden md:flex w-8 h-8 md:w-9 md:h-9 rounded-xl items-center justify-center bg-zinc-100 dark:bg-white/5 border border-zinc-200/50 dark:border-white/5 text-zinc-500 dark:text-white/35 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/10 transition-all border-none group"
-                        title="Toggle Fullscreen"
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 group-hover:scale-110 transition-transform"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" /></svg>
-                    </button>
-
-                    <button
-                        onClick={handleDownload}
-                        disabled={isDownloading}
-                        className={`w-8 h-8 md:w-9 md:h-9 rounded-xl flex items-center justify-center border-none transition-all shadow-lg ${isDownloading ? 'opacity-60 cursor-wait' : 'text-white hover:scale-105 active:scale-95'}`}
-                        style={{ backgroundColor: 'var(--brand-primary)', boxShadow: '0 8px 12px -3px var(--brand-glow)' }}
-                        title={isDownloading ? 'Preparing download...' : 'Download PDF'}
-                    >
-                        {isDownloading ? (
-                            <svg className="w-4 h-4 animate-spin text-white" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" /></svg>
-                        ) : (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-white"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                        )}
-                    </button>
-                </div>
-            </div>
-
-            {/* Main Content Wrapper (Must be flex to allow main to fill) */}
+            {/* Main Document Content Area */}
             <div className="flex-1 overflow-hidden relative flex flex-col">
-
                 <main
                     ref={containerRef}
                     onScroll={handleScroll}
-                    onContextMenu={(e) => !isAdmin && e.preventDefault()}
-                    onDragStart={(e) => !isAdmin && e.preventDefault()}
-                    onSelectStart={(e) => !isAdmin && e.preventDefault()}
-                    className="flex-1 overflow-auto bg-zinc-100 dark:bg-[#0a0a0a] relative select-none touch-auto overscroll-none pt-12 md:pt-14 animate-fade-in"
-                    style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'none' }}
+                    className="flex-1 overflow-auto relative touch-auto overscroll-none pt-14 md:pt-16 animate-fade-in custom-scrollbar"
+                    style={{
+                        WebkitOverflowScrolling: 'touch',
+                        overscrollBehavior: 'none',
+                        '--pdf-scale': scale.toString(),
+                    } as any}
                 >
                     {isLoading ? (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-100/50 dark:bg-[#0a0a0a]/50 backdrop-blur-sm z-30 transition-all duration-500">
-                            <div className="relative w-20 h-20 mb-4 flex items-center justify-center">
-                                <svg className="absolute w-full h-full pdf-loader-ring" viewBox="0 0 80 80">
-                                    <circle cx="40" cy="40" r="34" fill="none" stroke="currentColor" className="text-zinc-200 dark:text-zinc-800" strokeWidth="6" />
-                                    <circle cx="40" cy="40" r="34" fill="none" stroke="var(--brand-primary)" className="pdf-loader-arc" strokeWidth="6" strokeLinecap="round" />
-                                </svg>
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-8 h-8 text-orange-500 pdf-loader-pulse">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
-                                </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-100/60 dark:bg-[#0a0a0a]/60 backdrop-blur-sm z-30">
+                            <div className="relative w-16 h-16 mb-4 flex items-center justify-center">
+                                <div className="w-14 h-14 border-3 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
                             </div>
-                            <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest animate-pulse">Loading Document... {loadProgress > 0 && `${loadProgress}%`}</h4>
+                            <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest animate-pulse">
+                                Loading Document... {loadProgress > 0 && `${loadProgress}%`}
+                            </h4>
                         </div>
                     ) : (
                         <>
                             {isImage && imageUrl ? (
-                                <div 
-                                    className="w-full h-full flex flex-col items-center justify-center p-4 sm:p-8 overflow-auto min-h-[60vh] select-none"
-                                    onWheel={(e) => {
-                                        e.preventDefault();
-                                        const delta = e.deltaY < 0 ? 0.15 : -0.15;
-                                        handleZoom(Math.min(4, Math.max(0.2, scaleRef.current + delta)));
-                                    }}
-                                >
-                                    <div 
-                                        className="transition-transform duration-150 ease-out flex items-center justify-center max-w-full max-h-full"
-                                        style={{
-                                            transform: `scale(${scale}) rotate(${imageRotation}deg)`,
-                                            willChange: 'transform',
-                                        }}
-                                    >
-                                        <img 
-                                            src={imageUrl} 
-                                            alt={displayFileName} 
-                                            className="max-w-full max-h-[78vh] rounded-2xl shadow-2xl object-contain border border-zinc-200 dark:border-white/10"
-                                            draggable={false}
-                                        />
-                                    </div>
-                                </div>
-                            ) : isDocx && !docxRenderFailed ? (
-                                <div 
-                                    className="w-full flex flex-col items-center justify-start p-4 sm:p-8 overflow-auto min-h-[80vh]"
-                                    onWheel={(e) => {
-                                        if (e.ctrlKey) {
-                                            e.preventDefault();
-                                            const delta = e.deltaY < 0 ? 0.1 : -0.1;
-                                            handleZoom(Math.min(2.5, Math.max(0.4, scaleRef.current + delta)));
-                                        }
-                                    }}
-                                >
-                                    <div
-                                        className="transition-transform duration-150 ease-out origin-top flex flex-col items-center max-w-full"
-                                        style={{
-                                            transform: `scale(${scale})`,
-                                            transformOrigin: 'top center',
-                                            willChange: 'transform',
-                                            marginBottom: '80px'
-                                        }}
-                                    >
-                                        <div 
-                                            ref={docxContainerRef} 
-                                            className="docx-preview-root bg-white text-zinc-900 rounded-xl shadow-2xl p-6 sm:p-12 max-w-[850px] w-full min-h-[1000px] border border-zinc-200 dark:border-white/10 select-text overflow-hidden"
-                                        />
-                                    </div>
-                                </div>
+                                <ImageRenderer
+                                    imageUrl={imageUrl}
+                                    displayFileName={displayFileName}
+                                    scale={scale}
+                                    rotation={imageRotation}
+                                    onZoom={handleZoom}
+                                />
+                            ) : isDocx && !docxRenderFailed && docxBuffer ? (
+                                <DocxRenderer
+                                    docxBuffer={docxBuffer}
+                                    scale={scale}
+                                    onZoom={handleZoom}
+                                    onError={() => setDocxRenderFailed(true)}
+                                />
                             ) : isLegacyDoc || (isDocx && docxRenderFailed) ? (
-                                <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center min-h-[60vh]">
-                                    <div className="bg-white dark:bg-[#141416] border border-zinc-200 dark:border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl flex flex-col items-center space-y-5 animate-fade-in">
-                                        <div className="w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-500 border border-blue-500/20 flex items-center justify-center">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8">
-                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                                <polyline points="14 2 14 8 20 8" />
-                                                <line x1="16" y1="13" x2="8" y2="13" />
-                                                <line x1="16" y1="17" x2="8" y2="17" />
-                                                <polyline points="10 9 9 9 8 9" />
-                                            </svg>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <h4 className="text-base font-extrabold text-zinc-900 dark:text-white truncate max-w-[320px]">
-                                                {displayFileName}
-                                            </h4>
-                                            <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-                                                {isLegacyDoc ? "Microsoft Word Document (.doc)" : "Word Document (.docx)"}
-                                            </p>
-                                        </div>
-                                        <p className="text-xs text-zinc-400 dark:text-zinc-500 max-w-xs">
-                                            {isLegacyDoc 
-                                                ? "Binary Word format (.doc) can be viewed by downloading directly to your device."
-                                                : "Direct preview is unavailable for this document. You can download and open it in Word or Google Docs."}
-                                        </p>
-                                        <button
-                                            onClick={handleDownload}
-                                            disabled={isDownloading}
-                                            className="w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 border-none cursor-pointer"
-                                        >
-                                            {isDownloading ? (
-                                                <span className="flex items-center gap-2">
-                                                    <svg className="w-4 h-4 animate-spin text-white" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" /></svg>
-                                                    Downloading...
-                                                </span>
-                                            ) : (
-                                                <>
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                                                    Download Document
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
+                                <LegacyDocFallback
+                                    displayFileName={displayFileName}
+                                    isLegacyDoc={isLegacyDoc}
+                                    isDownloading={isDownloading}
+                                    onDownload={triggerDownload}
+                                />
                             ) : (
-                                <div 
+                                <div
                                     ref={zoomWrapperRef}
                                     className="flex flex-col items-center min-w-max mx-auto px-4 md:px-8"
                                     style={{
                                         transform: 'scale(var(--pdf-scale)) translateZ(0)',
-                                        transformOrigin: window.innerWidth < 768 ? 'top left' : 'top center',
+                                        transformOrigin: 'top center',
                                         willChange: 'transform',
-                                        paddingTop: '0px',
-                                        paddingBottom: 'calc(48px * var(--pdf-scale))',
+                                        paddingBottom: 'calc(60px * var(--pdf-scale))',
                                     }}
                                 >
                                     {Array.from({ length: numPages }).map((_, i) => (
-                                        <PageRenderer
+                                        <PDFPageRenderer
                                             key={i}
                                             pageNum={i + 1}
                                             pdfDoc={pdfDoc}
-                                            userProfile={userProfile}
+                                            pdfjsLib={pdfjsLibState}
+                                            scale={scale}
+                                            readingTheme={readingTheme}
                                             searchQuery={searchQuery}
                                             currentSearchIndex={currentSearchIndex}
                                             searchResults={searchResults}
-                                            pdfjsLib={pdfjsLibState}
                                             registerRef={registerPageRef}
-                                            isInteractingRef={isInteractingRef}
                                         />
                                     ))}
                                 </div>
@@ -1905,21 +774,23 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     )}
                 </main>
 
-                {/* Floating Page Indicator (Mobile) */}
-                <div className="md:hidden fixed bottom-10 right-8 z-50 text-white px-4 py-2 rounded-full font-black text-[10px] shadow-2xl animate-fade-in uppercase tracking-widest flex items-center gap-1.5" style={{ backgroundColor: 'var(--brand-primary)' }}>
-                    <span>{currentPage} / {numPages}</span>
-                    <span className="opacity-40">•</span>
-                    <span>{progressPercent}% Read</span>
-                </div>
+                {/* Floating Mobile Page Pill */}
+                {numPages > 1 && (
+                    <div
+                        className="md:hidden fixed bottom-6 right-6 z-40 text-white px-3.5 py-1.5 rounded-full font-bold text-[11px] shadow-2xl animate-fade-in flex items-center gap-1.5 border border-white/20"
+                        style={{ backgroundColor: 'var(--brand-primary)' }}
+                    >
+                        <span>{currentPage} / {numPages}</span>
+                        <span className="opacity-40">•</span>
+                        <span>{progressPercent}%</span>
+                    </div>
+                )}
             </div>
 
+            {/* Custom Embedded Styles */}
             <style>{`
                 .pdf-viewer-overlay {
-                    transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1), transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
-                }
-                .pdf-back-btn:hover {
-                    background-color: var(--brand-primary) !important;
-                    color: white !important;
+                    transition: opacity 250ms cubic-bezier(0.16, 1, 0.3, 1), transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
                 }
                 .textLayer {
                     position: absolute;
@@ -1929,8 +800,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     bottom: 0;
                     overflow: hidden;
                     line-height: 1;
-                    user-select: none;
-                    pointer-events: none;
+                    user-select: text;
+                    pointer-events: auto;
                 }
                 .textLayer > span {
                     color: transparent;
@@ -1939,170 +810,44 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, fileId, file, onClose, fileN
                     cursor: text;
                     transform-origin: 0% 0%;
                 }
+                .textLayer ::selection {
+                    background: rgba(234, 88, 12, 0.35);
+                    color: transparent;
+                }
+                mark.pdf-search-match {
+                    background-color: rgba(234, 88, 12, 0.35);
+                    color: transparent;
+                    border-radius: 2px;
+                }
+                mark.pdf-search-match.active-match {
+                    background-color: #ea580c;
+                    color: transparent;
+                    box-shadow: 0 0 12px rgba(234, 88, 12, 0.5);
+                    z-index: 10;
+                }
                 .custom-scrollbar::-webkit-scrollbar {
-                    width: 4px;
+                    width: 6px;
+                    height: 6px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-track {
                     background: transparent;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(0, 0, 0, 0.1);
-                    border-radius: 10px;
+                    background: rgba(150, 150, 150, 0.25);
+                    border-radius: 999px;
                 }
-                .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(255, 255, 255, 0.1);
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: rgba(150, 150, 150, 0.45);
                 }
-                .no-scrollbar::-webkit-scrollbar { display: none; }
-                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-                /* Fullscreen cleanup */
-                :fullscreen .Toolbar { display: none; }
-                
-                .textLayer > span.search-match {
-                    background-color: rgba(234, 88, 12, 0.4);
-                    border-radius: 2px;
-                    box-shadow: 0 0 10px rgba(234, 88, 12, 0.2);
-                    color: white;
-                }
-
-                mark.pdf-search-match {
-                    background-color: rgba(234, 88, 12, 0.3);
-                    color: transparent;
-                    border-radius: 1px;
-                    transition: background 0.2s ease;
-                }
-
-                mark.pdf-search-match.active-match {
-                    background-color: #ea580c;
-                    color: transparent;
-                    box-shadow: 0 0 15px rgba(234, 88, 12, 0.4);
-                    z-index: 10;
-                }
-
                 @keyframes fade-in {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
+                    from { opacity: 0; transform: translateY(4px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
-
-                /* PDF Loader Animations */
-                .pdf-loader-ring {
-                    animation: pdf-ring-spin 1.4s linear infinite;
-                }
-
-                .pdf-loader-arc {
-                    animation: pdf-arc-dash 1.4s ease-in-out infinite;
-                }
-
-                .pdf-loader-pulse {
-                    animation: pdf-icon-pulse 2s ease-in-out infinite;
-                }
-
-                @keyframes pdf-ring-spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-
-                @keyframes pdf-arc-dash {
-                    0% { stroke-dasharray: 1 213; stroke-dashoffset: 0; }
-                    50% { stroke-dasharray: 120 213; stroke-dashoffset: -40; }
-                    100% { stroke-dasharray: 1 213; stroke-dashoffset: -213; }
-                }
-
-                @keyframes pdf-icon-pulse {
-                    0%, 100% { opacity: 0.6; transform: scale(1); }
-                    50% { opacity: 1; transform: scale(1.08); }
-                }
-
-                .watermark-overlay {
-                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' transform='rotate(-35 150 150)' fill='currentColor' fill-opacity='1' font-family='Inter, sans-serif' font-weight='700' font-size='32'%3E${fullBrandName.toUpperCase()}%3C/text%3E%3C/svg%3E");
-                    background-repeat: repeat;
-                    background-size: 300px 300px;
-                }
-
-                .is-zooming .textLayer {
-                    opacity: 0 !important;
-                    transition: none !important;
-                }
-
-                .is-zooming .page-container {
-                    transition: none !important;
-                }
-
-                /* Security Print Shield */
-                @media print {
-                    body {
-                        display: none !important;
-                    }
-                    * {
-                        visibility: hidden !important;
-                    }
-                    .pdf-print-shield {
-                        visibility: visible !important;
-                        display: block !important;
-                        position: fixed !important;
-                        top: 0 !important;
-                        left: 0 !important;
-                        width: 100% !important;
-                        height: 100% !important;
-                        background: #000 !important;
-                        color: #ff0000 !important;
-                        text-align: center !important;
-                        padding-top: 200px !important;
-                        font-family: sans-serif !important;
-                        font-size: 24px !important;
-                        font-weight: bold !important;
-                        z-index: 999999 !important;
-                    }
-                }
-                
-                /* DOCX Preview Styles */
-                .docx-preview-root {
-                    font-family: Calibri, 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-                    color: #1a1a1a;
-                    line-height: 1.6;
-                }
-                .docx-preview-root p {
-                    margin-bottom: 0.8em;
-                }
-                .docx-preview-root h1, .docx-preview-root h2, .docx-preview-root h3, .docx-preview-root h4 {
-                    font-weight: bold;
-                    margin-top: 1em;
-                    margin-bottom: 0.5em;
-                    color: #111827;
-                }
-                .docx-preview-root table {
-                    border-collapse: collapse;
-                    width: 100%;
-                    margin: 1rem 0;
-                }
-                .docx-preview-root td, .docx-preview-root th {
-                    border: 1px solid #d1d5db;
-                    padding: 6px 10px;
-                }
-                .docx-preview-root img {
-                    max-width: 100%;
-                    height: auto;
-                    border-radius: 4px;
-                }
-                .docx-preview-root section {
-                    margin-bottom: 2rem;
-                }
-
-                @media screen {
-                    .pdf-print-shield {
-                        display: none;
-                    }
+                .animate-fade-in {
+                    animation: fade-in 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
                 }
             `}</style>
-
-            {/* Print Shield Overlay */}
-            <div className="pdf-print-shield">
-                <h1>SECURITY BREACH DETECTED</h1>
-                <p>UNAUTHORIZED PRINTING IS STRICTLY PROHIBITED</p>
-                <p>IP and User Session Logged to Registry Service.</p>
-            </div>
-        </div >
-,
+        </div>,
         document.getElementById('modal-root') || document.body
     );
 };
