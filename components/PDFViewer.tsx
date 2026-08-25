@@ -32,7 +32,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     const [numPages, setNumPages] = useState<number>(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [scale, setScale] = useState(1.0);
-    const [viewMode, setViewMode] = useState<ViewFitMode>('width');
+    const [viewMode, setViewMode] = useState<ViewFitMode>('page');
     const [isLoading, setIsLoading] = useState(true);
     const [loadProgress, setLoadProgress] = useState(0);
     const [error, setError] = useState<string | null>(null);
@@ -58,8 +58,23 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showToolbar, setShowToolbar] = useState(true);
     const [readingTheme, setReadingTheme] = useState<ReadingTheme>(() => {
-        return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('scholix_pdf_theme') as ReadingTheme | null;
+            if (saved && (saved === 'dark' || saved === 'dark-clean' || saved === 'light')) {
+                return saved;
+            }
+        }
+        return typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'light';
     });
+
+    const handleSetTheme = useCallback((nextTheme: ReadingTheme) => {
+        setReadingTheme(nextTheme);
+        try {
+            localStorage.setItem('scholix_pdf_theme', nextTheme);
+        } catch (e) {
+            console.warn('Failed to save reading theme preference:', e);
+        }
+    }, []);
     const [progressPercent, setProgressPercent] = useState(0);
     const [isDownloading, setIsDownloading] = useState(false);
 
@@ -417,22 +432,73 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         updateDOMScale(clamped, nextTop);
     }, [updateDOMScale]);
 
-    const toggleFit = useCallback(() => {
-        if (!containerRef.current) return;
-        const containerWidth = containerRef.current.clientWidth - 48;
-        if (viewMode === 'width') {
-            // Switch to fit whole page
-            const containerHeight = containerRef.current.clientHeight - 80;
-            const targetScale = Math.min(containerWidth / 612, containerHeight / 792, 1.0);
-            setViewMode('page');
-            handleZoom(targetScale);
+    const calculateFitScale = useCallback((mode: ViewFitMode, baseWidth = 612, baseHeight = 792) => {
+        if (typeof window === 'undefined') return 1.0;
+        const isMobile = window.innerWidth < 768;
+        const containerWidth = containerRef.current
+            ? Math.max(180, containerRef.current.clientWidth - (isMobile ? 16 : 48))
+            : Math.max(180, window.innerWidth - (isMobile ? 16 : 48));
+        const containerHeight = containerRef.current
+            ? Math.max(260, containerRef.current.clientHeight - (isMobile ? 64 : 96))
+            : Math.max(260, window.innerHeight - (isMobile ? 64 : 96));
+
+        if (mode === 'page') {
+            const scaleX = containerWidth / baseWidth;
+            const scaleY = containerHeight / baseHeight;
+            return Math.min(scaleX, scaleY, 1.0);
         } else {
-            // Fit to width
-            const targetScale = Math.min(2.0, Math.max(0.6, containerWidth / 612));
-            setViewMode('width');
-            handleZoom(targetScale);
+            return Math.min(2.0, Math.max(0.3, containerWidth / baseWidth));
         }
-    }, [viewMode, handleZoom]);
+    }, []);
+
+    // Initial scale calculation (default to fit-to-page on all devices)
+    useEffect(() => {
+        if (!pdfDoc) return;
+        const initialMode: ViewFitMode = 'page';
+        setViewMode('page');
+
+        let active = true;
+        pdfDoc.getPage(1).then((firstPage: any) => {
+            if (!active) return;
+            const vp = firstPage.getViewport({ scale: 1.0 });
+            const initialScale = calculateFitScale(initialMode, vp.width, vp.height);
+            setScale(initialScale);
+            scaleRef.current = initialScale;
+            if (containerRef.current) {
+                containerRef.current.style.setProperty('--pdf-scale', initialScale.toString());
+            }
+        }).catch(() => {
+            const fallbackScale = calculateFitScale(initialMode);
+            setScale(fallbackScale);
+            scaleRef.current = fallbackScale;
+            if (containerRef.current) {
+                containerRef.current.style.setProperty('--pdf-scale', fallbackScale.toString());
+            }
+        });
+
+        return () => {
+            active = false;
+        };
+    }, [pdfDoc, calculateFitScale]);
+
+    const toggleFit = useCallback(() => {
+        const nextMode: ViewFitMode = viewMode === 'width' ? 'page' : 'width';
+        setViewMode(nextMode);
+
+        if (pdfDoc) {
+            pdfDoc.getPage(1).then((page: any) => {
+                const vp = page.getViewport({ scale: 1.0 });
+                const nextScale = calculateFitScale(nextMode, vp.width, vp.height);
+                handleZoom(nextScale);
+            }).catch(() => {
+                const nextScale = calculateFitScale(nextMode);
+                handleZoom(nextScale);
+            });
+        } else {
+            const nextScale = calculateFitScale(nextMode);
+            handleZoom(nextScale);
+        }
+    }, [viewMode, pdfDoc, calculateFitScale, handleZoom]);
 
     // Jump to specific page
     const jumpToPage = useCallback((pageNum: number) => {
@@ -660,7 +726,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
                 onJumpToPage={jumpToPage}
                 progressPercent={progressPercent}
                 readingTheme={readingTheme}
-                onSetTheme={setReadingTheme}
+                onSetTheme={handleSetTheme}
                 isFullscreen={isFullscreen}
                 onToggleFullscreen={toggleFullscreen}
                 isDownloading={isDownloading}
@@ -746,7 +812,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
                             ) : (
                                 <div
                                     ref={zoomWrapperRef}
-                                    className="flex flex-col items-center min-w-max mx-auto px-4 md:px-8"
+                                    className="flex flex-col items-center w-full mx-auto px-2 md:px-8"
                                     style={{
                                         transform: 'scale(var(--pdf-scale)) translateZ(0)',
                                         transformOrigin: 'top center',
