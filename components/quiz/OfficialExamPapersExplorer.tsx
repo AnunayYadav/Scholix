@@ -97,7 +97,7 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
     { value: 'ca1', label: 'Quiz 1 / CA-1' },
     { value: 'ca2', label: 'Quiz 2 / CA-2' },
     { value: 'ca3', label: 'Quiz 3 / CA-3' },
-    { value: 'mock', label: 'AI Mock Papers' },
+    { value: 'practice', label: 'Practice Questions' },
   ];
 
   const yearOptions: DropdownOption[] = [

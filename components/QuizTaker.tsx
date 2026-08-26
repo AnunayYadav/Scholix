@@ -41,7 +41,7 @@ import { useQuizDashboardStore, getLevelInfo, LEVEL_THRESHOLDS } from '../stores
 
 const parseInline = (text: string) => {
   if (!text) return null;
-  const parts = text.split(/(\$\$[\s\S]*?\$\$|\$.*?\$|\*\*.*?\*\*)/g);
+  const parts = text.split(/(\$\$[\s\S]*?\$\$|\$.*?\$|\*\*.*?\*\*|\*.*?\*|`[^`]+`)/g);
   return parts.map((part, i) => {
     if (part.startsWith('$$') && part.endsWith('$$')) {
       const math = part.slice(2, -2);
@@ -52,89 +52,174 @@ const parseInline = (text: string) => {
       return <InlineMath key={i} math={math} />;
     }
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="font-bold">{part.slice(2, -2)}</strong>;
+      return <strong key={i} className="font-bold text-zinc-900 dark:text-white">{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+      return <em key={i} className="italic text-zinc-700 dark:text-zinc-300">{part.slice(1, -1)}</em>;
+    }
+    if (part.startsWith('`') && part.endsWith('`')) {
+      return (
+        <code key={i} className="px-1.5 py-0.5 rounded bg-zinc-200/80 dark:bg-white/10 font-mono text-xs text-orange-500 font-semibold">
+          {part.slice(1, -1)}
+        </code>
+      );
     }
     return <React.Fragment key={i}>{part}</React.Fragment>;
   });
 };
 
+const renderTextContent = (text: string) => {
+  const lines = text.split('\n');
+  const elements: React.ReactNode[] = [];
+  let tableLines: string[] = [];
+  let isInsideTable = false;
+
+  const flushTable = (key: number) => {
+    if (tableLines.length === 0) return null;
+    const validRows = tableLines.filter(line => !line.match(/^\|?\s*[-:]+[-| :]*\|?$/));
+    if (validRows.length === 0) return null;
+
+    const headerRow = validRows[0].split('|').map(c => c.trim()).filter(Boolean);
+    const dataRows = validRows.slice(1).map(row => row.split('|').map(c => c.trim()).filter(Boolean));
+
+    return (
+      <div key={`table-${key}`} className="my-3 overflow-x-auto flex justify-center">
+        <table className="border-collapse rounded-xl overflow-hidden bg-zinc-100/90 dark:bg-white/[0.04] text-center text-xs border border-zinc-200 dark:border-white/10 shadow-sm min-w-[200px]">
+          <thead>
+            <tr className="bg-zinc-200/80 dark:bg-white/10 font-bold border-b border-zinc-300 dark:border-white/10">
+              {headerRow.map((h, idx) => (
+                <th key={idx} className="px-4 py-2 text-zinc-900 dark:text-white font-mono text-center font-bold">
+                  {parseInline(h)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-200/60 dark:divide-white/5 font-mono">
+            {dataRows.map((r, rowIdx) => (
+              <tr key={rowIdx} className="hover:bg-orange-500/5 transition-colors">
+                {r.map((cell, colIdx) => (
+                  <td key={colIdx} className="px-4 py-1.5 text-zinc-700 dark:text-zinc-300 font-semibold text-center">
+                    {parseInline(cell)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  lines.forEach((line, idx) => {
+    const trimmed = line.trim();
+    const isTableLine = trimmed.startsWith('|') || (line.includes('|') && trimmed.endsWith('|'));
+
+    if (isTableLine) {
+      tableLines.push(line);
+      isInsideTable = true;
+    } else {
+      if (isInsideTable) {
+        const tbl = flushTable(idx);
+        if (tbl) elements.push(tbl);
+        tableLines = [];
+        isInsideTable = false;
+      }
+
+      if (trimmed.startsWith('### ')) {
+        elements.push(
+          <h4 key={`h3-${idx}`} className="text-sm font-bold text-zinc-900 dark:text-white mt-3 mb-1">
+            {parseInline(trimmed.slice(4))}
+          </h4>
+        );
+      } else if (trimmed.startsWith('## ')) {
+        elements.push(
+          <h3 key={`h2-${idx}`} className="text-base font-black text-zinc-900 dark:text-white mt-3 mb-1">
+            {parseInline(trimmed.slice(3))}
+          </h3>
+        );
+      } else if (trimmed.startsWith('# ')) {
+        elements.push(
+          <h2 key={`h1-${idx}`} className="text-lg font-black text-zinc-900 dark:text-white mt-3 mb-1">
+            {parseInline(trimmed.slice(2))}
+          </h2>
+        );
+      } else if (trimmed) {
+        elements.push(
+          <p key={`p-${idx}`} className="leading-relaxed my-1">
+            {parseInline(line)}
+          </p>
+        );
+      }
+    }
+  });
+
+  if (tableLines.length > 0) {
+    const tbl = flushTable(lines.length);
+    if (tbl) elements.push(tbl);
+  }
+
+  return elements.length > 0 ? <>{elements}</> : parseInline(text);
+};
+
 const parseText = (text: string | undefined) => {
   if (!text) return null;
 
-  // Check if text contains markdown table
-  if (text.includes('|') && text.includes('\n')) {
-    const lines = text.split('\n');
-    const elements: React.ReactNode[] = [];
-    let tableLines: string[] = [];
-    let isInsideTable = false;
+  // Split on fenced code blocks (```lang\n...code...\n```)
+  const codeBlockRegex = /```([a-zA-Z0-9_-]*)\s*([\s\S]*?)```/g;
+  const segments: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
 
-    const flushTable = (key: number) => {
-      if (tableLines.length === 0) return null;
-      const validRows = tableLines.filter(line => !line.match(/^\|?\s*[-:]+[-| :]*\|?$/));
-      if (validRows.length === 0) return null;
-
-      const headerRow = validRows[0].split('|').map(c => c.trim()).filter(Boolean);
-      const dataRows = validRows.slice(1).map(row => row.split('|').map(c => c.trim()).filter(Boolean));
-
-      return (
-        <div key={`table-${key}`} className="my-3 overflow-x-auto flex justify-center">
-          <table className="border-collapse rounded-xl overflow-hidden bg-zinc-100/90 dark:bg-white/[0.04] text-center text-xs border border-zinc-200 dark:border-white/10 shadow-sm min-w-[200px]">
-            <thead>
-              <tr className="bg-zinc-200/80 dark:bg-white/10 font-bold border-b border-zinc-300 dark:border-white/10">
-                {headerRow.map((h, idx) => (
-                  <th key={idx} className="px-4 py-2 text-zinc-900 dark:text-white font-mono text-center font-bold">
-                    {parseInline(h)}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-200/60 dark:divide-white/5 font-mono">
-              {dataRows.map((r, rowIdx) => (
-                <tr key={rowIdx} className="hover:bg-orange-500/5 transition-colors">
-                  {r.map((cell, colIdx) => (
-                    <td key={colIdx} className="px-4 py-1.5 text-zinc-700 dark:text-zinc-300 font-semibold text-center">
-                      {parseInline(cell)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+  while ((match = codeBlockRegex.exec(text)) !== null) {
+    const prevText = text.slice(lastIndex, match.index);
+    if (prevText.trim()) {
+      segments.push(
+        <div key={`text-${lastIndex}`} className="space-y-1">
+          {renderTextContent(prevText)}
         </div>
       );
-    };
-
-    lines.forEach((line, idx) => {
-      const isTableLine = line.trim().startsWith('|') || (line.includes('|') && line.trim().endsWith('|'));
-      if (isTableLine) {
-        tableLines.push(line);
-        isInsideTable = true;
-      } else {
-        if (isInsideTable) {
-          const tbl = flushTable(idx);
-          if (tbl) elements.push(tbl);
-          tableLines = [];
-          isInsideTable = false;
-        }
-        if (line.trim()) {
-          elements.push(
-            <div key={`p-${idx}`} className="my-0.5">
-              {parseInline(line)}
-            </div>
-          );
-        }
-      }
-    });
-
-    if (tableLines.length > 0) {
-      const tbl = flushTable(lines.length);
-      if (tbl) elements.push(tbl);
     }
 
-    return elements.length > 0 ? <>{elements}</> : parseInline(text);
+    const lang = match[1] || 'code';
+    const code = match[2].trim();
+    segments.push(
+      <div key={`code-${match.index}`} className="my-3 rounded-2xl overflow-hidden bg-[#121214] border border-white/10 shadow-lg">
+        <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5 text-[11px] font-mono text-zinc-400">
+          <span className="uppercase font-bold text-orange-400">{lang}</span>
+          <button
+            type="button"
+            onClick={() => {
+              navigator.clipboard.writeText(code);
+              showToast('Code copied to clipboard!', 'success');
+            }}
+            className="hover:text-white transition-colors cursor-pointer flex items-center gap-1 text-[10px]"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+            <span>Copy</span>
+          </button>
+        </div>
+        <pre className="p-4 font-mono text-xs text-zinc-100 overflow-x-auto custom-scrollbar leading-relaxed whitespace-pre">
+          <code>{code}</code>
+        </pre>
+      </div>
+    );
+
+    lastIndex = match.index + match[0].length;
   }
 
-  return parseInline(text);
+  const remainingText = text.slice(lastIndex);
+  if (remainingText.trim()) {
+    segments.push(
+      <div key={`text-${lastIndex}`} className="space-y-1">
+        {renderTextContent(remainingText)}
+      </div>
+    );
+  }
+
+  return segments.length > 0 ? <div className="space-y-2">{segments}</div> : renderTextContent(text);
 };
 
 const formatTime = (seconds: number) => {
@@ -1854,6 +1939,13 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           setTimerActive={setTimerActive}
           formatTime={formatTime}
           onCompleteExam={() => setQuizCompleted(true)}
+          onExitExam={() => {
+            setQuizQuestions([]);
+            setQuizCompleted(false);
+            setReviewMode(false);
+            setActiveExamPaper(null);
+            setTimerActive(false);
+          }}
           onReportQuestion={(qId) => handleReportOpen(qId)}
           bookmarkedIds={bookmarkedIds}
           toggleBookmark={toggleBookmark}

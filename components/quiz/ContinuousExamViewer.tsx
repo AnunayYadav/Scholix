@@ -28,6 +28,7 @@ interface ContinuousExamViewerProps {
   setTimerActive: React.Dispatch<React.SetStateAction<boolean>>;
   formatTime: (seconds: number) => string;
   onCompleteExam: () => void;
+  onExitExam?: () => void;
   onReportQuestion: (questionId: string) => void;
   bookmarkedIds: Set<string>;
   toggleBookmark: (questionId: string) => void;
@@ -64,6 +65,7 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
   setTimerActive,
   formatTime,
   onCompleteExam,
+  onExitExam = () => {},
   onReportQuestion,
   bookmarkedIds,
   toggleBookmark,
@@ -200,8 +202,15 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
 
   // Timer Pause / Resume
   const handleToggleTimer = () => {
-    setTimerPaused(prev => !prev);
-    showToast(timerPaused ? 'Timer Resumed' : 'Timer Paused', 'info');
+    if (timerActive) {
+      setTimerActive(false);
+      setTimerPaused(true);
+      showToast('Timer Paused', 'info');
+    } else {
+      setTimerActive(true);
+      setTimerPaused(false);
+      showToast('Timer Resumed', 'info');
+    }
   };
 
   // Timer Reset
@@ -212,6 +221,7 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
       setTimeLeft(60 * 60);
     }
     setTimerPaused(false);
+    setTimerActive(true);
     showToast('Timer Reset', 'info');
   };
 
@@ -333,9 +343,9 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
                 type="button"
                 onClick={handleToggleTimer}
                 className="p-2 rounded-xl bg-white dark:bg-[#202024] hover:bg-orange-500/10 text-zinc-600 dark:text-zinc-400 hover:text-orange-500 transition-colors cursor-pointer"
-                title={timerPaused ? 'Resume Timer' : 'Pause Timer'}
+                title={!timerActive ? 'Resume Timer' : 'Pause Timer'}
               >
-                {timerPaused ? (
+                {!timerActive ? (
                   <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-emerald-500">
                     <polygon points="5 3 19 12 5 21 5 3" />
                   </svg>
@@ -361,7 +371,7 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
             </div>
           </div>
 
-          {/* 5. Controls / Submit Exam */}
+          {/* 5. Controls / Submit Exam & Exit Exam */}
           <div className="space-y-2 pt-1">
             <button
               type="button"
@@ -372,6 +382,19 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
                 <polyline points="20 6 9 17 4 12" />
               </svg>
               <span>Submit Exam</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onExitExam}
+              className="w-full py-2.5 px-4 rounded-xl bg-white dark:bg-[#18181c] hover:bg-red-500/10 dark:hover:bg-red-500/10 text-zinc-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 font-bold text-xs uppercase tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              <span>Exit Exam</span>
             </button>
           </div>
         </aside>
