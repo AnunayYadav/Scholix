@@ -574,27 +574,39 @@ class NexusServer {
   }
 
   /**
-   * Fetch distinct subject names from the questions table
+   * Fetch distinct subject names from the questions and exam_papers tables
    */
   static async fetchSubjectNames(): Promise<string[]> {
     const client = getSupabase();
     if (!client) return [];
 
-    // Distinct subjects from the questions table
-    const { data, error } = await client
-      .from('questions')
-      .select('subject')
-      .limit(10000);
+    try {
+      const [questionsRes, papersRes] = await Promise.all([
+        client.from('questions').select('subject').limit(10000),
+        client.from('exam_papers').select('subject_code').limit(1000)
+      ]);
 
-    if (error || !data) {
-      console.error('Fetch Subject Names Error:', error);
+      const set = new Set<string>();
+
+      if (questionsRes.data) {
+        questionsRes.data.forEach((item: any) => {
+          const s = String(item.subject || '').trim();
+          if (s) set.add(s);
+        });
+      }
+
+      if (papersRes.data) {
+        papersRes.data.forEach((item: any) => {
+          const s = String(item.subject_code || '').trim();
+          if (s) set.add(s);
+        });
+      }
+
+      return Array.from(set);
+    } catch (err) {
+      console.error('Fetch Subject Names Error:', err);
       return [];
     }
-
-    // Return unique, trimmed, non-empty codes
-    return Array.from(new Set(
-      data.map(item => String(item.subject || '').trim()).filter(Boolean)
-    ));
   }
 
   /**

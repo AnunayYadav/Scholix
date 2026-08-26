@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExamPaper, ExamCategory } from '../../types.ts';
 import CustomDropdown, { DropdownOption } from './CustomDropdown.tsx';
+import EmptyExamState from './EmptyExamState.tsx';
 
 interface SubjectWithSyllabus {
   id: string;
@@ -37,17 +38,28 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
 
   // Available years from papers or defaults
   const availableYears = useMemo(() => {
-    const yearsSet = new Set<number>();
-    examPapers.forEach(p => { if (p.year) yearsSet.add(p.year); });
-    const list = Array.from(yearsSet).sort((a, b) => b - a);
-    return list.length > 0 ? list : [2026, 2025, 2024, 2023, 2022];
+    const yearsSet = new Set<string>();
+    examPapers.forEach(p => {
+      if (p.year && p.year > 0) {
+        yearsSet.add(String(p.year));
+      } else {
+        yearsSet.add('NA');
+      }
+    });
+    const list = Array.from(yearsSet).sort((a, b) => {
+      if (a === 'NA') return 1;
+      if (b === 'NA') return -1;
+      return Number(b) - Number(a);
+    });
+    return list.length > 0 ? list : ['2026', '2025', '2024', '2023', '2022', 'NA'];
   }, [examPapers]);
 
   // Filtered papers
   const filteredPapers = useMemo(() => {
     return examPapers.filter(paper => {
       const matchCat = selectedCategory === 'all' || paper.exam_type === selectedCategory;
-      const matchYear = selectedYear === 'all' || String(paper.year) === selectedYear;
+      const paperYearStr = paper.year && paper.year > 0 ? String(paper.year) : 'NA';
+      const matchYear = selectedYear === 'all' || paperYearStr === selectedYear;
       const matchSearch = !searchQuery || 
         paper.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         paper.subject_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -56,20 +68,19 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
     });
   }, [examPapers, selectedCategory, selectedYear, searchQuery]);
 
-  // Helper to format date / term display matching reference image
+  // Helper to format date / term display
   const getPaperDisplayDetails = (paper: ExamPaper, index: number) => {
-    const bundleNumber = paper.id ? (Math.abs(paper.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 50) + 1 : index + 1;
-    const term = paper.term || 'Term Examination';
-    const mainTitle = paper.title.length > 25 ? `${paper.year} ${paper.term || 'Exam'}` : paper.title;
+    const mainTitle = paper.title || `${paper.subject_code} ${paper.exam_type.toUpperCase()}`;
+    const yearStr = paper.year && paper.year > 0 ? String(paper.year) : 'NA';
 
     return {
-      bundleTag: `QP Bundle ${bundleNumber}`,
+      paperTag: paper.subject_code || 'Official Paper',
       mainTitle,
-      dateSub: `${paper.exam_type.toUpperCase()} • ${paper.year}`,
+      dateSub: `${paper.term ? `${paper.term} • ` : ''}${yearStr}`,
       typeLabel: paper.exam_type.toUpperCase(),
       duration: paper.duration_minutes || (paper.exam_type === 'endterm' ? 120 : paper.exam_type === 'midterm' ? 60 : 45),
       marks: paper.total_marks || (paper.exam_type === 'endterm' ? 50 : 30),
-      questionsCount: paper.total_questions || 40,
+      questionsCount: paper.total_questions || 20,
     };
   };
 
@@ -145,6 +156,8 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
             if (sub) onSelectSubject(sub);
           }}
           placeholder="Choose course..."
+          searchPlaceholder="Search course code or title..."
+          searchable={true}
         />
 
         {/* Select Exam Type */}
@@ -153,6 +166,7 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
           value={selectedCategory}
           options={categoryOptions}
           onChange={(val) => setSelectedCategory(val as ExamCategory)}
+          searchable={false}
         />
 
         {/* Select Year */}
@@ -161,6 +175,7 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
           value={selectedYear}
           options={yearOptions}
           onChange={(val) => setSelectedYear(val)}
+          searchable={false}
         />
 
         {/* Search */}
@@ -203,17 +218,18 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
                 onClick={() => setActivePaperModal(paper)}
                 className="p-3.5 rounded-2xl bg-zinc-100/70 dark:bg-white/[0.03] hover:bg-zinc-200/60 dark:hover:bg-white/[0.07] transition-all cursor-pointer flex flex-col justify-between min-h-[110px] group text-left"
               >
-                {/* Bundle Tag & Icon */}
+                {/* Top Tag & Type Badge */}
                 <div className="flex items-center justify-between gap-1">
-                  <div className="flex items-center gap-1 text-zinc-400 group-hover:text-orange-500 transition-colors">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
-                      <path d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5h-4m4 0v-4m0 4l-5-5" />
+                  <div className="flex items-center gap-1.5 text-zinc-400 group-hover:text-orange-500 transition-colors">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
                     </svg>
                     <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 group-hover:text-orange-500">
-                      {details.bundleTag}
+                      {details.paperTag}
                     </span>
                   </div>
-                  <span className="text-[8px] font-bold uppercase px-1 py-0.5 rounded bg-zinc-200/60 dark:bg-white/10 text-zinc-400">
+                  <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-zinc-200/60 dark:bg-white/10 text-zinc-600 dark:text-zinc-300">
                     {details.typeLabel}
                   </span>
                 </div>
@@ -228,38 +244,49 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
                   </p>
                 </div>
 
-                {/* Footer specs */}
+                {/* Footer specs with clean SVG icons */}
                 <div className="flex items-center justify-between pt-1.5 border-t border-zinc-200/50 dark:border-white/5 text-[9px] font-bold text-zinc-400">
-                  <span>⏱ {details.duration}m</span>
-                  <span>📝 {details.questionsCount} Qs</span>
-                  <span>🏆 {details.marks}M</span>
+                  <span className="flex items-center gap-1">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-2.5 h-2.5">
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    {details.duration}m
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-2.5 h-2.5">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                      <polyline points="10 9 9 9 8 9" />
+                    </svg>
+                    {details.questionsCount} Qs
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-2.5 h-2.5">
+                      <circle cx="12" cy="8" r="7" />
+                      <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+                    </svg>
+                    {details.marks}M
+                  </span>
                 </div>
               </motion.div>
             );
           })}
         </div>
       ) : (
-        /* Empty State */
-        <div className="py-12 px-6 rounded-2xl bg-zinc-100/50 dark:bg-white/[0.02] text-center space-y-3">
-          <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center mx-auto text-lg">
-            📑
-          </div>
-          <div className="space-y-1 max-w-sm mx-auto">
-            <h4 className="text-xs font-bold text-zinc-900 dark:text-white">
-              No Question Papers Found
-            </h4>
-            <p className="text-[11px] text-zinc-500">
-              No question papers found for the selected filters.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onSwitchToCustomBuilder}
-            className="px-4 py-2 rounded-xl bg-orange-500 text-white text-xs font-bold shadow-sm shadow-orange-500/20 active:scale-95 transition-all cursor-pointer"
-          >
-            Create Custom Test →
-          </button>
-        </div>
+        /* Empty State with Animated Vector Art */
+        <EmptyExamState
+          courseName={selectedSubject?.name}
+          category={selectedCategory}
+          year={selectedYear}
+          onResetFilters={() => {
+            setSelectedCategory('all');
+            setSelectedYear('all');
+            setSearchQuery('');
+          }}
+          onCreateCustomTest={onSwitchToCustomBuilder}
+        />
       )}
 
       {/* Action Modal */}
@@ -282,7 +309,7 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
               <div className="flex items-start justify-between">
                 <div>
                   <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-orange-500/10 text-orange-500">
-                    {activePaperModal.exam_type.toUpperCase()} • {activePaperModal.year}
+                    {activePaperModal.exam_type.toUpperCase()} • {activePaperModal.year && activePaperModal.year > 0 ? activePaperModal.year : 'NA'}
                   </span>
                   <h3 className="text-base font-black text-zinc-900 dark:text-white tracking-tight mt-1">
                     {activePaperModal.title}

@@ -16,6 +16,7 @@ import { InlineMath, BlockMath } from 'react-katex';
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
 
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
+import { findSubjectMetadata } from '../data/curriculumData.ts';
 // Removed QUIZTAKER_DATA import to resolve lag - fetching on demand from Supabase instead.
 
 // Dashboard components
@@ -37,7 +38,7 @@ import { useDashboard } from '../hooks/useDashboard.ts';
 import { useQuizDashboardStore, getLevelInfo, LEVEL_THRESHOLDS } from '../stores/quizStore.ts';
 
 
-const parseText = (text: string | undefined) => {
+const parseInline = (text: string) => {
   if (!text) return null;
   const parts = text.split(/(\$\$[\s\S]*?\$\$|\$.*?\$|\*\*.*?\*\*)/g);
   return parts.map((part, i) => {
@@ -50,10 +51,89 @@ const parseText = (text: string | undefined) => {
       return <InlineMath key={i} math={math} />;
     }
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
+      return <strong key={i} className="font-bold">{part.slice(2, -2)}</strong>;
     }
     return <React.Fragment key={i}>{part}</React.Fragment>;
   });
+};
+
+const parseText = (text: string | undefined) => {
+  if (!text) return null;
+
+  // Check if text contains markdown table
+  if (text.includes('|') && text.includes('\n')) {
+    const lines = text.split('\n');
+    const elements: React.ReactNode[] = [];
+    let tableLines: string[] = [];
+    let isInsideTable = false;
+
+    const flushTable = (key: number) => {
+      if (tableLines.length === 0) return null;
+      const validRows = tableLines.filter(line => !line.match(/^\|?\s*[-:]+[-| :]*\|?$/));
+      if (validRows.length === 0) return null;
+
+      const headerRow = validRows[0].split('|').map(c => c.trim()).filter(Boolean);
+      const dataRows = validRows.slice(1).map(row => row.split('|').map(c => c.trim()).filter(Boolean));
+
+      return (
+        <div key={`table-${key}`} className="my-3 overflow-x-auto flex justify-center">
+          <table className="border-collapse rounded-xl overflow-hidden bg-zinc-100/90 dark:bg-white/[0.04] text-center text-xs border border-zinc-200 dark:border-white/10 shadow-sm min-w-[200px]">
+            <thead>
+              <tr className="bg-zinc-200/80 dark:bg-white/10 font-bold border-b border-zinc-300 dark:border-white/10">
+                {headerRow.map((h, idx) => (
+                  <th key={idx} className="px-4 py-2 text-zinc-900 dark:text-white font-mono text-center font-bold">
+                    {parseInline(h)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-200/60 dark:divide-white/5 font-mono">
+              {dataRows.map((r, rowIdx) => (
+                <tr key={rowIdx} className="hover:bg-orange-500/5 transition-colors">
+                  {r.map((cell, colIdx) => (
+                    <td key={colIdx} className="px-4 py-1.5 text-zinc-700 dark:text-zinc-300 font-semibold text-center">
+                      {parseInline(cell)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    };
+
+    lines.forEach((line, idx) => {
+      const isTableLine = line.trim().startsWith('|') || (line.includes('|') && line.trim().endsWith('|'));
+      if (isTableLine) {
+        tableLines.push(line);
+        isInsideTable = true;
+      } else {
+        if (isInsideTable) {
+          const tbl = flushTable(idx);
+          if (tbl) elements.push(tbl);
+          tableLines = [];
+          isInsideTable = false;
+        }
+        if (line.trim()) {
+          elements.push(
+            <div key={`p-${idx}`} className="my-0.5">
+              {parseInline(line)}
+            </div>
+          );
+        }
+      }
+    });
+
+    if (tableLines.length > 0) {
+      const tbl = flushTable(lines.length);
+      if (tbl) elements.push(tbl);
+    }
+
+    return elements.length > 0 ? <>{elements}</> : parseInline(text);
+  }
+
+  return parseInline(text);
 };
 
 const formatTime = (seconds: number) => {
@@ -799,7 +879,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
   useEffect(() => {
     loadValidSubjects();
-  }, []);
+  }, [uniSlug, dashboardView]);
 
   // Update default counts when subject changes
   useEffect(() => {
@@ -843,7 +923,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     try {
       const subjectsMap = new Map<string, SubjectWithSyllabus>();
       
-      // Fetch available subject names from Supabase
+      // Fetch distinct subject codes that actually exist in Supabase (questions + exam_papers)
       const subjectNames = await NexusServer.fetchSubjectNames();
 
       const filteredSubjectNames = subjectNames.filter(name => {
@@ -855,76 +935,52 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         }
       });
 
-      filteredSubjectNames.forEach((subjectName, index) => {
-        // Normalize code by removing spaces: "CHE 110" -> "CHE110"
-        const subjectMatch = subjectName.match(/[A-Za-z]+[0-9]+/);
-        const normalizedCode = subjectMatch ? subjectMatch[0].toUpperCase() : subjectName.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+      filteredSubjectNames.forEach((rawSubject, index) => {
+        // Normalize code by removing spaces: "MTH 401" -> "MTH401"
+        const subjectMatch = rawSubject.match(/[A-Za-z]+[0-9]+/);
+        const normalizedCode = subjectMatch ? subjectMatch[0].toUpperCase() : rawSubject.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+        
+        // 1. Try finding in SYLLABUS_DATA
+        const syllabusKey = Object.keys(SYLLABUS_DATA).find(key => {
+          const keyMatch = key.match(/[A-Za-z]+[0-9]+/);
+          const keyCode = keyMatch ? keyMatch[0].toUpperCase() : key.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
+          return keyCode === normalizedCode;
+        });
+
+        // 2. Try finding in curriculum data registry
+        const meta = findSubjectMetadata('btech-cse', normalizedCode) || findSubjectMetadata('bs-data-science', normalizedCode);
+
+        let displayName = syllabusKey || (meta ? `${meta.code}: ${meta.title}` : rawSubject);
+        if (displayName === 'MTH401' || normalizedCode === 'MTH401') {
+          displayName = 'MTH401: Discrete Mathematics';
+        }
+
         subjectsMap.set(normalizedCode, {
           id: `QUIZ_SUB_${index}`,
-          name: subjectName,
+          name: displayName,
           syllabusFile: null as any
         });
       });
 
-      // Also ensure subjects from SYLLABUS_DATA (Fallback) are included
-      // We deduplicate by normalized code
-      const filteredSyllabusKeys = Object.keys(SYLLABUS_DATA).filter(fullName => {
-        const code = fullName.split(':')[0].trim().toUpperCase();
-        if (uniSlug === 'iitm') {
-          return code.startsWith('BS');
-        } else {
-          return !code.startsWith('BS');
-        }
-      });
-
-      filteredSyllabusKeys.forEach((fullName, index) => {
-        const fullCode = fullName.split(':')[0].trim();
-        const normalizedCode = fullCode.replace(/\s+/g, '').toUpperCase();
-        
-        const existing = subjectsMap.get(normalizedCode);
-        
-        if (!existing) {
-          // New subject
-          subjectsMap.set(normalizedCode, {
-            id: `AI_SUB_${index}`,
-            name: fullName,
-            syllabusFile: null as any
-          });
-        } else {
-            // If already exists, prefer the name that has a description (colon)
-            // or is generally longer/more descriptive
-            if (fullName.includes(':') && !existing.name.includes(':')) {
-                subjectsMap.set(normalizedCode, {
-                    ...existing,
-                    name: fullName
-                });
-            }
-        }
-      });
-
-      // Final unique subjects list
+      // Final unique subjects list (ONLY subjects in DB)
       const finalSubjects = Array.from(subjectsMap.values())
         .sort((a, b) => a.name.localeCompare(b.name));
         
       setSubjectsWithSyllabi(finalSubjects);
+
+      // Auto-select if selectedSubject is not set or not in list
+      if (finalSubjects.length > 0) {
+        setSelectedSubject(prev => {
+          if (!prev) return finalSubjects[0];
+          const exists = finalSubjects.find(s => s.name === prev.name || s.id === prev.id);
+          return exists || finalSubjects[0];
+        });
+      } else {
+        setSelectedSubject(null);
+      }
     } catch (err) {
       console.error("Library load error:", err);
-      // Fallback: at least show what's in SYLLABUS_DATA filtered
-      const fallback = Object.keys(SYLLABUS_DATA)
-        .filter(fullName => {
-          const code = fullName.split(':')[0].trim().toUpperCase();
-          if (uniSlug === 'iitm') {
-            return code.startsWith('BS');
-          } else {
-            return !code.startsWith('BS');
-          }
-        })
-        .map((name, i) => ({
-            id: `F_SUB_${i}`,
-            name,
-            syllabusFile: null as any
-        }));
-      setSubjectsWithSyllabi(fallback);
+      setSubjectsWithSyllabi([]);
     } finally {
       setInitializing(false);
     }

@@ -143,6 +143,8 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
             if (sub) onSelectSubject(sub);
           }}
           placeholder="Choose a course..."
+          searchPlaceholder="Search course code or title..."
+          searchable={true}
         />
 
         {/* 2. Units Scope */}
