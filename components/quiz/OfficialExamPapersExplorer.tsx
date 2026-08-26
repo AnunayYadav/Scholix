@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExamPaper, ExamCategory } from '../../types.ts';
 import CustomDropdown, { DropdownOption } from './CustomDropdown.tsx';
@@ -289,68 +290,98 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
         />
       )}
 
-      {/* Action Modal */}
-      <AnimatePresence>
-        {activePaperModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            onClick={() => setActivePaperModal(null)}
-          >
+      {/* Paper Quick Info Modal rendered into document.body to cover full viewport */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {activePaperModal && (
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm bg-white dark:bg-[#141416] rounded-2xl p-5 shadow-2xl space-y-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md"
+              style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+              onClick={() => setActivePaperModal(null)}
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-orange-500/10 text-orange-500">
-                    {activePaperModal.exam_type.toUpperCase()} • {activePaperModal.year && activePaperModal.year > 0 ? activePaperModal.year : 'NA'}
-                  </span>
-                  <h3 className="text-base font-black text-zinc-900 dark:text-white tracking-tight mt-1">
-                    {activePaperModal.title}
-                  </h3>
-                  <p className="text-[11px] text-zinc-400 font-medium">
-                    {selectedSubject?.name || activePaperModal.subject_code}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActivePaperModal(null)}
-                  className="p-1 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-white cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-md bg-white dark:bg-[#131316] rounded-3xl p-6 shadow-2xl space-y-5 relative overflow-hidden"
+              >
+                {/* Header */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-orange-500/10 text-orange-500">
+                        {activePaperModal.exam_type.toUpperCase()} • {activePaperModal.year && activePaperModal.year > 0 ? activePaperModal.year : 'NA'}
+                      </span>
+                      {activePaperModal.difficulty && (
+                        <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-zinc-100 dark:bg-white/5 text-zinc-500">
+                          {activePaperModal.difficulty}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-lg font-black text-zinc-900 dark:text-white tracking-tight leading-snug">
+                      {activePaperModal.title}
+                    </h3>
+                    <p className="text-xs text-zinc-400 font-medium">
+                      {selectedSubject?.name || activePaperModal.subject_code}
+                    </p>
+                  </div>
 
-              {/* Specs */}
-              <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-zinc-100 dark:bg-white/5 text-center">
-                <div>
-                  <span className="text-[9px] font-bold text-zinc-400 uppercase">Duration</span>
-                  <p className="text-xs font-black text-zinc-800 dark:text-white">
-                    {activePaperModal.duration_minutes || (activePaperModal.exam_type === 'endterm' ? 120 : 60)}m
-                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setActivePaperModal(null)}
+                    className="p-1.5 rounded-xl bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-400 hover:text-zinc-700 dark:hover:text-white transition-colors cursor-pointer"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
                 </div>
-                <div className="border-x border-zinc-200 dark:border-white/5">
-                  <span className="text-[9px] font-bold text-zinc-400 uppercase">Questions</span>
-                  <p className="text-xs font-black text-zinc-800 dark:text-white">
-                    {activePaperModal.total_questions || 40}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-[9px] font-bold text-zinc-400 uppercase">Marks</span>
-                  <p className="text-xs font-black text-zinc-800 dark:text-white">
-                    {activePaperModal.total_marks || (activePaperModal.exam_type === 'endterm' ? 50 : 30)}
-                  </p>
-                </div>
-              </div>
 
-              {/* Action Buttons */}
-              <div className="space-y-2 pt-1">
+                {/* Specs Grid */}
+                <div className="grid grid-cols-3 gap-2.5 p-3 rounded-2xl bg-zinc-50 dark:bg-[#1a1a1e] text-center">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Duration</span>
+                    <p className="text-sm font-black text-zinc-900 dark:text-white">
+                      {activePaperModal.duration_minutes || (activePaperModal.exam_type === 'endterm' ? 120 : 60)} mins
+                    </p>
+                  </div>
+                  <div className="space-y-0.5 border-x border-zinc-200/50 dark:border-white/5">
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Questions</span>
+                    <p className="text-sm font-black text-zinc-900 dark:text-white">
+                      {activePaperModal.total_questions || 40}
+                    </p>
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Total Marks</span>
+                    <p className="text-sm font-black text-emerald-500">
+                      {activePaperModal.total_marks || (activePaperModal.exam_type === 'endterm' ? 50 : 30)}.00
+                    </p>
+                  </div>
+                </div>
+
+                {/* Exam Info Bullet Points */}
+                <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-[#1a1a1e] space-y-2 text-xs text-zinc-600 dark:text-zinc-400 font-medium">
+                  <div className="flex items-center gap-2">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>Interactive continuous scroll test environment</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>Switch between <strong>Exam Mode</strong> and <strong>Learning Mode</strong> anytime</span>
+                  </div>
+                </div>
+
+                {/* Single Start Action Button */}
                 <button
                   type="button"
                   onClick={() => {
@@ -358,30 +389,19 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
                     setActivePaperModal(null);
                     onStartExamPaper(paper, false);
                   }}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-sm shadow-lg shadow-orange-500/25 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+                  <span>Start Test</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
                     <polygon points="5 3 19 12 5 21 5 3" />
                   </svg>
-                  <span>Simulate Exam (Timed)</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const paper = activePaperModal;
-                    setActivePaperModal(null);
-                    onStartExamPaper(paper, true);
-                  }}
-                  className="w-full py-2 rounded-xl bg-zinc-100 dark:bg-white/5 hover:bg-orange-500/10 text-zinc-700 dark:text-zinc-300 hover:text-orange-500 font-bold text-xs active:scale-95 transition-all cursor-pointer"
-                >
-                  Practice Mode (Instant Solutions)
-                </button>
-              </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
     </div>
   );
