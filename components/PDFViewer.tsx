@@ -111,6 +111,22 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         setDisplayFileName(fileName);
     }, [fileName]);
 
+    const [wrapperUnscaledHeight, setWrapperUnscaledHeight] = useState<number>(0);
+
+    // Track unscaled wrapper height to prevent bottom blank space during scaling
+    useEffect(() => {
+        if (!zoomWrapperRef.current) return;
+        const updateHeight = () => {
+            if (zoomWrapperRef.current) {
+                setWrapperUnscaledHeight(zoomWrapperRef.current.offsetHeight);
+            }
+        };
+        updateHeight();
+        const observer = new ResizeObserver(updateHeight);
+        observer.observe(zoomWrapperRef.current);
+        return () => observer.disconnect();
+    }, [numPages, pdfDoc, isDocx, isImage]);
+
     // Study Time Heartbeat Telemetry (30s)
     const lastTrackTimeRef = useRef<number>(Date.now());
     useEffect(() => {
@@ -811,29 +827,35 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
                                 />
                             ) : (
                                 <div
-                                    ref={zoomWrapperRef}
-                                    className="flex flex-col items-center w-full mx-auto px-2 md:px-8"
+                                    className="w-full flex justify-center pb-8"
                                     style={{
-                                        transform: 'scale(var(--pdf-scale)) translateZ(0)',
-                                        transformOrigin: 'top center',
-                                        willChange: 'transform',
-                                        paddingBottom: 'calc(60px * var(--pdf-scale))',
+                                        height: wrapperUnscaledHeight > 0 ? `${wrapperUnscaledHeight * scale + 32}px` : 'auto',
                                     }}
                                 >
-                                    {Array.from({ length: numPages }).map((_, i) => (
-                                        <PDFPageRenderer
-                                            key={i}
-                                            pageNum={i + 1}
-                                            pdfDoc={pdfDoc}
-                                            pdfjsLib={pdfjsLibState}
-                                            scale={scale}
-                                            readingTheme={readingTheme}
-                                            searchQuery={searchQuery}
-                                            currentSearchIndex={currentSearchIndex}
-                                            searchResults={searchResults}
-                                            registerRef={registerPageRef}
-                                        />
-                                    ))}
+                                    <div
+                                        ref={zoomWrapperRef}
+                                        className="flex flex-col items-center w-full mx-auto px-2 md:px-8"
+                                        style={{
+                                            transform: 'scale(var(--pdf-scale)) translateZ(0)',
+                                            transformOrigin: 'top center',
+                                            willChange: 'transform',
+                                        }}
+                                    >
+                                        {Array.from({ length: numPages }).map((_, i) => (
+                                            <PDFPageRenderer
+                                                key={i}
+                                                pageNum={i + 1}
+                                                pdfDoc={pdfDoc}
+                                                pdfjsLib={pdfjsLibState}
+                                                scale={scale}
+                                                readingTheme={readingTheme}
+                                                searchQuery={searchQuery}
+                                                currentSearchIndex={currentSearchIndex}
+                                                searchResults={searchResults}
+                                                registerRef={registerPageRef}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </>

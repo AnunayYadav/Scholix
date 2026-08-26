@@ -150,13 +150,47 @@ export const executeSecureDownload = async (options: DownloadOptions): Promise<v
             throw new Error("Unable to retrieve document source file.");
         }
 
-        // Direct download for Word Docs, Images, or non-PDF files
-        if (isDocx || isLegacyDoc || isImage || !displayFileName.toLowerCase().endsWith('.pdf')) {
-            const downloadBlob = new Blob([originalPdfBytes as any]);
+        // Sanitize PDF bytes
+        const sanitizedBytes = sanitizePdfBytes(originalPdfBytes);
+        const isPdfMagic = (
+            sanitizedBytes.length >= 5 &&
+            sanitizedBytes[0] === 0x25 &&
+            sanitizedBytes[1] === 0x50 &&
+            sanitizedBytes[2] === 0x44 &&
+            sanitizedBytes[3] === 0x46 &&
+            sanitizedBytes[4] === 0x2D
+        );
+
+        const isExplicitPdf = isPdfMagic || 
+            displayFileName.toLowerCase().endsWith('.pdf') || 
+            (fileName && fileName.toLowerCase().endsWith('.pdf')) ||
+            (file?.storage_path && file.storage_path.toLowerCase().endsWith('.pdf')) ||
+            (!isDocx && !isLegacyDoc && !isImage);
+
+        // Direct download for Word Docs, Images, or explicitly non-PDF files
+        if (!isExplicitPdf) {
+            let mimeType = 'application/octet-stream';
+            let ext = '';
+            if (isDocx) {
+                mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                ext = '.docx';
+            } else if (isLegacyDoc) {
+                mimeType = 'application/msword';
+                ext = '.doc';
+            } else if (isImage) {
+                mimeType = 'image/png';
+                ext = '.png';
+            }
+
+            let downloadName = displayFileName || fileName || 'document';
+            if (ext && !downloadName.toLowerCase().endsWith(ext)) {
+                downloadName += ext;
+            }
+
+            const downloadBlob = new Blob([originalPdfBytes as any], { type: mimeType });
             const blobUrl = URL.createObjectURL(downloadBlob);
             const link = document.createElement('a');
             link.href = blobUrl;
-            const downloadName = displayFileName || fileName || 'document';
             link.setAttribute('download', downloadName);
             document.body.appendChild(link);
             link.click();
@@ -180,8 +214,8 @@ export const executeSecureDownload = async (options: DownloadOptions): Promise<v
             return;
         }
 
-        // Sanitize PDF bytes
-        originalPdfBytes = sanitizePdfBytes(originalPdfBytes);
+        // It is a PDF document
+        originalPdfBytes = sanitizedBytes;
 
         const isPdfHeaderPresent = (
             originalPdfBytes.length >= 5 &&
