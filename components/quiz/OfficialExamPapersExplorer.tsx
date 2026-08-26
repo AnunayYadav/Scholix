@@ -109,7 +109,7 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
     <div className="w-full space-y-6 animate-fade-in pb-12">
       
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-zinc-200/50 dark:border-white/5">
+      <div className="flex items-center justify-between gap-4 pb-2 border-b border-zinc-200/50 dark:border-white/5">
         <div className="flex items-center gap-3">
           {onBackToDashboard && (
             <button
@@ -132,55 +132,50 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
             </p>
           </div>
         </div>
-
-        <button
-          type="button"
-          onClick={onSwitchToCustomBuilder}
-          className="px-3.5 py-2 rounded-xl bg-zinc-100 dark:bg-white/5 hover:bg-orange-500/10 text-zinc-700 dark:text-zinc-300 hover:text-orange-500 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-orange-500">
-            <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-          </svg>
-          <span>Custom Quiz Builder</span>
-        </button>
       </div>
 
-      {/* Styled Dropdowns Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-        {/* Select Course */}
-        <CustomDropdown
-          label="Select Course"
-          value={selectedSubject?.id || ''}
-          options={subjectOptions}
-          onChange={(val) => {
-            const sub = subjects.find(s => s.id === val);
-            if (sub) onSelectSubject(sub);
-          }}
-          placeholder="Choose course..."
-          searchPlaceholder="Search course code or title..."
-          searchable={true}
-        />
+      {/* Styled Dropdowns Bar: 2-column inline layout on phone, 4-column on desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+        {/* Select Course (Full width on phone, 1-col on desktop) */}
+        <div className="col-span-2 lg:col-span-1">
+          <CustomDropdown
+            label="Select Course"
+            value={selectedSubject?.id || ''}
+            options={subjectOptions}
+            onChange={(val) => {
+              const sub = subjects.find(s => s.id === val);
+              if (sub) onSelectSubject(sub);
+            }}
+            placeholder="Choose course..."
+            searchPlaceholder="Search course code or title..."
+            searchable={true}
+          />
+        </div>
 
-        {/* Select Exam Type */}
-        <CustomDropdown
-          label="Exam Type"
-          value={selectedCategory}
-          options={categoryOptions}
-          onChange={(val) => setSelectedCategory(val as ExamCategory)}
-          searchable={false}
-        />
+        {/* Select Exam Type (1 col on phone & desktop) */}
+        <div className="col-span-1">
+          <CustomDropdown
+            label="Exam Type"
+            value={selectedCategory}
+            options={categoryOptions}
+            onChange={(val) => setSelectedCategory(val as ExamCategory)}
+            searchable={false}
+          />
+        </div>
 
-        {/* Select Year */}
-        <CustomDropdown
-          label="Year"
-          value={selectedYear}
-          options={yearOptions}
-          onChange={(val) => setSelectedYear(val)}
-          searchable={false}
-        />
+        {/* Select Year (1 col on phone & desktop) */}
+        <div className="col-span-1">
+          <CustomDropdown
+            label="Year"
+            value={selectedYear}
+            options={yearOptions}
+            onChange={(val) => setSelectedYear(val)}
+            searchable={false}
+          />
+        </div>
 
-        {/* Search */}
-        <div className="space-y-1">
+        {/* Search (Full width on phone, 1-col on desktop) */}
+        <div className="col-span-2 lg:col-span-1 space-y-1">
           <label className="text-[11px] font-bold text-zinc-700 dark:text-zinc-300 block">
             Search
           </label>
@@ -222,40 +217,40 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
                 {/* Top Tag & Type Badge */}
                 <div className="flex items-center justify-between gap-1">
                   <div className="flex items-center gap-1.5 text-zinc-400 group-hover:text-orange-500 transition-colors">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                       <polyline points="14 2 14 8 20 8" />
                     </svg>
-                    <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 group-hover:text-orange-500">
+                    <span className="text-[11px] font-semibold text-zinc-400 group-hover:text-orange-500 transition-colors">
                       {details.paperTag}
                     </span>
                   </div>
-                  <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-zinc-200/60 dark:bg-white/10 text-zinc-600 dark:text-zinc-300">
+                  <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg bg-zinc-200/60 dark:bg-white/10 text-zinc-600 dark:text-zinc-300">
                     {details.typeLabel}
                   </span>
                 </div>
 
                 {/* Main Date / Title */}
-                <div className="my-1.5">
-                  <h4 className="text-sm font-black text-zinc-900 dark:text-white tracking-tight group-hover:text-orange-500 transition-colors leading-tight">
+                <div className="my-2 space-y-1">
+                  <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-orange-500 transition-colors leading-snug">
                     {details.mainTitle}
                   </h4>
-                  <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">
+                  <p className="text-[11px] text-zinc-400 dark:text-zinc-400 font-normal">
                     {details.dateSub}
                   </p>
                 </div>
 
                 {/* Footer specs with clean SVG icons */}
-                <div className="flex items-center justify-between pt-1.5 border-t border-zinc-200/50 dark:border-white/5 text-[9px] font-bold text-zinc-400">
-                  <span className="flex items-center gap-1">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-2.5 h-2.5">
+                <div className="flex items-center justify-between pt-2 border-t border-zinc-200/50 dark:border-white/5 text-[11px] font-medium text-zinc-400">
+                  <span className="flex items-center gap-1.5">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 text-zinc-400">
                       <circle cx="12" cy="12" r="10" />
                       <polyline points="12 6 12 12 16 14" />
                     </svg>
                     {details.duration}m
                   </span>
-                  <span className="flex items-center gap-1">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-2.5 h-2.5">
+                  <span className="flex items-center gap-1.5">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 text-zinc-400">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                       <line x1="16" y1="13" x2="8" y2="13" />
                       <line x1="16" y1="17" x2="8" y2="17" />
@@ -263,8 +258,8 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
                     </svg>
                     {details.questionsCount} Qs
                   </span>
-                  <span className="flex items-center gap-1">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-2.5 h-2.5">
+                  <span className="flex items-center gap-1.5">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 text-zinc-400">
                       <circle cx="12" cy="8" r="7" />
                       <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
                     </svg>
