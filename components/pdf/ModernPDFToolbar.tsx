@@ -39,7 +39,7 @@ interface ModernPDFToolbarProps {
     onSetTheme: (theme: ModernReadingTheme) => void;
     isFullscreen: boolean;
     onToggleFullscreen: () => void;
-    // Download & Print
+    // Download
     isDownloading: boolean;
     onDownload: () => void;
     onPrint?: () => void;
@@ -82,17 +82,24 @@ export const ModernPDFToolbar: React.FC<ModernPDFToolbarProps> = ({
     onToggleFullscreen,
     isDownloading,
     onDownload,
-    onPrint,
-    onOpenShortcuts,
 }) => {
     const [pageInputValue, setPageInputValue] = useState(currentPage.toString());
     const [isZoomMenuOpen, setIsZoomMenuOpen] = useState(false);
+    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
     const zoomMenuRef = useRef<HTMLDivElement>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         setPageInputValue(currentPage.toString());
     }, [currentPage]);
+
+    // Focus search input when mobile search is opened
+    useEffect(() => {
+        if (isMobileSearchOpen) {
+            setTimeout(() => searchInputRef.current?.focus(), 50);
+        }
+    }, [isMobileSearchOpen]);
 
     // Close dropdowns on outside click
     useEffect(() => {
@@ -148,8 +155,68 @@ export const ModernPDFToolbar: React.FC<ModernPDFToolbarProps> = ({
                     : 'bg-[#09090b] text-[#f4f4f5] border-b border-white/10 shadow-md'
             } ${showToolbar ? 'translate-y-0' : '-translate-y-full'}`}
         >
-            {/* Left Section: Close, Sidebar, Title, Badges */}
-            <div className="flex items-center gap-1.5 overflow-hidden">
+            {/* Mobile Expanded Search Bar Overlay */}
+            {isMobileSearchOpen && !isImage && (
+                <div className={`sm:hidden absolute inset-0 z-20 flex items-center px-3 gap-2 ${
+                    isLight ? 'bg-white text-zinc-900' : 'bg-[#09090b] text-white'
+                }`}>
+                    <div className={`flex-1 flex items-center rounded-xl border px-2.5 h-8 ${
+                        isLight ? 'bg-zinc-100 border-zinc-300' : 'bg-white/10 border-white/10'
+                    }`}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                        <input
+                            ref={searchInputRef}
+                            type="text"
+                            placeholder="Find in document..."
+                            value={searchQuery}
+                            onChange={(e) => onSearchChange(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    if (e.shiftKey) onPrevSearch();
+                                    else onNextSearch();
+                                }
+                            }}
+                            className={`flex-1 bg-transparent border-none outline-none text-xs font-medium px-2 ${
+                                isLight ? 'text-zinc-900 placeholder:text-zinc-500' : 'text-white placeholder:text-zinc-400'
+                            }`}
+                        />
+                        {searchResults.length > 0 && (
+                            <div className="flex items-center gap-0.5">
+                                <span className="text-[9px] font-black text-orange-500 whitespace-nowrap mr-1">
+                                    {currentSearchIndex + 1}/{searchResults.length}
+                                </span>
+                                <button
+                                    onClick={onPrevSearch}
+                                    className={`p-1 rounded border-none ${isLight ? 'text-zinc-700' : 'text-zinc-300'}`}
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="m18 15-6-6-6 6"/></svg>
+                                </button>
+                                <button
+                                    onClick={onNextSearch}
+                                    className={`p-1 rounded border-none ${isLight ? 'text-zinc-700' : 'text-zinc-300'}`}
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3"><path d="m6 9 6 6 6-6"/></svg>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    <button
+                        onClick={() => {
+                            setIsMobileSearchOpen(false);
+                            onSearchChange('');
+                        }}
+                        className={`text-xs font-bold px-2 py-1 rounded-lg border-none bg-transparent ${
+                            isLight ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'
+                        }`}
+                    >
+                        Cancel
+                    </button>
+                </div>
+            )}
+
+            {/* Left Section: Back button, Sidebar toggle, Title */}
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-hidden max-w-[55%] sm:max-w-[40%]">
                 <button
                     onClick={onClose}
                     className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all border-none group ${
@@ -180,26 +247,26 @@ export const ModernPDFToolbar: React.FC<ModernPDFToolbarProps> = ({
                     </button>
                 )}
 
-                <div className="hidden sm:block truncate ml-1">
-                    <div className="flex items-center gap-2">
-                        <h3 className={`text-xs font-bold tracking-tight truncate max-w-[150px] md:max-w-[240px] ${
+                <div className="truncate ml-0.5">
+                    <div className="flex items-center gap-1.5">
+                        <h3 className={`text-xs font-bold tracking-tight truncate ${
                             isLight ? 'text-zinc-900' : 'text-zinc-100'
                         }`}>
                             {displayFileName}
                         </h3>
-                        {isDocx && <span className="px-1.5 py-0.5 rounded text-[8px] font-black bg-blue-500/15 text-blue-600 border border-blue-500/20 uppercase tracking-wide shrink-0">DOCX</span>}
-                        {isLegacyDoc && <span className="px-1.5 py-0.5 rounded text-[8px] font-black bg-blue-500/15 text-blue-600 border border-blue-500/20 uppercase tracking-wide shrink-0">DOC</span>}
-                        {isImage && <span className="px-1.5 py-0.5 rounded text-[8px] font-black bg-purple-500/15 text-purple-600 border border-purple-500/20 uppercase tracking-wide shrink-0">IMG</span>}
-                        {!isDocx && !isLegacyDoc && !isImage && <span className="px-1.5 py-0.5 rounded text-[8px] font-black bg-orange-500/15 text-orange-600 border border-orange-500/20 uppercase tracking-wide shrink-0">PDF</span>}
+                        {isDocx && <span className="hidden sm:inline px-1.5 py-0.5 rounded text-[8px] font-black bg-blue-500/15 text-blue-600 border border-blue-500/20 uppercase tracking-wide shrink-0">DOCX</span>}
+                        {isLegacyDoc && <span className="hidden sm:inline px-1.5 py-0.5 rounded text-[8px] font-black bg-blue-500/15 text-blue-600 border border-blue-500/20 uppercase tracking-wide shrink-0">DOC</span>}
+                        {isImage && <span className="hidden sm:inline px-1.5 py-0.5 rounded text-[8px] font-black bg-purple-500/15 text-purple-600 border border-purple-500/20 uppercase tracking-wide shrink-0">IMG</span>}
+                        {!isDocx && !isLegacyDoc && !isImage && <span className="hidden sm:inline px-1.5 py-0.5 rounded text-[8px] font-black bg-orange-500/15 text-orange-600 border border-orange-500/20 uppercase tracking-wide shrink-0">PDF</span>}
                     </div>
-                    <p className="text-[9px] font-bold tracking-wide leading-none mt-0.5" style={{ color: 'var(--brand-primary)' }}>
+                    <p className="hidden sm:block text-[9px] font-bold tracking-wide leading-none mt-0.5" style={{ color: 'var(--brand-primary)' }}>
                         {fullBrandName} Reader Pro
                     </p>
                 </div>
             </div>
 
-            {/* Center Section: Page Navigation, Search */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Center Section (Desktop Only): Page Stepper & Search Bar */}
+            <div className="hidden sm:flex items-center gap-2">
                 {/* Page Navigation */}
                 {numPages > 1 && (
                     <div className={`flex items-center rounded-xl p-0.5 border text-xs ${
@@ -252,7 +319,7 @@ export const ModernPDFToolbar: React.FC<ModernPDFToolbarProps> = ({
                     </div>
                 )}
 
-                {/* Search Bar */}
+                {/* Search Bar on Desktop */}
                 {!isImage && (
                     <div className={`flex items-center rounded-xl border px-2 h-7 sm:h-8 transition-all ${
                         isLight
@@ -271,7 +338,7 @@ export const ModernPDFToolbar: React.FC<ModernPDFToolbarProps> = ({
                                     else onNextSearch();
                                 }
                             }}
-                            className={`bg-transparent border-none outline-none text-xs font-medium px-2 w-16 sm:w-28 ${
+                            className={`bg-transparent border-none outline-none text-xs font-medium px-2 w-20 md:w-28 ${
                                 isLight ? 'text-zinc-900 placeholder:text-zinc-500' : 'text-white placeholder:text-zinc-400'
                             }`}
                         />
@@ -300,10 +367,27 @@ export const ModernPDFToolbar: React.FC<ModernPDFToolbarProps> = ({
                 )}
             </div>
 
-            {/* Right Section: Zoom, Theme Toggle, Rotate, Actions */}
+            {/* Right Section: Mobile Search, Desktop Zoom, Theme, Rotate, Fullscreen, Download */}
             <div className="flex items-center gap-1 sm:gap-1.5">
-                {/* Zoom Controls */}
-                <div className={`flex items-center rounded-xl p-0.5 border text-xs relative ${
+                {/* Mobile Search Toggle Icon */}
+                {!isImage && (
+                    <button
+                        onClick={() => setIsMobileSearchOpen(true)}
+                        className={`sm:hidden w-8 h-8 rounded-xl flex items-center justify-center transition-all border-none ${
+                            searchQuery
+                                ? 'bg-orange-500/15 text-orange-600 font-bold'
+                                : isLight
+                                ? 'bg-zinc-100 text-zinc-600 hover:text-black'
+                                : 'bg-white/5 text-zinc-400 hover:text-white'
+                        }`}
+                        title="Search"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </button>
+                )}
+
+                {/* Zoom Controls (Desktop only - mobile uses native pinch) */}
+                <div className={`hidden md:flex items-center rounded-xl p-0.5 border text-xs relative ${
                     isLight
                         ? 'bg-zinc-100 border-zinc-300'
                         : 'bg-white/5 border-white/10'
@@ -396,7 +480,7 @@ export const ModernPDFToolbar: React.FC<ModernPDFToolbarProps> = ({
                         </svg>
                     )}
                     {readingTheme === 'dark-clean' && (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-orange-400">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-orange-400">
                             <circle cx="12" cy="12" r="9" strokeWidth="2" />
                             <path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" />
                         </svg>
@@ -416,10 +500,10 @@ export const ModernPDFToolbar: React.FC<ModernPDFToolbarProps> = ({
                     )}
                 </button>
 
-                {/* Rotate Button */}
+                {/* Rotate Button (Desktop) */}
                 <button
                     onClick={onRotate}
-                    className={`hidden sm:flex w-8 h-8 rounded-xl items-center justify-center transition-all border-none ${
+                    className={`hidden md:flex w-8 h-8 rounded-xl items-center justify-center transition-all border-none ${
                         isLight
                             ? 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 hover:text-black'
                             : 'bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white'
@@ -429,10 +513,10 @@ export const ModernPDFToolbar: React.FC<ModernPDFToolbarProps> = ({
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
                 </button>
 
-                {/* Fullscreen Button */}
+                {/* Fullscreen Button (Desktop) */}
                 <button
                     onClick={onToggleFullscreen}
-                    className={`hidden sm:flex w-8 h-8 rounded-xl items-center justify-center transition-all border-none ${
+                    className={`hidden md:flex w-8 h-8 rounded-xl items-center justify-center transition-all border-none ${
                         isLight
                             ? 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 hover:text-black'
                             : 'bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white'
