@@ -19,6 +19,7 @@ import NexusServer from '../services/nexusServer';
 import { askGeminiText } from '../services/geminiService';
 import FileDetailPage from './FileDetailPage';
 import PDFViewer from './PDFViewer.tsx';
+import ModernPDFViewer from './pdf/ModernPDFViewer.tsx';
 import { FileIcon } from './FileIcon';
 import { showToast } from './Toast';
 import { findSubjectMetadata, getProgramCurriculum } from '../data/curriculumData';
@@ -6378,7 +6379,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
       {/* 8. In-App PDF / Image Viewer Modal */}
       {activePdfFile && (
-        <PDFViewer
+        <ModernPDFViewer
           file={activePdfFile}
           fileName={activePdfFile.name}
           userProfile={userProfile as any}

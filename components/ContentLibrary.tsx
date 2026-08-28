@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { LibraryFile, UserProfile, Folder } from '../types.ts';
 import NexusServer, { isIITMProgram } from '../services/nexusServer.ts';
 import PDFViewer from './PDFViewer.tsx';
+import ModernPDFViewer from './pdf/ModernPDFViewer.tsx';
 import NexusOriginals from './NexusOriginals.tsx';
 import NexusDropdown from './NexusDropdown.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
@@ -3739,7 +3740,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
       {
         activePdfFile && (
-          <PDFViewer
+          <ModernPDFViewer
             file={activePdfFile}
             fileName={activePdfFile.name}
             userProfile={userProfile}
