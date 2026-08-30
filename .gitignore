@@ -59,5 +59,6 @@ scripts/gdrive_token.json
 scripts/inspect_gdrive_folder.cjs
 scripts/list_all_db_files.cjs
 scripts/migrate_supabase_to_gdrive.cjs
-scripts/migrate_supabase_to_gdrive_oauth.cjs
-
+# Markdown files
+*.md
+!README.md
