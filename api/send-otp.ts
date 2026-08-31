@@ -40,8 +40,8 @@ export default async function handler(req: any, res: any) {
     let userExists = false;
     let isVerified = false;
 
-    // First check profiles table (PostgREST)
-    const profileCheckResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=id,is_verified`, {
+    // First check user_private_info table (PostgREST)
+    const profileCheckResponse = await fetch(`${supabaseUrl}/rest/v1/user_private_info?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=id`, {
       method: 'GET',
       headers: {
         'apikey': supabaseServiceKey,
@@ -53,7 +53,19 @@ export default async function handler(req: any, res: any) {
       const userData = await profileCheckResponse.json();
       if (userData && userData.length > 0) {
         userExists = true;
-        isVerified = userData[0].is_verified === 'yes';
+        const uid = userData[0].id;
+        const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${uid}&select=is_verified`, {
+          headers: {
+            'apikey': supabaseServiceKey,
+            'Authorization': `Bearer ${supabaseServiceKey}`,
+          }
+        });
+        if (profileRes.ok) {
+          const pData = await profileRes.json();
+          if (pData && pData.length > 0) {
+            isVerified = pData[0].is_verified === 'yes';
+          }
+        }
       }
     }
 

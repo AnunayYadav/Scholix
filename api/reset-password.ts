@@ -79,8 +79,8 @@ export default async function handler(req: any, res: any) {
     // 2. Find User ID
     let userId: string | null = null;
 
-    // Try finding in profiles table (fastest and handles all standard cases)
-    const profileResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=id`, {
+    // Try finding in user_private_info table (protected table)
+    const profileResponse = await fetch(`${supabaseUrl}/rest/v1/user_private_info?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=id`, {
       headers: {
         'apikey': supabaseServiceKey,
         'Authorization': `Bearer ${supabaseServiceKey}`,
