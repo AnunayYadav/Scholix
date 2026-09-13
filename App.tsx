@@ -26,7 +26,6 @@ import DegreeGuide from './components/DegreeGuide.tsx';
 // Eager/static imports for shared/immediate layout components
 import VerifiedBadge from './components/VerifiedBadge.tsx';
 import BuyMeACoffee from './components/BuyMeACoffee.tsx';
-import CookieBanner from './components/CookieBanner.tsx';
 import ScholixLanding from './components/ScholixLanding.tsx';
 import DailyFeed from './components/DailyFeed.tsx';
 import AnnouncementModal from './components/AnnouncementModal.tsx';
@@ -2076,7 +2075,6 @@ const AppContent: React.FC = () => {
         initialMode={authMode === 'verify_email' ? 'verify_email' : authMode}
         userProfile={userProfile || undefined}
       />
-      <CookieBanner />
       <Analytics />
       <SpeedInsights />
       <ToastContainer />
