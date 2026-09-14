@@ -9,6 +9,7 @@ import RoommateFinder from './RoommateFinder.tsx';
 import NexusAd from './NexusAd.tsx';
 import type { UserProfile } from '../types';
 import CampusFacilities from './CampusFacilities.tsx';
+import { ChevronLeft } from 'lucide-react';
 
 const IconMarket = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className || "w-5 h-5 mr-2"}>
@@ -85,11 +86,18 @@ const IconBus = ({ className }: { className?: string }) => (
 
 
 const MealSkeleton = () => (
-  <div className="glass-panel rounded-2xl overflow-hidden border dark:border-white/5 bg-white dark:bg-[#0a0a0a] p-5 flex items-center space-x-4 animate-pulse">
-    <div className="w-12 h-12 rounded-2xl bg-zinc-200 dark:bg-white/10 shimmer" />
-    <div className="flex-1 space-y-2">
-      <div className="h-3 w-1/4 bg-zinc-200 dark:bg-white/10 rounded shimmer" />
-      <div className="h-4 w-1/2 bg-zinc-200 dark:bg-white/10 rounded shimmer" />
+  <div className="rounded-[32px] sm:rounded-[36px] bg-zinc-100/60 dark:bg-white/[0.03] p-6 sm:p-7 space-y-4 animate-pulse border-none">
+    <div className="flex items-center justify-between pb-3 border-b border-zinc-200/40 dark:border-white/[0.03]">
+      <div className="flex items-center gap-2.5">
+        <div className="w-9 h-9 rounded-full bg-zinc-200/60 dark:bg-white/5" />
+        <div className="h-4 w-24 bg-zinc-200/60 dark:bg-white/5 rounded-full" />
+      </div>
+      <div className="h-4 w-28 bg-zinc-200/60 dark:bg-white/5 rounded-full" />
+    </div>
+    <div className="space-y-3">
+      <div className="h-3.5 w-3/4 bg-zinc-200/60 dark:bg-white/5 rounded-full" />
+      <div className="h-3.5 w-1/2 bg-zinc-200/60 dark:bg-white/5 rounded-full" />
+      <div className="h-3.5 w-2/3 bg-zinc-200/60 dark:bg-white/5 rounded-full" />
     </div>
   </div>
 );
@@ -101,7 +109,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
   const { universityInfo } = useUniversity();
   const navigate = useNavigate();
   const { uniKey, tab: urlTab } = useParams();
-  
+
   // Combine university specific tabs with global campus features
   const availableTabs = React.useMemo(() => [
     ...(universityInfo?.features.campusTabs || ['mess', 'map']),
@@ -138,7 +146,6 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
 
   const [currentWeek, setCurrentWeek] = useState<1 | 2>(weekCycle as 1 | 2);
   const [selectedDay, setSelectedDay] = useState<string>(actualToday);
-  const [activeFoodCategory, setActiveFoodCategory] = useState('all');
 
   // Modal & Floating Button State
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -158,16 +165,19 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
 
   // Sync tab with URL parameter
   useEffect(() => {
-    const validTab = urlTab && availableTabs.includes(urlTab) ? (urlTab as any) : '';
-    if (validTab !== activeTab) {
-      setActiveTab(validTab);
+    if (urlTab && availableTabs.includes(urlTab)) {
+      setActiveTab(urlTab as any);
     }
   }, [urlTab, availableTabs]);
 
   const handleTabChange = (tab: 'mess' | 'map' | 'market' | 'roommate' | 'facilities' | '') => {
-    // Only navigate; the useEffect will sync the state
-    const prefix = uniKey ? `/${uniKey}/campus` : '/campus';
-    navigate(tab ? `${prefix}/${tab}` : prefix);
+    setActiveTab(tab);
+    const prefix = uniKey ? `/${uniKey}` : '';
+    if (tab === '') {
+      navigate(`${prefix}/campus`);
+    } else {
+      navigate(`${prefix}/campus/${tab}`);
+    }
   };
 
   // Auto-scroll logic for mess report modal
@@ -192,28 +202,16 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
     }
   }, [activeTab, actualToday, isInitializing]);
 
-  // Monitor scroll on the main app container
   useEffect(() => {
-    const mainArea = document.getElementById('main-content-area');
-
     const handleScroll = () => {
-      if (mainArea) {
-        setShowScrollTop(mainArea.scrollTop > 200);
-      }
+      setShowScrollTop(window.scrollY > 300);
     };
-
-    if (mainArea) {
-      mainArea.addEventListener('scroll', handleScroll, { passive: true });
-      handleScroll();
-      return () => mainArea.removeEventListener('scroll', handleScroll);
-    }
-  }, [activeTab]);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const scrollToTop = () => {
-    const mainArea = document.getElementById('main-content-area');
-    if (mainArea) {
-      mainArea.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const [isClosing, setIsClosing] = useState(false);
@@ -243,80 +241,69 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
   const handleReportSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!reportForm.hostelName || !reportForm.issueDetails) {
-      showToast("Please fill in the required fields.", "info");
+      showToast("Please fill in the hostel name and issue details.", "error");
       return;
     }
-    console.log("Report submitted:", reportForm);
     showToast("Thank you! Your report has been submitted. We'll verify and update the data shortly.", "success");
     setReportForm({ hostelName: '', issueDetails: '', imageProof: null });
     handleClose();
   };
 
-  const MealCard = ({ title, items, icon, accentColor }: { title: string, items: MealCategories, icon: React.ReactNode, accentColor: string }) => {
+  const getMealTiming = (mealTitle: string, day: string) => {
+    if (mealTitle === 'Breakfast') {
+      return day === 'Sunday' ? '8:00 AM – 9:30 AM' : '7:30 AM – 9:30 AM';
+    }
+    if (mealTitle === 'Lunch') {
+      return day === 'Sunday' ? '12:30 PM – 2:30 PM' : '11:30 AM – 2:30 PM';
+    }
+    if (mealTitle === 'Snacks') {
+      return '5:00 PM – 6:30 PM';
+    }
+    if (mealTitle === 'Dinner') {
+      return '7:30 PM – 9:30 PM';
+    }
+    return '';
+  };
+
+  const MealCard = ({ title, items, icon }: { title: string, items: MealCategories, icon: React.ReactNode, accentColor?: string }) => {
+    const timing = getMealTiming(title, selectedDay);
+
     return (
-      <div className="p-6 sm:p-7 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-200/50 dark:bg-white/5 transition-all duration-300 hover:scale-[1.01] group">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3.5">
-            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center bg-zinc-200/80 dark:bg-white/10 border-none shadow-none ${accentColor} transition-transform group-hover:scale-105`}>
-              {React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5" })}
+      <div className="rounded-[32px] sm:rounded-[36px] bg-zinc-100/60 dark:bg-white/[0.03] p-6 sm:p-7 transition-all duration-300 hover:bg-zinc-100/80 dark:hover:bg-white/[0.045] flex flex-col group border-none">
+        {/* Header */}
+        <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-zinc-200/40 dark:border-white/[0.03]">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full flex items-center justify-center bg-orange-500/10 text-orange-500 dark:text-orange-400">
+              {React.cloneElement(icon as React.ReactElement, { className: "w-4 h-4" })}
             </div>
             <div>
-              <h4 className="font-bold uppercase tracking-wider text-xs leading-none text-zinc-900 dark:text-white">
+              <h4 className="text-sm sm:text-[15px] font-semibold text-zinc-900 dark:text-white tracking-tight">
                 {title}
               </h4>
             </div>
           </div>
+          {timing && (
+            <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-200/40 dark:bg-white/[0.04] px-3 py-1 rounded-full border-none">
+              {timing}
+            </span>
+          )}
         </div>
 
-        <div className="space-y-5">
-          {Object.entries(items).map(([category, dishes]) => {
-            // Check if any part of the dish matches the selected nutrient category
-            const isMatch = matchesCategory(dishes, activeFoodCategory);
-            if (!isMatch && activeFoodCategory !== 'all') return null;
-
-            return (
-              <div key={category} className="group/item animate-fade-in">
-                <span className="font-bold text-[10px] uppercase tracking-widest block mb-1 text-zinc-400 dark:text-zinc-500 group-hover/item:text-brand-primary transition-colors">
-                  {category}
-                </span>
-
-                <div className="flex items-start gap-2">
-                  <span className="text-zinc-800 dark:text-zinc-200 font-bold text-sm leading-snug">
-                    {dishes}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-          {activeFoodCategory !== 'all' && Object.values(items).every(d => !matchesCategory(d, activeFoodCategory)) && (
-            <div className="py-4 text-center">
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest opacity-60">No matches found</span>
+        {/* Dishes list */}
+        <div className="space-y-2.5 flex-1">
+          {Object.entries(items).map(([category, dishes]) => (
+            <div key={category} className="group/item flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3.5 py-1">
+              <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 sm:w-28 sm:shrink-0 capitalize">
+                {category.toLowerCase()}
+              </span>
+              <span className="text-xs sm:text-[13px] font-medium text-zinc-800 dark:text-zinc-200 leading-snug flex-1">
+                {dishes}
+              </span>
             </div>
-          )}
+          ))}
         </div>
       </div>
     );
-  };
-
-  const FOOD_CATEGORIES = [
-    { id: 'all', label: 'Featured', icon: '✨' },
-    { id: 'protein', label: 'Protein Rich', icon: '💪' },
-    { id: 'carbs', label: 'Carbs / Energy', icon: '⚡' },
-    { id: 'salads', label: 'Salads & Greens', icon: '🥗' },
-    { id: 'fats', label: 'Fats & Sweets', icon: '🍯' },
-  ];
-
-  const matchesCategory = (dish: string, category: string) => {
-    if (category === 'all') return true;
-    const keywords: Record<string, string[]> = {
-      protein: ['paneer', 'soya', 'dal', 'sprouts', 'chana', 'rajma', 'matar', 'curd', 'raita', 'dahi', 'egg', 'pappu', 'sambhar', 'channa', 'parippu', 'gram', 'milk'],
-      carbs: ['rice', 'roti', 'prantha', 'poha', 'upma', 'potato', 'aloo', 'bread', 'pasta', 'kulcha', 'poori', 'vermicelli', 'noodles', 'sandwich', 'biryani', 'pulao', 'macaroni', 'pongal', 'bhel', 'fries', 'bun', 'tikki'],
-      salads: ['salad', 'cabbage', 'bhindi', 'carrot', 'beetroot', 'vegetable', 'veg', 'thoran', 'poriyal', 'fry', 'dum fry', 'kootu', 'ghia', 'arbi', 'baingan', 'tinda'],
-      fats: ['butter', 'ghee', 'oil', 'jamun', 'halwa', 'burfi', 'laddu', 'kheer', 'ice cream', 'custard', 'pongal', 'curry', 'makhni'] 
-    };
-    const target = keywords[category];
-    if (!target) return false;
-    return target.some(k => dish.toLowerCase().includes(k.toLowerCase()));
   };
 
   return (
@@ -324,57 +311,62 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
       {/* Persistent Header for Hub & Sections */}
       <header className="pt-2 flex items-center justify-between">
         <div className="animate-fade-in">
-          <p className="text-[10px] font-semibold tracking-wider text-zinc-500 mb-1 ml-0.5">
-            {userProfile ? `Welcome, ${userProfile.full_name?.split(' ')[0] || 'User'}` : 'Exploration Mode'}
+          <p className="text-[10px] font-semibold tracking-wider text-zinc-500 uppercase mb-0.5 ml-0.5">
+            {userProfile ? `Welcome, ${userProfile.full_name?.split(' ')[0] || 'User'}` : 'Campus Life'}
           </p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
+          <div className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
             {{
-            'mess': <h2 className="text-3xl font-bold text-zinc-800 dark:text-white tracking-tighter">Mess <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Menu</span></h2>,
-            'map': (
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-bold tracking-tight">{universityInfo?.shortName || ''} Campus <span className="text-brand-secondary">Map</span></span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsWalkthroughActive(!isWalkthroughActive);
-                  }}
-                  className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all border active:scale-95 ${
-                    isWalkthroughActive 
-                      ? 'bg-brand-primary text-white border-brand-primary shadow-sm' 
-                      : 'bg-zinc-100 dark:bg-white/5 border-zinc-200/60 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:border-brand-primary/30'
-                  }`}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3">
-                    {isWalkthroughActive ? (
-                      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                    ) : (
-                      <>
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </>
-                    )}
-                  </svg>
-                  <span className="text-[9px] font-bold uppercase tracking-tight whitespace-nowrap">
-                    {isWalkthroughActive ? '3D Map' : 'Walkthrough'}
-                  </span>
-                </button>
-              </div>
-            ),
-            'market': <>Nexus <span className="text-blue-500">Market</span></>,
-            'roommate': <>Roommate <span className="text-purple-500">Finder</span></>,
-            'facilities': <>Campus <span className="text-brand-primary">Facilities</span></>,
-            '': <>{universityInfo?.shortName || ''} Campus <span className="text-brand-primary">Hub</span></>
-          }[activeTab] || <>{universityInfo?.shortName || ''} Campus <span className="text-brand-primary">Hub</span></>}
-          </h1>
+              'mess': (
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
+                    Mess <span className="text-orange-500">Menu</span>
+                  </h1>
+                </div>
+              ),
+              'map': (
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-bold tracking-tight">{universityInfo?.shortName || ''} Campus <span className="text-brand-secondary">Map</span></span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsWalkthroughActive(!isWalkthroughActive);
+                    }}
+                    className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all border active:scale-95 ${isWalkthroughActive
+                        ? 'bg-brand-primary text-white border-brand-primary shadow-sm'
+                        : 'bg-zinc-100 dark:bg-white/5 border-zinc-200/60 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:border-brand-primary/30'
+                      }`}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3">
+                      {isWalkthroughActive ? (
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                      ) : (
+                        <>
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </>
+                      )}
+                    </svg>
+                    <span className="text-[9px] font-bold uppercase tracking-tight whitespace-nowrap">
+                      {isWalkthroughActive ? '3D Map' : 'Walkthrough'}
+                    </span>
+                  </button>
+                </div>
+              ),
+              'market': <>Nexus <span className="text-blue-500">Market</span></>,
+              'roommate': <>Roommate <span className="text-purple-500">Finder</span></>,
+              'facilities': <>Campus <span className="text-brand-primary">Facilities</span></>,
+              '': <>{universityInfo?.shortName || ''} Campus <span className="text-brand-primary">Hub</span></>
+            }[activeTab] || <>{universityInfo?.shortName || ''} Campus <span className="text-brand-primary">Hub</span></>}
+          </div>
         </div>
 
         {activeTab && (
-          <button 
+          <button
             onClick={() => handleTabChange('')}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-200/60 dark:bg-[#1c1c20] hover:bg-zinc-200 dark:hover:bg-[#242429] text-zinc-600 dark:text-zinc-300 font-bold text-xs border-none shadow-none transition-all cursor-pointer active:scale-95 group"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100/70 dark:bg-white/[0.04] hover:bg-zinc-200/60 dark:hover:bg-white/[0.08] transition-colors border-none cursor-pointer active:scale-95"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 transition-transform group-hover:-translate-x-0.5"><polyline points="15 18 9 12 15 6" /></svg>
-            Campus Hub
+            <ChevronLeft className="w-3.5 h-3.5" />
+            <span>Campus Hub</span>
           </button>
         )}
       </header>
@@ -444,7 +436,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                   <div className={`relative p-3 sm:p-4 rounded-2xl mb-4 transition-all duration-500 bg-zinc-200/60 dark:bg-[#18181b] border-none shadow-none text-zinc-400 group-hover:${config.accentColor} shadow-sm group-hover:shadow-lg group-hover:scale-110`}>
                     {React.cloneElement(config.icon as React.ReactElement, { className: 'w-5 h-5 sm:w-6 sm:h-6' })}
                   </div>
-                  
+
                   <div className="relative">
                     <span className="block text-[11px] sm:text-[12px] font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors duration-500 font-sans">
                       {config.label}
@@ -512,126 +504,104 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
         <div key={activeTab} className="w-full">
           {activeTab === 'mess' && (
             <div className="space-y-6 animate-fade-in">
-              {/* Mess Menu Content */}
-              <div className="flex justify-center space-x-2 mb-6">
-                <button
-                  onClick={() => setCurrentWeek(1)}
-                  className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer border-none shadow-none ${
-                    currentWeek === 1 
-                      ? 'bg-brand-primary text-white font-bold' 
-                      : 'bg-zinc-200/50 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white'
-                  }`}
-                >
-                  Week 1
-                </button>
-                <button
-                  onClick={() => setCurrentWeek(2)}
-                  className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer border-none shadow-none ${
-                    currentWeek === 2 
-                      ? 'bg-brand-primary text-white font-bold' 
-                      : 'bg-zinc-200/50 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white'
-                  }`}
-                >
-                  Week 2
-                </button>
-              </div>
-
-              <div
-                ref={scrollContainerRef}
-                className="flex overflow-x-auto pb-4 pt-2 -mx-4 px-4 space-x-3 no-scrollbar snap-x"
-              >
-                {DAYS.map((day) => {
-                  const isSelected = selectedDay === day;
-                  const isToday = (day === actualToday && currentWeek === weekCycle);
-
-                  return (
+              {/* Controls: Week Selector & Day Selector */}
+              <div className="space-y-4">
+                {/* Week Segmented Control */}
+                <div className="flex items-center">
+                  <div className="inline-flex p-1 rounded-full bg-zinc-100/80 dark:bg-white/[0.04] border-none">
                     <button
-                      key={day}
-                      data-day={day}
-                      onClick={() => setSelectedDay(day)}
-                      className={`
-                        flex-none snap-center flex flex-col items-center justify-center w-20 h-24 rounded-[2.5rem] transition-all duration-300 relative overflow-hidden group/day cursor-pointer border-none shadow-none
-                        ${isSelected
-                          ? 'bg-brand-primary text-white scale-[1.05]'
-                          : 'bg-zinc-200/50 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white'
-                        }
-                      `}
+                      onClick={() => setCurrentWeek(1)}
+                      className={`px-4 sm:px-5 py-1.5 rounded-full text-xs transition-all cursor-pointer border-none ${
+                        currentWeek === 1
+                          ? 'bg-white text-zinc-950 dark:bg-white dark:text-zinc-950 shadow-sm font-semibold'
+                          : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 bg-transparent font-medium'
+                      }`}
                     >
-                      {isToday && (
-                        <div className="absolute top-2.5 left-1/2 -translate-x-1/2 z-10">
-                          <div className={`px-2 py-0.5 rounded-full text-[6px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${
-                            isSelected 
-                              ? 'bg-white text-brand-primary' 
-                              : 'bg-brand-primary text-white'
-                          }`}>
-                            Today
-                          </div>
-                        </div>
-                      )}
-                      <div className={`flex flex-col items-center justify-center transition-all duration-300 ${isToday ? 'mt-3' : ''}`}>
-                        <span className={`text-[9px] font-bold uppercase tracking-[0.2em] mb-1 ${isSelected ? 'opacity-90' : 'opacity-60'}`}>{day.slice(0, 3)}</span>
-                        <span className="text-xl font-black tracking-tight">{day.slice(0, 1)}</span>
-                      </div>
+                      Week 1
                     </button>
-                  );
-                })}
-              </div>
+                    <button
+                      onClick={() => setCurrentWeek(2)}
+                      className={`px-4 sm:px-5 py-1.5 rounded-full text-xs transition-all cursor-pointer border-none ${
+                        currentWeek === 2
+                          ? 'bg-white text-zinc-950 dark:bg-white dark:text-zinc-950 shadow-sm font-semibold'
+                          : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 bg-transparent font-medium'
+                      }`}
+                    >
+                      Week 2
+                    </button>
+                  </div>
+                </div>
 
-              <div className="flex items-center space-x-2 overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
-                {FOOD_CATEGORIES.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setActiveFoodCategory(cat.id)}
-                    className={`
-                      flex-none px-4 py-2.5 rounded-full transition-all duration-300 flex items-center space-x-2 cursor-pointer border-none shadow-none
-                      ${activeFoodCategory === cat.id 
-                        ? 'bg-brand-primary text-white font-bold' 
-                        : 'bg-zinc-200/50 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white'
-                      }
-                    `}
-                  >
-                    <span className="text-xs">{cat.icon}</span>
-                    <span className={`text-xs font-bold tracking-tight capitalize ${activeFoodCategory === cat.id ? 'text-white' : 'text-zinc-600 dark:text-zinc-400'}`}>
-                      {cat.label}
-                    </span>
-                  </button>
-                ))}
+                {/* Days of the Week: Separate Individual Pills */}
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  {DAYS.map((day) => {
+                    const isSelected = selectedDay === day;
+                    const isToday = (day === actualToday && currentWeek === weekCycle);
+
+                    return (
+                      <button
+                        key={day}
+                        data-day={day}
+                        onClick={() => setSelectedDay(day)}
+                        className={`
+                          flex-1 py-2 sm:py-2.5 rounded-full text-[11.5px] sm:text-xs transition-all duration-200 cursor-pointer border-none flex items-center justify-center gap-1.5 active:scale-95
+                          ${isSelected
+                            ? 'bg-white text-zinc-950 dark:bg-white dark:text-zinc-950 shadow-sm font-semibold'
+                            : 'bg-zinc-100/80 dark:bg-white/[0.04] hover:bg-zinc-200/60 dark:hover:bg-white/[0.08] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 font-medium'
+                          }
+                        `}
+                      >
+                        <span>{day.slice(0, 3)}</span>
+                        {isToday && (
+                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-orange-500 shadow-[0_0_6px_rgba(249,115,22,0.6)]' : 'bg-orange-500/70'}`} />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {isInitializing ? (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <MealSkeleton />
                   <MealSkeleton />
                   <MealSkeleton />
                   <MealSkeleton />
                 </div>
               ) : selectedMeals ? (
-                <div className="space-y-4 animate-fade-in">
-                  <div className="flex items-center justify-between mb-4 px-2">
-                    <h3 className="text-xl font-extrabold text-zinc-800 dark:text-white tracking-tight uppercase">{selectedDay} Menu</h3>
-                    <span className="text-[11px] sm:text-xs text-brand-primary font-bold uppercase tracking-widest">W{currentWeek} Cycle</span>
+                <div className="space-y-4 animate-fade-in pt-1">
+                  <div className="flex items-center justify-between px-0.5">
+                    <div>
+                      <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-white tracking-tight">
+                        {selectedDay} Menu
+                      </h3>
+                      <p className="text-xs text-zinc-400 dark:text-zinc-500 font-normal">
+                        Week {currentWeek} Cycle {selectedDay === actualToday && currentWeek === weekCycle ? '• Today' : ''}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-10">
-                    <MealCard title="Breakfast" items={selectedMeals.breakfast} icon={<IconBreakfast />} accentColor="text-brand-primary" />
-                    <MealCard title="Lunch" items={selectedMeals.lunch} icon={<IconLunch />} accentColor="text-brand-primary" />
-                    <MealCard title="Snacks" items={selectedMeals.snacks} icon={<IconSnacks />} accentColor="text-brand-primary" />
-                    <MealCard title="Dinner" items={selectedMeals.dinner} icon={<IconDinner />} accentColor="text-brand-primary" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4">
+                    <MealCard title="Breakfast" items={selectedMeals.breakfast} icon={<IconBreakfast />} />
+                    <MealCard title="Lunch" items={selectedMeals.lunch} icon={<IconLunch />} />
+                    <MealCard title="Snacks" items={selectedMeals.snacks} icon={<IconSnacks />} />
+                    <MealCard title="Dinner" items={selectedMeals.dinner} icon={<IconDinner />} />
                   </div>
-
                 </div>
               ) : (
-                <div className="text-center py-20 text-zinc-500">
-                  <p className="font-bold">Menu not available.</p>
+                <div className="text-center py-20 text-zinc-500 text-xs font-medium">
+                  Menu not available for this selection.
                 </div>
               )}
 
-              <div className="pt-6 flex justify-center pb-20">
+              {/* Report Outdated Data */}
+              <div className="pt-2 flex justify-center pb-12">
                 <button
                   onClick={() => setIsReportModalOpen(true)}
-                  className="flex items-center gap-2 px-6 py-3 bg-zinc-200/60 dark:bg-[#1c1c20] hover:bg-zinc-200 dark:hover:bg-[#242429] text-zinc-600 dark:text-zinc-300 rounded-full transition-all border-none shadow-none cursor-pointer group"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white bg-zinc-100/70 dark:bg-white/[0.035] hover:bg-zinc-200/60 dark:hover:bg-white/[0.06] border-none transition-colors cursor-pointer"
                 >
-                  <IconAlert />
-                  <span className="text-xs font-bold uppercase tracking-widest">Report Issue / Outdated Data</span>
+                  <IconAlert className="w-3.5 h-3.5" />
+                  <span>Report Outdated Menu</span>
                 </button>
               </div>
             </div>
@@ -641,12 +611,12 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
             <div className="space-y-4">
               <div className="glass-panel p-1 rounded-[2.5rem] h-[600px] overflow-hidden shadow-2xl relative animate-fade-in border dark:border-white/5 bg-black">
                 {isWalkthroughActive ? (
-                  <iframe 
-                    src="https://www.google.com/maps/embed?pb=!4v1777702274105!6m8!1m7!1sPPeXkt5NPYNTeQijNbwYCg!2m2!1d31.2607325620669!2d75.70697036279117!3f237.79!4f0.4200000000000017!5f0.8741376114956905" 
-                    className="w-full h-full rounded-[2.2rem]" 
-                    style={{ border: 0 }} 
-                    allowFullScreen 
-                    loading="lazy" 
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!4v1777702274105!6m8!1m7!1sPPeXkt5NPYNTeQijNbwYCg!2m2!1d31.2607325620669!2d75.70697036279117!3f237.79!4f0.4200000000000017!5f0.8741376114956905"
+                    className="w-full h-full rounded-[2.2rem]"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                     title="Campus Walkthrough"
                   />
@@ -669,9 +639,9 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
         <button
           onClick={scrollToTop}
           aria-label="Scroll to top"
-          className="fixed bottom-10 right-6 md:right-10 z-[100] w-14 h-14 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-white/10 rounded-full flex items-center justify-center shadow-2xl text-zinc-800 dark:text-white hover:scale-110 active:scale-95 transition-all animate-fade-in"
+          className="fixed bottom-10 right-6 md:right-10 z-[100] w-12 h-12 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border-none rounded-full flex items-center justify-center shadow-xl text-zinc-800 dark:text-white hover:scale-105 active:scale-95 transition-all animate-fade-in cursor-pointer"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-6 h-6"><polyline points="18 15 12 9 6 15" /></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><polyline points="18 15 12 9 6 15" /></svg>
         </button>
       )}
 
