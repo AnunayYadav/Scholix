@@ -647,47 +647,62 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
 
       {isReportModalOpen && createPortal(
         <div className={`modal-overlay ${isClosing ? 'closing' : ''}`}
-          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          style={{ backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}
           onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
-          <div ref={reportModalRef} className={`nexus-modal w-full max-w-md p-6 sm:p-8 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] relative overflow-hidden ${isClosing ? 'closing' : ''}`}>
+          <div ref={reportModalRef} className={`nexus-modal w-full max-w-md p-6 sm:p-7 rounded-[32px] sm:rounded-[36px] border border-zinc-200/80 dark:border-white/[0.08] shadow-[0_25px_70px_rgba(0,0,0,0.4)] bg-white/95 dark:bg-[#121214]/95 backdrop-blur-2xl relative overflow-hidden flex flex-col ${isClosing ? 'closing' : ''}`}>
+            {/* Close Button */}
             <button
               onClick={handleClose}
-              className="absolute top-6 right-6 w-8 h-8 rounded-full bg-zinc-200/60 dark:bg-[#1c1c20] hover:bg-zinc-200 dark:hover:bg-[#242429] text-zinc-400 hover:text-zinc-800 dark:hover:text-white flex items-center justify-center border-none shadow-none transition-all cursor-pointer"
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/[0.06] hover:bg-zinc-200 dark:hover:bg-white/[0.1] text-zinc-400 hover:text-zinc-800 dark:hover:text-white flex items-center justify-center border-none transition-colors cursor-pointer"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
 
-            <header className="mb-6">
-              <h3 className="text-2xl font-bold text-zinc-800 dark:text-white mb-1 tracking-tight">Report Issue</h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Help us keep the mess menu accurate.</p>
+            {/* Header */}
+            <header className="mb-5 pr-8">
+              <h3 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
+                Report <span className="text-orange-500">Issue</span>
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-normal mt-0.5">
+                Help us keep the mess menu accurate.
+              </p>
             </header>
 
-            <form onSubmit={handleReportSubmit} className="space-y-5">
+            <form onSubmit={handleReportSubmit} className="space-y-4">
+              {/* Hostel Name */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-2 ml-1">Hostel Name</label>
+                <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5 ml-0.5">
+                  Hostel Name
+                </label>
                 <input
                   type="text"
-                  placeholder="e.g., BH-1, GH-4, Sun Hostel"
+                  placeholder="e.g. BH-1, GH-4, Sun Hostel"
                   value={reportForm.hostelName}
                   onChange={(e) => setReportForm(prev => ({ ...prev, hostelName: e.target.value }))}
-                  className="w-full px-5 py-4 rounded-[24px] bg-zinc-200/50 dark:bg-[#18181b] border-none shadow-none focus:ring-2 focus:ring-brand-primary/50 outline-none text-zinc-800 dark:text-white font-medium text-sm transition-all"
+                  className="w-full px-4 py-3 rounded-2xl bg-zinc-100/80 dark:bg-white/[0.04] hover:bg-zinc-100 dark:hover:bg-white/[0.06] focus:bg-white dark:focus:bg-[#18181b] border border-zinc-200/50 dark:border-white/[0.06] focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/15 outline-none text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-medium text-xs sm:text-sm transition-all"
                   required
                 />
               </div>
 
+              {/* What's the issue */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-2 ml-1">What's the issue?</label>
+                <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5 ml-0.5">
+                  What's the issue?
+                </label>
                 <textarea
-                  placeholder="e.g., Sunday breakfast items are swapped..."
+                  placeholder="e.g. Sunday breakfast items are swapped..."
                   value={reportForm.issueDetails}
                   onChange={(e) => setReportForm(prev => ({ ...prev, issueDetails: e.target.value }))}
-                  className="w-full h-32 px-5 py-4 rounded-[24px] bg-zinc-200/50 dark:bg-[#18181b] border-none shadow-none focus:ring-2 focus:ring-brand-primary/50 outline-none text-zinc-800 dark:text-white font-medium text-sm transition-all resize-none"
+                  className="w-full h-28 px-4 py-3 rounded-2xl bg-zinc-100/80 dark:bg-white/[0.04] hover:bg-zinc-100 dark:hover:bg-white/[0.06] focus:bg-white dark:focus:bg-[#18181b] border border-zinc-200/50 dark:border-white/[0.06] focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/15 outline-none text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-medium text-xs sm:text-sm transition-all resize-none"
                   required
                 />
               </div>
 
+              {/* Image Proof */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-2 ml-1">Image Proof (Optional)</label>
+                <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5 ml-0.5">
+                  Image Proof <span className="text-zinc-400 dark:text-zinc-600 font-normal">(Optional)</span>
+                </label>
                 <div className="relative group">
                   <input
                     type="file"
@@ -695,33 +710,40 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                     onChange={handleImageUpload}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   />
-                  <div className={`w-full py-6 rounded-[24px] border-2 border-dashed border-zinc-300/60 dark:border-white/10 bg-zinc-200/40 dark:bg-[#18181b] flex flex-col items-center justify-center transition-all ${reportForm.imageProof ? 'border-brand-primary bg-brand-primary/10' : 'group-hover:border-brand-primary/40'}`}>
+                  <div className={`w-full py-5 rounded-2xl border border-dashed transition-all flex flex-col items-center justify-center ${
+                    reportForm.imageProof 
+                      ? 'border-orange-500/50 bg-orange-500/5' 
+                      : 'border-zinc-300/70 dark:border-white/[0.08] hover:border-orange-500/40 bg-zinc-100/50 dark:bg-white/[0.02] hover:bg-zinc-100/80 dark:hover:bg-white/[0.04]'
+                  }`}>
                     {reportForm.imageProof ? (
                       <div className="flex flex-col items-center">
-                        <img src={reportForm.imageProof} alt="Proof" className="h-16 w-16 object-cover rounded-xl mb-2 shadow-md" />
-                        <span className="text-xs font-bold text-brand-primary uppercase tracking-wider">Image Added</span>
+                        <img src={reportForm.imageProof} alt="Proof" className="h-14 w-14 object-cover rounded-xl mb-1.5 shadow-sm" />
+                        <span className="text-xs font-medium text-orange-500">Image attached</span>
                       </div>
                     ) : (
                       <>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-7 h-7 text-zinc-400 mb-2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
-                        <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider text-center px-4">Tap to upload photo of menu board</span>
+                        <div className="w-8 h-8 rounded-full bg-zinc-200/50 dark:bg-white/[0.06] flex items-center justify-center text-zinc-400 group-hover:text-orange-500 mb-1.5 transition-colors">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+                        </div>
+                        <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors">Upload photo of menu board</span>
                       </>
                     )}
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 pt-2">
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2.5 pt-2">
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="flex-1 py-3.5 rounded-full bg-zinc-200/60 dark:bg-[#1c1c20] hover:bg-zinc-200 dark:hover:bg-[#242429] text-zinc-600 dark:text-zinc-300 font-bold text-xs border-none shadow-none transition-all cursor-pointer text-center"
+                  className="px-5 py-2.5 rounded-full text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-white/[0.05] hover:bg-zinc-200/60 dark:hover:bg-white/[0.08] transition-colors border-none cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-[2] py-3.5 rounded-full bg-gradient-to-r from-brand-primary via-orange-500 to-brand-secondary text-white font-bold text-xs shadow-lg shadow-brand-primary/25 border-none transition-all cursor-pointer hover:opacity-95 active:scale-95 text-center"
+                  className="flex-1 py-2.5 rounded-full text-xs font-semibold text-white bg-orange-500 hover:bg-orange-600 shadow-sm shadow-orange-500/20 active:scale-95 transition-all border-none cursor-pointer text-center"
                 >
                   Submit Report
                 </button>
