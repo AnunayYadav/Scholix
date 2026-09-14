@@ -9,7 +9,7 @@ import RoommateFinder from './RoommateFinder.tsx';
 import NexusAd from './NexusAd.tsx';
 import type { UserProfile } from '../types';
 import CampusFacilities from './CampusFacilities.tsx';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Utensils } from 'lucide-react';
 
 const IconMarket = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className || "w-5 h-5 mr-2"}>
@@ -146,6 +146,32 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
 
   const [currentWeek, setCurrentWeek] = useState<1 | 2>(weekCycle as 1 | 2);
   const [selectedDay, setSelectedDay] = useState<string>(actualToday);
+
+  const weekDaysWithDates = React.useMemo(() => {
+    const today = new Date();
+    const currentDayIndex = today.getDay(); // 0 = Sunday, 1 = Monday, ...
+    
+    // Calculate Sunday of current week
+    const currentSunday = new Date(today);
+    currentSunday.setDate(today.getDate() - currentDayIndex);
+    currentSunday.setHours(0, 0, 0, 0);
+
+    // If viewing the alternate cycle, show next week (+7 days)
+    const weekOffset = currentWeek === weekCycle ? 0 : 1;
+    const baseSunday = new Date(currentSunday);
+    baseSunday.setDate(currentSunday.getDate() + weekOffset * 7);
+
+    return DAYS.map((day, idx) => {
+      const d = new Date(baseSunday);
+      d.setDate(baseSunday.getDate() + idx);
+      const isDateToday = d.toDateString() === today.toDateString();
+      return {
+        day,
+        dateNumber: d.getDate(),
+        isToday: isDateToday
+      };
+    });
+  }, [currentWeek, weekCycle]);
 
   // Modal & Floating Button State
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -317,11 +343,10 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
           <div className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
             {{
               'mess': (
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
-                    Mess <span className="text-orange-500">Menu</span>
-                  </h1>
-                </div>
+                <h1 className="flex items-center gap-2.5 text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
+                  <Utensils className="w-6 h-6 sm:w-7 sm:h-7 text-orange-500 shrink-0" />
+                  <span>Mess Menu</span>
+                </h1>
               ),
               'map': (
                 <div className="flex items-center gap-2">
@@ -507,11 +532,11 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
               {/* Controls: Week Selector & Day Selector */}
               <div className="space-y-4">
                 {/* Week Segmented Control */}
-                <div className="flex items-center">
+                <div className="flex items-center justify-center">
                   <div className="inline-flex p-1 rounded-full bg-zinc-100/80 dark:bg-white/[0.04] border-none">
                     <button
                       onClick={() => setCurrentWeek(1)}
-                      className={`px-4 sm:px-5 py-1.5 rounded-full text-xs transition-all cursor-pointer border-none ${
+                      className={`px-5 sm:px-6 py-1.5 rounded-full text-xs transition-all cursor-pointer border-none ${
                         currentWeek === 1
                           ? 'bg-white text-zinc-950 dark:bg-white dark:text-zinc-950 shadow-sm font-semibold'
                           : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 bg-transparent font-medium'
@@ -521,7 +546,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                     </button>
                     <button
                       onClick={() => setCurrentWeek(2)}
-                      className={`px-4 sm:px-5 py-1.5 rounded-full text-xs transition-all cursor-pointer border-none ${
+                      className={`px-5 sm:px-6 py-1.5 rounded-full text-xs transition-all cursor-pointer border-none ${
                         currentWeek === 2
                           ? 'bg-white text-zinc-950 dark:bg-white dark:text-zinc-950 shadow-sm font-semibold'
                           : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 bg-transparent font-medium'
@@ -532,11 +557,10 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                   </div>
                 </div>
 
-                {/* Days of the Week: Separate Individual Pills */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  {DAYS.map((day) => {
+                {/* Days of the Week: Centered & Reduced Width */}
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 max-w-lg sm:max-w-xl mx-auto w-full">
+                  {weekDaysWithDates.map(({ day, dateNumber, isToday }) => {
                     const isSelected = selectedDay === day;
-                    const isToday = (day === actualToday && currentWeek === weekCycle);
 
                     return (
                       <button
@@ -544,16 +568,23 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                         data-day={day}
                         onClick={() => setSelectedDay(day)}
                         className={`
-                          flex-1 py-2 sm:py-2.5 rounded-full text-[11.5px] sm:text-xs transition-all duration-200 cursor-pointer border-none flex items-center justify-center gap-1.5 active:scale-95
+                          flex-1 max-w-[56px] sm:max-w-[66px] py-2.5 sm:py-3 rounded-2xl sm:rounded-[22px] transition-all duration-200 cursor-pointer border-none flex flex-col items-center justify-center active:scale-95
                           ${isSelected
                             ? 'bg-white text-zinc-950 dark:bg-white dark:text-zinc-950 shadow-sm font-semibold'
-                            : 'bg-zinc-100/80 dark:bg-white/[0.04] hover:bg-zinc-200/60 dark:hover:bg-white/[0.08] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 font-medium'
+                            : 'bg-zinc-100/80 dark:bg-white/[0.04] hover:bg-zinc-200/60 dark:hover:bg-white/[0.08] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                           }
                         `}
                       >
-                        <span>{day.slice(0, 3)}</span>
-                        {isToday && (
-                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-orange-500 shadow-[0_0_6px_rgba(249,115,22,0.6)]' : 'bg-orange-500/70'}`} />
+                        <span className={`text-sm sm:text-base font-bold leading-tight ${isSelected ? 'text-zinc-950 dark:text-zinc-950' : 'text-zinc-800 dark:text-zinc-200'}`}>
+                          {dateNumber}
+                        </span>
+                        <span className={`text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider mt-0.5 ${isSelected ? 'text-orange-500' : 'text-zinc-400 dark:text-zinc-500'}`}>
+                          {day.slice(0, 3)}
+                        </span>
+                        {isToday ? (
+                          <span className={`w-1.5 h-1.5 rounded-full mt-1 bg-orange-500 ${isSelected ? 'shadow-[0_0_6px_rgba(249,115,22,0.7)]' : ''}`} />
+                        ) : (
+                          <span className="w-1.5 h-1.5 mt-1 opacity-0" />
                         )}
                       </button>
                     );
